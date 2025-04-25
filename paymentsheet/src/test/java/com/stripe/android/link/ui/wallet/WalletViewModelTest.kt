@@ -9,6 +9,8 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -48,10 +50,12 @@ class WalletViewModelTest {
         assertThat(linkAccountManager.listPaymentDetailsCalls)
             .containsExactly(TestFactory.LINK_CONFIGURATION.stripeIntent.paymentMethodTypes.toSet())
 
-        assertThat(viewModel.uiState.value).isEqualTo(
+        val state = viewModel.uiState.value
+
+        assertThat(state).isEqualTo(
             WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItemId = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull()?.id,
+                selectedItemId = null,
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,
@@ -60,6 +64,7 @@ class WalletViewModelTest {
                 canAddNewPaymentMethod = true,
             )
         )
+        assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())
     }
 
     @Test
@@ -270,6 +275,15 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation skips update for non-expired card`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(
+                paymentDetails = listOf(
+                    validCard,
+                    CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+                    CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+                )
+            )
+        )
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
 

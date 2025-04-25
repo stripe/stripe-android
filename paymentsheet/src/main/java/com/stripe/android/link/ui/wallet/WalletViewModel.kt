@@ -32,6 +32,7 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -63,7 +64,7 @@ internal class WalletViewModel @Inject constructor(
         )
     )
 
-    val uiState: StateFlow<WalletUiState> = _uiState
+    val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
