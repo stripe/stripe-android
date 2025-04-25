@@ -28,6 +28,7 @@ import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
@@ -72,6 +73,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+
 
 /**
  * This drives the end to end payment sheet flow for any set of
@@ -1630,10 +1632,17 @@ internal class PlaygroundTestDriver(
         institutionTile.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
         institutionTile.click()
 
-        val successBankAccountItem = UiAutomatorText("Success", labelMatchesExactly = false, device = device)
-        successBankAccountItem.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        successBankAccountItem.click()
-        clickOnBottomSheetCtaByPosition()
+        val selectAccount = UiAutomatorText("Select account", labelMatchesExactly = false, device = device)
+        selectAccount.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        selectAccount.exists()
+
+        val title = UiAutomatorText("Select account", labelMatchesExactly = false, device = device)
+        title.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        title.exists()
+        printWebViewContent(device)
+//        val webView = device.findObject(By.clazz("android.webkit.WebView"))
+//        val connectAccountsButton = webView.findObject(By.textStartsWith("Connect"))
+//        connectAccountsButton!!.click()
 
         val saveAccountTitle = UiAutomatorText("Save account", labelMatchesExactly = false, device = device)
         saveAccountTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
@@ -1645,6 +1654,46 @@ internal class PlaygroundTestDriver(
         successTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
         clickOnBottomSheetCtaByPosition()
     }
+
+    // Method to dump the current UI hierarchy to logcat and/or a file
+    fun printWebViewContent(device: UiDevice) {
+        // Find the WebView
+        val webView = device.findObject(By.clazz("android.webkit.WebView"))
+        if (webView == null) {
+            Log.d("WEBVIEW_CONTENT", "No WebView found")
+            return
+        }
+
+        Log.d("WEBVIEW_CONTENT", "WebView found at: " + webView.getVisibleBounds())
+
+
+        // Find all elements with text inside WebView
+        val textElements = webView.findObjects(By.textContains(""))
+        Log.d("WEBVIEW_CONTENT", "Found " + textElements.size + " text elements")
+
+        for (element in textElements) {
+            Log.d(
+                "WEBVIEW_TEXT", "Text: " + element.getText() +
+                    ", Bounds: " + element.getVisibleBounds() +
+                    ", Class: " + element.getClassName()
+            )
+        }
+
+
+        // Find any button-like elements
+        val buttons = webView.findObjects(By.clickable(true))
+        for (button in buttons) {
+            val text = if (button.getText() != null) button.getText() else "null"
+            val contentDesc = if (button.getContentDescription() != null) button.getContentDescription() else "null"
+
+            Log.d(
+                "WEBVIEW_BUTTON", "Text: " + text +
+                    ", ContentDesc: " + contentDesc +
+                    ", Bounds: " + button.getVisibleBounds()
+            )
+        }
+    }
+
 
     private fun executeUsBankAccountFlow() {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
