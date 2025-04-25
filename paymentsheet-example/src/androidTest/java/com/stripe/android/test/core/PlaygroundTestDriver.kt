@@ -2,6 +2,7 @@ package com.stripe.android.test.core
 
 import android.app.Activity
 import android.app.Application
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
@@ -69,6 +71,8 @@ import org.junit.Assert.fail
 import org.junit.Assume
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -1639,10 +1643,7 @@ internal class PlaygroundTestDriver(
         val title = UiAutomatorText("Select account", labelMatchesExactly = false, device = device)
         title.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
         title.exists()
-        printWebViewContent(device)
-//        val webView = device.findObject(By.clazz("android.webkit.WebView"))
-//        val connectAccountsButton = webView.findObject(By.textStartsWith("Connect"))
-//        connectAccountsButton!!.click()
+        clickConnectAccountsButtonByPosition(device)
 
         val saveAccountTitle = UiAutomatorText("Save account", labelMatchesExactly = false, device = device)
         saveAccountTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
@@ -1655,45 +1656,23 @@ internal class PlaygroundTestDriver(
         clickOnBottomSheetCtaByPosition()
     }
 
-    // Method to dump the current UI hierarchy to logcat and/or a file
-    fun printWebViewContent(device: UiDevice) {
-        // Find the WebView
+
+    fun clickConnectAccountsButtonByPosition(device: UiDevice) {
         val webView = device.findObject(By.clazz("android.webkit.WebView"))
-        if (webView == null) {
-            Log.d("WEBVIEW_CONTENT", "No WebView found")
-            return
-        }
 
-        Log.d("WEBVIEW_CONTENT", "WebView found at: " + webView.getVisibleBounds())
+        if (webView != null) {
+            // Get the WebView bounds
+            val webViewBounds: Rect = webView.visibleBounds
 
-
-        // Find all elements with text inside WebView
-        val textElements = webView.findObjects(By.textContains(""))
-        Log.d("WEBVIEW_CONTENT", "Found " + textElements.size + " text elements")
-
-        for (element in textElements) {
-            Log.d(
-                "WEBVIEW_TEXT", "Text: " + element.getText() +
-                    ", Bounds: " + element.getVisibleBounds() +
-                    ", Class: " + element.getClassName()
-            )
-        }
-
-
-        // Find any button-like elements
-        val buttons = webView.findObjects(By.clickable(true))
-        for (button in buttons) {
-            val text = if (button.getText() != null) button.getText() else "null"
-            val contentDesc = if (button.getContentDescription() != null) button.getContentDescription() else "null"
-
-            Log.d(
-                "WEBVIEW_BUTTON", "Text: " + text +
-                    ", ContentDesc: " + contentDesc +
-                    ", Bounds: " + button.getVisibleBounds()
-            )
+            Log.d("WEBVIEW_INFO", "WebView bounds: $webViewBounds")
+            // Calculate position for bottom center where the CTA likely is
+            val buttonX: Int = webViewBounds.centerX()
+            val buttonY: Int = webViewBounds.bottom - 50 // 50px from bottom
+            device.click(buttonX, buttonY)
+        } else {
+            Log.e("WEBVIEW_ERROR", "WebView not found on screen!")
         }
     }
-
 
     private fun executeUsBankAccountFlow() {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
