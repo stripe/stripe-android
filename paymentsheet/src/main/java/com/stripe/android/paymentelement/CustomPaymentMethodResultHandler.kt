@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodProxyActivity
 import kotlinx.parcelize.Parcelize
 
@@ -11,7 +10,6 @@ import kotlinx.parcelize.Parcelize
  * Handler used to respond to custom payment method confirm results.
  */
 @ExperimentalCustomPaymentMethodsApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object CustomPaymentMethodResultHandler {
 
     /**
@@ -45,7 +43,6 @@ object CustomPaymentMethodResultHandler {
 /**
  * The result of an attempt to confirm a custom payment method.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CustomPaymentMethodResult : Parcelable {
     @Parcelize
     internal data object Completed : CustomPaymentMethodResult()
@@ -58,7 +55,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
         val displayMessage: String?,
     ) : CustomPaymentMethodResult()
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         /**
@@ -66,7 +62,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
          */
         @JvmStatic
         @ExperimentalCustomPaymentMethodsApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun completed(): CustomPaymentMethodResult {
             return Completed
         }
@@ -76,7 +71,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
          */
         @JvmStatic
         @ExperimentalCustomPaymentMethodsApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun canceled(): CustomPaymentMethodResult {
             return Canceled
         }
@@ -90,7 +84,6 @@ sealed class CustomPaymentMethodResult : Parcelable {
         @JvmStatic
         @JvmOverloads
         @ExperimentalCustomPaymentMethodsApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun failed(displayMessage: String? = null): CustomPaymentMethodResult {
             return Failed(displayMessage)
         }
