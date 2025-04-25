@@ -2,7 +2,6 @@ package com.stripe.android.test.core
 
 import android.app.Activity
 import android.app.Application
-import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,8 +28,8 @@ import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Direction
+import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
@@ -71,8 +70,6 @@ import org.junit.Assert.fail
 import org.junit.Assume
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
-import java.io.ByteArrayOutputStream
-import java.io.IOException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -1627,51 +1624,34 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        // The FC Lite flow is hosted on a web-view, so we interact with it via UiAutomator.
-        val consentText = UiAutomatorText("Agree and continue", labelMatchesExactly = false, device = device)
-        consentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        consentText.click()
+        defaultWait()
+        onWebView()
+            .withElementByTestId("agree-button")
+            .perform(webClick())
 
-        val institutionTile = UiAutomatorText("Test Institution", labelMatchesExactly = false, device = device)
-        institutionTile.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        institutionTile.click()
+        defaultWait()
+        onWebView()
+            .withElementByTestId("institution-default")
+            .perform(webClick())
 
-        val selectAccount = UiAutomatorText("Select account", labelMatchesExactly = false, device = device)
-        selectAccount.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        selectAccount.exists()
+        defaultWait()
+        onWebView()
+            .withElementByTestId(testId = "select-button")
+            .perform(webClick())
 
-        val title = UiAutomatorText("Select account", labelMatchesExactly = false, device = device)
-        title.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        title.exists()
-        clickConnectAccountsButtonByPosition(device)
+        defaultWait()
+        onWebView()
+            .withElementByTestId("link-not-now-button")
+            .perform(webClick())
 
-        val saveAccountTitle = UiAutomatorText("Save account", labelMatchesExactly = false, device = device)
-        saveAccountTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        // close auto-opened keyboard and skip saving account to link on the bottom sheet modal.
-        device.pressBack()
-        clickOnBottomSheetCtaByPosition()
-
-        val successTitle = UiAutomatorText("Success", labelMatchesExactly = false, device = device)
-        successTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        clickOnBottomSheetCtaByPosition()
+        defaultWait()
+        onWebView()
+            .withElementByTestId("done-button")
+            .perform(webClick())
     }
 
-
-    fun clickConnectAccountsButtonByPosition(device: UiDevice) {
-        val webView = device.findObject(By.clazz("android.webkit.WebView"))
-
-        if (webView != null) {
-            // Get the WebView bounds
-            val webViewBounds: Rect = webView.visibleBounds
-
-            Log.d("WEBVIEW_INFO", "WebView bounds: $webViewBounds")
-            // Calculate position for bottom center where the CTA likely is
-            val buttonX: Int = webViewBounds.centerX()
-            val buttonY: Int = webViewBounds.bottom - 50 // 50px from bottom
-            device.click(buttonX, buttonY)
-        } else {
-            Log.e("WEBVIEW_ERROR", "WebView not found on screen!")
-        }
+    private fun defaultWait() {
+        TimeUnit.SECONDS.sleep(5)
     }
 
     private fun executeUsBankAccountFlow() {
@@ -1738,8 +1718,10 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        val consentText = UiAutomatorText("Agree and continue", labelMatchesExactly = false, device = device)
-        consentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        defaultWait()
+        onWebView()
+            .withElementByTestId("agree-button")
+            .perform(webClick())
 
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
