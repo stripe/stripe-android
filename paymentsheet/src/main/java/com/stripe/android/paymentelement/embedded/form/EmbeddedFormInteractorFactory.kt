@@ -32,21 +32,24 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             eventReporter = eventReporter,
             selectionUpdater = {
                 embeddedSelectionHolder.set(it)
-            }
+            },
+            // If no saved payment methods, then first saved payment method is automatically set as default
+            setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
         )
 
-        val usBankAccountFormArguments = USBankAccountFormArguments.create(
+        val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             setSelection = embeddedSelectionHolder::set,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
                 formActivityStateHelper.updateMandate(mandateText)
             },
             onUpdatePrimaryButtonUIState = formActivityStateHelper::updatePrimaryButton,
             onError = formActivityStateHelper::updateError,
-            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) }
+            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
 
         return DefaultVerticalModeFormInteractor(
