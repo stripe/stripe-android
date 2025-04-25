@@ -2,6 +2,7 @@ apply from: configs.androidApplication
 
 apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
+apply plugin: 'io.sentry.android.gradle'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'shot'
@@ -14,6 +15,14 @@ def getBackendUrl() {
 
 def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
+}
+
+def sentryDsn() {
+    if (gradle.ext.isCi || gradle.ext.isNightlyBuild || gradle.ext.isBrowserstackBuild) {
+        return "https://1dbc5df15fcf4b0d9e3cc9d0e63d95fd@errors.stripe.com/1512"
+    } else {
+        return ""
+    }
 }
 
 emerge {
@@ -110,7 +119,8 @@ android {
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
-                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey()
+                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
+                SENTRY_DSN: sentryDsn(),
         ]
     }
     buildFeatures {
