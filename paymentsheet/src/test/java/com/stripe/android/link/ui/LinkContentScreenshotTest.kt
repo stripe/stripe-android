@@ -55,7 +55,6 @@ internal class LinkContentScreenshotTest {
                             navigationIcon = R.drawable.stripe_link_close,
                             showHeader = false,
                             showOverflowMenu = false,
-                            email = null
                         ),
                         sheetState = ModalBottomSheetState(
                             initialValue = ModalBottomSheetValue.Hidden,

@@ -55,6 +55,7 @@ class WalletViewModelTest {
         assertThat(state).isEqualTo(
             WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
+                email = "email@stripe.com",
                 selectedItemId = null,
                 isProcessing = false,
                 hasCompleted = false,

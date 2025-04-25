@@ -117,8 +117,18 @@ internal class WalletScreenTest {
         onWalletCollapsedChevron().assertIsDisplayed()
         onWalletCollapsedPaymentDetails().assertIsDisplayed()
         onCollapsedWalletRow().assertIsDisplayed().assertHasClickAction()
-        onWalletPayButton().assertIsDisplayed().assertIsNotEnabled().assertHasClickAction()
-        onWalletPayAnotherWayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
+
+        onWalletPayButton()
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsNotEnabled()
+            .assertHasClickAction()
+
+        onWalletPayAnotherWayButton()
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .assertHasClickAction()
     }
 
     @Test
@@ -150,8 +160,18 @@ internal class WalletScreenTest {
         onWalletAddPaymentMethodRow().assertIsDisplayed().assertHasClickAction()
         onExpandedWalletHeader().assertIsDisplayed()
         onPaymentMethodList().assertCountEquals(2)
-        onWalletPayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
-        onWalletPayAnotherWayButton().performScrollTo().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
+
+        onWalletPayButton()
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .assertHasClickAction()
+
+        onWalletPayAnotherWayButton()
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .assertHasClickAction()
     }
 
     @Test
@@ -178,8 +198,17 @@ internal class WalletScreenTest {
 
         composeTestRule.waitForIdle()
 
-        onWalletPayButton().assertIsDisplayed().assertIsNotEnabled().assertHasClickAction()
-        onWalletPayAnotherWayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
+        onWalletPayButton()
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsNotEnabled()
+            .assertHasClickAction()
+
+        onWalletPayAnotherWayButton()
+            .performScrollTo()
+            .assertIsDisplayed()
+            .assertIsEnabled()
+            .assertHasClickAction()
     }
 
     @Test
@@ -622,6 +651,7 @@ internal class WalletScreenTest {
         WalletBody(
             state = WalletUiState(
                 paymentDetailsList = paymentDetails,
+                email = "email@email.com",
                 selectedItemId = paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
                 hasCompleted = false,
