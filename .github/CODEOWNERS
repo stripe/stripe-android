@@ -21,8 +21,8 @@
 /identity-example/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Financial Connections SDK
-/financial-connections/ @stripe/android-connections-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/financial-connections-example/ @stripe/android-connections-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/financial-connections/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/financial-connections-example/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Stripe Connect SDK
 /connect/ @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
