@@ -89,7 +89,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(
         card = PaymentMethodCreateParams.Card.Builder().apply {
             setExpiryMonth(this@toApiParams.expiryMonth)
-            setExpiryYear(this@toApiParams.expiryMonth)
+            setExpiryYear(this@toApiParams.expiryYear)
             state.value.preferredCardBrand?.let { preferredCardBrand ->
                 setNetworks(Networks(preferred = preferredCardBrand.code))
             }
