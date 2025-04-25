@@ -30,7 +30,7 @@ internal object TransformToBankIcon {
         return bankNameRegexToIconCode
             .filter { it.key.findAll(bankName).any() }
             .firstNotNullOfOrNull {
-                TransformBankIconCodeToBankIcon(it.value, fallbackIcon)
+                transformBankIconCodeToBankIcon(it.value, fallbackIcon)
             } ?: FinancialConnectionsR.drawable.stripe_ic_bank
     }
 }

@@ -44,7 +44,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformBankIconCodeToBankIcon
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.R as StripeR
 
@@ -276,7 +276,7 @@ private fun BankIcon(
     modifier: Modifier = Modifier
 ) {
     val icon = remember(bankIconCode) {
-        TransformBankIconCodeToBankIcon(
+        transformBankIconCodeToBankIcon(
             iconCode = bankIconCode,
             fallbackIcon = R.drawable.stripe_link_bank_outlined,
         )
