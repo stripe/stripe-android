@@ -1023,6 +1023,34 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `RemoveSavedPaymentMethod event should return expected toString()`() {
+        val event = PaymentSheetEvent.RemovePaymentOption(
+            mode = EventReporter.Mode.Custom,
+            code = "card",
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_custom_paymentoption_removed"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_lpm" to "card",
+                "currency" to "usd",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
     fun `SelectPaymentOption event should return expected toString()`() {
         val event = PaymentSheetEvent.SelectPaymentOption(
             mode = EventReporter.Mode.Custom,
@@ -1086,6 +1114,31 @@ class PaymentSheetEventTest {
             event.eventName
         ).isEqualTo(
             "mc_form_interacted"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_lpm" to "card",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `PaymentMethodFormCompleted event should return expected toString()`() {
+        val event = PaymentSheetEvent.PaymentMethodFormCompleted(
+            code = "card",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_form_completed"
         )
         assertThat(
             event.params

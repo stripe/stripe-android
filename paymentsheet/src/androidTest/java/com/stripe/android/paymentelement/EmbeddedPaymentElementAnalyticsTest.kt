@@ -94,6 +94,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
+        validateAnalyticsRequest(eventName = "mc_form_completed")
         formPage.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
@@ -308,6 +309,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
         validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
+        validateAnalyticsRequest(eventName = "mc_embedded_paymentoption_removed")
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
 
