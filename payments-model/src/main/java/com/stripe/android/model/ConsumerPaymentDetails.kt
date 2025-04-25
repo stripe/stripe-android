@@ -55,9 +55,10 @@ data class ConsumerPaymentDetails(
                 expiryYear = expiryYear
             )
 
-        val availableNetworks = networks
-            .map { CardBrand.fromCode(it) }
-            .filter { it != CardBrand.Unknown }
+        val availableNetworks
+            get() = networks
+                .map { CardBrand.fromCode(it) }
+                .filter { it != CardBrand.Unknown }
 
         companion object {
             const val TYPE = "card"

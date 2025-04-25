@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -37,6 +38,10 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
         set(value) = savedStateHandle.set(PREVIOUS_CONFIGURATION_KEY, value)
 
+    private var previousPaymentMethodMetadata: PaymentMethodMetadata?
+        get() = savedStateHandle[PREVIOUS_PAYMENT_METHOD_METADATA_KEY]
+        set(value) = savedStateHandle.set(PREVIOUS_PAYMENT_METHOD_METADATA_KEY, value)
+
     override fun choose(
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>?,
@@ -53,6 +58,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         } ?: newSelection
 
         previousConfiguration = newConfiguration
+        previousPaymentMethodMetadata = paymentMethodMetadata
 
         return result
     }
@@ -97,16 +103,34 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection.New,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        val newFormType = formHelperFactory.create(
+        val newFormHelper = formHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
+            // Not important for determining formType so use default value
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         ) {}
-            .formTypeForCode(previousSelection.paymentMethodType)
-        return newFormType != FormHelper.FormType.UserInteractionRequired
+        val newFormType = newFormHelper.formTypeForCode(previousSelection.paymentMethodType)
+        if (newFormType != FormHelper.FormType.UserInteractionRequired) {
+            return true
+        }
+        return previousPaymentMethodMetadata?.let { previousPaymentMethodMetadata ->
+            val previousFormHelper = formHelperFactory.create(
+                coroutineScope = coroutineScope,
+                paymentMethodMetadata = previousPaymentMethodMetadata,
+                eventReporter = eventReporter,
+                // Not important for determining formType so use default value
+                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            ) {}
+            val previousFormElements = previousFormHelper.formElementsForCode(previousSelection.paymentMethodType)
+            val newFormElements = newFormHelper.formElementsForCode(previousSelection.paymentMethodType)
+            previousFormElements.size >= newFormElements.size
+        } == true
     }
 
     companion object {
         const val PREVIOUS_CONFIGURATION_KEY = "DefaultEmbeddedSelectionChooser_PREVIOUS_CONFIGURATION_KEY"
+        const val PREVIOUS_PAYMENT_METHOD_METADATA_KEY =
+            "DefaultEmbeddedSelectionChooser_PREVIOUS_PAYMENT_METHOD_METADATA_KEY"
     }
 }

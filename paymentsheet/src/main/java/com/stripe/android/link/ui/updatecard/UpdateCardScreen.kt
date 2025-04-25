@@ -14,6 +14,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.Loader
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -33,9 +34,10 @@ import com.stripe.android.R as StripeR
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
-    viewModel.interactor?.let {
-        UpdateCardScreenBody(
-            interactor = it,
+    when (val interactor = viewModel.interactor) {
+        null -> Loader()
+        else -> UpdateCardScreenBody(
+            interactor = interactor,
             isDefault = state.isDefault,
             primaryButtonState = state.primaryButtonState,
             secondaryButtonEnabled = state.loading.not(),
@@ -95,7 +97,7 @@ internal fun UpdateCardScreenBody(
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
-    DefaultLinkTheme {
+    DefaultLinkTheme(darkTheme = true) {
         UpdateCardScreenBody(
             interactor = DefaultEditCardDetailsInteractor.Factory().create(
                 coroutineScope = rememberCoroutineScope(),
