@@ -225,6 +225,15 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
         fireAnalyticEvent(AnalyticEvent.RemovedSavedPaymentMethod(code))
+        fireEvent(
+            PaymentSheetEvent.RemoveSavedPaymentMethod(
+                code = code,
+                currency = currency,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
@@ -257,6 +266,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireAnalyticEvent(
             AnalyticEvent.CompletedPaymentMethodForm(
                 paymentMethodType = code,
+            )
+        )
+        fireEvent(
+            PaymentSheetEvent.PaymentMethodFormCompleted(
+                code = code,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }

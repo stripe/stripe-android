@@ -282,6 +282,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class RemoveSavedPaymentMethod(
+        code: String,
+        currency: String?,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_saved_payment_method_removed"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CURRENCY to currency,
+            FIELD_SELECTED_LPM to code,
+        )
+    }
+
     class SelectPaymentOption(
         mode: EventReporter.Mode,
         paymentSelection: PaymentSelection?,
@@ -316,6 +330,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_form_interacted"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to code
+        )
+    }
+
+    class PaymentMethodFormCompleted(
+        code: String,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_form_completed"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_SELECTED_LPM to code
         )

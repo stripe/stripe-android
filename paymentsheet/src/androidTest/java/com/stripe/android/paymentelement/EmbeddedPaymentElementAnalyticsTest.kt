@@ -95,6 +95,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
         formPage.fillOutCardDetails()
+        validateAnalyticsRequest(eventName = "mc_form_completed")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
@@ -309,6 +310,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
         editPage.clickRemove()
+        validateAnalyticsRequest(eventName = "mc_saved_payment_method_removed")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
 
         managePage.waitUntilVisible()
