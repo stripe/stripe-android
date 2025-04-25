@@ -68,9 +68,9 @@ private fun Label(
 @Composable
 private fun disabledBackgroundColor(): Color {
     return if (isSystemInDarkTheme()) {
-        Color.White.copy(alpha = 0.075f)
+        Color.White.copy(alpha = 0.04f)
     } else {
-        Color.Black.copy(alpha = 0.075f)
+        Color.Black.copy(alpha = 0.04f)
     }
 }
 
