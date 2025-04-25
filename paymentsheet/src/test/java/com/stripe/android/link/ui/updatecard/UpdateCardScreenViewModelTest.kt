@@ -6,6 +6,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -50,13 +51,32 @@ class UpdateCardScreenViewModelTest {
     }
 
     @Test
-    fun `onUpdateClicked logs update action`() = runTest(dispatcher) {
-        val logger = FakeLogger()
-        val viewModel = createViewModel(logger = logger)
+    fun `onUpdateClicked updates payment details successfully`() = runTest(dispatcher) {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            paymentDetailsId = card.id
+        )
+
+        val cardUpdateParams = CardUpdateParams(
+            expiryMonth = 12,
+            expiryYear = 2025,
+            billingDetails = null
+        )
+
+        viewModel.onCardUpdateParamsChanged(cardUpdateParams)
 
         viewModel.onUpdateClicked()
 
-        assertThat(logger.infoLogs).contains("Update button clicked")
+        val state = viewModel.state.value
+        val call = linkAccountManager.awaitUpdateCardDetailsCall()
+        assertThat(state.loading).isFalse()
+        assertThat(state.error).isNull()
+        assertThat(call.id).isEqualTo(state.paymentDetailsId!!)
+        assertThat(call).isNotNull()
     }
 
     @Test

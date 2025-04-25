@@ -58,6 +58,7 @@ internal open class FakeLinkAccountManager(
 
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
+    private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
 
     private val logoutCall = Turbine<Unit>()
 
@@ -191,11 +192,18 @@ internal open class FakeLinkAccountManager(
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams
     ): Result<ConsumerPaymentDetails> {
+        updateCardDetailsTurbine.add(
+            updateParams
+        )
         return updatePaymentDetailsResult
     }
 
     suspend fun awaitMobileSignUpCall(): MobileSignUpCall {
         return mobileSignUpTurbine.awaitItem()
+    }
+
+    suspend fun awaitUpdateCardDetailsCall(): ConsumerPaymentDetailsUpdateParams {
+        return updateCardDetailsTurbine.awaitItem()
     }
 
     suspend fun awaitSignUpCall(): SignUpCall {

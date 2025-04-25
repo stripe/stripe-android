@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.updatecard
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -117,7 +118,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         onBrandChoiceChanged = ::onBrandChoiceChanged
     )
 
-    private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
+    @VisibleForTesting
+    internal fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
         _state.update { it.copy(cardUpdateParams = cardUpdateParams) }
     }
 
