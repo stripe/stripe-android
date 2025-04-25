@@ -119,6 +119,8 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
                 coroutineScope = coroutineScope,
                 paymentMethodMetadata = previousPaymentMethodMetadata,
                 eventReporter = eventReporter,
+                // Not important for determining formType so use default value
+                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             ) {}
             val previousFormElements = previousFormHelper.formElementsForCode(previousSelection.paymentMethodType)
             val newFormElements = newFormHelper.formElementsForCode(previousSelection.paymentMethodType)
