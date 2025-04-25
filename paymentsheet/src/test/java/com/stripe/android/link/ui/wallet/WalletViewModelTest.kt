@@ -51,7 +51,7 @@ class WalletViewModelTest {
         assertThat(viewModel.uiState.value).isEqualTo(
             WalletUiState(
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull(),
+                selectedItemId = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,

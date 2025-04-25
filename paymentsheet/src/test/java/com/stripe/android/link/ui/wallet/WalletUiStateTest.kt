@@ -171,7 +171,7 @@ class WalletUiStateTest {
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
-            selectedItem = selectedItem,
+            selectedItemId = selectedItem?.id,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
