@@ -18,12 +18,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.assertComplete
 import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
@@ -66,12 +62,9 @@ internal open class BaseLpmNetworkTest(
 
     fun test(
         testType: TestType,
+        params: PaymentMethodTestParams,
         country: MerchantCountry = MerchantCountry.US,
-        createParams: PaymentMethodCreateParams,
-        optionsParams: PaymentMethodOptionsParams? = null,
-        extraParams: PaymentMethodExtraParams? = null,
         shippingDetails: AddressDetails? = null,
-        customerRequestedSave: Boolean = false,
         allowsManualConfirmation: Boolean = false,
     ) = runLpmNetworkTest(country = country, allowsManualConfirmation = allowsManualConfirmation) {
         val factory = CreateIntentFactory(
@@ -80,16 +73,17 @@ internal open class BaseLpmNetworkTest(
             testClient = testClient,
         )
 
-        val createIntentData = testType.createIntent(country, factory)
+        val confirmParams = params.create(country, testClient).getOrElse { exception ->
+            fail(exception.message, exception)
+        }
+
+        val createIntentData = testType.createIntent(confirmParams.customerId, country, factory)
 
         createIntentData.onSuccess { data ->
             assertCanConfirmIntent(
+                option = confirmParams.option,
                 intent = data.intent,
-                createParams = createParams,
-                optionsParams = optionsParams,
-                extraParams = extraParams,
                 shippingDetails = shippingDetails,
-                customerRequestedSave = customerRequestedSave,
                 initializationMode = data.initializationMode,
             )
         }.onFailure { exception ->
@@ -137,22 +131,12 @@ internal open class BaseLpmNetworkTest(
     }
 
     private suspend fun LpmNetworkTestActivity.assertCanConfirmIntent(
+        option: ConfirmationHandler.Option,
         initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
-        createParams: PaymentMethodCreateParams,
-        optionsParams: PaymentMethodOptionsParams?,
-        extraParams: PaymentMethodExtraParams?,
         shippingDetails: AddressDetails?,
-        customerRequestedSave: Boolean,
     ) {
         intendingPaymentConfirmationToBeLaunched(intent)
-
-        val option = PaymentMethodConfirmationOption.New(
-            createParams = createParams,
-            optionsParams = optionsParams,
-            extraParams = extraParams,
-            shouldSave = customerRequestedSave,
-        )
 
         confirmationHandler.state.test {
             awaitItem().assertIdle()

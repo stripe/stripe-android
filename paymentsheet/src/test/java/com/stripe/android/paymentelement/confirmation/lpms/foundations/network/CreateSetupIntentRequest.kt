@@ -20,6 +20,8 @@ internal data class CreateSetupIntentRequest(
         val paymentMethodTypes: List<String>,
         @SerialName("payment_method")
         val paymentMethodId: String?,
+        @SerialName("customer")
+        val customerId: String?,
     )
 
     @Serializable

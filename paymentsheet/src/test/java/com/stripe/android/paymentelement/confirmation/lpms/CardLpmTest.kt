@@ -16,28 +16,39 @@ internal class CardLpmTest(
     fun `Confirm a card with US merchant`() = test(
         testType = testType,
         country = MerchantCountry.US,
-        createParams = PaymentMethodCreateParams.createCard(
-            cardParams = CardParams(
-                number = "4242424242424242",
-                expMonth = 12,
-                expYear = 2032,
-                cvc = "454",
+        params = PaymentMethodTestParams.New(
+            createParams = PaymentMethodCreateParams.createCard(
+                cardParams = CardParams(
+                    number = "4242424242424242",
+                    expMonth = 12,
+                    expYear = 2032,
+                    cvc = "454",
+                )
             )
-        ),
+        )
     )
 
     @Test
     fun `Confirm a card with FR merchant`() = test(
         testType = testType,
         country = MerchantCountry.FR,
-        createParams = PaymentMethodCreateParams.createCard(
-            cardParams = CardParams(
-                number = "4242424242424242",
-                expMonth = 12,
-                expYear = 2032,
-                cvc = "454",
+        params = PaymentMethodTestParams.New(
+            createParams = PaymentMethodCreateParams.createCard(
+                cardParams = CardParams(
+                    number = "4242424242424242",
+                    expMonth = 12,
+                    expYear = 2032,
+                    cvc = "454",
+                )
             )
-        ),
+        )
+    )
+
+    @Test
+    fun `Confirm a card with saved card`() = test(
+        testType = testType,
+        country = MerchantCountry.US,
+        params = PaymentMethodTestParams.Saved()
     )
 
     companion object {
