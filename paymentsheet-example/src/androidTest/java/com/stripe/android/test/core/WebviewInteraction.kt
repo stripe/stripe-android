@@ -5,7 +5,8 @@ import android.os.SystemClock.sleep
 import androidx.test.espresso.web.sugar.Web.WebInteraction
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Find a button in a web view using its `data-testid` ID (commonly used in Stripe frontend surfaces)
@@ -17,18 +18,18 @@ internal fun WebInteraction<Void>.withElementByTestId(
         .getOrNull()
 }
 
+/**
+ * Retry until the given block returns a non-null value or the timeout is reached.
+ */
 private fun <T> retryUntil(
-    timeoutSeconds: Long = 15,
-    pollIntervalMillis: Long = 3,
+    timeout: Duration = 15.seconds,
+    pollInterval: Duration = 3.seconds,
     block: () -> T?
 ): T {
-    val endTime = elapsedRealtime() + TimeUnit.SECONDS.toMillis(timeoutSeconds)
+    val endTime = elapsedRealtime() + timeout.inWholeMilliseconds
     while (elapsedRealtime() < endTime) {
-        val result = block()
-        if (result != null) {
-            return result
-        }
-        sleep(pollIntervalMillis)
+        block()?.let { return it }
+        sleep(pollInterval.inWholeMilliseconds)
     }
-    throw AssertionError("Condition not met within $timeoutSeconds seconds")
+    throw AssertionError("Condition not met within $timeout")
 }
