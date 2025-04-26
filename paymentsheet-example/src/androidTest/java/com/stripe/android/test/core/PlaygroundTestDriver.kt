@@ -1760,14 +1760,6 @@ internal class PlaygroundTestDriver(
         composeTestRule.onNodeWithTag(tag).performClick()
     }
 
-    private fun clickOnBottomSheetCtaByPosition() {
-        // Unfortunately text matchers don't work within bottom modals within web views.
-        // This clicks CTA at the bottom of the screen by position on these scenarios.
-        val x = (device.displayWidth * 0.50).toInt()
-        val y = (device.displayHeight * 0.92).toInt()
-        device.click(x, y)
-    }
-
     internal fun setup(testParameters: TestParameters) {
         if (BuildConfig.IS_NIGHTLY_BUILD) {
             assumeTrue(testParameters.executeInNightlyRun)
