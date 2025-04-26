@@ -252,7 +252,6 @@ class PaymentSheet internal constructor(
         /**
          * @param callback Called when an analytic event occurs.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             callbacksBuilder.analyticEventCallback(callback)
@@ -2327,7 +2326,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback If specified, called when an analytic event occurs.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalAnalyticEventCallbackApi
             fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
                 callbacksBuilder.analyticEventCallback(callback)

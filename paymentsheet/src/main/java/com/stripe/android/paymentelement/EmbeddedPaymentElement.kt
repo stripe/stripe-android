@@ -4,7 +4,6 @@ import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
@@ -151,7 +150,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * Called when an analytic event is emitted.
          */
         @ExperimentalAnalyticEventCallbackApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
         }
