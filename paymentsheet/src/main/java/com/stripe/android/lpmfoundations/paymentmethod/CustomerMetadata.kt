@@ -81,12 +81,9 @@ internal data class CustomerMetadata(
                     canRemovePaymentMethods = customerSheetSession.permissions.canRemovePaymentMethods,
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     canRemoveDuplicates = true,
-                    /*
-                     * Un-scoped legacy ephemeral keys do not have permissions to update payment method. This should
-                     * always be set to false.
-                     */
-                    canUpdateFullPaymentMethodDetails = false,
-                    )
+                    canUpdateFullPaymentMethodDetails =
+                    customerSheetSession.permissions.canUpdateFullPaymentMethodDetails,
+                )
             }
 
             // Native link uses PaymentMethodMetadata for DefaultFormHelper and doesn't use CustomerMetadata at all
