@@ -20,21 +20,19 @@ import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -42,6 +40,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -276,13 +275,17 @@ private fun PaymentMethodSection(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
-    var labelWidth by remember { mutableStateOf(0.dp) }
+    val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
+    val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
+
+    val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel)
 
     PaymentMethodPicker(
         email = state.email,
-        paymentLabelWidth = labelWidth,
         expanded = isExpanded,
         selectedItem = state.selectedItem,
+        emailLabel = emailLabel,
+        labelMaxWidth = labelMaxWidthDp,
         expandedContent = {
             ExpandedPaymentDetails(
                 uiState = state,
@@ -320,11 +323,10 @@ private fun PaymentMethodSection(
             CollapsedPaymentDetails(
                 selectedPaymentMethod = selectedItem,
                 enabled = !state.primaryButtonState.isBlocking,
+                label = paymentLabel,
+                labelMaxWidth = labelMaxWidthDp,
                 onClick = {
                     onExpandedChanged(true)
-                },
-                onLabelWidth = {
-                    labelWidth = it
                 },
             )
         },
@@ -332,14 +334,31 @@ private fun PaymentMethodSection(
 }
 
 @Composable
+private fun computeMaxLabelWidth(vararg labels: String): Dp {
+    val textStyle = LocalTextStyle.current
+    val textMeasurer = rememberTextMeasurer()
+
+    val maxLabelSize = labels.maxOfOrNull { label ->
+        textMeasurer.measure(style = textStyle, text = label).size.width
+    } ?: 0
+
+    val labelMaxWidthDp = with(LocalDensity.current) {
+        maxLabelSize.toDp()
+    }
+
+    return labelMaxWidthDp
+}
+
+@Composable
 private fun PaymentMethodPicker(
     email: String,
+    emailLabel: String,
+    labelMaxWidth: Dp,
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
-    paymentLabelWidth: Dp,
     modifier: Modifier = Modifier,
-    collapsedContent: @Composable (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    expandedContent: @Composable () -> Unit,
+    collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
+    expandedContent: @Composable (() -> Unit),
 ) {
     Column(
         modifier = modifier
@@ -358,7 +377,8 @@ private fun PaymentMethodPicker(
     ) {
         EmailDetails(
             email = email,
-            labelWidth = paymentLabelWidth,
+            label = emailLabel,
+            labelMaxWidth = labelMaxWidth
         )
 
         Divider(
@@ -378,10 +398,10 @@ private fun PaymentMethodPicker(
 private fun CollapsedPaymentDetails(
     selectedPaymentMethod: ConsumerPaymentDetails.PaymentDetails,
     enabled: Boolean,
+    label: String,
+    labelMaxWidth: Dp,
     onClick: () -> Unit,
-    onLabelWidth: (Dp) -> Unit,
 ) {
-    val density = LocalDensity.current
     Row(
         modifier = Modifier
             .testTag(COLLAPSED_WALLET_ROW)
@@ -397,20 +417,15 @@ private fun CollapsedPaymentDetails(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            text = stringResource(R.string.stripe_wallet_collapsed_payment),
+            text = label,
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_HEADER_TAG)
-                .onSizeChanged {
-                    with(density) {
-                        onLabelWidth(it.width.toDp())
-                    }
-                },
+                .width(labelMaxWidth),
             color = MaterialTheme.linkColors.disabledText,
         )
 
         PaymentDetails(
-            modifier = Modifier
-                .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
+            modifier = Modifier.testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
             paymentDetails = selectedPaymentMethod
         )
 
@@ -428,7 +443,8 @@ private fun CollapsedPaymentDetails(
 @Composable
 private fun EmailDetails(
     email: String,
-    labelWidth: Dp,
+    label: String,
+    labelMaxWidth: Dp
 ) {
     Row(
         modifier = Modifier
@@ -441,16 +457,10 @@ private fun EmailDetails(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        val widthModifier = if (labelWidth > 0.dp) {
-            Modifier.width(labelWidth)
-        } else {
-            Modifier
-        }
-
         Text(
-            text = stringResource(StripeUiCoreR.string.stripe_email),
+            modifier = Modifier.width(labelMaxWidth),
+            text = label,
             color = MaterialTheme.linkColors.disabledText,
-            modifier = widthModifier,
         )
 
         Text(
