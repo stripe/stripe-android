@@ -71,7 +71,12 @@ internal fun FullScreenContent(
         navigationChannel = navigationChannel,
         navHostController = navController,
         keyboardController = keyboardController,
-        onBackStackEntryUpdated = onNavBackStackEntryChanged
+        onBackStackEntryUpdated = onNavBackStackEntryChanged,
+        onPopBackStackResult = { handled ->
+            if (!handled) {
+                dismiss()
+            }
+        },
     )
 
     ElementsBottomSheetLayout(

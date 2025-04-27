@@ -65,7 +65,6 @@ internal class LinkActivity : ComponentActivity() {
             LinkScreenContent(
                 viewModel = vm,
                 bottomSheetState = bottomSheetState,
-                onBackPressed = onBackPressedDispatcher::onBackPressed
             )
         }
     }

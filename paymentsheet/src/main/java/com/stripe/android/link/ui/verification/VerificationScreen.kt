@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
@@ -103,9 +102,7 @@ internal fun VerificationBody(
     onResendCodeClick: () -> Unit,
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
-    ScrollableTopLevelColumn(
-        modifier = Modifier.navigationBarsPadding(),
-    ) {
+    ScrollableTopLevelColumn {
         Header(
             isDialog = state.isDialog,
             onBackClicked = onBack

@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.SharedFlow
 internal fun LinkScreenContent(
     viewModel: LinkActivityViewModel,
     bottomSheetState: StripeBottomSheetState,
-    onBackPressed: () -> Unit
 ) {
     val screenState by viewModel.linkScreenState.collectAsState()
     val appBarState by viewModel.linkAppBarState.collectAsState()
@@ -31,7 +30,7 @@ internal fun LinkScreenContent(
         eventReporter = viewModel.eventReporter,
         onVerificationSucceeded = viewModel::onVerificationSucceeded,
         onDismissClicked = viewModel::onDismissVerificationClicked,
-        onBackPressed = onBackPressed,
+        onBackPressed = viewModel::goBack,
         navigate = viewModel::navigate,
         dismiss = viewModel::dismissSheet,
         dismissWithResult = viewModel::handleResult,

@@ -134,6 +134,7 @@ internal fun WalletBody(
         }
     }
 
+    // TODO(tillh-stripe): Replace this with ScrollableTopLevelColumn
     ScrollableColumn(
         modifier = Modifier
             .testTag(WALLET_SCREEN_BOX)

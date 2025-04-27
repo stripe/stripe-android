@@ -89,29 +89,23 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onDismissVerificationClicked() {
-        viewModelScope.launch {
-            _result.emit(
-                LinkActivityResult.Canceled(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                )
+        dismissWithResult(
+            LinkActivityResult.Canceled(
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
-        }
+        )
     }
 
     fun handleResult(result: LinkActivityResult) {
-        viewModelScope.launch {
-            _result.emit(result)
-        }
+        dismissWithResult(result)
     }
 
     fun dismissSheet() {
-        viewModelScope.launch {
-            _result.emit(
-                LinkActivityResult.Canceled(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                )
+        dismissWithResult(
+            LinkActivityResult.Canceled(
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
-        }
+        )
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -120,14 +114,12 @@ internal class LinkActivityViewModel @Inject constructor(
             linkAccountManager.logOut()
         }
 
-        viewModelScope.launch {
-            _result.emit(
-                LinkActivityResult.Canceled(
-                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
-                )
+        dismissWithResult(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
             )
-        }
+        )
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntryUpdate) {
@@ -154,13 +146,11 @@ internal class LinkActivityViewModel @Inject constructor(
      * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
      */
     fun handleBackPressed() {
-        viewModelScope.launch {
-            _result.emit(
-                LinkActivityResult.Canceled(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                )
+        dismissWithResult(
+            LinkActivityResult.Canceled(
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
-        }
+        )
     }
 
     fun registerActivityForConfirmation(
@@ -263,6 +253,12 @@ internal class LinkActivityViewModel @Inject constructor(
         linkAccountManager.logOut()
         linkAccountHolder.set(null)
         updateScreenState()
+    }
+
+    private fun dismissWithResult(result: LinkActivityResult) {
+        viewModelScope.launch {
+            _result.emit(result)
+        }
     }
 
     companion object {
