@@ -17,9 +17,9 @@ def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
 }
 
-def sentryDsn() {
+def getSentryDsn() {
     if (gradle.ext.isCi || gradle.ext.isNightlyBuild || gradle.ext.isBrowserstackBuild) {
-        return "https://1dbc5df15fcf4b0d9e3cc9d0e63d95fd@errors.stripe.com/1512"
+        return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN') ?: ""
     } else {
         return ""
     }
@@ -38,6 +38,12 @@ emerge {
             repoName.set("stripe-android")
         }
     }
+}
+
+sentry {
+    org = "stripe"
+    projectName = "elements-mobile-android"
+    includeProguardMapping = false
 }
 
 dependencies {
@@ -120,7 +126,7 @@ android {
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
                 GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
-                SENTRY_DSN: sentryDsn(),
+                SENTRY_DSN: getSentryDsn(),
         ]
     }
     buildFeatures {
