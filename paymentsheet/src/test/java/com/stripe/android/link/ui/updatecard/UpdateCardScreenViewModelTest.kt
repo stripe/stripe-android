@@ -73,9 +73,9 @@ class UpdateCardScreenViewModelTest {
 
         val state = viewModel.state.value
         val call = linkAccountManager.awaitUpdateCardDetailsCall()
-        assertThat(state.loading).isFalse()
+        assertThat(state.processing).isFalse()
         assertThat(state.error).isNull()
-        assertThat(call.id).isEqualTo(state.paymentDetailsId!!)
+        assertThat(call.id).isEqualTo(state.paymentDetailsId)
         assertThat(call).isNotNull()
     }
 

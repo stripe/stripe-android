@@ -23,16 +23,18 @@ internal data class WalletUiState(
     val alertMessage: ResolvableString? = null,
 ) {
 
-    val selectedItem
+    val selectedItem: ConsumerPaymentDetails.PaymentDetails?
         get() = if (selectedItemId != null) {
             paymentDetailsList.firstOrNull { it.id == selectedItemId }
         } else {
             paymentDetailsList.firstOrNull()
         }
 
-    val selectedCard: Card? = selectedItem as? Card
+    val selectedCard: Card?
+        get() = selectedItem as? Card
 
-    val showBankAccountTerms = selectedItem is ConsumerPaymentDetails.BankAccount
+    val showBankAccountTerms: Boolean
+        get() = selectedItem is ConsumerPaymentDetails.BankAccount
 
     val primaryButtonState: PrimaryButtonState
         get() {

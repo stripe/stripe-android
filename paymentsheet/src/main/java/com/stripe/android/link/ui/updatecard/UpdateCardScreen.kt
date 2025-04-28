@@ -7,19 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.Loader
 import com.stripe.android.link.ui.PrimaryButton
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.CardBrand
@@ -31,6 +27,7 @@ import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 
@@ -41,10 +38,7 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
         null -> Loader()
         else -> UpdateCardScreenBody(
             interactor = interactor,
-            primaryButtonState = state.primaryButtonState,
-            secondaryButtonEnabled = state.loading.not(),
-            isDefault = state.isDefault,
-            errorMessage = state.errorMessage,
+            state = state,
             onUpdateClicked = viewModel::onUpdateClicked,
             onCancelClicked = viewModel::onCancelClicked,
         )
@@ -54,10 +48,7 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
 @Composable
 internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
-    primaryButtonState: PrimaryButtonState,
-    secondaryButtonEnabled: Boolean,
-    isDefault: Boolean,
-    errorMessage: ResolvableString?,
+    state: UpdateCardScreenState,
     onUpdateClicked: () -> Unit,
     onCancelClicked: () -> Unit,
 ) {
@@ -75,7 +66,7 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        if (isDefault) {
+        if (state.isDefault) {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
@@ -84,10 +75,10 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        errorMessage?.let {
+        state.errorMessage?.let {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
-                text = it.resolve(LocalContext.current),
+                text = it.resolve(),
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.error
             )
@@ -96,13 +87,13 @@ internal fun UpdateCardScreenBody(
         PrimaryButton(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
             label = stringResource(R.string.stripe_link_update_card_confirm_cta),
-            state = primaryButtonState,
+            state = state.primaryButtonState,
             onButtonClick = onUpdateClicked
         )
 
         SecondaryButton(
             label = stringResource(StripeR.string.stripe_cancel),
-            enabled = secondaryButtonEnabled,
+            enabled = state.processing.not(),
             onClick = onCancelClicked
         )
     }
@@ -146,10 +137,14 @@ internal fun UpdateCardScreenBodyPreview() {
                 onCardUpdateParamsChanged = {},
                 addressCollectionMode = AddressCollectionMode.Automatic
             ),
-            isDefault = true,
-            primaryButtonState = PrimaryButtonState.Enabled,
-            secondaryButtonEnabled = true,
-            errorMessage = Exception().stripeErrorMessage(),
+            state = UpdateCardScreenState(
+                paymentDetailsId = "card_id_1234",
+                isDefault = false,
+                cardUpdateParams = null,
+                preferredCardBrand = null,
+                error = Exception(),
+                processing = false,
+            ),
             onUpdateClicked = {},
             onCancelClicked = {},
         )

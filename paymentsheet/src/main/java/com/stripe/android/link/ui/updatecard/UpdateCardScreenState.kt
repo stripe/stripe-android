@@ -14,19 +14,19 @@ internal data class UpdateCardScreenState(
     val cardUpdateParams: CardUpdateParams? = null,
     val preferredCardBrand: CardBrand? = null,
     val error: Throwable? = null,
-    val loading: Boolean = false,
+    val processing: Boolean = false,
 ) {
 
     val cardModified: Boolean
-        get() = cardUpdateParams != null || preferredCardBrand != null
+        get() = cardUpdateParams != null
 
     val primaryButtonState: PrimaryButtonState
         get() = when {
             cardModified.not() -> PrimaryButtonState.Disabled
-            loading -> PrimaryButtonState.Processing
+            processing -> PrimaryButtonState.Processing
             else -> PrimaryButtonState.Enabled
         }
 
-    val errorMessage : ResolvableString?
+    val errorMessage: ResolvableString?
         get() = error?.stripeErrorMessage()
 }

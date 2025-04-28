@@ -65,7 +65,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     fun onUpdateClicked() {
         viewModelScope.launch {
             runCatching {
-                _state.update { it.copy(loading = true, error = null) }
+                _state.update { it.copy(processing = true, error = null) }
                 val cardParams = requireNotNull(state.value.cardUpdateParams)
                 val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
                 val updateParams = ConsumerPaymentDetailsUpdateParams(
@@ -76,10 +76,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
                 )
                 linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
-                _state.update { it.copy(loading = false, error = null) }
+                _state.update { it.copy(processing = false, error = null) }
             }.onFailure { throwable ->
                 logger.error("Failed to update payment details", throwable)
-                _state.update { it.copy(loading = false, error = throwable) }
+                _state.update { it.copy(processing = false, error = throwable) }
             }.onSuccess {
                 navigationManager.tryNavigateBack()
             }
