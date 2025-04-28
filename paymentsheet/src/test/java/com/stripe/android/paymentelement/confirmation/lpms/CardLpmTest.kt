@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.lpms
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentelement.confirmation.lpms.foundations.assertIntentConfirmed
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.MerchantCountry
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +25,7 @@ internal class CardLpmTest(
                 cvc = "454",
             )
         ),
+        assertion = ::assertIntentConfirmed
     )
 
     @Test
@@ -38,6 +40,7 @@ internal class CardLpmTest(
                 cvc = "454",
             )
         ),
+        assertion = ::assertIntentConfirmed
     )
 
     companion object {
