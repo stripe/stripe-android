@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.12.0 - 2025-04-28
+
 ### PaymentSheet
 * [ADDED][10733](https://github.com/stripe/stripe-android/pull/10733) Added support for [custom payment methods](https://docs.stripe.com/payments/payment-methods/custom-payment-methods).
 * [ADDED][10720](https://github.com/stripe/stripe-android/pull/10720) `EmbeddedPaymentElement` now supports customizing `FormSheetAction` and a 2 step flow (similar to `PaymentSheet.FlowController`).
