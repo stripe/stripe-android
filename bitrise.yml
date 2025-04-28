@@ -331,7 +331,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug -PIS_BROWSERSTACK_BUILD=true
+            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug -PIS_BROWSERSTACK_BUILD=true -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
       - script@1:
           timeout: 120
           inputs:

@@ -15,6 +15,11 @@
         tools:ignore="AllowBackup">
 
         <meta-data
+            android:name="io.sentry.dsn"
+            android:value="${SENTRY_DSN}"
+        />
+
+        <meta-data
             android:name="com.stripe.android.paymentsheet.example.metadata.backend_url"
             android:value="${BACKEND_URL}" />
 
