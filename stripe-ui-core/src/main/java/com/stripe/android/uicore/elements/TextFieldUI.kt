@@ -388,7 +388,8 @@ fun AnimatedIcons(
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun TextFieldColors(
-    shouldShowError: Boolean = false
+    shouldShowError: Boolean = false,
+    backgroundColor: Color = MaterialTheme.stripeColors.component,
 ) = TextFieldDefaults.textFieldColors(
     textColor = if (shouldShowError) {
         MaterialTheme.colors.error
@@ -398,7 +399,7 @@ fun TextFieldColors(
     unfocusedLabelColor = MaterialTheme.stripeColors.placeholderText,
     focusedLabelColor = MaterialTheme.stripeColors.placeholderText,
     placeholderColor = MaterialTheme.stripeColors.placeholderText,
-    backgroundColor = MaterialTheme.stripeColors.component,
+    backgroundColor = backgroundColor,
     focusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
