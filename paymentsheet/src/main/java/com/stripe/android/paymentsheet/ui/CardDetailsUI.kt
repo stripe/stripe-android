@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
+import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -73,6 +75,10 @@ private fun CardDetailsEditUI(
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
+    val hiddenBillingDetailsFields: State<Set<IdentifierSpec>>? = billingDetailsForm
+        ?.hiddenElements
+        ?.collectAsState()
+
     Column {
         Section(
             title = billingDetailsForm?.let {
@@ -95,15 +101,17 @@ private fun CardDetailsEditUI(
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    ExpiryField(
+                    ExpiryTextField(
                         modifier = Modifier
+                            .testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG)
                             .weight(1F)
                             .onSizeChanged {
                                 dividerHeight.value =
                                     (it.height / Resources.getSystem().displayMetrics.density).dp
                             },
                         state = expiryDateState,
-                        onValueChanged = onExpDateChanged
+                        hasNextField = hiddenBillingDetailsFields?.value?.hasFocusableFields() == true,
+                        onValueChange = onExpDateChanged,
                     )
                     Divider(
                         modifier = Modifier
@@ -126,6 +134,14 @@ private fun CardDetailsEditUI(
         }
     }
 }
+
+/**
+ * Checks if the billing details form has any fields that are focusable.
+ */
+@Composable
+private fun Set<IdentifierSpec>.hasFocusableFields(): Boolean = listOf(
+    IdentifierSpec.PostalCode
+).none { contains(it) }
 
 @Composable
 private fun CardNumberField(
@@ -154,21 +170,7 @@ private fun CardNumberField(
                     modifier = Modifier,
                 )
             }
-        },
-    )
-}
-
-@Composable
-private fun ExpiryField(
-    modifier: Modifier,
-    state: ExpiryDateState,
-    onValueChanged: (String) -> Unit
-) {
-    ExpiryTextField(
-        modifier = modifier
-            .testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
-        state = state,
-        onValueChange = onValueChanged,
+        }
     )
 }
 
