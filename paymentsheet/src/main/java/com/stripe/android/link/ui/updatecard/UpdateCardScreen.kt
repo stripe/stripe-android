@@ -142,7 +142,7 @@ internal fun UpdateCardScreenBodyPreview() {
                 isDefault = false,
                 cardUpdateParams = null,
                 preferredCardBrand = null,
-                error = Exception(),
+                error = IllegalArgumentException("Random error."),
                 processing = false,
             ),
             onUpdateClicked = {},
