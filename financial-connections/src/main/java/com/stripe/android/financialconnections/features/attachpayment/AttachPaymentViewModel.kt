@@ -95,7 +95,8 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
         if (manifest.canSetCustomLinkSuccessMessage && !isNetworkingRelinkSession()) {
             successContentRepository.set(
                 message = PluralId(
-                    value = R.plurals.stripe_success_pane_desc_link_success,
+                    singular = R.string.stripe_success_pane_desc_link_success_singular,
+                    plural = R.string.stripe_success_pane_desc_link_success_plural,
                     count = accounts.size
                 )
             )

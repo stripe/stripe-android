@@ -18,7 +18,11 @@ internal class SuccessPreviewParameterProvider :
             SuccessState.Payload(
                 skipSuccessPane = false,
                 title = TextResource.StringId(R.string.stripe_success_pane_title),
-                content = TextResource.PluralId(R.plurals.stripe_success_pane_desc, count = 3),
+                content = TextResource.PluralId(
+                    singular = R.string.stripe_success_pane_desc_singular,
+                    plural = R.string.stripe_success_pane_desc_plural,
+                    count = 3
+                ),
                 businessName = "Stripe",
             )
         ),

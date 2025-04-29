@@ -13,11 +13,11 @@ class StringResources
             'payments-ui-core',
             'stripe-core',
             'stripe-ui-core',
-            'stripecardscan'
+            'stripecardscan',
+            'financial-connections',
 
     #         These following modules don't use Lokalise
     #         'camera-core',
-    #         'financial-connections',
         ]
 
         files = modules.map { |mod| "#{project_root}/#{mod}/res/values/strings.xml" }
@@ -35,6 +35,12 @@ class StringResources
                 # Get the main element information
                 key_name = element.attributes['name']
                 value = element.text
+
+                if value.nil?
+                    puts "Warning: The string for key '#{key_name}' is nil and will be skipped."
+                    next  # Skip this iteration if value is nil
+                end
+
                 lokalise_value = escape_for_lokalise(value)
 
                 # Get the line number with this shitty workaround because REXML changes the quotes from
