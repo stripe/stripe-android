@@ -453,7 +453,13 @@ internal class WalletScreenTest {
 
     @Test
     fun `wallet menu is displayed on payment method menu clicked`() = runTest(dispatcher) {
-        val viewModel = createViewModel(navigationManager = TestNavigationManager())
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            navigationManager = TestNavigationManager()
+        )
+
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             Box {
@@ -616,7 +622,7 @@ internal class WalletScreenTest {
         WalletBody(
             state = WalletUiState(
                 paymentDetailsList = paymentDetails,
-                selectedItem = paymentDetails.firstOrNull(),
+                selectedItemId = paymentDetails.firstOrNull()?.id,
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = "Buy".resolvableString,

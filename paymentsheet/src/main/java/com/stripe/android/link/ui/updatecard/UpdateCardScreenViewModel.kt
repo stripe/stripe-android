@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.updatecard
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,9 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
@@ -21,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class UpdateCardScreenViewModel @Inject constructor(
@@ -58,8 +63,39 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     }
 
     fun onUpdateClicked() {
-        logger.info("Update button clicked")
+        viewModelScope.launch {
+            runCatching {
+                _state.update { it.copy(processing = true, error = null) }
+                val cardParams = requireNotNull(state.value.cardUpdateParams)
+                val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
+                val updateParams = ConsumerPaymentDetailsUpdateParams(
+                    id = paymentDetailsId,
+                    // When updating a card that is not the default and you send isDefault=false to the server you get
+                    // "Can't unset payment details when it's not the default", so send nil instead of false
+                    isDefault = state.value.isDefault.takeIf { it == true },
+                    cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
+                )
+                linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
+                _state.update { it.copy(processing = false, error = null) }
+            }.onFailure { throwable ->
+                logger.error("Failed to update payment details", throwable)
+                _state.update { it.copy(processing = false, error = throwable) }
+            }.onSuccess {
+                navigationManager.tryNavigateBack()
+            }
+        }
     }
+
+    private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(
+        card = PaymentMethodCreateParams.Card.Builder().apply {
+            setExpiryMonth(this@toApiParams.expiryMonth)
+            setExpiryYear(this@toApiParams.expiryYear)
+            state.value.preferredCardBrand?.let { preferredCardBrand ->
+                setNetworks(Networks(preferred = preferredCardBrand.code))
+            }
+        }.build(),
+        billingDetails = billingDetails
+    )
 
     fun onCancelClicked() {
         logger.info("Cancel button clicked")
@@ -82,7 +118,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         onBrandChoiceChanged = ::onBrandChoiceChanged
     )
 
-    private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
+    @VisibleForTesting
+    internal fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
         _state.update { it.copy(cardUpdateParams = cardUpdateParams) }
     }
 

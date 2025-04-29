@@ -29,7 +29,8 @@ internal open class FakeLinkAccountManager(
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
-    private val _consumerPaymentDetails = MutableStateFlow<ConsumerPaymentDetails?>(null)
+    private val _consumerPaymentDetails =
+        MutableStateFlow<ConsumerPaymentDetails?>(TestFactory.CONSUMER_PAYMENT_DETAILS)
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
@@ -44,16 +45,21 @@ internal open class FakeLinkAccountManager(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
-    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var linkAccountFromLookupResult: LinkAccount? = null
+    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        set(value) {
+            field = value
+            _consumerPaymentDetails.value = value.getOrNull()
+        }
 
     private val lookupTurbine = Turbine<LookupCall>()
     private val mobileLookupTurbine = Turbine<MobileLookupCall>()
 
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
+    private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
 
     private val logoutCall = Turbine<Unit>()
 
@@ -187,11 +193,18 @@ internal open class FakeLinkAccountManager(
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams
     ): Result<ConsumerPaymentDetails> {
+        updateCardDetailsTurbine.add(
+            updateParams
+        )
         return updatePaymentDetailsResult
     }
 
     suspend fun awaitMobileSignUpCall(): MobileSignUpCall {
         return mobileSignUpTurbine.awaitItem()
+    }
+
+    suspend fun awaitUpdateCardDetailsCall(): ConsumerPaymentDetailsUpdateParams {
+        return updateCardDetailsTurbine.awaitItem()
     }
 
     suspend fun awaitSignUpCall(): SignUpCall {

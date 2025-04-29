@@ -32,7 +32,9 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,7 +55,7 @@ internal class WalletViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
-            selectedItem = null,
+            selectedItemId = null,
             isProcessing = false,
             hasCompleted = false,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
@@ -62,7 +64,7 @@ internal class WalletViewModel @Inject constructor(
         )
     )
 
-    val uiState: StateFlow<WalletUiState> = _uiState
+    val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
@@ -76,6 +78,18 @@ internal class WalletViewModel @Inject constructor(
     init {
         _uiState.update {
             it.setProcessing()
+        }
+
+        viewModelScope.launch {
+            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
+                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
+                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                } else {
+                    _uiState.update {
+                        it.updateWithResponse(consumerPaymentDetails)
+                    }
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -105,7 +119,7 @@ internal class WalletViewModel @Inject constructor(
         ).fold(
             onSuccess = { response ->
                 _uiState.update {
-                    it.updateWithResponse(response, selectedItemId = selectedItemId)
+                    it.copy(selectedItemId = selectedItemId)
                 }
 
                 if (response.paymentDetails.isEmpty()) {
@@ -135,7 +149,7 @@ internal class WalletViewModel @Inject constructor(
 
         _uiState.update {
             it.copy(
-                selectedItem = item,
+                selectedItemId = item.id,
                 isExpanded = false,
             )
         }

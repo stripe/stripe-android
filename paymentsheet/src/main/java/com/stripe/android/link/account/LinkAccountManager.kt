@@ -23,7 +23,8 @@ internal interface LinkAccountManager {
 
     /**
      * Cached payment details for the current Link account.
-     * [listPaymentDetails] calls will update this value.
+     * [listPaymentDetails] calls will refresh this value.
+     * [updatePaymentDetails] calls will refresh the edited payment details on the list.
      */
     val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?>
 

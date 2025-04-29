@@ -7,6 +7,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
@@ -46,7 +47,7 @@ internal class UpdateCardScreenshotTest(
                         onCardUpdateParamsChanged = {},
                         addressCollectionMode = AddressCollectionMode.Automatic
                     ),
-                    isDefault = true,
+                    state = testCase.state,
                     onUpdateClicked = {},
                     onCancelClicked = {},
                 )
@@ -61,14 +62,45 @@ internal class UpdateCardScreenshotTest(
             return listOf(
                 TestCase(
                     name = "Canonical",
-                    isDefault = false,
+                    state = state(),
                     card = card()
                 ),
                 TestCase(
                     name = "Default",
-                    isDefault = true,
+                    state = state(isDefault = true),
                     card = card()
-                )
+                ),
+                TestCase(
+                    name = "Processing",
+                    state = state(processing = true),
+                    card = card()
+                ),
+                TestCase(
+                    name = "Error",
+                    state = state(error = Exception("Error")),
+                    card = card()
+                ),
+                TestCase(
+                    name = "Unchanged",
+                    state = state(cardUpdateParams = null),
+                    card = card()
+                ),
+            )
+        }
+
+        private fun state(
+            isDefault: Boolean = false,
+            processing: Boolean = false,
+            error: Exception? = null,
+            cardUpdateParams: CardUpdateParams? = CardUpdateParams(expiryMonth = 11),
+        ): UpdateCardScreenState {
+            return UpdateCardScreenState(
+                paymentDetailsId = "card_id_1234",
+                isDefault = isDefault,
+                cardUpdateParams = cardUpdateParams,
+                preferredCardBrand = null,
+                error = error,
+                processing = processing
             )
         }
 
@@ -97,8 +129,8 @@ internal class UpdateCardScreenshotTest(
 
     internal data class TestCase(
         val name: String,
+        val state: UpdateCardScreenState,
         val card: ConsumerPaymentDetails.Card,
-        val isDefault: Boolean,
     ) {
         override fun toString(): String = name
     }

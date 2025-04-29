@@ -34,11 +34,11 @@ class WalletUiStateTest {
 
     @Test
     fun testDisabledButtonStateForExpiredCard() {
+        val selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1900)
+
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-                .copy(
-                    expiryYear = 1900
-                ),
+            paymentDetailsList = listOf(selectedItem),
+            selectedItem = selectedItem,
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
@@ -46,11 +46,11 @@ class WalletUiStateTest {
 
     @Test
     fun testDisabledButtonStateForCvcRecollection() {
+        val selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(cvcCheck = CvcCheck.Unchecked)
+
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-                .copy(
-                    cvcCheck = CvcCheck.Unchecked
-                )
+            paymentDetailsList = listOf(selectedItem),
+            selectedItem = selectedItem,
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
@@ -83,8 +83,11 @@ class WalletUiStateTest {
 
     @Test
     fun testDisabledButtonStateForExpiredCardWithIncompleteExpiryDate() {
+        val selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1900)
+
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1900),
+            paymentDetailsList = listOf(selectedItem),
+            selectedItem = selectedItem,
             expiryDateInput = FormFieldEntry("", isComplete = false)
         )
 
@@ -93,8 +96,11 @@ class WalletUiStateTest {
 
     @Test
     fun testEnabledButtonStateForExpiredCardWithCompleteExpiryDateAndIncompleteCvc() {
+        val selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1900)
+
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1900),
+            paymentDetailsList = listOf(selectedItem),
+            selectedItem = selectedItem,
             expiryDateInput = FormFieldEntry("12/25", isComplete = true),
         )
 
@@ -114,10 +120,12 @@ class WalletUiStateTest {
 
     @Test
     fun testDisabledButtonStateForCardRequiringCvcWithIncompleteCvc() {
+        val selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            cvcCheck = CvcCheck.Unchecked
+        )
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
-                cvcCheck = CvcCheck.Unchecked
-            ),
+            paymentDetailsList = listOf(selectedItem),
+            selectedItem = selectedItem,
             cvcInput = FormFieldEntry("12", isComplete = false)
         )
 
@@ -171,7 +179,7 @@ class WalletUiStateTest {
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
-            selectedItem = selectedItem,
+            selectedItemId = selectedItem?.id,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
