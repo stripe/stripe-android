@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -26,30 +27,22 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoMoreInteractions
 
 internal class DefaultVerticalModeFormInteractorTest {
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val rule: TestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `state is updated when processing emits`() = runScenario(selectedPaymentMethodCode = "card") {
