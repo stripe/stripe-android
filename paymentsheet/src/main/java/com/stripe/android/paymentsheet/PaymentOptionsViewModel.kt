@@ -237,9 +237,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             )
             if (shouldShowLinkConfiguration) {
                 linkPaymentLauncher.present(
-                    configuration = linkState.configuration,
+                    configuration = linkState!!.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                    consumerSessionPublishableKey = null, // TODO
                     useLinkExpress = true
                 )
             } else {

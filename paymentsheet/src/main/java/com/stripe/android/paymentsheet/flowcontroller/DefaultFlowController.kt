@@ -279,6 +279,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
                     useLinkExpress = true,
+                    consumerSessionPublishableKey = null,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     )
@@ -555,11 +556,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
                 onPaymentSelection()
             }
-            null,
             is PaymentOptionResult.Canceled -> {
-                viewModel.paymentSelection = result?.paymentSelection
+                viewModel.paymentSelection = result.paymentSelection
                 onPaymentSelection()
             }
+            null,
             is PaymentOptionResult.Failed -> {
                 onPaymentSelection()
             }

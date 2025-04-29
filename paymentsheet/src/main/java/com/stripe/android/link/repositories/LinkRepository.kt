@@ -9,7 +9,9 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -80,6 +82,13 @@ internal interface LinkRepository {
         consumerPublishableKey: String?,
         active: Boolean,
     ): Result<LinkPaymentDetails.New>
+
+    suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+        userEmail: String
+    ): Result<ConsumerPaymentDetails>
 
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
@@ -152,4 +161,11 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
+
+    suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent,
+        linkMode: LinkMode,
+        consumerPublishableKey: String?
+    ): Result<FinancialConnectionsSession>
 }
