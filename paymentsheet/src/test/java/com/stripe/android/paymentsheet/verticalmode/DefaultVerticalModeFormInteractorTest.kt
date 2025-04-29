@@ -39,10 +39,8 @@ import org.mockito.kotlin.verifyNoMoreInteractions
 
 internal class DefaultVerticalModeFormInteractorTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
     @get:Rule
-    val rule: TestRule = CoroutineTestRule(testDispatcher)
+    val rule: TestRule = CoroutineTestRule()
 
     @Test
     fun `state is updated when processing emits`() = runScenario(selectedPaymentMethodCode = "card") {
