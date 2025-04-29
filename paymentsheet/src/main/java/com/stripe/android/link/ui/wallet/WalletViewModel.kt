@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.link.DismissalCoordinator
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -20,6 +21,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
+import com.stripe.android.link.ui.wallet.WalletUiState.ViewEffect.ShowAddPaymentMethodMenu
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -337,7 +339,13 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onAddNewPaymentMethodClicked() {
-        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+        if (FeatureFlags.addBankAccountInLinkNative.isEnabled) {
+            _uiState.update {
+                it.copy(viewEffect = ShowAddPaymentMethodMenu)
+            }
+        } else {
+            navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+        }
     }
 
     fun onDismissAlert() {
@@ -359,6 +367,14 @@ internal class WalletViewModel @Inject constructor(
                 alertMessage = error.stripeErrorMessage(),
                 isProcessing = false,
                 cardBeingUpdated = null
+            )
+        }
+    }
+
+    fun onViewEffectLaunched() {
+        _uiState.update {
+            it.copy(
+                viewEffect = null
             )
         }
     }

@@ -11,6 +11,7 @@ object FeatureFlags {
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val enableCardEditInLinkNative = FeatureFlag("Enable Card Edit In Link Native")
+    val addBankAccountInLinkNative = FeatureFlag("Add bank account in Link Native")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

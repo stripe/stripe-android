@@ -453,6 +453,7 @@ internal class PlaygroundSettings private constructor(
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
             FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
             FeatureFlagSettingsDefinition(FeatureFlags.enableCardEditInLinkNative),
+            FeatureFlagSettingsDefinition(FeatureFlags.addBankAccountInLinkNative),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
