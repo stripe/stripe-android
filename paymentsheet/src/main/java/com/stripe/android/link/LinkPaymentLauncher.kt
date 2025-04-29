@@ -18,7 +18,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
-    private val linkStore: LinkStore,
+    private val linkStore: LinkStore
 ) {
     private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 
@@ -77,12 +77,14 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         configuration: LinkConfiguration,
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
+        consumerSessionPublishableKey: String?,
         useLinkExpress: Boolean
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
+            consumerSessionPublishableKey = consumerSessionPublishableKey,
             startWithVerificationDialog = useLinkExpress
         )
         linkActivityResultLauncher?.launch(args)

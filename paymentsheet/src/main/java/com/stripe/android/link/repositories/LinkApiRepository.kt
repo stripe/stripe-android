@@ -19,7 +19,9 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -200,6 +202,26 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?,
+        userEmail: String
+    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
+        consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
+                bankAccountId = bankAccountId,
+                billingEmailAddress = null,
+                billingAddress = null
+            ),
+            requestSurface = REQUEST_SURFACE,
+            requestOptions = buildRequestOptions(consumerPublishableKey),
+        ).onFailure {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE, StripeException.create(it))
+        }
+    }
+
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
@@ -373,6 +395,26 @@ internal class LinkApiRepository @Inject constructor(
         return stripeRepository.updatePaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentDetailsUpdateParams = updateParams,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        )
+    }
+
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent,
+        linkMode: LinkMode,
+        consumerPublishableKey: String?
+    ): Result<FinancialConnectionsSession> {
+        return consumersApiService.createLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            intentToken = stripeIntent.clientSecret,
+            linkMode = linkMode,
+            requestSurface = REQUEST_SURFACE,
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
