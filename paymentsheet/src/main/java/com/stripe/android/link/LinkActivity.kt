@@ -53,7 +53,12 @@ internal class LinkActivity : ComponentActivity() {
         observeBackPress()
 
         setContent {
-            val bottomSheetState = rememberStripeBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState(
+                confirmValueChange = {
+                    // Prevent dismissal by tapping outside
+                    false
+                },
+            )
 
             LaunchedEffect(Unit) {
                 vm.result.collect { result ->
