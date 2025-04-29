@@ -10,6 +10,8 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
@@ -94,6 +96,10 @@ internal interface LinkAccountManager {
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails>
 
+    suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String,
+    ): Result<ConsumerPaymentDetails>
+
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
@@ -103,6 +109,10 @@ internal interface LinkAccountManager {
         lookup: ConsumerSessionLookup,
         startSession: Boolean,
     ): LinkAccount?
+
+    suspend fun createLinkAccountSession(
+        linkMode: LinkMode
+    ) : Result<FinancialConnectionsSession>
 
     /**
      * Triggers sending a verification code to the user.

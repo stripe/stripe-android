@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -47,6 +48,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.intentBuilder
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
@@ -77,7 +83,19 @@ internal fun WalletScreen(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
+    val financialConnectionsSheetLauncher = rememberFinancialConnectionsSheet {
+        viewModel.onFinancialConnectionsResult(it)
+    }
+
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(state.financialConnectionsSheetConfiguration) {
+        if (state.financialConnectionsSheetConfiguration != null) {
+            financialConnectionsSheetLauncher.present(
+                state.financialConnectionsSheetConfiguration!!
+            )
+        }
+    }
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -694,6 +712,22 @@ private fun AlertMessage(
             }
         }
     )
+}
+
+@Composable
+fun rememberFinancialConnectionsSheet(
+    callback: (FinancialConnectionsSheetResult) -> Unit
+): FinancialConnectionsSheetForDataLauncher {
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        FinancialConnectionsSheetForDataContract(
+            intentBuilder(LocalContext.current)
+        )
+    ) { callback(it) }
+    return remember {
+        FinancialConnectionsSheetForDataLauncher(
+            activityResultLauncher
+        )
+    }
 }
 
 private fun String.replaceHyperlinks() = this.replace(

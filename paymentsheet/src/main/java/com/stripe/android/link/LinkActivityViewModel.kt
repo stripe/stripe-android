@@ -70,6 +70,10 @@ internal class LinkActivityViewModel @Inject constructor(
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
+    init {
+        linkAccountManager.consumerPublishableKey = getArgs(savedStateHandle)?.consumerPublishableKey
+    }
+
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()

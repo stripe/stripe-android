@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
 
@@ -13,7 +14,7 @@ import javax.inject.Inject
  * Contract used to explicitly launch Link natively.
  */
 internal class NativeLinkActivityContract @Inject constructor(
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
@@ -24,6 +25,7 @@ internal class NativeLinkActivityContract @Inject constructor(
                 configuration = input.configuration,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
                 publishableKey = paymentConfiguration.publishableKey,
+                consumerPublishableKey = input.consumerSessionPublishableKey,
                 startWithVerificationDialog = input.startWithVerificationDialog,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccount = input.linkAccount

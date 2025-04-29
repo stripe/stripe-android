@@ -13,6 +13,10 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Canceled
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Completed
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult.Failed
 import com.stripe.android.paymentsheet.BuildConfig
 
 internal class LinkActivity : ComponentActivity() {
@@ -22,6 +26,7 @@ internal class LinkActivity : ComponentActivity() {
     internal var viewModel: LinkActivityViewModel? = null
 
     private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,6 +87,7 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.Args(
                 configuration = configuration,
                 startWithVerificationDialog = false,
+                consumerSessionPublishableKey = null,
                 linkAccount = null
             )
         )
