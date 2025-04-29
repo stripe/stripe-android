@@ -21,6 +21,8 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -60,7 +62,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
      * The publishable key for the signed in Link account.
      */
     @Volatile
-    @VisibleForTesting
     override var consumerPublishableKey: String? = null
 
     override val accountStatus = linkAccountHolder.linkAccountInfo
@@ -100,6 +101,20 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 lookup = consumerSessionLookup,
                 startSession = startSession
             )
+        }
+    }
+
+    override suspend fun createLinkAccountSession(
+        linkMode: LinkMode
+    ): Result<FinancialConnectionsSession> {
+        return runCatching {
+            val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+            linkRepository.createLinkAccountSession(
+                consumerSessionClientSecret = linkAccount.clientSecret,
+                stripeIntent = config.stripeIntent,
+                linkMode = config.linkMode!!,
+                consumerPublishableKey = consumerPublishableKey,
+            ).getOrThrow()
         }
     }
 
@@ -264,6 +279,27 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 }.onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
+            }
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to create payment details")
+            )
+        }
+    }
+
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String
+    ): Result<ConsumerPaymentDetails> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+        return if (linkAccount != null) {
+            linkAccount.let { account ->
+                linkRepository.createBankAccountPaymentDetails(
+                    bankAccountId = bankAccountId,
+                    userEmail = account.email,
+                    consumerSessionClientSecret = account.clientSecret,
+                    consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
+                )
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)

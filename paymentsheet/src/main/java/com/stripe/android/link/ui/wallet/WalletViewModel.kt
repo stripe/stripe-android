@@ -9,6 +9,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
@@ -384,8 +386,53 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onAddNewPaymentMethodClicked() {
-        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+        viewModelScope.launch {
+            linkAccountManager.createLinkAccountSession(
+                configuration.linkMode!!
+            ).fold(
+                onSuccess = { result ->
+                    logger.info(result.clientSecret!!)
+                    _uiState.update {
+                        it.copy(
+                            financialConnectionsSheetConfiguration = FinancialConnectionsSheetConfiguration(
+                                financialConnectionsSessionClientSecret = result.clientSecret!!,
+                                publishableKey = linkAccountManager.consumerPublishableKey!!,
+                            )
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    updateErrorMessageAndStopProcessing(
+                        error = error,
+                        loggerMessage = "Failed to create Link account session"
+                    )
+                }
+            )
+        }
     }
+
+    fun onFinancialConnectionsResult(result: FinancialConnectionsSheetResult) {
+        viewModelScope.launch {
+            if (result is FinancialConnectionsSheetResult.Completed) {
+                val accounts = result.financialConnectionsSession.accounts.data
+                if (accounts.isNotEmpty()) {
+                    linkAccountManager.createBankAccountPaymentDetails(
+                        bankAccountId = accounts.first().id,
+                    )
+                    linkAccountManager
+                        .listPaymentDetails(stripeIntent.supportedPaymentMethodTypes(linkAccount))
+                }
+            } else {
+//                _uiState.update {
+//                    it.copy(
+//                        alertMessage = "Failed to add bank account",
+//                        isProcessing = false
+//                    )
+//                }
+            }
+        }
+    }
+
 
     fun onDismissAlert() {
         _uiState.update {
