@@ -179,6 +179,7 @@ class WalletUiStateTest {
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
+            email = "email@stripe.com",
             selectedItemId = selectedItem?.id,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,

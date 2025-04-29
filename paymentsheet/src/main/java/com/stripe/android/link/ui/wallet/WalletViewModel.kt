@@ -55,6 +55,7 @@ internal class WalletViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
+            email = linkAccount.email,
             selectedItemId = null,
             isProcessing = false,
             hasCompleted = false,

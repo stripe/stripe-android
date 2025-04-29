@@ -8,7 +8,6 @@ internal data class LinkAppBarState(
     @DrawableRes val navigationIcon: Int,
     val showHeader: Boolean,
     val showOverflowMenu: Boolean,
-    val email: String?,
 ) {
 
     internal companion object {
@@ -18,13 +17,11 @@ internal data class LinkAppBarState(
                 navigationIcon = R.drawable.stripe_link_close,
                 showHeader = true,
                 showOverflowMenu = false,
-                email = null,
             )
         }
 
         fun create(
             route: String?,
-            email: String?,
             previousEntryRoute: String?,
             consumerIsSigningUp: Boolean,
         ): LinkAppBarState {
@@ -35,15 +32,9 @@ internal data class LinkAppBarState(
                 LinkScreen.Verification.route,
             )
 
-            val showEmailRoutes = mutableSetOf(
-                LinkScreen.Wallet.route,
-            )
-
             if (consumerIsSigningUp) {
-                // If the consumer is just signing up, we show the Link logo and the email address used for signup
-                // on the payment method screen.
+                // If the consumer is just signing up, we show the Link logo on the payment method screen.
                 showHeaderRoutes.add(LinkScreen.PaymentMethod.route)
-                showEmailRoutes.add(LinkScreen.PaymentMethod.route)
             }
 
             return LinkAppBarState(
@@ -53,9 +44,6 @@ internal data class LinkAppBarState(
                     R.drawable.stripe_link_back
                 } else {
                     R.drawable.stripe_link_close
-                },
-                email = email?.takeIf {
-                    route in showEmailRoutes
                 },
             )
         }

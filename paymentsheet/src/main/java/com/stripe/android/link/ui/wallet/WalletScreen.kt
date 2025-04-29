@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -32,12 +34,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -62,6 +68,8 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
 internal fun WalletScreen(
@@ -241,7 +249,7 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(LocalContext.current),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
-            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+            iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
 
         SecondaryButton(
@@ -267,20 +275,25 @@ private fun PaymentMethodSection(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .animateContentSize()
-    ) {
-        val selectedItem = state.selectedItem
-        if (isExpanded || selectedItem == null) {
+    val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
+    val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
+
+    val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel)
+
+    PaymentMethodPicker(
+        email = state.email,
+        expanded = isExpanded,
+        selectedItem = state.selectedItem,
+        emailLabel = emailLabel,
+        labelMaxWidth = labelMaxWidthDp,
+        expandedContent = {
             ExpandedPaymentDetails(
                 uiState = state,
                 onItemSelected = onItemSelected,
                 onMenuButtonClick = {
                     showBottomSheetContent {
                         WalletPaymentMethodMenu(
-                            modifier = Modifier
-                                .testTag(WALLET_SCREEN_MENU_SHEET_TAG),
+                            modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
                             paymentDetails = it,
                             onSetDefaultClick = {
                                 hideBottomSheetContent()
@@ -305,71 +318,159 @@ private fun PaymentMethodSection(
                     onExpandedChanged(false)
                 }
             )
-        } else {
+        },
+        collapsedContent = { selectedItem ->
             CollapsedPaymentDetails(
                 selectedPaymentMethod = selectedItem,
                 enabled = !state.primaryButtonState.isBlocking,
+                label = paymentLabel,
+                labelMaxWidth = labelMaxWidthDp,
                 onClick = {
                     onExpandedChanged(true)
-                }
+                },
             )
+        },
+    )
+}
+
+@Composable
+private fun computeMaxLabelWidth(vararg labels: String): Dp {
+    val textStyle = LocalTextStyle.current
+    val textMeasurer = rememberTextMeasurer()
+
+    val maxLabelSize = labels.maxOfOrNull { label ->
+        textMeasurer.measure(style = textStyle, text = label).size.width
+    } ?: 0
+
+    val labelMaxWidthDp = with(LocalDensity.current) {
+        maxLabelSize.toDp()
+    }
+
+    return labelMaxWidthDp
+}
+
+@Composable
+private fun PaymentMethodPicker(
+    email: String,
+    emailLabel: String,
+    labelMaxWidth: Dp,
+    expanded: Boolean,
+    selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    modifier: Modifier = Modifier,
+    collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
+    expandedContent: @Composable (() -> Unit),
+) {
+    Column(
+        modifier = modifier
+            .animateContentSize()
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.linkColors.componentBorder,
+                shape = MaterialTheme.linkShapes.large
+            )
+            .clip(MaterialTheme.linkShapes.large)
+            .background(
+                color = MaterialTheme.linkColors.componentBackground,
+                shape = MaterialTheme.linkShapes.large
+            )
+    ) {
+        EmailDetails(
+            email = email,
+            label = emailLabel,
+            labelMaxWidth = labelMaxWidth
+        )
+
+        Divider(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.linkColors.componentBorder,
+        )
+
+        if (expanded || selectedItem == null) {
+            expandedContent()
+        } else {
+            collapsedContent(selectedItem)
         }
     }
 }
 
 @Composable
-internal fun CollapsedPaymentDetails(
+private fun CollapsedPaymentDetails(
     selectedPaymentMethod: ConsumerPaymentDetails.PaymentDetails,
     enabled: Boolean,
-    onClick: () -> Unit
+    label: String,
+    labelMaxWidth: Dp,
+    onClick: () -> Unit,
 ) {
-    Column {
-        Row(
+    Row(
+        modifier = Modifier
+            .testTag(COLLAPSED_WALLET_ROW)
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 64.dp)
+            .clickable(
+                enabled = enabled,
+                onClick = onClick
+            )
+            .padding(vertical = 16.dp)
+            .padding(start = HorizontalPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = label,
             modifier = Modifier
-                .testTag(COLLAPSED_WALLET_ROW)
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 64.dp)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.linkColors.componentBorder,
-                    shape = MaterialTheme.linkShapes.large
-                )
-                .clip(MaterialTheme.linkShapes.large)
-                .background(
-                    color = MaterialTheme.linkColors.componentBackground,
-                    shape = MaterialTheme.linkShapes.large
-                )
-                .clickable(
-                    enabled = enabled,
-                    onClick = onClick
-                )
-                .padding(vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_wallet_collapsed_payment),
-                modifier = Modifier
-                    .testTag(COLLAPSED_WALLET_HEADER_TAG)
-                    .padding(start = HorizontalPadding),
-                color = MaterialTheme.linkColors.disabledText
-            )
+                .testTag(COLLAPSED_WALLET_HEADER_TAG)
+                .width(labelMaxWidth),
+            color = MaterialTheme.linkColors.disabledText,
+        )
 
-            PaymentDetails(
-                modifier = Modifier
-                    .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
-                paymentDetails = selectedPaymentMethod
-            )
+        PaymentDetails(
+            modifier = Modifier.testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
+            paymentDetails = selectedPaymentMethod
+        )
 
-            Icon(
-                painter = painterResource(R.drawable.stripe_link_chevron),
-                contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
-                modifier = Modifier
-                    .padding(end = 22.dp)
-                    .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
-                tint = MaterialTheme.linkColors.disabledText
-            )
-        }
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_chevron),
+            contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
+            modifier = Modifier
+                .padding(end = 22.dp)
+                .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
+            tint = MaterialTheme.linkColors.disabledText
+        )
+    }
+}
+
+@Composable
+private fun EmailDetails(
+    email: String,
+    label: String,
+    labelMaxWidth: Dp
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 64.dp)
+            .padding(
+                vertical = 16.dp,
+                horizontal = HorizontalPadding,
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            modifier = Modifier.width(labelMaxWidth),
+            text = label,
+            color = MaterialTheme.linkColors.disabledText,
+        )
+
+        Text(
+            text = email,
+            color = MaterialTheme.colors.onPrimary,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1,
+            style = MaterialTheme.typography.h6,
+            modifier = Modifier.weight(1f),
+        )
     }
 }
 
@@ -383,20 +484,7 @@ private fun ExpandedPaymentDetails(
 ) {
     val isEnabled = !uiState.primaryButtonState.isBlocking
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clip(MaterialTheme.linkShapes.large)
-            .background(
-                color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.linkShapes.large
-            )
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(
             isEnabled = isEnabled,
             onCollapse = onCollapse
@@ -439,27 +527,25 @@ private fun ExpandedRowHeader(
     Row(
         modifier = Modifier
             .testTag(WALLET_SCREEN_EXPANDED_ROW_HEADER)
-            .height(44.dp)
+            .fillMaxWidth()
             .clickable(
                 enabled = isEnabled,
-                onClick = onCollapse
-            ),
-        verticalAlignment = Alignment.CenterVertically
+                onClick = onCollapse,
+            )
+            .padding(start = 20.dp, end = 22.dp)
+            .padding(top = 20.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            modifier = Modifier
-                .padding(start = HorizontalPadding, top = 20.dp),
             color = MaterialTheme.colors.onPrimary,
             style = MaterialTheme.typography.button
         )
-        Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
             contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
-            modifier = Modifier
-                .padding(top = 20.dp, end = 22.dp)
-                .rotate(CHEVRON_ICON_ROTATION),
+            modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
             tint = MaterialTheme.colors.onPrimary
         )
     }

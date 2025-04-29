@@ -10,6 +10,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 @Immutable
 internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
+    val email: String,
     val isExpanded: Boolean = false,
     val selectedItemId: String?,
     val isProcessing: Boolean,

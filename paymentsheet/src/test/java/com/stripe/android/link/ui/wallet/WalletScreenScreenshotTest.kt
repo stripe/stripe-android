@@ -162,6 +162,7 @@ internal class WalletScreenScreenshotTest {
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
+            email = "email@email.com",
             selectedItemId = selectedItem?.id,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
