@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import android.app.Activity
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -17,6 +16,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
@@ -44,9 +44,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
         starterArgs.appearance.parseAppearance()
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
 
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()

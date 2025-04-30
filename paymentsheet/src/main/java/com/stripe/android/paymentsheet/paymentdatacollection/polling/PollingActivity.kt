@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -17,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
@@ -46,9 +46,7 @@ internal class PollingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
 
             StripeTheme {
                 val uiState by viewModel.uiState.collectAsState()

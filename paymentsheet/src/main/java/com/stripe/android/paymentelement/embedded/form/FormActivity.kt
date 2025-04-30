@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Activity
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +12,7 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
@@ -57,9 +57,7 @@ internal class FormActivity : AppCompatActivity() {
         ).inject(this)
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
 
             StripeTheme {
                 val state by formActivityStateHelper.state.collectAsState()

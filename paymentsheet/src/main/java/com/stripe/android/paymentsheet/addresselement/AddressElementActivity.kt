@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -25,6 +24,7 @@ import androidx.navigation.navArgument
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
@@ -59,9 +59,7 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
 
             val coroutineScope = rememberCoroutineScope()
 

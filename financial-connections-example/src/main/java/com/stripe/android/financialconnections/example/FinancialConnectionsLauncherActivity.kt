@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.example
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 
 class FinancialConnectionsLauncherActivity : AppCompatActivity() {
 
@@ -93,9 +93,7 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
             FinancialConnectionsExampleTheme {
                 MainScreen(items = items)
             }

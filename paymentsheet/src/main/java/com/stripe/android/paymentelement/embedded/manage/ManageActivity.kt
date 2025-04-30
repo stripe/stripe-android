@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.manage
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -31,6 +30,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -77,9 +77,7 @@ internal class ManageActivity : AppCompatActivity() {
         }
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
 
             StripeTheme {
                 val screen by manageNavigator.screen.collectAsState()

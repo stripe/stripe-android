@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,6 +26,7 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -49,9 +49,7 @@ internal class SepaMandateActivity : AppCompatActivity() {
         }
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
 

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -17,6 +16,7 @@ import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.filterNotNull
@@ -55,9 +55,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         }
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
 
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()

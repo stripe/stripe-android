@@ -2,7 +2,6 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.enableEdgeToEdge
@@ -14,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
@@ -42,9 +42,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
         title = resources.getString(R.string.stripe_confirming_transaction_status)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            window.isNavigationBarContrastEnforced = false
-        }
+        disableNavigationBarContrastEnforcement()
 
         val args = runCatching {
             requireNotNull(starterArgs) {
