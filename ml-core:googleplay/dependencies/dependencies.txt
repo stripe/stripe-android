@@ -4,102 +4,74 @@
 |    \--- androidx.annotation:annotation:1.9.1
 |         \--- androidx.annotation:annotation-jvm:1.9.1
 |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.1.10 (*)
-+--- com.google.android.gms:play-services-tflite-support:16.0.1
-|    +--- com.google.android.gms:play-services-basement:18.1.0
-|    |    +--- androidx.collection:collection:1.0.0
-|    |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
++--- com.google.android.gms:play-services-tflite-support:16.4.0
+|    +--- com.google.android.gms:play-services-basement:18.4.0
+|    |    +--- androidx.collection:collection:1.0.0 -> 1.1.0
+|    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
 |    |    +--- androidx.core:core:1.2.0
 |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.0.0
-|    |    |    |    +--- androidx.lifecycle:lifecycle-common:2.0.0
-|    |    |    |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |    |    |    +--- androidx.arch.core:core-common:2.0.0
-|    |    |    |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |    |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
+|    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.0.0 -> 2.1.0
+|    |    |    |    +--- androidx.lifecycle:lifecycle-common:2.1.0
+|    |    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |    |    |    +--- androidx.arch.core:core-common:2.1.0
+|    |    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |    |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
 |    |    |    +--- androidx.versionedparcelable:versionedparcelable:1.1.0
 |    |    |    |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
-|    |    |    |    \--- androidx.collection:collection:1.0.0 (*)
-|    |    |    \--- androidx.collection:collection:1.0.0 (*)
-|    |    \--- androidx.fragment:fragment:1.0.0
-|    |         +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         +--- androidx.legacy:legacy-support-core-ui:1.0.0
+|    |    |    |    \--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
+|    |    |    \--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
+|    |    \--- androidx.fragment:fragment:1.1.0
+|    |         +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         +--- androidx.core:core:1.1.0 -> 1.2.0 (*)
+|    |         +--- androidx.collection:collection:1.1.0 (*)
+|    |         +--- androidx.viewpager:viewpager:1.0.0
 |    |         |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
 |    |         |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    +--- androidx.legacy:legacy-support-core-utils:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    +--- androidx.documentfile:documentfile:1.0.0
-|    |         |    |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.loader:loader:1.0.0
+|    |         |    \--- androidx.customview:customview:1.0.0
+|    |         |         +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
+|    |         |         \--- androidx.core:core:1.0.0 -> 1.2.0 (*)
+|    |         +--- androidx.loader:loader:1.0.0
+|    |         |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
+|    |         |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
+|    |         |    +--- androidx.lifecycle:lifecycle-livedata:2.0.0
+|    |         |    |    +--- androidx.arch.core:core-runtime:2.0.0
 |    |         |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.0.0
-|    |         |    |    |    |    +--- androidx.arch.core:core-runtime:2.0.0
-|    |         |    |    |    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    |    |    |    \--- androidx.arch.core:core-common:2.0.0 (*)
-|    |         |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.0.0
-|    |         |    |    |    |    |    +--- androidx.lifecycle:lifecycle-common:2.0.0 (*)
-|    |         |    |    |    |    |    +--- androidx.arch.core:core-common:2.0.0 (*)
-|    |         |    |    |    |    |    \--- androidx.arch.core:core-runtime:2.0.0 (*)
-|    |         |    |    |    |    \--- androidx.arch.core:core-common:2.0.0 (*)
-|    |         |    |    |    \--- androidx.lifecycle:lifecycle-viewmodel:2.0.0
-|    |         |    |    |         \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.localbroadcastmanager:localbroadcastmanager:1.0.0
-|    |         |    |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    \--- androidx.print:print:1.0.0
-|    |         |    |         \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    +--- androidx.customview:customview:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    \--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    +--- androidx.viewpager:viewpager:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    \--- androidx.customview:customview:1.0.0 (*)
-|    |         |    +--- androidx.coordinatorlayout:coordinatorlayout:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    \--- androidx.customview:customview:1.0.0 (*)
-|    |         |    +--- androidx.drawerlayout:drawerlayout:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    \--- androidx.customview:customview:1.0.0 (*)
-|    |         |    +--- androidx.slidingpanelayout:slidingpanelayout:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    \--- androidx.customview:customview:1.0.0 (*)
-|    |         |    +--- androidx.interpolator:interpolator:1.0.0
-|    |         |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    +--- androidx.swiperefreshlayout:swiperefreshlayout:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    +--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    |    \--- androidx.interpolator:interpolator:1.0.0 (*)
-|    |         |    +--- androidx.asynclayoutinflater:asynclayoutinflater:1.0.0
-|    |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         |    |    \--- androidx.core:core:1.0.0 -> 1.2.0 (*)
-|    |         |    \--- androidx.cursoradapter:cursoradapter:1.0.0
-|    |         |         \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         +--- androidx.legacy:legacy-support-core-utils:1.0.0 (*)
-|    |         +--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
-|    |         +--- androidx.loader:loader:1.0.0 (*)
-|    |         \--- androidx.lifecycle:lifecycle-viewmodel:2.0.0 (*)
-|    +--- com.google.android.gms:play-services-tflite-java:16.0.1
-|    |    +--- com.google.android.gms:play-services-base:18.1.0
-|    |    |    +--- androidx.collection:collection:1.0.0 (*)
+|    |         |    |    |    \--- androidx.arch.core:core-common:2.0.0 -> 2.1.0 (*)
+|    |         |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.0.0
+|    |         |    |    |    +--- androidx.lifecycle:lifecycle-common:2.0.0 -> 2.1.0 (*)
+|    |         |    |    |    +--- androidx.arch.core:core-common:2.0.0 -> 2.1.0 (*)
+|    |         |    |    |    \--- androidx.arch.core:core-runtime:2.0.0 (*)
+|    |         |    |    \--- androidx.arch.core:core-common:2.0.0 -> 2.1.0 (*)
+|    |         |    \--- androidx.lifecycle:lifecycle-viewmodel:2.0.0 -> 2.1.0
+|    |         |         \--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         +--- androidx.activity:activity:1.0.0
+|    |         |    +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |    +--- androidx.core:core:1.1.0 -> 1.2.0 (*)
+|    |         |    +--- androidx.lifecycle:lifecycle-runtime:2.1.0 (*)
+|    |         |    +--- androidx.lifecycle:lifecycle-viewmodel:2.1.0 (*)
+|    |         |    \--- androidx.savedstate:savedstate:1.0.0
+|    |         |         +--- androidx.annotation:annotation:1.1.0 -> 1.9.1 (*)
+|    |         |         +--- androidx.arch.core:core-common:2.0.1 -> 2.1.0 (*)
+|    |         |         \--- androidx.lifecycle:lifecycle-common:2.0.0 -> 2.1.0 (*)
+|    |         \--- androidx.lifecycle:lifecycle-viewmodel:2.0.0 -> 2.1.0 (*)
+|    +--- com.google.android.gms:play-services-tflite-java:16.4.0
+|    |    +--- com.google.android.gms:play-services-base:18.5.0
+|    |    |    +--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
 |    |    |    +--- androidx.core:core:1.2.0 (*)
-|    |    |    +--- androidx.fragment:fragment:1.0.0 (*)
-|    |    |    +--- com.google.android.gms:play-services-basement:18.1.0 (*)
-|    |    |    \--- com.google.android.gms:play-services-tasks:18.0.2
-|    |    |         \--- com.google.android.gms:play-services-basement:18.1.0 (*)
-|    |    +--- com.google.android.gms:play-services-basement:18.1.0 (*)
-|    |    +--- com.google.android.gms:play-services-tasks:18.0.2 (*)
-|    |    +--- com.google.android.gms:play-services-tflite-impl:16.0.1
-|    |    |    +--- com.google.android.gms:play-services-base:18.1.0 (*)
-|    |    |    +--- com.google.android.gms:play-services-basement:18.1.0 (*)
-|    |    |    \--- com.google.android.gms:play-services-tasks:18.0.2 (*)
-|    |    \--- org.tensorflow:tensorflow-lite-api:2.10.0
+|    |    |    +--- androidx.fragment:fragment:1.0.0 -> 1.1.0 (*)
+|    |    |    +--- com.google.android.gms:play-services-basement:18.4.0 (*)
+|    |    |    \--- com.google.android.gms:play-services-tasks:18.2.0
+|    |    |         \--- com.google.android.gms:play-services-basement:18.4.0 (*)
+|    |    +--- com.google.android.gms:play-services-basement:18.4.0 (*)
+|    |    +--- com.google.android.gms:play-services-tasks:18.2.0 (*)
+|    |    +--- com.google.android.gms:play-services-tflite-impl:16.4.0
+|    |    |    +--- com.google.android.gms:play-services-base:18.5.0 (*)
+|    |    |    +--- com.google.android.gms:play-services-basement:18.4.0 (*)
+|    |    |    \--- com.google.android.gms:play-services-tasks:18.2.0 (*)
+|    |    \--- org.tensorflow:tensorflow-lite-api:2.16.1
 |    \--- org.tensorflow:tensorflow-lite-support-api:0.4.2
 |         +--- org.checkerframework:checker-qual:2.5.8
-|         +--- org.tensorflow:tensorflow-lite-api:2.9.0 -> 2.10.0
+|         +--- org.tensorflow:tensorflow-lite-api:2.9.0 -> 2.16.1
 |         \--- com.google.android.odml:image:1.0.0-beta1
 +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
-\--- com.google.android.gms:play-services-tflite-java:16.0.1 (*)
+\--- com.google.android.gms:play-services-tflite-java:16.4.0 (*)

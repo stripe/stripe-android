@@ -25,8 +25,11 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -41,7 +44,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
 ) : LinkAccountManager {
+
     override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
+
+    private val _consumerPaymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
+    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     /**
      * The publishable key for the signed in Link account.
@@ -334,7 +341,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
-        )
+        ).map { paymentDetailsList ->
+            paymentDetailsList.also { _consumerPaymentDetails.value = it }
+        }
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
@@ -356,7 +365,21 @@ internal class DefaultLinkAccountManager @Inject constructor(
             updateParams = updateParams,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
-        )
+        ).map { updatedPaymentDetails ->
+            updatedPaymentDetails.also {
+                updateCachedPaymentDetails(it.paymentDetails.first())
+            }
+        }
+    }
+
+    private fun updateCachedPaymentDetails(updatedPayment: ConsumerPaymentDetails.PaymentDetails) {
+        _consumerPaymentDetails.update { currentDetails ->
+            currentDetails?.copy(
+                paymentDetails = currentDetails.paymentDetails.map { paymentDetail ->
+                    if (paymentDetail.id == updatedPayment.id) updatedPayment else paymentDetail
+                }
+            )
+        }
     }
 
     @VisibleForTesting
@@ -369,6 +392,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         } ?: run {
             withContext(Dispatchers.Main.immediate) {
                 linkAccountHolder.set(null)
+                _consumerPaymentDetails.value = null
             }
             consumerPublishableKey = null
             null

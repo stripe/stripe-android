@@ -1334,6 +1334,38 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun temporarySelection_doesNotAllowChangeDetails_whenSavedCardIsSelected() = runScenario(
+        formTypeForCode = {
+            FormHelper.FormType.UserInteractionRequired
+        },
+        updateSelection = {},
+        shouldUpdateVerticalModeSelection = { true }
+    ) {
+        selectionSource.value = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        interactor.state.test {
+            assertThat(awaitItem().selection).isEqualTo(
+                PaymentMethodVerticalLayoutInteractor.Selection.Saved
+            )
+
+            // Mimic user pressing on the new card row button.
+            temporarySelectionSource.value = "card"
+            assertThat(awaitItem().selection).isEqualTo(
+                PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "card",
+                    changeDetails = null,
+                    canBeChanged = false,
+                )
+            )
+
+            // Mimic user cancelling form sheet.
+            temporarySelectionSource.value = null
+            assertThat(awaitItem().selection).isEqualTo(
+                PaymentMethodVerticalLayoutInteractor.Selection.Saved
+            )
+        }
+    }
+
+    @Test
     fun savedSelectionUpdatesMandate() {
         val paymentMethodTypes = listOf("card", "sepa_debit")
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(

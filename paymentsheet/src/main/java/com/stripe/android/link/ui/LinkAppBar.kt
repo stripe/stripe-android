@@ -1,21 +1,15 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
@@ -25,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.AppBarHeight
@@ -41,82 +34,75 @@ internal fun LinkAppBar(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = AppBarHeight),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.Top
     ) {
-        IconButton(
-            onClick = onBackPressed,
-            modifier = Modifier.padding(4.dp)
-        ) {
-            Icon(
-                painter = painterResource(state.navigationIcon),
-                contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
-                tint = MaterialTheme.linkColors.closeButton
-            )
-        }
+        BackIcon(
+            icon = state.navigationIcon,
+            onBackPressed = onBackPressed,
+            modifier = Modifier.align(Alignment.CenterStart),
+        )
 
         LinkAppBarTitle(
-            email = state.email,
-            showHeader = state.showHeader
+            showHeader = state.showHeader,
+            modifier = Modifier.align(Alignment.Center),
         )
 
         LinkAppBarAction(
             showOverflowMenu = state.showOverflowMenu,
             showBottomSheetContent = showBottomSheetContent,
-            onLogoutClicked = onLogoutClicked
+            onLogoutClicked = onLogoutClicked,
+            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }
 
 @Composable
-private fun RowScope.LinkAppBarTitle(
-    email: String?,
-    showHeader: Boolean
+private fun BackIcon(
+    icon: Int,
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+) {
+    IconButton(
+        onClick = onBackPressed,
+        modifier = modifier.padding(4.dp),
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
+            tint = MaterialTheme.linkColors.closeButton
+        )
+    }
+}
+
+@Composable
+private fun LinkAppBarTitle(
+    showHeader: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val contentAlpha by animateFloatAsState(
         targetValue = if (showHeader) 1f else 0f,
         label = "titleAlpha"
     )
-    Column(
-        modifier = Modifier
-            .weight(1f)
-            .alpha(contentAlpha)
-            .padding(top = 18.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = modifier.alpha(contentAlpha),
+        contentAlignment = Alignment.Center,
     ) {
         Image(
             painter = painterResource(R.drawable.stripe_link_logo),
             contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
         )
-
-        AnimatedVisibility(visible = email != null, modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .height(24.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = email.orEmpty(),
-                    color = MaterialTheme.linkColors.disabledText,
-                    overflow = TextOverflow.Ellipsis,
-                    maxLines = 1
-                )
-            }
-        }
     }
 }
 
 @Composable
 private fun LinkAppBarAction(
     showOverflowMenu: Boolean,
+    modifier: Modifier = Modifier,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    onLogoutClicked: () -> Unit
+    onLogoutClicked: () -> Unit,
 ) {
     val overflowIconAlpha by animateFloatAsState(
         targetValue = if (showOverflowMenu) 1f else 0f,
@@ -130,7 +116,7 @@ private fun LinkAppBarAction(
             }
         },
         enabled = showOverflowMenu,
-        modifier = Modifier
+        modifier = modifier
             .alpha(overflowIconAlpha)
             .padding(4.dp)
     ) {
@@ -152,27 +138,6 @@ private fun LinkAppBarPreview() {
                     navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
                     showOverflowMenu = true,
-                    email = "email@example.com",
-                ),
-                onBackPressed = {},
-                showBottomSheetContent = {},
-                onLogoutClicked = {}
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun LinkAppBarNoEmail() {
-    DefaultLinkTheme {
-        Surface {
-            LinkAppBar(
-                state = LinkAppBarState(
-                    navigationIcon = R.drawable.stripe_link_close,
-                    showHeader = true,
-                    showOverflowMenu = true,
-                    email = null,
                 ),
                 onBackPressed = {},
                 showBottomSheetContent = {},
@@ -192,27 +157,6 @@ private fun LinkAppBarChildScreen() {
                     navigationIcon = R.drawable.stripe_link_back,
                     showHeader = false,
                     showOverflowMenu = false,
-                    email = "email@example.com",
-                ),
-                onBackPressed = {},
-                showBottomSheetContent = {},
-                onLogoutClicked = {}
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun LinkAppBarChildScreenNoEmail() {
-    DefaultLinkTheme {
-        Surface {
-            LinkAppBar(
-                state = LinkAppBarState(
-                    navigationIcon = R.drawable.stripe_link_back,
-                    showHeader = false,
-                    showOverflowMenu = false,
-                    email = null,
                 ),
                 onBackPressed = {},
                 showBottomSheetContent = {},

@@ -125,7 +125,7 @@
   <!-- Label for ID number section -->
   <string name="stripe_id_number">ID broj</string>
   <!-- I'm ready button text -->
-  <string name="stripe_im_ready">Spreman sam</string>
+  <string name="stripe_im_ready">Spreman/na sam</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Uneseni identifikacijski broj nije potpun.</string>
   <!-- Instructional text when environment is too dark -->

@@ -22,6 +22,13 @@ internal interface LinkAccountManager {
     var consumerPublishableKey: String?
 
     /**
+     * Cached payment details for the current Link account.
+     * [listPaymentDetails] calls will refresh this value.
+     * [updatePaymentDetails] calls will refresh the edited payment details on the list.
+     */
+    val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?>
+
+    /**
      * Retrieves the Link account associated with the email if it exists.
      *
      * Optionally starts a user session, by storing the cookie for the account and starting a

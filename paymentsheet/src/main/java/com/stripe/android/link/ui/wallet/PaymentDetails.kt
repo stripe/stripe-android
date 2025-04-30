@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -23,9 +25,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,6 +44,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.R as StripeR
 
@@ -201,9 +206,16 @@ private fun RowScope.CardInfo(
 ) {
     PaymentMethodInfo(
         modifier = modifier,
-        iconResource = icon,
         title = title,
         subtitle = subtitle,
+        icon = {
+            Image(
+                painter = painterResource(icon),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+        }
     )
 }
 
@@ -214,33 +226,29 @@ private fun RowScope.BankAccountInfo(
 ) {
     PaymentMethodInfo(
         modifier = modifier,
-        iconResource = R.drawable.stripe_link_bank,
-        iconColorFilter = ColorFilter.tint(MaterialTheme.linkColors.actionLabelLight),
         title = bankAccount.displayName,
         subtitle = "•••• ${bankAccount.last4}",
+        icon = {
+            BankIcon(bankAccount.bankIconCode)
+        }
     )
 }
 
 @Composable
 private fun RowScope.PaymentMethodInfo(
-    iconResource: Int,
+    icon: @Composable () -> Unit,
     title: String,
     subtitle: String?,
     modifier: Modifier = Modifier,
-    iconColorFilter: ColorFilter? = null,
 ) {
     Row(
         modifier = modifier.weight(1f),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Image(
-            painter = painterResource(iconResource),
-            contentDescription = title,
-            modifier = Modifier.size(24.dp),
-            alignment = Alignment.Center,
-            colorFilter = iconColorFilter,
-        )
+        Box(modifier = Modifier.size(24.dp)) {
+            icon()
+        }
 
         Column {
             Text(
@@ -259,6 +267,46 @@ private fun RowScope.PaymentMethodInfo(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun BankIcon(
+    bankIconCode: String?,
+    modifier: Modifier = Modifier
+) {
+    val icon = remember(bankIconCode) {
+        transformBankIconCodeToBankIcon(
+            iconCode = bankIconCode,
+            fallbackIcon = R.drawable.stripe_link_bank_outlined,
+        )
+    }
+
+    val isGenericIcon = icon == R.drawable.stripe_link_bank_outlined
+
+    val containerModifier = if (isGenericIcon) {
+        modifier
+            .background(
+                color = MaterialTheme.linkColors.componentBorder,
+                shape = RoundedCornerShape(3.dp),
+            )
+            .padding(4.dp)
+    } else {
+        modifier
+    }
+
+    Box(modifier = containerModifier) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Fit,
+            colorFilter = if (isGenericIcon) {
+                ColorFilter.tint(MaterialTheme.colors.onSecondary)
+            } else {
+                null
+            },
+        )
     }
 }
 

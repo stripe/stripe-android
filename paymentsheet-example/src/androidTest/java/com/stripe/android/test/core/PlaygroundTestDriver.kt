@@ -28,6 +28,8 @@ import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.web.sugar.Web.onWebView
+import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
@@ -996,7 +998,7 @@ internal class PlaygroundTestDriver(
 
         // We might have more than one bank account
         composeTestRule
-            .onAllNodesWithText("Test Institution")
+            .onAllNodesWithText("Payment Success")
             .onFirst()
             .performScrollTo()
             .performClick()
@@ -1621,29 +1623,25 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        // The FC Lite flow is hosted on a web-view, so we interact with it via UiAutomator.
-        val consentText = UiAutomatorText("Agree and continue", labelMatchesExactly = false, device = device)
-        consentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        consentText.click()
+        onWebView()
+            .withElementByTestId("agree-button")
+            .perform(webClick())
 
-        val institutionTile = UiAutomatorText("Test Institution", labelMatchesExactly = false, device = device)
-        institutionTile.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        institutionTile.click()
+        onWebView()
+            .withElementByTestId("institution-default")
+            .perform(webClick())
 
-        val successBankAccountItem = UiAutomatorText("Success", labelMatchesExactly = false, device = device)
-        successBankAccountItem.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        successBankAccountItem.click()
-        clickOnBottomSheetCtaByPosition()
+        onWebView()
+            .withElementByTestId(testId = "select-button")
+            .perform(webClick())
 
-        val saveAccountTitle = UiAutomatorText("Save account", labelMatchesExactly = false, device = device)
-        saveAccountTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        // close auto-opened keyboard and skip saving account to link on the bottom sheet modal.
-        device.pressBack()
-        clickOnBottomSheetCtaByPosition()
+        onWebView()
+            .withElementByTestId("link-not-now-button")
+            .perform(webClick())
 
-        val successTitle = UiAutomatorText("Success", labelMatchesExactly = false, device = device)
-        successTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
-        clickOnBottomSheetCtaByPosition()
+        onWebView()
+            .withElementByTestId("done-button")
+            .perform(webClick())
     }
 
     private fun executeUsBankAccountFlow() {
@@ -1710,8 +1708,9 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        val consentText = UiAutomatorText("Agree and continue", labelMatchesExactly = false, device = device)
-        consentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        onWebView()
+            .withElementByTestId("agree-button")
+            .perform(webClick())
 
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
@@ -1759,14 +1758,6 @@ internal class PlaygroundTestDriver(
         }
 
         composeTestRule.onNodeWithTag(tag).performClick()
-    }
-
-    private fun clickOnBottomSheetCtaByPosition() {
-        // Unfortunately text matchers don't work within bottom modals within web views.
-        // This clicks CTA at the bottom of the screen by position on these scenarios.
-        val x = (device.displayWidth * 0.50).toInt()
-        val y = (device.displayHeight * 0.92).toInt()
-        device.click(x, y)
     }
 
     internal fun setup(testParameters: TestParameters) {

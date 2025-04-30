@@ -18,6 +18,7 @@ import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -27,6 +28,10 @@ internal open class FakeLinkAccountManager(
 
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
+
+    private val _consumerPaymentDetails =
+        MutableStateFlow<ConsumerPaymentDetails?>(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -40,20 +45,29 @@ internal open class FakeLinkAccountManager(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
-    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
     var linkAccountFromLookupResult: LinkAccount? = null
+    var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        set(value) {
+            field = value
+            _consumerPaymentDetails.value = value.getOrNull()
+        }
 
     private val lookupTurbine = Turbine<LookupCall>()
     private val mobileLookupTurbine = Turbine<MobileLookupCall>()
 
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
+    private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
 
     private val logoutCall = Turbine<Unit>()
 
     override var consumerPublishableKey: String? = null
+
+    fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
+        _consumerPaymentDetails.value = consumerPaymentDetails
+    }
 
     fun setLinkAccount(account: LinkAccount?) {
         linkAccountHolder.set(account)
@@ -179,11 +193,18 @@ internal open class FakeLinkAccountManager(
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams
     ): Result<ConsumerPaymentDetails> {
+        updateCardDetailsTurbine.add(
+            updateParams
+        )
         return updatePaymentDetailsResult
     }
 
     suspend fun awaitMobileSignUpCall(): MobileSignUpCall {
         return mobileSignUpTurbine.awaitItem()
+    }
+
+    suspend fun awaitUpdateCardDetailsCall(): ConsumerPaymentDetailsUpdateParams {
+        return updateCardDetailsTurbine.awaitItem()
     }
 
     suspend fun awaitSignUpCall(): SignUpCall {

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 
@@ -10,7 +9,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
  * To learn more about custom payment methods, see "docs_url"
  */
 @ExperimentalCustomPaymentMethodsApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface ConfirmCustomPaymentMethodCallback {
 
     /**

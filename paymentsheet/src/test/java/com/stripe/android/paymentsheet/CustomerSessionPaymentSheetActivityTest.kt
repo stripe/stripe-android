@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
@@ -78,11 +79,11 @@ internal class CustomerSessionPaymentSheetActivityTest {
         ) {
             composeTestRule.onEditButton().performClick()
 
-            composeTestRule.onSavedPaymentMethod(last4 = "4242").assertIsEnabled()
+            composeTestRule.onSavedPaymentMethod(last4 = "4242").assertIsDisplayed()
         }
 
     @Test
-    fun `When single PM with remove permissions and cannot remove last PM from server, edit should not be shown`() =
+    fun `When single PM with remove permissions and cannot remove last PM from server, edit should be shown`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
@@ -91,11 +92,11 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().assertDoesNotExist()
+            composeTestRule.onEditButton().assertIsDisplayed()
         }
 
     @Test
-    fun `When single PM with remove permissions & cannot remove last PM from config, edit should not be shown`() =
+    fun `When single PM with remove permissions & cannot remove last PM from config, edit should be shown`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
@@ -104,11 +105,11 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = false,
             canRemoveLastPaymentMethodServer = true,
         ) {
-            composeTestRule.onEditButton().assertDoesNotExist()
+            composeTestRule.onEditButton().assertIsDisplayed()
         }
 
     @Test
-    fun `When single PM with remove permissions but cannot remove last PM, edit button should not be displayed`() =
+    fun `When single PM with remove permissions but cannot remove last PM, edit button should be displayed`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
@@ -117,11 +118,11 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = false,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().assertDoesNotExist()
+            composeTestRule.onEditButton().assertExists()
         }
 
     @Test
-    fun `When multiple PMs but no remove permissions, edit button should not be displayed`() =
+    fun `When multiple PMs but no remove permissions, edit button should be displayed`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
@@ -131,7 +132,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().assertDoesNotExist()
+            composeTestRule.onEditButton().assertIsDisplayed()
         }
 
     @Test

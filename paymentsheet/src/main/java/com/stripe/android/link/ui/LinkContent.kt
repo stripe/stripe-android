@@ -293,7 +293,7 @@ private fun WalletRoute(
 }
 
 @Composable
-private fun Loader() {
+internal fun Loader() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

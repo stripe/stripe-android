@@ -237,7 +237,6 @@ class PaymentSheet internal constructor(
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
         @ExperimentalCustomPaymentMethodsApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
@@ -253,7 +252,6 @@ class PaymentSheet internal constructor(
         /**
          * @param callback Called when an analytic event occurs.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             callbacksBuilder.analyticEventCallback(callback)
@@ -895,7 +893,6 @@ class PaymentSheet internal constructor(
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
              */
             @ExperimentalCustomPaymentMethodsApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun customPaymentMethods(
                 customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
@@ -1998,7 +1995,6 @@ class PaymentSheet internal constructor(
         internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
         @ExperimentalCustomPaymentMethodsApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -2027,7 +2023,6 @@ class PaymentSheet internal constructor(
         )
 
         @ExperimentalCustomPaymentMethodsApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
              * The unique identifier for this custom payment method type in the format of "cmpt_...".
@@ -2317,7 +2312,6 @@ class PaymentSheet internal constructor(
              * @param callback Called when a user confirms payment for a custom payment method.
              */
             @ExperimentalCustomPaymentMethodsApi
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
                 callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }
@@ -2332,7 +2326,6 @@ class PaymentSheet internal constructor(
             /**
              * @param callback If specified, called when an analytic event occurs.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalAnalyticEventCallbackApi
             fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
                 callbacksBuilder.analyticEventCallback(callback)
