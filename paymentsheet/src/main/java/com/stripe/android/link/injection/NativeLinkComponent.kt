@@ -8,6 +8,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.DismissalCoordinator
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.WebLinkActivityContract
@@ -58,6 +59,7 @@ internal interface NativeLinkComponent {
     val viewModel: LinkActivityViewModel
     val eventReporter: EventReporter
     val navigationManager: NavigationManager
+    val dismissalCoordinator: DismissalCoordinator
 
     @Component.Builder
     interface Builder {

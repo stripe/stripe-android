@@ -19,6 +19,8 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.link.DismissalCoordinator
+import com.stripe.android.link.RealDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
@@ -117,6 +119,10 @@ internal interface NativeLinkModule {
 
     @Binds
     fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory
+
+    @Binds
+    @NativeLinkScope
+    fun bindsDismissalCoordinator(impl: RealDismissalCoordinator): DismissalCoordinator
 
     @SuppressWarnings("TooManyFunctions")
     companion object {

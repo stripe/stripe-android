@@ -75,6 +75,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
+    val canDismissSheet: Boolean
+        get() = activityRetainedComponent.dismissalCoordinator.canDismiss
+
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()
@@ -101,11 +104,13 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun dismissSheet() {
-        dismissWithResult(
-            LinkActivityResult.Canceled(
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+        if (activityRetainedComponent.dismissalCoordinator.canDismiss) {
+            dismissWithResult(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                )
             )
-        )
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -170,7 +175,9 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun goBack() {
-        navigationManager.tryNavigateBack()
+        if (activityRetainedComponent.dismissalCoordinator.canDismiss) {
+            navigationManager.tryNavigateBack()
+        }
     }
 
     fun changeEmail() {

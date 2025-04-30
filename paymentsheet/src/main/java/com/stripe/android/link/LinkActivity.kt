@@ -54,10 +54,7 @@ internal class LinkActivity : ComponentActivity() {
 
         setContent {
             val bottomSheetState = rememberStripeBottomSheetState(
-                confirmValueChange = {
-                    // Prevent dismissal by tapping outside
-                    false
-                },
+                confirmValueChange = { vm.canDismissSheet },
             )
 
             LaunchedEffect(Unit) {
