@@ -14,7 +14,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -28,7 +27,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -404,7 +403,7 @@ class PaymentSheet internal constructor(
              */
             @Poko
             @Parcelize
-            @OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
+            @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
             class Payment @JvmOverloads constructor(
                 val amount: Long,
                 val currency: String,
@@ -428,7 +427,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                @PaymentMethodOptionsSetupFutureUsePreview
+                @PaymentMethodOptionsSetupFutureUsagePreview
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class PaymentMethodOptions(
                     internal val setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>

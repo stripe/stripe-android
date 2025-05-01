@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 
 internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {
@@ -15,7 +15,7 @@ internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): Deferred
     )
 }
 
-@OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
+@OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
 private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): DeferredIntentParams.Mode {
     return when (this) {
         is PaymentSheet.IntentConfiguration.Mode.Payment -> {

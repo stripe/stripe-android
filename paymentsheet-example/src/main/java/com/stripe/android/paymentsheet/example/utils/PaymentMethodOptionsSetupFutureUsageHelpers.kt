@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.example.utils
 
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
-@OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
+@OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
 internal fun getPMOSFUFromStringMap(
     values: Map<String, String>
 ): PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions {
