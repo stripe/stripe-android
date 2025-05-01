@@ -182,7 +182,7 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `selecting a payment method closes the payment method picker`() = runTest(dispatcher) {
+    fun `selecting a valid payment method closes the payment method picker`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {
