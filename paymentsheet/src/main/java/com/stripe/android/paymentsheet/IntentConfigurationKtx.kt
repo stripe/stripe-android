@@ -40,7 +40,9 @@ private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toIntentUsage(): Str
     return when (this) {
         PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> StripeIntent.Usage.OnSession
         PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> StripeIntent.Usage.OffSession
-        PaymentSheet.IntentConfiguration.SetupFutureUse.None -> StripeIntent.Usage.None
+        PaymentSheet.IntentConfiguration.SetupFutureUse.None -> throw IllegalArgumentException(
+            "PaymentSheet.IntentConfiguration setupFutureUse cannot be set to None"
+        )
     }
 }
 

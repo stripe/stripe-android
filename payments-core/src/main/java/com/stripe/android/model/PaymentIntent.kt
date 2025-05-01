@@ -239,7 +239,6 @@ constructor(
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
             StripeIntent.Usage.OneTime -> false
-            StripeIntent.Usage.None -> false
             null -> false
         }
     }

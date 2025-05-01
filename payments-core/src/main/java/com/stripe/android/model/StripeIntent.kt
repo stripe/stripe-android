@@ -157,8 +157,6 @@ sealed interface StripeIntent : StripeModel {
          */
         OffSession("off_session"),
 
-        None("none"),
-
         OneTime("one_time");
 
         @Keep
