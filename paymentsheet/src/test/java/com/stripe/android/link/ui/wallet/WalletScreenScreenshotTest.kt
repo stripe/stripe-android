@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -43,16 +44,35 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testCollapsedStateWithUnavailable() {
+        snapshot(
+            state = walletUiState(
+                cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+            )
+        )
+    }
+
+    @Test
     fun testExpandedState() {
         snapshot(
-            state = walletUiState(isExpanded = true),
+            state = walletUiState(userSetIsExpanded = true),
+        )
+    }
+
+    @Test
+    fun testExpandedStateWithUnavailable() {
+        snapshot(
+            state = walletUiState(
+                userSetIsExpanded = true,
+                cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+            ),
         )
     }
 
     @Test
     fun testPayButtonCompletedState() {
         snapshot(
-            state = walletUiState(isExpanded = true),
+            state = walletUiState(userSetIsExpanded = true),
         )
     }
 
@@ -61,7 +81,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 isProcessing = true,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -79,7 +99,7 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -97,7 +117,7 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -109,7 +129,7 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
                     it is ConsumerPaymentDetails.BankAccount
                 },
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -119,7 +139,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 alertMessage = "Something went wrong".resolvableString,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -134,7 +154,7 @@ internal class WalletScreenScreenshotTest {
                         id = "${card.id}_$index"
                     )
                 },
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -144,7 +164,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 canAddNewPaymentMethod = false,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -153,19 +173,20 @@ internal class WalletScreenScreenshotTest {
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetailsList.firstOrNull(),
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         alertMessage: ResolvableString? = null,
         canAddNewPaymentMethod: Boolean = true,
-        isExpanded: Boolean = false,
+        userSetIsExpanded: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
             selectedItemId = selectedItem?.id,
-            cardBrandFilter = DefaultCardBrandFilter,
+            cardBrandFilter = cardBrandFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
@@ -173,7 +194,7 @@ internal class WalletScreenScreenshotTest {
             cvcInput = cvcInput,
             alertMessage = alertMessage,
             canAddNewPaymentMethod = canAddNewPaymentMethod,
-            userSetIsExpanded = isExpanded,
+            userSetIsExpanded = userSetIsExpanded,
         )
     }
 

@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
@@ -11,7 +10,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.parcelize.Parcelize
 import org.junit.Test
 
 class WalletUiStateTest {
@@ -182,7 +180,7 @@ class WalletUiStateTest {
         val state = walletUiState(
             paymentDetailsList = paymentDetailsList,
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            cardBrandFilter = TestCardBrandFilter(setOf(CardBrand.Visa))
+            cardBrandFilter = RejectCardBrands(CardBrand.Visa)
         )
 
         assertThat(state.isItemAvailable(paymentDetailsList[0])).isFalse()
@@ -196,7 +194,7 @@ class WalletUiStateTest {
             paymentDetailsList = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD),
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
         )
-        val noVisa = TestCardBrandFilter(setOf(CardBrand.Visa))
+        val noVisa = RejectCardBrands(CardBrand.Visa)
 
         // Collapsed when there's a valid selection.
         assertThat(state.isExpanded).isFalse()
@@ -208,19 +206,10 @@ class WalletUiStateTest {
         assertThat(state.copy(userSetIsExpanded = false, cardBrandFilter = noVisa).isExpanded).isFalse()
     }
 
-    @Parcelize
-    private class TestCardBrandFilter(
-        private val rejectedCardBrands: Set<CardBrand> = setOf()
-    ) : CardBrandFilter {
-        override fun isAccepted(cardBrand: CardBrand): Boolean {
-            return cardBrand !in rejectedCardBrands
-        }
-    }
-
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
-        cardBrandFilter: CardBrandFilter = TestCardBrandFilter(),
+        cardBrandFilter: CardBrandFilter = RejectCardBrands(),
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,

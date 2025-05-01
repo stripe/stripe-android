@@ -183,7 +183,7 @@ private fun PaymentDetailsListItemPreview() {
     DefaultLinkTheme {
         Column {
             PaymentDetailsListItem(
-                paymentDetails = card,
+                paymentDetails = card.copy(isDefault = true),
                 enabled = true,
                 isSelected = true,
                 isAvailable = true,
@@ -192,7 +192,7 @@ private fun PaymentDetailsListItemPreview() {
                 onMenuButtonClick = {}
             )
             PaymentDetailsListItem(
-                paymentDetails = card.copy(brand = CardBrand.MasterCard, expiryYear = 0),
+                paymentDetails = card.copy(isDefault = true, brand = CardBrand.MasterCard, expiryYear = 0),
                 enabled = true,
                 isSelected = false,
                 isAvailable = true,
