@@ -74,8 +74,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
                     val updateParams = ConsumerPaymentDetailsUpdateParams(
                         id = paymentDetailsId,
-                        // When updating a card that is not the default and you send isDefault=false to the server you get
-                        // "Can't unset payment details when it's not the default", so send nil instead of false
+                        // When updating a card that is not the default and you send isDefault=false to the server,
+                        // you get "Can't unset payment details when it's not the default", so send nil instead of false
                         isDefault = state.value.isDefault.takeIf { it == true },
                         cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
                     )
