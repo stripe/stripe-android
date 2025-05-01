@@ -22,13 +22,13 @@ internal fun AddPaymentMethodMenu(
             items = listOf(
                 MenuPayload.MenuItem(
                     title = resolvableString(R.string.stripe_link_add_bank),
-                    icon = R.drawable.stripe_link_bank,
+                    icon = R.drawable.stripe_ic_next_bank,
                     testTag = null,
                     onClick = onAddBankAccount
                 ),
                 MenuPayload.MenuItem(
                     title = resolvableString(R.string.stripe_link_add_debit_or_credit_card),
-                    icon = StripeCoreR.drawable.stripe_ic_paymentsheet_pm_card,
+                    icon = R.drawable.stripe_ic_next_card,
                     testTag = null,
                     onClick = onAddCard
                 )
@@ -36,7 +36,7 @@ internal fun AddPaymentMethodMenu(
         )
     }
     LinkMenuV2(
-        payload,
+        payload = payload,
         onClose = onClose
     )
 }

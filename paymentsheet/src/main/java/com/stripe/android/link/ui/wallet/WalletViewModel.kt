@@ -346,6 +346,14 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
+    fun onAddNewBankAccountClicked() {
+        TODO("Not yet implemented")
+    }
+
+    fun onAddNewCardClicked() {
+        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+    }
+
     fun onDismissAlert() {
         _uiState.update {
             it.copy(alertMessage = null)
@@ -375,10 +383,6 @@ internal class WalletViewModel @Inject constructor(
                 viewEffect = null
             )
         }
-    }
-
-    fun onAddNewBankAccountClicked() {
-        TODO("Not yet implemented")
     }
 
     companion object {

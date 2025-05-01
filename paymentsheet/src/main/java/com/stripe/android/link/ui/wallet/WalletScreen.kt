@@ -88,7 +88,7 @@ internal fun WalletScreen(
                     AddPaymentMethodMenu(
                         onClose = { hideBottomSheetContent() },
                         onAddCard = {
-                            viewModel.onAddNewPaymentMethodClicked()
+                            viewModel.onAddNewCardClicked()
                             hideBottomSheetContent()
                         },
                         onAddBankAccount = {

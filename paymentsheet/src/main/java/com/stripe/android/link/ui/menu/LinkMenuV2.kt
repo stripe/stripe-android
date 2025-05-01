@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.menu
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,10 +27,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.strings.resolve
 
@@ -47,8 +46,9 @@ internal data class MenuPayload(
         val onClick: () -> Unit
     )
 }
+
 /**
- * Displays a generic bottom sheet with the provided [items].
+ * Displays a generic bottom sheet with the provided payload.
  *
  * @param payload The payload containing the title and items to be displayed in the menu
  * @param onClose Called when the close button is pressed
@@ -71,14 +71,16 @@ internal fun LinkMenuV2(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.linkColors.componentBorder,
-                    shape = MaterialTheme.linkShapes.large
+                    color = LinkTheme.colors.componentBorder,
+                    shape = LinkTheme.shapes.large
                 )
-                .clip(MaterialTheme.linkShapes.large)
+                .clip(LinkTheme.shapes.large)
         ) {
             payload.items.forEach {
                 MenuItemRow(it)
-                Divider()
+                Divider(
+                    color = LinkTheme.colors.componentBorder
+                )
             }
         }
         Spacer(modifier = Modifier.size(24.dp))
@@ -95,12 +97,11 @@ private fun MenuTitle(title: ResolvableString, onClose: () -> Unit) {
 
         Text(
             text = title.resolve(),
-            style = MaterialTheme.typography.h6.copy(fontSize = 20.sp),
+            style = MaterialTheme.typography.h6,
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(1f, true)
+            modifier = Modifier.weight(1f, true)
         )
 
         IconButton(
@@ -118,8 +119,11 @@ private fun MenuTitle(title: ResolvableString, onClose: () -> Unit) {
 private fun MenuItemRow(item: MenuPayload.MenuItem) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(16.dp)
-
+        modifier = Modifier
+            .clickable { item.onClick() }
+            .padding(16.dp)
+            .background(LinkTheme.colors.componentBackground)
+            .also { if (item.testTag != null) it.testTag(item.testTag) }
     ) {
         IconWithBackground(
             itemIcon = item.icon,
@@ -136,8 +140,7 @@ private fun MenuItemRow(item: MenuPayload.MenuItem) {
         Icon(
             painter = painterResource(R.drawable.stripe_ic_chevron_right),
             contentDescription = null,
-            modifier = Modifier
-                .also { if (item.testTag != null) it.testTag(item.testTag) }
+
         )
     }
 }
@@ -147,7 +150,10 @@ private fun IconWithBackground(itemIcon: Int) {
     Box(
         modifier = Modifier
             .size(40.dp)
-            .background(color = MaterialTheme.linkColors.disabledText, shape = RoundedCornerShape(6.dp))
+            .background(
+                color = LinkTheme.colors.textSecondary,
+                shape = RoundedCornerShape(6.dp)
+            )
     ) {
         Icon(
             modifier = Modifier
