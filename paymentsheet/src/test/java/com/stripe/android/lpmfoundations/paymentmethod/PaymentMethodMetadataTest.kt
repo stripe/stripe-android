@@ -1586,6 +1586,17 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 
+    @Test
+    fun `Passes CBF along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
+    }
+
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
         return LinkInlineConfiguration(
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
