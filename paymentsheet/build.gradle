@@ -13,6 +13,8 @@ dependencies {
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
     implementation project(":stripe-attestation")
+    implementation("com.stripe:stripeterminal-taptopay:4.3.1")
+    implementation("com.stripe:stripeterminal-core:4.3.1")
 
     // Kotlin
     api libs.kotlin.coroutines
