@@ -165,7 +165,7 @@ internal fun TestModeBadge() {
             .padding(horizontal = 6.dp, vertical = 2.dp),
     ) {
         Text(
-            text = "TEST MODE",
+            text = "TEST",
             fontWeight = FontWeight.Bold,
             color = textColor,
         )
