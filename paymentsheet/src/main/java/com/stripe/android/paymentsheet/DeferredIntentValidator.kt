@@ -47,6 +47,10 @@ internal object DeferredIntentValidator {
                     "Your PaymentIntent confirmationMethod (${stripeIntent.confirmationMethod}) " +
                         "can only be used with PaymentSheet.FlowController."
                 }
+
+                require(paymentMode.setupFutureUsage != StripeIntent.Usage.None) {
+                    "Your PaymentSheet.IntentConfiguration setupFutureUse cannot be set to None"
+                }
             }
             is SetupIntent -> {
                 val setupMode = requireNotNull(params.mode as? DeferredIntentParams.Mode.Setup) {

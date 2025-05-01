@@ -149,6 +149,7 @@ private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.T
 private fun PaymentIntent.canSetupFutureUsage(): Boolean {
     return when (setupFutureUsage) {
         null,
+        StripeIntent.Usage.None,
         StripeIntent.Usage.OneTime -> false
         StripeIntent.Usage.OnSession,
         StripeIntent.Usage.OffSession -> true

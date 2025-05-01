@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
@@ -379,6 +380,14 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Test deferred PaymentIntent`() {
+        val pmoMap = mapOf(
+            "card" to mapOf(
+                "setup_future_usage" to "off_session"
+            ),
+            "affirm" to mapOf(
+                "setup_future_usage" to "none"
+            )
+        )
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
@@ -387,6 +396,7 @@ class ElementsSessionJsonParserTest {
                         currency = "usd",
                         captureMethod = PaymentIntent.CaptureMethod.Automatic,
                         setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmoMap).toString()
                     ),
                     paymentMethodTypes = emptyList(),
                     paymentMethodConfigurationId = null,
@@ -419,7 +429,9 @@ class ElementsSessionJsonParserTest {
                 setupFutureUsage = null,
                 unactivatedPaymentMethods = listOf(),
                 paymentMethodTypes = listOf("card", "link", "cashapp"),
-                linkFundingSources = listOf("card")
+                linkFundingSources = listOf("card"),
+                paymentMethodOptionsJsonString = "{\"affirm\":{\"setup_future_usage\":\"none\"}," +
+                    "\"card\":{\"setup_future_usage\":\"off_session\"}}"
             )
         )
     }

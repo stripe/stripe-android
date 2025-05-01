@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
@@ -47,7 +48,8 @@ class DeferredPaymentIntentJsonParser(
             created = timeProvider(),
             setupFutureUsage = paymentMode.setupFutureUsage,
             amount = paymentMode.amount,
-            currency = paymentMode.currency
+            currency = paymentMode.currency,
+            paymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString
         )
     }
 

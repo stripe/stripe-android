@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
+import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 
 internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {
     return DeferredIntentParams(
@@ -13,6 +15,7 @@ internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): Deferred
     )
 }
 
+@OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
 private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): DeferredIntentParams.Mode {
     return when (this) {
         is PaymentSheet.IntentConfiguration.Mode.Payment -> {
@@ -21,6 +24,7 @@ private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): Deferr
                 currency = currency,
                 setupFutureUsage = setupFutureUse?.toIntentUsage(),
                 captureMethod = captureMethod.toIntentCaptureMethod(),
+                paymentMethodOptionsJsonString = paymentMethodOptions?.toJsonObjectString()
             )
         }
         is PaymentSheet.IntentConfiguration.Mode.Setup -> {
@@ -36,6 +40,7 @@ private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toIntentUsage(): Str
     return when (this) {
         PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> StripeIntent.Usage.OnSession
         PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> StripeIntent.Usage.OffSession
+        PaymentSheet.IntentConfiguration.SetupFutureUse.None -> StripeIntent.Usage.None
     }
 }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -44,12 +45,14 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
         }
     },
     PAYMENT("payment") {
+        @OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
                 currency = playgroundState.currencyCode.value,
+                paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
         }
     },

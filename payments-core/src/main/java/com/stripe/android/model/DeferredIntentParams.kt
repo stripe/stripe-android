@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -28,6 +29,7 @@ data class DeferredIntentParams(
             override val currency: String,
             override val setupFutureUsage: StripeIntent.Usage?,
             val captureMethod: PaymentIntent.CaptureMethod,
+            val paymentMethodOptionsJsonString: String?
         ) : Mode {
             override val code: String get() = "payment"
         }

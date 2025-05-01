@@ -181,6 +181,24 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
+    fun `Fails if IntentConfiguration setupFutureUse is set to None`() {
+        val paymentIntent = PaymentIntentFactory.create(
+            setupFutureUsage = StripeIntent.Usage.None
+        )
+        val intentConfiguration = makeIntentConfigurationForPayment(
+            setupFutureUse = IntentConfiguration.SetupFutureUse.None,
+        )
+
+        val result = DeferredIntentValidator.validate(
+            stripeIntent = paymentIntent,
+            intentConfiguration = intentConfiguration,
+            allowsManualConfirmation = true,
+        )
+
+        assertThat(result).isEqualTo(paymentIntent)
+    }
+
+    @Test
     fun `Fails if SetupIntent is validated against IntentConfiguration in payment mode`() {
         val setupIntent = SetupIntentFixtures.SI_SUCCEEDED
         val intentConfiguration = makeIntentConfigurationForPayment()
