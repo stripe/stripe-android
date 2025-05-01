@@ -400,6 +400,7 @@ class PaymentSheet internal constructor(
              * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              * @param captureMethod Controls when the funds will be captured from the customer's
              * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
+             * @param paymentMethodOptions Additional payment method options params. See [our docs](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-payment_method_options) for more info.
              */
             @Poko
             @Parcelize
