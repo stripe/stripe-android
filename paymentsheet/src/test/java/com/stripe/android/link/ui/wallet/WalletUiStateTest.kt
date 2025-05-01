@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
@@ -168,6 +170,7 @@ class WalletUiStateTest {
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -181,6 +184,7 @@ class WalletUiStateTest {
             paymentDetailsList = paymentDetailsList,
             email = "email@stripe.com",
             selectedItemId = selectedItem?.id,
+            cardBrandFilter = cardBrandFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,

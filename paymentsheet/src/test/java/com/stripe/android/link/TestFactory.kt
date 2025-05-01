@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -162,6 +163,7 @@ internal object TestFactory {
         shippingDetails = null,
         flags = emptyMap(),
         cardBrandChoice = null,
+        cardBrandFilter = DefaultCardBrandFilter,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,

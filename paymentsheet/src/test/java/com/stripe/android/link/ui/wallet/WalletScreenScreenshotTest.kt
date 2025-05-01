@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
@@ -164,6 +165,7 @@ internal class WalletScreenScreenshotTest {
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
             selectedItemId = selectedItem?.id,
+            cardBrandFilter = DefaultCardBrandFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,

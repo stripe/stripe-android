@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -662,6 +663,7 @@ internal class DefaultPaymentElementLoaderTest {
             shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
+            cardBrandFilter = DefaultCardBrandFilter,
             flags = emptyMap(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

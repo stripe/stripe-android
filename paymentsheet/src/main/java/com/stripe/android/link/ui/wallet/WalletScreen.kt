@@ -482,20 +482,23 @@ private fun ExpandedPaymentDetails(
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
-    val isEnabled = !uiState.primaryButtonState.isBlocking
+    val isInteractionEnabled = !uiState.primaryButtonState.isBlocking
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(
-            isEnabled = isEnabled,
+            isEnabled = isInteractionEnabled,
             onCollapse = onCollapse
         )
 
         uiState.paymentDetailsList.forEachIndexed { index, item ->
+            val isItemAvailable = uiState.isItemAvailable(item)
+            val isItemEnabled = isInteractionEnabled && isItemAvailable
             PaymentDetailsListItem(
                 modifier = Modifier
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
                 paymentDetails = item,
-                enabled = isEnabled,
+                isAvailable = isItemAvailable,
+                enabled = isItemEnabled,
                 isSelected = uiState.selectedItem?.id == item.id,
                 isUpdating = uiState.cardBeingUpdated == item.id,
                 onClick = { onItemSelected(item) },
@@ -512,7 +515,7 @@ private fun ExpandedPaymentDetails(
 
         if (uiState.canAddNewPaymentMethod) {
             AddPaymentMethodRow(
-                isEnabled = isEnabled,
+                isEnabled = isInteractionEnabled,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
             )
         }

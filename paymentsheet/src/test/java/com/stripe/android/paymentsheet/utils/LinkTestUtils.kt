@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
@@ -79,6 +80,7 @@ internal object LinkTestUtils {
             merchantCountryCode = "US",
             passthroughModeEnabled = false,
             cardBrandChoice = cardBrandChoice,
+            cardBrandFilter = DefaultCardBrandFilter,
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
@@ -1604,6 +1605,7 @@ internal class PaymentMethodMetadataTest {
                     eligible = true,
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
+                cardBrandFilter = DefaultCardBrandFilter,
                 passthroughModeEnabled = false,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,

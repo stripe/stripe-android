@@ -212,6 +212,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 PaymentDetailsListItem(
                     paymentDetails = state.details,
                     enabled = state.enabled,
+                    isAvailable = true,
                     isSelected = state.isSelected,
                     isUpdating = state.isUpdating,
                     onClick = {},

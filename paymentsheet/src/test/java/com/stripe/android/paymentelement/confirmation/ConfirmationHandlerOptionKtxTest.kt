@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -543,6 +544,7 @@ class ConfirmationHandlerOptionKtxTest {
             shippingDetails = null,
             passthroughModeEnabled = false,
             cardBrandChoice = null,
+            cardBrandFilter = DefaultCardBrandFilter,
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

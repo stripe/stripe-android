@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.wallet
 
 import androidx.compose.runtime.Immutable
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -11,6 +12,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val email: String,
+    val cardBrandFilter: CardBrandFilter,
     val isExpanded: Boolean = false,
     val selectedItemId: String?,
     val isProcessing: Boolean,
@@ -47,7 +49,8 @@ internal data class WalletUiState(
             val isMissingCvcInput = cvcInput.isComplete.not()
 
             val disableButton = (isExpired && isMissingExpiryDateInput) ||
-                (requiresCvcRecollection && isMissingCvcInput) || (cardBeingUpdated != null)
+                (requiresCvcRecollection && isMissingCvcInput) || (cardBeingUpdated != null) ||
+                selectedItem?.let { !isItemAvailable(it) } != true
 
             return when {
                 hasCompleted -> {
@@ -65,6 +68,10 @@ internal data class WalletUiState(
             }
         }
 
+    fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
+        return item !is Card || cardBrandFilter.isAccepted(item.brand)
+    }
+
     fun setProcessing(): WalletUiState {
         return copy(
             isProcessing = true,
@@ -76,6 +83,7 @@ internal data class WalletUiState(
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.paymentDetails,
+            isExpanded = selectedItem?.let { isItemAvailable(it) } == false,
             isProcessing = false,
             cardBeingUpdated = null
         )

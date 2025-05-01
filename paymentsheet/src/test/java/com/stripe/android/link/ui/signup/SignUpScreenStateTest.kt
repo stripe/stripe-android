@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.signup
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.model.LinkMode
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -85,6 +86,7 @@ class SignUpScreenStateTest {
             passthroughModeEnabled = true,
             flags = emptyMap(),
             cardBrandChoice = null,
+            cardBrandFilter = DefaultCardBrandFilter,
             useAttestationEndpointsForLink = true,
             suppress2faModal = false,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_secret_456"),
