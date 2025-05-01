@@ -211,11 +211,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         displayedSavedPaymentMethod,
         canRemove,
-    ) { paymentMethods, displayedSavedPaymentMethod, canRemove ->
+        canUpdateFullPaymentMethodDetails,
+    ) { paymentMethods, displayedSavedPaymentMethod, canRemove, canUpdateFullPaymentMethodDetails ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
-            canRemove = canRemove
+            canRemove = canRemove,
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
         )
     }
 
@@ -378,6 +380,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canRemove: Boolean,
+        canUpdateFullPaymentMethodDetails: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -389,6 +392,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 getSavedPaymentMethodActionForOnePaymentMethod(
                     canRemove = canRemove,
                     savedPaymentMethod = savedPaymentMethod,
+                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                 )
             }
             else ->
@@ -399,8 +403,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getSavedPaymentMethodActionForOnePaymentMethod(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
+        canUpdateFullPaymentMethodDetails: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails.value) == true || canRemove) {
+        return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails) == true || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
