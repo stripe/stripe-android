@@ -5,7 +5,9 @@ import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePrevi
 import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
-internal fun getPMOSFUFromStringMap(values: Map<String, String>): PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions {
+internal fun getPMOSFUFromStringMap(
+    values: Map<String, String>
+): PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions {
     val setupFutureUsageValues = values.mapNotNull { (key, value) ->
         val paymentMethodType = PaymentMethod.Type.fromCode(key)
         val setupFutureUse = when (value) {

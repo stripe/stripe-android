@@ -432,21 +432,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class PaymentMethodOptions(
                     internal val setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>
-                ) : Parcelable {
-                    internal fun toMap(): Map<String, Map<String, String>> {
-                        val map = mutableMapOf<String, Map<String, String>>()
-                        this.setupFutureUsageValues.forEach {
-                            map[it.key.code] = mapOf(
-                                "setup_future_usage" to when (it.value) {
-                                    SetupFutureUse.OffSession -> "off_session"
-                                    SetupFutureUse.OnSession -> "on_session"
-                                    SetupFutureUse.None -> "none"
-                                }
-                            )
-                        }
-                        return map
-                    }
-                }
+                ) : Parcelable
             }
 
             /**

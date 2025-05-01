@@ -1,7 +1,6 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
