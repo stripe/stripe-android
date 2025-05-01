@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -48,6 +49,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -57,6 +59,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -74,6 +77,12 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
+
+    @get:Rule
+    val linkCardBrandFilteringFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.linkCardBrandFiltering,
+        isEnabled = false,
+    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
@@ -1374,8 +1383,35 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables Link if card brand filtering is used`() = runTest {
-        val loader = createPaymentElementLoader()
+    fun `Returns correct Link enablement based on card brand filtering`() = runTest {
+        linkCardBrandFilteringFeatureFlagRule.setEnabled(false)
+        testLinkEnablementWithCardBrandFiltering(
+            passthroughModeEnabled = false,
+            expectedEnabled = true
+        )
+        testLinkEnablementWithCardBrandFiltering(
+            passthroughModeEnabled = true,
+            expectedEnabled = false
+        )
+
+        linkCardBrandFilteringFeatureFlagRule.setEnabled(true)
+        testLinkEnablementWithCardBrandFiltering(
+            passthroughModeEnabled = false,
+            expectedEnabled = true
+        )
+        testLinkEnablementWithCardBrandFiltering(
+            passthroughModeEnabled = true,
+            expectedEnabled = true
+        )
+    }
+
+    private suspend fun testLinkEnablementWithCardBrandFiltering(
+        passthroughModeEnabled: Boolean,
+        expectedEnabled: Boolean,
+    ) {
+        val loader = createPaymentElementLoader(
+            linkSettings = createLinkSettings(passthroughModeEnabled = passthroughModeEnabled)
+        )
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -1392,8 +1428,11 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.paymentMethodMetadata.linkState).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
+        if (expectedEnabled) {
+            assertThat(result.paymentMethodMetadata.linkState).isNotNull()
+        } else {
+            assertThat(result.paymentMethodMetadata.linkState).isNull()
+        }
     }
 
     @Test
