@@ -8,8 +8,10 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.DismissalCoordinator
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.RealDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CUSTOMER_EMAIL
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -596,6 +598,7 @@ internal class SignUpViewModelTest {
             lookupResult = LinkAuthResult.NoLinkAccountFound
         },
         logger: Logger = FakeLogger(),
+        dismissalCoordinator: DismissalCoordinator = RealDismissalCoordinator(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {}
@@ -616,6 +619,7 @@ internal class SignUpViewModelTest {
             savedStateHandle = savedStateHandle,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
+            dismissalCoordinator = dismissalCoordinator,
         )
     }
 

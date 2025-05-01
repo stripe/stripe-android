@@ -2,6 +2,8 @@ package com.stripe.android.link.ui.updatecard
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.DismissalCoordinator
+import com.stripe.android.link.RealDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.utils.TestNavigationManager
@@ -93,13 +95,15 @@ class UpdateCardScreenViewModelTest {
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
+        dismissalCoordinator: DismissalCoordinator = RealDismissalCoordinator(),
         paymentDetailsId: String = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id
     ): UpdateCardScreenViewModel {
         return UpdateCardScreenViewModel(
             logger = logger,
             linkAccountManager = linkAccountManager,
             navigationManager = navigationManager,
-            paymentDetailsId = paymentDetailsId
+            dismissalCoordinator = dismissalCoordinator,
+            paymentDetailsId = paymentDetailsId,
         )
     }
 }
