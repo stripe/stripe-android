@@ -152,14 +152,14 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedItemId = item.id,
-                isExpanded = false,
+                userSetIsExpanded = null,
             )
         }
     }
 
     fun onExpandedChanged(expanded: Boolean) {
         _uiState.update {
-            it.copy(isExpanded = expanded)
+            it.copy(userSetIsExpanded = expanded)
         }
     }
 

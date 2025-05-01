@@ -173,7 +173,7 @@ internal class WalletScreenScreenshotTest {
             cvcInput = cvcInput,
             alertMessage = alertMessage,
             canAddNewPaymentMethod = canAddNewPaymentMethod,
-            isExpanded = isExpanded,
+            userSetIsExpanded = isExpanded,
         )
     }
 

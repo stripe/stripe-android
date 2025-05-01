@@ -13,12 +13,12 @@ internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val email: String,
     val cardBrandFilter: CardBrandFilter,
-    val isExpanded: Boolean = false,
     val selectedItemId: String?,
     val isProcessing: Boolean,
     val primaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
     val canAddNewPaymentMethod: Boolean,
+    val userSetIsExpanded: Boolean? = null,
     val cardBeingUpdated: String? = null,
     val errorMessage: ResolvableString? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
@@ -39,6 +39,9 @@ internal data class WalletUiState(
     val showBankAccountTerms: Boolean
         get() = selectedItem is ConsumerPaymentDetails.BankAccount
 
+    val isExpanded: Boolean
+        get() = userSetIsExpanded ?: (selectedItem?.let { isItemAvailable(it) } != true)
+
     val primaryButtonState: PrimaryButtonState
         get() {
             val card = selectedItem as? Card
@@ -50,7 +53,7 @@ internal data class WalletUiState(
 
             val disableButton = (isExpired && isMissingExpiryDateInput) ||
                 (requiresCvcRecollection && isMissingCvcInput) || (cardBeingUpdated != null) ||
-                selectedItem?.let { !isItemAvailable(it) } != true
+                selectedItem?.let { isItemAvailable(it) } != true
 
             return when {
                 hasCompleted -> {
@@ -83,7 +86,7 @@ internal data class WalletUiState(
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.paymentDetails,
-            isExpanded = selectedItem?.let { isItemAvailable(it) } == false,
+            userSetIsExpanded = null,
             isProcessing = false,
             cardBeingUpdated = null
         )

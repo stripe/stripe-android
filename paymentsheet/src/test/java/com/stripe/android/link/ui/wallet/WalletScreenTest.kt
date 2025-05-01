@@ -664,7 +664,7 @@ internal class WalletScreenTest {
                 hasCompleted = false,
                 primaryButtonLabel = "Buy".resolvableString,
                 canAddNewPaymentMethod = true,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
             onItemSelected = {},
             onExpandedChanged = {},
