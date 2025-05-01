@@ -17,6 +17,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -66,9 +67,11 @@ internal data class PaymentMethodMetadata(
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String
 ) : Parcelable {
-    fun hasIntentToSetup(): Boolean {
+    fun hasIntentToSetup(paymentMethod: PaymentMethod.Type?): Boolean {
         return when (stripeIntent) {
-            is PaymentIntent -> stripeIntent.setupFutureUsage != null
+            is PaymentIntent -> {
+                stripeIntent.hasIntentToSetupForPaymentMethod(paymentMethod) || stripeIntent.setupFutureUsage != null
+            }
             is SetupIntent -> true
         }
     }
@@ -261,9 +264,10 @@ internal data class PaymentMethodMetadata(
 
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        paymentMethod: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         return paymentMethodSaveConsentBehavior.allowRedisplay(
-            isSetupIntent = hasIntentToSetup(),
+            isSetupIntent = hasIntentToSetup(PaymentMethod.Type.fromCode(paymentMethod)!!),
             customerRequestedSave = customerRequestedSave,
         )
     }

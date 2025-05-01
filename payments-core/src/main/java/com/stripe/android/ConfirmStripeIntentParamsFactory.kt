@@ -136,7 +136,7 @@ internal class ConfirmSetupIntentParamsFactory(
 private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.Type?): MandateDataParams? {
     return paymentMethodType?.let { type ->
         val supportsAddingMandateData = when (intent) {
-            is PaymentIntent -> intent.canSetupFutureUsage() || type.requiresMandateForPaymentIntent
+            is PaymentIntent -> intent.canSetupFutureUsage(type) || type.requiresMandateForPaymentIntent
             is SetupIntent -> true
         }
 
@@ -146,13 +146,17 @@ private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.T
     }
 }
 
-private fun PaymentIntent.canSetupFutureUsage(): Boolean {
-    return when (setupFutureUsage) {
+private fun PaymentIntent.canSetupFutureUsage(paymentMethodType: PaymentMethod.Type): Boolean {
+    // Add PMO level check
+    val topLevel =  when (setupFutureUsage) {
         null,
+        StripeIntent.Usage.None,
         StripeIntent.Usage.OneTime -> false
         StripeIntent.Usage.OnSession,
         StripeIntent.Usage.OffSession -> true
     }
+    val pmoLevel = hasIntentToSetupForPaymentMethod(paymentMethodType)
+    return pmoLevel || topLevel
 }
 
 private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraParams(): Boolean? {

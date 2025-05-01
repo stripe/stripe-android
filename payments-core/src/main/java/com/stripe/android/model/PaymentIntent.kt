@@ -160,6 +160,21 @@ constructor(
         StripeJsonUtils.jsonObjectToMap(JSONObject(it))
     } ?: emptyMap()
 
+    private fun getPMOSFUForCode(paymentMethod: PaymentMethod.Type?): StripeIntent.Usage? {
+        val pmo = getPaymentMethodOptions()[paymentMethod?.code]
+        val sfu = (pmo as? Map<*, *>)?.get("setup_future_usage")
+        return StripeIntent.Usage.fromCode(sfu.toString())
+    }
+
+    fun hasIntentToSetupForPaymentMethod(paymentMethod: PaymentMethod.Type?): Boolean {
+        val sfu = getPMOSFUForCode(paymentMethod)
+        return when (sfu) {
+            StripeIntent.Usage.OffSession,
+            StripeIntent.Usage.OnSession -> true
+            else -> false
+        }
+    }
+
     override val nextActionType: StripeIntent.NextActionType?
         get() = when (nextActionData) {
             is StripeIntent.NextActionData.SdkData -> {
@@ -239,6 +254,7 @@ constructor(
             StripeIntent.Usage.OnSession -> true
             StripeIntent.Usage.OffSession -> true
             StripeIntent.Usage.OneTime -> false
+            StripeIntent.Usage.None -> false
             null -> false
         }
     }

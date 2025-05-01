@@ -23,7 +23,7 @@ internal object IdealDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.takeIf { hasIntentToSetup },
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = IdealUiDefinitionFactory
 }
@@ -47,7 +47,7 @@ private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedData
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields,
-            placeholderOverrideList = if (metadata.hasIntentToSetup()) {
+            placeholderOverrideList = if (metadata.hasIntentToSetup(PaymentMethod.Type.Ideal)) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()

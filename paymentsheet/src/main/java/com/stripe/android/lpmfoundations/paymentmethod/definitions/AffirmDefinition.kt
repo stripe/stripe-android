@@ -20,7 +20,7 @@ internal object AffirmDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.ShippingAddress,
-        AddPaymentMethodRequirement.UnsupportedForSetup,
+//        AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false

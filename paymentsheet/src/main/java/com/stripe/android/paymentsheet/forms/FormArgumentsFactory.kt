@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 
@@ -18,7 +19,7 @@ internal object FormArgumentsFactory {
             shippingDetails = metadata.shippingDetails,
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
-            hasIntentToSetup = metadata.hasIntentToSetup(),
+            hasIntentToSetup = metadata.hasIntentToSetup(PaymentMethod.Type.fromCode(paymentMethodCode)),
             paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
         )
     }

@@ -5,7 +5,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -17,10 +19,10 @@ internal object AlipayDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.UnsupportedForSetup,
+//        AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = AlipayUiDefinitionFactory
 }

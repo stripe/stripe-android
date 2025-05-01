@@ -28,3 +28,12 @@ internal object PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition :
     override fun convertToString(value: String): String = value
     override fun convertToValue(value: String): String = value
 }
+
+internal fun pmoSfuOverrideStringToMap(values: String): Map<String, String>? {
+    return values.split(",")
+        .mapNotNull { entry ->
+            entry.split(":").takeIf { it.size == 2 }?.let { pair ->
+                pair[0] to pair[1]
+            }
+        }.toMap().ifEmpty { null }
+}

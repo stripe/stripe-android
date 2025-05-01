@@ -22,7 +22,7 @@ internal object PayPalDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = PayPalUiDefinitionFactory
 }
@@ -43,7 +43,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements
     ): List<FormElement> {
-        val localLayoutSpecs: List<FormItemSpec> = if (metadata.hasIntentToSetup()) {
+        val localLayoutSpecs: List<FormItemSpec> = if (metadata.hasIntentToSetup(PaymentMethod.Type.PayPal)) {
             listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
         } else {
             emptyList()

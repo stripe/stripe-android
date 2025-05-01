@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -44,12 +46,14 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
         }
     },
     PAYMENT("payment") {
+        @OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
                 currency = playgroundState.currencyCode.value,
+                paymentMethodOptions = getPMO(playgroundState.paymentMethodOptionsSetupFutureUsage)
             )
         }
     },
@@ -68,4 +72,24 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
     abstract fun intentConfigurationMode(
         playgroundState: PlaygroundState.Payment
     ): PaymentSheet.IntentConfiguration.Mode
+}
+
+@OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
+internal fun getPMO(values: Map<String, String>): PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions {
+    val map = mutableMapOf<PaymentMethod.Type, PaymentSheet.IntentConfiguration.SetupFutureUse>()
+    values.forEach {
+        val key = PaymentMethod.Type.fromCode(it.key)
+        val value = when (it.value) {
+            "off_session" -> PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+            "on_session" -> PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession
+            "none" -> PaymentSheet.IntentConfiguration.SetupFutureUse.None
+            else -> null
+        }
+        if (key != null && value != null) {
+            map[key] = value
+        }
+    }
+    return PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+        setupFutureUsageValues = map
+    )
 }

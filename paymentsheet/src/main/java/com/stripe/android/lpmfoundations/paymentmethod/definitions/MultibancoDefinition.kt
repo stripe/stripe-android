@@ -17,7 +17,7 @@ internal object MultibancoDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.UnsupportedForSetup,
+        //AddPaymentMethodRequirement.UnsupportedForSetup,
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 

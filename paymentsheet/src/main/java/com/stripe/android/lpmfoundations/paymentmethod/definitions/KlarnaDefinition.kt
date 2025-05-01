@@ -22,7 +22,7 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = KlarnaUiDefinitionFactory
 }
