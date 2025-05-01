@@ -1,14 +1,11 @@
 package com.stripe.android.common.ui
 
-import android.content.Context
-import android.content.ContextWrapper
 import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,13 +13,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetLayoutInfo
+import com.stripe.android.utils.rememberActivityOrNull
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ElementsBottomSheetLayout(
     state: StripeBottomSheetState,
@@ -30,6 +26,7 @@ internal fun ElementsBottomSheetLayout(
     onDismissed: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    val activity = rememberActivityOrNull() as? ComponentActivity
     val layoutInfo = rememberStripeBottomSheetLayoutInfo(
         scrimColor = Color.Black.copy(alpha = 0.32f),
     )
@@ -46,9 +43,7 @@ internal fun ElementsBottomSheetLayout(
         label = "StatusBarColorAlpha",
     )
 
-    val context = LocalContext.current
     LaunchedEffect(statusBarColorAlpha) {
-        val activity = context.getActivity()
         activity?.enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
                 lightScrim = layoutInfo.scrimColor.copy(statusBarColorAlpha).toArgb(),
@@ -86,9 +81,3 @@ private val isRunningUiTest: Boolean
             Class.forName("androidx.test.InstrumentationRegistry")
         }.isSuccess
     }
-
-private fun Context.getActivity(): ComponentActivity? = when (this) {
-    is ComponentActivity -> this
-    is ContextWrapper -> baseContext.getActivity()
-    else -> null
-}
