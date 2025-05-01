@@ -65,12 +65,6 @@ internal data class WalletUiState(
             }
         }
 
-    fun setProcessing(): WalletUiState {
-        return copy(
-            isProcessing = true,
-        )
-    }
-
     fun updateWithResponse(
         response: ConsumerPaymentDetails,
     ): WalletUiState {
@@ -85,4 +79,3 @@ internal data class WalletUiState(
         data object ShowAddPaymentMethodMenu : ViewEffect
     }
 }
-

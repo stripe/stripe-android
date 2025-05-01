@@ -84,7 +84,18 @@ internal fun WalletScreen(
     LaunchedEffect(state.viewEffect) {
         when (state.viewEffect) {
             is ViewEffect.ShowAddPaymentMethodMenu -> {
-                showBottomSheetContent(AddPaymentMethodMenu())
+                showBottomSheetContent {
+                    AddPaymentMethodMenu(
+                        onClose = { hideBottomSheetContent() },
+                        onAddCard = {
+                            viewModel.onAddNewPaymentMethodClicked()
+                            hideBottomSheetContent()
+                        },
+                        onAddBankAccount = {
+                            viewModel.onAddNewBankAccountClicked()
+                        }
+                    )
+                }
             }
             null -> Unit
         }
@@ -107,32 +118,6 @@ internal fun WalletScreen(
         onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
         onDismissAlert = viewModel::onDismissAlert
     )
-}
-
-@Composable
-private fun AddPaymentMethodMenu() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clip(MaterialTheme.linkShapes.large)
-            .background(
-                color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.linkShapes.large
-            )
-    ) {
-        Text("Test")
-        Divider()
-        Text("Test")
-        Divider()
-        Text("Test")
-    }
-
 }
 
 @Composable

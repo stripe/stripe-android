@@ -83,7 +83,7 @@ internal class WalletViewModel @Inject constructor(
 
     init {
         _uiState.update {
-            it.setProcessing()
+            it.copy(isProcessing = true)
         }
 
         viewModelScope.launch {
@@ -269,9 +269,7 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onRemoveClicked(item: ConsumerPaymentDetails.PaymentDetails) {
-        _uiState.update {
-            it.setProcessing()
-        }
+        _uiState.update { it.copy(isProcessing = true) }
         viewModelScope.launch {
             linkAccountManager.deletePaymentDetails(item.id)
                 .fold(
@@ -377,6 +375,10 @@ internal class WalletViewModel @Inject constructor(
                 viewEffect = null
             )
         }
+    }
+
+    fun onAddNewBankAccountClicked() {
+        TODO("Not yet implemented")
     }
 
     companion object {
