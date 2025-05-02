@@ -7,10 +7,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.link.DismissalCoordinator
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -38,7 +38,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
     private val formHelper: FormHelper,
-    private val dismissalCoordinator: DismissalCoordinator,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val _state = MutableStateFlow(

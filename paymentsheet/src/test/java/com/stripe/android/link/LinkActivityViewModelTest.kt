@@ -22,6 +22,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.TestNavigationManager
@@ -513,6 +514,30 @@ internal class LinkActivityViewModelTest {
         )
     }
 
+    @Test
+    fun `blocks dismissal if LinkDismissalCoordinator disables it`() = runTest {
+        val dismissalCoordinator = RealLinkDismissalCoordinator()
+        val viewModel = createViewModel(
+            activityRetainedComponent = FakeNativeLinkComponent(
+                dismissalCoordinator = dismissalCoordinator,
+            ),
+        )
+
+        viewModel.result.test {
+            dismissalCoordinator.setDismissible(false)
+            viewModel.dismissSheet()
+            expectNoEvents()
+
+            dismissalCoordinator.setDismissible(true)
+            viewModel.dismissSheet()
+            assertThat(awaitItem()).isEqualTo(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
+        }
+    }
+
     private fun testAttestationCheckError(
         attestationCheckResult: LinkAttestationCheck.Result,
     ) = runTest {
@@ -557,6 +582,7 @@ internal class LinkActivityViewModelTest {
     }
 
     private fun createViewModel(
+        activityRetainedComponent: NativeLinkComponent = FakeNativeLinkComponent(),
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
@@ -570,7 +596,7 @@ internal class LinkActivityViewModelTest {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
             linkAccountHolder = linkAccountHolder,
-            activityRetainedComponent = FakeNativeLinkComponent(),
+            activityRetainedComponent = activityRetainedComponent,
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,

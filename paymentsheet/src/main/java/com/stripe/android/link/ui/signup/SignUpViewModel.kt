@@ -10,8 +10,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.DismissalCoordinator
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
@@ -45,7 +45,7 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
-    private val dismissalCoordinator: DismissalCoordinator,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {

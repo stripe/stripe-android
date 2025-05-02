@@ -2,12 +2,19 @@ package com.stripe.android.link
 
 import javax.inject.Inject
 
-internal interface DismissalCoordinator {
+/**
+ * This coordinator sets the ability to dismiss the Link sheet. We want to avoid
+ * dismissing the sheet while certain network requests are in progress.
+ */
+internal interface LinkDismissalCoordinator {
     val canDismiss: Boolean
     fun setDismissible(dismissible: Boolean)
 }
 
-internal inline fun <R> DismissalCoordinator.withDismissalDisabled(
+/**
+ * Runs the provided [action] and disables the dismissal of the Link sheet while it is running.
+ */
+internal inline fun <R> LinkDismissalCoordinator.withDismissalDisabled(
     action: () -> R,
 ): R {
     val originalDismissible = canDismiss
@@ -19,7 +26,7 @@ internal inline fun <R> DismissalCoordinator.withDismissalDisabled(
     }
 }
 
-internal class RealDismissalCoordinator @Inject constructor() : DismissalCoordinator {
+internal class RealLinkDismissalCoordinator @Inject constructor() : LinkDismissalCoordinator {
 
     private var _canDismiss: Boolean = true
 

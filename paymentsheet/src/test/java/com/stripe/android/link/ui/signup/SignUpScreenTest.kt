@@ -14,9 +14,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.link.DismissalCoordinator
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.RealDismissalCoordinator
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAuth
@@ -226,7 +226,7 @@ internal class SignUpScreenTest {
 
     private fun viewModel(
         linkAuth: LinkAuth = FakeLinkAuth(),
-        dismissalCoordinator: DismissalCoordinator = RealDismissalCoordinator(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO,
         moveToWeb: () -> Unit = {}
     ): SignUpViewModel {

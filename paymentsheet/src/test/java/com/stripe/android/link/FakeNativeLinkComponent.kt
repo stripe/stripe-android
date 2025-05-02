@@ -39,5 +39,5 @@ internal class FakeNativeLinkComponent(
     override val savedStateHandle: SavedStateHandle = SavedStateHandle(),
     override val eventReporter: EventReporter = FakeEventReporter(),
     override val navigationManager: NavigationManager = TestNavigationManager(),
-    override val dismissalCoordinator: DismissalCoordinator = RealDismissalCoordinator(),
+    override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
 ) : NativeLinkComponent

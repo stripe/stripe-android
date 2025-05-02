@@ -104,7 +104,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun dismissSheet() {
-        if (activityRetainedComponent.dismissalCoordinator.canDismiss) {
+        if (canDismissSheet) {
             dismissWithResult(
                 LinkActivityResult.Canceled(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate
@@ -175,7 +175,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun goBack() {
-        if (activityRetainedComponent.dismissalCoordinator.canDismiss) {
+        if (canDismissSheet) {
             navigationManager.tryNavigateBack()
         }
     }

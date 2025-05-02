@@ -19,8 +19,8 @@ import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.DismissalCoordinator
-import com.stripe.android.link.RealDismissalCoordinator
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
@@ -139,7 +139,7 @@ internal class PaymentMethodScreenTest {
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         linkConfirmationHandler: FakeLinkConfirmationHandler = FakeLinkConfirmationHandler(),
         formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(),
-        dismissalCoordinator: DismissalCoordinator = RealDismissalCoordinator(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         block: suspend Scenario.() -> Unit
     ) {
         screen(
@@ -168,7 +168,7 @@ internal class PaymentMethodScreenTest {
         linkAccountManager: FakeLinkAccountManager,
         linkConfirmationHandler: FakeLinkConfirmationHandler,
         formHelper: FormHelper,
-        dismissalCoordinator: DismissalCoordinator,
+        dismissalCoordinator: LinkDismissalCoordinator,
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,

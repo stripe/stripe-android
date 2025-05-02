@@ -8,7 +8,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
-import com.stripe.android.link.DismissalCoordinator
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.withDismissalDisabled
@@ -34,7 +34,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAccountManager: LinkAccountManager,
     private val navigationManager: NavigationManager,
-    private val dismissalCoordinator: DismissalCoordinator,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     paymentDetailsId: String,
 ) : ViewModel() {
 
