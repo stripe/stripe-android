@@ -37,6 +37,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 displayableSavedPaymentMethod = it,
                 isEnabled = true,
                 isSelected = isSelected,
+                canShowLinkIcon = true,
                 onClick = {
                     rowOnClick(
                         isEditing = state.isEditing,

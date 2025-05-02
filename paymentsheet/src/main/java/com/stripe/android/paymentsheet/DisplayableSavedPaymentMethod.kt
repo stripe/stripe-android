@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 
 internal data class DisplayableSavedPaymentMethod private constructor(
@@ -24,6 +25,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             }
             is SavedPaymentMethod.SepaDebit,
             is SavedPaymentMethod.USBankAccount,
+            is SavedPaymentMethod.Link,
             SavedPaymentMethod.Unexpected -> false
         }
     }
@@ -35,6 +37,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             }
             is SavedPaymentMethod.SepaDebit,
             is SavedPaymentMethod.USBankAccount,
+            is SavedPaymentMethod.Link,
             SavedPaymentMethod.Unexpected -> false
         }
     }
@@ -54,6 +57,11 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         is SavedPaymentMethod.USBankAccount -> resolvableString(
             R.string.stripe_bank_account_ending_in,
             savedPaymentMethod.usBankAccount.last4
+        )
+        is SavedPaymentMethod.Link -> resolvableString(
+            com.stripe.android.R.string.stripe_card_ending_in,
+            brandDisplayName(),
+            savedPaymentMethod.paymentDetails.last4
         )
         is SavedPaymentMethod.Unexpected -> resolvableString("")
     }
@@ -76,6 +84,9 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 val brand = savedPaymentMethod.card.displayBrand?.let { CardBrand.fromCode(it) }
                     ?: savedPaymentMethod.card.brand
                 return brand.displayName
+            }
+            is SavedPaymentMethod.Link -> {
+                return savedPaymentMethod.paymentDetails.brand.displayName
             }
             is SavedPaymentMethod.USBankAccount,
             is SavedPaymentMethod.SepaDebit,
@@ -109,6 +120,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                     )
                 }
                 PaymentMethod.Type.SepaDebit -> paymentMethod.sepaDebit?.let { SavedPaymentMethod.SepaDebit(it) }
+                PaymentMethod.Type.Link -> paymentMethod.linkPaymentDetails?.let { SavedPaymentMethod.Link(it) }
                 else -> null
             }
 
@@ -142,5 +154,6 @@ internal sealed interface SavedPaymentMethod {
     }
     data class USBankAccount(val usBankAccount: PaymentMethod.USBankAccount) : SavedPaymentMethod
     data class SepaDebit(val sepaDebit: PaymentMethod.SepaDebit) : SavedPaymentMethod
+    data class Link(val paymentDetails: LinkPaymentDetails) : SavedPaymentMethod
     data object Unexpected : SavedPaymentMethod
 }

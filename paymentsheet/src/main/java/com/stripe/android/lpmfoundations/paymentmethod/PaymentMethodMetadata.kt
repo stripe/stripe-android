@@ -48,6 +48,7 @@ internal data class PaymentMethodMetadata(
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
+    val allowsLinkInSavedPaymentMethods: Boolean,
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
@@ -100,10 +101,16 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
-        return supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
+        val supportedTypes = supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
             paymentMethodDefinition.supportedAsSavedPaymentMethod
         }.map {
             it.type
+        }
+
+        return if (allowsLinkInSavedPaymentMethods && FeatureFlags.linkPMsInSPM.isEnabled) {
+            supportedTypes + listOf(PaymentMethod.Type.Link)
+        } else {
+            supportedTypes
         }
     }
 
@@ -288,12 +295,15 @@ internal data class PaymentMethodMetadata(
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
 
+            val allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled
+
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = configuration
                     .allowsPaymentMethodsRequiringShippingAddress,
+                allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -332,6 +342,7 @@ internal data class PaymentMethodMetadata(
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
+                allowsLinkInSavedPaymentMethods = false,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -365,6 +376,7 @@ internal data class PaymentMethodMetadata(
                 billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
+                allowsLinkInSavedPaymentMethods = false,
                 paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = configuration.cardBrandChoice?.eligible == true,
