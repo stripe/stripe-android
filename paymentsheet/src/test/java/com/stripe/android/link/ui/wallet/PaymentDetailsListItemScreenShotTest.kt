@@ -251,7 +251,8 @@ internal class PaymentDetailsListItemScreenShotTest {
             DefaultLinkTheme {
                 PaymentDetailsListItem(
                     paymentDetails = state.details,
-                    enabled = state.enabled,
+                    isClickable = state.enabled,
+                    isMenuButtonClickable = true,
                     isAvailable = state.isAvailable,
                     isSelected = state.isSelected,
                     isUpdating = state.isUpdating,

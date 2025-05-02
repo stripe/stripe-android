@@ -86,7 +86,6 @@ internal data class WalletUiState(
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.paymentDetails,
-            userSetIsExpanded = null,
             isProcessing = false,
             cardBeingUpdated = null
         )

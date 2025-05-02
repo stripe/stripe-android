@@ -54,12 +54,12 @@ import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.R as StripeR
 
 @Composable
-@Suppress("LongMethod")
 internal fun PaymentDetailsListItem(
     modifier: Modifier = Modifier,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    isClickable: Boolean,
+    isMenuButtonClickable: Boolean,
     isAvailable: Boolean,
-    enabled: Boolean,
     isSelected: Boolean,
     isUpdating: Boolean,
     onClick: () -> Unit,
@@ -73,7 +73,7 @@ internal fun PaymentDetailsListItem(
     Layout(
         modifier = modifier
             .padding(top = 8.dp, bottom = 8.dp, start = 20.dp)
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = isClickable, onClick = onClick),
         content = {
             RadioButton(
                 selected = isSelected,
@@ -112,7 +112,7 @@ internal fun PaymentDetailsListItem(
             }
 
             MenuAndLoader(
-                enabled = enabled,
+                enabled = isMenuButtonClickable,
                 isUpdating = isUpdating,
                 onMenuButtonClick = onMenuButtonClick
             )
@@ -188,7 +188,8 @@ private fun PaymentDetailsListItemPreview() {
         Column {
             PaymentDetailsListItem(
                 paymentDetails = card.copy(isDefault = true),
-                enabled = true,
+                isClickable = true,
+                isMenuButtonClickable = true,
                 isSelected = true,
                 isAvailable = true,
                 isUpdating = false,
@@ -197,7 +198,8 @@ private fun PaymentDetailsListItemPreview() {
             )
             PaymentDetailsListItem(
                 paymentDetails = card.copy(isDefault = true, brand = CardBrand.MasterCard, expiryYear = 0),
-                enabled = true,
+                isClickable = true,
+                isMenuButtonClickable = true,
                 isSelected = false,
                 isAvailable = true,
                 isUpdating = false,
@@ -206,7 +208,8 @@ private fun PaymentDetailsListItemPreview() {
             )
             PaymentDetailsListItem(
                 paymentDetails = card,
-                enabled = false,
+                isClickable = false,
+                isMenuButtonClickable = true,
                 isSelected = false,
                 isAvailable = false,
                 isUpdating = true,
