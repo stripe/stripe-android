@@ -29,7 +29,7 @@ internal fun getPMOSFUFromStringMap(
     )
 }
 
-fun stringValueToMap(value: String): Map<String, String>? {
+internal fun stringValueToMap(value: String): Map<String, String>? {
     return value.split(",")
         .mapNotNull { entry ->
             entry.split(":").takeIf { it.size == 2 }?.let { pair ->
