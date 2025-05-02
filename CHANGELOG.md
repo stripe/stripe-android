@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][10761](https://github.com/stripe/stripe-android/pull/10761) Updated the "TEST MODE" badge to say "TEST", due to the upcoming release of [Sandboxes](https://docs.stripe.com/sandboxes).
+
 ## 21.12.0 - 2025-04-28
 
 ### PaymentSheet
