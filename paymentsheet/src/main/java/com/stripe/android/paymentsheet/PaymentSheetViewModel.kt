@@ -36,7 +36,6 @@ import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
-import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
@@ -51,6 +50,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
@@ -139,19 +139,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
-    private val googlePayButtonType: GooglePayButtonType =
-        when (args.config.googlePay?.buttonType) {
-            PaymentSheet.GooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
-            PaymentSheet.GooglePayConfiguration.ButtonType.Book -> GooglePayButtonType.Book
-            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout -> GooglePayButtonType.Checkout
-            PaymentSheet.GooglePayConfiguration.ButtonType.Donate -> GooglePayButtonType.Donate
-            PaymentSheet.GooglePayConfiguration.ButtonType.Order -> GooglePayButtonType.Order
-            PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe -> GooglePayButtonType.Subscribe
-            PaymentSheet.GooglePayConfiguration.ButtonType.Plain -> GooglePayButtonType.Plain
-            PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
-            null -> GooglePayButtonType.Pay
-        }
-
     @VisibleForTesting
     internal val googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config? =
         args.googlePayConfig?.let { config ->
@@ -194,7 +181,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
-            googlePayButtonType = googlePayButtonType,
+            googlePayButtonType = args.googlePayConfig?.buttonType.asGooglePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = this::checkoutWithLink,
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent
