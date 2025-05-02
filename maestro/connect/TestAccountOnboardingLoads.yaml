@@ -14,6 +14,8 @@ tags:
 - scrollUntilVisible:
     element:
       id: "other_account_input"
+    speed: 80
+    timeout: 60_000
 - tapOn:
     id: "other_account_input"
 - inputText: "acct_1RKLk9PwPtoT2bUJ"
