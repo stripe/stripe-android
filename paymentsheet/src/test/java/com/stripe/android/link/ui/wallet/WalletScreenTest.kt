@@ -49,11 +49,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.Int
 import kotlin.Result
-import kotlin.Throwable
-import kotlin.Unit
-import kotlin.let
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
