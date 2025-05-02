@@ -88,6 +88,23 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./scripts/retry.sh 3 ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+  build-connect-debug:
+    envs:
+      - BUILD_VARIANT: debug
+    before_run:
+      - _build-connect
+  _build-connect:
+    before_run:
+      - prepare_all
+    steps:
+      - android-build@1:
+          inputs:
+            - module: connect-example
+            - variant: $BUILD_VARIANT
+            - build_type: apk
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -168,6 +185,7 @@ workflows:
       - _run-connections-e2e-tests
   _run-connect-e2e-tests:
     before_run:
+      - build-connect-debug
       - start_connections_emulator
       - prepare_all
     after_run:
