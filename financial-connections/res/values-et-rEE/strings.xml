@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Ühenda kontod</string>
+  <string name="stripe_account_picker_cta_link_singular">Ühenda konto</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Teie %1$s kontole juurdepääsemisel ilmnes probleem</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Leidsime %1$s %2$s kontot, kuid üksusega %3$s saab ühendada ainult arveldus- või säästukontosid. Proovige valida mõni muu pank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Leidsime %1$s %2$s konto, kuid üksusega %3$s saab ühendada ainult arveldus- või säästukontosid. Proovige valida mõni muu pank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Sobivaid maksekontosid pole saadaval</string>
+  <string name="stripe_account_picker_multiselect_account">Vali kontod</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Vali konto</string>
+  <string name="stripe_accounts_error_desc_manualentry">Palun sisestage oma pangaandmed käsitsi või valige mõni muu pank.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Palun valige mõni muu pank.</string>
+  <string name="stripe_accounts_error_desc_retry">Palun valige mõni muu pank või proovige uuesti.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Palun sisestage oma pangaandmed käsitsi</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Palun sisestage oma pangaandmed käsitsi või valige mõni muu pank.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Teie kontonumbrile ei saadud praegu juurdepääsu</string>
+  <string name="stripe_close_dialog_networking_desc">Kui tühistate praegu, lingitakse teie konto ettevõttega %1$s, kuid seda ei salvestata Linki.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Kui tühistate praegu, lingitakse teie konto selle ettevõttega, kuid seda ei salvestata Linki.</string>
+  <string name="stripe_error_cta_close">Sulge</string>
+  <string name="stripe_error_cta_manual_entry">Sisesta pangaandmed käsitsi</string>
+  <string name="stripe_error_cta_retry">Proovi uuesti</string>
+  <string name="stripe_error_cta_select_another_bank">Vali mõni muu pank</string>
+  <string name="stripe_error_generic_desc">Teie kontot ei saa praegu linkida. Proovige hiljem uuesti.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Midagi läks valesti</string>
+  <string name="stripe_error_planned_downtime_desc">Hoolduse kavandatud lõppaeg on %1$s. Palun valige mõni muu pank või proovige hiljem uuesti.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s ei ole serveri hooldustööde tõttu ajutiselt kättesaadav</string>
+  <string name="stripe_error_unplanned_downtime_desc">Palun valige mõni muu pank või proovige hiljem uuesti.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s pole hetkel saadaval</string>
+  <string name="stripe_exit_modal_cta_accept">Jah, välju</string>
+  <string name="stripe_exit_modal_cta_cancel">Tühista</string>
+  <string name="stripe_exit_modal_desc">Teie pangakontot ei ühendata ettevõttega %1$s ja kogu senine edenemine läheb kaotsi.</string>
+  <string name="stripe_exit_modal_desc_no_business">Teie pangakontot ei ühendata selle ettevõttega ja kogu senine edenemine läheb kaotsi.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Kas soovite väljuda ilma ühendamata?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Sisestage oma konto- ja marsruutimisnumber</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Kas te ei näe oma panka?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Proovige otsida mõnda muud panka</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Proovige otsida mõnda muud panka või </string>
+  <string name="stripe_institutionpicker_pane_error_title">Tulemusi ei leitud</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Vali pank</string>
+  <string name="stripe_institutionpicker_search_more_title">Otsi veel panku</string>
+  <string name="stripe_link_stepup_verification_desc">Sisestage kood, mis saadeti: %1$s. Nõuame aeg-ajalt selle täiendava meetme võtmist teie konto turvalisena hoidmiseks.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Saada kood uuesti</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Kinnitage oma e-posti aadress</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Oodake palun – peaaegu valmis</string>
+  <string name="stripe_manualentry_account">Kontonumber</string>
+  <string name="stripe_manualentry_accountconfirm">Kinnitage kontonumber</string>
+  <string name="stripe_manualentry_cta">Esita</string>
+  <string name="stripe_manualentry_microdeposits_desc">Teie pangainfo kinnitatakse teie kontole deponeeritavate minikannetega, milleks kulub enamasti 1–2 tööpäeva. Toetatud on ainult arvelduskontod.</string>
+  <string name="stripe_manualentry_routing">Marsruutimisnumber</string>
+  <string name="stripe_manualentry_test_banner">Kasuta testkontot</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Sisestage pangaandmed</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Tühista</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Jätka Linkiga</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Mitte praegu</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Kasutage teavet, mille olete varem oma Linki kontole salvestanud.</string>
+  <string name="stripe_networking_link_login_warmup_title">Jätka Linkiga</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Mitte praegu</string>
+  <string name="stripe_networking_save_to_link_verification_title">Kinnitage, et see olete teie</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-posti aadress</string>
+  <string name="stripe_networking_verification_desc">Sisestage kood, mis saadeti: %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Kinnitage, et see olete teie</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Tühista</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Vali teine pank</string>
+  <string name="stripe_search">Otsing</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Teie kontod on ühendatud, kuid neid ei saanud Linki salvestada.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Teie konto on ühendatud, kuid seda ei saanud Linki salvestada.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Teie kontod on ühendatud ja Linki salvestatud.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Teie konto on ühendatud ja Linki salvestatud.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Saate minikanded kontole lõpuga ••••%1$s 1–2 päeva jooksul ja meili täiendavate juhistega.</string>
+  <string name="stripe_success_pane_desc_plural">Teie kontod on ühendatud</string>
+  <string name="stripe_success_pane_desc_singular">Teie konto on ühendatud</string>
+  <string name="stripe_success_pane_done">Valmis</string>
+  <string name="stripe_success_pane_done_with_merchant">Tagasi lehele %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Õnnestus</string>
+  <string name="stripe_success_pane_title_microdeposits">Peaaegu valmis</string>
+  <string name="stripe_validation_account_confirm_mismatch">Teie kontonumbrid ei ühti.</string>
+  <string name="stripe_validation_account_required">Kontonumber on nõutav.</string>
+  <string name="stripe_validation_account_too_long">Sobimatu pangakonto number: peab olema maksimaalselt 17-kohaline.</string>
+  <string name="stripe_validation_no_us_routing">Sobimatu marsruutimisnumber.</string>
+  <string name="stripe_validation_routing_required">Marsruutimisnumber on nõutav.</string>
+  <string name="stripe_validation_routing_too_short">Sisestage 9-kohaline marsruutimisnumber.</string>
+  <string name="stripe_verification.codeExpiredEmail">Näib, et teie sisestatud kinnituskood pole enam kehtiv. Klõpsake nuppu Saada kood uuesti ja proovige uuesti või </string>
+  <string name="stripe_verification.codeExpiredSms">Näib, et teie sisestatud kinnituskood pole enam kehtiv. Proovige uuesti või </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Hmm, see kood ei olnud õige. Kontrollige seda ja proovige uuesti.</string>
+  <string name="stripe_verification.inTestMode">Olete testrežiimis.</string>
+  <string name="stripe_verification.useTestCode">Kasuta testkoodi</string>
+</resources>
