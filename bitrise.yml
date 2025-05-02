@@ -28,19 +28,20 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-connections-e2e-payments-tests-on-push: { }
-      - run-connections-e2e-token-tests-on-push: { }
-      - run-connections-e2e-data-tests-on-push: { }
-      - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
-      - run-paymentsheet-screenshot-tests: { }
-      - check-dependencies: { }
+      # - check: { }
+      # - test: { }
+      # - run-instrumentation-tests: { }
+      # - run-paymentsheet-instrumentation-tests: { }
+      # - run-example-instrumentation-tests: { }
+      # - run-financial-connections-instrumentation-tests: { }
+      # - run-connections-e2e-payments-tests-on-push: { }
+      - run-connect-e2e-tests: { }
+      # - run-connections-e2e-token-tests-on-push: { }
+      # - run-connections-e2e-data-tests-on-push: { }
+      # - run-cardscan-instrumentation-tests: { }
+      # - run-paymentsheet-end-to-end-tests: { }
+      # - run-paymentsheet-screenshot-tests: { }
+      # - check-dependencies: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -110,6 +111,11 @@ workflows:
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
+  run-connect-e2e-tests:
+    envs:
+      - MAESTRO_TAGS: all
+    before_run:
+      - _run-connect-e2e-tests
   run-connections-e2e-payments-tests:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -160,6 +166,25 @@ workflows:
       - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
+  _run-connect-e2e-tests:
+    before_run:
+      - start_connections_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: .*
+      - script@1:
+          title: Execute Maestro tests
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                bash ./scripts/execute_maestro_tests.sh -m connect -t $MAESTRO_TAGS
   _run-connections-e2e-tests:
     before_run:
       - start_connections_emulator
@@ -178,7 +203,7 @@ workflows:
           inputs:
             - content: |-
                 #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
+                bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
       # Notify all executions.

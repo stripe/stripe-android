@@ -1,4 +1,6 @@
 appId: com.stripe.android.connect.example
+tags:
+  - all
 ---
 - clearState
 - launchApp
