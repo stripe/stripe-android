@@ -1,0 +1,23 @@
+appId: com.stripe.android.connect.example
+---
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "settings_button"
+    timeout: 30_000
+- tapOn:
+    id: "settings_button"
+- scrollUntilVisible:
+    element:
+      id: "other_account_input"
+- tapOn:
+    id: "other_account_input"
+- inputText: "acct_1RKLk9PwPtoT2bUJ"
+- "hideKeyboard"
+- tapOn:
+    id: "save_button"
+- tapOn: "Account Onboarding"
+- extendedWaitUntil:
+    visible: "Review and confirm"
+    timeout: 30_000
