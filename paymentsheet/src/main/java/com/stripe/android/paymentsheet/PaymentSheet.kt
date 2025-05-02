@@ -476,6 +476,7 @@ class PaymentSheet internal constructor(
              * Use none if you do not intend to reuse this payment method and want to override the top-level
              * setup_future_usage value for this payment method.
              */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             None
         }
 
