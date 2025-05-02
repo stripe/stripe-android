@@ -55,6 +55,7 @@ import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.ui.wallet.WalletUiState.ViewEffect
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
@@ -79,6 +80,28 @@ internal fun WalletScreen(
     hideBottomSheetContent: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(state.viewEffect) {
+        when (state.viewEffect) {
+            is ViewEffect.ShowAddPaymentMethodMenu -> {
+                showBottomSheetContent {
+                    AddPaymentMethodMenu(
+                        onClose = { hideBottomSheetContent() },
+                        onAddCard = {
+                            viewModel.onAddNewCardClicked()
+                            hideBottomSheetContent()
+                        },
+                        onAddBankAccount = {
+                            viewModel.onAddNewBankAccountClicked()
+                        }
+                    )
+                }
+            }
+            null -> Unit
+        }
+        viewModel.onViewEffectLaunched()
+    }
+
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -282,7 +305,6 @@ private fun PaymentMethodSection(
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
 
     val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel)
-
     PaymentMethodPicker(
         email = state.email,
         expanded = isExpanded,

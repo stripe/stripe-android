@@ -22,8 +22,8 @@ internal data class WalletUiState(
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val alertMessage: ResolvableString? = null,
+    val viewEffect: ViewEffect? = null
 ) {
-
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
         get() = if (selectedItemId != null) {
             paymentDetailsList.firstOrNull { it.id == selectedItemId }
@@ -65,12 +65,6 @@ internal data class WalletUiState(
             }
         }
 
-    fun setProcessing(): WalletUiState {
-        return copy(
-            isProcessing = true,
-        )
-    }
-
     fun updateWithResponse(
         response: ConsumerPaymentDetails,
     ): WalletUiState {
@@ -79,5 +73,9 @@ internal data class WalletUiState(
             isProcessing = false,
             cardBeingUpdated = null
         )
+    }
+
+    sealed interface ViewEffect {
+        data object ShowAddPaymentMethodMenu : ViewEffect
     }
 }
