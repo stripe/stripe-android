@@ -277,11 +277,11 @@ private fun BankIcon(
     val icon = remember(bankIconCode) {
         transformBankIconCodeToBankIcon(
             iconCode = bankIconCode,
-            fallbackIcon = R.drawable.stripe_link_bank_outlined,
+            fallbackIcon = R.drawable.stripe_ic_next_bank,
         )
     }
 
-    val isGenericIcon = icon == R.drawable.stripe_link_bank_outlined
+    val isGenericIcon = icon == R.drawable.stripe_ic_next_bank
 
     val containerModifier = if (isGenericIcon) {
         modifier
