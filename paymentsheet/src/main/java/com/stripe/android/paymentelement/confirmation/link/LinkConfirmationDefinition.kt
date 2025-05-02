@@ -8,8 +8,10 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Result.*
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption.*
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import javax.inject.Inject
 
@@ -104,6 +106,12 @@ internal class LinkConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationParameters.intent,
                     deferredIntentConfirmationType = deferredIntentConfirmationType
+                )
+            }
+            is LinkActivityResult.Authenticated -> {
+                result.linkAccountUpdate.updateLinkAccount()
+                Canceled(
+                    action = ConfirmationHandler.Result.Canceled.Action.None,
                 )
             }
         }

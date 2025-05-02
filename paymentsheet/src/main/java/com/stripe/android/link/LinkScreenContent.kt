@@ -28,7 +28,7 @@ internal fun LinkScreenContent(
         screenState = screenState,
         appBarState = appBarState,
         eventReporter = viewModel.eventReporter,
-        onVerificationSucceeded = viewModel::onVerificationSucceeded,
+        onVerificationSucceeded = { viewModel.onVerificationDialogSucceeded() },
         onDismissClicked = viewModel::onDismissVerificationClicked,
         onBackPressed = viewModel::goBack,
         navigate = viewModel::navigate,

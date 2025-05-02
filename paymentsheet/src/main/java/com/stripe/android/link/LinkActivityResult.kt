@@ -14,6 +14,11 @@ internal sealed class LinkActivityResult : Parcelable {
         val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult()
 
+    @Parcelize
+    data class Authenticated(
+        val linkAccountUpdate: LinkAccountUpdate
+    ) : LinkActivityResult()
+
     /**
      * Indicates that the user selected a payment method. This payment method has not yet been confirmed.
      */

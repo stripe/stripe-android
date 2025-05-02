@@ -57,6 +57,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
                 linkStore.markLinkAsUsed()
             }
             is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
+            is LinkActivityResult.Authenticated -> Unit
         }
         nextStep(linkActivityResult)
     }

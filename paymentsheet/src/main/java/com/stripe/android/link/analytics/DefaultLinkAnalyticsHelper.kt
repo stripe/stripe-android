@@ -33,6 +33,8 @@ internal class DefaultLinkAnalyticsHelper @Inject internal constructor(
             is LinkActivityResult.Failed -> {
                 linkEventsReporter.onPopupError(linkActivityResult.error)
             }
+            is LinkActivityResult.Authenticated -> {
+            }
         }
     }
 

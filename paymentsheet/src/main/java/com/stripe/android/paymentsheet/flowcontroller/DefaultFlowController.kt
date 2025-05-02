@@ -15,6 +15,10 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -71,6 +75,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
     private val linkHandler: LinkHandler,
+    private val linkLauncher: LinkPaymentLauncher,
+    private val linkAccountHolder: LinkAccountHolder,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
@@ -80,7 +86,6 @@ internal class DefaultFlowController @Inject internal constructor(
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
-
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
      * after [DefaultFlowController].
@@ -116,6 +121,11 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
+        linkLauncher.register(
+            activityResultCaller,
+            ::onLinkResult
+        )
+
         val activityResultLaunchers = setOf(
             paymentOptionActivityLauncher,
             sepaMandateActivityLauncher,
@@ -138,6 +148,29 @@ internal class DefaultFlowController @Inject internal constructor(
                     is ConfirmationHandler.State.Complete -> onIntentResult(state.result)
                 }
             }
+        }
+    }
+
+    fun onLinkResult(linkActivityResult: LinkActivityResult) {
+        if (linkActivityResult is LinkActivityResult.Authenticated) {
+            val account = linkActivityResult.linkAccountUpdate as LinkAccountUpdate.Value?
+            linkAccountHolder.set(account?.linkAccount)
+            onPaymentOptionResult(
+                PaymentOptionResult.Succeeded(
+                    paymentSelection = PaymentSelection.Link(),
+                    paymentMethods = null,
+                )
+            )
+        } else {
+            val stateResult = currentStateForPresenting()
+            val state = stateResult.fold(
+                onSuccess = { it },
+                onFailure = {
+                    paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(it))
+                    return
+                }
+            )
+            launchPaymentOptions(state)
         }
     }
 
@@ -230,6 +263,21 @@ internal class DefaultFlowController @Inject internal constructor(
             }
         )
 
+        viewModelScope.launch {
+            val eager = linkHandler.setupLinkWithEagerLaunch(state.paymentSheetState.paymentMethodMetadata.linkState)
+            if (eager) {
+                linkLauncher.present(
+                    configuration = state.paymentSheetState.paymentMethodMetadata.linkState?.configuration!!,
+                    linkAccount = null,
+                    useLinkExpress = true
+                )
+            } else {
+                launchPaymentOptions(state)
+            }
+        }
+    }
+
+    private fun launchPaymentOptions(state: State) {
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = viewModel.paymentSelection),
             configuration = state.config,
