@@ -2,6 +2,7 @@ appId: com.stripe.android.connect.example
 tags:
   - all
 ---
+- startRecording: ${'/tmp/test_results/connect-testaccountonboardingloads-' + new Date().getTime()}
 - clearState
 - launchApp
 - extendedWaitUntil:
@@ -23,3 +24,4 @@ tags:
 - extendedWaitUntil:
     visible: "Review and confirm"
     timeout: 30_000
+- stopRecording
