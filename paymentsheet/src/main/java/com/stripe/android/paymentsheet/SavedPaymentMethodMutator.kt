@@ -95,7 +95,7 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails)
+            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails.value)
         }
     }
 
@@ -150,6 +150,7 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
+        val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
         val didRemoveSelectedItem = currentSelection?.id == paymentMethodId
 
@@ -168,7 +169,7 @@ internal class SavedPaymentMethodMutator(
                 customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethodId,
-            canRemoveDuplicates = currentCustomer.permissions.canRemoveDuplicates,
+            canRemoveDuplicates = canRemoveDuplicates,
         )
     }
 
@@ -382,7 +383,7 @@ internal class SavedPaymentMethodMutator(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
                             canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder
-                                .canUpdateFullPaymentMethodDetails,
+                                .canUpdateFullPaymentMethodDetails.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.asCommonConfiguration()

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateContentSize
@@ -27,9 +28,9 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
-import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -59,14 +60,13 @@ internal class ManageActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         if (args == null) {
             finish()
             return
         }
-
-        renderEdgeToEdge()
 
         viewModel.component.inject(this)
 
@@ -77,6 +77,8 @@ internal class ManageActivity : AppCompatActivity() {
         }
 
         setContent {
+            disableNavigationBarContrastEnforcement()
+
             StripeTheme {
                 val screen by manageNavigator.screen.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(
