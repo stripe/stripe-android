@@ -6,8 +6,7 @@ trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
   - pull_request_source_branch: '*'
-    # pipeline: main-trigger-pipeline
-    pipeline: pipeline-connect-e2e-debug-tests
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
