@@ -12,6 +12,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -28,10 +29,12 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -119,8 +122,16 @@ internal interface EmbeddedCommonModule {
         fun provideCustomerStateHolder(
             savedStateHandle: SavedStateHandle,
             selectionHolder: EmbeddedSelectionHolder,
+            paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>
         ): CustomerStateHolder {
-            return CustomerStateHolder(savedStateHandle, selectionHolder.selection)
+            val customerMetadataPermissions = paymentMethodMetadataFlow.mapAsStateFlow {
+                it?.customerMetadata?.permissions
+            }
+            return CustomerStateHolder(
+                savedStateHandle = savedStateHandle,
+                selection = selectionHolder.selection,
+                customerMetadataPermissions = customerMetadataPermissions
+            )
         }
 
         @Provides
