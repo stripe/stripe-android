@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
@@ -14,8 +15,8 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationViewAction.OnBackPressed
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
-import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
@@ -33,9 +34,8 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
             viewModel.handleViewAction(OnBackPressed)
@@ -44,6 +44,8 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
         starterArgs.appearance.parseAppearance()
 
         setContent {
+            disableNavigationBarContrastEnforcement()
+
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
 

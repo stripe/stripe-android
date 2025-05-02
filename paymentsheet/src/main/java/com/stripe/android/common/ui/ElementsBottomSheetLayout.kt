@@ -1,22 +1,24 @@
 package com.stripe.android.common.ui
 
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetLayoutInfo
+import com.stripe.android.utils.rememberActivityOrNull
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ElementsBottomSheetLayout(
     state: StripeBottomSheetState,
@@ -24,8 +26,7 @@ internal fun ElementsBottomSheetLayout(
     onDismissed: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    @Suppress("DEPRECATION")
-    val systemUiController = rememberSystemUiController()
+    val activity = rememberActivityOrNull() as? ComponentActivity
     val layoutInfo = rememberStripeBottomSheetLayoutInfo(
         scrimColor = Color.Black.copy(alpha = 0.32f),
     )
@@ -42,17 +43,16 @@ internal fun ElementsBottomSheetLayout(
         label = "StatusBarColorAlpha",
     )
 
-    LaunchedEffect(systemUiController, statusBarColorAlpha) {
-        systemUiController.setStatusBarColor(
-            color = layoutInfo.scrimColor.copy(statusBarColorAlpha),
-            darkIcons = false,
-        )
-    }
-
-    LaunchedEffect(systemUiController) {
-        systemUiController.setNavigationBarColor(
-            color = Color.Transparent,
-            darkIcons = false,
+    LaunchedEffect(statusBarColorAlpha) {
+        activity?.enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                lightScrim = layoutInfo.scrimColor.copy(statusBarColorAlpha).toArgb(),
+                darkScrim = layoutInfo.scrimColor.copy(statusBarColorAlpha).toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                lightScrim = Color.Transparent.toArgb(),
+                darkScrim = Color.Transparent.toArgb()
+            )
         )
     }
 

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.example
 
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -68,6 +67,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Compan
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheet
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
@@ -98,9 +98,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isNavigationBarContrastEnforced = false
-            }
+            disableNavigationBarContrastEnforcement()
             FinancialConnectionsExampleTheme {
                 FinancialConnectionsScreen()
             }
