@@ -123,7 +123,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 null
             }
 
-            if (metadata.hasIntentToSetup()) {
+            if (metadata.hasIntentToSetup(PaymentMethod.Type.Card)) {
                 add(createCardMandateElement(metadata.merchantName, signupMode, canChangeSaveForFutureUsage))
             }
         }

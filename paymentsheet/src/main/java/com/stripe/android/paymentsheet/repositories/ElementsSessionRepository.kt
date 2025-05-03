@@ -4,6 +4,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.util.Calendar
 import javax.inject.Inject
 import javax.inject.Named
@@ -197,6 +199,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             currency = deferredIntentParams.mode.currency,
             isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
+            paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(deferredIntentMode.paymentMethodOptions).toString()
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,

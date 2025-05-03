@@ -18,7 +18,7 @@ internal object OxxoDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
-        AddPaymentMethodRequirement.UnsupportedForSetup,
+        //AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -21,10 +22,13 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.pmoSfuOverrideStringToMap
 import kotlinx.parcelize.Parcelize
 
 @Stable
@@ -70,6 +74,11 @@ internal sealed interface PlaygroundState : Parcelable {
 
         override val endpoint: String
             get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
+
+        val paymentMethodOptionsSetupFutureUsage: Map<String, String>
+            get() = pmoSfuOverrideStringToMap(
+                snapshot[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition]
+            ) ?: snapshot[PaymentMethodOptionsSetupFutureUsageSettingsDefinition].valuesMap
 
         fun intentConfiguration(): PaymentSheet.IntentConfiguration {
             return PaymentSheet.IntentConfiguration(

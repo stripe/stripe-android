@@ -17,7 +17,7 @@ internal object CryptoDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.UnsupportedForSetup,
+//        AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false

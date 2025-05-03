@@ -28,6 +28,7 @@ data class DeferredIntentParams(
             override val currency: String,
             override val setupFutureUsage: StripeIntent.Usage?,
             val captureMethod: PaymentIntent.CaptureMethod,
+            val paymentMethodOptions: Map<String, Map<String, String>>?
         ) : Mode {
             override val code: String get() = "payment"
         }
@@ -51,6 +52,7 @@ data class DeferredIntentParams(
             "deferred_intent[capture_method]" to (mode as? Mode.Payment)?.captureMethod?.code,
             "deferred_intent[payment_method_configuration][id]" to paymentMethodConfigurationId,
             "deferred_intent[on_behalf_of]" to onBehalfOf,
+            //"deferred_intent[payment_method_options]" to (mode as Mode.Payment?)?.paymentMethodOptions
         ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
             "deferred_intent[payment_method_types][$index]" to paymentMethodType
         }

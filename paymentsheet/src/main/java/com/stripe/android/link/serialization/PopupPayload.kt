@@ -209,8 +209,10 @@ internal data class PopupPayload(
         }
 
         private fun StripeIntent.Usage?.isSetupForFutureUsage(): Boolean {
+            // PMO level check here
             return when (this) {
                 null,
+                StripeIntent.Usage.None,
                 StripeIntent.Usage.OneTime -> false
                 StripeIntent.Usage.OffSession,
                 StripeIntent.Usage.OnSession -> true

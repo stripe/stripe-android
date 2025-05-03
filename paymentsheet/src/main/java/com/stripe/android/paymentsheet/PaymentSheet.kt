@@ -20,12 +20,14 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsePreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -401,12 +403,50 @@ class PaymentSheet internal constructor(
              */
             @Poko
             @Parcelize
+            @OptIn(PaymentMethodOptionsSetupFutureUsePreview::class)
             class Payment @JvmOverloads constructor(
                 val amount: Long,
                 val currency: String,
                 override val setupFutureUse: SetupFutureUse? = null,
                 override val captureMethod: CaptureMethod = CaptureMethod.Automatic,
-            ) : Mode()
+                internal val paymentMethodOptions: PaymentMethodOptions? = null
+            ) : Mode() {
+
+                constructor(
+                    amount: Long,
+                    currency: String,
+                    setupFutureUse: SetupFutureUse? = null,
+                    captureMethod: CaptureMethod = CaptureMethod.Automatic,
+                ) : this(
+                    amount = amount,
+                    currency = currency,
+                    setupFutureUse = setupFutureUse,
+                    captureMethod = captureMethod,
+                    paymentMethodOptions = null
+                )
+
+                @Parcelize
+                @Poko
+                @PaymentMethodOptionsSetupFutureUsePreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class PaymentMethodOptions(
+                    internal val setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>
+                ) : Parcelable {
+                    internal fun toMap(): Map<String, Map<String, String>> {
+                        val map = mutableMapOf<String, Map<String, String>>()
+                        this.setupFutureUsageValues.forEach {
+                            map[it.key.code] = mapOf(
+                                "setup_future_usage" to when (it.value) {
+                                    SetupFutureUse.OffSession -> "off_session"
+                                    SetupFutureUse.OnSession -> "on_session"
+                                    SetupFutureUse.None -> "none"
+                                }
+                            )
+                        }
+                        return map
+                    }
+                }
+            }
 
             /**
              * Use this if your integration creates a [SetupIntent].
@@ -444,6 +484,12 @@ class PaymentSheet internal constructor(
              * Use this if your customer may or may not be present in your checkout flow.
              */
             OffSession,
+
+            /**
+             * Use none if you do not intend to reuse this payment method and want to override the top-level
+             * setup_future_usage value for this payment method.
+             */
+            None
         }
 
         /**

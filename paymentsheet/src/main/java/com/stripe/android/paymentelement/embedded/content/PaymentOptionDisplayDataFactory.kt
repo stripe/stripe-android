@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -38,7 +39,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             is PaymentSelection.Saved -> {
                 selection.mandateText(
                     paymentMethodMetadata.merchantName,
-                    paymentMethodMetadata.hasIntentToSetup()
+                    paymentMethodMetadata.hasIntentToSetup(selection.paymentMethod.type)
                 )
             }
             is PaymentSelection.CustomPaymentMethod,
