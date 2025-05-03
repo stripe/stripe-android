@@ -53,6 +53,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.editableText
@@ -176,40 +178,17 @@ fun TextField(
 
     val autofillReporter = LocalAutofillEventReporter.current
 
-    var selection by remember {
-        mutableStateOf<TextRange?>(null)
-    }
-
-    var composition by remember {
-        mutableStateOf<TextRange?>(null)
-    }
-
     val context = LocalContext.current
 
     TextFieldUi(
         value = TextFieldValue(
             text = value,
-            selection = selection ?: TextRange(value.length),
-            composition = composition
+            selection = TextRange(value.length),
         ),
         loading = loading,
-        onValueChange = { newValue ->
-            val newTextValue = newValue.text
-            val acceptInput = fieldState.canAcceptInput(value, newTextValue)
-
-            if (newTextValue == value || acceptInput) {
-                selection = newValue.selection
-                composition = newValue.composition
-            }
-
-            if (acceptInput) {
-                val newTextState = textFieldController.onValueChange(newTextValue)
-
-                if (newTextState != null) {
-                    onTextStateChanged(newTextState)
-                }
-            }
-        },
+        textFieldController = textFieldController,
+        onTextStateChanged = onTextStateChanged,
+        fieldState = fieldState,
         onDropdownItemClicked = textFieldController::onDropdownItemClicked,
         modifier = modifier
             .onPreviewKeyEvent(
@@ -258,6 +237,9 @@ fun TextField(
     )
 }
 
+val ImeCompositionKey = SemanticsPropertyKey<TextRange?>("ImeCompositionKey")
+var SemanticsPropertyReceiver.imeComposition by ImeCompositionKey
+
 @Composable
 internal fun TextFieldUi(
     value: TextFieldValue,
@@ -269,24 +251,58 @@ internal fun TextFieldUi(
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
     errorMessage: String?,
+    fieldState: TextFieldState,
+    textFieldController: TextFieldController,
+    onTextStateChanged: (TextFieldState?) -> Unit,
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     layoutDirection: LayoutDirection? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
-    onValueChange: (value: TextFieldValue) -> Unit = {},
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
     val colors = TextFieldColors(shouldShowError)
 
     val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
 
+    var selection by remember {
+        mutableStateOf<TextRange?>(null)
+    }
+
+    var composition by remember {
+        mutableStateOf<TextRange?>(null)
+    }
+
     CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
         CompatTextField(
-            value = value,
-            onValueChange = onValueChange,
-            modifier = modifier.fillMaxWidth(),
+            value = TextFieldValue(
+                text = value.text,
+                selection = selection ?: TextRange(value.text.length),
+                composition = composition
+            ),
+            onValueChange = { newValue ->
+                val newTextValue = newValue.text
+                val acceptInput = fieldState.canAcceptInput(value.text, newTextValue)
+
+                if (newTextValue == value.text || acceptInput) {
+                    selection = newValue.selection
+                    composition = newValue.composition
+                }
+
+                if (acceptInput) {
+                    val newTextState = textFieldController.onValueChange(newTextValue)
+
+                    if (newTextState != null) {
+                        onTextStateChanged(newTextState)
+                    }
+                }
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics {
+                    imeComposition = composition
+                },
             enabled = enabled,
             label = label?.let {
                 {
