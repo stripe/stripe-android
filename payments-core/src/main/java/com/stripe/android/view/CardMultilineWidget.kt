@@ -29,8 +29,6 @@ import com.stripe.android.cards.CardNumber
 import com.stripe.android.databinding.StripeCardMultilineWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardParams
-import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -166,18 +164,24 @@ class CardMultilineWidget @JvmOverloads constructor(
      * otherwise `null`
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
-        @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
-                PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution,
-                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
-                )
+            if (!validateAllFields()) {
+                shouldShowErrorIcon = true
+                return null
             }
+
+            shouldShowErrorIcon = false
+
+            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
+            val cvcValue = cvcEditText.text?.toString()
+            return PaymentMethodCreateParams.Card(
+                number = validatedCardNumber?.value.orEmpty(),
+                cvc = cvcValue,
+                expiryMonth = expirationDate.month,
+                expiryYear = expirationDate.year,
+                attribution = setOf(CARD_MULTILINE_TOKEN),
+                networks = cardBrandView.paymentMethodCreateParamsNetworks(),
+            )
         }
 
     /**
@@ -233,38 +237,6 @@ class CardMultilineWidget @JvmOverloads constructor(
                 }
                 field = value
             }
-        }
-
-    /**
-     * A [CardParams] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    override val cardParams: CardParams?
-        get() {
-            if (!validateAllFields()) {
-                shouldShowErrorIcon = true
-                return null
-            }
-
-            shouldShowErrorIcon = false
-
-            val expirationDate = requireNotNull(expiryDateEditText.validatedDate)
-            val cvcValue = cvcEditText.text?.toString()
-            val postalCode = postalCodeEditText.text?.toString()
-                .takeIf { shouldShowPostalCode }
-
-            return CardParams(
-                brand = brand,
-                loggingTokens = setOf(CARD_MULTILINE_TOKEN),
-                number = validatedCardNumber?.value.orEmpty(),
-                expMonth = expirationDate.month,
-                expYear = expirationDate.year,
-                cvc = cvcValue,
-                address = Address.Builder()
-                    .setPostalCode(postalCode.takeUnless { it.isNullOrBlank() })
-                    .build(),
-                networks = cardBrandView.cardParamsNetworks()
-            )
         }
 
     internal val validatedCardNumber: CardNumber.Validated?
