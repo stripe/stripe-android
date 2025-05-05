@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.menu.LinkMenu
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
@@ -24,7 +23,7 @@ internal fun WalletPaymentMethodMenu(
                 add(WalletPaymentMethodMenuItem.SetAsDefault)
             }
 
-            if (FeatureFlags.enableCardEditInLinkNative.isEnabled && paymentDetails is ConsumerPaymentDetails.Card) {
+            if (paymentDetails is ConsumerPaymentDetails.Card) {
                 add(WalletPaymentMethodMenuItem.Update)
             }
 
