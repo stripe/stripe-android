@@ -8,19 +8,19 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
     Unsupported {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean = false
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean = false
     },
 
     /** Indicates the payment method is unsupported by PaymentSheet when using SetupIntents or SFU. */
     UnsupportedForSetup {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
-            return !metadata.hasIntentToSetup()
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            return !metadata.hasIntentToSetup(code)
         }
     },
 
     /** Indicates that a payment method requires shipping information. */
     ShippingAddress {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             if (metadata.allowsPaymentMethodsRequiringShippingAddress) {
                 return true
             }
@@ -35,21 +35,21 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that the developer declare support for asynchronous payment methods. */
     MerchantSupportsDelayedPaymentMethods {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.allowsDelayedPaymentMethods
         }
     },
 
     /** Requires that the FinancialConnections SDK has been linked. */
     FinancialConnectionsSdk {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.financialConnectionsAvailability != null
         }
     },
 
     /** Requires a valid us bank verification method. */
     ValidUsBankVerificationMethod {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             // Verification method is always 'automatic' for deferred intents
             val isDeferred = metadata.stripeIntent.clientSecret == null
             return isDeferred || supportedVerificationMethodForNonDeferredIntent(metadata)
@@ -67,7 +67,7 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that Instant Debits are possible for this transaction. */
     InstantDebits {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.linkConfiguration.shouldDisplay &&
                 metadata.linkMode != LinkMode.LinkCardBrand &&
                 metadata.supportsMobileInstantDebitsFlow
@@ -76,14 +76,14 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that LinkCardBrand is possible for this transaction. */
     LinkCardBrand {
-        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.linkConfiguration.shouldDisplay &&
                 metadata.linkMode == LinkMode.LinkCardBrand &&
                 metadata.supportsMobileInstantDebitsFlow
         }
     };
 
-    abstract fun isMetBy(metadata: PaymentMethodMetadata): Boolean
+    abstract fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean
 }
 
 private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean

@@ -11,6 +11,7 @@ object FeatureFlags {
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val enableCardEditInLinkNative = FeatureFlag("Enable Card Edit In Link Native")
+    val enablePaymentMethodOptionsSetupFutureUsage = FeatureFlag("Enable PaymentMethodOptions SetupFutureUse")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

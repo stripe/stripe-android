@@ -3,6 +3,7 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -228,7 +229,12 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+        return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
+            (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
+                getPaymentMethodOptionSetupFutureUsage(code) != NONE
+        } else {
+            isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+        }
     }
 
     /**
@@ -243,10 +249,15 @@ constructor(
         }
     }
 
-    private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+    private fun getPaymentMethodOptionSetupFutureUsage(code: PaymentMethodCode): String? {
         return paymentMethodOptionsJsonString?.let { json ->
-            val pmOptions = JSONObject(json).optJSONObject(code)
-            pmOptions?.has("setup_future_usage") ?: false
+            JSONObject(json).optJSONObject(code)?.optString(SETUP_FUTURE_USAGE)
+        }
+    }
+
+    private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
+        return getPaymentMethodOptionSetupFutureUsage(code)?.let {
+            it == OFF_SESSION || it == ON_SESSION
         } ?: false
     }
 
@@ -463,5 +474,9 @@ constructor(
 
         internal const val CARD = "card"
         internal const val REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
+        internal const val SETUP_FUTURE_USAGE = "setup_future_usage"
+        internal const val NONE = "none"
+        internal const val OFF_SESSION = "off_session"
+        internal const val ON_SESSION = "on_session"
     }
 }

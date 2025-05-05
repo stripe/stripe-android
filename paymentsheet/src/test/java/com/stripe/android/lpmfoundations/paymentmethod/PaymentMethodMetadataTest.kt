@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -37,6 +39,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -46,12 +49,18 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
+        isEnabled = false
+    )
+
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
         )
-        assertThat(metadata.hasIntentToSetup()).isTrue()
+        assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Card.code)).isTrue()
     }
 
     @Test
@@ -61,7 +70,7 @@ internal class PaymentMethodMetadataTest {
                 setupFutureUsage = StripeIntent.Usage.OnSession,
             ),
         )
-        assertThat(metadata.hasIntentToSetup()).isTrue()
+        assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Card.code)).isTrue()
     }
 
     @Test
@@ -69,7 +78,53 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
-        assertThat(metadata.hasIntentToSetup()).isFalse()
+        assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Card.code)).isFalse()
+    }
+
+    @Test
+    fun `hasIntentToSetup returns true for payment_intent with PMO SFU set to off_session`() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = """
+                    {
+                        "card": {
+                            "setup_future_usage": "off_session"
+                        }
+                    }
+                """.trimIndent()
+            ),
+        )
+        assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Card.code)).isTrue()
+    }
+
+    @Test
+    fun `hasIntentToSetup returns false for payment_intent with PMO SFU set to none`() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = """
+                    {
+                        "affirm": {
+                            "setup_future_usage": "none"
+                        }
+                    }
+                """.trimIndent()
+            ),
+        )
+        assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Affirm.code)).isFalse()
+    }
+
+    @Test
+    fun `hasIntentToSetup returns top level SFU if PMO SFU is not set`() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession
+            ),
+        )
+        assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Klarna.code)).isTrue()
     }
 
     @Test
@@ -1234,15 +1289,24 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(
-            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+            metadataForPaymentIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
-            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+            metadataForPaymentIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
-            metadataForPaymentIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+            metadataForPaymentIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         val metadataForSetupIntent = PaymentMethodMetadataFactory.create(
@@ -1251,15 +1315,24 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(
-            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
-            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
-            metadataForSetupIntent.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+            metadataForSetupIntent.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         val metadataForPaymentIntentWithSfu = PaymentMethodMetadataFactory.create(
@@ -1270,15 +1343,24 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(
-            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestReuse)
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
-            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
-            metadataForPaymentIntentWithSfu.allowRedisplay(PaymentSelection.CustomerRequestedSave.NoRequest)
+            metadataForPaymentIntentWithSfu.allowRedisplay(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                code = PaymentMethod.Type.Card.code
+            )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
     }
 
@@ -1292,7 +1374,8 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadataForSetupIntent.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
@@ -1305,7 +1388,8 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadataForPaymentIntentWithSfu.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
         }
@@ -1320,13 +1404,15 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadataForSetupIntent.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
             assertThat(
                 metadataForSetupIntent.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
@@ -1339,13 +1425,15 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadataForPaymentIntentWithSfu.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
             assertThat(
                 metadataForPaymentIntentWithSfu.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
         }
@@ -1360,7 +1448,8 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadata.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
         }
@@ -1375,13 +1464,15 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadata.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
             assertThat(
                 metadata.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
         }
@@ -1397,19 +1488,22 @@ internal class PaymentMethodMetadataTest {
 
         assertThat(
             metadata.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
             metadata.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
         assertThat(
             metadata.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
     }
@@ -1425,19 +1519,22 @@ internal class PaymentMethodMetadataTest {
 
         assertThat(
             metadataForSetupIntent.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
         assertThat(
             metadataForSetupIntent.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
         assertThat(
             metadataForSetupIntent.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
@@ -1452,19 +1549,22 @@ internal class PaymentMethodMetadataTest {
 
         assertThat(
             metadataForPaymentIntentWithSfu.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
         assertThat(
             metadataForPaymentIntentWithSfu.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
         assertThat(
             metadataForPaymentIntentWithSfu.allowRedisplay(
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                code = PaymentMethod.Type.Card.code
             )
         ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
     }
@@ -1481,19 +1581,22 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadataForSetupIntent.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
             assertThat(
                 metadataForSetupIntent.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
             assertThat(
                 metadataForSetupIntent.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
@@ -1508,19 +1611,22 @@ internal class PaymentMethodMetadataTest {
 
             assertThat(
                 metadataForPaymentIntentWithSfu.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
             assertThat(
                 metadataForPaymentIntentWithSfu.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
             assertThat(
                 metadataForPaymentIntentWithSfu.allowRedisplay(
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    code = PaymentMethod.Type.Card.code
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.UNSPECIFIED)
         }
@@ -1583,6 +1689,23 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
 
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
+    }
+
+    @Test
+    fun `requiresMandate respects PMO SFU if set`() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = """
+                    {
+                        "amazon_pay": {
+                            "setup_future_usage": "off_session"
+                        }
+                    }
+                """.trimIndent()
+            ),
+        )
+        assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isTrue()
     }
 
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {

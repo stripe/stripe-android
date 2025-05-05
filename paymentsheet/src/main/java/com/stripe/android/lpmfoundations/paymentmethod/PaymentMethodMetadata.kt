@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -17,6 +18,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -66,9 +68,13 @@ internal data class PaymentMethodMetadata(
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String
 ) : Parcelable {
-    fun hasIntentToSetup(): Boolean {
+    fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
-            is PaymentIntent -> stripeIntent.setupFutureUsage != null
+            is PaymentIntent -> if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
+                stripeIntent.isSetupFutureUsageSet(code)
+            } else {
+                stripeIntent.setupFutureUsage != null
+            }
             is SetupIntent -> true
         }
     }
@@ -261,9 +267,10 @@ internal data class PaymentMethodMetadata(
 
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         return paymentMethodSaveConsentBehavior.allowRedisplay(
-            isSetupIntent = hasIntentToSetup(),
+            isSetupIntent = hasIntentToSetup(code),
             customerRequestedSave = customerRequestedSave,
         )
     }

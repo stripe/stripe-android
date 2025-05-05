@@ -1,12 +1,14 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
 import com.stripe.android.model.Address
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
@@ -14,21 +16,28 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
+import org.junit.Rule
 import org.junit.Test
 
 internal class AddPaymentMethodRequirementTest {
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
+        isEnabled = false
+    )
 
     @Test
     fun testUnsupportedReturnsFalse() {
         val metadata = PaymentMethodMetadataFactory.create()
-        assertThat(AddPaymentMethodRequirement.Unsupported.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.Unsupported.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
     fun testUnsupportedForSetupReturnsReturnsTrueForPaymentIntents() {
         val metadata = PaymentMethodMetadataFactory.create()
-        assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -38,15 +47,35 @@ internal class AddPaymentMethodRequirementTest {
                 setupFutureUsage = StripeIntent.Usage.OnSession
             )
         )
-        assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata, "")).isFalse()
     }
+
+    @Test
+    fun testUnsupportedForSetupReturnsReturnsTrueForPaymentIntentsWithSetupFutureUsageAndPMOSFUOverride() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = """
+                    { "affirm": { "setup_future_usage": "none" }}
+                """.trimIndent()
+            )
+        )
+        assertThat(
+            AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(
+                metadata,
+                PaymentMethod.Type.Affirm.code
+            )
+        ).isTrue()
+    }
+
 
     @Test
     fun testUnsupportedForSetupReturnsReturnsFalseForSetupIntents() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
         )
-        assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -63,7 +92,7 @@ internal class AddPaymentMethodRequirementTest {
                 )
             )
         )
-        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -74,7 +103,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
         )
-        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -90,7 +119,7 @@ internal class AddPaymentMethodRequirementTest {
                 )
             )
         )
-        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -106,7 +135,7 @@ internal class AddPaymentMethodRequirementTest {
                 )
             )
         )
-        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -114,39 +143,39 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
         )
-        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
     fun testMerchantSupportsDelayedPaymentMethodsReturnsTrue() {
         val metadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = true)
-        assertThat(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.isMetBy(metadata))
+        assertThat(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.isMetBy(metadata, ""))
             .isTrue()
     }
 
     @Test
     fun testMerchantSupportsDelayedPaymentMethodsReturnsFalse() {
         val metadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false)
-        assertThat(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.isMetBy(metadata))
+        assertThat(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.isMetBy(metadata, ""))
             .isFalse()
     }
 
     @Test
     fun testFinancialConnectionsWithLiteSdkReturnsTrue() {
         val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = Lite)
-        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
     fun testFinancialConnectionsWithFullSdkReturnsTrue() {
         val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = Full)
-        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
     fun testFinancialConnectionsSdkReturnsFalse() {
         val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = null)
-        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -154,7 +183,7 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(clientSecret = null)
         )
-        assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -164,13 +193,13 @@ internal class AddPaymentMethodRequirementTest {
                 paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}"""
             )
         )
-        assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata)).isTrue()
+        assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
     fun testValidUsBankVerificationMethodReturnsFalse() {
         val metadata = PaymentMethodMetadataFactory.create()
-        assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata)).isFalse()
+        assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -179,7 +208,7 @@ internal class AddPaymentMethodRequirementTest {
             stripeIntent = createValidInstantDebitsPaymentIntent(),
         )
 
-        assertThat(InstantDebits.isMetBy(metadata)).isTrue()
+        assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -190,7 +219,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -201,7 +230,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -211,7 +240,7 @@ internal class AddPaymentMethodRequirementTest {
             linkMode = LinkMode.LinkCardBrand,
         )
 
-        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -223,7 +252,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(InstantDebits.isMetBy(metadata)).isTrue()
+        assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -235,7 +264,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+        assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -245,7 +274,7 @@ internal class AddPaymentMethodRequirementTest {
             linkMode = LinkMode.LinkCardBrand,
         )
 
-        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -260,7 +289,7 @@ internal class AddPaymentMethodRequirementTest {
             defaultBillingDetails = PaymentSheet.BillingDetails(),
         )
 
-        assertThat(LinkCardBrand.isMetBy(metadata)).isFalse()
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -277,7 +306,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(LinkCardBrand.isMetBy(metadata)).isFalse()
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -294,7 +323,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -307,7 +336,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -320,7 +349,7 @@ internal class AddPaymentMethodRequirementTest {
             ),
         )
 
-        assertThat(LinkCardBrand.isMetBy(metadata)).isFalse()
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()
     }
 
     private fun createValidInstantDebitsPaymentIntent(): PaymentIntent {

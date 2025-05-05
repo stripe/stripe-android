@@ -38,7 +38,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             is PaymentSelection.Saved -> {
                 selection.mandateText(
                     paymentMethodMetadata.merchantName,
-                    paymentMethodMetadata.hasIntentToSetup()
+                    paymentMethodMetadata.hasIntentToSetup(selection.paymentMethod.type?.code ?: "")
                 )
             }
             is PaymentSelection.CustomPaymentMethod,

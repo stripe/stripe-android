@@ -455,7 +455,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
         } else {
             val savedSelection = selection as? PaymentSelection.Saved?
-            savedSelection?.mandateText(paymentMethodMetadata.merchantName, paymentMethodMetadata.hasIntentToSetup())
+            savedSelection?.mandateText(
+                paymentMethodMetadata.merchantName,
+                paymentMethodMetadata.hasIntentToSetup(savedSelection.paymentMethod.type?.code ?: "")
+            )
         }
     }
 

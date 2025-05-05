@@ -23,7 +23,7 @@ internal object SofortDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = SofortUiDefinitionFactory
 }
@@ -47,7 +47,7 @@ private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields,
-            placeholderOverrideList = if (metadata.hasIntentToSetup()) {
+            placeholderOverrideList = if (metadata.hasIntentToSetup(SofortDefinition.type.code)) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()
