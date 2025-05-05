@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">Voulez-vous vraiment fermer ce formulaire?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Enregistrer mes informations pour payer en un clic de façon sécurisée avec Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">Carte de crédit %1$s</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">Carte de débit %1$s</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">Carte prépayée %1$s</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">Carte %1$s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Accepter et continuer</string>
   <!-- Title for the Link signup screen -->
@@ -34,8 +42,16 @@
   <string name="stripe_link_sign_up_message">Enregistrez vos informations de paiement avec Link et payez en un clic et en toute sécurité sur les sites qui proposent Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[En continuant, vous acceptez les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy>.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Mettre à jour la carte</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">Votre mode de paiement par défaut</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Mettre à jour la carte</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Saisissez le code envoyé au %s pour utiliser vos informations enregistrées.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Mettre à jour la carte</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Déconnexion de Link with Stripe</string>
   <!-- Text that is displayed when a network error occurs -->

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Σύνδεση λογαριασμών</string>
+  <string name="stripe_account_picker_cta_link_singular">Σύνδεση λογαριασμού</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Παρουσιάστηκε πρόβλημα κατά την πρόσβαση στον λογαριασμό %1$s</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Βρήκαμε %1$s λογαριασμούς %2$s, αλλά μπορείτε να συνδέσετε μόνο τρεχούμενους λογαριασμούς ή λογαριασμούς ταμιευτηρίου με τον έμπορο %3$s. Δοκιμάστε να επιλέξετε άλλη τράπεζα.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Βρήκαμε %1$s λογαριασμό %2$s, αλλά μπορείτε να συνδέσετε μόνο τρεχούμενους λογαριασμούς ή λογαριασμούς ταμιευτηρίου με τον έμπορο %3$s. Δοκιμάστε να επιλέξετε άλλη τράπεζα.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Δεν υπάρχουν διαθέσιμοι λογαριασμοί πληρωμής</string>
+  <string name="stripe_account_picker_multiselect_account">Επιλέξτε λογαριασμούς</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Επιλέξτε έναν λογαριασμό</string>
+  <string name="stripe_accounts_error_desc_manualentry">Εισαγάγετε τα τραπεζικά σας στοιχεία με μη αυτόματο τρόπο ή επιλέξτε άλλη τράπεζα.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Επιλέξτε άλλη τράπεζα.</string>
+  <string name="stripe_accounts_error_desc_retry">Επιλέξτε άλλη τράπεζα ή δοκιμάστε ξανά.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Εισαγάγετε τα τραπεζικά σας στοιχεία με μη αυτόματο τρόπο</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Εισαγάγετε τα τραπεζικά σας στοιχεία με μη αυτόματο τρόπο ή επιλέξτε άλλη τράπεζα.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Ο αριθμός λογαριασμού σας δεν μπορεί να προσπελαστεί αυτή τη στιγμή</string>
+  <string name="stripe_close_dialog_networking_desc">Αν ακυρώσετε τώρα, ο λογαριασμός σας θα συνδεθεί με την %1$s αλλά δε θα αποθηκευτεί στο Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Αν ακυρώσετε τώρα, ο λογαριασμός σας θα συνδεθεί με αυτήν την επιχείρηση αλλά δε θα αποθηκευτεί στο Link.</string>
+  <string name="stripe_error_cta_close">Κλείσιμο</string>
+  <string name="stripe_error_cta_manual_entry">Εισαγάγετε στοιχεία τράπεζας με μη αυτόματο τρόπο</string>
+  <string name="stripe_error_cta_retry">Δοκιμάστε ξανά</string>
+  <string name="stripe_error_cta_select_another_bank">Επιλέξτε άλλη τράπεζα</string>
+  <string name="stripe_error_generic_desc">Ο λογαριασμός σας δεν μπορεί να συνδεθεί αυτή τη στιγμή. Δοκιμάστε ξανά αργότερα.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Παρουσιάστηκε κάποιο πρόβλημα</string>
+  <string name="stripe_error_planned_downtime_desc">Η συντήρηση έχει προγραμματιστεί να λήξει στις %1$s. Επιλέξτε άλλη τράπεζα ή δοκιμάστε ξανά αργότερα.</string>
+  <string name="stripe_error_planned_downtime_title">Το ίδρυμα %1$s βρίσκεται υπό συντήρηση</string>
+  <string name="stripe_error_unplanned_downtime_desc">Επιλέξτε άλλη τράπεζα ή δοκιμάστε ξανά αργότερα.</string>
+  <string name="stripe_error_unplanned_downtime_title">Το ίδρυμα %1$s δεν είναι διαθέσιμο επί του παρόντος</string>
+  <string name="stripe_exit_modal_cta_accept">Ναι, έξοδος</string>
+  <string name="stripe_exit_modal_cta_cancel">Ακύρωση</string>
+  <string name="stripe_exit_modal_desc">Ο τραπεζικός λογαριασμός σας δε θα συνδεθεί με την %1$s και όλη η πρόοδος θα χαθεί.</string>
+  <string name="stripe_exit_modal_desc_no_business">Ο τραπεζικός λογαριασμός σας δεν θα συνδεθεί με αυτήν την επιχείρηση και όλη η πρόοδος θα χαθεί.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Έξοδος χωρίς σύνδεση;</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Εισαγάγετε τον αριθμό λογαριασμού και το routing number σας</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Δεν βλέπετε την τράπεζά σας;</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Δοκιμάστε να αναζητήσετε άλλη τράπεζα</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Δοκιμάστε να αναζητήσετε άλλη τράπεζα ή </string>
+  <string name="stripe_institutionpicker_pane_error_title">Δεν υπάρχουν αποτελέσματα</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Επιλογή τράπεζας</string>
+  <string name="stripe_institutionpicker_search_more_title">Αναζήτηση περισσότερων τραπεζών</string>
+  <string name="stripe_link_stepup_verification_desc">Εισαγάγετε τον κωδικό που στάλθηκε στο %1$s. Ζητάμε περιοδικά αυτό το επιπλέον βήμα για να διατηρούμε ασφαλή τον λογαριασμό σας.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Επανάληψη αποστολής κωδικού</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Επαληθεύστε το email σας</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Περιμένετε λίγο, είστε σχεδόν έτοιμοι</string>
+  <string name="stripe_manualentry_account">Αριθμός λογαριασμού</string>
+  <string name="stripe_manualentry_accountconfirm">Επιβεβαίωση αριθμού λογαριασμού</string>
+  <string name="stripe_manualentry_cta">Υποβολή</string>
+  <string name="stripe_manualentry_microdeposits_desc">Τα τραπεζικά σας στοιχεία θα επαληθευτούν μέσω μικροκαταθέσεων στον λογαριασμό σας, συνήθως εντός 1–2 εργάσιμων ημερών. Υποστηρίζονται μόνο τρεχούμενοι λογαριασμοί.</string>
+  <string name="stripe_manualentry_routing">Routing number</string>
+  <string name="stripe_manualentry_test_banner">Χρήση δοκιμαστικού λογαριασμού</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Εισαγάγετε στοιχεία τράπεζας</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Ακύρωση</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Συνέχεια με το Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Όχι τώρα</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Χρησιμοποιήστε τα στοιχεία που είχατε αποθηκεύσει προηγουμένως με τον λογαριασμό σας στο Link.</string>
+  <string name="stripe_networking_link_login_warmup_title">Συνέχεια με το Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Όχι τώρα</string>
+  <string name="stripe_networking_save_to_link_verification_title">Επιβεβαιώστε ότι είστε εσείς</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">Διεύθυνση email</string>
+  <string name="stripe_networking_verification_desc">Εισαγάγετε τον κωδικό που στάλθηκε στο %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Επιβεβαιώστε ότι είστε εσείς</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Ακύρωση</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Επιλέξτε διαφορετική τράπεζα</string>
+  <string name="stripe_search">Αναζήτηση</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Οι λογαριασμοί σας συνδέθηκαν, αλλά δεν ήταν δυνατή η αποθήκευσή τους με το Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Ο λογαριασμός σας συνδέθηκε, αλλά δεν ήταν δυνατή η αποθήκευσή του με το Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Οι λογαριασμοί σας συνδέθηκαν και αποθηκεύτηκαν με το Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Ο λογαριασμός σας συνδέθηκε και αποθηκεύτηκε με το Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Μπορείτε να αναμένετε μικροκαταθέσεις στον λογαριασμό ••••%1$s σε 1–2 ημέρες και ένα email με περαιτέρω οδηγίες.</string>
+  <string name="stripe_success_pane_desc_plural">Οι λογαριασμοί σας συνδέθηκαν</string>
+  <string name="stripe_success_pane_desc_singular">Ο λογαριασμός σας συνδέθηκε</string>
+  <string name="stripe_success_pane_done">Τέλος</string>
+  <string name="stripe_success_pane_done_with_merchant">Επιστροφή στην %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Επιτυχία</string>
+  <string name="stripe_success_pane_title_microdeposits">Κοντεύετε</string>
+  <string name="stripe_validation_account_confirm_mismatch">Οι αριθμοί λογαριασμού σας δεν συμφωνούν.</string>
+  <string name="stripe_validation_account_required">Απαιτείται αριθμός λογαριασμού.</string>
+  <string name="stripe_validation_account_too_long">Μη έγκυρος αριθμός τραπεζικού λογαριασμού: Πρέπει να αποτελείται από έως και 17 ψηφία.</string>
+  <string name="stripe_validation_no_us_routing">Μη έγκυρος routing number.</string>
+  <string name="stripe_validation_routing_required">Απαιτείται routing number.</string>
+  <string name="stripe_validation_routing_too_short">Εισαγάγετε 9 ψηφία για τον routing number σας.</string>
+  <string name="stripe_verification.codeExpiredEmail">Φαίνεται ότι ο κωδικός επαλήθευσης που παρείχατε δεν είναι έγκυρος πια. Κάντε κλικ στο «Επανάληψη αποστολής κωδικού» και δοκιμάστε ξανά ή </string>
+  <string name="stripe_verification.codeExpiredSms">Φαίνεται ότι ο κωδικός επαλήθευσης που παρείχατε δεν είναι έγκυρος πια. Δοκιμάστε ξανά ή </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Χμμ, αυτός ο κωδικός δεν λειτουργεί. Επανελέγξτε τον και δοκιμάστε ξανά.</string>
+  <string name="stripe_verification.inTestMode">Βρίσκεστε σε δοκιμαστική λειτουργία.</string>
+  <string name="stripe_verification.useTestCode">Χρήση δοκιμαστικού κωδικού</string>
+</resources>

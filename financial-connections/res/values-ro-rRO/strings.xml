@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Conectați conturile</string>
+  <string name="stripe_account_picker_cta_link_singular">Conectați contul</string>
+  <string name="stripe_account_picker_error_no_account_available_title">A apărut o problemă la accesarea contului dvs. %1$s</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Am găsit %1$s %2$s conturi, dar puteți conecta doar conturi curente sau de economii la %3$s. Încercați să selectați o altă bancă.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Am găsit %1$s %2$s cont, dar puteți conecta doar conturi curente sau de economii la %3$s. Încercați să selectați o altă bancă.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Niciun cont de plată disponibil</string>
+  <string name="stripe_account_picker_multiselect_account">Selectare conturi</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Selectați un cont</string>
+  <string name="stripe_accounts_error_desc_manualentry">Vă rugăm să introduceți detaliile dvs. bancare manual sau să selectați o altă bancă.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Vă rugăm să selectați o altă bancă.</string>
+  <string name="stripe_accounts_error_desc_retry">Vă rugăm să selectați o altă bancă sau să încercați din nou.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Vă rugăm să introduceți detaliile dvs. bancare manual</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Vă rugăm să introduceți detaliile dvs. bancare manual sau să selectați o altă bancă.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Numărul dvs. de cont nu a putut fi accesat în acest moment</string>
+  <string name="stripe_close_dialog_networking_desc">Dacă anulați acum, contul dvs. va fi asociat la %1$s, dar nu va fi salvat în Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Dacă anulați acum, contul dvs. va fi asociat la această întreprindere, dar nu va fi salvat în Link.</string>
+  <string name="stripe_error_cta_close">Închidere</string>
+  <string name="stripe_error_cta_manual_entry">Introduceți detaliile bancare manual</string>
+  <string name="stripe_error_cta_retry">Încercați din nou</string>
+  <string name="stripe_error_cta_select_another_bank">Selectați o altă bancă</string>
+  <string name="stripe_error_generic_desc">Contul dvs. nu poate fi asociat în acest moment. Vă rugăm să încercați din nou mai târziu.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Ceva nu a mers bine</string>
+  <string name="stripe_error_planned_downtime_desc">Întreținerea este programată să se încheie la %1$s. Vă rugăm să selectați o altă bancă sau să încercați din nou.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s este în curs de întreținere</string>
+  <string name="stripe_error_unplanned_downtime_desc">Vă rugăm să selectați o altă bancă sau să încercați din nou mai târziu.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s nu este disponibilă în prezent</string>
+  <string name="stripe_exit_modal_cta_accept">Da, ieșire</string>
+  <string name="stripe_exit_modal_cta_cancel">Anulare</string>
+  <string name="stripe_exit_modal_desc">Contul dvs. bancar nu va fi conectat la %1$s și se va pierde întregul progres.</string>
+  <string name="stripe_exit_modal_desc_no_business">Contul dvs. bancar nu va fi conectat la această întreprindere și se va pierde întregul progres.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Ieșiți fără să vă conectați?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Introduceți contul dvs. și numerele de rutare</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Banca dvs. nu este afișată?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Încercați să căutați o altă bancă</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Încercați să căutați o altă bancă sau </string>
+  <string name="stripe_institutionpicker_pane_error_title">Nu există rezultate</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Selectare bancă</string>
+  <string name="stripe_institutionpicker_search_more_title">Căutați mai multe bănci</string>
+  <string name="stripe_link_stepup_verification_desc">Introduceți codul trimis la %1$s. Solicităm periodic acest pas suplimentar pentru a vă menține contul în siguranță.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Retrimitere cod</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Verificați-vă e-mailul</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Așteptați, aproape am terminat</string>
+  <string name="stripe_manualentry_account">Număr cont</string>
+  <string name="stripe_manualentry_accountconfirm">Confirmare număr cont</string>
+  <string name="stripe_manualentry_cta">Trimitere</string>
+  <string name="stripe_manualentry_microdeposits_desc">Informațiile dvs. bancare vor fi verificate cu micro-depuneri în contul dvs. Acest lucru durează de obicei 1-2 zile lucrătoare. Sunt acceptate doar conturile curente.</string>
+  <string name="stripe_manualentry_routing">Număr de rutare</string>
+  <string name="stripe_manualentry_test_banner">Utilizați un cont de testare</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Introduceți detaliile bancare</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Anulare</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Continuare cu Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Nu acum</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Utilizați informațiile pe care le-ați salvat anterior cu contul dvs. Link.</string>
+  <string name="stripe_networking_link_login_warmup_title">Continuare cu Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Nu acum</string>
+  <string name="stripe_networking_save_to_link_verification_title">Confirmați că sunteți dvs.</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">Adresă de e-mail</string>
+  <string name="stripe_networking_verification_desc">Introduceți codul trimis la %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Confirmați că sunteți dvs.</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Anulare</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Alegeți o altă bancă</string>
+  <string name="stripe_search">Căutare</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Conturile dvs. au fost conectate, dar nu au putut fi salvate cu Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Contul dvs. a fost conectat, dar nu a putut fi salvat cu Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Conturile dvs. au fost conectate și salvate cu Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Contul dvs. a fost conectat și salvat cu Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Vă puteți aștepta la două micro-depuneri în contul care se termină în ••••%1$s în 1-2 zile și la un e-mail cu instrucțiuni suplimentare.</string>
+  <string name="stripe_success_pane_desc_plural">Conturile dvs. au fost conectate</string>
+  <string name="stripe_success_pane_desc_singular">Contul dvs. a fost conectat</string>
+  <string name="stripe_success_pane_done">Efectuat</string>
+  <string name="stripe_success_pane_done_with_merchant">Înapoi la %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Succes</string>
+  <string name="stripe_success_pane_title_microdeposits">Aproape ați terminat</string>
+  <string name="stripe_validation_account_confirm_mismatch">Numerele dvs. de cont nu corespund.</string>
+  <string name="stripe_validation_account_required">Este necesar numărul de cont.</string>
+  <string name="stripe_validation_account_too_long">Număr de cont bancar nevalid: trebuie să conțină cel mult 17 cifre.</string>
+  <string name="stripe_validation_no_us_routing">Număr de rutare nevalid.</string>
+  <string name="stripe_validation_routing_required">Este necesar numărul de rutare.</string>
+  <string name="stripe_validation_routing_too_short">Vă rugăm să introduceți 9 cifre pentru numărul dvs. de rutare.</string>
+  <string name="stripe_verification.codeExpiredEmail">Se pare că ați furnizat un cod de verificare nevalid. Faceți clic pe „Retrimitere cod” și încercați din nou sau </string>
+  <string name="stripe_verification.codeExpiredSms">Se pare că ați furnizat un cod de verificare nevalid. Încercați din nou sau </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Hmm, acel cod nu a funcționat. Verificați și încercați din nou.</string>
+  <string name="stripe_verification.inTestMode">Sunteți în modul de testare.</string>
+  <string name="stripe_verification.useTestCode">Utilizați un cod de testare</string>
+</resources>
