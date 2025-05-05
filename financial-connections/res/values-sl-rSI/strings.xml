@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Povežite račune</string>
+  <string name="stripe_account_picker_cta_link_singular">Povežite račun</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Pri dostopu do vašega računa %1$s je prišlo do napake</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Našli smo račune (%1$s) za %2$s, vendar lahko s storitvijo %3$s povežete samo transakcijske ali varčevalne račune. Poskusite izbrati drugo banko.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Našli smo %1$s račun za %2$s, vendar lahko s storitvijo %3$s povežete samo transakcijske ali varčevalne račune. Poskusite izbrati drugo banko.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Na voljo ni noben račun za plačila</string>
+  <string name="stripe_account_picker_multiselect_account">Izberite račune</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Izberite račun</string>
+  <string name="stripe_accounts_error_desc_manualentry">Ročno vnesite podatke o banki ali pa izberite drugo banko.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Izberite drugo banko.</string>
+  <string name="stripe_accounts_error_desc_retry">Izberite drugo banko ali poskusite znova.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Ročno vnesite podatke o svoji banki</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Ročno vnesite podatke o banki ali pa izberite drugo banko.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Dostop do številke vašega računa trenutno ni mogoč</string>
+  <string name="stripe_close_dialog_networking_desc">Če postopek prekličete zdaj, bo vaš račun povezan s podjetjem %1$s, vendar ne bo shranjen v storitev Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Če postopek prekličete zdaj, bo vaš račun povezan s tem podjetjem, vendar ne bo shranjen v storitev Link.</string>
+  <string name="stripe_error_cta_close">Zapri</string>
+  <string name="stripe_error_cta_manual_entry">Ročno vnesite podatke o banki</string>
+  <string name="stripe_error_cta_retry">Poskusi znova</string>
+  <string name="stripe_error_cta_select_another_bank">Izberite drugo banko</string>
+  <string name="stripe_error_generic_desc">Vašega računa trenutno ni mogoče povezati. Poskusite znova pozneje.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Prišlo je do neznane napake</string>
+  <string name="stripe_error_planned_downtime_desc">Vzdrževanje naj bi bilo predvidoma končano ob %1$s. Izberite drugo banko ali poskusite znova pozneje.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s izvaja vzdrževanje</string>
+  <string name="stripe_error_unplanned_downtime_desc">Izberite drugo banko ali poskusite znova pozneje.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s trenutno ni na voljo</string>
+  <string name="stripe_exit_modal_cta_accept">Da, zapri</string>
+  <string name="stripe_exit_modal_cta_cancel">Prekliči</string>
+  <string name="stripe_exit_modal_desc">Vaš bančni račun ne bo povezan s podjetjem %1$s in izgubili boste ves napredek.</string>
+  <string name="stripe_exit_modal_desc_no_business">Vaš bančni račun ne bo povezan s tem podjetjem in izgubili boste ves napredek.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Ali želite zapreti brez povezave računa?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Vnesite številko računa in klirinško kodo</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Ali vaša banka ni prikazana?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Poskusite poiskati drugo banko</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Poskusite poiskati drugo banko ali pa </string>
+  <string name="stripe_institutionpicker_pane_error_title">Ni rezultatov</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Izberite banko</string>
+  <string name="stripe_institutionpicker_search_more_title">Poiščite več bank</string>
+  <string name="stripe_link_stepup_verification_desc">Vnesite kodo, poslano na e-poštni naslov %1$s. Za varnost vašega računa občasno zahtevamo ta dodatni korak.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Znova pošlji kodo</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Potrdite svoj e-poštni naslov</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Malo še potrpite, postopek je skoraj končan</string>
+  <string name="stripe_manualentry_account">Številka računa</string>
+  <string name="stripe_manualentry_accountconfirm">Potrdi številko računa</string>
+  <string name="stripe_manualentry_cta">Pošlji</string>
+  <string name="stripe_manualentry_microdeposits_desc">Podatki o vaši banki bodo preverjeni z mikro pologi na vaš račun, kar običajno traja 1–2 delovnega dneva. Podprti so samo transakcijski računi.</string>
+  <string name="stripe_manualentry_routing">Klirinška koda</string>
+  <string name="stripe_manualentry_test_banner">Uporabi preskusni račun</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Vnesite podatke o banki</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Prekliči</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Nadaljuj s storitvijo Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Trenutno ne</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Uporabite podatke, ki ste jih shranili v račun Link.</string>
+  <string name="stripe_networking_link_login_warmup_title">Nadaljuj s storitvijo Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Trenutno ne</string>
+  <string name="stripe_networking_save_to_link_verification_title">Potrdite svojo identiteto</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-poštni naslov</string>
+  <string name="stripe_networking_verification_desc">Vnesite kodo, ki je bila poslana na številko %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Potrdite svojo identiteto</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Prekliči</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Izberite drugo banko</string>
+  <string name="stripe_search">Iskanje</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Vaši računi so bili povezani, vendar jih ni bilo mogoče shraniti s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Vaš račun je bil povezan, vendar ga ni bilo mogoče shraniti s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Vaši računi so bili povezani in shranjeni s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Vaš račun je bil povezan in shranjen s storitvijo Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Mikro pologe na račun ••••%1$s lahko pričakujete v 1–2 dneh in e-poštno sporočilo z nadaljnjimi navodili.</string>
+  <string name="stripe_success_pane_desc_plural">Vaši računi so bili povezani</string>
+  <string name="stripe_success_pane_desc_singular">Vaš račun je bil povezan</string>
+  <string name="stripe_success_pane_done">Dokončano</string>
+  <string name="stripe_success_pane_done_with_merchant">Nazaj na %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Uspelo</string>
+  <string name="stripe_success_pane_title_microdeposits">Postopek je skoraj končan</string>
+  <string name="stripe_validation_account_confirm_mismatch">Številke računov se ne ujemajo.</string>
+  <string name="stripe_validation_account_required">Številka računa je obvezna.</string>
+  <string name="stripe_validation_account_too_long">Neveljavna številka bančnega računa: vsebuje lahko največ 17 števk.</string>
+  <string name="stripe_validation_no_us_routing">Neveljavna klirinška koda.</string>
+  <string name="stripe_validation_routing_required">Klirinška koda je obvezna.</string>
+  <string name="stripe_validation_routing_too_short">Vnesite 9-mestno klirinško kodo.</string>
+  <string name="stripe_verification.codeExpiredEmail">Videti je, da vnesena potrditvena koda ni več veljavna. Kliknite “Znova pošlji kodo” in poskusite znova ali pa </string>
+  <string name="stripe_verification.codeExpiredSms">Videti je, da vnesena potrditvena koda ni več veljavna. Poskusite znova ali pa </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Ta koda žal ni delovala. Še enkrat jo preverite in poskusite znova.</string>
+  <string name="stripe_verification.inTestMode">Ste v načinu preskusne uporabe.</string>
+  <string name="stripe_verification.useTestCode">Uporabi preskusno kodo</string>
+</resources>

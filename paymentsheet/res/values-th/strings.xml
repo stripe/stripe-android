@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">แน่ใจไหมว่าต้องการปิดแบบฟอร์มนี้</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของคุณไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียวด้วย Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">บัตรเครดิต %1$s</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">บัตรเดบิต %1$s</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">บัตรเติมเงิน %1$s</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">บัตร %1$s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">ยอมรับและดำเนินการต่อ</string>
   <!-- Title for the Link signup screen -->
@@ -34,8 +42,16 @@
   <string name="stripe_link_sign_up_message">บันทึกข้อมูลการชำระเงินของคุณด้วย Link แล้วชำระเงินอย่างปลอดภัยในคลิกเดียวบนเว็บไซต์ที่ Link รองรับ</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">อัปเดตบัตร</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">นี่คือค่าเริ่มต้นของคุณ</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">อัปเดตบัตร</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">ป้อนรหัสยืนยันที่ส่งไปยัง %s เพื่อใช้ข้อมูลที่บันทึกไว้</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">อัปเดตบัตร</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">ออกจากระบบ Link</string>
   <!-- Text that is displayed when a network error occurs -->

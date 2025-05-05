@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Tilslut konti</string>
+  <string name="stripe_account_picker_cta_link_singular">Tilslut konto</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Der opstod et problem med at få adgang til din %1$s-konto</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Vi fandt %1$s %2$s-konti, men du kan kun knytte løn- eller opsparingskonti til %3$s. Vælg en anden bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Vi fandt %1$s %2$s-konto, men du kan kun knytte løn- eller opsparingskonti til %3$s. Vælg en anden bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Ingen tilgængelige betalingskonti</string>
+  <string name="stripe_account_picker_multiselect_account">Vælg konti</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Vælg en konto</string>
+  <string name="stripe_accounts_error_desc_manualentry">Indtast dine bankoplysninger manuelt, eller vælg en anden bank.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Vælg en anden bank.</string>
+  <string name="stripe_accounts_error_desc_retry">Vælg en anden bank, eller prøv igen.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Indtast dine bankoplysninger manuelt</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Indtast dine bankoplysninger manuelt, eller vælg en anden bank.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Der kunne ikke opnås adgang til dit kontonummer på nuværende tidspunkt</string>
+  <string name="stripe_close_dialog_networking_desc">Hvis du annullerer nu, vil din konto blive linket til %1$s, men den vil ikke blive gemt i Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Hvis du annullerer nu, vil din konto blive linket til denne virksomhed, men den vil ikke blive gemt i Link.</string>
+  <string name="stripe_error_cta_close">Luk</string>
+  <string name="stripe_error_cta_manual_entry">Indtast bankoplysninger manuelt</string>
+  <string name="stripe_error_cta_retry">Prøv igen</string>
+  <string name="stripe_error_cta_select_another_bank">Valg en anden bank</string>
+  <string name="stripe_error_generic_desc">Din konto kan ikke tilknyttes på nuværende tidspunkt. Prøv igen senere.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Noget gik galt</string>
+  <string name="stripe_error_planned_downtime_desc">Vedligeholdelse er planlagt til at slutte kl. %1$s. Vælg en anden bank, eller prøv igen senere.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s er under vedligeholdelse</string>
+  <string name="stripe_error_unplanned_downtime_desc">Vælg en anden bank, eller prøv igen senere.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s er i øjeblikket ikke tilgængelig</string>
+  <string name="stripe_exit_modal_cta_accept">Ja, afslut</string>
+  <string name="stripe_exit_modal_cta_cancel">Annuller</string>
+  <string name="stripe_exit_modal_desc">Din bankkonto vil ikke blive tilsluttet %1$s, og alle fremskridt vil gå tabt.</string>
+  <string name="stripe_exit_modal_desc_no_business">Din bankkonto vil ikke blive tilsluttet denne virksomhed, og alle fremskridt vil gå tabt.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Vil du afslutte uden at tilslutte?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Indtast dine konto- og dirigeringsnumre</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Kan du ikke se din bank?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Prøv at søge efter en anden bank</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Prøv at søge efter en anden bank, eller </string>
+  <string name="stripe_institutionpicker_pane_error_title">Ingen resultater</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Vælg bank</string>
+  <string name="stripe_institutionpicker_search_more_title">Søg efter flere banker</string>
+  <string name="stripe_link_stepup_verification_desc">Indtast koden, der blev sendt til %1$s. Vi anmoder jævnligt om dette ekstra trin for at beskytte din konto.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Send kode igen</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Bekræft din e-mailadresse</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Hæng på, næsten der</string>
+  <string name="stripe_manualentry_account">Kontonummer</string>
+  <string name="stripe_manualentry_accountconfirm">Bekræft kontonummer</string>
+  <string name="stripe_manualentry_cta">Indsend</string>
+  <string name="stripe_manualentry_microdeposits_desc">Dine bankoplysninger vil blive verificeret via mikroindskud til din konto, typisk inden for 1-2 hverdage. Kun lønkonti understøttes.</string>
+  <string name="stripe_manualentry_routing">Dirigeringsnummer</string>
+  <string name="stripe_manualentry_test_banner">Brug testkonto</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Angiv bankoplysninger</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Annuller</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Fortsæt med Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Ikke nu</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Brug oplysninger, du tidligere har gemt på din Link-konto.</string>
+  <string name="stripe_networking_link_login_warmup_title">Fortsæt med Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Ikke nu</string>
+  <string name="stripe_networking_save_to_link_verification_title">Bekræft, at det er dig</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-mailadresse</string>
+  <string name="stripe_networking_verification_desc">Indtast den kode, der blev sendt til %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Bekræft, at det er dig</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Annuller</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Vælg en anden bank</string>
+  <string name="stripe_search">Søg</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Dine konti blev tilsluttet, men de kunne ikke gemmes med Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Din konto blev tilsluttet, men den kunne ikke gemmes med Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Dine konti blev tilsluttet og gemt med Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Din konto blev tilsluttet og gemt med Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Du kan forvente mikroindskud på kontoen ••••%1$s inden for 1-2 dage og en e-mail med yderligere instruktioner.</string>
+  <string name="stripe_success_pane_desc_plural">Dine konti blev tilsluttet</string>
+  <string name="stripe_success_pane_desc_singular">Din konto blev tilsluttet</string>
+  <string name="stripe_success_pane_done">Færdig</string>
+  <string name="stripe_success_pane_done_with_merchant">Tilbage til %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Lykkedes</string>
+  <string name="stripe_success_pane_title_microdeposits">Du er der næsten</string>
+  <string name="stripe_validation_account_confirm_mismatch">Dine kontonumre stemmer ikke overens.</string>
+  <string name="stripe_validation_account_required">Kontonummer er påkrævet.</string>
+  <string name="stripe_validation_account_too_long">Ugyldigt bankkontonummer: må højst være 17 cifre langt.</string>
+  <string name="stripe_validation_no_us_routing">Ugyldigt dirigeringsnummer.</string>
+  <string name="stripe_validation_routing_required">Dirigeringsnummer er påkrævet.</string>
+  <string name="stripe_validation_routing_too_short">Indtast 9 cifre til dit dirigeringsnummer.</string>
+  <string name="stripe_verification.codeExpiredEmail">Det ser ud til, at den bekræftelseskode, du har angivet, ikke længere er gyldig. Klik på \"Send kode igen\" og prøv igen, eller </string>
+  <string name="stripe_verification.codeExpiredSms">Det ser ud til, at den bekræftelseskode, du har angivet, ikke længere er gyldig. Prøv igen, eller </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Hmm, den kode virkede ikke. Dobbelttjek den, og prøv igen.</string>
+  <string name="stripe_verification.inTestMode">Du er i testtilstand.</string>
+  <string name="stripe_verification.useTestCode">Brug testkode</string>
+</resources>

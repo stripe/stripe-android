@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Számlák összekapcsolása</string>
+  <string name="stripe_account_picker_cta_link_singular">Számla összekapcsolása</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Probléma merült fel %1$s számlájának elérésekor</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">%1$s %2$s számlát találtunk, de a(z) %3$s csak folyószámlával vagy megtakarítási számlával kapcsolható össze. Próbáljon másik bankot választani.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">%1$s %2$s számlát találtunk, de a(z) %3$s csak folyószámlával vagy megtakarítási számlával kapcsolható össze. Próbáljon másik bankot választani.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Nem érhető el fizetési számla</string>
+  <string name="stripe_account_picker_multiselect_account">Számlák kiválasztása</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Számla kiválasztása</string>
+  <string name="stripe_accounts_error_desc_manualentry">Adja meg a bankadatait kézzel, vagy válasszon másik bankot.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Válasszon másik bankot.</string>
+  <string name="stripe_accounts_error_desc_retry">Válasszon másik bankot, vagy próbálja meg újra.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Vigye be kézzel a banki adatokat</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Adja meg a bankadatait kézzel, vagy válasszon másik bankot.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">A számlaszámát most nem sikerült lekérni</string>
+  <string name="stripe_close_dialog_networking_desc">Ha most megszakítja, a számlája kapcsolva lesz a(z) %1$s kereskedőhöz, de nem lesz mentve a Linkben.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Ha most megszakítja, a számláját összekapcsoljuk a kereskedővel, de nem lesz mentve a Linkben.</string>
+  <string name="stripe_error_cta_close">Bezárás</string>
+  <string name="stripe_error_cta_manual_entry">Banki adatok kézi bevitele</string>
+  <string name="stripe_error_cta_retry">Próbálja újra</string>
+  <string name="stripe_error_cta_select_another_bank">Másik bank választása</string>
+  <string name="stripe_error_generic_desc">A számlája jelenleg nem kapcsolható össze. Próbálja meg újra később.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Hiba történt</string>
+  <string name="stripe_error_planned_downtime_desc">A karbantartás befejezésének tervezett ideje: %1$s. Válasszon másik bankot, vagy később próbálja meg újra.</string>
+  <string name="stripe_error_planned_downtime_title">A(z) %1$s karbantartás alatt áll</string>
+  <string name="stripe_error_unplanned_downtime_desc">Válasszon másik bankot, vagy később próbálja meg újra.</string>
+  <string name="stripe_error_unplanned_downtime_title">A(z) %1$s jelenleg nem érhető el</string>
+  <string name="stripe_exit_modal_cta_accept">Igen, kilépek</string>
+  <string name="stripe_exit_modal_cta_cancel">Mégse</string>
+  <string name="stripe_exit_modal_desc">A bankszámlája nem lesz összekapcsolva vele: %1$s, és minden eddigi művelet el fog veszni.</string>
+  <string name="stripe_exit_modal_desc_no_business">A bankszámlája nem lesz összekapcsolva, és minden eddigi művelet el fog veszni.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Kilép kapcsolódás nélkül?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Adja meg a számlaszámait és a bankazonosítóit</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Nem látja a bankját?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Másik bank keresése</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Próbáljon meg másik bankot keresni, vagy </string>
+  <string name="stripe_institutionpicker_pane_error_title">Nincs találat</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Bank kiválasztása</string>
+  <string name="stripe_institutionpicker_search_more_title">További bankok keresése</string>
+  <string name="stripe_link_stepup_verification_desc">Adja meg a(z) %1$s címre küldött kódot. Időnként kérjük ezt a plusz lépést, hogy megőrizzük számlája biztonságát.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Kód újraküldése</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">E-mail-cím igazolása</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Már mindjárt kész</string>
+  <string name="stripe_manualentry_account">Számlaszám</string>
+  <string name="stripe_manualentry_accountconfirm">Számlaszám megerősítése</string>
+  <string name="stripe_manualentry_cta">Elküldés</string>
+  <string name="stripe_manualentry_microdeposits_desc">A banki adatait mikroösszegek bankszámlájára való utalásával ellenőrizzük, jellemzően 1–2 munkanapon belül. Csak folyószámlák támogatottak.</string>
+  <string name="stripe_manualentry_routing">Bankazonosító</string>
+  <string name="stripe_manualentry_test_banner">Tesztszámla használata</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Banki adatok megadása</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Mégse</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Folytatás a Linkkel</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Most nem</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Használja az előzőleg a Link számlájához mentett adatokat.</string>
+  <string name="stripe_networking_link_login_warmup_title">Folytatás a Linkkel</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Most nem</string>
+  <string name="stripe_networking_save_to_link_verification_title">Igazolja, hogy Ön az</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-mail-cím</string>
+  <string name="stripe_networking_verification_desc">Adja meg a(z) ide küldött kódot: %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Igazolja, hogy Ön az</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Mégse</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Másik bank választása</string>
+  <string name="stripe_search">Keresés</string>
+  <string name="stripe_success_pane_desc_link_error_plural">A számlái össze voltak kapcsolva, de nem lehetett elmenteni őket a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">A számlája össze volt kapcsolva, de nem lehetett elmenteni a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">A számlái össze voltak kapcsolva, és mentésre kerültek a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">A számlája össze volt kapcsolva, és mentésre került a Link szolgáltatással.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Várhatóan 1–2 napon belül megérkeznek a mikroösszegű utalások a(z) %1$s bankszámlára. A további teendőkről e-mailben tájékoztatjuk.</string>
+  <string name="stripe_success_pane_desc_plural">A számlái össze voltak kapcsolva</string>
+  <string name="stripe_success_pane_desc_singular">A számlája össze volt kapcsolva</string>
+  <string name="stripe_success_pane_done">Kész</string>
+  <string name="stripe_success_pane_done_with_merchant">Vissza ide: %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Sikeres</string>
+  <string name="stripe_success_pane_title_microdeposits">Mindjárt kész</string>
+  <string name="stripe_validation_account_confirm_mismatch">A számlaszámai nem egyeznek.</string>
+  <string name="stripe_validation_account_required">A számlaszám megadása kötelező.</string>
+  <string name="stripe_validation_account_too_long">Érvénytelen számlaszám: legfeljebb 17 számjegy hosszú lehet.</string>
+  <string name="stripe_validation_no_us_routing">Érvénytelen bankazonosító.</string>
+  <string name="stripe_validation_routing_required">A bankazonosító megadása kötelező.</string>
+  <string name="stripe_validation_routing_too_short">A bankazonosítóhoz 9 számjegyű számot kell megadni.</string>
+  <string name="stripe_verification.codeExpiredEmail">Úgy tűnik, hogy a megadott ellenőrző kód már nem érvényes. Kattintson a „Kód újraküldése” gombra, és próbálja újra, vagy </string>
+  <string name="stripe_verification.codeExpiredSms">Úgy tűnik, a megadott ellenőrző kód már nem érvényes. Próbálja meg újból, vagy </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Nem jó kód, ellenőrizze és próbálja újra.</string>
+  <string name="stripe_verification.inTestMode">Ön tesztmódban van.</string>
+  <string name="stripe_verification.useTestCode">Tesztkód használata</string>
+</resources>
