@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
+import com.stripe.android.link.TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -239,6 +240,7 @@ class WalletUiStateTest {
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
         primaryButtonLabel: ResolvableString = LINK_WALLET_PRIMARY_BUTTON_LABEL,
+        secondaryButtonLabel: ResolvableString = LINK_WALLET_SECONDARY_BUTTON_LABEL,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         canAddNewPaymentMethod: Boolean = true,
@@ -254,6 +256,7 @@ class WalletUiStateTest {
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
+            secondaryButtonLabel = secondaryButtonLabel,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             canAddNewPaymentMethod = canAddNewPaymentMethod,

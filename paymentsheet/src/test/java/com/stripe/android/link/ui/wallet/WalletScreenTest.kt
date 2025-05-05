@@ -693,6 +693,7 @@ internal class WalletScreenTest {
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = "Buy".resolvableString,
+                secondaryButtonLabel = "Pay another way".resolvableString,
                 canAddNewPaymentMethod = true,
                 userSetIsExpanded = true,
                 isSettingUp = false,

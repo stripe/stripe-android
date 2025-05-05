@@ -20,6 +20,7 @@ internal data class WalletUiState(
     val isSettingUp: Boolean,
     val merchantName: String,
     val primaryButtonLabel: ResolvableString,
+    val secondaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
     val canAddNewPaymentMethod: Boolean,
     val userSetIsExpanded: Boolean? = null,

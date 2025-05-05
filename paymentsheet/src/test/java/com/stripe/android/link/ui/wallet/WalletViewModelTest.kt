@@ -63,6 +63,7 @@ class WalletViewModelTest {
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,
+                secondaryButtonLabel = TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL,
                 expiryDateInput = FormFieldEntry(""),
                 cvcInput = FormFieldEntry(""),
                 canAddNewPaymentMethod = true,
