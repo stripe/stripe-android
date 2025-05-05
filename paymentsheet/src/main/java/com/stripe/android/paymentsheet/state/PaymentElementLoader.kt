@@ -14,6 +14,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -133,6 +134,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure,
     private val linkStore: LinkStore,
+    private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val cvcRecollectionHandler: CvcRecollectionHandler
@@ -528,7 +530,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         }
 
-        return LinkConfiguration(
+        val linkConfiguration = LinkConfiguration(
             stripeIntent = elementsSession.stripeIntent,
             merchantName = configuration.merchantDisplayName,
             merchantCountryCode = elementsSession.merchantCountry,
@@ -544,6 +546,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
         )
+
+        // CBF isn't currently supported in the web flow.
+        val useWebLink = !linkGateFactory.create(linkConfiguration).useNativeLink
+        if (isCardBrandFilteringRequired && useWebLink) {
+            return null
+        }
+
+        return linkConfiguration
     }
 
     private suspend fun isGooglePayReady(

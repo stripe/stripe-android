@@ -12,6 +12,8 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
@@ -1387,30 +1389,46 @@ internal class DefaultPaymentElementLoaderTest {
         linkCardBrandFilteringFeatureFlagRule.setEnabled(false)
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = false,
+            useNativeLink = true,
             expectedEnabled = true
         )
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = true,
+            useNativeLink = true,
             expectedEnabled = false
         )
 
         linkCardBrandFilteringFeatureFlagRule.setEnabled(true)
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = false,
+            useNativeLink = true,
             expectedEnabled = true
         )
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = true,
+            useNativeLink = true,
             expectedEnabled = true
+        )
+        testLinkEnablementWithCardBrandFiltering(
+            passthroughModeEnabled = false,
+            useNativeLink = false,
+            expectedEnabled = true
+        )
+        testLinkEnablementWithCardBrandFiltering(
+            passthroughModeEnabled = true,
+            useNativeLink = false,
+            expectedEnabled = false
         )
     }
 
     private suspend fun testLinkEnablementWithCardBrandFiltering(
         passthroughModeEnabled: Boolean,
+        useNativeLink: Boolean,
         expectedEnabled: Boolean,
     ) {
         val loader = createPaymentElementLoader(
-            linkSettings = createLinkSettings(passthroughModeEnabled = passthroughModeEnabled)
+            linkSettings = createLinkSettings(passthroughModeEnabled = passthroughModeEnabled),
+            linkGate = FakeLinkGate().apply { setUseNativeLink(useNativeLink) }
         )
 
         val result = loader.load(
@@ -2906,6 +2924,7 @@ internal class DefaultPaymentElementLoaderTest {
         linkAccountState: AccountStatus = AccountStatus.Verified,
         error: Throwable? = null,
         linkSettings: ElementsSession.LinkSettings? = null,
+        linkGate: LinkGate = FakeLinkGate(),
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
         cardBrandChoice: ElementsSession.CardBrandChoice? = null,
@@ -2941,6 +2960,7 @@ internal class DefaultPaymentElementLoaderTest {
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
             linkStore = linkStore,
+            linkGateFactory = { linkGate },
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
