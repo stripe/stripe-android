@@ -131,6 +131,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
 
+        internal var rowSelectionImmediateActionCallback: RowSelectionImmediateActionCallback? = null
+            private set
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -152,6 +155,25 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
+        }
+
+        /**
+         * Called when a user selects a payment method and sets rowSelectionBehavior to ImmediateAction.
+         */
+        fun rowSelectionImmediateActionCallback(callback: RowSelectionImmediateActionCallback) = apply {
+            this.rowSelectionImmediateActionCallback = callback
+        }
+
+        internal fun validateRowSelectionConfiguration(configuration: Configuration) {
+            if (configuration.rowSelectionBehavior == RowSelectionBehavior.ImmediateAction &&
+                (configuration.googlePay != null || configuration.customer != null)
+            ) {
+                throw IllegalArgumentException(
+                    "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
+                        "when Google Pay or a customer configuration is provided. " +
+                        "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
+                )
+            }
         }
     }
 
@@ -179,6 +201,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
+        internal val rowSelectionBehavior: RowSelectionBehavior,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         @ExperimentalEmbeddedPaymentElementApi
@@ -211,6 +234,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Confirm
+            private var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.Default
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -409,6 +433,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.formSheetAction = formSheetAction
             }
 
+            /**
+             * Configuration related to [RowSelectionBehavior].
+             */
+            fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior): Builder = apply {
+                this.rowSelectionBehavior = rowSelectionBehavior
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -429,6 +460,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
+                rowSelectionBehavior = rowSelectionBehavior,
             )
         }
     }
@@ -451,6 +483,31 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * The button says "Pay" or "Setup". When tapped, we confirm the payment or setup in the form sheet.
          */
         Confirm
+    }
+
+    /**
+     * Describes how you handle row selections in EmbeddedPaymentElement
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    enum class RowSelectionBehavior {
+        /**
+         * When a payment option is selected, the customer taps a button to continue or confirm payment.
+         * This is the default recommended integration.
+         */
+        Default,
+
+        /**
+         * When a payment option is selected, [RowSelectionImmediateActionCallback.didSelectPaymentOption] is triggered.
+         * [RowSelectionImmediateActionCallback] is set with
+         * [EmbeddedPaymentElement.Builder.rowSelectionImmediateActionCallback]
+         *
+         * You can implement this method to immediately perform an action e.g.
+         * go back to the checkout screen or confirm the payment.
+         *
+         * Note that certain payment options like Google Pay and saved payment methods are disabled in this mode if you
+         * set [FormSheetAction] to [FormSheetAction.Confirm].
+         */
+        ImmediateAction
     }
 
     /**

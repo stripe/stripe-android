@@ -138,6 +138,7 @@ internal class PaymentSheetPlaygroundActivity :
                     viewModel::createIntentCallback,
                     viewModel::onEmbeddedResult,
                 )
+                    .rowSelectionImmediateActionCallback(viewModel::rowSelectionCallback)
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 

@@ -39,6 +39,7 @@ fun rememberEmbeddedPaymentElement(
             .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
             .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
             .analyticEventCallback(builder.analyticEventCallback)
+            .rowSelectionImmediateActionCallback(builder.rowSelectionImmediateActionCallback)
             .build()
     }
 

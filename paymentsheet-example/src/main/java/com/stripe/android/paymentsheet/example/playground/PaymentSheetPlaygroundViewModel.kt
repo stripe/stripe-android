@@ -492,6 +492,10 @@ internal class PaymentSheetPlaygroundViewModel(
         Log.d("AnalyticEvent", "Event: $event")
     }
 
+    fun rowSelectionCallback() {
+        Log.d("rowSelectionCallback", "rowSelectionCallback rowSelectionCallback")
+    }
+
     @OptIn(DelicatePaymentSheetApi::class)
     private suspend fun createAndConfirmIntent(
         paymentMethodId: String,

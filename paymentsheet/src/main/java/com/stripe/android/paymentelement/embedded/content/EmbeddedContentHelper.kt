@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.RowSelectionImmediateActionCallback
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -68,6 +69,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     private val confirmationHandler: ConfirmationHandler,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
+    private val rowSelectionImmediateActionCallback: RowSelectionImmediateActionCallback?,
 ) : EmbeddedContentHelper {
 
     private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
@@ -207,7 +209,15 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 } else {
                     true
                 }
-            }
+            },
+            rowSelectionImmediateActionCallback = if (
+                confirmationStateHolder.state?.configuration?.rowSelectionBehavior ==
+                EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction
+            ) {
+                rowSelectionImmediateActionCallback
+            } else {
+                null
+            },
         )
     }
 

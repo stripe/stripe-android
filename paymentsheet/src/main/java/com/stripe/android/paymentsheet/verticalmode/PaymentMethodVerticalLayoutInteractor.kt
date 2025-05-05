@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.RowSelectionImmediateActionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -104,6 +105,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
+    private val rowSelectionImmediateActionCallback: RowSelectionImmediateActionCallback?,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -169,7 +171,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     val requiresFormScreen = paymentMethodCode != null &&
                         formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
                     !requiresFormScreen
-                }
+                },
+                rowSelectionImmediateActionCallback = null,
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
@@ -411,13 +414,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         when (viewAction) {
             is ViewAction.PaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
-
-                val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
-                if (formType == FormType.UserInteractionRequired) {
-                    reportFormShown(viewAction.selectedPaymentMethodCode)
-                    transitionToFormScreen(viewAction.selectedPaymentMethodCode)
+                if (rowSelectionImmediateActionCallback != null) {
+                    rowSelectionImmediateActionCallback.didSelectPaymentOption()
                 } else {
-                    updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
+                    val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
+                    if (formType == FormType.UserInteractionRequired) {
+                        reportFormShown(viewAction.selectedPaymentMethodCode)
+                        transitionToFormScreen(viewAction.selectedPaymentMethodCode)
+                    } else {
+                        updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
+                    }
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {

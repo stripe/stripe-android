@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.RowSelectionImmediateActionCallback
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -64,7 +65,8 @@ internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
     ExternalPaymentMethodConfirmHandler,
-    AnalyticEventCallback {
+    AnalyticEventCallback,
+    RowSelectionImmediateActionCallback{
     companion object {
         private const val PLAYGROUND_STATE_KEY = "playgroundState"
         const val EMBEDDED_PAYMENT_ELEMENT_STATE_KEY = "EMBEDDED_PAYMENT_ELEMENT_STATE_KEY"
@@ -115,6 +117,7 @@ internal class EmbeddedPlaygroundActivity :
             .confirmCustomPaymentMethodCallback(this)
             .externalPaymentMethodConfirmHandler(this)
             .analyticEventCallback(this)
+            .rowSelectionImmediateActionCallback(this)
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
@@ -366,5 +369,9 @@ internal class EmbeddedPlaygroundActivity :
 
     override fun onEvent(event: AnalyticEvent) {
         Log.d("AnalyticEvent", "Event: $event")
+    }
+
+    override fun didSelectPaymentOption() {
+        Log.d("didSelectPaymentOption", "didSelectPaymentOption didSelectPaymentOption")
     }
 }
