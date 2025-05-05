@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -23,7 +24,10 @@ internal class LinkAppBarMenuScreenshotTest {
     @Test
     fun testMenu() {
         paparazziRule.snapshot {
-            LinkAppBarMenu {
+            DefaultLinkTheme {
+                LinkAppBarMenu(
+                    onLogoutClicked = {}
+                )
             }
         }
     }

@@ -64,6 +64,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -675,7 +676,14 @@ private fun AlertMessage(
     AlertDialog(
         modifier = Modifier
             .testTag(WALLET_SCREEN_DIALOG_TAG),
-        text = { Text(alertMessage.resolve(context)) },
+        text = {
+            Text(
+                text = alertMessage.resolve(),
+                style = LinkTheme.typography.body,
+                color = LinkTheme.colors.textPrimary,
+            )
+        },
+        backgroundColor = LinkTheme.colors.background,
         onDismissRequest = onDismissAlert,
         confirmButton = {
             TextButton(
