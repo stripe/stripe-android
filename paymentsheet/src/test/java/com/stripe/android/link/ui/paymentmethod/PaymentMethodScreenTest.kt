@@ -24,6 +24,7 @@ import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.link.ui.paymentmenthod.PAYMENT_METHOD_ERROR_TAG
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
@@ -127,10 +128,12 @@ internal class PaymentMethodScreenTest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                PaymentMethodScreen(
-                    viewModel = viewModel,
-                    onCancelClicked = {}
-                )
+                DefaultLinkTheme {
+                    PaymentMethodScreen(
+                        viewModel = viewModel,
+                        onCancelClicked = {}
+                    )
+                }
             }
         }
     }

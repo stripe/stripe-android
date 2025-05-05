@@ -17,6 +17,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.delay
@@ -40,7 +41,9 @@ internal class VerificationScreenTest {
     fun `title, email and otp should be displayed on screen load`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         composeTestRule.setContent {
-            VerificationScreen(viewModel)
+            DefaultLinkTheme {
+                VerificationScreen(viewModel)
+            }
         }
 
         onTitleField().assertIsDisplayed()
@@ -62,7 +65,9 @@ internal class VerificationScreenTest {
         val viewModel = createViewModel(linkAccountManager)
 
         composeTestRule.setContent {
-            VerificationScreen(viewModel)
+            DefaultLinkTheme {
+                VerificationScreen(viewModel)
+            }
         }
 
         onTitleField().assertIsDisplayed()
@@ -87,7 +92,9 @@ internal class VerificationScreenTest {
         val viewModel = createViewModel(linkAccountManager)
 
         composeTestRule.setContent {
-            VerificationScreen(viewModel)
+            DefaultLinkTheme {
+                VerificationScreen(viewModel)
+            }
         }
 
         viewModel.onVerificationCodeEntered("code")
@@ -119,7 +126,9 @@ internal class VerificationScreenTest {
         val viewModel = createViewModel(linkAccountManager)
 
         composeTestRule.setContent {
-            VerificationScreen(viewModel)
+            DefaultLinkTheme {
+                VerificationScreen(viewModel)
+            }
         }
 
         viewModel.resendCode()
@@ -150,7 +159,9 @@ internal class VerificationScreenTest {
         val viewModel = createViewModel(linkAccountManager)
 
         composeTestRule.setContent {
-            VerificationScreen(viewModel)
+            DefaultLinkTheme {
+                VerificationScreen(viewModel)
+            }
         }
 
         viewModel.otpElement.controller.onAutofillDigit("555555")
@@ -175,9 +186,11 @@ internal class VerificationScreenTest {
             isDialog = true
         )
         composeTestRule.setContent {
-            VerificationDialogBody(
-                viewModel = viewModel
-            )
+            DefaultLinkTheme {
+                VerificationDialogBody(
+                    viewModel = viewModel
+                )
+            }
         }
 
         onTitleField().assertIsDisplayed()
@@ -206,9 +219,11 @@ internal class VerificationScreenTest {
             }
         )
         composeTestRule.setContent {
-            VerificationDialogBody(
-                viewModel = viewModel
-            )
+            DefaultLinkTheme {
+                VerificationDialogBody(
+                    viewModel = viewModel
+                )
+            }
         }
 
         onVerificationHeaderButtonTag()

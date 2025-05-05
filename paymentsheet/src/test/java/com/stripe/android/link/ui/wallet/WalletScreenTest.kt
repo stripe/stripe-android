@@ -31,6 +31,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
@@ -78,11 +79,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
-            )
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -109,11 +112,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
-            )
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -148,11 +153,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
 
         composeTestRule.waitForIdle()
@@ -193,11 +200,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
 
         composeTestRule.waitForIdle()
@@ -222,11 +231,13 @@ internal class WalletScreenTest {
 
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
 
         composeTestRule.waitForIdle()
@@ -244,11 +255,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -269,11 +282,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -292,11 +307,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -322,11 +339,13 @@ internal class WalletScreenTest {
         linkAccountManager.updatePaymentDetailsResult = Result.failure(error)
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -366,11 +385,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -402,11 +423,13 @@ internal class WalletScreenTest {
             navigationManager = TestNavigationManager()
         )
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
                 hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -440,11 +463,13 @@ internal class WalletScreenTest {
             navigationManager = TestNavigationManager()
         )
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
                 hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -471,11 +496,13 @@ internal class WalletScreenTest {
         )
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
                 hideBottomSheetContent = {}
             )
+                }
         }
         composeTestRule.waitForIdle()
 
@@ -494,20 +521,22 @@ internal class WalletScreenTest {
         )
 
         composeTestRule.setContent {
-            var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-            Box {
-                WalletScreen(
-                    viewModel = viewModel,
-                    showBottomSheetContent = {
-                        sheetContent = it
-                    },
-                    hideBottomSheetContent = {
-                        sheetContent = null
-                    }
-                )
+            DefaultLinkTheme {
+                var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+                Box {
+                    WalletScreen(
+                        viewModel = viewModel,
+                        showBottomSheetContent = {
+                            sheetContent = it
+                        },
+                        hideBottomSheetContent = {
+                            sheetContent = null
+                        }
+                    )
 
-                sheetContent?.let {
-                    Column { it() }
+                    sheetContent?.let {
+                        Column { it() }
+                    }
                 }
             }
         }
@@ -522,7 +551,6 @@ internal class WalletScreenTest {
         onWalletPaymentMethodRowMenuButton().onLast().performClick()
 
         composeTestRule.waitForIdle()
-
         onWalletPaymentMethodMenu().assertIsDisplayed()
     }
 
@@ -544,11 +572,13 @@ internal class WalletScreenTest {
 
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = {},
-                hideBottomSheetContent = {}
-            )
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -602,25 +632,27 @@ internal class WalletScreenTest {
         var onSetDefaultCounter = 0
         var onRemoveClickedCounter = 0
         composeTestRule.setContent {
-            var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-            Box {
-                TestWalletBody(
-                    onSetDefaultClicked = {
-                        onSetDefaultCounter += 1
-                    },
-                    onRemoveClicked = {
-                        onRemoveClickedCounter += 1
-                    },
-                    showBottomSheetContent = {
-                        sheetContent = it
-                    },
-                    hideBottomSheetContent = {
-                        sheetContent = null
-                    }
-                )
+            DefaultLinkTheme {
+                var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+                Box {
+                    TestWalletBody(
+                        onSetDefaultClicked = {
+                            onSetDefaultCounter += 1
+                        },
+                        onRemoveClicked = {
+                            onRemoveClickedCounter += 1
+                        },
+                        showBottomSheetContent = {
+                            sheetContent = it
+                        },
+                        hideBottomSheetContent = {
+                            sheetContent = null
+                        }
+                    )
 
-                sheetContent?.let {
-                    Column { it() }
+                    sheetContent?.let {
+                        Column { it() }
+                    }
                 }
             }
         }
