@@ -180,4 +180,31 @@ internal class PhoneNumberControllerTest {
             assertThat(awaitItem().value).isEqualTo("+11222525252")
         }
     }
+
+    @Test
+    fun `when only prefix is received as initial phone number, should filter out properly`() = runTest {
+        val usPhoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initialValue = "+1",
+        )
+
+        usPhoneNumberController.countryDropdownController.formFieldValue.test {
+            assertThat(awaitItem().value).isEqualTo("US")
+        }
+
+        usPhoneNumberController.fieldValue.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+
+        val lsPhoneNumberController = PhoneNumberController.createPhoneNumberController(
+            initialValue = "+266"
+        )
+
+        lsPhoneNumberController.countryDropdownController.formFieldValue.test {
+            assertThat(awaitItem().value).isEqualTo("LS")
+        }
+
+        lsPhoneNumberController.fieldValue.test {
+            assertThat(awaitItem()).isEmpty()
+        }
+    }
 }

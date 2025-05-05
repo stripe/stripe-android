@@ -213,7 +213,7 @@ internal sealed class PhoneNumberFormatter {
 
             // Find the regions that match the phone number prefix, then pick the top match from the
             // device's locales
-            while (charIndex < phoneNumber.lastIndex && charIndex < COUNTRY_PREFIX_MAX_LENGTH - 1) {
+            while (charIndex <= phoneNumber.lastIndex && charIndex < COUNTRY_PREFIX_MAX_LENGTH - 1) {
                 charIndex++
 
                 val country = findBestCountryForPrefix(
