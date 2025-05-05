@@ -2,9 +2,6 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-### PaymentSheet
-* [ADDED][10763](https://github.com/stripe/stripe-android/pull/10763) Added support for updating card details in Link in PaymentSheet.
-
 ## 21.12.0 - 2025-04-28
 
 ### PaymentSheet
