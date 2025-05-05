@@ -7,7 +7,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
@@ -524,6 +526,7 @@ class WalletViewModelTest {
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): WalletViewModel {
@@ -535,7 +538,8 @@ class WalletViewModelTest {
             logger = logger,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult,
-            navigationManager = navigationManager
+            navigationManager = navigationManager,
+            dismissalCoordinator = dismissalCoordinator,
         )
     }
 

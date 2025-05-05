@@ -24,6 +24,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -681,7 +683,8 @@ internal class WalletScreenTest {
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
-        navigationManager: TestNavigationManager = TestNavigationManager()
+        navigationManager: TestNavigationManager = TestNavigationManager(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
     ): WalletViewModel {
         return WalletViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
@@ -691,7 +694,8 @@ internal class WalletScreenTest {
             logger = FakeLogger(),
             navigateAndClearStack = {},
             dismissWithResult = {},
-            navigationManager = navigationManager
+            navigationManager = navigationManager,
+            dismissalCoordinator = dismissalCoordinator,
         )
     }
 

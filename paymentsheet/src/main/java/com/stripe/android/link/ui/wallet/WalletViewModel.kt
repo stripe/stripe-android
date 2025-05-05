@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
@@ -18,6 +19,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.completePaymentButtonLabel
+import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -47,6 +49,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -213,11 +216,13 @@ internal class WalletViewModel @Inject constructor(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         cvc: String?
     ) {
-        val result = linkConfirmationHandler.confirm(
-            paymentDetails = selectedPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc
-        )
+        val result = dismissalCoordinator.withDismissalDisabled {
+            linkConfirmationHandler.confirm(
+                paymentDetails = selectedPaymentDetails,
+                linkAccount = linkAccount,
+                cvc = cvc
+            )
+        }
         when (result) {
             LinkConfirmationResult.Canceled -> Unit
             is LinkConfirmationResult.Failed -> {
@@ -243,13 +248,14 @@ internal class WalletViewModel @Inject constructor(
     ): Result<ConsumerPaymentDetails> {
         val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
 
-        val updateParams = ConsumerPaymentDetailsUpdateParams(
-            id = selectedPaymentDetails.id,
-            isDefault = selectedPaymentDetails.isDefault,
-            cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
-        )
-
-        return linkAccountManager.updatePaymentDetails(updateParams)
+        return dismissalCoordinator.withDismissalDisabled {
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = selectedPaymentDetails.id,
+                isDefault = selectedPaymentDetails.isDefault,
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+            )
+            linkAccountManager.updatePaymentDetails(updateParams)
+        }
     }
 
     fun onPayAnotherWayClicked() {
@@ -375,6 +381,7 @@ internal class WalletViewModel @Inject constructor(
                         ),
                         logger = parentComponent.logger,
                         navigationManager = parentComponent.navigationManager,
+                        dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkAccount = linkAccount,
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult

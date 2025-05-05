@@ -5,6 +5,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -223,6 +225,7 @@ class PaymentMethodViewModelTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         logger: Logger = FakeLogger(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
@@ -232,6 +235,7 @@ class PaymentMethodViewModelTest {
             dismissWithResult = dismissWithResult,
             formHelper = formHelper,
             logger = logger,
+            dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager
         )
     }
