@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.LaunchedEffect
@@ -14,7 +15,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
 
@@ -27,8 +28,8 @@ internal class LinkActivity : ComponentActivity() {
     private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        renderEdgeToEdge()
 
         try {
             viewModel = ViewModelProvider(this, viewModelFactory)[LinkActivityViewModel::class.java]
@@ -53,6 +54,8 @@ internal class LinkActivity : ComponentActivity() {
         observeBackPress()
 
         setContent {
+            disableNavigationBarContrastEnforcement()
+
             val bottomSheetState = rememberStripeBottomSheetState(
                 confirmValueChange = { vm.canDismissSheet },
             )
