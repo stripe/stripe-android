@@ -191,8 +191,10 @@ private fun PaymentDetailsSection(
             hideBottomSheetContent = hideBottomSheetContent
         )
 
-        AnimatedVisibility(state.showBankAccountTerms) {
-            BankAccountTerms()
+        AnimatedVisibility(visible = state.mandate != null) {
+            state.mandate?.let { mandate ->
+                LinkMandate(mandate.resolve())
+            }
         }
 
         ErrorSection(state.errorMessage)
@@ -577,9 +579,9 @@ private fun AddPaymentMethodRow(
 }
 
 @Composable
-private fun BankAccountTerms() {
+private fun LinkMandate(text: String) {
     Html(
-        html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
+        html = text.replaceHyperlinks(),
         color = LinkTheme.colors.textSecondary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,

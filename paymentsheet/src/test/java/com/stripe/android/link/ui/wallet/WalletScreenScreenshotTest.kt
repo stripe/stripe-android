@@ -195,6 +195,8 @@ internal class WalletScreenScreenshotTest {
             alertMessage = alertMessage,
             canAddNewPaymentMethod = canAddNewPaymentMethod,
             userSetIsExpanded = userSetIsExpanded,
+            isSettingUp = false,
+            merchantName = "Example Inc.",
         )
     }
 
