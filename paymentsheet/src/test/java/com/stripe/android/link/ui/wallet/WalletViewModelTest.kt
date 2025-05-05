@@ -57,6 +57,7 @@ class WalletViewModelTest {
                 paymentDetailsList = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
                 email = "email@stripe.com",
                 selectedItemId = null,
+                cardBrandFilter = TestFactory.LINK_CONFIGURATION.cardBrandFilter,
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,
@@ -181,7 +182,7 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `selecting a payment method closes the payment method picker`() = runTest(dispatcher) {
+    fun `selecting a valid payment method closes the payment method picker`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
         viewModel.uiState.test {

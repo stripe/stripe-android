@@ -383,7 +383,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
                 displayableCustomPaymentMethods = emptyList(),
-                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )

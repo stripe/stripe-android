@@ -13,6 +13,7 @@ import app.cash.turbine.turbineScope
 import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
@@ -966,6 +967,7 @@ internal class PaymentSheetViewModelTest {
                 merchantCountryCode = "US",
                 passthroughModeEnabled = false,
                 cardBrandChoice = null,
+                cardBrandFilter = DefaultCardBrandFilter,
                 shippingDetails = null,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,

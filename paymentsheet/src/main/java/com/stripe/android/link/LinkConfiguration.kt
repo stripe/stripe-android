@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -17,6 +18,7 @@ internal data class LinkConfiguration(
     val passthroughModeEnabled: Boolean,
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,
+    val cardBrandFilter: CardBrandFilter,
     val useAttestationEndpointsForLink: Boolean,
     val suppress2faModal: Boolean,
     val initializationMode: PaymentElementLoader.InitializationMode,

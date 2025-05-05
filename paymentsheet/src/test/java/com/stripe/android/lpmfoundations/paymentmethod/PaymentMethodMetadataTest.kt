@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
@@ -1587,6 +1588,17 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 
+    @Test
+    fun `Passes CBF along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
+    }
+
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
         return LinkInlineConfiguration(
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
@@ -1606,6 +1618,7 @@ internal class PaymentMethodMetadataTest {
                     eligible = true,
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
+                cardBrandFilter = DefaultCardBrandFilter,
                 passthroughModeEnabled = false,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,

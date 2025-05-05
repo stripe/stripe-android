@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -48,6 +49,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -653,11 +655,12 @@ internal class WalletScreenTest {
                 paymentDetailsList = paymentDetails,
                 email = "email@email.com",
                 selectedItemId = paymentDetails.firstOrNull()?.id,
+                cardBrandFilter = DefaultCardBrandFilter,
                 isProcessing = false,
                 hasCompleted = false,
                 primaryButtonLabel = "Buy".resolvableString,
                 canAddNewPaymentMethod = true,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
             onItemSelected = {},
             onExpandedChanged = {},
