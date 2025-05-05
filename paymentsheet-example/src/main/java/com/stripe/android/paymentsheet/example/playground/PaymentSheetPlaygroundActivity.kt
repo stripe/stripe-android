@@ -3,6 +3,7 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
@@ -61,7 +62,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
@@ -115,7 +115,9 @@ internal class PaymentSheetPlaygroundActivity :
         super.onCreate(savedInstanceState)
 
         setContent {
-            disableNavigationBarContrastEnforcement()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .confirmCustomPaymentMethodCallback(this)

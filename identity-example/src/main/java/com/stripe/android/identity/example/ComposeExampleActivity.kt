@@ -2,6 +2,7 @@ package com.stripe.android.identity.example
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.compose.material.MaterialTheme
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.example.ui.ExampleScreen
-import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 
 abstract class ComposeExampleActivity : ComponentActivity() {
     protected abstract val getBrandLogoResId: Int
@@ -31,7 +31,9 @@ abstract class ComposeExampleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            disableNavigationBarContrastEnforcement()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             MaterialTheme {
                 ExampleScreen(
                     configuration = configuration,

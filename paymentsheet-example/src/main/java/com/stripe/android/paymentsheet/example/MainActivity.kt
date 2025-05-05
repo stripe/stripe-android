@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
@@ -41,7 +42,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_fl
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 
 private const val SurfaceOverlayOpacity = 0.12f
 
@@ -103,7 +103,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
         setSupportActionBar(viewBinding.toolbar)
 
-        disableNavigationBarContrastEnforcement()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
         viewBinding.content.setContent {
             PaymentSheetExampleTheme {
                 MainScreen(items = items)

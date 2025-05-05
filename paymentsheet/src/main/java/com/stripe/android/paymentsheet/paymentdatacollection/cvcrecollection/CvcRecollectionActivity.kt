@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.disableNavigationBarContrastEnforcement
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
@@ -34,8 +33,6 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
 
         args.appearance.parseAppearance()
         setContent {
-            disableNavigationBarContrastEnforcement()
-
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 val state by viewModel.viewState.collectAsState()
