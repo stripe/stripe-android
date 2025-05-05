@@ -505,4 +505,12 @@ internal object PaymentIntentFixtures {
     )!!.copy(
         setupFutureUsage = StripeIntent.Usage.OffSession
     )
+
+    val PMO_SETUP_FUTURE_USAGE_CARD = """
+        {
+            "card": {
+                "setup_future_usage": "off_session"
+            }
+        }
+    """.trimIndent()
 }

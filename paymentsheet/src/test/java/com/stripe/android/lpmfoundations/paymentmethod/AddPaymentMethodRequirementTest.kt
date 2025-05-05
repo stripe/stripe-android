@@ -69,7 +69,6 @@ internal class AddPaymentMethodRequirementTest {
         ).isTrue()
     }
 
-
     @Test
     fun testUnsupportedForSetupReturnsReturnsFalseForSetupIntents() {
         val metadata = PaymentMethodMetadataFactory.create(
