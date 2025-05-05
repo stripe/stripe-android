@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
@@ -40,10 +39,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.MinimumTouchTargetSize
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
@@ -82,8 +80,8 @@ internal fun PaymentDetailsListItem(
                     .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
                     .padding(end = 12.dp),
                 colors = RadioButtonDefaults.colors(
-                    selectedColor = MaterialTheme.linkColors.actionLabelLight,
-                    unselectedColor = MaterialTheme.linkColors.disabledText
+                    selectedColor = LinkTheme.colors.actionLabelLight,
+                    unselectedColor = LinkTheme.colors.disabledText
                 )
             )
 
@@ -106,7 +104,7 @@ internal fun PaymentDetailsListItem(
                         painter = painterResource(R.drawable.stripe_link_error),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.linkColors.errorText
+                        tint = LinkTheme.colors.errorText
                     )
                 }
             }
@@ -249,7 +247,7 @@ private fun MenuAndLoader(
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = stringResource(StripeR.string.stripe_edit),
-                    tint = MaterialTheme.linkColors.actionLabelLight,
+                    tint = LinkTheme.colors.actionLabelLight,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -262,17 +260,18 @@ private fun DefaultTag() {
     Box(
         modifier = Modifier
             .background(
-                color = MaterialTheme.colors.secondary,
-                shape = MaterialTheme.linkShapes.extraSmall
+                color = LinkTheme.colors.secondary,
+                shape = LinkTheme.shapes.extraSmall
             ),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = stringResource(id = R.string.stripe_wallet_default),
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-            color = MaterialTheme.linkColors.disabledText,
+            color = LinkTheme.colors.disabledText,
+            style = LinkTheme.typography.caption,
             fontSize = 12.sp,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
     }
 }
@@ -361,17 +360,17 @@ private fun RowScope.PaymentMethodInfo(
         Column {
             Text(
                 text = title,
-                color = MaterialTheme.colors.onPrimary,
+                color = LinkTheme.colors.textPrimary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.h6
+                style = LinkTheme.typography.bodyEmphasized,
             )
 
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = MaterialTheme.colors.onSecondary,
-                    style = MaterialTheme.typography.body2
+                    color = LinkTheme.colors.textSecondary,
+                    style = LinkTheme.typography.detail,
                 )
             }
         }
@@ -395,7 +394,7 @@ private fun BankIcon(
     val containerModifier = if (isGenericIcon) {
         modifier
             .background(
-                color = MaterialTheme.linkColors.componentBorder,
+                color = LinkTheme.colors.componentBorder,
                 shape = RoundedCornerShape(3.dp),
             )
             .padding(4.dp)
@@ -410,7 +409,7 @@ private fun BankIcon(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
             colorFilter = if (isGenericIcon) {
-                ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                ColorFilter.tint(LinkTheme.colors.textSecondary)
             } else {
                 null
             },

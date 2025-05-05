@@ -19,7 +19,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -43,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.common.ui.InlineContentTemplateBuilder
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 
@@ -113,8 +112,8 @@ internal fun LinkButton(
                 shape = LinkButtonShape,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.primary,
-                    disabledBackgroundColor = MaterialTheme.colors.primary
+                    backgroundColor = LinkTheme.colors.primary,
+                    disabledBackgroundColor = LinkTheme.colors.primary,
                 ),
                 contentPadding = PaddingValues(
                     start = LinkButtonHorizontalPadding,
@@ -141,7 +140,7 @@ private fun SignedInButtonContent(email: String) {
         }
     }
 
-    val color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+    val color = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current)
     val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
 
     Row(
@@ -155,6 +154,7 @@ private fun SignedInButtonContent(email: String) {
         Text(
             text = annotatedEmail,
             color = color,
+            style = LinkTheme.typography.bodyEmphasized,
             fontSize = LINK_EMAIL_FONT_SIZE.sp,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
@@ -189,7 +189,8 @@ private fun RowScope.SignedOutButtonContent() {
             .semantics {
                 this.contentDescription = text
             },
-        color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
+        color = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current),
+        style = LinkTheme.typography.bodyEmphasized,
         fontSize = LINK_PAY_WITH_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
@@ -223,6 +224,7 @@ private fun LinkIconAndDivider() {
     Text(
         text = annotatedLinkAndDivider,
         fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        style = LinkTheme.typography.bodyEmphasized,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
@@ -240,7 +242,7 @@ private fun LinkDivider() {
         modifier = Modifier
             .width(1.dp)
             .fillMaxHeight(),
-        color = MaterialTheme.linkColors.actionLabelLight,
+        color = LinkTheme.colors.actionLabelLight,
     )
 }
 

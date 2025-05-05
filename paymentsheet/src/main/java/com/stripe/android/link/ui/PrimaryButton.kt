@@ -13,7 +13,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -28,9 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -60,10 +58,10 @@ internal fun PrimaryButton(
                     .testTag(PrimaryButtonTag),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                shape = MaterialTheme.linkShapes.medium,
+                shape = LinkTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.primary,
-                    disabledBackgroundColor = MaterialTheme.colors.primary
+                    backgroundColor = LinkTheme.colors.primary,
+                    disabledBackgroundColor = LinkTheme.colors.primary,
                 )
             ) {
                 when (state) {
@@ -73,7 +71,7 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = ProgressIndicatorTestTag
                             },
-                        color = MaterialTheme.linkColors.buttonLabel,
+                        color = LinkTheme.colors.buttonLabel,
                         strokeWidth = 2.dp
                     )
                     PrimaryButtonState.Completed -> Icon(
@@ -84,7 +82,7 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = CompletedIconTestTag
                             },
-                        tint = MaterialTheme.linkColors.buttonLabel
+                        tint = LinkTheme.colors.buttonLabel
                     )
                     else -> Row(
                         Modifier.fillMaxWidth(),
@@ -94,9 +92,10 @@ internal fun PrimaryButton(
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
-                            color = MaterialTheme.linkColors.buttonLabel
+                            color = LinkTheme.colors.buttonLabel
                                 .copy(alpha = LocalContentAlpha.current),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            style = LinkTheme.typography.bodyEmphasized,
                         )
                         PrimaryButtonIcon(iconEnd)
                     }
@@ -123,7 +122,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current)
             )
         }
     }
