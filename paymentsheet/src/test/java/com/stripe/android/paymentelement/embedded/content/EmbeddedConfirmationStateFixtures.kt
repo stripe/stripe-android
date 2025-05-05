@@ -17,6 +17,8 @@ internal object EmbeddedConfirmationStateFixtures {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
             )
         ),
-        configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            .build()
     )
 }
