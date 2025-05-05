@@ -135,6 +135,8 @@ android {
     }
     buildTypes {
         release {
+            minifyEnabled false
+            shrinkResources false
             firebaseAppDistribution {
                 appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
                 groups = "elements-mobile"

@@ -25,6 +25,7 @@ constructor(
     internal val code: PaymentMethodCode,
     internal val requiresMandate: Boolean,
     val card: Card? = null,
+    val cardPresent: CardPresent? = null,
     private val ideal: Ideal? = null,
     private val fpx: Fpx? = null,
     private val sepaDebit: SepaDebit? = null,
@@ -58,6 +59,7 @@ constructor(
     internal constructor(
         type: PaymentMethod.Type,
         card: Card? = null,
+        cardPresent: CardPresent? = null,
         ideal: Ideal? = null,
         fpx: Fpx? = null,
         sepaDebit: SepaDebit? = null,
@@ -79,6 +81,7 @@ constructor(
         type.code,
         type.requiresMandate,
         card,
+        cardPresent,
         ideal,
         fpx,
         sepaDebit,
@@ -119,6 +122,19 @@ constructor(
     ) : this(
         type = PaymentMethod.Type.Card,
         card = card,
+        allowRedisplay = allowRedisplay,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
+    private constructor(
+        cardPresent: CardPresent,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = PaymentMethod.Type.CardPresent,
+        cardPresent = cardPresent,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
@@ -297,6 +313,7 @@ constructor(
         get() {
             return when (code) {
                 PaymentMethod.Type.Card.code -> card?.toParamMap()
+                PaymentMethod.Type.CardPresent.code -> cardPresent?.toParamMap()
                 PaymentMethod.Type.Ideal.code -> ideal?.toParamMap()
                 PaymentMethod.Type.Fpx.code -> fpx?.toParamMap()
                 PaymentMethod.Type.SepaDebit.code -> sepaDebit?.toParamMap()
@@ -433,6 +450,31 @@ constructor(
             fun create(token: String): Card {
                 return Card(token = token, number = null)
             }
+        }
+    }
+
+    @Parcelize
+    data class CardPresent
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        internal val emv: String,
+        internal val encryptedTrack2: String,
+        internal val cryptogram: String,
+        internal val latitude: String,
+        internal val longitude: String,
+        internal val posSessionToken: String
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return mapOf(
+                "type" to "encrypted_emv",
+                "read_method" to "contactless_emv",
+                "emv_data" to emv,
+                "track_2" to encryptedTrack2,
+                "track_2_key_type" to "rsa_aes",
+                "track_2_key_id" to cryptogram,
+                "latitude" to latitude,
+                "longitude" to longitude,
+            )
         }
     }
 
@@ -724,6 +766,22 @@ constructor(
                     address = cardParams.address
                 ),
                 metadata = cardParams.metadata
+            )
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            cardPresent: CardPresent,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                cardPresent = cardPresent,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
             )
         }
 
