@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">Θέλετε να κλείσετε αυτή τη φόρμα;</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Αποθήκευση των στοιχείων σας για ασφαλή ολοκλήρωση αγοράς με 1 κλικ μέσω Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">Πιστωτική κάρτα %1$s</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">Χρεωστική κάρτα %1$s</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">Προπληρωμένη κάρτα %1$s</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">Κάρτα %1$s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Αποδοχή και συνέχεια</string>
   <!-- Title for the Link signup screen -->
@@ -34,8 +42,16 @@
   <string name="stripe_link_sign_up_message">Αποθηκεύστε τα στοιχεία πληρωμής σας με το Link, για ασφαλή ολοκλήρωση αγοράς με 1 κλικ στους ιστότοπους που υποστηρίζονται από το Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Αν συνεχίσετε, συμφωνείτε με τους <terms>Όρους</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Ενημέρωση κάρτας</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">Αυτή είναι η προεπιλογή σας</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Ενημέρωση κάρτας</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Εισαγάγετε τον κωδικό που στάλθηκε στο %s για να χρησιμοποιήσετε τα αποθηκευμένα στοιχεία σας.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Ενημέρωση κάρτας</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Αποσύνδεση από το Link</string>
   <!-- Text that is displayed when a network error occurs -->

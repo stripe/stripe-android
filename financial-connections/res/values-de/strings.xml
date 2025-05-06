@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Konten verbinden</string>
+  <string name="stripe_account_picker_cta_link_singular">Konto verbinden</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Beim Zugriff auf Ihr %1$s-Konto ist ein Problem aufgetreten</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Wir haben %1$s %2$s Konten gefunden, aber Sie können nur Giro- oder Sparkonten mit %3$s verbinden. Bitte wählen Sie eine andere Bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Wir haben %1$s %2$s Konto gefunden, aber Sie können nur Giro- oder Sparkonten mit %3$s verbinden. Bitte wählen Sie eine andere Bank.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Keine Zahlungskonten verfügbar</string>
+  <string name="stripe_account_picker_multiselect_account">Konten auswählen</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Konto auswählen</string>
+  <string name="stripe_accounts_error_desc_manualentry">Bitte geben Sie Ihre Kontoverbindung manuell ein oder wählen Sie eine andere Bank.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Bitte andere Bank auswählen.</string>
+  <string name="stripe_accounts_error_desc_retry">Bitte wählen Sie eine andere Bank oder versuchen Sie es noch einmal.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Bitte geben Sie Ihre Bankdaten manuell ein</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Bitte geben Sie Ihre Bankdaten manuell ein oder wählen Sie eine andere Bank.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Derzeit ist kein Zugriff auf Ihre Kontonummer möglich</string>
+  <string name="stripe_close_dialog_networking_desc">Wenn Sie jetzt abbrechen, wird Ihr Konto mit %1$s verbunden, aber nicht bei Link gespeichert.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Wenn Sie jetzt abbrechen, wird Ihr Konto mit diesem Unternehmen verbunden, aber nicht bei Link gespeichert.</string>
+  <string name="stripe_error_cta_close">Schließen</string>
+  <string name="stripe_error_cta_manual_entry">Bankdaten manuell eingeben</string>
+  <string name="stripe_error_cta_retry">Erneut versuchen</string>
+  <string name="stripe_error_cta_select_another_bank">Andere Bank auswählen</string>
+  <string name="stripe_error_generic_desc">Ihr Konto kann derzeit nicht verbunden werden. Bitte versuchen Sie es zu einem späteren Zeitpunkt noch einmal.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Etwas ist schiefgegangen</string>
+  <string name="stripe_error_planned_downtime_desc">Das Ende der Wartungsarbeiten ist für %1$s geplant. Bitte wählen Sie eine andere Bank oder versuchen Sie es später noch einmal.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s führt gerade Wartungsarbeiten durch</string>
+  <string name="stripe_error_unplanned_downtime_desc">Bitte wählen Sie eine andere Bank oder versuchen Sie es später noch einmal.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s ist derzeit nicht verfügbar</string>
+  <string name="stripe_exit_modal_cta_accept">Ja, abbrechen</string>
+  <string name="stripe_exit_modal_cta_cancel">Abbrechen</string>
+  <string name="stripe_exit_modal_desc">Ihr Bankkonto wird nicht mit %1$s verbunden und Ihr Fortschritt geht verloren.</string>
+  <string name="stripe_exit_modal_desc_no_business">Ihr Bankkonto wird nicht mit diesem Unternehmen verbunden und Ihr Fortschritt geht verloren.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Beenden, ohne eine Verbindung herzustellen?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Konto- und Routingnummer eingeben</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Ihre Bank wird nicht angezeigt?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Suchen Sie nach einer anderen Bank</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Suchen Sie nach einer anderen Bank oder </string>
+  <string name="stripe_institutionpicker_pane_error_title">Keine Treffer</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Bank auswählen</string>
+  <string name="stripe_institutionpicker_search_more_title">Nach weiteren Banken suchen</string>
+  <string name="stripe_link_stepup_verification_desc">Geben Sie den Code ein, der an %1$s gesendet wurde. Dieser gelegentlich nötige Zusatzschritt dient zum Schutz Ihres Kontos.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Code erneut senden</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">E-Mail-Adresse bestätigen</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Gleich geschafft, bleiben Sie dran</string>
+  <string name="stripe_manualentry_account">Kontonummer</string>
+  <string name="stripe_manualentry_accountconfirm">Kontonummer bestätigen</string>
+  <string name="stripe_manualentry_cta">Absenden</string>
+  <string name="stripe_manualentry_microdeposits_desc">Ihre Kontoinformationen werden mithilfe von Testeinzahlungen auf Ihr Konto bestätigt. Dieser Vorgang nimmt in der Regel 1–2 Werktage in Anspruch. Dieses Verfahren wird nur bei Girokonten angewendet.</string>
+  <string name="stripe_manualentry_routing">Routingnummer</string>
+  <string name="stripe_manualentry_test_banner">Testkonto verwenden</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Bankdaten eingeben</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Abbrechen</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Mit Link fortfahren</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Nicht jetzt</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Informationen verwenden, die Sie zu einem früheren Zeitpunkt in Ihrem Link-Konto gespeichert haben.</string>
+  <string name="stripe_networking_link_login_warmup_title">Mit Link fortfahren</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Nicht jetzt</string>
+  <string name="stripe_networking_save_to_link_verification_title">Bestätigen Sie, dass Sie es sind</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-Mail-Adresse</string>
+  <string name="stripe_networking_verification_desc">Geben Sie den Code ein, der an %1$s geschickt wurde</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Bestätigen Sie, dass Sie es sind</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Abbrechen</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Andere Bank auswählen</string>
+  <string name="stripe_search">Suchen</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Ihre Konten wurden verbunden, konnten aber nicht bei Link gespeichert werden.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Ihr Konto wurde verbunden, konnte aber nicht bei Link gespeichert werden.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Ihre Konten wurden mit Link verbunden und dort gespeichert.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Ihr Konto wurde mit Link verbunden und dort gespeichert.</string>
+  <string name="stripe_success_pane_desc_microdeposits">In 1–2 Tagen werden kleinere Beträge auf das Konto ••••%1$s überwiesen und Sie erhalten eine E-Mail mit weiteren Anweisungen.</string>
+  <string name="stripe_success_pane_desc_plural">Ihre Konten wurden verbunden</string>
+  <string name="stripe_success_pane_desc_singular">Ihr Konto wurde verbunden</string>
+  <string name="stripe_success_pane_done">Erledigt</string>
+  <string name="stripe_success_pane_done_with_merchant">Zurück zu %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Erfolg</string>
+  <string name="stripe_success_pane_title_microdeposits">Fast geschafft</string>
+  <string name="stripe_validation_account_confirm_mismatch">Ihre Kontonummern stimmen nicht überein.</string>
+  <string name="stripe_validation_account_required">Kontonummer ist ein Pflichtfeld.</string>
+  <string name="stripe_validation_account_too_long">Ungültige Bankkontonummer – darf maximal 17-stellig sein.</string>
+  <string name="stripe_validation_no_us_routing">Ungültige Routingnummer.</string>
+  <string name="stripe_validation_routing_required">Routingnummer ist ein Pflichtfeld.</string>
+  <string name="stripe_validation_routing_too_short">Bitte geben Sie Ihre neunstellige Routingnummer ein.</string>
+  <string name="stripe_verification.codeExpiredEmail">Anscheinend ist der von Ihnen eingegebene Verifizierungscode nicht mehr gültig. Klicken Sie auf „Code erneut versenden“ oder versuchen Sie es noch einmal oder </string>
+  <string name="stripe_verification.codeExpiredSms">Anscheinend ist der von Ihnen eingegebene Verifizierungscode nicht mehr gültig. Versuchen Sie es erneut oder </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Leider stimmt dieser Code nicht. Bitte überprüfen Sie ihn noch einmal und versuchen Sie es erneut.</string>
+  <string name="stripe_verification.inTestMode">Sie befinden sich im Test-Modus.</string>
+  <string name="stripe_verification.useTestCode">Testcode verwenden</string>
+</resources>

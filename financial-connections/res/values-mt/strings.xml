@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Orbot il-kontijiet</string>
+  <string name="stripe_account_picker_cta_link_singular">Orbot il-kont</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Kien hemm problema biex intellgħu l-kont ta\' %1$s tiegħek</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Sibna kontijiet ta\' %1$s %2$s imma tista\' torbot biss kontijiet kurrenti jew tat-tfaddil ma\' %3$s. Jekk jogħġbok ipprova agħżel -bank ieħor.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Sibna kont ta\' %1$s %2$s imma tista\' torbot biss kontijiet kurrenti jew tat-tfaddil ma\' %3$s. Jekk jogħġbok ipprova agħżel bank ieħor.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">L-ebda kont tal-pagament disponibbli</string>
+  <string name="stripe_account_picker_multiselect_account">Agħżel il-kontijiet</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Agħżel kont</string>
+  <string name="stripe_accounts_error_desc_manualentry">Jekk jogħġbok daħħal id-dettalji tal-bank tiegħek int stess jew agħżel bank ieħor.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Jekk jogħġbok agħżel bank ieħor.</string>
+  <string name="stripe_accounts_error_desc_retry">Jekk jogħġbok agħżel bank ieħor jew erġa\' pprova.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Jekk jogħġbok daħħal id-dettalji tal-bank tiegħek int stess</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Jekk jogħġbok daħħal id-dettalji tal-bank tiegħek int stess jew agħżel bank ieħor.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Did-darba ma stajniex intellgħu n-numru tal-kont tiegħek</string>
+  <string name="stripe_close_dialog_networking_desc">Jekk tikkanċella issa, il-kont tiegħek se jintrabat ma\' %1$s imma mhux se jintrefa\' f\'Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Jekk tikkanċella issa, il-kont tiegħek se jintrabat ma\' dan-negozju imma mhux se jintrefa\' f\'Link.</string>
+  <string name="stripe_error_cta_close">Agħlaq</string>
+  <string name="stripe_error_cta_manual_entry">Daħħal id-dettalji tal-bank int stess</string>
+  <string name="stripe_error_cta_retry">Erġa\' pprova</string>
+  <string name="stripe_error_cta_select_another_bank">Agħżel bank ieħor</string>
+  <string name="stripe_error_generic_desc">Għalissa ma nistgħux norbtulek il-kont. Jekk jogħġbok erġa\' pprova iktar tard.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Xi ħaġa marret ħażin</string>
+  <string name="stripe_error_planned_downtime_desc">Ix-xogħol taż-żamma mistenni jintemm f\'dal-ħin: %1$s. Jekk jogħġbok agħżel bank ieħor jew erġa\' pprova iktar tard.</string>
+  <string name="stripe_error_planned_downtime_title">Bħalissa qed isir xi xogħol ta\' żamma fuq %1$s</string>
+  <string name="stripe_error_unplanned_downtime_desc">Jekk jogħġbok agħżel bank ieħor jew erġa\' pprova iktar tard.</string>
+  <string name="stripe_error_unplanned_downtime_title">Bħalissa ma nistgħux naqbdu ma\' %1$s</string>
+  <string name="stripe_exit_modal_cta_accept">Iva, oħroġ</string>
+  <string name="stripe_exit_modal_cta_cancel">Ikkanċella</string>
+  <string name="stripe_exit_modal_desc">Il-kont tiegħek mhux se jintrabat ma\' %1$s u kull ħaġa li għamilt s\'issa se tintesa.</string>
+  <string name="stripe_exit_modal_desc_no_business">Il-kont tiegħek mhux se jintrabat ma\' dan-negozju u kull ħaġa li għamilt s\'issa se tintesa.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Tixtieq toħroġ minn dal-proċess mingħajr ma torbot il-kont?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Daħħal in-numri tal-kont u tar-routing tiegħek</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Ma tistax issib il-bank tiegħek?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Ipprova fittex bank ieħor</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Ipprova fittex bank ieħor jew </string>
+  <string name="stripe_institutionpicker_pane_error_title">L-ebda riżultat</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Agħżel il-bank</string>
+  <string name="stripe_institutionpicker_search_more_title">Fittex iktar banek</string>
+  <string name="stripe_link_stepup_verification_desc">Daħħal il-kodiċi li bgħatna lil %1$s. Kull tant żmien nitolbuk tagħmel dal-pass miżjud biex il-kont tiegħek jinżamm sigur.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Erġa\' ibgħat il-kodiċi</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Ivverifika l-indirizz tal-email tiegħek</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Stenna ftit, daqt lesti</string>
+  <string name="stripe_manualentry_account">In-numru tal-kont</string>
+  <string name="stripe_manualentry_accountconfirm">Ikkonferma n-numru tal-kont</string>
+  <string name="stripe_manualentry_cta">Ibgħat</string>
+  <string name="stripe_manualentry_microdeposits_desc">Se nivverifikaw l-informazzjoni tal-bank tiegħek bil-mikrodepożiti fil-kont tiegħek, ħafna drabi fi żmien jum sa jumejn tax-xogħol. Tista\' tuża biss il-kontijiet kurrenti.</string>
+  <string name="stripe_manualentry_routing">In-numru tar-routing</string>
+  <string name="stripe_manualentry_test_banner">Uża l-kont ta\' prova</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Daħħal id-dettalji tal-bank</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Ikkanċella</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Kompli b\'Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Mhux issa</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Uża d-dettalji li diġà kont erfajt fil-kont Link tiegħek.</string>
+  <string name="stripe_networking_link_login_warmup_title">Kompli b\'Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Mhux issa</string>
+  <string name="stripe_networking_save_to_link_verification_title">Ikkonferma li int min qed tgħid li int</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">L-indirizz tal-email</string>
+  <string name="stripe_networking_verification_desc">Daħħal il-kodiċi li bgħatna lil %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Ikkonferma li int min qed tgħid li int</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Ikkanċella</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Agħżel bank ieħor</string>
+  <string name="stripe_search">Fittex</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Il-kontijiet tiegħek intrabtu imma ma setgħux jintrefgħu f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Il-kont tiegħek intrabat imma ma setax jintrefa\' f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Il-kontijiet tiegħek intrabtu u ntrefgħu f\'Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Il-kont tiegħek intrabat u ntrefa\' f\'Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Għandek tistenna li l-mikrodepożiti jaslulek fi żmien jum jew jumejn fil-kont li jispiċċa ••••%1$s flimkien ma\' email b\'iktar istruzzjonijiet.</string>
+  <string name="stripe_success_pane_desc_plural">Il-kontijiet tiegħek intrabtu</string>
+  <string name="stripe_success_pane_desc_singular">Il-kont tiegħek intrabat</string>
+  <string name="stripe_success_pane_done">Bil-lest</string>
+  <string name="stripe_success_pane_done_with_merchant">Lura għand %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Irnexxa</string>
+  <string name="stripe_success_pane_title_microdeposits">Kważi lest</string>
+  <string name="stripe_validation_account_confirm_mismatch">In-numri tal-kontijiet tiegħek ma jaqblux.</string>
+  <string name="stripe_validation_account_required">In-numru tal-kont huwa meħtieġ.</string>
+  <string name="stripe_validation_account_too_long">In-numru tal-kont tal-bank mhux tajjeb: ma jistax ikun itwal minn 17-il ċifra.</string>
+  <string name="stripe_validation_no_us_routing">In-numru tar-routing mhux tajjeb.</string>
+  <string name="stripe_validation_routing_required">Neħtieġu n-numru tar-routing</string>
+  <string name="stripe_validation_routing_too_short">Jekk jogħġbok daħħal 9 ċifri għan-numru tar-routing tiegħek.</string>
+  <string name="stripe_verification.codeExpiredEmail">Milli jidher il-kodiċi tal-verifika li tajtna m\'għadux tajjeb. Agħfas fuq \"Ibgħatuli l-kodiċi mill-ġdid\" u erġa\' pprova jew </string>
+  <string name="stripe_verification.codeExpiredSms">Milli jidher il-kodiċi tal-verifika li tajtna m\'għadux tajjeb. Erġa\' pprova jew </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Mmm, dak il-kodiċi mhux tajjeb. Iċċekkjah sew u erġa\' pprova.</string>
+  <string name="stripe_verification.inTestMode">Tinsab fil-modalità tal-prova.</string>
+  <string name="stripe_verification.useTestCode">Uża l-kodiċi tal-prova</string>
+</resources>
