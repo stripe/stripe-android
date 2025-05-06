@@ -258,7 +258,7 @@ class PaymentIntentTest {
             paymentMethodOptionsJsonString = """
                 {
                   "card": {
-                    "setup_future_usage": "off_session"
+                    "setup_future_usage": ""
                   }
                 }
             """.trimIndent()

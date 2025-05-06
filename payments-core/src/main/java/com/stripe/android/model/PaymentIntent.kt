@@ -231,7 +231,7 @@ constructor(
     fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
         return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
             (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
-                getPaymentMethodOptionSetupFutureUsage(code) != NONE
+                !isPaymentMethodOptionsSetupFutureUsageNone(code)
         } else {
             isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
         }
@@ -249,15 +249,16 @@ constructor(
         }
     }
 
-    private fun getPaymentMethodOptionSetupFutureUsage(code: PaymentMethodCode): String? {
+    private fun isPaymentMethodOptionsSetupFutureUsageNone(code: PaymentMethodCode): Boolean {
         return paymentMethodOptionsJsonString?.let { json ->
-            JSONObject(json).optJSONObject(code)?.optString(SETUP_FUTURE_USAGE)
-        }
+            JSONObject(json).optJSONObject(code)?.optString(SETUP_FUTURE_USAGE) == NONE
+        } ?: false
     }
 
     private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return getPaymentMethodOptionSetupFutureUsage(code)?.let {
-            it == OFF_SESSION || it == ON_SESSION
+        return paymentMethodOptionsJsonString?.let { json ->
+            val pmOptions = JSONObject(json).optJSONObject(code)
+            pmOptions?.has(SETUP_FUTURE_USAGE) ?: false
         } ?: false
     }
 

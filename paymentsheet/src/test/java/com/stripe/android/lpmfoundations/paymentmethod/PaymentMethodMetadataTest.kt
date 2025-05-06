@@ -89,7 +89,7 @@ internal class PaymentMethodMetadataTest {
         featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
         )
         assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Card.code)).isTrue()
@@ -101,7 +101,7 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
         )
         assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Affirm.code)).isFalse()
@@ -1309,7 +1309,7 @@ internal class PaymentMethodMetadataTest {
         featureFlagTestRule.setEnabled(true)
         val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
         )
@@ -1352,7 +1352,7 @@ internal class PaymentMethodMetadataTest {
             featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
@@ -1411,7 +1411,7 @@ internal class PaymentMethodMetadataTest {
             featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled
             )
@@ -1516,7 +1516,7 @@ internal class PaymentMethodMetadataTest {
         featureFlagTestRule.setEnabled(true)
         val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
                 overrideAllowRedisplay = null,
@@ -1561,7 +1561,7 @@ internal class PaymentMethodMetadataTest {
             featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
                 ),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy
             )
@@ -1663,13 +1663,7 @@ internal class PaymentMethodMetadataTest {
         featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = """
-                    {
-                        "amazon_pay": {
-                            "setup_future_usage": "off_session"
-                        }
-                    }
-                """.trimIndent()
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
         )
         assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isTrue()
