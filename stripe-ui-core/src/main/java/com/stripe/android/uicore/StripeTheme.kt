@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import java.lang.Float.max
+import androidx.compose.ui.unit.max as maxDp
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeColors(
@@ -495,8 +496,11 @@ val MaterialTheme.stripeTypography: StripeTypography
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) max(stripeShapes.borderStrokeWidth, 2f).dp else stripeShapes.borderStrokeWidth.dp
+fun MaterialTheme.getBorderStrokeWidth(
+    isSelected: Boolean,
+    selectedStrokeWidth: Dp = 1.5.dp
+) =
+    if (isSelected) maxDp(stripeShapes.borderStrokeWidth.dp, selectedStrokeWidth) else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable
