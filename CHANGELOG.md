@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.13.0 - 2025-05-06
+
 ### PaymentSheet
 * [FIXED][10761](https://github.com/stripe/stripe-android/pull/10761) Updated the "TEST MODE" badge to say "TEST", due to the upcoming release of [Sandboxes](https://docs.stripe.com/sandboxes).
 * [CHANGED][10704](https://github.com/stripe/stripe-android/pull/10704) Embedded Payment Element now uses `FormSheetAction.Continue` by default.
