@@ -86,31 +86,19 @@ internal class PaymentMethodMetadataTest {
         featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodOptionsJsonString = """
-                    {
-                        "card": {
-                            "setup_future_usage": "off_session"
-                        }
-                    }
-                """.trimIndent()
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
             ),
         )
         assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Card.code)).isTrue()
     }
 
     @Test
-    fun `hasIntentToSetup returns false for payment_intent with PMO SFU set to none`() {
+    fun `hasIntentToSetup returns false for payment_intent with top level SFU and PMO SFU set to none`() {
         featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
-                paymentMethodOptionsJsonString = """
-                    {
-                        "affirm": {
-                            "setup_future_usage": "none"
-                        }
-                    }
-                """.trimIndent()
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE_CARD
             ),
         )
         assertThat(metadata.hasIntentToSetup(PaymentMethod.Type.Affirm.code)).isFalse()
