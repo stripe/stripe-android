@@ -9,8 +9,12 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
@@ -334,6 +338,18 @@ internal class EmbeddedPlaygroundActivity :
         Complete {
             @Composable
             override fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit) {
+                embeddedPaymentElement.ExpressCheckoutContent()
+                Spacer(Modifier.height(24.dp))
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text("This is merchant content")
+                    Text("This is merchant content")
+                    Text("This is merchant content")
+                    Text("This is merchant content")
+                    Text("This is merchant content")
+                }
+                Spacer(Modifier.height(24.dp))
                 embeddedPaymentElement.Content()
             }
         },

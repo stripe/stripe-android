@@ -17,8 +17,6 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
     private val linkHandler: LinkHandler,
 ) : EmbeddedWalletsHelper {
     override fun walletsState(paymentMethodMetadata: PaymentMethodMetadata): StateFlow<WalletsState?> {
-        linkHandler.setupLink(paymentMethodMetadata.linkState)
-
         return combineAsStateFlow(
             linkHandler.isLinkEnabled,
             linkHandler.linkConfigurationCoordinator.emailFlow,
@@ -26,7 +24,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
             WalletsState.create(
                 isLinkAvailable = isLinkAvailable,
                 linkEmail = linkEmail,
-                isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
+                isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
                 buttonsEnabled = true,
                 paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
                 googlePayLauncherConfig = null, // This isn't used for embedded.

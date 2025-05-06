@@ -2,6 +2,8 @@ package com.stripe.android.common.configuration
 
 import android.content.res.ColorStateList
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -28,6 +30,13 @@ internal object ConfigurationDefaults {
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    val expressCheckoutTypes: List<EmbeddedPaymentElement.ExpressCheckoutType> =
+        listOf(
+            EmbeddedPaymentElement.ExpressCheckoutType.Link,
+            EmbeddedPaymentElement.ExpressCheckoutType.GooglePay
+        )
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

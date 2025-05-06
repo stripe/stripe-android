@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
@@ -86,6 +87,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
     fun Content() {
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
+    }
+
+    /**
+     * A composable function that displays express checkout options that customers can click for fast checkout.
+     */
+    @Composable
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun ExpressCheckoutContent() {
+        val expressCheckoutContent by contentHelper.expressCheckoutContent.collectAsState()
+        expressCheckoutContent?.Content()
     }
 
     /**
@@ -179,6 +190,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
+        internal val expressCheckoutTypes: List<ExpressCheckoutType>,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         @ExperimentalEmbeddedPaymentElementApi
@@ -209,6 +221,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
+            private var expressCheckoutTypes: List<ExpressCheckoutType> =
+                ConfigurationDefaults.expressCheckoutTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
 
@@ -380,6 +394,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * Configuration related to express checkout options. Options defined here are displayed when using
+             * [EmbeddedPaymentElement.ExpressCheckoutType]
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun expressCheckoutTypes(
+                expressCheckoutTypes: List<ExpressCheckoutType>,
+            ) = apply {
+                this.expressCheckoutTypes = expressCheckoutTypes
+            }
+
+            /**
              * Controls whether the view displays mandate text at the bottom for payment methods that require it.
              *
              * If set to `false`, your integration must display `PaymentOptionDisplayData.mandateText` to the customer
@@ -429,6 +454,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
+                expressCheckoutTypes = expressCheckoutTypes,
             )
         }
     }
@@ -451,6 +477,24 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * The button says "Pay" or "Setup". When tapped, we confirm the payment or setup in the form sheet.
          */
         Confirm
+    }
+
+    /**
+     * Express checkout options that can be displayed when using [EmbeddedPaymentElement.ExpressCheckoutContent]
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class ExpressCheckoutType {
+
+        /**
+         * Allows Google Pay to be shown as an express checkout type.
+         */
+        GooglePay,
+
+        /**
+         * Allows Link to be shown as an express checkout type.
+         */
+        Link
     }
 
     /**
