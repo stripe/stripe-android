@@ -63,7 +63,7 @@ internal fun LinkContent(
 ) {
     DefaultLinkTheme {
         Surface(
-            color = LinkTheme.colors.background,
+            color = LinkTheme.colorsV2.surfacePrimary,
         ) {
             ModalBottomSheetLayout(
                 sheetContent = bottomSheetContent ?: {
@@ -77,8 +77,10 @@ internal fun LinkContent(
                     bottomStart = CornerSize(0.dp),
                     bottomEnd = CornerSize(0.dp)
                 ),
-                sheetBackgroundColor = LinkTheme.colors.background,
-                scrimColor = LinkTheme.colors.sheetScrim
+                sheetBackgroundColor = LinkTheme.colorsV2.surfacePrimary,
+                scrimColor = LinkTheme.colorsV2.surfaceBackdrop.copy(
+                    alpha = .9f
+                )
             ) {
                 Column(
                     modifier = Modifier
@@ -298,7 +300,7 @@ internal fun Loader() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
-            color = LinkTheme.colors.primary,
+            color = LinkTheme.colorsV2.iconBrand,
         )
     }
 }

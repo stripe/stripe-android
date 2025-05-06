@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -75,9 +75,10 @@ internal fun ErrorText(
         // This is also used in the inline signup form in MPE, so we need
         // to re-apply the theme here.
         Row(
-            modifier = modifier.background(
-                color = LinkTheme.colors.errorComponentBackground,
-                shape = style.shape
+            modifier = modifier.border(
+                width = 1.dp,
+                color = LinkTheme.colorsV2.borderDefault,
+                shape = style.shape,
             ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -85,12 +86,12 @@ internal fun ErrorText(
                 painter = painterResource(id = R.drawable.stripe_link_error),
                 contentDescription = null,
                 modifier = style.iconModifier,
-                tint = LinkTheme.colors.errorText
+                tint = LinkTheme.colorsV2.iconCritical
             )
             HyperlinkedText(
                 text = text,
                 modifier = style.textModifier,
-                color = LinkTheme.colors.errorText,
+                color = LinkTheme.colorsV2.typeCritical,
                 style = style.textStyle
             )
         }

@@ -112,8 +112,8 @@ internal fun LinkButton(
                 shape = LinkButtonShape,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.primary,
-                    disabledBackgroundColor = LinkTheme.colors.primary,
+                    backgroundColor = LinkTheme.colorsV2.buttonBrand,
+                    disabledBackgroundColor = LinkTheme.colorsV2.typePrimary,
                 ),
                 contentPadding = PaddingValues(
                     start = LinkButtonHorizontalPadding,
@@ -140,7 +140,7 @@ private fun SignedInButtonContent(email: String) {
         }
     }
 
-    val color = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+    val color = LinkTheme.colorsV2.typePrimary.copy(alpha = LocalContentAlpha.current)
     val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
 
     Row(
@@ -189,7 +189,7 @@ private fun RowScope.SignedOutButtonContent() {
             .semantics {
                 this.contentDescription = text
             },
-        color = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current),
+        color = LinkTheme.colorsV2.typePrimary.copy(alpha = LocalContentAlpha.current),
         style = LinkTheme.typography.bodyEmphasized,
         fontSize = LINK_PAY_WITH_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
@@ -242,7 +242,7 @@ private fun LinkDivider() {
         modifier = Modifier
             .width(1.dp)
             .fillMaxHeight(),
-        color = LinkTheme.colors.actionLabelLight,
+        color = LinkTheme.colorsV2.borderDefault,
     )
 }
 

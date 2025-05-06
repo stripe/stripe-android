@@ -7,43 +7,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.elements.OTPElementColors
 
-private val LinkTeal = Color(0xFF00D66F)
-private val ActionLightGreen = Color(0xFF00A355)
-private val ActionGreen = Color(0xFF05A87F)
-private val ButtonLabel = Color(0xFF011E0F)
-private val ErrorText = Color(0xFFFF2F4C)
-private val ErrorBackground = Color(0x2EFE87A1)
-
-private val LightComponentBackground = Color.White
-private val LightComponentBorder = Color(0xFFE0E6EB)
-private val LightComponentDivider = Color(0xFFEFF2F4)
-private val LightTextPrimary = Color(0xFF30313D)
-private val LightTextSecondary = Color(0xFF6A7383)
-private val LightTextDisabled = Color(0xFFA3ACBA)
-private val LightBackground = Color.White
-private val LightFill = Color(0xFFF6F8FA)
-private val LightProgressIndicator = Color(0xFF1D3944)
-private val LightSheetScrim = Color(0x1F0A2348)
-private val LightSecondaryButtonLabel = Color(0xFF1D3944)
-private val LightCloseButton = Color(0xFF30313D)
-private val LightLinkLogo = Color(0xFF1D3944)
-private val LightOtpPlaceholder = Color(0xFFEBEEF1)
-
-private val DarkComponentBackground = Color(0x2E747480)
-private val DarkComponentBorder = Color(0x5C787880)
-private val DarkComponentDivider = Color(0x33787880)
-private val DarkTextPrimary = Color.White
-private val DarkTextSecondary = Color(0x99EBEBF5)
-private val DarkTextDisabled = Color(0x61FFFFFF)
-private val DarkBackground = Color(0xFF2E2E2E)
-private val DarkFill = Color(0x33787880)
-private val DarkCloseButton = Color(0x99EBEBF5)
-private val DarkLinkLogo = Color.White
-private val DarkProgressIndicator = LinkTeal
-private val DarkSecondaryButtonLabel = ActionGreen
-private val DarkOtpPlaceholder = Color(0x61FFFFFF)
-
-// new color references
 // Neutral Colors
 private val Neutral900 = Color(0xFF171717)
 private val Neutral800 = Color(0xFF262626)
@@ -110,8 +73,7 @@ private val Info100 = Color(0xFFA7E7FC)
 private val Info50 = Color(0xFFCBF5FD)
 private val Info25 = Color(0xFFE2FBFE)
 
-
-internal data class LinkColorsV2(
+internal data class LinkColors(
     val surfacePrimary: Color,
     val surfaceSecondary: Color,
     val surfaceTertiary: Color,
@@ -138,43 +100,13 @@ internal data class LinkColorsV2(
     val iconCritical: Color,
 )
 
-@Deprecated(
-    message = "LinkColors is deprecated. Use LinkColorsV2 instead.",
-    replaceWith = ReplaceWith("LinkColorsV2")
-)
-internal data class LinkColors(
-    val primary: Color,
-    val secondary: Color,
-    val background: Color,
-    val textPrimary: Color,
-    val textSecondary: Color,
-    val componentBackground: Color,
-    val componentBorder: Color,
-    val componentDivider: Color,
-    val actionLabel: Color,
-    val buttonLabel: Color,
-    val actionLabelLight: Color,
-    val errorText: Color,
-    val disabledText: Color,
-    val errorComponentBackground: Color,
-    val progressIndicator: Color,
-    val secondaryButtonLabel: Color,
-    val sheetScrim: Color,
-    val closeButton: Color,
-    val linkLogo: Color,
-    val otpElementColors: OTPElementColors,
-)
-
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
-        return if (isDark) colorsDark else colorsLight
-    }
-
-    fun colorsV2(isDark: Boolean): LinkColorsV2 {
+        // TODO(carlosmuvi) dark mode.
         return if (isDark) colorsV2Light else colorsV2Light
     }
 
-    private val colorsV2Light = LinkColorsV2(
+    private val colorsV2Light = LinkColors(
         surfacePrimary = Neutral0,
         surfaceSecondary = Neutral100,
         surfaceTertiary = Neutral200,
@@ -201,51 +133,12 @@ internal object LinkThemeConfig {
         iconCritical = Critical500
     )
 
-    private val colorsLight = LinkColors(
-        primary = LinkTeal,
-        secondary = LightFill,
-        background = LightBackground,
-        textPrimary = LightTextPrimary,
-        textSecondary = LightTextSecondary,
-        componentBackground = LightComponentBackground,
-        componentBorder = LightComponentBorder,
-        componentDivider = LightComponentDivider,
-        buttonLabel = ButtonLabel,
-        actionLabelLight = ActionLightGreen,
-        errorText = ErrorText,
-        errorComponentBackground = ErrorBackground,
-        progressIndicator = LightProgressIndicator,
-        secondaryButtonLabel = LightSecondaryButtonLabel,
-        sheetScrim = LightSheetScrim,
-        linkLogo = LightLinkLogo,
-        closeButton = LightCloseButton,
-        disabledText = LightTextDisabled,
-        otpElementColors = OTPElementColors(
-            selectedBorder = LinkTeal,
-            placeholder = LightOtpPlaceholder
-        ),
-        actionLabel = ActionGreen,
-    )
-
-    private val colorsDark = colorsLight.copy(
-        primary = LinkTeal,
-        secondary = DarkFill,
-        background = DarkBackground,
-        textPrimary = DarkTextPrimary,
-        textSecondary = DarkTextSecondary,
-        componentBackground = DarkComponentBackground,
-        componentBorder = DarkComponentBorder,
-        componentDivider = DarkComponentDivider,
-        progressIndicator = DarkProgressIndicator,
-        linkLogo = DarkLinkLogo,
-        closeButton = DarkCloseButton,
-        disabledText = DarkTextDisabled,
-        secondaryButtonLabel = DarkSecondaryButtonLabel,
-        otpElementColors = OTPElementColors(
-            selectedBorder = LinkTeal,
-            placeholder = DarkOtpPlaceholder
-        ),
-    )
+    internal fun LinkColors.otpElementColors(): OTPElementColors {
+        return OTPElementColors(
+            selectedBorder = borderSelected,
+            placeholder = typePrimary
+        )
+    }
 }
 
 @Composable
@@ -257,7 +150,7 @@ internal fun StripeThemeForLink(
     StripeTheme(
         colors = stripeDefaultColors.copy(
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = ActionGreen
+                primary = LinkTheme.colorsV2.iconBrand
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
