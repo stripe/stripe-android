@@ -16,6 +16,7 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -52,7 +53,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -158,8 +158,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
 
         composeTestRule.waitForIdle()
@@ -205,8 +205,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
 
         composeTestRule.waitForIdle()
@@ -236,8 +236,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
 
         composeTestRule.waitForIdle()
@@ -260,8 +260,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -287,8 +287,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -312,8 +312,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -344,8 +344,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -390,8 +390,8 @@ internal class WalletScreenTest {
                     viewModel = viewModel,
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {}
-            )
-                }
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -427,9 +427,9 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                hideBottomSheetContent = {}
-            )
-                }
+                    hideBottomSheetContent = {}
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -467,9 +467,9 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                hideBottomSheetContent = {}
-            )
-                }
+                    hideBottomSheetContent = {}
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -500,9 +500,9 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                hideBottomSheetContent = {}
-            )
-                }
+                    hideBottomSheetContent = {}
+                )
+            }
         }
         composeTestRule.waitForIdle()
 
@@ -548,7 +548,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPaymentMethodMenu().assertDoesNotExist()
-        onWalletPaymentMethodRowMenuButton().onLast().performClick()
+        onWalletPaymentMethodRowMenuButton().onFirst().performClick()
 
         composeTestRule.waitForIdle()
         onWalletPaymentMethodMenu().assertIsDisplayed()
