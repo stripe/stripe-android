@@ -17,6 +17,10 @@ internal val LocalLinkColors = staticCompositionLocalOf<LinkColors> {
     error("No Colors provided")
 }
 
+internal val LocalLinkColorsV2 = staticCompositionLocalOf<LinkColorsV2> {
+    error("No Colors provided")
+}
+
 internal val LocalLinkShapes = staticCompositionLocalOf<LinkShapes> {
     error("No Shapes provided")
 }
@@ -34,6 +38,7 @@ internal fun DefaultLinkTheme(
     CompositionLocalProvider(
         LocalLinkTypography provides linkTypography,
         LocalLinkColors provides LinkThemeConfig.colors(darkTheme),
+        LocalLinkColorsV2 provides LinkThemeConfig.colorsV2(darkTheme),
         LocalLinkShapes provides LinkShapes,
     ) {
         MaterialTheme(
