@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">이 양식을 닫으시겠습니까?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link로 안전한 원클릭 결제를 위해 사용자 정보 저장</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">%1$s 신용</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">%1$s 직불</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">%1$s 선불</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">%1$s 카드</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">동의하고 계속</string>
   <!-- Title for the Link signup screen -->
@@ -34,8 +42,16 @@
   <string name="stripe_link_sign_up_message">Link에서 결제 정보를 저장하고 Link 지원 사이트에서 원클릭으로 안전하게 체크아웃하십시오.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[계속하면 <terms>약관</terms>과 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">카드 업데이트</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">기본값입니다</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">카드 업데이트</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">저장된 정보를 사용하려면 %s(으)로 보낸 코드를 입력하십시오.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">카드 업데이트</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link 로그아웃</string>
   <!-- Text that is displayed when a network error occurs -->

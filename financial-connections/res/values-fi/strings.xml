@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Yhdistä tilit</string>
+  <string name="stripe_account_picker_cta_link_singular">Yhdistä tili</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Tilisi %1$s käytössä ilmeni virhe</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Löysimme %1$s %2$s tiliä, mutta voit linkittää vain käyttö- tai säästötilejä kohteeseen %3$s. Yritä valitsemalla toinen pankki.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Löysimme %1$s %2$s tiliä, mutta voit linkittää vain käyttö- tai säästötilejä kohteeseen %3$s. Yritä valitsemalla toinen pankki.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Maksutilejä ei ole saatavilla</string>
+  <string name="stripe_account_picker_multiselect_account">Valitse tilit</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Valitse tili</string>
+  <string name="stripe_accounts_error_desc_manualentry">Anna pankkitiedot manuaalisesti tai valitse toinen pankki.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Valitse toinen pankki.</string>
+  <string name="stripe_accounts_error_desc_retry">Valitse toinen pankki tai yritä uudelleen.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Syötä pankkitiedot manuaalisesti</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Anna pankkitiedot manuaalisesti tai valitse toinen pankki.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Tilinumeroasi ei voitu käsitellä juuri nyt</string>
+  <string name="stripe_close_dialog_networking_desc">Jos peruutat nyt, tilisi linkitetään yritykseen %1$s, mutta sitä ei tallenneta Link-palveluun.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Jos peruutat nyt, tilisi linkitetään tähän yritykseen, mutta sitä ei tallenneta Link-palveluun.</string>
+  <string name="stripe_error_cta_close">Sulje</string>
+  <string name="stripe_error_cta_manual_entry">Syötä pankkitiedot manuaalisesti</string>
+  <string name="stripe_error_cta_retry">Yritä uudelleen</string>
+  <string name="stripe_error_cta_select_another_bank">Valitse toinen pankki</string>
+  <string name="stripe_error_generic_desc">Tiliäsi ei voida linkittää nyt. Yritä myöhemmin uudelleen.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Jokin meni pieleen</string>
+  <string name="stripe_error_planned_downtime_desc">Huolto on ajoitettu päättyväksi %1$s. Valitse toinen pankki tai yritä myöhemmin uudelleen.</string>
+  <string name="stripe_error_planned_downtime_title">%1$s on huollossa</string>
+  <string name="stripe_error_unplanned_downtime_desc">Valitse toinen pankki tai yritä myöhemmin uudelleen.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s ei tällä hetkellä ole saatavilla</string>
+  <string name="stripe_exit_modal_cta_accept">Kyllä, poistu</string>
+  <string name="stripe_exit_modal_cta_cancel">Peruuta</string>
+  <string name="stripe_exit_modal_desc">Pankkitiliäsi ei yhdistetä yritykseen %1$s ja kaikki edistyminen menetetään.</string>
+  <string name="stripe_exit_modal_desc_no_business">Pankkitiliäsi ei yhdistetä tähän yritykseen ja kaikki edistyminen menetetään.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Poistutaanko ilman yhdistämistä?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Anna tili- ja reititysnumerot</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Etkö näe pankkiasi?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Yritä hakea toista pankkia</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Yritä hakea toista pankkia tai </string>
+  <string name="stripe_institutionpicker_pane_error_title">Ei tuloksia</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Valitse pankki</string>
+  <string name="stripe_institutionpicker_search_more_title">Etsi lisää pankkeja</string>
+  <string name="stripe_link_stepup_verification_desc">Syötä sähköpostiin %1$s lähetetty koodi. Pyydämme tätä ylimääräistä vaihetta säännöllisesti pitääksemme tilisi turvassa.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Lähetä koodi uudelleen</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Vahvista sähköposti</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Odota, melkein valmista</string>
+  <string name="stripe_manualentry_account">Tilinumero</string>
+  <string name="stripe_manualentry_accountconfirm">Vahvista tilinumero</string>
+  <string name="stripe_manualentry_cta">Lähetä</string>
+  <string name="stripe_manualentry_microdeposits_desc">Pankkitietosi vahvistetaan tilisi mikrotalletuksien avulla noin 1–2 arkipäivän kuluessa. Vain käyttötilejä tuetaan.</string>
+  <string name="stripe_manualentry_routing">Reititysnumero</string>
+  <string name="stripe_manualentry_test_banner">Käytä testitiliä</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Anna pankkitiedot</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Peruuta</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Jatka Link-palvelulla</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Ei nyt</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Käytä Link-tilille aiemmin tallennettuja tietoja.</string>
+  <string name="stripe_networking_link_login_warmup_title">Jatka Link-palvelulla</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Ei nyt</string>
+  <string name="stripe_networking_save_to_link_verification_title">Vahvista, että se olet sinä</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">Sähköpostiosoite</string>
+  <string name="stripe_networking_verification_desc">Syötä koodi, joka lähetettiin numeroon %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Vahvista, että se olet sinä</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Peruuta</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Valitse toinen pankki</string>
+  <string name="stripe_search">Etsi</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Tilisi on yhdistetty, mutta niitä ei voitu tallentaa Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Tilisi on yhdistetty, mutta sitä ei voitu tallentaa Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Tilisi on yhdistetty ja tallennettu Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Tilisi on yhdistetty ja tallennettu Link-palvelun kanssa.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Voit odottaa mikrotalletuksia tilillesi ••••%1$s 1–2 päivän kuluessa ja sähköpostiviestin, joka sisältää tarkemmat ohjeet.</string>
+  <string name="stripe_success_pane_desc_plural">Tilisi on yhdistetty</string>
+  <string name="stripe_success_pane_desc_singular">Tilisi on yhdistetty</string>
+  <string name="stripe_success_pane_done">Valmis</string>
+  <string name="stripe_success_pane_done_with_merchant">Takaisin kohteeseen %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Onnistui</string>
+  <string name="stripe_success_pane_title_microdeposits">Melkein valmista</string>
+  <string name="stripe_validation_account_confirm_mismatch">Tilinumerot eivät täsmää.</string>
+  <string name="stripe_validation_account_required">Tilinumero on pakollinen.</string>
+  <string name="stripe_validation_account_too_long">Virheellinen pankkitilin numero: täytyy olla enintään 17 numeroa pitkä.</string>
+  <string name="stripe_validation_no_us_routing">Virheellinen reititysnumero.</string>
+  <string name="stripe_validation_routing_required">Reititysnumero on pakollinen.</string>
+  <string name="stripe_validation_routing_too_short">Syötä 9 numeroa reititysnumerollesi.</string>
+  <string name="stripe_verification.codeExpiredEmail">Näyttää siltä, että antamasi vahvistuskoodi ei enää kelpaa. Napsauta Lähetä koodi uudelleen ja yritä uudelleen tai </string>
+  <string name="stripe_verification.codeExpiredSms">Näyttää siltä, että antamasi vahvistuskoodi ei enää kelpaa. Yritä uudelleen tai </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Hmm, kyseinen koodi ei toiminut. Tarkista se ja yritä uudelleen.</string>
+  <string name="stripe_verification.inTestMode">Olet testitilassa.</string>
+  <string name="stripe_verification.useTestCode">Käytä testikoodia</string>
+</resources>

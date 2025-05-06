@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_account_picker_cta_link_plural">Pripojiť účty</string>
+  <string name="stripe_account_picker_cta_link_singular">Pripojiť účet</string>
+  <string name="stripe_account_picker_error_no_account_available_title">Vyskytol sa problém s prístupom k vášmu %1$s účtu</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_plural">Našli sme %1$s%2$s účtov, ale môžete prepojiť len bežné alebo sporiace účty s %3$s. Skúste vybrať inú banku.</string>
+  <string name="stripe_account_picker_error_no_payment_method_desc_singular">Našli sme %1$s%2$s účet, ale môžete prepojiť len bežné alebo sporiace účty s %3$s. Skúste vybrať inú banku.</string>
+  <string name="stripe_account_picker_error_no_payment_method_title">Nie sú k dispozícii žiadne platobné účty</string>
+  <string name="stripe_account_picker_multiselect_account">Vybrať účty</string>
+  <!-- Account picker -->
+  <string name="stripe_account_picker_singleselect_account">Vybrať účet</string>
+  <string name="stripe_accounts_error_desc_manualentry">Zadajte bankové údaje manuálne alebo vyberte inú banku.</string>
+  <string name="stripe_accounts_error_desc_no_retry">Vyberte inú banku.</string>
+  <string name="stripe_accounts_error_desc_retry">Vyberte inú banku alebo to skúste znova.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc">Zadajte svoje bankové údaje manuálne</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Zadajte bankové údaje manuálne alebo vyberte inú banku.</string>
+  <string name="stripe_attachlinkedpaymentaccount_error_title">Číslo vášho účtu nebolo možné teraz sprístupniť</string>
+  <string name="stripe_close_dialog_networking_desc">Ak ho zrušíte teraz, váš účet sa prepojí so spoločnosťou %1$s, ale nebude uložené do služby Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business">Ak ho zrušíte teraz, váš účet sa prepojí so spoločnosťou, ale nebude uložené do služby Link.</string>
+  <string name="stripe_error_cta_close">Zatvoriť</string>
+  <string name="stripe_error_cta_manual_entry">Zadať bankové údaje manuálne</string>
+  <string name="stripe_error_cta_retry">Skúsiť znova</string>
+  <string name="stripe_error_cta_select_another_bank">Vybrať inú banku</string>
+  <string name="stripe_error_generic_desc">Váš účet nie je možné prepojiť teraz. Skúste to znova neskôr.</string>
+  <!-- Error pane -->
+  <string name="stripe_error_generic_title">Niečo sa pokazilo</string>
+  <string name="stripe_error_planned_downtime_desc">Ukončenie údržby je naplánované na %1$s. Vyberte inú banku alebo skúste znova neskôr.</string>
+  <string name="stripe_error_planned_downtime_title">Práve prebieha údržba %1$s</string>
+  <string name="stripe_error_unplanned_downtime_desc">Vyberte inú banku alebo skúste znova neskôr.</string>
+  <string name="stripe_error_unplanned_downtime_title">%1$s nie je práve k dispozícii</string>
+  <string name="stripe_exit_modal_cta_accept">Áno, ukončiť</string>
+  <string name="stripe_exit_modal_cta_cancel">Zrušiť</string>
+  <string name="stripe_exit_modal_desc">Váš bankový účet nebude prepojený so spoločnosťou %1$s a všetok pokrok sa stratí.</string>
+  <string name="stripe_exit_modal_desc_no_business">Váš bankový účet nebude prepojený s touto spoločnosťou a všetok pokrok sa stratí.</string>
+  <!-- Exit modal -->
+  <string name="stripe_exit_modal_title">Ukončiť bez pripojenia?</string>
+  <string name="stripe_institutionpicker_manual_entry_desc">Zadajte číslo účtu a smerové číslo</string>
+  <string name="stripe_institutionpicker_manual_entry_title">Nevidíte vašu banku?</string>
+  <string name="stripe_institutionpicker_pane_error_desc">Skúste vyhľadať inú banku</string>
+  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Skúste vyhľadať inú banku alebo </string>
+  <string name="stripe_institutionpicker_pane_error_title">Žiadne výsledky</string>
+  <!-- Institution picker -->
+  <string name="stripe_institutionpicker_pane_select_bank">Vybrať banku</string>
+  <string name="stripe_institutionpicker_search_more_title">Vyhľadať viac bánk</string>
+  <string name="stripe_link_stepup_verification_desc">Zadajte kód odoslaný na %1$s. Tento dodatočný krok vyžadujeme pravidelne, aby sme váš účet udržali v bezpečí.</string>
+  <string name="stripe_link_stepup_verification_resend_code">Znovu odoslať kód</string>
+  <!-- Networking step-up verification -->
+  <string name="stripe_link_stepup_verification_title">Overiť váš e-mail</string>
+  <!-- Loading -->
+  <string name="stripe_loading_pill_label">Počkajte, už je to skoro hotové</string>
+  <string name="stripe_manualentry_account">Číslo účtu</string>
+  <string name="stripe_manualentry_accountconfirm">Potvrďte číslo účtu</string>
+  <string name="stripe_manualentry_cta">Odoslať</string>
+  <string name="stripe_manualentry_microdeposits_desc">Vaše bankové údaje sa overia mikro vkladmi na váš účet, zvyčajne to trvá 1 – 2 pracovné dni. Podporované sú len bežné účty.</string>
+  <string name="stripe_manualentry_routing">Smerové číslo</string>
+  <string name="stripe_manualentry_test_banner">Použiť testovací účet</string>
+  <!-- Manual entry -->
+  <string name="stripe_manualentry_title">Zadať bankové údaje</string>
+  <string name="stripe_networking_link_login_warmup_cta_cancel">Zrušiť</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue">Pokračovať so službou Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_skip">Teraz nie</string>
+  <!-- Networking warmup -->
+  <string name="stripe_networking_link_login_warmup_description">Použite informácie, ktoré ste predtým uložili pomocou svojho účtu Link.</string>
+  <string name="stripe_networking_link_login_warmup_title">Pokračovať so službou Link</string>
+  <string name="stripe_networking_save_to_link_verification_cta_negative">Teraz nie</string>
+  <string name="stripe_networking_save_to_link_verification_title">Potvrdenie vašej totožnosti</string>
+  <!-- Networking signup -->
+  <string name="stripe_networking_signup_email_label">E-mailová adresa</string>
+  <string name="stripe_networking_verification_desc">Zadajte kód zaslaný na telefónne číslo %1$s</string>
+  <!-- Networking verification -->
+  <string name="stripe_networking_verification_title">Potvrdenie vašej totožnosti</string>
+  <!-- Partner auth -->
+  <string name="stripe_prepane_cancel_cta">Zrušiť</string>
+  <string name="stripe_prepane_choose_different_bank_cta">Vybrať inú banku</string>
+  <string name="stripe_search">Vyhľadať</string>
+  <string name="stripe_success_pane_desc_link_error_plural">Vaše účty boli pripojené, ale nebolo možné uloženie so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular">Váš účet bol pripojený, ale nebolo možné uloženie so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural">Vaše účty boli pripojené a uložené so službou Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular">Váš účet bol pripojený a uložený so službou Link.</string>
+  <string name="stripe_success_pane_desc_microdeposits">Mikro vklady na účet ••••%1$s môžete očakávať do 1 – 2 dní a e-mail s ďalšími pokynmi.</string>
+  <string name="stripe_success_pane_desc_plural">Vaše účty boli pripojené</string>
+  <string name="stripe_success_pane_desc_singular">Váš účet bol pripojený</string>
+  <string name="stripe_success_pane_done">Hotovo</string>
+  <string name="stripe_success_pane_done_with_merchant">Späť na %1$s</string>
+  <!-- Success panes -->
+  <string name="stripe_success_pane_title">Úspech</string>
+  <string name="stripe_success_pane_title_microdeposits">Už je to takmer hotové</string>
+  <string name="stripe_validation_account_confirm_mismatch">Čísla účtov sa nezhodujú.</string>
+  <string name="stripe_validation_account_required">Vyžaduje sa číslo účtu.</string>
+  <string name="stripe_validation_account_too_long">Neplatné číslo bankového účtu: musí mať maximálne 17 číslic.</string>
+  <string name="stripe_validation_no_us_routing">Neplatné smerové číslo.</string>
+  <string name="stripe_validation_routing_required">Smerové číslo je povinné.</string>
+  <string name="stripe_validation_routing_too_short">Zadajte 9-miestne smerové číslo.</string>
+  <string name="stripe_verification.codeExpiredEmail">Zdá sa, že vami zadaný overovací kód už nie je platný. Kliknite na položku „Znova zaslať kód“ a skúste to znova alebo </string>
+  <string name="stripe_verification.codeExpiredSms">Zdá sa, že vami zadaný overovací kód už nie je platný. Skúste to znova alebo </string>
+  <!-- Verification (shared) -->
+  <string name="stripe_verification.codeInvalid">Tento kód nefungoval. Skontrolujte ho ešte raz a skúste to znova.</string>
+  <string name="stripe_verification.inTestMode">Ste v testovacom režime.</string>
+  <string name="stripe_verification.useTestCode">Použiť testovací kód</string>
+</resources>
