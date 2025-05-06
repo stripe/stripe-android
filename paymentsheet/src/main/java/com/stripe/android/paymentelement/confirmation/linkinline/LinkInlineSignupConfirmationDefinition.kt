@@ -164,6 +164,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                     saveOption.shouldSave()
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
+            originatedFromWallet = true,
         )
     }
 

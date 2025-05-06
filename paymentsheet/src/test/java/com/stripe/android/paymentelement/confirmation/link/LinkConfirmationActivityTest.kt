@@ -121,6 +121,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
                     )
                 )
 
@@ -224,7 +225,11 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             arrayOf(false),
         )
 
-        val PAYMENT_INTENT = PaymentIntentFactory.create().copy(
+        val PAYMENT_INTENT = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = """
+                {"card": {"require_cvc_recollection": true}}
+            """.trimIndent()
+        ).copy(
             id = "pm_1",
             amount = 5000,
             currency = "CAD",

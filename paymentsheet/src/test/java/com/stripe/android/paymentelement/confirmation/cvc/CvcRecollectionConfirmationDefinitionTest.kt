@@ -61,6 +61,22 @@ class CvcRecollectionConfirmationDefinitionTest {
     }
 
     @Test
+    fun `'canConfirm' returns 'false' if payment method originated from wallet`() = test(
+        handler = FakeCvcRecollectionHandler().apply {
+            requiresCVCRecollection = true
+        }
+    ) {
+        assertThat(
+            definition.canConfirm(
+                confirmationOption = createSavedConfirmationOption(
+                    originatedFromWallet = true,
+                ),
+                confirmationParameters = CONFIRMATION_PARAMETERS,
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun `'canConfirm' returns 'false' if CVC recollection is not required`() = test(
         handler = FakeCvcRecollectionHandler().apply {
             requiresCVCRecollection = false
@@ -273,11 +289,13 @@ class CvcRecollectionConfirmationDefinitionTest {
     }
 
     private fun createSavedConfirmationOption(
-        optionsParams: PaymentMethodOptionsParams? = null
+        optionsParams: PaymentMethodOptionsParams? = null,
+        originatedFromWallet: Boolean = false,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = optionsParams,
+            originatedFromWallet = originatedFromWallet,
         )
     }
 

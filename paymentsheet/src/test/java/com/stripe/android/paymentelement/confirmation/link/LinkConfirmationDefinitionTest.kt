@@ -189,6 +189,7 @@ internal class LinkConfirmationDefinitionTest {
         val savedOption = nextStepResult.confirmationOption.asSaved()
 
         assertThat(savedOption.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(savedOption.originatedFromWallet).isTrue()
         assertThat(savedOption.optionsParams).isNull()
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()

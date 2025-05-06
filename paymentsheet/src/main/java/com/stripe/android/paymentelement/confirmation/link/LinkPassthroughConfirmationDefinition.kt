@@ -91,6 +91,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
             PaymentMethodConfirmationOption.Saved(
                 paymentMethod = paymentMethod,
                 optionsParams = null,
+                originatedFromWallet = true,
             )
         }
     }

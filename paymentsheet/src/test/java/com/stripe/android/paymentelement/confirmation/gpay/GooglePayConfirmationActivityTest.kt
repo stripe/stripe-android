@@ -82,6 +82,7 @@ internal class GooglePayConfirmationActivityTest {
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
                     )
                 )
 
@@ -269,7 +270,11 @@ internal class GooglePayConfirmationActivityTest {
     }
 
     private companion object {
-        val PAYMENT_INTENT = PaymentIntentFactory.create().copy(
+        val PAYMENT_INTENT = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = """
+                {"card": {"require_cvc_recollection": true}}
+            """.trimIndent()
+        ).copy(
             id = "pm_1",
             amount = 5000,
             currency = "CAD",
