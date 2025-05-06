@@ -94,7 +94,7 @@ internal fun SignUpBody(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary
+            color = LinkTheme.colorsV2.typeTertiary
         )
         Text(
             text = stringResource(R.string.stripe_link_sign_up_message),
@@ -103,7 +103,7 @@ internal fun SignUpBody(
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textSecondary
+            color = LinkTheme.colorsV2.typeSecondary
         )
         StripeThemeForLink {
             EmailCollectionSection(
@@ -179,7 +179,7 @@ private fun EmailCollectionSection(
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                color = LinkTheme.colors.progressIndicator,
+                color = LinkTheme.colorsV2.iconBrand,
                 strokeWidth = 2.dp
             )
         }

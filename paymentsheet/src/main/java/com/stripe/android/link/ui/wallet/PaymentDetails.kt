@@ -80,8 +80,8 @@ internal fun PaymentDetailsListItem(
                     .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
                     .padding(end = 12.dp),
                 colors = RadioButtonDefaults.colors(
-                    selectedColor = LinkTheme.colors.actionLabelLight,
-                    unselectedColor = LinkTheme.colors.disabledText
+                    selectedColor = LinkTheme.colorsV2.buttonBrand,
+                    unselectedColor = LinkTheme.colorsV2.borderDefault
                 )
             )
 
@@ -98,13 +98,13 @@ internal fun PaymentDetailsListItem(
                     DefaultTag()
                 }
 
-                val showWarning = (paymentDetails as? Card)?.isExpired ?: false
+                val showWarning = (paymentDetails as? Card)?.isExpired == true
                 if (showWarning) {
                     Icon(
                         painter = painterResource(R.drawable.stripe_link_error),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
-                        tint = LinkTheme.colors.errorText
+                        tint = LinkTheme.colorsV2.iconCritical
                     )
                 }
             }
@@ -247,7 +247,7 @@ private fun MenuAndLoader(
                 Icon(
                     imageVector = Icons.Filled.MoreVert,
                     contentDescription = stringResource(StripeR.string.stripe_edit),
-                    tint = LinkTheme.colors.actionLabelLight,
+                    tint = LinkTheme.colorsV2.iconBrand,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -260,7 +260,7 @@ private fun DefaultTag() {
     Box(
         modifier = Modifier
             .background(
-                color = LinkTheme.colors.secondary,
+                color = LinkTheme.colorsV2.surfaceSecondary,
                 shape = LinkTheme.shapes.extraSmall
             ),
         contentAlignment = Alignment.Center
@@ -268,7 +268,7 @@ private fun DefaultTag() {
         Text(
             text = stringResource(id = R.string.stripe_wallet_default),
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-            color = LinkTheme.colors.disabledText,
+            color = LinkTheme.colorsV2.typeTertiary,
             style = LinkTheme.typography.caption,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
@@ -360,7 +360,7 @@ private fun RowScope.PaymentMethodInfo(
         Column {
             Text(
                 text = title,
-                color = LinkTheme.colors.textPrimary,
+                color = LinkTheme.colorsV2.typePrimary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = LinkTheme.typography.bodyEmphasized,
@@ -369,7 +369,7 @@ private fun RowScope.PaymentMethodInfo(
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = LinkTheme.colors.textSecondary,
+                    color = LinkTheme.colorsV2.typeSecondary,
                     style = LinkTheme.typography.detail,
                 )
             }
@@ -394,7 +394,7 @@ private fun BankIcon(
     val containerModifier = if (isGenericIcon) {
         modifier
             .background(
-                color = LinkTheme.colors.componentBorder,
+                color = LinkTheme.colorsV2.surfaceSecondary,
                 shape = RoundedCornerShape(3.dp),
             )
             .padding(4.dp)
@@ -409,7 +409,7 @@ private fun BankIcon(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
             colorFilter = if (isGenericIcon) {
-                ColorFilter.tint(LinkTheme.colors.textSecondary)
+                ColorFilter.tint(LinkTheme.colorsV2.iconPrimary)
             } else {
                 null
             },

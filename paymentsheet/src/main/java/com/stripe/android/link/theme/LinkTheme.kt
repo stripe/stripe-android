@@ -8,7 +8,7 @@ internal object LinkTheme {
         @Composable
         get() = LocalLinkTypography.current
 
-    val colors: LinkColors
+    val colorsV2: LinkColors
         @Composable
         get() = LocalLinkColors.current
 

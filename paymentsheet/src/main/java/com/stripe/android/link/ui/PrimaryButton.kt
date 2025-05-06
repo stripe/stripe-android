@@ -60,8 +60,8 @@ internal fun PrimaryButton(
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.primary,
-                    disabledBackgroundColor = LinkTheme.colors.primary,
+                    backgroundColor = LinkTheme.colorsV2.buttonBrand,
+                    disabledBackgroundColor = LinkTheme.colorsV2.buttonBrand,
                 )
             ) {
                 when (state) {
@@ -71,7 +71,7 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = ProgressIndicatorTestTag
                             },
-                        color = LinkTheme.colors.buttonLabel,
+                        color = LinkTheme.colorsV2.typePrimary,
                         strokeWidth = 2.dp
                     )
                     PrimaryButtonState.Completed -> Icon(
@@ -82,7 +82,7 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = CompletedIconTestTag
                             },
-                        tint = LinkTheme.colors.buttonLabel
+                        tint = LinkTheme.colorsV2.typePrimary
                     )
                     else -> Row(
                         Modifier.fillMaxWidth(),
@@ -92,7 +92,7 @@ internal fun PrimaryButton(
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
-                            color = LinkTheme.colors.buttonLabel
+                            color = LinkTheme.colorsV2.typePrimary
                                 .copy(alpha = LocalContentAlpha.current),
                             textAlign = TextAlign.Center,
                             style = LinkTheme.typography.bodyEmphasized,
@@ -122,7 +122,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colorsV2.typePrimary.copy(alpha = LocalContentAlpha.current)
             )
         }
     }
