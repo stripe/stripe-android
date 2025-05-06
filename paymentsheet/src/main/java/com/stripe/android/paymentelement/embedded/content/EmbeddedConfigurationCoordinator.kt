@@ -68,10 +68,17 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
             newSelection = state.paymentSelection,
             newConfiguration = configuration.asCommonConfiguration(),
         )
+        val shouldUseNewPaymentSelection =
+            (configuration.rowSelectionBehavior == EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction &&
+                configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm).not()
         stateHelper.state = EmbeddedPaymentElement.State(
             confirmationState = EmbeddedConfirmationStateHolder.State(
                 paymentMethodMetadata = state.paymentMethodMetadata,
-                selection = newPaymentSelection,
+                selection = if (shouldUseNewPaymentSelection) {
+                    newPaymentSelection
+                } else {
+                    null
+                },
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration
                 ),

@@ -8,6 +8,8 @@ import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.EmbeddedPaymentElement.Configuration
+import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -48,6 +50,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
+        validateRowSelectionConfiguration(configuration)
         val targetConfiguration = configuration.asCommonConfiguration()
         eventReporter.onInit(
             commonConfiguration = targetConfiguration,
@@ -124,6 +127,18 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         )
 
         return coalescingOrchestrator.get()
+    }
+
+    private fun validateRowSelectionConfiguration(configuration: Configuration) {
+        if (configuration.rowSelectionBehavior == RowSelectionBehavior.ImmediateAction &&
+            (configuration.googlePay != null || configuration.customer != null)
+        ) {
+            throw IllegalArgumentException(
+                "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
+                    "when Google Pay or a customer configuration is provided. " +
+                    "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
+            )
+        }
     }
 
     @Parcelize
