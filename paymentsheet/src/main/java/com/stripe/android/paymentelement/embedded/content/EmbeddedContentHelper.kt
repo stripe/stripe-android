@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -39,6 +40,7 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface EmbeddedContentHelper {
     val embeddedContent: StateFlow<EmbeddedContent?>
+    val expressCheckoutContent: StateFlow<ExpressCheckoutContent?>
 
     fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -62,6 +64,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
+    private val linkHandler: LinkHandler,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
@@ -78,6 +81,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
+    private val _expressCheckoutContent = MutableStateFlow<ExpressCheckoutContent?>(null)
+    override val expressCheckoutContent: StateFlow<ExpressCheckoutContent?> = _expressCheckoutContent.asStateFlow()
+
     private var sheetLauncher: EmbeddedSheetLauncher? = null
 
     init {
@@ -90,10 +96,28 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         interactor = createInteractor(
                             coroutineScope = coroutineScope,
                             paymentMethodMetadata = state.paymentMethodMetadata,
-                            walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
+                            walletsState = embeddedWalletsHelper.walletsState(
+                                state.paymentMethodMetadata
+                            ),
                         ),
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         rowStyle = state.rowStyle,
+                    )
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            state.collect { state ->
+                _expressCheckoutContent.value = if (state == null) {
+                    null
+                } else {
+                    ExpressCheckoutContent(
+                        interactor = createExpressCheckoutInteractor(
+                            confirmationHandler = confirmationHandler,
+                            linkHandler = linkHandler,
+                            coroutineScope = coroutineScope,
+                        ),
                     )
                 }
             }
@@ -106,6 +130,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         eventReporter.onShowNewPaymentOptions()
+        linkHandler.setupLink(paymentMethodMetadata.linkState)
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
             rowStyle = rowStyle,
@@ -208,6 +233,20 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     true
                 }
             }
+        )
+    }
+
+    private fun createExpressCheckoutInteractor(
+        linkHandler: LinkHandler,
+        confirmationHandler: ConfirmationHandler,
+        coroutineScope: CoroutineScope,
+    ): ExpressCheckoutInteractor {
+        return DefaultExpressCheckoutInteractor(
+            isLinkEnabled = linkHandler.isLinkEnabled,
+            linkEmail = linkHandler.linkConfigurationCoordinator.emailFlow,
+            confirmationState = confirmationStateHolder.stateFlow,
+            confirmationHandler = confirmationHandler,
+            coroutineScope = coroutineScope,
         )
     }
 
