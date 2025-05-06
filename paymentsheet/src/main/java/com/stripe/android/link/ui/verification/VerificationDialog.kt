@@ -10,6 +10,7 @@ import androidx.compose.ui.window.Dialog
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 
 @Composable
 internal fun VerificationDialog(
@@ -48,7 +49,10 @@ internal fun VerificationDialogBody(
             }
         ) {
             DefaultLinkTheme {
-                Surface(shape = RoundedCornerShape(16.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = LinkTheme.colors.background,
+                ) {
                     VerificationScreen(viewModel)
                 }
             }

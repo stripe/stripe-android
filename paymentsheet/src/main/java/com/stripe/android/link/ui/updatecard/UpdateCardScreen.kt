@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui.updatecard
 
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -13,7 +13,9 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.Loader
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -57,7 +59,8 @@ internal fun UpdateCardScreenBody(
             modifier = Modifier
                 .padding(bottom = 32.dp),
             text = stringResource(R.string.stripe_link_update_card_title),
-            style = MaterialTheme.typography.h2
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary,
         )
 
         StripeThemeForLink {
@@ -70,17 +73,17 @@ internal fun UpdateCardScreenBody(
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
-                style = MaterialTheme.typography.subtitle2,
-                color = MaterialTheme.colors.onSecondary
+                style = LinkTheme.typography.bodyEmphasized,
+                color = LinkTheme.colors.textSecondary,
             )
         }
 
         state.errorMessage?.let {
-            Text(
-                modifier = Modifier.padding(top = 8.dp),
+            ErrorText(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
                 text = it.resolve(),
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.error
             )
         }
 

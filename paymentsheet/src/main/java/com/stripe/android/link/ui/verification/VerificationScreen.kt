@@ -15,7 +15,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,9 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
@@ -115,8 +113,8 @@ internal fun VerificationBody(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 20.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSecondary
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textSecondary,
         )
 
         StripeThemeForLink {
@@ -126,7 +124,7 @@ internal fun VerificationBody(
                 modifier = Modifier
                     .testTag(VERIFICATION_OTP_TAG)
                     .padding(vertical = 10.dp),
-                colors = MaterialTheme.linkColors.otpElementColors,
+                colors = LinkTheme.colors.otpElementColors,
                 focusRequester = focusRequester
             )
         }
@@ -158,8 +156,8 @@ internal fun VerificationBody(
             Text(
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                 text = state.email,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onSecondary,
+                style = LinkTheme.typography.detail,
+                color = LinkTheme.colors.textSecondary,
             )
         }
     }
@@ -205,8 +203,8 @@ private fun Header(
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onPrimary
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary,
         )
     } else {
         Text(
@@ -215,8 +213,8 @@ private fun Header(
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onPrimary
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary,
         )
     }
 }
@@ -234,10 +232,10 @@ private fun ChangeEmailRow(
         Text(
             text = stringResource(id = R.string.stripe_verification_not_email, email),
             modifier = Modifier.weight(weight = 1f, fill = false),
-            color = MaterialTheme.colors.onSecondary,
+            color = LinkTheme.colors.textSecondary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            style = MaterialTheme.typography.body2
+            style = LinkTheme.typography.detail,
         )
         Text(
             text = stringResource(id = R.string.stripe_verification_change_email),
@@ -248,9 +246,9 @@ private fun ChangeEmailRow(
                     enabled = !isProcessing,
                     onClick = onChangeEmailClick
                 ),
-            color = MaterialTheme.linkColors.actionLabel,
+            color = LinkTheme.colors.actionLabel,
             maxLines = 1,
-            style = MaterialTheme.typography.body2
+            style = LinkTheme.typography.detail,
         )
     }
 }
@@ -267,10 +265,10 @@ private fun ResendCodeButton(
             .padding(top = 12.dp)
             .border(
                 width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.extraSmall,
+                color = LinkTheme.colors.componentBorder,
+                shape = LinkTheme.shapes.extraSmall,
             )
-            .clip(shape = MaterialTheme.linkShapes.extraSmall)
+            .clip(shape = LinkTheme.shapes.extraSmall)
             .clickable(
                 enabled = !isProcessing && !isSendingNewCode,
                 onClick = onClick,
@@ -287,8 +285,8 @@ private fun ResendCodeButton(
 
         Text(
             text = stringResource(id = R.string.stripe_verification_resend),
-            style = MaterialTheme.typography.button,
-            color = MaterialTheme.colors.onPrimary,
+            style = LinkTheme.typography.detailEmphasized,
+            color = LinkTheme.colors.textPrimary,
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 4.dp)
                 .alpha(textAlpha),
@@ -298,7 +296,7 @@ private fun ResendCodeButton(
             visible = isSendingNewCode
         ) {
             CircularProgressIndicator(
-                color = MaterialTheme.colors.onPrimary,
+                color = LinkTheme.colors.textPrimary,
                 strokeWidth = 2.dp,
                 modifier = Modifier
                     .testTag(VERIFICATION_RESEND_LOADER_TAG)

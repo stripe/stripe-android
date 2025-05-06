@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.paymentmenthod
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -14,6 +13,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -55,7 +55,8 @@ internal fun PaymentMethodBody(
             modifier = Modifier
                 .padding(bottom = 32.dp),
             text = R.string.stripe_add_payment_method.resolvableString.resolve(context),
-            style = MaterialTheme.typography.h2
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary,
         )
 
         StripeThemeForLink {

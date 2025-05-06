@@ -1,9 +1,6 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
@@ -47,6 +44,11 @@ private val DarkSecondaryButtonLabel = ActionGreen
 private val DarkOtpPlaceholder = Color(0x61FFFFFF)
 
 internal data class LinkColors(
+    val primary: Color,
+    val secondary: Color,
+    val background: Color,
+    val textPrimary: Color,
+    val textSecondary: Color,
     val componentBackground: Color,
     val componentBorder: Color,
     val componentDivider: Color,
@@ -57,7 +59,6 @@ internal data class LinkColors(
     val disabledText: Color,
     val errorComponentBackground: Color,
     val progressIndicator: Color,
-    val materialColors: Colors,
     val secondaryButtonLabel: Color,
     val sheetScrim: Color,
     val closeButton: Color,
@@ -71,6 +72,11 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
+        primary = LinkTeal,
+        secondary = LightFill,
+        background = LightBackground,
+        textPrimary = LightTextPrimary,
+        textSecondary = LightTextSecondary,
         componentBackground = LightComponentBackground,
         componentBorder = LightComponentBorder,
         componentDivider = LightComponentDivider,
@@ -89,17 +95,14 @@ internal object LinkThemeConfig {
             placeholder = LightOtpPlaceholder
         ),
         actionLabel = ActionGreen,
-        materialColors = lightColors(
-            primary = LinkTeal,
-            secondary = LightFill,
-            background = LightBackground,
-            surface = LightBackground,
-            onPrimary = LightTextPrimary,
-            onSecondary = LightTextSecondary,
-        )
     )
 
     private val colorsDark = colorsLight.copy(
+        primary = LinkTeal,
+        secondary = DarkFill,
+        background = DarkBackground,
+        textPrimary = DarkTextPrimary,
+        textSecondary = DarkTextSecondary,
         componentBackground = DarkComponentBackground,
         componentBorder = DarkComponentBorder,
         componentDivider = DarkComponentDivider,
@@ -112,14 +115,6 @@ internal object LinkThemeConfig {
             selectedBorder = LinkTeal,
             placeholder = DarkOtpPlaceholder
         ),
-        materialColors = darkColors(
-            primary = LinkTeal,
-            secondary = DarkFill,
-            background = DarkBackground,
-            surface = DarkBackground,
-            onPrimary = DarkTextPrimary,
-            onSecondary = DarkTextSecondary,
-        )
     )
 }
 

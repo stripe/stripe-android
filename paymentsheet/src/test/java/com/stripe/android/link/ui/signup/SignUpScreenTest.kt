@@ -22,6 +22,7 @@ import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -58,7 +59,9 @@ internal class SignUpScreenTest {
         )
 
         composeTestRule.setContent {
-            SignUpScreen(viewModel = viewModel)
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
         }
 
         onEmailField().assertIsDisplayed()
@@ -73,7 +76,9 @@ internal class SignUpScreenTest {
         val viewModel = viewModel()
 
         composeTestRule.setContent {
-            SignUpScreen(viewModel = viewModel)
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
         }
 
         dispatcher.scheduler.advanceTimeBy(1500)
@@ -96,7 +101,9 @@ internal class SignUpScreenTest {
         )
 
         composeTestRule.setContent {
-            SignUpScreen(viewModel = viewModel)
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
         }
 
         dispatcher.scheduler.advanceTimeBy(1001)
@@ -115,7 +122,9 @@ internal class SignUpScreenTest {
             val viewModel = viewModel(linkAuth = linkAuth)
 
             composeTestRule.setContent {
-                SignUpScreen(viewModel)
+                DefaultLinkTheme {
+                    SignUpScreen(viewModel)
+                }
             }
 
             linkAuth.signupResult = LinkAuthResult.Error(error)
@@ -136,7 +145,9 @@ internal class SignUpScreenTest {
             val viewModel = viewModel(linkAuth = linkAuth)
 
             composeTestRule.setContent {
-                SignUpScreen(viewModel)
+                DefaultLinkTheme {
+                    SignUpScreen(viewModel)
+                }
             }
 
             viewModel.emailController.onRawValueChange(TestFactory.CUSTOMER_EMAIL)
@@ -172,7 +183,9 @@ internal class SignUpScreenTest {
             val viewModel = viewModel(linkAuth = linkAuth)
 
             composeTestRule.setContent {
-                SignUpScreen(viewModel)
+                DefaultLinkTheme {
+                    SignUpScreen(viewModel)
+                }
             }
 
             viewModel.emailController.onRawValueChange("a@b.com")
@@ -194,7 +207,9 @@ internal class SignUpScreenTest {
             val viewModel = viewModel(linkAuth = linkAuth)
 
             composeTestRule.setContent {
-                SignUpScreen(viewModel)
+                DefaultLinkTheme {
+                    SignUpScreen(viewModel)
+                }
             }
 
             linkAuth.lookupResult = LinkAuthResult.Error(error)

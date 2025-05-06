@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,8 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
-import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
@@ -94,8 +93,8 @@ internal fun SignUpBody(
                 .testTag(SIGN_UP_HEADER_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onSurface
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary
         )
         Text(
             text = stringResource(R.string.stripe_link_sign_up_message),
@@ -103,8 +102,8 @@ internal fun SignUpBody(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSecondary
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textSecondary
         )
         StripeThemeForLink {
             EmailCollectionSection(
@@ -180,7 +179,7 @@ private fun EmailCollectionSection(
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                color = MaterialTheme.linkColors.progressIndicator,
+                color = LinkTheme.colors.progressIndicator,
                 strokeWidth = 2.dp
             )
         }

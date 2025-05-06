@@ -1,14 +1,25 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-private val LocalColors = staticCompositionLocalOf { LinkThemeConfig.colors(false) }
+internal val LocalLinkTypography = staticCompositionLocalOf<LinkTypography> {
+    error("No Typography provided")
+}
+
+internal val LocalLinkColors = staticCompositionLocalOf<LinkColors> {
+    error("No Colors provided")
+}
+
+internal val LocalLinkShapes = staticCompositionLocalOf<LinkShapes> {
+    error("No Shapes provided")
+}
 
 internal val MinimumTouchTargetSize = 48.dp
 internal val PrimaryButtonHeight = 56.dp
@@ -20,26 +31,37 @@ internal fun DefaultLinkTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = LinkThemeConfig.colors(darkTheme)
-
-    CompositionLocalProvider(LocalColors provides colors) {
+    CompositionLocalProvider(
+        LocalLinkTypography provides linkTypography,
+        LocalLinkColors provides LinkThemeConfig.colors(darkTheme),
+        LocalLinkShapes provides LinkShapes,
+    ) {
         MaterialTheme(
-            colors = colors.materialColors,
-            typography = Typography,
-            shapes = MaterialTheme.shapes,
+            colors = debugColors(),
         ) {
             content()
         }
     }
 }
 
-@Suppress("UnusedReceiverParameter")
-internal val MaterialTheme.linkColors: LinkColors
-    @Composable
-    @ReadOnlyComposable
-    get() = LocalColors.current
-
-internal val MaterialTheme.linkShapes: LinkShapes
-    @Composable
-    @ReadOnlyComposable
-    get() = LinkShapes
+/**
+ * A Material [Colors] implementation which sets all colors to [debugColor] to discourage usage of
+ * [MaterialTheme.colors] in preference to [FinancialConnectionsColors].
+ */
+private fun debugColors(
+    debugColor: Color = Color.Magenta
+) = Colors(
+    primary = debugColor,
+    primaryVariant = debugColor,
+    secondary = debugColor,
+    secondaryVariant = debugColor,
+    background = debugColor,
+    surface = debugColor,
+    error = debugColor,
+    onPrimary = debugColor,
+    onSecondary = debugColor,
+    onBackground = debugColor,
+    onSurface = debugColor,
+    onError = debugColor,
+    isLight = true
+)
