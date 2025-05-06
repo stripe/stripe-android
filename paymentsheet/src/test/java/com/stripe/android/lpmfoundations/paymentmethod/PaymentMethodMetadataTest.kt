@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -8,6 +9,8 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
@@ -1034,6 +1037,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
             linkState = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1069,9 +1073,8 @@ internal class PaymentMethodMetadataTest {
                 )
             ),
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = true,
-                isPaymentMethodSetAsDefaultEnabled = false,
+            customerMetadata = getDefaultCustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = false
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
@@ -1123,7 +1126,7 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isPaymentMethodSyncDefaultEnabled = false,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1141,9 +1144,8 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             displayableCustomPaymentMethods = emptyList(),
             externalPaymentMethodSpecs = listOf(),
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = true,
-                isPaymentMethodSetAsDefaultEnabled = false,
+            customerMetadata = getDefaultCustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
@@ -1225,6 +1227,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkInlineConfiguration = null,
             linkState = null,
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
         )
     }
 
@@ -1672,6 +1675,16 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isTrue()
     }
 
+    fun `Passes CBF along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
+    }
+
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
         return LinkInlineConfiguration(
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
@@ -1691,6 +1704,7 @@ internal class PaymentMethodMetadataTest {
                     eligible = true,
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
+                cardBrandFilter = DefaultCardBrandFilter,
                 passthroughModeEnabled = false,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,

@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][10761](https://github.com/stripe/stripe-android/pull/10761) Updated the "TEST MODE" badge to say "TEST", due to the upcoming release of [Sandboxes](https://docs.stripe.com/sandboxes).
+* [CHANGED][10704](https://github.com/stripe/stripe-android/pull/10704) Embedded Payment Element now uses `FormSheetAction.Continue` by default.
+
 ## 21.12.0 - 2025-04-28
 
 ### PaymentSheet
@@ -23,7 +27,7 @@ Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10
 * Bumped Androidx Navigation from 2.7.7 to 2.8.5.
 
 ### PaymentSheet
-[Added] Bank payments are now available in the PaymentSheet without requiring a dependency on `:financial-connections`.
+* [ADDED] Bank payments are now available in the PaymentSheet without requiring a dependency on `:financial-connections`.
 
 ## 21.10.0 - 2025-04-11
 

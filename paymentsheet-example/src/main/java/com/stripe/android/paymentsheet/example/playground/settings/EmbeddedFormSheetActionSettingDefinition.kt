@@ -12,7 +12,7 @@ internal object EmbeddedFormSheetActionSettingDefinition :
     PlaygroundSettingDefinition.Saveable<EmbeddedFormSheetActionSettingDefinition.FormSheetAction> by EnumSaveable(
         key = "embeddedFormSheetAction",
         values = FormSheetAction.entries.toTypedArray(),
-        defaultValue = FormSheetAction.Confirm
+        defaultValue = FormSheetAction.Continue
     ),
     PlaygroundSettingDefinition.Displayable<EmbeddedFormSheetActionSettingDefinition.FormSheetAction> {
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {

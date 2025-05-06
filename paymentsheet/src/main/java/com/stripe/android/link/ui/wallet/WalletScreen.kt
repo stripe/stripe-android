@@ -10,10 +10,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
@@ -133,11 +136,13 @@ internal fun WalletBody(
         }
     }
 
+    // TODO(tillh-stripe): Replace this with ScrollableTopLevelColumn
     ScrollableColumn(
         modifier = Modifier
             .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
     ) {
         PaymentDetailsSection(
             modifier = Modifier,
@@ -482,20 +487,23 @@ private fun ExpandedPaymentDetails(
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
-    val isEnabled = !uiState.primaryButtonState.isBlocking
+    val isInteractionEnabled = !uiState.primaryButtonState.isBlocking
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(
-            isEnabled = isEnabled,
+            isEnabled = isInteractionEnabled,
             onCollapse = onCollapse
         )
 
         uiState.paymentDetailsList.forEachIndexed { index, item ->
+            val isItemAvailable = uiState.isItemAvailable(item)
             PaymentDetailsListItem(
                 modifier = Modifier
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
                 paymentDetails = item,
-                enabled = isEnabled,
+                isClickable = isInteractionEnabled && isItemAvailable,
+                isMenuButtonClickable = isInteractionEnabled,
+                isAvailable = isItemAvailable,
                 isSelected = uiState.selectedItem?.id == item.id,
                 isUpdating = uiState.cardBeingUpdated == item.id,
                 onClick = { onItemSelected(item) },
@@ -512,7 +520,7 @@ private fun ExpandedPaymentDetails(
 
         if (uiState.canAddNewPaymentMethod) {
             AddPaymentMethodRow(
-                isEnabled = isEnabled,
+                isEnabled = isInteractionEnabled,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
             )
         }

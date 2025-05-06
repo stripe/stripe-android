@@ -38,5 +38,5 @@
     <!--    <string name="paymentsheet_payment_method_item_card_number">····%1$s</string>-->
 
     <!--    &lt;!&ndash; Label indicating the payment intent is in testmode &ndash;&gt;-->
-    <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>-->
+    <!--    <string name="stripe_paymentsheet_test_mode_indicator">TEST</string>-->
 </resources>

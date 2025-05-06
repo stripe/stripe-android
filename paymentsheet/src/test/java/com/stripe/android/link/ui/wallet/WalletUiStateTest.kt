@@ -1,10 +1,12 @@
 package com.stripe.android.link.ui.wallet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -165,9 +167,49 @@ class WalletUiStateTest {
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
     }
 
+    @Test
+    fun testPaymentMethodAvailability() {
+        val paymentDetailsList = listOf(
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                brand = CardBrand.MasterCard,
+                last4 = "1234"
+            )
+        )
+        val state = walletUiState(
+            paymentDetailsList = paymentDetailsList,
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+        )
+
+        assertThat(state.isItemAvailable(paymentDetailsList[0])).isFalse()
+        assertThat(state.isItemAvailable(paymentDetailsList[1])).isTrue()
+        assertThat(state.isItemAvailable(paymentDetailsList[2])).isTrue()
+    }
+
+    @Test
+    fun testIsExpanded() {
+        val state = walletUiState(
+            paymentDetailsList = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD),
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+        )
+        val noVisa = RejectCardBrands(CardBrand.Visa)
+
+        // Collapsed when there's a valid selection.
+        assertThat(state.isExpanded).isFalse()
+
+        // Expanded when there's no valid selection.
+        assertThat(state.copy(cardBrandFilter = noVisa).isExpanded).isTrue()
+
+        // User interaction is respected.
+        assertThat(state.copy(userSetIsExpanded = false, cardBrandFilter = noVisa).isExpanded).isFalse()
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
+        cardBrandFilter: CardBrandFilter = RejectCardBrands(),
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
@@ -181,6 +223,7 @@ class WalletUiStateTest {
             paymentDetailsList = paymentDetailsList,
             email = "email@stripe.com",
             selectedItemId = selectedItem?.id,
+            cardBrandFilter = cardBrandFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,

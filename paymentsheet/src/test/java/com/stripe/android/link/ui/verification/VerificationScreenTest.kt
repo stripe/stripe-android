@@ -214,8 +214,6 @@ internal class VerificationScreenTest {
         onVerificationHeaderButtonTag()
             .performClick()
 
-        composeTestRule.awaitIdle()
-
         assertThat(dismissClicked).isTrue()
     }
 

@@ -11,6 +11,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
@@ -19,6 +20,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.EmailSource
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
@@ -43,6 +45,7 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
@@ -156,13 +159,15 @@ internal class SignUpViewModel @Inject constructor(
                 it.copy(isSubmitting = true)
             }
 
-            val signupResult = linkAuth.signUp(
-                email = emailController.fieldValue.value,
-                phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
-                country = phoneNumberController.getCountryCode(),
-                name = nameController.fieldValue.value,
-                consentAction = SignUpConsentAction.Implied
-            )
+            val signupResult = dismissalCoordinator.withDismissalDisabled {
+                linkAuth.signUp(
+                    email = emailController.fieldValue.value,
+                    phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+                    country = phoneNumberController.getCountryCode(),
+                    name = nameController.fieldValue.value,
+                    consentAction = SignUpConsentAction.Implied
+                )
+            }
 
             when (signupResult) {
                 is LinkAuthResult.AttestationFailed -> {
@@ -255,6 +260,7 @@ internal class SignUpViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
+                        dismissalCoordinator = parentComponent.dismissalCoordinator,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb
                     )

@@ -284,13 +284,9 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             linkInlineConfiguration: LinkInlineConfiguration?,
             linkState: LinkState?,
+            customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
-            val customerMetadata =
-                CustomerMetadata(
-                    hasCustomerConfiguration = configuration.customer != null,
-                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
-                )
 
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -329,7 +325,7 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isPaymentMethodSyncDefaultEnabled: Boolean,
+            customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -344,10 +340,7 @@ internal data class PaymentMethodMetadata(
                 merchantName = configuration.merchantDisplayName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
-                customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = true,
-                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-                ),
+                customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
@@ -385,6 +378,7 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
                     isPaymentMethodSetAsDefaultEnabled = false,
+                    permissions = CustomerMetadata.Permissions.createForNativeLink(),
                 ),
                 sharedDataSpecs = emptyList(),
                 externalPaymentMethodSpecs = emptyList(),
@@ -396,17 +390,10 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
                 displayableCustomPaymentMethods = emptyList(),
-                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
-        }
-
-        private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
-            val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
-                as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
-            return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
-                ?: false
         }
     }
 }

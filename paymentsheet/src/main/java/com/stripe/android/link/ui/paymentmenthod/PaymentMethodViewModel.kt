@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -18,6 +19,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
+import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
@@ -36,6 +38,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
     private val formHelper: FormHelper,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val _state = MutableStateFlow(
@@ -79,29 +82,32 @@ internal class PaymentMethodViewModel @Inject constructor(
         viewModelScope.launch {
             clearErrorMessage()
             updateButtonState(PrimaryButtonState.Processing)
-            linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
-                .fold(
-                    onSuccess = { linkPaymentDetails ->
-                        val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
-                        performConfirmation(
-                            paymentDetails = linkPaymentDetails,
-                            cvc = cardMap?.get("cvc") as? String?
-                        )
-                        updateButtonState(PrimaryButtonState.Enabled)
-                    },
-                    onFailure = { error ->
-                        _state.update {
-                            it.copy(
-                                errorMessage = error.stripeErrorMessage()
+
+            dismissalCoordinator.withDismissalDisabled {
+                linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
+                    .fold(
+                        onSuccess = { linkPaymentDetails ->
+                            val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
+                            performConfirmation(
+                                paymentDetails = linkPaymentDetails,
+                                cvc = cardMap?.get("cvc") as? String?
+                            )
+                            updateButtonState(PrimaryButtonState.Enabled)
+                        },
+                        onFailure = { error ->
+                            _state.update {
+                                it.copy(
+                                    errorMessage = error.stripeErrorMessage()
+                                )
+                            }
+                            updateButtonState(PrimaryButtonState.Enabled)
+                            logger.error(
+                                msg = "PaymentMethodViewModel: Failed to create card payment details",
+                                t = error
                             )
                         }
-                        updateButtonState(PrimaryButtonState.Enabled)
-                        logger.error(
-                            msg = "PaymentMethodViewModel: Failed to create card payment details",
-                            t = error
-                        )
-                    }
-                )
+                    )
+            }
         }
     }
 
@@ -168,6 +174,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             savedStateHandle = parentComponent.viewModel.savedStateHandle
                         ),
                         logger = parentComponent.logger,
+                        dismissalCoordinator = parentComponent.dismissalCoordinator,
                         dismissWithResult = dismissWithResult
                     )
                 }

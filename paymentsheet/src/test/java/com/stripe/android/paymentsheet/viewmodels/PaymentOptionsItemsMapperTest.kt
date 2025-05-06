@@ -4,7 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadataFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -32,12 +32,7 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = MutableStateFlow(
-                CustomerMetadata(
-                    hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = false
-                )
-            ),
+            customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
         mapper().test {
@@ -68,12 +63,7 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = MutableStateFlow(
-                CustomerMetadata(
-                    hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = false
-                )
-            ),
+            customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
         mapper().test {
@@ -123,11 +113,8 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = MutableStateFlow(
-                CustomerMetadata(
-                    hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled
-                )
+            customerMetadata = getDefaultCustomerMetadataFlow(
+                isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled
             ),
         )
     }
@@ -175,12 +162,6 @@ class PaymentOptionsItemsMapperTest {
             ephemeralKeySecret = "ek_123",
             customerSessionClientSecret = null,
             paymentMethods = paymentMethods,
-            permissions = CustomerState.Permissions(
-                canRemovePaymentMethods = true,
-                canRemoveLastPaymentMethod = true,
-                canRemoveDuplicates = false,
-                canUpdateFullPaymentMethodDetails = true
-            ),
             defaultPaymentMethodId = defaultPaymentMethodId,
         )
     }

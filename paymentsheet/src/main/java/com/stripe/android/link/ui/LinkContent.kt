@@ -55,7 +55,7 @@ internal fun LinkContent(
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
-    dismissWithResult: ((LinkActivityResult) -> Unit)?,
+    dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
@@ -108,9 +108,7 @@ internal fun LinkContent(
                         navigateAndClearStack = { screen ->
                             navigate(screen, true)
                         },
-                        dismissWithResult = { result ->
-                            dismissWithResult?.invoke(result)
-                        },
+                        dismissWithResult = dismissWithResult,
                         getLinkAccount = getLinkAccount,
                         showBottomSheetContent = onUpdateSheetContent,
                         changeEmail = changeEmail,

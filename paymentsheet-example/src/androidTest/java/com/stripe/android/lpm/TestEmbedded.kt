@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CurrencySetti
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedFormSheetActionSettingDefinition.FormSheetAction
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
@@ -23,15 +25,19 @@ internal class TestEmbedded : BasePlaygroundTest() {
         context = ApplicationProvider.getApplicationContext()
     )
 
+    private val parameters = TestParameters.create(
+        paymentMethodCode = "card",
+        executeInNightlyRun = true,
+    ) { settings ->
+        settings[EmbeddedFormSheetActionSettingDefinition] = FormSheetAction.Confirm
+    }
+
     @Test
     fun testCard() {
         testDriver.confirmEmbedded(
-            testParameters = TestParameters.create(
-                paymentMethodCode = "card",
-                authorizationAction = null,
-                executeInNightlyRun = true,
-            ).copy(
+            testParameters = parameters.copy(
                 saveForFutureUseCheckboxVisible = true,
+                authorizationAction = null,
             ),
             populateCustomLpmFields = {
                 populateCardDetails()
@@ -42,15 +48,12 @@ internal class TestEmbedded : BasePlaygroundTest() {
     @Test
     fun testCardWithCardBrandChoice() {
         testDriver.confirmEmbedded(
-            testParameters = TestParameters.create(
-                paymentMethodCode = "card",
+            testParameters = parameters.copy(
+                saveForFutureUseCheckboxVisible = true,
                 authorizationAction = null,
-                executeInNightlyRun = true,
-            ) { settings ->
+            ).copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.FR
-            }.copy(
-                saveForFutureUseCheckboxVisible = true
-            ),
+            },
             values = FieldPopulator.Values(
                 cardNumber = "4000002500001001"
             ),
@@ -64,10 +67,9 @@ internal class TestEmbedded : BasePlaygroundTest() {
     @Test
     fun testCashAppPay() {
         testDriver.confirmEmbedded(
-            testParameters = TestParameters.create(
+            testParameters = parameters.copy(
                 paymentMethodCode = "cashapp",
-                executeInNightlyRun = true,
-            ) { settings ->
+            ).copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CurrencySettingsDefinition] = Currency.USD
                 settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
@@ -82,10 +84,9 @@ internal class TestEmbedded : BasePlaygroundTest() {
     @Test
     fun testUsBankAccount() {
         testDriver.confirmEmbeddedUsBankAccount(
-            testParameters = TestParameters.create(
+            testParameters = parameters.copy(
                 paymentMethodCode = "us_bank_account",
-                executeInNightlyRun = true,
-            ) { settings ->
+            ).copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CurrencySettingsDefinition] = Currency.USD
                 settings[DelayedPaymentMethodsSettingsDefinition] = true
