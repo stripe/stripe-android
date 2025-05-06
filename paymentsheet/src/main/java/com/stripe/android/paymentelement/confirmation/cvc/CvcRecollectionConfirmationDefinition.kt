@@ -37,7 +37,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
             initializationMode = confirmationParameters.initializationMode,
             paymentMethod = confirmationOption.paymentMethod,
             optionsParams = confirmationOption.optionsParams,
-        )
+        ) && !confirmationOption.originatedFromWallet
     }
 
     override suspend fun action(

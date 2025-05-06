@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation.linkinline
 
-import androidx.compose.material.Card
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
@@ -505,6 +504,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     setupFutureUsage = expectedSetupForFutureUsage,
                 )
             )
+
+            assertThat(savedConfirmationOption.originatedFromWallet).isTrue()
 
             val paymentMethod = savedConfirmationOption.paymentMethod
 

@@ -120,6 +120,7 @@ class LinkConfirmationFlowTest {
                 confirmationOption = PaymentMethodConfirmationOption.Saved(
                     paymentMethod = PAYMENT_METHOD,
                     optionsParams = null,
+                    originatedFromWallet = true,
                 ),
                 parameters = CONFIRMATION_PARAMETERS,
             )

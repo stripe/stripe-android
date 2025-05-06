@@ -61,7 +61,7 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `card & intent requiring cvc recollection should return false if card is from a wallet`() {
+    fun `card & intent requiring cvc recollection should return true if card is from a wallet`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.run {
             copy(card = card?.copy(wallet = Wallet.GooglePayWallet(dynamicLast4 = null)))
@@ -72,7 +72,7 @@ class CvcRecollectionHandlerTest {
             optionsParams = null,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
-        assertThat(response).isFalse()
+        assertThat(response).isTrue()
     }
 
     @Test
@@ -128,7 +128,7 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `card & valid deferred intent should return false if card is from a wallet`() {
+    fun `card & valid deferred intent should return true if card is from a wallet`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.run {
             copy(card = card?.copy(wallet = Wallet.GooglePayWallet(dynamicLast4 = null)))
@@ -147,7 +147,7 @@ class CvcRecollectionHandlerTest {
                 )
             )
         )
-        assertThat(response).isFalse()
+        assertThat(response).isTrue()
     }
 
     @Test

@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
+import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -115,7 +116,14 @@ class GooglePayConfirmationDefinitionTest {
         val successResult = result.asNextStep()
 
         assertThat(successResult.parameters).isEqualTo(CONFIRMATION_PARAMETERS)
+
         assertThat(successResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+
+        val savedOption = successResult.confirmationOption.asSaved()
+
+        assertThat(savedOption.paymentMethod).isEqualTo(savedOption.paymentMethod)
+        assertThat(savedOption.optionsParams).isNull()
+        assertThat(savedOption.originatedFromWallet).isTrue()
     }
 
     @Test

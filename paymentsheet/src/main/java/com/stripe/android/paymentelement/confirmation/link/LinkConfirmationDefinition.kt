@@ -80,6 +80,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
                     confirmationOption = PaymentMethodConfirmationOption.Saved(
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
                     ),
                     parameters = confirmationParameters,
                 )
