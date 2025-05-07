@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.contentOverPrimaryButton
 import com.stripe.android.link.theme.PrimaryButtonHeight
-import com.stripe.android.link.theme.colorOverPrimaryButton
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -73,8 +73,8 @@ internal fun PrimaryButton(
                             .size(24.dp)
                             .semantics { testTag = ProgressIndicatorTestTag },
                         backgroundColor =
-                            LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
-                        filledColor = colorOverPrimaryButton,
+                        LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
+                        filledColor = LinkTheme.colors.contentOverPrimaryButton,
                     )
                     PrimaryButtonState.Completed -> Icon(
                         painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -84,22 +84,22 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = CompletedIconTestTag
                             },
-                        tint = colorOverPrimaryButton
+                        tint = LinkTheme.colors.contentOverPrimaryButton
                     )
                     else -> Row(
                         Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        PrimaryButtonIcon(colorOverPrimaryButton, iconStart)
+                        PrimaryButtonIcon(LinkTheme.colors.contentOverPrimaryButton, iconStart)
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
-                            color = colorOverPrimaryButton
+                            color = LinkTheme.colors.contentOverPrimaryButton
                                 .copy(alpha = LocalContentAlpha.current),
                             textAlign = TextAlign.Center,
                             style = LinkTheme.typography.bodyEmphasized,
                         )
-                        PrimaryButtonIcon(colorOverPrimaryButton, iconEnd)
+                        PrimaryButtonIcon(LinkTheme.colors.contentOverPrimaryButton, iconEnd)
                     }
                 }
             }
