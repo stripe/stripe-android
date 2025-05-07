@@ -1,7 +1,9 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -68,11 +70,11 @@ internal fun PrimaryButton(
                 when (state) {
                     PrimaryButtonState.Processing -> LinkSpinner(
                         modifier = Modifier
-                            .semantics {
-                                testTag = ProgressIndicatorTestTag
-                            },
+                            .size(24.dp)
+                            .semantics { testTag = ProgressIndicatorTestTag },
+                        backgroundColor =
+                            LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
                         filledColor = colorOverPrimaryButton,
-                        strokeWidth = 2.dp
                     )
                     PrimaryButtonState.Completed -> Icon(
                         painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -166,11 +168,21 @@ internal const val PrimaryButtonTag = "PrimaryButtonTag"
 @Preview
 private fun PrimaryButtonPreview() {
     DefaultLinkTheme {
-        PrimaryButton(
-            label = "Testing",
-            state = PrimaryButtonState.Enabled,
-            onButtonClick = { },
-            iconEnd = uiCoreR.drawable.stripe_ic_lock
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            PrimaryButton(
+                label = "Testing",
+                state = PrimaryButtonState.Enabled,
+                onButtonClick = { },
+                iconEnd = uiCoreR.drawable.stripe_ic_lock
+            )
+            PrimaryButton(
+                label = "Testing",
+                state = PrimaryButtonState.Processing,
+                onButtonClick = { },
+                iconEnd = uiCoreR.drawable.stripe_ic_lock
+            )
+        }
     }
 }

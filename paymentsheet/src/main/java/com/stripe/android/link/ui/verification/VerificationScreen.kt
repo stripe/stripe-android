@@ -301,8 +301,10 @@ private fun ResendCodeButton(
         ) {
             LinkSpinner(
                 modifier = Modifier
-                    .size(24.dp)
-                    .testTag(VERIFICATION_RESEND_LOADER_TAG)
+                    .size(16.dp)
+                    .testTag(VERIFICATION_RESEND_LOADER_TAG),
+                filledColor = LinkTheme.colors.iconPrimary,
+                strokeWidth = 3.dp
             )
         }
     }
