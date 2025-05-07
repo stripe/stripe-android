@@ -3,9 +3,11 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 @Immutable
@@ -15,7 +17,10 @@ internal data class WalletUiState(
     val cardBrandFilter: CardBrandFilter,
     val selectedItemId: String?,
     val isProcessing: Boolean,
+    val isSettingUp: Boolean,
+    val merchantName: String,
     val primaryButtonLabel: ResolvableString,
+    val secondaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
     val canAddNewPaymentMethod: Boolean,
     val userSetIsExpanded: Boolean? = null,
@@ -36,8 +41,8 @@ internal data class WalletUiState(
     val selectedCard: Card?
         get() = selectedItem as? Card
 
-    val showBankAccountTerms: Boolean
-        get() = selectedItem is ConsumerPaymentDetails.BankAccount
+    val mandate: ResolvableString?
+        get() = selectedItem?.makeMandateText(isSettingUp, merchantName)
 
     val isExpanded: Boolean
         get() = userSetIsExpanded ?: (selectedItem?.let { isItemAvailable(it) } != true)
@@ -89,5 +94,24 @@ internal data class WalletUiState(
             isProcessing = false,
             cardBeingUpdated = null
         )
+    }
+}
+
+private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
+    isSettingUp: Boolean,
+    merchantName: String,
+): ResolvableString? {
+    return when (this) {
+        is ConsumerPaymentDetails.BankAccount -> {
+            resolvableString(R.string.stripe_wallet_bank_account_terms)
+        }
+        is Card,
+        is ConsumerPaymentDetails.Passthrough -> {
+            if (isSettingUp) {
+                resolvableString(R.string.stripe_paymentsheet_card_mandate, merchantName)
+            } else {
+                null
+            }
+        }
     }
 }

@@ -190,11 +190,14 @@ internal class WalletScreenScreenshotTest {
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
+            secondaryButtonLabel = secondaryButtonLabel,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
             canAddNewPaymentMethod = canAddNewPaymentMethod,
             userSetIsExpanded = userSetIsExpanded,
+            isSettingUp = false,
+            merchantName = "Example Inc.",
         )
     }
 
@@ -225,5 +228,6 @@ internal class WalletScreenScreenshotTest {
 
     companion object {
         private val primaryButtonLabel = "Pay $50".resolvableString
+        private val secondaryButtonLabel = "Pay another way".resolvableString
     }
 }

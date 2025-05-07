@@ -43,6 +43,8 @@ import com.stripe.android.common.ui.InlineContentTemplateBuilder
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.contentOverPrimaryButton
+import com.stripe.android.link.theme.LinkThemeConfig.separatorOverPrimaryButton
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 
@@ -112,8 +114,8 @@ internal fun LinkButton(
                 shape = LinkButtonShape,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.primary,
-                    disabledBackgroundColor = LinkTheme.colors.primary,
+                    backgroundColor = LinkTheme.colors.buttonBrand,
+                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
                 ),
                 contentPadding = PaddingValues(
                     start = LinkButtonHorizontalPadding,
@@ -140,7 +142,7 @@ private fun SignedInButtonContent(email: String) {
         }
     }
 
-    val color = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+    val color = LinkTheme.colors.contentOverPrimaryButton.copy(alpha = LocalContentAlpha.current)
     val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
 
     Row(
@@ -189,7 +191,7 @@ private fun RowScope.SignedOutButtonContent() {
             .semantics {
                 this.contentDescription = text
             },
-        color = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current),
+        color = LinkTheme.colors.contentOverPrimaryButton.copy(alpha = LocalContentAlpha.current),
         style = LinkTheme.typography.bodyEmphasized,
         fontSize = LINK_PAY_WITH_FONT_SIZE.sp,
         overflow = TextOverflow.Ellipsis,
@@ -242,7 +244,7 @@ private fun LinkDivider() {
         modifier = Modifier
             .width(1.dp)
             .fillMaxHeight(),
-        color = LinkTheme.colors.actionLabelLight,
+        color = LinkTheme.colors.separatorOverPrimaryButton,
     )
 }
 

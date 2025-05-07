@@ -75,7 +75,7 @@ internal fun VerificationDialogBody(
                 Surface(
                     modifier = Modifier.width(360.dp),
                     shape = RoundedCornerShape(24.dp),
-                    color = LinkTheme.colors.background
+                    color = LinkTheme.colors.surfacePrimary
                 ) {
                     VerificationBody(
                         state = state,
