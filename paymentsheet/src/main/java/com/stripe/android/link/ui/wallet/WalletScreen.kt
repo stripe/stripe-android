@@ -242,7 +242,7 @@ private fun ActionSection(
             modifier = Modifier
                 .testTag(WALLET_SCREEN_PAY_BUTTON)
                 .padding(top = 16.dp, bottom = 8.dp),
-            label = state.primaryButtonLabel.resolve(LocalContext.current),
+            label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
             iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
@@ -252,7 +252,7 @@ private fun ActionSection(
             modifier = Modifier
                 .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
             enabled = !state.primaryButtonState.isBlocking,
-            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            label = state.secondaryButtonLabel.resolve(),
             onClick = onPayAnotherWayClicked
         )
     }

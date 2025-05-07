@@ -150,7 +150,9 @@ internal fun completePaymentButtonLabel(
             requireNotNull(stripeIntent.currency)
         ).buildPayButtonLabel()
     }
-    is SetupIntent -> uiCoreR.string.stripe_setup_button_label.resolvableString
+    is SetupIntent -> {
+        uiCoreR.string.stripe_continue_button_label.resolvableString
+    }
 }
 
 private val PrimaryButtonIconWidth = 13.dp
