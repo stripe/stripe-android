@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -36,8 +35,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.otpElementColors
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
@@ -106,7 +107,7 @@ internal fun VerificationBody(
                 .fillMaxWidth(),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textSecondary
+            color = LinkTheme.colors.typeSecondary
         )
 
         Spacer(modifier = Modifier.size(24.dp))
@@ -123,7 +124,7 @@ internal fun VerificationBody(
                     // 48dp per OTP box plus 8dp per space
                     .width(328.dp)
                     .testTag(VERIFICATION_OTP_TAG),
-                colors = LinkTheme.colors.otpElementColors,
+                colors = LinkTheme.colors.otpElementColors(),
                 focusRequester = focusRequester
             )
         }
@@ -229,7 +230,7 @@ private fun Header(
                 .testTag(VERIFICATION_TITLE_TAG),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary
+            color = LinkTheme.colors.typePrimary
         )
     } else {
         Text(
@@ -239,7 +240,7 @@ private fun Header(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary
+            color = LinkTheme.colors.typePrimary
         )
     }
 }
@@ -256,7 +257,7 @@ private fun ChangeEmailRow(
         Text(
             text = email,
             modifier = Modifier.weight(weight = 1f, fill = false),
-            color = LinkTheme.colors.textSecondary,
+            color = LinkTheme.colors.typeTertiary,
             overflow = TextOverflow.Companion.Ellipsis,
             maxLines = 1,
             style = LinkTheme.typography.body
@@ -270,7 +271,7 @@ private fun ChangeEmailRow(
                     enabled = !isProcessing,
                     onClick = onChangeEmailClick
                 ),
-            color = LinkTheme.colors.actionLabel,
+            color = LinkTheme.colors.typeBrand,
             maxLines = 1,
             style = LinkTheme.typography.body
         )
@@ -303,7 +304,7 @@ private fun ResendCodeButton(
         Text(
             text = stringResource(id = R.string.stripe_verification_resend),
             style = LinkTheme.typography.bodyEmphasized,
-            color = LinkTheme.colors.actionLabel,
+            color = LinkTheme.colors.typeBrand,
             modifier = Modifier
                 .alpha(textAlpha),
         )
@@ -311,9 +312,9 @@ private fun ResendCodeButton(
         AnimatedVisibility(
             visible = isSendingNewCode
         ) {
-            CircularProgressIndicator(
-                color = LinkTheme.colors.actionLabel,
-                strokeWidth = 2.dp,
+            LinkSpinner(
+                filledColor = LinkTheme.colors.typePrimary,
+                strokeWidth = 3.dp,
                 modifier = Modifier
                     .testTag(VERIFICATION_RESEND_LOADER_TAG)
                     .size(18.dp)
