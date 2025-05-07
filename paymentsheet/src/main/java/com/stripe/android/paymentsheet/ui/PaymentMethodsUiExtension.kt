@@ -78,7 +78,7 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     CardBrand.MasterCard -> com.stripe.payments.model.R.drawable.stripe_ic_mastercard_unpadded
     CardBrand.UnionPay -> com.stripe.payments.model.R.drawable.stripe_ic_unionpay_unpadded
     CardBrand.CartesBancaires -> com.stripe.payments.model.R.drawable.stripe_ic_cartes_bancaires_unpadded
-    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_ref
+    Unknown -> com.stripe.payments.model.R.drawable.stripe_ic_unknown_brand_unpadded
 }
 
 @DrawableRes
