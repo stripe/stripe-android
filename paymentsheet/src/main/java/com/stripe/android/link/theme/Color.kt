@@ -73,6 +73,14 @@ private val Info100 = Color(0xFFA7E7FC)
 private val Info50 = Color(0xFFCBF5FD)
 private val Info25 = Color(0xFFE2FBFE)
 
+// Workaround:
+// - The new Link theme primary button uses white on dark mode and dark on light mode)
+// - But we're still using Link green theming for buttons, regardless of dark mode
+// - This means that the fixed button color is not consistent with variable text color, so we need to fix it here.
+//
+internal val colorOverPrimaryButton = Neutral900
+internal val colorSeparatorOverPrimaryButton = Brand400
+
 internal data class LinkColors(
     val surfacePrimary: Color,
     val surfaceSecondary: Color,
@@ -103,10 +111,10 @@ internal data class LinkColors(
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
         // TODO(carlosmuvi) dark mode.
-        return if (isDark) colorsV2Light else colorsV2Light
+        return if (isDark) colorsDark else colorsLight
     }
 
-    private val colorsV2Light = LinkColors(
+    private val colorsLight = LinkColors(
         surfacePrimary = Neutral0,
         surfaceSecondary = Neutral100,
         surfaceTertiary = Neutral200,
@@ -133,6 +141,33 @@ internal object LinkThemeConfig {
         iconCritical = Critical500
     )
 
+    private val colorsDark = LinkColors(
+        surfacePrimary = Neutral900,
+        surfaceSecondary = Neutral800,
+        surfaceTertiary = Neutral700,
+        surfaceBackdrop = Neutral900,
+        borderDefault = Neutral0.copy(alpha = 0.1f),
+        borderSelected = Neutral0,
+        borderCritical = Critical500,
+        buttonPrimary = Neutral50,
+        buttonSecondary = Neutral800,
+        buttonTertiary = Neutral700,
+        buttonBrand = Brand200,
+        buttonCritical = Critical500,
+        typePrimary = Neutral50,
+        typeSecondary = Neutral400,
+        typeTertiary = Neutral400,
+        typeWhite = Neutral0,
+        typeBrand = Brand200,
+        typeCritical = Critical600,
+        iconPrimary = Neutral50,
+        iconTertiary = Neutral700,
+        iconWhite = Neutral0,
+        iconSecondary = Neutral800,
+        iconBrand = Brand200,
+        iconCritical = Critical500,
+    )
+
     internal fun LinkColors.otpElementColors(): OTPElementColors {
         return OTPElementColors(
             selectedBorder = borderSelected,
@@ -150,7 +185,8 @@ internal fun StripeThemeForLink(
     StripeTheme(
         colors = stripeDefaultColors.copy(
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = LinkTheme.colorsV2.iconBrand
+                primary = LinkTheme.colors.typeBrand,
+                error = LinkTheme.colors.typeCritical
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(

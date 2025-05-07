@@ -71,7 +71,7 @@ private fun BackIcon(
         Icon(
             painter = painterResource(icon),
             contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
-            tint = LinkTheme.colorsV2.iconSecondary
+            tint = LinkTheme.colors.iconSecondary
         )
     }
 }
@@ -122,7 +122,7 @@ private fun LinkAppBarAction(
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = stringResource(R.string.stripe_show_menu),
-            tint = LinkTheme.colorsV2.iconSecondary
+            tint = LinkTheme.colors.iconSecondary
         )
     }
 }

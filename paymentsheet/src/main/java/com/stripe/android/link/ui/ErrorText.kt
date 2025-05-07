@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,7 +30,7 @@ internal sealed class ErrorTextStyle {
     abstract val textStyle: TextStyle
 
     internal object Small : ErrorTextStyle() {
-        override val shape = RoundedCornerShape(4.dp)
+        override val shape = RoundedCornerShape(6.dp)
         override val iconModifier = Modifier
             .padding(4.dp)
             .size(12.dp)
@@ -44,7 +45,7 @@ internal sealed class ErrorTextStyle {
     }
 
     internal object Medium : ErrorTextStyle() {
-        override val shape = RoundedCornerShape(8.dp)
+        override val shape = RoundedCornerShape(12.dp)
         override val iconModifier = Modifier
             .padding(horizontal = 10.dp, vertical = 12.dp)
             .size(20.dp)
@@ -62,7 +63,18 @@ internal sealed class ErrorTextStyle {
 @Preview
 @Composable
 private fun ErrorTextPreview() {
-    ErrorText(text = "Test error message")
+    Column {
+        ErrorText(
+            text = "Test error message",
+            modifier = Modifier.padding(16.dp),
+            style = ErrorTextStyle.Small
+        )
+        ErrorText(
+            text = "Test error message",
+            modifier = Modifier.padding(16.dp),
+            style = ErrorTextStyle.Medium
+        )
+    }
 }
 
 @Composable
@@ -76,22 +88,22 @@ internal fun ErrorText(
         // to re-apply the theme here.
         Row(
             modifier = modifier.border(
-                width = 1.dp,
-                color = LinkTheme.colorsV2.borderDefault,
+                width = .5.dp,
+                color = LinkTheme.colors.borderDefault,
                 shape = style.shape,
             ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.stripe_link_error),
+                painter = painterResource(id = R.drawable.stripe_sail_warning_circle),
                 contentDescription = null,
                 modifier = style.iconModifier,
-                tint = LinkTheme.colorsV2.iconCritical
+                tint = LinkTheme.colors.iconCritical
             )
             HyperlinkedText(
                 text = text,
                 modifier = style.textModifier,
-                color = LinkTheme.colorsV2.typeCritical,
+                color = LinkTheme.colors.typeCritical,
                 style = style.textStyle
             )
         }

@@ -28,13 +28,13 @@ internal fun SecondaryButton(
         enabled = enabled,
         shape = LinkTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = LinkTheme.colorsV2.buttonSecondary,
-            disabledBackgroundColor = LinkTheme.colorsV2.buttonSecondary
+            backgroundColor = LinkTheme.colors.buttonSecondary,
+            disabledBackgroundColor = LinkTheme.colors.buttonSecondary
         )
     ) {
         Text(
             text = label,
-            color = LinkTheme.colorsV2.typePrimary
+            color = LinkTheme.colors.typePrimary
                 .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled),
             style = LinkTheme.typography.bodyEmphasized,
         )

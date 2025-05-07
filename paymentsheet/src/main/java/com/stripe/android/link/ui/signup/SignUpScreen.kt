@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.PrimaryButton
@@ -94,7 +94,7 @@ internal fun SignUpBody(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colorsV2.typeTertiary
+            color = LinkTheme.colors.typePrimary
         )
         Text(
             text = stringResource(R.string.stripe_link_sign_up_message),
@@ -103,7 +103,7 @@ internal fun SignUpBody(
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colorsV2.typeSecondary
+            color = LinkTheme.colors.typeTertiary
         )
         StripeThemeForLink {
             EmailCollectionSection(
@@ -167,9 +167,10 @@ private fun EmailCollectionSection(
             )
         }
         if (signUpScreenState.signUpState == SignUpState.VerifyingEmail) {
-            CircularProgressIndicator(
+            LinkSpinner(
+                filledColor = LinkTheme.colors.iconPrimary,
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(20.dp)
                     .padding(
                         start = 0.dp,
                         top = 8.dp,
@@ -179,8 +180,6 @@ private fun EmailCollectionSection(
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                color = LinkTheme.colorsV2.iconBrand,
-                strokeWidth = 2.dp
             )
         }
     }
