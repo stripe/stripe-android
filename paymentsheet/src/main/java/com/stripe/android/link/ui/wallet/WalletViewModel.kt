@@ -23,8 +23,11 @@ import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.elements.CvcController
@@ -59,6 +62,8 @@ internal class WalletViewModel @Inject constructor(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
             email = linkAccount.email,
+            isSettingUp = stripeIntent.hasIntentToSetup(),
+            merchantName = configuration.merchantName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
             isProcessing = false,
@@ -399,4 +404,11 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
         code = Card.code,
         requiresMandate = false
     )
+}
+
+private fun StripeIntent.hasIntentToSetup(): Boolean {
+    return when (this) {
+        is PaymentIntent -> setupFutureUsage != null
+        is SetupIntent -> true
+    }
 }

@@ -3,12 +3,14 @@ package com.stripe.android.link.ui.wallet
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
 
@@ -68,19 +70,42 @@ class WalletUiStateTest {
     }
 
     @Test
-    fun testShowBankAccountTermsForSelectedBankPaymentMethod() {
+    fun testShowTermsForSelectedBankPaymentMethodIfNotReusing() {
         val state = walletUiState(
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
         )
 
-        assertThat(state.showBankAccountTerms).isTrue()
+        assertThat(state.mandate).isEqualTo(
+            resolvableString(R.string.stripe_wallet_bank_account_terms)
+        )
     }
 
     @Test
-    fun testNoBankAccountTermsForSelectedNonBankPaymentMethod() {
-        val state = walletUiState()
+    fun testShowTermsForSelectedBankPaymentMethodIfReusing() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+            isSettingUp = true,
+        )
 
-        assertThat(state.showBankAccountTerms).isFalse()
+        assertThat(state.mandate).isEqualTo(
+            resolvableString(R.string.stripe_wallet_bank_account_terms)
+        )
+    }
+
+    @Test
+    fun testShowNoTermsForSelectedCardIfNotReusing() {
+        val state = walletUiState(isSettingUp = false)
+
+        assertThat(state.mandate).isNull()
+    }
+
+    @Test
+    fun testShowTermsForSelectedCardIfReusing() {
+        val state = walletUiState(isSettingUp = true)
+
+        assertThat(state.mandate).isEqualTo(
+            resolvableString(R.string.stripe_paymentsheet_card_mandate, "Example Inc.")
+        )
     }
 
     @Test
@@ -217,7 +242,9 @@ class WalletUiStateTest {
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         canAddNewPaymentMethod: Boolean = true,
-        cardBeingUpdated: String? = null
+        cardBeingUpdated: String? = null,
+        isSettingUp: Boolean = false,
+        merchantName: String = "Example Inc.",
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -230,7 +257,9 @@ class WalletUiStateTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             canAddNewPaymentMethod = canAddNewPaymentMethod,
-            cardBeingUpdated = cardBeingUpdated
+            cardBeingUpdated = cardBeingUpdated,
+            isSettingUp = isSettingUp,
+            merchantName = merchantName,
         )
     }
 }

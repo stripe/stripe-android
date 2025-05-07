@@ -66,6 +66,8 @@ class WalletViewModelTest {
                 expiryDateInput = FormFieldEntry(""),
                 cvcInput = FormFieldEntry(""),
                 canAddNewPaymentMethod = true,
+                isSettingUp = false,
+                merchantName = "merchantName",
             )
         )
         assertThat(state.selectedItem).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull())
