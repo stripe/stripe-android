@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -32,22 +31,21 @@ class LinkFieldsScreenshotTest {
     fun testInputtingPrimaryField() {
         paparazziRule.snapshot {
             val focusRequester = remember { FocusRequester() }
-            DefaultLinkTheme {
-                LinkFields(
-                    expanded = true,
-                    enabled = true,
-                    signUpState = SignUpState.InputtingPrimaryField,
-                    requiresNameCollection = false,
-                    errorMessage = null,
-                    sectionController = SectionController(null, listOf()),
-                    emailController = EmailConfig.createController(
-                        initialValue = "email@em"
-                    ),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(),
-                    nameController = NameConfig.createController(null),
-                    emailFocusRequester = focusRequester
-                )
-            }
+
+            LinkFields(
+                expanded = true,
+                enabled = true,
+                signUpState = SignUpState.InputtingPrimaryField,
+                requiresNameCollection = false,
+                errorMessage = null,
+                sectionController = SectionController(null, listOf()),
+                emailController = EmailConfig.createController(
+                    initialValue = "email@em"
+                ),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(),
+                nameController = NameConfig.createController(null),
+                emailFocusRequester = focusRequester
+            )
         }
     }
 
@@ -55,22 +53,20 @@ class LinkFieldsScreenshotTest {
     fun testVerifyingEmail() {
         paparazziRule.snapshot {
             val focusRequester = remember { FocusRequester() }
-            DefaultLinkTheme {
-                LinkFields(
-                    expanded = true,
-                    enabled = true,
-                    signUpState = SignUpState.VerifyingEmail,
-                    requiresNameCollection = false,
-                    errorMessage = null,
-                    sectionController = SectionController(null, listOf()),
-                    emailController = EmailConfig.createController(
-                        initialValue = "email@em"
-                    ),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(),
-                    nameController = NameConfig.createController(null),
-                    emailFocusRequester = focusRequester
-                )
-            }
+            LinkFields(
+                expanded = true,
+                enabled = true,
+                signUpState = SignUpState.VerifyingEmail,
+                requiresNameCollection = false,
+                errorMessage = null,
+                sectionController = SectionController(null, listOf()),
+                emailController = EmailConfig.createController(
+                    initialValue = "email@em"
+                ),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(),
+                nameController = NameConfig.createController(null),
+                emailFocusRequester = focusRequester
+            )
         }
     }
 
@@ -78,24 +74,23 @@ class LinkFieldsScreenshotTest {
     fun testInputtingRemainingFields() {
         paparazziRule.snapshot {
             val focusRequester = remember { FocusRequester() }
-            DefaultLinkTheme {
-                LinkFields(
-                    expanded = true,
-                    enabled = true,
-                    signUpState = SignUpState.InputtingRemainingFields,
-                    requiresNameCollection = false,
-                    errorMessage = null,
-                    sectionController = SectionController(null, listOf()),
-                    emailController = EmailConfig.createController(
-                        initialValue = "email@em"
-                    ),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(
-                        "123456"
-                    ),
-                    nameController = NameConfig.createController(null),
-                    emailFocusRequester = focusRequester
-                )
-            }
+
+            LinkFields(
+                expanded = true,
+                enabled = true,
+                signUpState = SignUpState.InputtingRemainingFields,
+                requiresNameCollection = false,
+                errorMessage = null,
+                sectionController = SectionController(null, listOf()),
+                emailController = EmailConfig.createController(
+                    initialValue = "email@em"
+                ),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(
+                    "123456"
+                ),
+                nameController = NameConfig.createController(null),
+                emailFocusRequester = focusRequester
+            )
         }
     }
 
@@ -103,26 +98,25 @@ class LinkFieldsScreenshotTest {
     fun testInputtingRemainingFieldsWithName() {
         paparazziRule.snapshot {
             val focusRequester = remember { FocusRequester() }
-            DefaultLinkTheme {
-                LinkFields(
-                    expanded = true,
-                    enabled = true,
-                    signUpState = SignUpState.InputtingRemainingFields,
-                    requiresNameCollection = true,
-                    errorMessage = null,
-                    sectionController = SectionController(null, listOf()),
-                    emailController = EmailConfig.createController(
-                        initialValue = "email@em"
-                    ),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(
-                        "123456"
-                    ),
-                    nameController = NameConfig.createController(
-                        initialValue = "James Doe"
-                    ),
-                    emailFocusRequester = focusRequester
-                )
-            }
+
+            LinkFields(
+                expanded = true,
+                enabled = true,
+                signUpState = SignUpState.InputtingRemainingFields,
+                requiresNameCollection = true,
+                errorMessage = null,
+                sectionController = SectionController(null, listOf()),
+                emailController = EmailConfig.createController(
+                    initialValue = "email@em"
+                ),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(
+                    "123456"
+                ),
+                nameController = NameConfig.createController(
+                    initialValue = "James Doe"
+                ),
+                emailFocusRequester = focusRequester
+            )
         }
     }
 
@@ -130,26 +124,25 @@ class LinkFieldsScreenshotTest {
     fun testErrorMessage() {
         paparazziRule.snapshot {
             val focusRequester = remember { FocusRequester() }
-            DefaultLinkTheme {
-                LinkFields(
-                    expanded = true,
-                    enabled = true,
-                    signUpState = SignUpState.InputtingRemainingFields,
-                    requiresNameCollection = true,
-                    errorMessage = "Something went wrong",
-                    sectionController = SectionController(null, listOf()),
-                    emailController = EmailConfig.createController(
-                        initialValue = "email@em"
-                    ),
-                    phoneNumberController = PhoneNumberController.createPhoneNumberController(
-                        "123456"
-                    ),
-                    nameController = NameConfig.createController(
-                        initialValue = "James Doe"
-                    ),
-                    emailFocusRequester = focusRequester
-                )
-            }
+
+            LinkFields(
+                expanded = true,
+                enabled = true,
+                signUpState = SignUpState.InputtingRemainingFields,
+                requiresNameCollection = true,
+                errorMessage = "Something went wrong",
+                sectionController = SectionController(null, listOf()),
+                emailController = EmailConfig.createController(
+                    initialValue = "email@em"
+                ),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController(
+                    "123456"
+                ),
+                nameController = NameConfig.createController(
+                    initialValue = "James Doe"
+                ),
+                emailFocusRequester = focusRequester
+            )
         }
     }
 }
