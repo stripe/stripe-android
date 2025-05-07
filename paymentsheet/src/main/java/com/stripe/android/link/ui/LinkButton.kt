@@ -115,7 +115,7 @@ internal fun LinkButton(
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = LinkTheme.colors.buttonBrand,
-                    disabledBackgroundColor = LinkTheme.colors.typePrimary,
+                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
                 ),
                 contentPadding = PaddingValues(
                     start = LinkButtonHorizontalPadding,

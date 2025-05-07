@@ -24,9 +24,9 @@ import com.stripe.android.link.theme.LinkTheme
 internal fun LinkSpinner(
     modifier: Modifier = Modifier,
     filledColor: Color = LinkTheme.colors.iconBrand,
+    backgroundColor: Color = LinkTheme.colors.surfaceTertiary,
     strokeWidth: Dp = 6.dp
 ) {
-    val emptyColor = LinkTheme.colors.surfaceTertiary
     val transition = rememberInfiniteTransition()
     val angle by transition.animateFloat(
         initialValue = 0f,
@@ -40,7 +40,7 @@ internal fun LinkSpinner(
     Canvas(modifier = modifier) {
         val strokeWidth = strokeWidth.toPx()
         drawCircle(
-            color = emptyColor,
+            color = backgroundColor,
             radius = size.minDimension / 2 - strokeWidth / 2,
             style = Stroke(
                 width = strokeWidth,
