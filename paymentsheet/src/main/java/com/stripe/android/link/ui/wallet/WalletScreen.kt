@@ -706,11 +706,6 @@ private fun AlertMessage(
     )
 }
 
-@Preview
-@Composable
-fun WalletPreview() {
-}
-
 private fun String.replaceHyperlinks() = this.replace(
     "<terms>",
     "<a href=\"https://link.com/terms/ach-authorization\">"
