@@ -123,7 +123,6 @@ internal fun VerificationBody(
                 enabled = !state.isProcessing,
                 element = otpElement,
                 otpInputPlaceholder = " ",
-                boxSpacing = 8.dp,
                 middleSpacing = 8.dp,
                 modifier = Modifier
                     .testTag(VERIFICATION_OTP_TAG)

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -73,14 +75,6 @@ private val Info100 = Color(0xFFA7E7FC)
 private val Info50 = Color(0xFFCBF5FD)
 private val Info25 = Color(0xFFE2FBFE)
 
-// Workaround:
-// - The new Link theme primary button uses white on dark mode and dark on light mode)
-// - But we're still using Link green theming for buttons, regardless of dark mode
-// - This means that the fixed button color is not consistent with variable text color, so we need to fix it here.
-//
-internal val colorOverPrimaryButton = Neutral900
-internal val colorSeparatorOverPrimaryButton = Brand400
-
 internal data class LinkColors(
     val surfacePrimary: Color,
     val surfaceSecondary: Color,
@@ -110,7 +104,6 @@ internal data class LinkColors(
 
 internal object LinkThemeConfig {
     fun colors(isDark: Boolean): LinkColors {
-        // TODO(carlosmuvi) dark mode.
         return if (isDark) colorsDark else colorsLight
     }
 
@@ -174,6 +167,19 @@ internal object LinkThemeConfig {
             placeholder = typePrimary
         )
     }
+
+    /**
+     * Workaround:
+     *
+     * - The new Link theme primary button uses white on dark mode and dark on light mode
+     * - But we're still using Link green theming for buttons, regardless of dark mode
+     * - This means that the fixed button color is not consistent with variable text / divider colors,
+     *   so we need to keep them fixed until we migrate to the updated primary color styling.
+     */
+    internal val LinkColors.contentOverPrimaryButton
+        get() = Neutral900
+    internal val LinkColors.separatorOverPrimaryButton
+        get() = Brand400
 }
 
 @Composable
