@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
@@ -18,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -29,6 +29,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
+import com.stripe.android.link.theme.colorOverPrimaryButton
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -60,18 +61,17 @@ internal fun PrimaryButton(
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colorsV2.buttonBrand,
-                    disabledBackgroundColor = LinkTheme.colorsV2.buttonBrand,
+                    backgroundColor = LinkTheme.colors.buttonBrand,
+                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
                 )
             ) {
                 when (state) {
-                    PrimaryButtonState.Processing -> CircularProgressIndicator(
+                    PrimaryButtonState.Processing -> LinkSpinner(
                         modifier = Modifier
-                            .size(18.dp)
                             .semantics {
                                 testTag = ProgressIndicatorTestTag
                             },
-                        color = LinkTheme.colorsV2.typePrimary,
+                        filledColor = colorOverPrimaryButton,
                         strokeWidth = 2.dp
                     )
                     PrimaryButtonState.Completed -> Icon(
@@ -82,22 +82,22 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = CompletedIconTestTag
                             },
-                        tint = LinkTheme.colorsV2.typePrimary
+                        tint = colorOverPrimaryButton
                     )
                     else -> Row(
                         Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        PrimaryButtonIcon(iconStart)
+                        PrimaryButtonIcon(colorOverPrimaryButton, iconStart)
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
-                            color = LinkTheme.colorsV2.typePrimary
+                            color = colorOverPrimaryButton
                                 .copy(alpha = LocalContentAlpha.current),
                             textAlign = TextAlign.Center,
                             style = LinkTheme.typography.bodyEmphasized,
                         )
-                        PrimaryButtonIcon(iconEnd)
+                        PrimaryButtonIcon(colorOverPrimaryButton, iconEnd)
                     }
                 }
             }
@@ -107,6 +107,7 @@ internal fun PrimaryButton(
 
 @Composable
 private fun PrimaryButtonIcon(
+    color: Color,
     @DrawableRes icon: Int?
 ) {
     Box(
@@ -122,7 +123,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = LinkTheme.colorsV2.typePrimary.copy(alpha = LocalContentAlpha.current)
+                tint = color.copy(alpha = LocalContentAlpha.current)
             )
         }
     }

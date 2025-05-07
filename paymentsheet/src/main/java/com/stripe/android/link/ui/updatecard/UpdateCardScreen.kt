@@ -60,7 +60,7 @@ internal fun UpdateCardScreenBody(
                 .padding(bottom = 32.dp),
             text = stringResource(R.string.stripe_link_update_card_title),
             style = LinkTheme.typography.title,
-            color = LinkTheme.colorsV2.typePrimary,
+            color = LinkTheme.colors.typePrimary,
         )
 
         StripeThemeForLink {
@@ -74,7 +74,7 @@ internal fun UpdateCardScreenBody(
                 modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
                 style = LinkTheme.typography.bodyEmphasized,
-                color = LinkTheme.colorsV2.typeSecondary,
+                color = LinkTheme.colors.typeSecondary,
             )
         }
 
