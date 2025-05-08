@@ -572,7 +572,7 @@ private fun AddPaymentMethodRow(
             icon = R.drawable.stripe_ic_sail_add,
             iconSize = 12.dp,
             backgroundSize = 24.dp,
-            iconColor = LinkTheme.colors.iconPrimary,
+            iconColor = LinkTheme.colors.iconBrand,
             backgroundColor = LinkTheme.colors.iconBackground,
             backgroundShape = RoundedCornerShape(6.dp)
         )
