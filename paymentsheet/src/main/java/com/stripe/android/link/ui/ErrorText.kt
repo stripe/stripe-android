@@ -25,13 +25,11 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.HyperlinkedText
 
 internal sealed class ErrorTextStyle {
-    abstract val shape: Shape
     abstract val iconModifier: Modifier
     abstract val textModifier: Modifier
     abstract val textStyle: TextStyle
 
     internal object Small : ErrorTextStyle() {
-        override val shape = RoundedCornerShape(4.dp)
         override val iconModifier = Modifier
             .padding(4.dp)
             .size(12.dp)
@@ -46,7 +44,6 @@ internal sealed class ErrorTextStyle {
     }
 
     internal object Medium : ErrorTextStyle() {
-        override val shape = RoundedCornerShape(8.dp)
         override val iconModifier = Modifier
             .padding(horizontal = 10.dp, vertical = 12.dp)
             .size(20.dp)
@@ -90,11 +87,6 @@ internal fun ErrorText(
         // This is also used in the inline signup form in MPE, so we need
         // to re-apply the theme here.
         Row(
-            modifier = modifier.border(
-                width = .5.dp,
-                color = LinkTheme.colors.borderDefault,
-                shape = style.shape,
-            ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

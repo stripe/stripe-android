@@ -264,7 +264,7 @@ private fun DefaultTag() {
     Box(
         modifier = Modifier
             .background(
-                color = LinkTheme.colors.surfaceSecondary,
+                color = LinkTheme.colors.surfaceTertiary,
                 shape = LinkTheme.shapes.extraSmall
             ),
         contentAlignment = Alignment.Center

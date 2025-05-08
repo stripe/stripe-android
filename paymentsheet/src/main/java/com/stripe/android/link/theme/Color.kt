@@ -137,7 +137,7 @@ internal object LinkThemeConfig {
     private val colorsDark = LinkColors(
         surfacePrimary = Neutral900, // V
         surfaceSecondary = Neutral800, // V
-        surfaceTertiary = Neutral700,
+        surfaceTertiary = Neutral700, // V
         surfaceBackdrop = Neutral900,
         borderDefault = Neutral900, // V
         borderSelected = Brand200, // V
@@ -164,7 +164,8 @@ internal object LinkThemeConfig {
     internal fun LinkColors.otpElementColors(): OTPElementColors {
         return OTPElementColors(
             selectedBorder = borderSelected,
-            placeholder = typePrimary
+            placeholder = typePrimary,
+            background = surfaceSecondary
         )
     }
 
