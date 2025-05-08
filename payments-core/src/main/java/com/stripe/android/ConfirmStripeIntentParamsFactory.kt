@@ -1,12 +1,14 @@
 package com.stripe.android
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -136,7 +138,8 @@ internal class ConfirmSetupIntentParamsFactory(
 private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.Type?): MandateDataParams? {
     return paymentMethodType?.let { type ->
         val supportsAddingMandateData = when (intent) {
-            is PaymentIntent -> intent.canSetupFutureUsage() || type.requiresMandateForPaymentIntent
+            is PaymentIntent ->
+                intent.canSetupFutureUsage(paymentMethodType.code) || type.requiresMandateForPaymentIntent
             is SetupIntent -> true
         }
 
@@ -146,12 +149,16 @@ private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.T
     }
 }
 
-private fun PaymentIntent.canSetupFutureUsage(): Boolean {
-    return when (setupFutureUsage) {
-        null,
-        StripeIntent.Usage.OneTime -> false
-        StripeIntent.Usage.OnSession,
-        StripeIntent.Usage.OffSession -> true
+private fun PaymentIntent.canSetupFutureUsage(paymentMethodCode: PaymentMethodCode): Boolean {
+    return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
+        isSetupFutureUsageSet(paymentMethodCode)
+    } else {
+        when (setupFutureUsage) {
+            null,
+            StripeIntent.Usage.OneTime -> false
+            StripeIntent.Usage.OnSession,
+            StripeIntent.Usage.OffSession -> true
+        }
     }
 }
 
