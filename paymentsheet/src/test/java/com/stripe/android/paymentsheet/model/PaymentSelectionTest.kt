@@ -174,11 +174,13 @@ class PaymentSelectionTest {
         )
         assertThat(
             selection.mandateTextFromPaymentMethodMetadata(metadata)
-        ).isEqualTo(USBankAccountTextBuilder.buildMandateText(
-            merchantName = metadata.merchantName,
-            isSaveForFutureUseSelected = false,
-            isInstantDebits = false,
-            isSetupFlow = true
-        ))
+        ).isEqualTo(
+            USBankAccountTextBuilder.buildMandateText(
+                merchantName = metadata.merchantName,
+                isSaveForFutureUseSelected = false,
+                isInstantDebits = false,
+                isSetupFlow = true
+            )
+        )
     }
 }
