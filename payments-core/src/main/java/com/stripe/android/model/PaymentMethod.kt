@@ -145,6 +145,8 @@ constructor(
      */
     @JvmField val usBankAccount: USBankAccount? = null,
 
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val linkPaymentDetails: LinkPaymentDetails? = null,
+
     /**
      * Indicates whether this payment method can be shown again to its customer in a checkout flow. Stripe products
      * such as Checkout and Elements use this field to determine whether a payment method can be shown as a saved

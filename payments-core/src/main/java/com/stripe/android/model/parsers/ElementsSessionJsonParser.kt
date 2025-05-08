@@ -41,13 +41,16 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
+        val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags -> parseSessionFlags(json = flags) } ?: emptyMap()
+
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
-        val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
+        val customer = parseCustomer(
+            json = json.optJSONObject(FIELD_CUSTOMER),
+            enableLinkInSpm = flags[ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM] == true
+        )
 
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
         val linkFundingSources = linkSettings?.optJSONArray(FIELD_LINK_FUNDING_SOURCES)
-
-        val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags -> parseSessionFlags(json = flags) } ?: emptyMap()
 
         val stripeIntent = parseStripeIntent(
             elementsSessionId = elementsSessionId,
@@ -202,17 +205,19 @@ internal class ElementsSessionJsonParser(
         return customPaymentMethods
     }
 
-    private fun parseCustomer(json: JSONObject?): ElementsSession.Customer? {
+    private fun parseCustomer(
+        json: JSONObject?,
+        enableLinkInSpm: Boolean,
+    ): ElementsSession.Customer? {
         if (json == null) {
             return null
         }
 
-        val paymentMethodsJson = json.optJSONArray(FIELD_CUSTOMER_PAYMENT_METHODS)
-        val paymentMethods = paymentMethodsJson?.let { pmsJson ->
-            (0 until pmsJson.length()).mapNotNull { index ->
-                PAYMENT_METHOD_JSON_PARSER.parse(pmsJson.optJSONObject(index))
-            }
-        } ?: emptyList()
+        val paymentMethods = if (enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled) {
+            parsePaymentMethodsWithLinkDetails(json)
+        } else {
+            parsePaymentMethods(json)
+        }
 
         val customerSession = parseCustomerSession(json.optJSONObject(FIELD_CUSTOMER_SESSION))
             ?: return null
@@ -226,6 +231,24 @@ internal class ElementsSessionJsonParser(
             session = customerSession,
             defaultPaymentMethod = defaultPaymentMethod
         )
+    }
+
+    private fun parsePaymentMethodsWithLinkDetails(json: JSONObject): List<PaymentMethod> {
+        val paymentMethodsJson = json.optJSONArray(FIELD_CUSTOMER_PAYMENT_METHODS_WITH_LINK_DETAILS)
+        return paymentMethodsJson?.let { pmsJson ->
+            (0 until pmsJson.length()).mapNotNull { index ->
+                PaymentMethodWithLinkDetailsJsonParser.parse(pmsJson.optJSONObject(index))
+            }
+        } ?: emptyList()
+    }
+
+    private fun parsePaymentMethods(json: JSONObject): List<PaymentMethod> {
+        val paymentMethodsJson = json.optJSONArray(FIELD_CUSTOMER_PAYMENT_METHODS)
+        return paymentMethodsJson?.let { pmsJson ->
+            (0 until pmsJson.length()).mapNotNull { index ->
+                PaymentMethodJsonParser().parse(pmsJson.optJSONObject(index))
+            }
+        } ?: emptyList()
     }
 
     private fun parseCustomerSession(json: JSONObject?): ElementsSession.Customer.Session? {
@@ -422,6 +445,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_EXTERNAL_PAYMENT_METHOD_DATA = "external_payment_method_data"
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_CUSTOMER_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_CUSTOMER_PAYMENT_METHODS_WITH_LINK_DETAILS = "payment_methods_with_link_details"
         private const val FIELD_CUSTOMER_SESSION = "customer_session"
         private const val FIELD_DEFAULT_PAYMENT_METHOD = "default_payment_method"
         private const val FIELD_CUSTOM_PAYMENT_METHODS_DATA = "custom_payment_method_data"
@@ -448,7 +472,6 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
         private const val ARB_ID = "arb_id"
 
-        private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()
     }
 }
