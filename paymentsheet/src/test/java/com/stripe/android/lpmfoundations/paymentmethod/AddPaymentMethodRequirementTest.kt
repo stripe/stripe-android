@@ -70,6 +70,25 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
+    fun testUnsupportedForSetupReturnsReturnsFalseForPaymentIntentsWithSetupFutureUsageAndNoPMOSFUOverride() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = """
+                    { "affirm": { "setup_future_usage": "none" }}
+                """.trimIndent()
+            )
+        )
+        assertThat(
+            AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(
+                metadata,
+                PaymentMethod.Type.WeChatPay.code
+            )
+        ).isFalse()
+    }
+
+    @Test
     fun testUnsupportedForSetupReturnsReturnsFalseForSetupIntents() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
