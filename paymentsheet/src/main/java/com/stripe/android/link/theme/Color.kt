@@ -161,14 +161,6 @@ internal object LinkThemeConfig {
         iconCritical = Critical500 // V
     )
 
-    internal fun LinkColors.otpElementColors(): OTPElementColors {
-        return OTPElementColors(
-            selectedBorder = borderSelected,
-            placeholder = typePrimary,
-            background = surfaceSecondary
-        )
-    }
-
     /**
      * Workaround:
      *
@@ -187,12 +179,14 @@ internal object LinkThemeConfig {
 
 @Composable
 internal fun StripeThemeForLink(
+    componentBorder: Color? = null,
     content: @Composable () -> Unit
 ) {
     val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
 
     StripeTheme(
         colors = stripeDefaultColors.copy(
+            componentBorder = componentBorder ?: stripeDefaultColors.componentBorder,
             materialColors = stripeDefaultColors.materialColors.copy(
                 primary = LinkTheme.colors.typeBrand,
                 error = LinkTheme.colors.typeCritical

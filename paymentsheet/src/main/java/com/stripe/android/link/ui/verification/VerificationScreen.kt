@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.otpElementColors
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
@@ -45,6 +44,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -121,7 +121,10 @@ internal fun VerificationBody(
             color = LinkTheme.colors.typeSecondary,
         )
 
-        StripeThemeForLink {
+        StripeThemeForLink(
+            // We want the OTP unselected color to match the fill color.
+            componentBorder = LinkTheme.colors.surfaceSecondary,
+        ) {
             OTPElementUI(
                 enabled = !state.isProcessing,
                 element = otpElement,
@@ -130,7 +133,11 @@ internal fun VerificationBody(
                 modifier = Modifier
                     .testTag(VERIFICATION_OTP_TAG)
                     .padding(vertical = 10.dp),
-                colors = LinkTheme.colors.otpElementColors(),
+                colors = OTPElementColors(
+                    selectedBorder = LinkTheme.colors.borderSelected,
+                    placeholder = LinkTheme.colors.typePrimary,
+                    background = LinkTheme.colors.surfaceSecondary
+                ),
                 focusRequester = focusRequester
             )
         }

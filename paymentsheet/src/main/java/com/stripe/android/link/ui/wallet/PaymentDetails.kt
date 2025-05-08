@@ -120,7 +120,6 @@ internal fun PaymentDetailsListItem(
 
             if (!isAvailable) {
                 ErrorText(
-                    modifier = Modifier.padding(bottom = 8.dp),
                     text = stringResource(R.string.stripe_wallet_unavailable),
                     style = ErrorTextStyle.Small
                 )
