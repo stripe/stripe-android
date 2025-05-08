@@ -18,7 +18,7 @@ internal object FormArgumentsFactory {
             shippingDetails = metadata.shippingDetails,
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
-            hasIntentToSetup = metadata.hasIntentToSetup(),
+            hasIntentToSetup = metadata.hasIntentToSetup(paymentMethodCode),
             paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
         )
     }

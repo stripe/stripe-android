@@ -2,6 +2,9 @@ package com.stripe.android.model
 
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -9,6 +12,12 @@ import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentIntentTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
+        isEnabled = false
+    )
 
     @Test
     fun parseIdFromClientSecret_parsesCorrectly() {
@@ -267,6 +276,58 @@ class PaymentIntentTest {
                   "card": {
                     "some_other_key_that_has_nothing_to_do_with_sfu": ""
                   }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("card")
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage is none in payment method options`() {
+        featureFlagTestRule.setEnabled(true)
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+            paymentMethodOptionsJsonString = """
+                {
+                  "affirm": {
+                    "setup_future_usage": "none"
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("affirm")
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage exists in PMO with feature enabled`() {
+        featureFlagTestRule.setEnabled(true)
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "setup_future_usage": "off_session"
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("card")
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage does not exists in PMO with PMO SFU feature enabled`() {
+        featureFlagTestRule.setEnabled(true)
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                    "card": {
+                        "some_other_key_that_has_nothing_to_do_with_sfu": "some value"
+                    }
                 }
             """.trimIndent()
         )

@@ -456,6 +456,7 @@ internal class PlaygroundSettings private constructor(
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage),
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
         )

@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.model.darkThemeIconUrl
 import com.stripe.android.paymentsheet.model.drawableResourceId
 import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import javax.inject.Inject
@@ -35,12 +36,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     uiDefinitionFactoryArgumentsFactory = NullUiDefinitionFactoryHelper.nullEmbeddedUiDefinitionFactory
                 )?.firstNotNullOfOrNull { it.mandateText }
             }
-            is PaymentSelection.Saved -> {
-                selection.mandateText(
-                    paymentMethodMetadata.merchantName,
-                    paymentMethodMetadata.hasIntentToSetup()
-                )
-            }
+            is PaymentSelection.Saved -> selection.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata)
             is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.GooglePay,

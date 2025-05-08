@@ -11,6 +11,7 @@ object FeatureFlags {
     val linkCardBrandFiltering = FeatureFlag("Link Card Brand Filtering")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
+    val enablePaymentMethodOptionsSetupFutureUsage = FeatureFlag("Enable PaymentMethodOptions SetupFutureUse")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

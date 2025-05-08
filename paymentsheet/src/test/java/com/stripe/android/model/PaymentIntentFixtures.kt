@@ -505,4 +505,18 @@ internal object PaymentIntentFixtures {
     )!!.copy(
         setupFutureUsage = StripeIntent.Usage.OffSession
     )
+
+    val PMO_SETUP_FUTURE_USAGE = """
+        {
+            "card": {
+                "setup_future_usage": "off_session"
+            },
+            "affirm": {
+                "setup_future_usage": "none"
+            },
+            "amazon_pay": {
+                "setup_future_usage": "off_session"
+            }
+        }
+    """.trimIndent()
 }
