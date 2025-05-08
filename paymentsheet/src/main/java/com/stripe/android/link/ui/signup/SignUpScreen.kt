@@ -3,10 +3,11 @@ package com.stripe.android.link.ui.signup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -105,7 +106,10 @@ internal fun SignUpBody(
             style = LinkTheme.typography.body,
             color = LinkTheme.colors.typeTertiary
         )
-        StripeThemeForLink {
+        StripeThemeForLink(
+            componentBorder = LinkTheme.colors.surfacePrimary,
+            componentDivider = LinkTheme.colors.surfacePrimary
+        ) {
             EmailCollectionSection(
                 enabled = signUpScreenState.canEditForm,
                 emailController = emailController,
@@ -167,20 +171,16 @@ private fun EmailCollectionSection(
             )
         }
         if (signUpScreenState.signUpState == SignUpState.VerifyingEmail) {
-            LinkSpinner(
-                filledColor = LinkTheme.colors.iconPrimary,
-                modifier = Modifier
-                    .size(20.dp)
-                    .padding(
-                        start = 0.dp,
-                        top = 8.dp,
-                        end = 16.dp,
-                        bottom = 8.dp
-                    )
-                    .semantics {
-                        testTag = ProgressIndicatorTestTag
-                    },
-            )
+            Row {
+                LinkSpinner(
+                    filledColor = LinkTheme.colors.iconPrimary,
+                    strokeWidth = 4.dp,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .semantics { testTag = ProgressIndicatorTestTag },
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+            }
         }
     }
 }
@@ -194,7 +194,10 @@ private fun SecondaryFields(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier = Modifier.fillMaxWidth()) {
-        StripeThemeForLink {
+        StripeThemeForLink(
+            componentBorder = LinkTheme.colors.surfacePrimary,
+            componentDivider = LinkTheme.colors.surfacePrimary
+        ) {
             PhoneNumberCollectionSection(
                 enabled = signUpScreenState.canEditForm,
                 phoneNumberController = phoneNumberController,
@@ -256,21 +259,38 @@ internal const val SIGN_UP_ERROR_TAG = "signUpErrorTag"
 
 @Preview
 @Composable
+private fun SignUpScreenLoadingPreview() {
+    DefaultLinkTheme {
+        SignUpBody(
+            emailController = EmailConfig.createController("email@email.com"),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpScreenState = SignUpScreenState(
+                merchantName = "Example, Inc.",
+                signUpEnabled = false,
+                signUpState = SignUpState.VerifyingEmail,
+                requiresNameCollection = true,
+            ),
+            onSignUpClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
 private fun SignUpScreenPreview() {
     DefaultLinkTheme {
-        Surface {
-            SignUpBody(
-                emailController = EmailConfig.createController("email"),
-                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = NameConfig.createController("My Name"),
-                signUpScreenState = SignUpScreenState(
-                    merchantName = "Example, Inc.",
-                    signUpEnabled = false,
-                    signUpState = SignUpState.InputtingRemainingFields,
-                    requiresNameCollection = true,
-                ),
-                onSignUpClick = {}
-            )
-        }
+        SignUpBody(
+            emailController = EmailConfig.createController("email"),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpScreenState = SignUpScreenState(
+                merchantName = "Example, Inc.",
+                signUpEnabled = false,
+                signUpState = SignUpState.InputtingRemainingFields,
+                requiresNameCollection = true,
+            ),
+            onSignUpClick = {}
+        )
     }
 }

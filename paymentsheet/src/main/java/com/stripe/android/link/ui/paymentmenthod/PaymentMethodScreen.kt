@@ -58,7 +58,10 @@ internal fun PaymentMethodBody(
             color = LinkTheme.colors.typePrimary,
         )
 
-        StripeThemeForLink {
+        StripeThemeForLink(
+            componentBorder = LinkTheme.colors.surfacePrimary,
+            componentDivider = LinkTheme.colors.surfacePrimary
+        ) {
             PaymentMethodForm(
                 uuid = uuid,
                 args = state.formArguments,

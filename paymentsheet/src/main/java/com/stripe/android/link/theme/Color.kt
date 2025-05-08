@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.elements.OTPElementColors
 
 // Neutral Colors
 private val Neutral900 = Color(0xFF171717)
@@ -139,7 +138,7 @@ internal object LinkThemeConfig {
         surfaceSecondary = Neutral800, // V
         surfaceTertiary = Neutral700, // V
         surfaceBackdrop = Neutral900,
-        borderDefault = Neutral900, // V
+        borderDefault = Neutral700, // V
         borderSelected = Brand200, // V
         borderCritical = Critical500, // V
         buttonPrimary = Neutral200, // V
@@ -173,19 +172,22 @@ internal object LinkThemeConfig {
         get() = Neutral900
     internal val LinkColors.separatorOverPrimaryButton
         get() = Brand400
-
-
 }
 
 @Composable
 internal fun StripeThemeForLink(
     componentBorder: Color? = null,
+    componentDivider: Color? = null,
     content: @Composable () -> Unit
 ) {
     val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
 
     StripeTheme(
         colors = stripeDefaultColors.copy(
+            component = LinkTheme.colors.surfaceSecondary,
+            onComponent = LinkTheme.colors.typePrimary,
+            placeholderText = LinkTheme.colors.typeTertiary,
+            componentDivider = componentDivider ?: stripeDefaultColors.componentDivider,
             componentBorder = componentBorder ?: stripeDefaultColors.componentBorder,
             materialColors = stripeDefaultColors.materialColors.copy(
                 primary = LinkTheme.colors.typeBrand,

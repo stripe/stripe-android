@@ -121,26 +121,11 @@ internal fun VerificationBody(
             color = LinkTheme.colors.typeSecondary,
         )
 
-        StripeThemeForLink(
-            // We want the OTP unselected color to match the fill color.
-            componentBorder = LinkTheme.colors.surfaceSecondary,
-        ) {
-            OTPElementUI(
-                enabled = !state.isProcessing,
-                element = otpElement,
-                otpInputPlaceholder = " ",
-                middleSpacing = 8.dp,
-                modifier = Modifier
-                    .testTag(VERIFICATION_OTP_TAG)
-                    .padding(vertical = 10.dp),
-                colors = OTPElementColors(
-                    selectedBorder = LinkTheme.colors.borderSelected,
-                    placeholder = LinkTheme.colors.typePrimary,
-                    background = LinkTheme.colors.surfaceSecondary
-                ),
-                focusRequester = focusRequester
-            )
-        }
+        OTPView(
+            state = state,
+            otpElement = otpElement,
+            focusRequester = focusRequester
+        )
 
         if (state.isDialog.not()) {
             ChangeEmailRow(
@@ -173,6 +158,34 @@ internal fun VerificationBody(
                 color = LinkTheme.colors.typeTertiary,
             )
         }
+    }
+}
+
+@Composable
+private fun OTPView(
+    state: VerificationViewState,
+    otpElement: OTPElement,
+    focusRequester: FocusRequester
+) {
+    StripeThemeForLink(
+        // We want the OTP unselected color to match the fill color.
+        componentBorder = LinkTheme.colors.surfaceSecondary,
+    ) {
+        OTPElementUI(
+            enabled = !state.isProcessing,
+            element = otpElement,
+            otpInputPlaceholder = " ",
+            middleSpacing = 8.dp,
+            modifier = Modifier
+                .testTag(VERIFICATION_OTP_TAG)
+                .padding(vertical = 10.dp),
+            colors = OTPElementColors(
+                selectedBorder = LinkTheme.colors.borderSelected,
+                placeholder = LinkTheme.colors.typePrimary,
+                background = LinkTheme.colors.surfaceSecondary
+            ),
+            focusRequester = focusRequester
+        )
     }
 }
 

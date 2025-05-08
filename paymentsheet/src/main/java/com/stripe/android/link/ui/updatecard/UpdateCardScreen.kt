@@ -63,7 +63,10 @@ internal fun UpdateCardScreenBody(
             color = LinkTheme.colors.typePrimary,
         )
 
-        StripeThemeForLink {
+        StripeThemeForLink(
+            componentBorder = LinkTheme.colors.surfacePrimary,
+            componentDivider = LinkTheme.colors.surfacePrimary
+        ) {
             CardDetailsEditUI(
                 editCardDetailsInteractor = interactor,
             )
