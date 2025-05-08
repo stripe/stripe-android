@@ -12,4 +12,4 @@ runs:
         distribution: 'corretto'
         java-version: '21'
     - name: Setup Gradle
-      uses: gradle/gradle-build-action@v3
+      uses: gradle/actions/setup-gradle@v4
