@@ -302,6 +302,17 @@ private fun ResendCodeButton(
         AnimatedVisibility(
             visible = isSendingNewCode
         ) {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                    .alpha(ContentAlpha.disabled)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.stripe_verification_resend),
+                    style = LinkTheme.typography.detailEmphasized,
+                    color = LinkTheme.colors.typePrimary,
+                )
+            }
             LinkSpinner(
                 modifier = Modifier
                     .size(16.dp)

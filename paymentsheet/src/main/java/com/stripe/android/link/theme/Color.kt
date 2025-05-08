@@ -135,30 +135,30 @@ internal object LinkThemeConfig {
     )
 
     private val colorsDark = LinkColors(
-        surfacePrimary = Neutral900,
-        surfaceSecondary = Neutral800,
+        surfacePrimary = Neutral900, // V
+        surfaceSecondary = Neutral800, // V
         surfaceTertiary = Neutral700,
         surfaceBackdrop = Neutral900,
-        borderDefault = Neutral0.copy(alpha = 0.1f),
-        borderSelected = Neutral0,
-        borderCritical = Critical500,
-        buttonPrimary = Neutral50,
-        buttonSecondary = Neutral800,
-        buttonTertiary = Neutral700,
-        buttonBrand = Brand200,
-        buttonCritical = Critical500,
-        typePrimary = Neutral50,
-        typeSecondary = Neutral400,
-        typeTertiary = Neutral400,
-        typeWhite = Neutral0,
-        typeBrand = Brand200,
-        typeCritical = Critical600,
-        iconPrimary = Neutral50,
-        iconTertiary = Neutral700,
-        iconWhite = Neutral0,
-        iconSecondary = Neutral800,
-        iconBrand = Brand200,
-        iconCritical = Critical500,
+        borderDefault = Neutral900, // V
+        borderSelected = Brand200, // V
+        borderCritical = Critical500, // V
+        buttonPrimary = Neutral200, // V
+        buttonSecondary = Neutral700, // V
+        buttonTertiary = Neutral800, // V
+        buttonBrand = Brand200, // V
+        buttonCritical = Critical600, // V
+        typePrimary = Neutral0, // V
+        typeSecondary = Neutral300, // V
+        typeTertiary = Neutral500, // V
+        typeWhite = Neutral0, // V
+        typeBrand = Brand200, // V
+        typeCritical = Critical600, // V
+        iconPrimary = Neutral100,
+        iconSecondary = Neutral500, // V
+        iconTertiary = Neutral500, // V
+        iconWhite = Neutral0, // V
+        iconBrand = Brand200, // V
+        iconCritical = Critical500 // V
     )
 
     internal fun LinkColors.otpElementColors(): OTPElementColors {
@@ -180,6 +180,8 @@ internal object LinkThemeConfig {
         get() = Neutral900
     internal val LinkColors.separatorOverPrimaryButton
         get() = Brand400
+
+
 }
 
 @Composable
