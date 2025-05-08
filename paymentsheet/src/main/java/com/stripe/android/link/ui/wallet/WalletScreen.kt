@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -48,6 +50,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.iconBackground
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
@@ -564,17 +567,45 @@ private fun AddPaymentMethodRow(
             .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_add_green),
-            contentDescription = null,
-            modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
-            tint = Color.Unspecified
+        Spacer(modifier = Modifier.width(HorizontalPadding))
+        RoundedIcon(
+            icon = R.drawable.stripe_ic_sail_add,
+            iconSize = 12.dp,
+            backgroundSize = 24.dp,
+            iconColor = LinkTheme.colors.iconPrimary,
+            backgroundColor = LinkTheme.colors.iconBackground,
+            backgroundShape = RoundedCornerShape(6.dp)
         )
+        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier.padding(end = HorizontalPadding),
             color = LinkTheme.colors.typeBrand,
             style = LinkTheme.typography.bodyEmphasized,
+        )
+    }
+}
+
+@Composable
+private fun RoundedIcon(
+    @DrawableRes icon: Int,
+    iconSize: Dp,
+    backgroundSize: Dp,
+    iconColor: Color = Color.Unspecified,
+    backgroundColor: Color = LinkTheme.colors.surfacePrimary,
+    backgroundShape: RoundedCornerShape
+) {
+    Box(
+        modifier = Modifier
+            .size(backgroundSize)
+            .background(color = backgroundColor, shape = backgroundShape),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            modifier = Modifier.size(iconSize),
+            tint = iconColor
         )
     }
 }

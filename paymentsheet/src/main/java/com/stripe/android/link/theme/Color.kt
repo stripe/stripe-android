@@ -172,6 +172,19 @@ internal object LinkThemeConfig {
         get() = Neutral900
     internal val LinkColors.separatorOverPrimaryButton
         get() = Brand400
+
+    /**
+     * Workaround:
+     *
+     * Icon backgrounds are not consistent with the new Link theme so we hardcode them here.
+     */
+    internal val LinkColors.iconBackground
+        @Composable
+        get() = if (isSystemInDarkTheme()) {
+            Brand900
+        } else {
+            Brand50
+        }
 }
 
 @Composable

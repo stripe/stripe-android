@@ -104,7 +104,7 @@ internal fun PaymentDetailsListItem(
                 if (showWarning) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
-                        painter = painterResource(R.drawable.stripe_sail_warning_circle),
+                        painter = painterResource(R.drawable.stripe_ic_sail_warning_circle),
                         contentDescription = null,
                         modifier = Modifier.size(20.dp),
                         tint = LinkTheme.colors.iconCritical

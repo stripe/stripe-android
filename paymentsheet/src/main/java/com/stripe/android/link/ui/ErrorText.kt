@@ -79,7 +79,7 @@ internal fun ErrorText(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.stripe_sail_warning_circle),
+                painter = painterResource(id = R.drawable.stripe_ic_sail_warning_circle),
                 contentDescription = null,
                 modifier = style.iconModifier,
                 tint = LinkTheme.colors.iconCritical
