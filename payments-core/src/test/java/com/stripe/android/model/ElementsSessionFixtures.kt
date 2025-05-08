@@ -451,6 +451,8 @@ internal object ElementsSessionFixtures {
         paymentMethodRemoveLastFeature: String? = "enabled",
         paymentMethodSetAsDefaultFeature: String = "disabled",
         paymentMethodSyncDefaultFeature: String = "disabled",
+        enableLinkSpm: Boolean = false,
+        paymentMethodsWithLinkDetails: String = "",
     ): JSONObject {
         return JSONObject(
             """
@@ -459,6 +461,9 @@ internal object ElementsSessionFixtures {
               "link_settings": {
                 "link_bank_enabled": false,
                 "link_bank_onboarding_enabled": false
+              },
+              "flags": {
+                "elements_enable_link_spm": $enableLinkSpm
               },
               "merchant_country": "US",
               "payment_method_preference": {
@@ -582,7 +587,9 @@ internal object ElementsSessionFixtures {
                     }
                   }
                 ],
-                "payment_methods_with_link_details": []
+                "payment_methods_with_link_details": [
+                  $paymentMethodsWithLinkDetails
+                ]
               }
             }
             """.trimIndent()
@@ -2166,4 +2173,138 @@ internal object ElementsSessionFixtures {
             """.trimIndent()
         )
     }
+
+    val PAYMENT_METHODS_WITH_LINK_DETAILS = """
+      {
+        "link_payment_details": {
+          "id": "csmrpd_test_61S4AzLQgLW0RABmO41L7cNqHDkf19Am",
+          "backup_ids": [],
+          "balance_details": null,
+          "bank_account_details": null,
+          "billing_address": {
+            "administrative_area": null,
+            "country_code": "US",
+            "dependent_locality": null,
+            "line_1": null,
+            "line_2": null,
+            "locality": null,
+            "name": null,
+            "postal_code": "11234",
+            "sorting_code": null
+          },
+          "billing_email_address": "david.estes+12302193@gmail.com",
+          "card_details": {
+            "brand": "MASTERCARD",
+            "brand_enum": "mastercard",
+            "checks": {
+              "address_line1_check": "UNAVAILABLE",
+              "address_postal_code_check": "PASS",
+              "cvc_check": "PASS"
+            },
+            "country": "COUNTRY_US",
+            "exp_month": 12,
+            "exp_year": 2025,
+            "funding": "CREDIT",
+            "last4": "4444",
+            "networks": [
+              "MASTERCARD"
+            ],
+            "preferred_network": null,
+            "program_details": {
+              "background_color": null,
+              "card_art_network_id": null,
+              "card_art_url": null,
+              "foreground_color": null,
+              "height": null,
+              "program_name": null,
+              "width": null
+            }
+          },
+          "is_default": false,
+          "is_us_debit_prepaid_or_bank_payment": false,
+          "klarna_details": null,
+          "nickname": "",
+          "type": "CARD"
+        },
+        "payment_method": {
+          "id": "pm_1Qun1zEsh8quxL21pDqJeSWF",
+          "object": "payment_method",
+          "allow_redisplay": "always",
+          "billing_details": {
+            "address": {
+              "city": null,
+              "country": "US",
+              "line1": null,
+              "line2": null,
+              "postal_code": "11234",
+              "state": null
+            },
+            "email": null,
+            "name": null,
+            "phone": null,
+            "tax_id": null
+          },
+          "created": 1740108963,
+          "customer": "cus_Qurj8RK03RchBB",
+          "link": {
+            "email": "david.estes+12302193@gmail.com"
+          },
+          "livemode": false,
+          "type": "link"
+        }
+      },
+      {
+        "link_payment_details": null,
+        "payment_method": {
+          "id": "pm_1QoYo1Esh8quxL21bpIFTRrP",
+          "object": "payment_method",
+          "allow_redisplay": "always",
+          "billing_details": {
+            "address": {
+              "city": null,
+              "country": "US",
+              "line1": null,
+              "line2": null,
+              "postal_code": "12345",
+              "state": null
+            },
+            "email": null,
+            "name": null,
+            "phone": null,
+            "tax_id": null
+          },
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "visa",
+            "exp_month": 4,
+            "exp_year": 2026,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4242",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "created": 1738624313,
+          "customer": "cus_Qurj8RK03RchBB",
+          "livemode": false,
+          "radar_options": {},
+          "type": "card"
+        }
+      }
+    """.trimIndent()
 }
