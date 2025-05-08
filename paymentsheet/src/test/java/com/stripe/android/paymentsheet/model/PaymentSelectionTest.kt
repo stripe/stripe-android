@@ -3,7 +3,13 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -12,6 +18,12 @@ import org.robolectric.RobolectricTestRunner
 class PaymentSelectionTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
+        isEnabled = false
+    )
 
     @Test
     fun `Doesn't display a mandate for Link`() {
@@ -141,5 +153,32 @@ class PaymentSelectionTest {
                 paymentMethod = PaymentMethodFactory.card(),
             ).requiresConfirmation
         ).isFalse()
+    }
+
+    @Test
+    fun `mandateTextFromPaymentMethodMetadata returns correct mandate for USBankAccount with PMO SFU set`() {
+        featureFlagTestRule.setEnabled(true)
+        val selection = PaymentSelection.Saved(
+            PaymentMethodFactory.usBankAccount()
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = """
+                    {
+                        "us_bank_account": {
+                            "setup_future_usage": "off_session"
+                        }
+                    }
+                """.trimIndent()
+            )
+        )
+        assertThat(
+            selection.mandateTextFromPaymentMethodMetadata(metadata)
+        ).isEqualTo(USBankAccountTextBuilder.buildMandateText(
+            merchantName = metadata.merchantName,
+            isSaveForFutureUseSelected = false,
+            isInstantDebits = false,
+            isSetupFlow = true
+        ))
     }
 }

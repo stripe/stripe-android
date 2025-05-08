@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -437,3 +438,10 @@ internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): Paymen
         phone = phone
     )
 }
+
+internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
+    metadata: PaymentMethodMetadata
+): ResolvableString? = mandateText(
+    metadata.merchantName,
+    metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
+)

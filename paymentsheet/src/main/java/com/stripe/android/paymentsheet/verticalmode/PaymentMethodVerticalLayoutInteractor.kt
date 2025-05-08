@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -460,10 +461,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
         } else {
             val savedSelection = selection as? PaymentSelection.Saved?
-            savedSelection?.mandateText(
-                paymentMethodMetadata.merchantName,
-                paymentMethodMetadata.hasIntentToSetup(savedSelection.paymentMethod.type?.code ?: "")
-            )
+            savedSelection?.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata)
         }
     }
 
