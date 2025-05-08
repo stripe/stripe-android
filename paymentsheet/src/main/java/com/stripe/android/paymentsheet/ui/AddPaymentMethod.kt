@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.testTag
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -16,6 +17,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.getSetupFutureUseValue
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.collectAsState
@@ -101,7 +103,9 @@ internal fun FormFieldValues.transformToPaymentSelection(
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
             paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = userRequestedReuse.setupFutureUsage
+                setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
+                    paymentMethodMetadata.hasIntentToSetup(PaymentMethod.Type.Card.code)
+                )
             ),
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,

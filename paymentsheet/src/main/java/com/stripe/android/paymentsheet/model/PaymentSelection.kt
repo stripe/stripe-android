@@ -12,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
@@ -445,3 +446,25 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
     metadata.merchantName,
     metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
 )
+
+/**
+ * If setup_future_usage is set at the top level to "off_session" the payment method will
+ * inherit this value so sending [ConfirmPaymentIntentParams.SetupFutureUsage.OnSession] and
+ * [ConfirmPaymentIntentParams.SetupFutureUsage.Blank] have no effect.
+ * If setup_future_usage is set to "on_session" at either the top level or payment_method_options level it can
+ * only be updated to "off_session". This method will always return the [ConfirmPaymentIntentParams.SetupFutureUsage]
+ * value if it is [ConfirmPaymentIntentParams.SetupFutureUsage.OffSession]. Otherwise it will return null if
+ * @param hasIntentToSetup is true
+ */
+internal fun PaymentSelection.CustomerRequestedSave.getSetupFutureUseValue(
+    hasIntentToSetup: Boolean
+): ConfirmPaymentIntentParams.SetupFutureUsage? {
+    return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
+        when (setupFutureUsage) {
+            ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> setupFutureUsage
+            else -> setupFutureUsage.takeIf { !hasIntentToSetup }
+        }
+    } else {
+        setupFutureUsage
+    }
+}

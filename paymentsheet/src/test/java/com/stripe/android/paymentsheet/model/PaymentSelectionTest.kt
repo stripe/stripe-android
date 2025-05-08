@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -182,5 +183,43 @@ class PaymentSelectionTest {
                 isSetupFlow = true
             )
         )
+    }
+
+    @Test
+    fun `getSetupFutureUseValue returns correct value when hasIntentToSetup is true`() {
+        featureFlagTestRule.setEnabled(true)
+        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
+            hasIntentToSetup = true
+        )
+        assertThat(noRequestSfu).isNull()
+
+        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
+            hasIntentToSetup = true
+        )
+        assertThat(noReuseSfu).isNull()
+
+        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
+            hasIntentToSetup = true
+        )
+        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+    }
+
+    @Test
+    fun `getSetupFutureUseValue returns correct value when hasIntentToSetup is false`() {
+        featureFlagTestRule.setEnabled(true)
+        val noRequestSfu = PaymentSelection.CustomerRequestedSave.NoRequest.getSetupFutureUseValue(
+            hasIntentToSetup = false
+        )
+        assertThat(noRequestSfu).isNull()
+
+        val noReuseSfu = PaymentSelection.CustomerRequestedSave.RequestNoReuse.getSetupFutureUseValue(
+            hasIntentToSetup = false
+        )
+        assertThat(noReuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
+
+        val reuseSfu = PaymentSelection.CustomerRequestedSave.RequestReuse.getSetupFutureUseValue(
+            hasIntentToSetup = false
+        )
+        assertThat(reuseSfu).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
     }
 }
