@@ -369,7 +369,7 @@ private fun RowScope.PaymentMethodInfo(
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = LinkTheme.colors.textSecondary,
+                    color = LinkTheme.colors.textTertiary,
                     style = LinkTheme.typography.detail,
                 )
             }

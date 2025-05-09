@@ -10,7 +10,7 @@ import com.stripe.android.link.theme.LinkTheme
 internal fun LinkDivider(modifier: Modifier = Modifier) {
     Divider(
         modifier = modifier,
-        thickness = 1.dp,
+        thickness = 0.5.dp,
         color = LinkTheme.colors.borderDefault,
     )
 }

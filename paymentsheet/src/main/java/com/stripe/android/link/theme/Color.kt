@@ -18,11 +18,9 @@ private val Neutral100 = Color(0xFFF5F5F5)
 private val Neutral0 = Color(0xFFFFFFFF)
 
 // Brand Colors
-private val Brand900 = Color(0xFF011E0F)
 private val Brand600 = Color(0xFF006635)
 private val Brand400 = Color(0xFF00A355)
 private val Brand200 = Color(0xFF00D66F)
-private val Brand50 = Color(0xFFE6FFED)
 
 // Critical Colors
 private val Critical600 = Color(0xFFC0123C)
@@ -140,19 +138,6 @@ internal object LinkThemeConfig {
             selectedColor = LinkTheme.colors.buttonBrand,
             unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
         )
-
-    /**
-     * Workaround:
-     *
-     * Icon backgrounds are not consistent with the new Link theme so we hardcode them here.
-     */
-    internal val LinkColors.iconBackground
-        @Composable
-        get() = if (isSystemInDarkTheme()) {
-            Brand900
-        } else {
-            Brand50
-        }
 }
 
 @Composable

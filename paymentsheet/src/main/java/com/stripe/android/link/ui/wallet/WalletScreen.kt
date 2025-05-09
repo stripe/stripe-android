@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
@@ -31,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -48,7 +45,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.iconBackground
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkDivider
@@ -205,13 +202,14 @@ private fun PaymentDetailsSection(
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                CardDetailsRecollectionForm(
-                    paymentDetails = selectedCard,
-                    expiryDateController = expiryDateController,
-                    cvcController = cvcController,
-                    isCardExpired = selectedCard.isExpired
-                )
+                StripeThemeForLink {
+                    CardDetailsRecollectionForm(
+                        paymentDetails = selectedCard,
+                        expiryDateController = expiryDateController,
+                        cvcController = cvcController,
+                        isCardExpired = selectedCard.isExpired
+                    )
+                }
             }
         }
     }
@@ -557,44 +555,11 @@ private fun AddPaymentMethodRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(HorizontalPadding))
-        RoundedIcon(
-            icon = R.drawable.stripe_ic_sail_add,
-            iconSize = 12.dp,
-            backgroundSize = 24.dp,
-            iconColor = LinkTheme.colors.textBrand,
-            backgroundColor = LinkTheme.colors.iconBackground,
-            backgroundShape = RoundedCornerShape(6.dp)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier.padding(end = HorizontalPadding),
             color = LinkTheme.colors.textBrand,
             style = LinkTheme.typography.bodyEmphasized,
-        )
-    }
-}
-
-@Composable
-private fun RoundedIcon(
-    @DrawableRes icon: Int,
-    iconSize: Dp,
-    backgroundSize: Dp,
-    iconColor: Color = Color.Unspecified,
-    backgroundColor: Color = LinkTheme.colors.surfacePrimary,
-    backgroundShape: RoundedCornerShape
-) {
-    Box(
-        modifier = Modifier
-            .size(backgroundSize)
-            .background(color = backgroundColor, shape = backgroundShape),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(icon),
-            contentDescription = null,
-            modifier = Modifier.size(iconSize),
-            tint = iconColor
         )
     }
 }
@@ -611,7 +576,7 @@ private fun LinkMandate(text: String) {
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
-            color = LinkTheme.colors.textPrimary,
+            color = LinkTheme.colors.textBrand,
         )
     )
 }
