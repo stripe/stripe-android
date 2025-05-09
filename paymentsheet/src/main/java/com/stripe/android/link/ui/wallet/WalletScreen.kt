@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
@@ -53,6 +51,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.iconBackground
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkDivider
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -364,14 +363,9 @@ private fun PaymentMethodPicker(
         modifier = modifier
             .animateContentSize()
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = LinkTheme.colors.borderDefault,
-                shape = LinkTheme.shapes.large
-            )
             .clip(LinkTheme.shapes.large)
             .background(
-                color = LinkTheme.colors.surfacePrimary,
+                color = LinkTheme.colors.surfaceSecondary,
                 shape = LinkTheme.shapes.large
             )
     ) {
@@ -381,10 +375,7 @@ private fun PaymentMethodPicker(
             labelMaxWidth = labelMaxWidth
         )
 
-        Divider(
-            modifier = Modifier.fillMaxWidth(),
-            color = LinkTheme.colors.borderDefault,
-        )
+        LinkDivider()
 
         if (expanded || selectedItem == null) {
             expandedContent()
@@ -506,8 +497,7 @@ private fun ExpandedPaymentDetails(
             )
 
             if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
-                Divider(
-                    color = LinkTheme.colors.borderDefault,
+                LinkDivider(
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
             }
