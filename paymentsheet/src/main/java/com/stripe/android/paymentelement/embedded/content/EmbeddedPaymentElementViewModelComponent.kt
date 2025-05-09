@@ -15,7 +15,6 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
@@ -45,12 +44,10 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
-@ExperimentalEmbeddedPaymentElementApi
 @Singleton
 @Component(
     modules = [
@@ -82,7 +79,6 @@ internal interface EmbeddedPaymentElementViewModelComponent {
     }
 }
 
-@ExperimentalEmbeddedPaymentElementApi
 @Module(
     subcomponents = [
         EmbeddedPaymentElementSubcomponent::class,
