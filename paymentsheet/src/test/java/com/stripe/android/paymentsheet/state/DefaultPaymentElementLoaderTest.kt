@@ -7,7 +7,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -52,7 +51,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -62,7 +60,6 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -80,12 +77,6 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
-
-    @get:Rule
-    val linkCardBrandFilteringFeatureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkCardBrandFiltering,
-        isEnabled = false,
-    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
@@ -1387,19 +1378,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `Returns correct Link enablement based on card brand filtering`() = runTest {
-        linkCardBrandFilteringFeatureFlagRule.setEnabled(false)
-        testLinkEnablementWithCardBrandFiltering(
-            passthroughModeEnabled = false,
-            useNativeLink = true,
-            expectedEnabled = true
-        )
-        testLinkEnablementWithCardBrandFiltering(
-            passthroughModeEnabled = true,
-            useNativeLink = true,
-            expectedEnabled = false
-        )
-
-        linkCardBrandFilteringFeatureFlagRule.setEnabled(true)
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = false,
             useNativeLink = true,
@@ -2195,30 +2173,32 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() = runTest {
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
-            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
-        )
+    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() =
+        runTest {
+            val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+                lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+                defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+            )
 
-        val observedElements = result.customer?.paymentMethods
-        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
-        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
-    }
+            val observedElements = result.customer?.paymentMethods
+            val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+            assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+        }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() = runTest {
-        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() =
+        runTest {
+            val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
 
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
-            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = defaultPaymentMethod,
-        )
+            val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+                lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+                defaultPaymentMethod = defaultPaymentMethod,
+            )
 
-        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            defaultPaymentMethod
-        )
-    }
+            assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+                defaultPaymentMethod
+            )
+        }
 
     @Test
     fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runTest {
