@@ -57,7 +57,8 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
         return ConsumerPaymentDetails(paymentDetails)
     }
 
-    private fun parsePaymentDetails(json: JSONObject): ConsumerPaymentDetails.PaymentDetails? =
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun parsePaymentDetails(json: JSONObject): ConsumerPaymentDetails.PaymentDetails? =
         optString(json, FIELD_TYPE)?.let { type ->
             val id = json.getString(FIELD_ID)
             val isDefault = json.optBoolean(FIELD_IS_DEFAULT)
