@@ -1,6 +1,7 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
@@ -91,7 +92,7 @@ internal object LinkThemeConfig {
         surfaceSecondary = Neutral800,
         surfaceTertiary = Neutral700,
         surfaceBackdrop = Neutral900,
-        borderDefault = Neutral700,
+        borderDefault = Neutral900,
         borderSelected = Brand200,
         borderCritical = Critical500,
         buttonPrimary = Neutral200,
@@ -129,6 +130,20 @@ internal object LinkThemeConfig {
     /**
      * Workaround:
      *
+     * Border color doesn't look great for radio buttons on dark mode. We give it a clearer
+     * color here.
+     *
+     */
+    internal val LinkColors.radioButtonColors
+        @Composable
+        get() = RadioButtonDefaults.colors(
+            selectedColor = LinkTheme.colors.buttonBrand,
+            unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
+        )
+
+    /**
+     * Workaround:
+     *
      * Icon backgrounds are not consistent with the new Link theme so we hardcode them here.
      */
     internal val LinkColors.iconBackground
@@ -142,6 +157,7 @@ internal object LinkThemeConfig {
 
 @Composable
 internal fun StripeThemeForLink(
+    materialPrimary: Color = LinkTheme.colors.textPrimary,
     content: @Composable () -> Unit
 ) {
     val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
@@ -151,11 +167,11 @@ internal fun StripeThemeForLink(
             component = LinkTheme.colors.surfaceSecondary,
             onComponent = LinkTheme.colors.textPrimary,
             placeholderText = LinkTheme.colors.textTertiary,
-            componentDivider = LinkTheme.colors.surfacePrimary,
-            componentBorder = LinkTheme.colors.surfacePrimary,
+            componentDivider = LinkTheme.colors.borderDefault,
+            componentBorder = LinkTheme.colors.surfaceSecondary,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = LinkTheme.colors.textBrand,
-                error = LinkTheme.colors.textCritical
+                primary = materialPrimary,
+                error = LinkTheme.colors.textCritical,
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(

@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.verification
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -288,11 +287,6 @@ private fun ResendCodeButton(
         modifier = Modifier
             .testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
             .padding(top = 12.dp)
-            .border(
-                width = 1.dp,
-                color = LinkTheme.colors.borderDefault,
-                shape = LinkTheme.shapes.extraSmall,
-            )
             .clip(shape = LinkTheme.shapes.extraSmall)
             .clickable(
                 enabled = !isProcessing && !isSendingNewCode,
@@ -311,7 +305,7 @@ private fun ResendCodeButton(
         Text(
             text = stringResource(id = R.string.stripe_verification_resend),
             style = LinkTheme.typography.detailEmphasized,
-            color = LinkTheme.colors.textPrimary,
+            color = LinkTheme.colors.textBrand,
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 4.dp)
                 .alpha(textAlpha),

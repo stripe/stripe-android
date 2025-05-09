@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -144,6 +145,7 @@ private fun EmailCollectionSection(
     signUpScreenState: SignUpScreenState,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
+    var focused by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -152,12 +154,15 @@ private fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
+            isSelected = focused,
             modifier = Modifier
                 .padding(vertical = 8.dp),
         ) {
             TextField(
                 modifier = Modifier
-                    .focusRequester(focusRequester),
+                    .padding(vertical = 4.dp)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focused = it.isFocused },
                 textFieldController = emailController,
                 imeAction = if (signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
                     ImeAction.Next
@@ -189,11 +194,17 @@ private fun SecondaryFields(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
+    var emailFocused by remember { mutableStateOf(false) }
+    var nameFocused by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .onFocusChanged { emailFocused = it.isFocused },
                 enabled = signUpScreenState.canEditForm,
+                isSelected = emailFocused,
                 phoneNumberController = phoneNumberController,
                 requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                 imeAction = if (signUpScreenState.requiresNameCollection) {
@@ -205,10 +216,14 @@ private fun SecondaryFields(
 
             if (signUpScreenState.requiresNameCollection) {
                 TextFieldSection(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .onFocusChanged { nameFocused = it.isFocused }
+                        .padding(vertical = 8.dp),
+                    isSelected = nameFocused,
                     textFieldController = nameController,
                 ) {
                     TextField(
+                        modifier = Modifier.padding(vertical = 4.dp),
                         textFieldController = nameController,
                         imeAction = ImeAction.Done,
                         enabled = signUpScreenState.canEditForm,

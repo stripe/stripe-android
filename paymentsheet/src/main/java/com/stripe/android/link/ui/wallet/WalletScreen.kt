@@ -532,8 +532,7 @@ private fun ExpandedRowHeader(
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            color = LinkTheme.colors.textPrimary,
-            style = LinkTheme.typography.bodyEmphasized,
+            color = LinkTheme.colors.textTertiary
         )
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),

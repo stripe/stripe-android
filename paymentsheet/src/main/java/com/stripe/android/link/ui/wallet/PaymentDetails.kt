@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
-import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.radioButtonColors
 import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
@@ -81,10 +81,7 @@ internal fun PaymentDetailsListItem(
                 modifier = Modifier
                     .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
                     .padding(end = 12.dp),
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = LinkTheme.colors.buttonBrand,
-                    unselectedColor = LinkTheme.colors.borderDefault
-                )
+                colors = LinkTheme.colors.radioButtonColors
             )
 
             Row(
