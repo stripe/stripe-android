@@ -104,7 +104,7 @@ internal fun ErrorText(
             HyperlinkedText(
                 text = text,
                 modifier = style.textModifier,
-                color = LinkTheme.colors.typeCritical,
+                color = LinkTheme.colors.textCritical,
                 style = style.textStyle
             )
         }

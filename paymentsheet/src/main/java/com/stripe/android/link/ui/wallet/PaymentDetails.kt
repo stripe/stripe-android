@@ -271,7 +271,7 @@ private fun DefaultTag() {
         Text(
             text = stringResource(id = R.string.stripe_wallet_default),
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
             style = LinkTheme.typography.caption,
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
@@ -363,7 +363,7 @@ private fun RowScope.PaymentMethodInfo(
         Column {
             Text(
                 text = title,
-                color = LinkTheme.colors.typePrimary,
+                color = LinkTheme.colors.textPrimary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = LinkTheme.typography.bodyEmphasized,
@@ -372,7 +372,7 @@ private fun RowScope.PaymentMethodInfo(
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = LinkTheme.colors.typeSecondary,
+                    color = LinkTheme.colors.textSecondary,
                     style = LinkTheme.typography.detail,
                 )
             }

@@ -95,7 +95,7 @@ internal fun SignUpBody(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary
+            color = LinkTheme.colors.textPrimary
         )
         Text(
             text = stringResource(R.string.stripe_link_sign_up_message),
@@ -104,7 +104,7 @@ internal fun SignUpBody(
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.typeTertiary
+            color = LinkTheme.colors.textTertiary
         )
         StripeThemeForLink(
             componentBorder = LinkTheme.colors.surfacePrimary,

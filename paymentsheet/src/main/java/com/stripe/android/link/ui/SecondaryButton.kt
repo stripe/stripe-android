@@ -34,7 +34,7 @@ internal fun SecondaryButton(
     ) {
         Text(
             text = label,
-            color = LinkTheme.colors.typePrimary
+            color = LinkTheme.colors.textPrimary
                 .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled),
             style = LinkTheme.typography.bodyEmphasized,
         )

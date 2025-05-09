@@ -421,7 +421,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_HEADER_TAG)
                 .width(labelMaxWidth),
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
         )
 
         PaymentDetails(
@@ -460,12 +460,12 @@ private fun EmailDetails(
         Text(
             modifier = Modifier.width(labelMaxWidth),
             text = label,
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
         )
 
         Text(
             text = email,
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = LinkTheme.typography.bodyEmphasized,
@@ -542,7 +542,7 @@ private fun ExpandedRowHeader(
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
             style = LinkTheme.typography.bodyEmphasized,
         )
         Icon(
@@ -572,7 +572,7 @@ private fun AddPaymentMethodRow(
             icon = R.drawable.stripe_ic_sail_add,
             iconSize = 12.dp,
             backgroundSize = 24.dp,
-            iconColor = LinkTheme.colors.typeBrand,
+            iconColor = LinkTheme.colors.textBrand,
             backgroundColor = LinkTheme.colors.iconBackground,
             backgroundShape = RoundedCornerShape(6.dp)
         )
@@ -580,7 +580,7 @@ private fun AddPaymentMethodRow(
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier.padding(end = HorizontalPadding),
-            color = LinkTheme.colors.typeBrand,
+            color = LinkTheme.colors.textBrand,
             style = LinkTheme.typography.bodyEmphasized,
         )
     }
@@ -614,7 +614,7 @@ private fun RoundedIcon(
 private fun LinkMandate(text: String) {
     Html(
         html = text.replaceHyperlinks(),
-        color = LinkTheme.colors.typeSecondary,
+        color = LinkTheme.colors.textSecondary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
         ),
@@ -622,7 +622,7 @@ private fun LinkMandate(text: String) {
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
         )
     )
 }
@@ -716,7 +716,7 @@ private fun AlertMessage(
             Text(
                 text = alertMessage.resolve(),
                 style = LinkTheme.typography.body,
-                color = LinkTheme.colors.typePrimary,
+                color = LinkTheme.colors.textPrimary,
             )
         },
         backgroundColor = LinkTheme.colors.surfacePrimary,
@@ -729,7 +729,7 @@ private fun AlertMessage(
             ) {
                 Text(
                     text = android.R.string.ok.resolvableString.resolve(context),
-                    color = LinkTheme.colors.typeBrand
+                    color = LinkTheme.colors.textBrand
                 )
             }
         }

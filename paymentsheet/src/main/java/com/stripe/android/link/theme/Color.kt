@@ -87,12 +87,12 @@ internal data class LinkColors(
     val buttonTertiary: Color,
     val buttonBrand: Color,
     val buttonCritical: Color,
-    val typePrimary: Color,
-    val typeSecondary: Color,
-    val typeTertiary: Color,
-    val typeWhite: Color,
-    val typeBrand: Color,
-    val typeCritical: Color,
+    val textPrimary: Color,
+    val textSecondary: Color,
+    val textTertiary: Color,
+    val textWhite: Color,
+    val textBrand: Color,
+    val textCritical: Color,
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
@@ -119,12 +119,12 @@ internal object LinkThemeConfig {
         buttonTertiary = Neutral0,
         buttonBrand = Brand200,
         buttonCritical = Critical500,
-        typePrimary = Neutral900,
-        typeSecondary = Neutral700,
-        typeTertiary = Neutral500,
-        typeWhite = Neutral0,
-        typeBrand = Brand600,
-        typeCritical = Critical600,
+        textPrimary = Neutral900,
+        textSecondary = Neutral700,
+        textTertiary = Neutral500,
+        textWhite = Neutral0,
+        textBrand = Brand600,
+        textCritical = Critical600,
         iconPrimary = Neutral900,
         iconSecondary = Neutral700,
         iconTertiary = Neutral500,
@@ -146,12 +146,12 @@ internal object LinkThemeConfig {
         buttonTertiary = Neutral800, // V
         buttonBrand = Brand200, // V
         buttonCritical = Critical600, // V
-        typePrimary = Neutral0, // V
-        typeSecondary = Neutral300, // V
-        typeTertiary = Neutral500, // V
-        typeWhite = Neutral0, // V
-        typeBrand = Brand200, // V
-        typeCritical = Critical600, // V
+        textPrimary = Neutral0, // V
+        textSecondary = Neutral300, // V
+        textTertiary = Neutral500, // V
+        textWhite = Neutral0, // V
+        textBrand = Brand200, // V
+        textCritical = Critical600, // V
         iconPrimary = Neutral100,
         iconSecondary = Neutral500, // V
         iconTertiary = Neutral500, // V
@@ -198,13 +198,13 @@ internal fun StripeThemeForLink(
     StripeTheme(
         colors = stripeDefaultColors.copy(
             component = LinkTheme.colors.surfaceSecondary,
-            onComponent = LinkTheme.colors.typePrimary,
-            placeholderText = LinkTheme.colors.typeTertiary,
+            onComponent = LinkTheme.colors.textPrimary,
+            placeholderText = LinkTheme.colors.textTertiary,
             componentDivider = componentDivider ?: stripeDefaultColors.componentDivider,
             componentBorder = componentBorder ?: stripeDefaultColors.componentBorder,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = LinkTheme.colors.typeBrand,
-                error = LinkTheme.colors.typeCritical
+                primary = LinkTheme.colors.textBrand,
+                error = LinkTheme.colors.textCritical
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(

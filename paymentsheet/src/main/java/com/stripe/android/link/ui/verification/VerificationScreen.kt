@@ -119,7 +119,7 @@ internal fun VerificationBody(
                 .padding(top = 4.dp, bottom = 20.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.typeSecondary,
+            color = LinkTheme.colors.textSecondary,
         )
 
         OTPView(
@@ -156,7 +156,7 @@ internal fun VerificationBody(
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                 text = state.email,
                 style = LinkTheme.typography.detail,
-                color = LinkTheme.colors.typeTertiary,
+                color = LinkTheme.colors.textTertiary,
             )
         }
     }
@@ -182,7 +182,7 @@ private fun OTPView(
                 .padding(vertical = 10.dp),
             colors = OTPElementColors(
                 selectedBorder = LinkTheme.colors.borderSelected,
-                placeholder = LinkTheme.colors.typePrimary,
+                placeholder = LinkTheme.colors.textPrimary,
                 background = LinkTheme.colors.surfaceSecondary
             ),
             focusRequester = focusRequester
@@ -231,7 +231,7 @@ private fun Header(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
         )
     } else {
         Text(
@@ -241,7 +241,7 @@ private fun Header(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
         )
     }
 }
@@ -259,7 +259,7 @@ private fun ChangeEmailRow(
         Text(
             text = stringResource(id = R.string.stripe_verification_not_email, email),
             modifier = Modifier.weight(weight = 1f, fill = false),
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = LinkTheme.typography.detail,
@@ -273,7 +273,7 @@ private fun ChangeEmailRow(
                     enabled = !isProcessing,
                     onClick = onChangeEmailClick
                 ),
-            color = LinkTheme.colors.typeBrand,
+            color = LinkTheme.colors.textBrand,
             maxLines = 1,
             style = LinkTheme.typography.detail,
         )
@@ -314,7 +314,7 @@ private fun ResendCodeButton(
         Text(
             text = stringResource(id = R.string.stripe_verification_resend),
             style = LinkTheme.typography.detailEmphasized,
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 4.dp)
                 .alpha(textAlpha),
@@ -324,7 +324,7 @@ private fun ResendCodeButton(
             visible = isSendingNewCode
         ) {
             CircularProgressIndicator(
-                color = LinkTheme.colors.typePrimary,
+                color = LinkTheme.colors.textPrimary,
                 strokeWidth = 2.dp,
                 modifier = Modifier
                     .testTag(VERIFICATION_RESEND_LOADER_TAG)
