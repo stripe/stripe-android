@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,67 +10,22 @@ import com.stripe.android.uicore.StripeThemeDefaults
 private val Neutral900 = Color(0xFF171717)
 private val Neutral800 = Color(0xFF262626)
 private val Neutral700 = Color(0xFF404040)
-private val Neutral600 = Color(0xFF525252)
 private val Neutral500 = Color(0xFF707070)
-private val Neutral400 = Color(0xFFA3A3A3)
 private val Neutral300 = Color(0xFFD4D4D4)
 private val Neutral200 = Color(0xFFE5E5E5)
 private val Neutral100 = Color(0xFFF5F5F5)
-private val Neutral50 = Color(0xFFFAFAFA)
-private val Neutral25 = Color(0xFFFEF4F6)
 private val Neutral0 = Color(0xFFFFFFFF)
 
 // Brand Colors
 private val Brand900 = Color(0xFF011E0F)
-private val Brand800 = Color(0xFF023B1E)
-private val Brand700 = Color(0xFF034F28)
 private val Brand600 = Color(0xFF006635)
-private val Brand500 = Color(0xFF008545)
 private val Brand400 = Color(0xFF00A355)
-private val Brand300 = Color(0xFF00C767)
 private val Brand200 = Color(0xFF00D66F)
-private val Brand100 = Color(0xFF5EEE97)
 private val Brand50 = Color(0xFFE6FFED)
-private val Brand25 = Color(0xFFFEF4F6)
 
 // Critical Colors
-private val Critical900 = Color(0xFF4E0322)
-private val Critical800 = Color(0xFF76072F)
-private val Critical700 = Color(0xFF9B0C36)
 private val Critical600 = Color(0xFFC0123C)
 private val Critical500 = Color(0xFFE61947)
-private val Critical400 = Color(0xFFFAA467)
-private val Critical300 = Color(0xFFFA7E91)
-private val Critical200 = Color(0xFFFAA9B8)
-private val Critical100 = Color(0xFFFBD3DC)
-private val Critical50 = Color(0xFFFDE9EE)
-private val Critical25 = Color(0xFFFEF4F6)
-
-// Attention Colors
-private val Attention900 = Color(0xFF4A0F02)
-private val Attention800 = Color(0xFF701B01)
-private val Attention700 = Color(0xFF922700)
-private val Attention600 = Color(0xFFB13600)
-private val Attention500 = Color(0xFFCC4B00)
-private val Attention400 = Color(0xFFE46602)
-private val Attention300 = Color(0xFFF7870F)
-private val Attention200 = Color(0xFFFC4AF4)
-private val Attention100 = Color(0xFFFBD992)
-private val Attention50 = Color(0xFFFCEEB5)
-private val Attention25 = Color(0xFFFEF8C9)
-
-// Info Colors
-private val Info900 = Color(0xFF0A2156)
-private val Info800 = Color(0xFF0D3485)
-private val Info700 = Color(0xFF0B46AD)
-private val Info600 = Color(0xFF045AD0)
-private val Info500 = Color(0xFF007E29)
-private val Info400 = Color(0xFF088EF9)
-private val Info300 = Color(0xFF3BABFD)
-private val Info200 = Color(0xFF6DC9FC)
-private val Info100 = Color(0xFFA7E7FC)
-private val Info50 = Color(0xFFCBF5FD)
-private val Info25 = Color(0xFFE2FBFE)
 
 internal data class LinkColors(
     val surfacePrimary: Color,
@@ -134,30 +87,30 @@ internal object LinkThemeConfig {
     )
 
     private val colorsDark = LinkColors(
-        surfacePrimary = Neutral900, // V
-        surfaceSecondary = Neutral800, // V
-        surfaceTertiary = Neutral700, // V
+        surfacePrimary = Neutral900,
+        surfaceSecondary = Neutral800,
+        surfaceTertiary = Neutral700,
         surfaceBackdrop = Neutral900,
-        borderDefault = Neutral700, // V
-        borderSelected = Brand200, // V
-        borderCritical = Critical500, // V
-        buttonPrimary = Neutral200, // V
-        buttonSecondary = Neutral700, // V
-        buttonTertiary = Neutral800, // V
-        buttonBrand = Brand200, // V
-        buttonCritical = Critical600, // V
-        textPrimary = Neutral0, // V
-        textSecondary = Neutral300, // V
-        textTertiary = Neutral500, // V
-        textWhite = Neutral0, // V
-        textBrand = Brand200, // V
-        textCritical = Critical600, // V
+        borderDefault = Neutral700,
+        borderSelected = Brand200,
+        borderCritical = Critical500,
+        buttonPrimary = Neutral200,
+        buttonSecondary = Neutral700,
+        buttonTertiary = Neutral800,
+        buttonBrand = Brand200,
+        buttonCritical = Critical600,
+        textPrimary = Neutral0,
+        textSecondary = Neutral300,
+        textTertiary = Neutral500,
+        textWhite = Neutral0,
+        textBrand = Brand200,
+        textCritical = Critical600,
         iconPrimary = Neutral100,
-        iconSecondary = Neutral500, // V
-        iconTertiary = Neutral500, // V
-        iconWhite = Neutral0, // V
-        iconBrand = Brand200, // V
-        iconCritical = Critical500 // V
+        iconSecondary = Neutral500,
+        iconTertiary = Neutral500,
+        iconWhite = Neutral0,
+        iconBrand = Brand200,
+        iconCritical = Critical500
     )
 
     /**
@@ -189,8 +142,6 @@ internal object LinkThemeConfig {
 
 @Composable
 internal fun StripeThemeForLink(
-    componentBorder: Color? = null,
-    componentDivider: Color? = null,
     content: @Composable () -> Unit
 ) {
     val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
@@ -200,8 +151,8 @@ internal fun StripeThemeForLink(
             component = LinkTheme.colors.surfaceSecondary,
             onComponent = LinkTheme.colors.textPrimary,
             placeholderText = LinkTheme.colors.textTertiary,
-            componentDivider = componentDivider ?: stripeDefaultColors.componentDivider,
-            componentBorder = componentBorder ?: stripeDefaultColors.componentBorder,
+            componentDivider = LinkTheme.colors.surfacePrimary,
+            componentBorder = LinkTheme.colors.surfacePrimary,
             materialColors = stripeDefaultColors.materialColors.copy(
                 primary = LinkTheme.colors.textBrand,
                 error = LinkTheme.colors.textCritical

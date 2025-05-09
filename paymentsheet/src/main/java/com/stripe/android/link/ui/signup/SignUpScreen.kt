@@ -106,10 +106,7 @@ internal fun SignUpBody(
             style = LinkTheme.typography.body,
             color = LinkTheme.colors.textTertiary
         )
-        StripeThemeForLink(
-            componentBorder = LinkTheme.colors.surfacePrimary,
-            componentDivider = LinkTheme.colors.surfacePrimary
-        ) {
+        StripeThemeForLink {
             EmailCollectionSection(
                 enabled = signUpScreenState.canEditForm,
                 emailController = emailController,
@@ -194,10 +191,7 @@ private fun SecondaryFields(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier = Modifier.fillMaxWidth()) {
-        StripeThemeForLink(
-            componentBorder = LinkTheme.colors.surfacePrimary,
-            componentDivider = LinkTheme.colors.surfacePrimary
-        ) {
+        StripeThemeForLink {
             PhoneNumberCollectionSection(
                 enabled = signUpScreenState.canEditForm,
                 phoneNumberController = phoneNumberController,

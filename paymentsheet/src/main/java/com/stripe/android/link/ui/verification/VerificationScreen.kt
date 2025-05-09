@@ -168,10 +168,7 @@ private fun OTPView(
     otpElement: OTPElement,
     focusRequester: FocusRequester
 ) {
-    StripeThemeForLink(
-        // We want the OTP unselected color to match the fill color.
-        componentBorder = LinkTheme.colors.surfaceSecondary,
-    ) {
+    StripeThemeForLink {
         OTPElementUI(
             enabled = !state.isProcessing,
             element = otpElement,
