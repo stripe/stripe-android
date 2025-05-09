@@ -31,8 +31,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,10 +39,10 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
-import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
@@ -325,13 +323,12 @@ private fun ResendCodeButton(
         AnimatedVisibility(
             visible = isSendingNewCode
         ) {
-            LinkSpinner(
+            CircularProgressIndicator(
+                color = LinkTheme.colors.typePrimary,
+                strokeWidth = 2.dp,
                 modifier = Modifier
-                    .size(16.dp)
-                    .semantics { testTagsAsResourceId = true }
-                    .testTag(VERIFICATION_RESEND_LOADER_TAG),
-                filledColor = LinkTheme.colors.iconPrimary,
-                strokeWidth = 3.dp
+                    .testTag(VERIFICATION_RESEND_LOADER_TAG)
+                    .size(18.dp)
             )
         }
     }
