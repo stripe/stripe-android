@@ -35,7 +35,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
@@ -43,6 +45,7 @@ import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
@@ -322,17 +325,6 @@ private fun ResendCodeButton(
         AnimatedVisibility(
             visible = isSendingNewCode
         ) {
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                    .alpha(ContentAlpha.disabled)
-            ) {
-                Text(
-                    text = stringResource(id = R.string.stripe_verification_resend),
-                    style = LinkTheme.typography.detailEmphasized,
-                    color = LinkTheme.colors.typePrimary,
-                )
-            }
             LinkSpinner(
                 modifier = Modifier
                     .size(16.dp)
@@ -342,6 +334,29 @@ private fun ResendCodeButton(
                 strokeWidth = 3.dp
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun VerificationBodyPreview() {
+    DefaultLinkTheme {
+        VerificationBody(
+            state = VerificationViewState(
+                isDialog = true,
+                redactedPhoneNumber = "123-456-7890",
+                email = "",
+                isProcessing = false,
+                errorMessage = null,
+                isSendingNewCode = true,
+                didSendNewCode = false,
+                requestFocus = false,
+            ),
+            otpElement = OTPSpec.transform(),
+            onBack = {},
+            onChangeEmailClick = {},
+            onResendCodeClick = {}
+        )
     }
 }
 
