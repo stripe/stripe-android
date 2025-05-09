@@ -11,7 +11,6 @@ import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -83,8 +82,6 @@ private fun ErrorTextPreview() {
 internal fun ErrorText(
     text: String,
     modifier: Modifier = Modifier,
-    iconColor: Color = LinkTheme.colors.iconCritical,
-    textColor: Color = LinkTheme.colors.typeCritical,
     style: ErrorTextStyle = ErrorTextStyle.Medium
 ) {
     DefaultLinkTheme {
