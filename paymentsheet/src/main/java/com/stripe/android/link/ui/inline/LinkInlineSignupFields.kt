@@ -26,6 +26,8 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
+private val LinkLogoModifier = Modifier.padding(end = 16.dp)
+
 @Composable
 internal fun LinkInlineSignupFields(
     sectionError: Int?,
@@ -60,7 +62,9 @@ internal fun LinkInlineSignupFields(
                     ImeAction.Done
                 },
                 focusRequester = phoneFocusRequester,
-                trailingIcon = { LinkLogo() },
+                trailingIcon = {
+                    LinkLogo(LinkLogoModifier)
+                },
             )
         } else {
             EmailCollection(
@@ -73,7 +77,7 @@ internal fun LinkInlineSignupFields(
                     ImeAction.Done
                 },
                 focusRequester = emailFocusRequester,
-                trailingIcon = { LinkLogo() },
+                trailingIcon = { LinkLogo(LinkLogoModifier) },
             )
         }
 

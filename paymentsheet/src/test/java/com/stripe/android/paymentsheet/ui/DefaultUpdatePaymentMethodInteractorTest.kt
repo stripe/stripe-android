@@ -615,7 +615,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
         assertThat(exception)
             .hasMessageThat()
-            .isEqualTo("Card payment method required for creating EditCardDetailsInteractor")
+            .isEqualTo("Card or Link payment method required for creating EditCardDetailsInteractor")
     }
 
     @Test

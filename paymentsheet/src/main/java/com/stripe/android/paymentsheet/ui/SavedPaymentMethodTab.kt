@@ -75,6 +75,7 @@ internal fun SavedPaymentMethodTab(
     iconRes: Int,
     iconTint: Color? = null,
     @DrawableRes labelIcon: Int? = null,
+    shouldTintLabelIcon: Boolean = true,
     labelText: String = "",
     description: String,
     onModifyListener: (() -> Unit)? = null,
@@ -119,6 +120,7 @@ internal fun SavedPaymentMethodTab(
                     text = labelText,
                     textColor = MaterialTheme.colors.onSurface,
                     isEnabled = isEnabled,
+                    shouldTintIcon = shouldTintLabelIcon,
                     modifier = Modifier
                         .padding(top = 4.dp, start = 6.dp, end = 6.dp)
                         .semantics {
