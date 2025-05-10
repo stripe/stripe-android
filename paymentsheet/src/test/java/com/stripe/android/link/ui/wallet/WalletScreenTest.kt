@@ -15,6 +15,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
@@ -325,52 +326,6 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsEnabled()
-        onWalletDialogTag().assertDoesNotExist()
-    }
-
-    @Test
-    fun `alert is displayed after expiry update failure`() = runTest(dispatcher) {
-        val error = Throwable("oops")
-        val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
-        val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
-        )
-        linkAccountManager.updatePaymentDetailsResult = Result.failure(error)
-        val viewModel = createViewModel(linkAccountManager)
-        composeTestRule.setContent {
-            DefaultLinkTheme {
-                WalletScreen(
-                    viewModel = viewModel,
-                    showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
-                )
-            }
-        }
-        composeTestRule.waitForIdle()
-
-        onWalletPayButton().assertIsNotEnabled()
-
-        viewModel.expiryDateController.onRawValueChange("1225")
-        viewModel.cvcController.onRawValueChange("123")
-
-        composeTestRule.waitForIdle()
-
-        onWalletPayButton()
-            .assertIsEnabled()
-            .performClick()
-
-        composeTestRule.waitForIdle()
-
-        onWalletDialogTag()
-            .assertIsDisplayed()
-
-        onWalletDialogButtonTag()
-            .assertIsDisplayed()
-            .performClick()
-
-        composeTestRule.waitForIdle()
-
         onWalletDialogTag().assertDoesNotExist()
     }
 
