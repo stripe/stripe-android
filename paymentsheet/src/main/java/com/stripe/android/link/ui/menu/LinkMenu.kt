@@ -65,7 +65,7 @@ private fun LinkBottomSheetRow(
             text = item.text.resolve(context),
             style = LinkTheme.typography.body,
             color = if (item.isDestructive) {
-                LinkTheme.colors.errorText
+                LinkTheme.colors.textCritical
             } else {
                 LinkTheme.colors.textPrimary
             },

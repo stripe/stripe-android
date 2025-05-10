@@ -51,7 +51,7 @@ internal fun VerificationDialogBody(
             DefaultLinkTheme {
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = LinkTheme.colors.background,
+                    color = LinkTheme.colors.surfacePrimary,
                 ) {
                     VerificationScreen(viewModel)
                 }

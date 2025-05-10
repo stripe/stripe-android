@@ -3,11 +3,11 @@ package com.stripe.android.link.ui.signup
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -34,6 +35,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.PrimaryButton
@@ -103,7 +105,7 @@ internal fun SignUpBody(
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textSecondary
+            color = LinkTheme.colors.textTertiary
         )
         StripeThemeForLink {
             EmailCollectionSection(
@@ -143,6 +145,7 @@ private fun EmailCollectionSection(
     signUpScreenState: SignUpScreenState,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
+    var focused by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -151,12 +154,15 @@ private fun EmailCollectionSection(
     ) {
         TextFieldSection(
             textFieldController = emailController,
+            isSelected = focused,
             modifier = Modifier
                 .padding(vertical = 8.dp),
         ) {
             TextField(
                 modifier = Modifier
-                    .focusRequester(focusRequester),
+                    .padding(vertical = 4.dp)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged { focused = it.isFocused },
                 textFieldController = emailController,
                 imeAction = if (signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
                     ImeAction.Next
@@ -167,21 +173,16 @@ private fun EmailCollectionSection(
             )
         }
         if (signUpScreenState.signUpState == SignUpState.VerifyingEmail) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(32.dp)
-                    .padding(
-                        start = 0.dp,
-                        top = 8.dp,
-                        end = 16.dp,
-                        bottom = 8.dp
-                    )
-                    .semantics {
-                        testTag = ProgressIndicatorTestTag
-                    },
-                color = LinkTheme.colors.progressIndicator,
-                strokeWidth = 2.dp
-            )
+            Row {
+                LinkSpinner(
+                    filledColor = LinkTheme.colors.iconPrimary,
+                    strokeWidth = 4.dp,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .semantics { testTag = ProgressIndicatorTestTag },
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+            }
         }
     }
 }
@@ -193,11 +194,17 @@ private fun SecondaryFields(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
+    var emailFocused by remember { mutableStateOf(false) }
+    var nameFocused by remember { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .onFocusChanged { emailFocused = it.isFocused },
                 enabled = signUpScreenState.canEditForm,
+                isSelected = emailFocused,
                 phoneNumberController = phoneNumberController,
                 requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                 imeAction = if (signUpScreenState.requiresNameCollection) {
@@ -209,10 +216,14 @@ private fun SecondaryFields(
 
             if (signUpScreenState.requiresNameCollection) {
                 TextFieldSection(
-                    modifier = Modifier.padding(vertical = 8.dp),
+                    modifier = Modifier
+                        .onFocusChanged { nameFocused = it.isFocused }
+                        .padding(vertical = 8.dp),
+                    isSelected = nameFocused,
                     textFieldController = nameController,
                 ) {
                     TextField(
+                        modifier = Modifier.padding(vertical = 4.dp),
                         textFieldController = nameController,
                         imeAction = ImeAction.Done,
                         enabled = signUpScreenState.canEditForm,
@@ -257,21 +268,38 @@ internal const val SIGN_UP_ERROR_TAG = "signUpErrorTag"
 
 @Preview
 @Composable
+private fun SignUpScreenLoadingPreview() {
+    DefaultLinkTheme {
+        SignUpBody(
+            emailController = EmailConfig.createController("email@email.com"),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpScreenState = SignUpScreenState(
+                merchantName = "Example, Inc.",
+                signUpEnabled = false,
+                signUpState = SignUpState.VerifyingEmail,
+                requiresNameCollection = true,
+            ),
+            onSignUpClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
 private fun SignUpScreenPreview() {
     DefaultLinkTheme {
-        Surface {
-            SignUpBody(
-                emailController = EmailConfig.createController("email"),
-                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = NameConfig.createController("My Name"),
-                signUpScreenState = SignUpScreenState(
-                    merchantName = "Example, Inc.",
-                    signUpEnabled = false,
-                    signUpState = SignUpState.InputtingRemainingFields,
-                    requiresNameCollection = true,
-                ),
-                onSignUpClick = {}
-            )
-        }
+        SignUpBody(
+            emailController = EmailConfig.createController("email"),
+            phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+            nameController = NameConfig.createController("My Name"),
+            signUpScreenState = SignUpScreenState(
+                merchantName = "Example, Inc.",
+                signUpEnabled = false,
+                signUpState = SignUpState.InputtingRemainingFields,
+                requiresNameCollection = true,
+            ),
+            onSignUpClick = {}
+        )
     }
 }
