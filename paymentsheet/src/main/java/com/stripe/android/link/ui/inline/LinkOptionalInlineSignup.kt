@@ -214,7 +214,9 @@ internal fun EmailCollection(
 }
 
 @Composable
-internal fun LinkLogo() {
+internal fun LinkLogo(
+    modifier: Modifier = Modifier,
+) {
     Icon(
         painter = painterResource(
             id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
@@ -224,11 +226,9 @@ internal fun LinkLogo() {
             }
         ),
         contentDescription = stringResource(id = com.stripe.android.R.string.stripe_link),
-        modifier = Modifier
-            .padding(end = 16.dp)
-            .semantics {
-                testTag = "LinkLogoIcon"
-            },
+        modifier = modifier.semantics {
+            testTag = "LinkLogoIcon"
+        },
         tint = Color.Unspecified,
     )
 }

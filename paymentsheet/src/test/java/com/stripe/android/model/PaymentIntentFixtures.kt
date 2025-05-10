@@ -519,4 +519,14 @@ internal object PaymentIntentFixtures {
             }
         }
     """.trimIndent()
+
+    fun getPaymentMethodOptionsJsonString(code: String, sfuValue: String): String {
+        return """
+            {
+                "$code": {
+                    "setup_future_usage": "$sfuValue"
+                }
+            }
+        """.trimIndent()
+    }
 }

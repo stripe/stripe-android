@@ -9,6 +9,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -26,6 +27,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -65,7 +67,7 @@ internal class WalletViewModel @Inject constructor(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
             email = linkAccount.email,
-            isSettingUp = stripeIntent.hasIntentToSetup(),
+            isSettingUp = stripeIntent.isSetupForFutureUsage(configuration.passthroughModeEnabled),
             merchantName = configuration.merchantName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
@@ -408,6 +410,23 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
         code = Card.code,
         requiresMandate = false
     )
+}
+
+internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean): Boolean {
+    return when (this) {
+        is PaymentIntent -> {
+            if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
+                if (passthroughModeEnabled) {
+                    isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
+                } else {
+                    isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
+                }
+            } else {
+                hasIntentToSetup()
+            }
+        }
+        is SetupIntent -> true
+    }
 }
 
 private fun StripeIntent.hasIntentToSetup(): Boolean {

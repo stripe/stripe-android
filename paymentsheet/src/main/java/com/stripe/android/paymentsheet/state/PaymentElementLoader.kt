@@ -8,7 +8,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -527,12 +526,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession.linkPassthroughModeEnabled &&
                 configuration.cardBrandAcceptance != PaymentSheet.CardBrandAcceptance.All
 
-        if (isCardBrandFilteringRequired && !FeatureFlags.linkCardBrandFiltering.isEnabled) {
-            return null
-        }
-
         val cardBrandFilter =
-            if (FeatureFlags.linkCardBrandFiltering.isEnabled && isCardBrandFilteringRequired) {
+            if (isCardBrandFilteringRequired) {
                 PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             } else {
                 DefaultCardBrandFilter

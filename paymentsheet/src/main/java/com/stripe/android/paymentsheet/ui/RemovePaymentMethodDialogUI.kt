@@ -31,7 +31,8 @@ internal fun RemovePaymentMethodDialogUI(
 }
 
 private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (paymentMethod.type) {
-    PaymentMethod.Type.Card -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+    PaymentMethod.Type.Card,
+    PaymentMethod.Type.Link -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
     PaymentMethod.Type.SepaDebit,
     PaymentMethod.Type.USBankAccount ->
         resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
@@ -51,6 +52,11 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogDescription() = when (p
     PaymentMethod.Type.USBankAccount -> resolvableString(
         R.string.stripe_bank_account_with_last_4,
         paymentMethod.usBankAccount?.last4
+    )
+    PaymentMethod.Type.Link -> resolvableString(
+        com.stripe.android.R.string.stripe_card_with_last_4,
+        this.brandDisplayName(),
+        paymentMethod.linkPaymentDetails?.last4
     )
     else -> resolvableString("")
 }

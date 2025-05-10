@@ -141,6 +141,13 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         )
     }
 
+    @Test
+    fun testLinkPaymentMethod() {
+        testPaymentMethodRowButton_RadioButton(
+            showLinkIcon = true,
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -171,6 +178,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        showLinkIcon: Boolean = false,
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -181,6 +189,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
+            showLinkIcon = showLinkIcon,
             rowStyle = rowStyle,
             paparazziRule = paparazziRule,
         )

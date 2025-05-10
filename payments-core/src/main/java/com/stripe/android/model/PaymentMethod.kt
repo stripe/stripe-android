@@ -157,6 +157,10 @@ constructor(
     @JvmField val allowRedisplay: AllowRedisplay? = null,
 ) : StripeModel {
 
+    val isLinkPaymentMethod: Boolean
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        get() = type == Type.Link && linkPaymentDetails != null
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     fun hasExpectedDetails(): Boolean =
         when (type) {

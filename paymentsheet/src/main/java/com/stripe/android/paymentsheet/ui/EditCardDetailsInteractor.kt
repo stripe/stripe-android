@@ -6,6 +6,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -81,6 +82,18 @@ internal data class EditCardPayload(
                     name = card.billingAddress?.name,
                     phone = billingPhoneNumber,
                 )
+            )
+        }
+
+        fun create(link: LinkPaymentDetails): EditCardPayload {
+            return EditCardPayload(
+                last4 = link.last4,
+                expiryMonth = link.expMonth,
+                expiryYear = link.expYear,
+                brand = link.brand,
+                displayBrand = null,
+                networks = null,
+                billingDetails = null,
             )
         }
     }
