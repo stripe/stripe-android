@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.paymentsheet.R
@@ -40,15 +41,17 @@ internal fun LinkTerms(
         }
     }
 
-    StripeThemeForLink(
-        // Override hyperlink colors.
-        materialPrimary = LinkTheme.colors.textBrand
-    ) {
-        Mandate(
-            mandateText = text.replaceHyperlinks(),
-            modifier = modifier,
-            textAlign = textAlign,
-        )
+    DefaultLinkTheme {
+        StripeThemeForLink(
+            // Override hyperlink colors.
+            materialPrimary = LinkTheme.colors.textBrand
+        ) {
+            Mandate(
+                mandateText = text.replaceHyperlinks(),
+                modifier = modifier,
+                textAlign = textAlign,
+            )
+        }
     }
 }
 
