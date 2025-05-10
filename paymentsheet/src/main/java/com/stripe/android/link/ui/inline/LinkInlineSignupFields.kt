@@ -211,7 +211,7 @@ private fun ErrorText(
 
 @Composable
 @Preview
-fun PreviewLinkInlineSignupFields() {
+internal fun PreviewLinkInlineSignupFields() {
     LinkInlineSignupFields(
         sectionError = null,
         emailController = EmailConfig.createController(
