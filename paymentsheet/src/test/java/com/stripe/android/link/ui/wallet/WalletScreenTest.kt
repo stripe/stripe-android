@@ -329,6 +329,53 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun `alert is displayed after expiry update failure`() = runTest(dispatcher) {
+        val error = Throwable("oops")
+        val expiredCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1999)
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(expiredCard))
+        )
+        linkAccountManager.updatePaymentDetailsResult = Result.failure(error)
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                WalletScreen(
+                    viewModel = viewModel,
+                    showBottomSheetContent = {},
+                    hideBottomSheetContent = {}
+                )
+            }
+        }
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton().assertIsNotEnabled()
+
+        viewModel.expiryDateController.onRawValueChange("1225")
+        viewModel.cvcController.onRawValueChange("123")
+
+        composeTestRule.waitForIdle()
+
+        onWalletPayButton()
+            .performScrollTo()
+            .assertIsEnabled()
+            .performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletDialogTag()
+            .assertIsDisplayed()
+
+        onWalletDialogButtonTag()
+            .assertIsDisplayed()
+            .performClick()
+
+        composeTestRule.waitForIdle()
+
+        onWalletDialogTag().assertDoesNotExist()
+    }
+
+    @Test
     fun `pay button is enabled after filling CVC for card requiring CVC`() = runTest(dispatcher) {
         val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
             cvcCheck = CvcCheck.Unchecked

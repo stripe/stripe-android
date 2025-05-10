@@ -74,6 +74,16 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testCollapsedStateWithExpiredCardCollection() {
+        snapshot(
+            state = walletUiState(
+                userSetIsExpanded = false,
+
+            ),
+        )
+    }
+
+    @Test
     fun testPayButtonCompletedState() {
         snapshot(
             state = walletUiState(userSetIsExpanded = true),
