@@ -65,9 +65,9 @@ private fun LinkBottomSheetRow(
             text = item.text.resolve(context),
             style = LinkTheme.typography.body,
             color = if (item.isDestructive) {
-                LinkTheme.colors.errorText
+                LinkTheme.colors.typeCritical
             } else {
-                LinkTheme.colors.textPrimary
+                LinkTheme.colors.typePrimary
             },
             modifier = Modifier.padding(horizontal = HorizontalPadding)
         )

@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,7 +64,20 @@ internal sealed class ErrorTextStyle {
 @Preview
 @Composable
 private fun ErrorTextPreview() {
-    ErrorText(text = "Test error message")
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ErrorText(
+            text = "Test error message",
+            modifier = Modifier.padding(16.dp),
+            style = ErrorTextStyle.Small
+        )
+        ErrorText(
+            text = "Test error message",
+            modifier = Modifier.padding(16.dp),
+            style = ErrorTextStyle.Medium
+        )
+    }
 }
 
 @Composable
@@ -75,22 +90,23 @@ internal fun ErrorText(
         // This is also used in the inline signup form in MPE, so we need
         // to re-apply the theme here.
         Row(
-            modifier = modifier.background(
-                color = LinkTheme.colors.errorComponentBackground,
-                shape = style.shape
+            modifier = modifier.border(
+                width = .5.dp,
+                color = LinkTheme.colors.borderDefault,
+                shape = style.shape,
             ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.stripe_link_error),
+                painter = painterResource(id = R.drawable.stripe_sail_warning_circle),
                 contentDescription = null,
                 modifier = style.iconModifier,
-                tint = LinkTheme.colors.errorText
+                tint = LinkTheme.colors.iconCritical
             )
             HyperlinkedText(
                 text = text,
                 modifier = style.textModifier,
-                color = LinkTheme.colors.errorText,
+                color = LinkTheme.colors.typeCritical,
                 style = style.textStyle
             )
         }
