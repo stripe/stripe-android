@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.SerialName
@@ -194,13 +193,8 @@ class CheckoutRequest private constructor(
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
-                paymentMethodOptionsSetupFutureUsage =
-                if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-                    overridePaymentMethodOptionsSetupFutureUsage
-                        ?: paymentMethodOptionsSetupFutureUsage
-                } else {
-                    null
-                }
+                paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
+                    ?: paymentMethodOptionsSetupFutureUsage
             )
         }
     }
