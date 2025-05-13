@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -11,24 +12,35 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
 
     override fun parse(json: JSONObject): PaymentMethod? {
         val paymentMethod = PaymentMethodJsonParser().parse(json.getJSONObject("payment_method"))
+        val linkPaymentDetailsJson = json.optJSONObject("link_payment_details")
+
+        if (isUnsupportedLinkPaymentDetailsType(linkPaymentDetailsJson)) {
+            // This is a Link payment method, but we don't support the type yet. We can't render them, so hide them.
+            return null
+        }
 
         val consumerPaymentDetails = if (FeatureFlags.linkPMsInSPM.isEnabled) {
-            json.optJSONObject("link_payment_details")?.let {
+            linkPaymentDetailsJson?.let {
                 ConsumerPaymentDetailsJsonParser.parsePaymentDetails(it)
             }
         } else {
             null
         }
 
-        val cardDetails = consumerPaymentDetails as? ConsumerPaymentDetails.Card
-
-        val linkDetails = cardDetails?.let {
-            LinkPaymentDetails(
-                expMonth = it.expiryMonth,
-                expYear = it.expiryYear,
-                last4 = it.last4,
-                brand = it.brand,
-            )
+        val linkDetails = when (consumerPaymentDetails) {
+            is ConsumerPaymentDetails.Card -> {
+                LinkPaymentDetails(
+                    expMonth = consumerPaymentDetails.expiryMonth,
+                    expYear = consumerPaymentDetails.expiryYear,
+                    last4 = consumerPaymentDetails.last4,
+                    brand = consumerPaymentDetails.brand,
+                )
+            }
+            is ConsumerPaymentDetails.BankAccount,
+            is ConsumerPaymentDetails.Passthrough,
+            null -> {
+                null
+            }
         }
 
         // TODO(tillh-stripe): This is a short-term solution. We plan to create a new type that
@@ -36,5 +48,9 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
         return paymentMethod.copy(
             linkPaymentDetails = linkDetails,
         )
+    }
+
+    private fun isUnsupportedLinkPaymentDetailsType(json: JSONObject?): Boolean {
+        return json != null && optString(json, "type") != "CARD"
     }
 }
