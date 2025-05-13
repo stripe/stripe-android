@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ internal fun PaymentMethodBody(
     onPayClicked: () -> Unit,
     onCancelClicked: () -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
 
     ScrollableTopLevelColumn {
@@ -85,7 +87,10 @@ internal fun PaymentMethodBody(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
-            onButtonClick = onPayClicked,
+            onButtonClick = {
+                focusManager.clearFocus()
+                onPayClicked()
+            },
             iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
         )
 
