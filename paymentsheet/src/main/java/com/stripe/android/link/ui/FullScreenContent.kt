@@ -1,7 +1,6 @@
 package com.stripe.android.link.ui
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -28,7 +27,6 @@ import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun FullScreenContent(
     modifier: Modifier,
