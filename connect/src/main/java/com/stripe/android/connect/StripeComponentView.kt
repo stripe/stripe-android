@@ -283,10 +283,8 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         } else if (progressBar.isVisible) {
             @Suppress("MagicNumber")
             progressBar.animate()
-                // Delay a bit to allow the web spinner to appear.
-                .setStartDelay(200L)
                 // Fade out to reduce visual impact from minor UI discrepancies.
-                .setDuration(200L)
+                .setDuration(100L)
                 .alpha(0f)
                 .withStartAction { progressBar.alpha = 1f }
                 .withEndAction { progressBar.isVisible = false }
