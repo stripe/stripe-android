@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -90,7 +89,7 @@ internal fun PrimaryButton(
                         Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        PrimaryButtonIcon(LinkTheme.colors.contentOnPrimaryButton, iconStart)
+                        PrimaryButtonIcon(iconStart)
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
@@ -99,7 +98,7 @@ internal fun PrimaryButton(
                             textAlign = TextAlign.Center,
                             style = LinkTheme.typography.bodyEmphasized,
                         )
-                        PrimaryButtonIcon(LinkTheme.colors.contentOnPrimaryButton, iconEnd)
+                        PrimaryButtonIcon(iconEnd)
                     }
                 }
             }
@@ -109,7 +108,6 @@ internal fun PrimaryButton(
 
 @Composable
 private fun PrimaryButtonIcon(
-    color: Color,
     @DrawableRes icon: Int?
 ) {
     Box(
@@ -125,7 +123,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = color.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
             )
         }
     }

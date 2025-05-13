@@ -3,6 +3,7 @@ package com.stripe.android.link.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,25 +61,6 @@ internal sealed class ErrorTextStyle {
     }
 }
 
-@Preview
-@Composable
-private fun ErrorTextPreview() {
-    DefaultLinkTheme {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ErrorText(
-                text = "Test error message",
-                style = ErrorTextStyle.Small
-            )
-            ErrorText(
-                text = "Test error message",
-                style = ErrorTextStyle.Medium
-            )
-        }
-    }
-}
-
 @Composable
 internal fun ErrorText(
     text: String,
@@ -87,7 +69,8 @@ internal fun ErrorText(
 ) {
     Row(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
         Icon(
             painter = painterResource(id = R.drawable.stripe_ic_sail_warning_circle),
@@ -101,5 +84,26 @@ internal fun ErrorText(
             color = LinkTheme.colors.textCritical,
             style = style.textStyle
         )
+    }
+}
+
+@Preview
+@Composable
+private fun ErrorTextPreview() {
+    DefaultLinkTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ErrorText(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Test error message",
+                style = ErrorTextStyle.Small
+            )
+            ErrorText(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Test error message",
+                style = ErrorTextStyle.Medium
+            )
+        }
     }
 }

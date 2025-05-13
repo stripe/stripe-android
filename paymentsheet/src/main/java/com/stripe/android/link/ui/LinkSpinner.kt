@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 
 @Composable
@@ -38,12 +39,12 @@ internal fun LinkSpinner(
     )
 
     Canvas(modifier = modifier) {
-        val strokeWidth = strokeWidth.toPx()
+        val strokeWidthPx = strokeWidth.toPx()
         drawCircle(
             color = backgroundColor,
-            radius = size.minDimension / 2 - strokeWidth / 2,
+            radius = size.minDimension / 2 - strokeWidthPx / 2,
             style = Stroke(
-                width = strokeWidth,
+                width = strokeWidthPx,
                 cap = StrokeCap.Round
             )
         )
@@ -53,14 +54,14 @@ internal fun LinkSpinner(
             sweepAngle = 90f,
             useCenter = false,
             style = Stroke(
-                width = strokeWidth,
+                width = strokeWidthPx,
                 cap = StrokeCap.Round
             ),
             size = Size(
-                width = size.width - strokeWidth,
-                height = size.height - strokeWidth
+                width = size.width - strokeWidthPx,
+                height = size.height - strokeWidthPx
             ),
-            topLeft = Offset(strokeWidth / 2, strokeWidth / 2)
+            topLeft = Offset(strokeWidthPx / 2, strokeWidthPx / 2)
         )
     }
 }
@@ -68,8 +69,10 @@ internal fun LinkSpinner(
 @Preview
 @Composable
 private fun LinkSpinnerPreview() {
-    LinkSpinner(
-        modifier = Modifier.size(24.dp),
-        strokeWidth = 6.dp
-    )
+    DefaultLinkTheme {
+        LinkSpinner(
+            modifier = Modifier.size(24.dp),
+            strokeWidth = 6.dp
+        )
+    }
 }

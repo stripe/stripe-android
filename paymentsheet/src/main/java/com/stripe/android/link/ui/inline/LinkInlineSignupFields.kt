@@ -98,7 +98,7 @@ internal fun LinkInlineSignupFields(
             visible = signUpState != SignUpState.InputtingRemainingFields && errorMessage != null,
         ) {
             DefaultLinkTheme {
-                ErrorText(
+                LinkInlineErrorText(
                     text = errorMessage.orEmpty(),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -171,7 +171,7 @@ internal fun LinkInlineSignupFields(
                 }
 
                 AnimatedVisibility(visible = errorMessage != null) {
-                    ErrorText(
+                    LinkInlineErrorText(
                         text = errorMessage.orEmpty(),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -182,7 +182,7 @@ internal fun LinkInlineSignupFields(
 }
 
 @Composable
-private fun ErrorText(
+private fun LinkInlineErrorText(
     text: String,
     modifier: Modifier = Modifier,
 ) {

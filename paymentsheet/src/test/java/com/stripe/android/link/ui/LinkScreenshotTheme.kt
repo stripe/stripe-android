@@ -6,7 +6,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 
 @Composable
-internal fun LinkScreenshotTheme(
+internal fun LinkScreenshotSurface(
     content: @Composable () -> Unit
 ) {
     DefaultLinkTheme {

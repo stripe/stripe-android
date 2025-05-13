@@ -143,7 +143,7 @@ internal object LinkThemeConfig {
     /**
      * Scrim color does not have a match in the Link theme, so we use a default color matching Elements.
      */
-    internal val LinkColors.scrimColor: Color
+    internal val LinkColors.scrim: Color
         get() = Color.Black.copy(alpha = 0.32f)
 }
 

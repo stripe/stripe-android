@@ -3,7 +3,7 @@ package com.stripe.android.link.ui.updatecard
 import androidx.compose.runtime.rememberCoroutineScope
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.link.ui.LinkScreenshotTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -32,7 +32,7 @@ internal class UpdateCardScreenshotTest(
     @Test
     fun testScreen() {
         paparazziRule.snapshot {
-            LinkScreenshotTheme {
+            LinkScreenshotSurface {
                 UpdateCardScreenBody(
                     interactor = DefaultEditCardDetailsInteractor.Factory().create(
                         coroutineScope = rememberCoroutineScope(),

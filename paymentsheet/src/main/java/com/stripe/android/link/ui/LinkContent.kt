@@ -31,7 +31,7 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.scrimColor
+import com.stripe.android.link.theme.LinkThemeConfig.scrim
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -79,7 +79,7 @@ internal fun LinkContent(
                     bottomEnd = CornerSize(0.dp)
                 ),
                 sheetBackgroundColor = LinkTheme.colors.surfacePrimary,
-                scrimColor = LinkTheme.colors.scrimColor
+                scrimColor = LinkTheme.colors.scrim
             ) {
                 Column(
                     modifier = Modifier

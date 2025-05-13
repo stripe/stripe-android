@@ -8,7 +8,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-import com.stripe.android.link.ui.LinkScreenshotTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -217,7 +217,7 @@ internal class WalletScreenScreenshotTest {
 
     private fun snapshot(state: WalletUiState) {
         paparazziRule.snapshot {
-            LinkScreenshotTheme {
+            LinkScreenshotSurface {
                 WalletBody(
                     state = state,
                     onItemSelected = {},

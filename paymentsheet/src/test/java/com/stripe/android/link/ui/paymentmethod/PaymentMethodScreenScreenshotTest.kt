@@ -2,7 +2,7 @@ package com.stripe.android.link.ui.paymentmethod
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.ui.LinkScreenshotTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodBody
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodState
@@ -66,7 +66,7 @@ internal class PaymentMethodScreenScreenshotTest {
     ) {
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
-                LinkScreenshotTheme {
+                LinkScreenshotSurface {
                     PaymentMethodBody(
                         state = state,
                         onFormFieldValuesChanged = {},

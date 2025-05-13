@@ -554,10 +554,9 @@ private fun AddPaymentMethodRow(
             .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(modifier = Modifier.width(HorizontalPadding))
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
-            modifier = Modifier.padding(end = HorizontalPadding),
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
             color = LinkTheme.colors.textBrand,
             style = LinkTheme.typography.bodyEmphasized,
         )
