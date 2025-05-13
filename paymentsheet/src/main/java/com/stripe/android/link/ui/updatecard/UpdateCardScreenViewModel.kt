@@ -103,7 +103,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     )
 
     fun onCancelClicked() {
-        logger.info("Cancel button clicked")
+        navigationManager.tryNavigateBack()
     }
 
     private fun initializeInteractor(
