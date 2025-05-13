@@ -45,6 +45,7 @@ import com.stripe.android.link.ui.wallet.WalletViewModel
 @SuppressWarnings("LongMethod")
 @Composable
 internal fun LinkContent(
+    modifier: Modifier,
     navController: NavHostController,
     appBarState: LinkAppBarState,
     sheetState: ModalBottomSheetState,
@@ -62,6 +63,7 @@ internal fun LinkContent(
 ) {
     DefaultLinkTheme {
         Surface(
+            modifier = modifier,
             color = LinkTheme.colors.surfacePrimary,
         ) {
             ModalBottomSheetLayout(

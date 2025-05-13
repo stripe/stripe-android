@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -81,37 +80,34 @@ internal fun FullScreenContent(
         state = bottomSheetState,
         onDismissed = dismiss,
     ) {
-        Box(
-            modifier = modifier
+        EventReporterProvider(
+            eventReporter = eventReporter
         ) {
-            EventReporterProvider(
-                eventReporter = eventReporter
-            ) {
-                LinkContent(
-                    initialDestination = initialDestination,
-                    navController = navController,
-                    appBarState = appBarState,
-                    sheetState = sheetState,
-                    bottomSheetContent = bottomSheetContent,
-                    onUpdateSheetContent = { content ->
-                        if (content != null) {
-                            bottomSheetContent = content
-                        } else {
-                            coroutineScope.launch {
-                                sheetState.hide()
-                            }
+            LinkContent(
+                modifier = modifier,
+                initialDestination = initialDestination,
+                navController = navController,
+                appBarState = appBarState,
+                sheetState = sheetState,
+                bottomSheetContent = bottomSheetContent,
+                onUpdateSheetContent = { content ->
+                    if (content != null) {
+                        bottomSheetContent = content
+                    } else {
+                        coroutineScope.launch {
+                            sheetState.hide()
                         }
-                    },
-                    onBackPressed = onBackPressed,
-                    moveToWeb = moveToWeb,
-                    handleViewAction = handleViewAction,
-                    navigate = navigate,
-                    dismissWithResult = dismissWithResult,
-                    getLinkAccount = getLinkAccount,
-                    goBack = goBack,
-                    changeEmail = changeEmail
-                )
-            }
+                    }
+                },
+                onBackPressed = onBackPressed,
+                moveToWeb = moveToWeb,
+                handleViewAction = handleViewAction,
+                navigate = navigate,
+                dismissWithResult = dismissWithResult,
+                getLinkAccount = getLinkAccount,
+                goBack = goBack,
+                changeEmail = changeEmail
+            )
         }
     }
 }
