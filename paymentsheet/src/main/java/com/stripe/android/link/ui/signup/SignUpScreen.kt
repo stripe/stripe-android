@@ -145,7 +145,7 @@ private fun EmailCollectionSection(
     signUpScreenState: SignUpScreenState,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    var focused by remember { mutableStateOf(false) }
+    var focused by rememberSaveable { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -194,8 +194,8 @@ private fun SecondaryFields(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
-    var emailFocused by remember { mutableStateOf(false) }
-    var nameFocused by remember { mutableStateOf(false) }
+    var emailFocused by rememberSaveable { mutableStateOf(false) }
+    var nameFocused by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
