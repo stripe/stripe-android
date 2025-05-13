@@ -68,6 +68,7 @@ internal interface UpdatePaymentMethodInteractor {
                 is SavedPaymentMethod.SepaDebit -> R.string.stripe_paymentsheet_manage_sepa_debit
                 is SavedPaymentMethod.USBankAccount -> R.string.stripe_paymentsheet_manage_bank_account
                 is SavedPaymentMethod.Card -> R.string.stripe_paymentsheet_manage_card
+                is SavedPaymentMethod.Link -> R.string.stripe_paymentsheet_manage_card
                 SavedPaymentMethod.Unexpected -> null
             }
             )?.resolvableString
@@ -137,13 +138,27 @@ internal class DefaultUpdatePaymentMethodInteractor(
         setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
     }
     override val editCardDetailsInteractor by lazy {
-        val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
-        requireNotNull(savedPaymentMethodCard) {
-            "Card payment method required for creating EditCardDetailsInteractor"
+        when (val paymentMethod = displayableSavedPaymentMethod.savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                createEditCardDetailsInteractorForCard(paymentMethod)
+            }
+            is SavedPaymentMethod.Link -> {
+                createEditCardDetailsInteractorForLink(paymentMethod)
+            }
+            else -> {
+                throw IllegalArgumentException(
+                    "Card or Link payment method required for creating EditCardDetailsInteractor"
+                )
+            }
         }
+    }
+
+    private fun createEditCardDetailsInteractorForCard(
+        savedPaymentMethodCard: SavedPaymentMethod.Card,
+    ): EditCardDetailsInteractor {
         val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
-        editCardDetailsInteractorFactory.create(
+        return editCardDetailsInteractorFactory.create(
             payload = payload,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
@@ -154,6 +169,24 @@ internal class DefaultUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = onBrandChoiceSelected,
             areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
             addressCollectionMode = addressCollectionMode,
+        )
+    }
+
+    private fun createEditCardDetailsInteractorForLink(
+        savedPaymentMethodCard: SavedPaymentMethod.Link,
+    ): EditCardDetailsInteractor {
+        val payload = EditCardPayload.create(savedPaymentMethodCard.paymentDetails)
+        return editCardDetailsInteractorFactory.create(
+            payload = payload,
+            onCardUpdateParamsChanged = { cardUpdateParams ->
+                onCardUpdateParamsChanged(cardUpdateParams)
+            },
+            coroutineScope = coroutineScope,
+            isCbcModifiable = false,
+            cardBrandFilter = cardBrandFilter,
+            onBrandChoiceChanged = onBrandChoiceSelected,
+            areExpiryDateAndAddressModificationSupported = false,
+            addressCollectionMode = AddressCollectionMode.Never,
         )
     }
 

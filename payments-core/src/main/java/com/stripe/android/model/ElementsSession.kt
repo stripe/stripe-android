@@ -48,6 +48,9 @@ data class ElementsSession(
     val suppressLink2faModal: Boolean
         get() = linkSettings?.suppress2faModal ?: false
 
+    val enableLinkInSpm: Boolean
+        get() = flags[Flag.ELEMENTS_ENABLE_LINK_SPM] == true
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(

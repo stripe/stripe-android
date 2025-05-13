@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -32,6 +33,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -54,6 +56,12 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
+
+    @get:Rule
+    val featureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
+        isEnabled = false
+    )
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         instantDebits = false,
@@ -215,6 +223,31 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
                 PaymentMethodOptionsParams.USBankAccount(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `when hasIntentToSetup, paymentMethodOptionsParams does not send SFU`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+        val viewModel = createViewModel(
+            defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = true
+                ),
+                showCheckbox = true,
+            )
+        )
+        val bankAccount = mockVerifiedBankAccount()
+
+        viewModel.linkedAccount.test {
+            skipItems(1)
+            viewModel.handleCollectBankAccountResult(bankAccount)
+
+            assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = null
                 )
             )
         }
@@ -1320,6 +1353,44 @@ class USBankAccountFormViewModelTest {
 
             viewModel.saveForFutureUseElement.controller.onValueChange(false)
             assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+        }
+    }
+
+    @Test
+    fun `PaymentMethodOptionsParams does not contain SFU for RequestNoReuse if hasIntentToSetup`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = true
+                )
+            )
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+
+            val initialAccount = awaitItem()
+            assertThat(initialAccount?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+            assertThat(initialAccount?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = null
+                )
+            )
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+            val updatedAccount = awaitItem()
+            assertThat(updatedAccount?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestReuse)
+            assertThat(updatedAccount?.paymentMethodOptionsParams).isEqualTo(
+                PaymentMethodOptionsParams.USBankAccount(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
+            )
         }
     }
 

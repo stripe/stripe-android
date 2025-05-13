@@ -165,6 +165,13 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         )
     }
 
+    @Test
+    fun testLinkPaymentMethod() {
+        testPaymentMethodRowButton_FloatingButton(
+            showLinkIcon = true,
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -196,6 +203,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        showLinkIcon: Boolean = false,
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -206,6 +214,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
+            showLinkIcon = showLinkIcon,
             rowStyle = rowStyle,
             paparazziRule = paparazziRule
         )

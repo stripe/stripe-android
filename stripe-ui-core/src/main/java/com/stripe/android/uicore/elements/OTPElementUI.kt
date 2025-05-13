@@ -104,7 +104,8 @@ fun OTPElementUI(
     otpInputPlaceholder: String = "●",
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
-        placeholder = MaterialTheme.stripeColors.placeholderText
+        placeholder = MaterialTheme.stripeColors.placeholderText,
+        background = Color.Transparent
     ),
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
@@ -267,11 +268,11 @@ private fun OTPInputDecorationBox(
         interactionSource = remember { MutableInteractionSource() },
         colors = TextFieldDefaults.textFieldColors(
             textColor = MaterialTheme.stripeColors.onComponent,
-            backgroundColor = Color.Transparent,
+            backgroundColor = colors.background,
             cursorColor = MaterialTheme.stripeColors.textCursor,
-            focusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = colors.background,
+            disabledIndicatorColor = colors.background,
+            unfocusedIndicatorColor = colors.background,
             placeholderColor = colors.placeholder,
             disabledPlaceholderColor = colors.placeholder
         ),
@@ -295,5 +296,6 @@ internal object OTPElementUI {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class OTPElementColors(
     val selectedBorder: Color,
-    val placeholder: Color
+    val placeholder: Color,
+    val background: Color
 )

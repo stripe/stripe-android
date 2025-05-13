@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui.verification
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -21,7 +21,7 @@ internal class VerificationScreenshotTest(
     @Test
     fun testContent() {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
+            LinkScreenshotSurface {
                 if (testCase.content.state.isDialog) {
                     VerificationDialogBody(
                         state = testCase.content.state,

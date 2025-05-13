@@ -53,7 +53,6 @@ class LinkFieldsScreenshotTest {
     fun testVerifyingEmail() {
         paparazziRule.snapshot {
             val focusRequester = remember { FocusRequester() }
-
             LinkFields(
                 expanded = true,
                 enabled = true,

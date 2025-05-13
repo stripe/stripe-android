@@ -37,6 +37,7 @@ internal fun SavedPaymentMethodRowButton(
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
+    canShowLinkIcon: Boolean = false,
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -67,6 +68,7 @@ internal fun SavedPaymentMethodRowButton(
         title = paymentMethodTitle.resolve(),
         subtitle = null,
         promoText = null,
+        showLinkIcon = displayableSavedPaymentMethod.paymentMethod.isLinkPaymentMethod && canShowLinkIcon,
         onClick = onClick,
         modifier = modifier
             .testTag(

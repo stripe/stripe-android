@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
@@ -31,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -48,8 +45,10 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkDivider
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -203,13 +202,14 @@ private fun PaymentDetailsSection(
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                CardDetailsRecollectionForm(
-                    paymentDetails = selectedCard,
-                    expiryDateController = expiryDateController,
-                    cvcController = cvcController,
-                    isCardExpired = selectedCard.isExpired
-                )
+                StripeThemeForLink {
+                    CardDetailsRecollectionForm(
+                        paymentDetails = selectedCard,
+                        expiryDateController = expiryDateController,
+                        cvcController = cvcController,
+                        isCardExpired = selectedCard.isExpired
+                    )
+                }
             }
         }
     }
@@ -361,14 +361,9 @@ private fun PaymentMethodPicker(
         modifier = modifier
             .animateContentSize()
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = LinkTheme.colors.borderDefault,
-                shape = LinkTheme.shapes.large
-            )
             .clip(LinkTheme.shapes.large)
             .background(
-                color = LinkTheme.colors.surfacePrimary,
+                color = LinkTheme.colors.surfaceSecondary,
                 shape = LinkTheme.shapes.large
             )
     ) {
@@ -378,10 +373,7 @@ private fun PaymentMethodPicker(
             labelMaxWidth = labelMaxWidth
         )
 
-        Divider(
-            modifier = Modifier.fillMaxWidth(),
-            color = LinkTheme.colors.borderDefault,
-        )
+        LinkDivider()
 
         if (expanded || selectedItem == null) {
             expandedContent()
@@ -418,7 +410,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_HEADER_TAG)
                 .width(labelMaxWidth),
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
         )
 
         PaymentDetails(
@@ -457,12 +449,12 @@ private fun EmailDetails(
         Text(
             modifier = Modifier.width(labelMaxWidth),
             text = label,
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
         )
 
         Text(
             text = email,
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = LinkTheme.typography.bodyEmphasized,
@@ -503,8 +495,7 @@ private fun ExpandedPaymentDetails(
             )
 
             if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
-                Divider(
-                    color = LinkTheme.colors.borderDefault,
+                LinkDivider(
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
             }
@@ -539,8 +530,7 @@ private fun ExpandedRowHeader(
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            color = LinkTheme.colors.typePrimary,
-            style = LinkTheme.typography.bodyEmphasized,
+            color = LinkTheme.colors.textTertiary
         )
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
@@ -564,16 +554,10 @@ private fun AddPaymentMethodRow(
             .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_add_green),
-            contentDescription = null,
-            modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
-            tint = Color.Unspecified
-        )
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
-            modifier = Modifier.padding(end = HorizontalPadding),
-            color = LinkTheme.colors.typeBrand,
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            color = LinkTheme.colors.textBrand,
             style = LinkTheme.typography.bodyEmphasized,
         )
     }
@@ -583,7 +567,7 @@ private fun AddPaymentMethodRow(
 private fun LinkMandate(text: String) {
     Html(
         html = text.replaceHyperlinks(),
-        color = LinkTheme.colors.typeSecondary,
+        color = LinkTheme.colors.textTertiary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
         ),
@@ -591,7 +575,7 @@ private fun LinkMandate(text: String) {
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textBrand,
         )
     )
 }
@@ -685,7 +669,7 @@ private fun AlertMessage(
             Text(
                 text = alertMessage.resolve(),
                 style = LinkTheme.typography.body,
-                color = LinkTheme.colors.typePrimary,
+                color = LinkTheme.colors.textPrimary,
             )
         },
         backgroundColor = LinkTheme.colors.surfacePrimary,
@@ -698,7 +682,7 @@ private fun AlertMessage(
             ) {
                 Text(
                     text = android.R.string.ok.resolvableString.resolve(context),
-                    color = LinkTheme.colors.typeBrand
+                    color = LinkTheme.colors.textBrand
                 )
             }
         }

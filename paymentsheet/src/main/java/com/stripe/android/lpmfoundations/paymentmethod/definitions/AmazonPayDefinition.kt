@@ -22,7 +22,7 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = AmazonPayUiDefinitionFactory
 }

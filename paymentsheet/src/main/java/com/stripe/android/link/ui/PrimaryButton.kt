@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -30,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.contentOverPrimaryButton
+import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -70,11 +69,11 @@ internal fun PrimaryButton(
                 when (state) {
                     PrimaryButtonState.Processing -> LinkSpinner(
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(20.dp)
                             .semantics { testTag = ProgressIndicatorTestTag },
-                        backgroundColor =
-                        LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
-                        filledColor = LinkTheme.colors.contentOverPrimaryButton,
+                        backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
+                        strokeWidth = 4.dp,
+                        filledColor = LinkTheme.colors.contentOnPrimaryButton,
                     )
                     PrimaryButtonState.Completed -> Icon(
                         painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -84,22 +83,22 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = CompletedIconTestTag
                             },
-                        tint = LinkTheme.colors.contentOverPrimaryButton
+                        tint = LinkTheme.colors.contentOnPrimaryButton
                     )
                     else -> Row(
                         Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        PrimaryButtonIcon(LinkTheme.colors.contentOverPrimaryButton, iconStart)
+                        PrimaryButtonIcon(iconStart)
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
-                            color = LinkTheme.colors.contentOverPrimaryButton
+                            color = LinkTheme.colors.contentOnPrimaryButton
                                 .copy(alpha = LocalContentAlpha.current),
                             textAlign = TextAlign.Center,
                             style = LinkTheme.typography.bodyEmphasized,
                         )
-                        PrimaryButtonIcon(LinkTheme.colors.contentOverPrimaryButton, iconEnd)
+                        PrimaryButtonIcon(iconEnd)
                     }
                 }
             }
@@ -109,7 +108,6 @@ internal fun PrimaryButton(
 
 @Composable
 private fun PrimaryButtonIcon(
-    color: Color,
     @DrawableRes icon: Int?
 ) {
     Box(
@@ -125,7 +123,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = color.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
             )
         }
     }
