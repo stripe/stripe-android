@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -19,12 +18,8 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
             return null
         }
 
-        val consumerPaymentDetails = if (FeatureFlags.linkPMsInSPM.isEnabled) {
-            linkPaymentDetailsJson?.let {
-                ConsumerPaymentDetailsJsonParser.parsePaymentDetails(it)
-            }
-        } else {
-            null
+        val consumerPaymentDetails = linkPaymentDetailsJson?.let {
+            ConsumerPaymentDetailsJsonParser.parsePaymentDetails(it)
         }
 
         val linkDetails = when (consumerPaymentDetails) {
