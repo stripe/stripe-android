@@ -46,6 +46,7 @@ import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
@@ -181,6 +182,14 @@ private fun PaymentDetailsListItemPreview() {
         nickname = null,
         billingAddress = null
     )
+    val bank = BankAccount(
+        id = "bank_id",
+        last4 = "1234",
+        isDefault = false,
+        bankIconCode = null,
+        nickname = null,
+        bankName = "Bank of America",
+    )
     DefaultLinkTheme {
         Column {
             PaymentDetailsListItem(
@@ -205,6 +214,16 @@ private fun PaymentDetailsListItemPreview() {
             )
             PaymentDetailsListItem(
                 paymentDetails = card,
+                isClickable = false,
+                isMenuButtonClickable = true,
+                isSelected = false,
+                isAvailable = false,
+                isUpdating = true,
+                onClick = {},
+                onMenuButtonClick = {}
+            )
+            PaymentDetailsListItem(
+                paymentDetails = bank,
                 isClickable = false,
                 isMenuButtonClickable = true,
                 isSelected = false,
@@ -290,7 +309,7 @@ internal fun RowScope.PaymentDetails(
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
         }
-        is ConsumerPaymentDetails.BankAccount -> {
+        is BankAccount -> {
             BankAccountInfo(bankAccount = paymentDetails)
         }
         is ConsumerPaymentDetails.Passthrough -> {
@@ -329,7 +348,7 @@ private fun RowScope.CardInfo(
 @Composable
 private fun RowScope.BankAccountInfo(
     modifier: Modifier = Modifier,
-    bankAccount: ConsumerPaymentDetails.BankAccount,
+    bankAccount: BankAccount,
 ) {
     PaymentMethodInfo(
         modifier = modifier,
@@ -394,7 +413,7 @@ private fun BankIcon(
     val containerModifier = if (isGenericIcon) {
         modifier
             .background(
-                color = LinkTheme.colors.surfaceSecondary,
+                color = LinkTheme.colors.surfaceTertiary,
                 shape = RoundedCornerShape(3.dp),
             )
             .padding(4.dp)
@@ -409,7 +428,7 @@ private fun BankIcon(
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
             colorFilter = if (isGenericIcon) {
-                ColorFilter.tint(LinkTheme.colors.iconPrimary)
+                ColorFilter.tint(LinkTheme.colors.textTertiary)
             } else {
                 null
             },

@@ -12,6 +12,7 @@ private val Neutral900 = Color(0xFF171717)
 private val Neutral800 = Color(0xFF262626)
 private val Neutral700 = Color(0xFF404040)
 private val Neutral500 = Color(0xFF707070)
+private val Neutral400 = Color(0xFFA3A3A3)
 private val Neutral300 = Color(0xFFD4D4D4)
 private val Neutral200 = Color(0xFFE5E5E5)
 private val Neutral100 = Color(0xFFF5F5F5)
@@ -101,7 +102,7 @@ internal object LinkThemeConfig {
         buttonCritical = Critical600,
         textPrimary = Neutral0,
         textSecondary = Neutral300,
-        textTertiary = Neutral500,
+        textTertiary = Neutral400,
         textWhite = Neutral0,
         textBrand = Brand200,
         textCritical = Critical400,
