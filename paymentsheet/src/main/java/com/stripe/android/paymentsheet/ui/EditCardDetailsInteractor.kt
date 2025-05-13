@@ -65,7 +65,7 @@ internal data class EditCardPayload(
                 expiryMonth = card.expiryMonth,
                 expiryYear = card.expiryYear,
                 brand = card.brand,
-                displayBrand = null,
+                displayBrand = card.brand.code,
                 networks = card.networks.toSet().takeIf { it.size > 1 },
                 billingDetails = PaymentMethod.BillingDetails(
                     address = card.billingAddress?.let {
