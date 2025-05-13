@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -73,7 +74,9 @@ internal fun LinkContent(
                     // calculating its initial size
                     Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                 },
-                modifier = Modifier.height(IntrinsicSize.Min),
+                modifier = Modifier
+                    .animateContentSize()
+                    .height(IntrinsicSize.Min),
                 sheetState = sheetState,
                 sheetShape = LinkTheme.shapes.large.copy(
                     bottomStart = CornerSize(0.dp),
