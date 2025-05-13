@@ -1,7 +1,7 @@
 package com.stripe.android.link.ui.signup
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -26,7 +26,7 @@ internal class SignUpScreenshotTest(
     @Test
     fun testScreen() {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
+            LinkScreenshotSurface {
                 SignUpBody(
                     emailController = EmailConfig.createController("test@test.com"),
                     phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),

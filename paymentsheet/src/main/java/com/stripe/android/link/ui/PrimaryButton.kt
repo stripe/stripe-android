@@ -1,7 +1,9 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -60,19 +62,18 @@ internal fun PrimaryButton(
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.primary,
-                    disabledBackgroundColor = LinkTheme.colors.primary,
+                    backgroundColor = LinkTheme.colors.buttonBrand,
+                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
                 )
             ) {
                 when (state) {
-                    PrimaryButtonState.Processing -> CircularProgressIndicator(
+                    PrimaryButtonState.Processing -> LinkSpinner(
                         modifier = Modifier
-                            .size(18.dp)
-                            .semantics {
-                                testTag = ProgressIndicatorTestTag
-                            },
-                        color = LinkTheme.colors.buttonLabel,
-                        strokeWidth = 2.dp
+                            .size(20.dp)
+                            .semantics { testTag = ProgressIndicatorTestTag },
+                        backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
+                        strokeWidth = 4.dp,
+                        filledColor = LinkTheme.colors.contentOnPrimaryButton,
                     )
                     PrimaryButtonState.Completed -> Icon(
                         painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -82,7 +83,7 @@ internal fun PrimaryButton(
                             .semantics {
                                 testTag = CompletedIconTestTag
                             },
-                        tint = LinkTheme.colors.buttonLabel
+                        tint = LinkTheme.colors.contentOnPrimaryButton
                     )
                     else -> Row(
                         Modifier.fillMaxWidth(),
@@ -92,7 +93,7 @@ internal fun PrimaryButton(
                         Text(
                             text = label,
                             modifier = Modifier.weight(1f),
-                            color = LinkTheme.colors.buttonLabel
+                            color = LinkTheme.colors.contentOnPrimaryButton
                                 .copy(alpha = LocalContentAlpha.current),
                             textAlign = TextAlign.Center,
                             style = LinkTheme.typography.bodyEmphasized,
@@ -122,7 +123,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = LinkTheme.colors.buttonLabel.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
             )
         }
     }
@@ -165,11 +166,21 @@ internal const val PrimaryButtonTag = "PrimaryButtonTag"
 @Preview
 private fun PrimaryButtonPreview() {
     DefaultLinkTheme {
-        PrimaryButton(
-            label = "Testing",
-            state = PrimaryButtonState.Enabled,
-            onButtonClick = { },
-            iconEnd = uiCoreR.drawable.stripe_ic_lock
-        )
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            PrimaryButton(
+                label = "Testing",
+                state = PrimaryButtonState.Enabled,
+                onButtonClick = { },
+                iconEnd = uiCoreR.drawable.stripe_ic_lock
+            )
+            PrimaryButton(
+                label = "Testing",
+                state = PrimaryButtonState.Processing,
+                onButtonClick = { },
+                iconEnd = uiCoreR.drawable.stripe_ic_lock
+            )
+        }
     }
 }

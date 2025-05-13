@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -111,51 +112,55 @@ internal fun UpdateCardScreenBody(
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
-    DefaultLinkTheme(darkTheme = true) {
-        UpdateCardScreenBody(
-            interactor = DefaultEditCardDetailsInteractor.Factory().create(
-                coroutineScope = rememberCoroutineScope(),
-                isCbcModifiable = false,
-                areExpiryDateAndAddressModificationSupported = true,
-                cardBrandFilter = DefaultCardBrandFilter,
-                payload = EditCardPayload.create(
-                    ConsumerPaymentDetails.Card(
-                        id = "card_id_1234",
-                        last4 = "4242",
-                        expiryYear = 2500,
-                        expiryMonth = 4,
-                        brand = CardBrand.Visa,
-                        cvcCheck = CvcCheck.Pass,
-                        isDefault = false,
-                        networks = listOf("VISA"),
-                        nickname = "Fancy Card",
-                        funding = "credit",
-                        billingAddress = ConsumerPaymentDetails.BillingAddress(
-                            name = null,
-                            line1 = null,
-                            line2 = null,
-                            locality = null,
-                            administrativeArea = null,
-                            countryCode = CountryCode.US,
-                            postalCode = "42424"
-                        )
+    DefaultLinkTheme(darkTheme = false) {
+        Surface(
+            color = LinkTheme.colors.surfacePrimary
+        ) {
+            UpdateCardScreenBody(
+                interactor = DefaultEditCardDetailsInteractor.Factory().create(
+                    coroutineScope = rememberCoroutineScope(),
+                    isCbcModifiable = false,
+                    areExpiryDateAndAddressModificationSupported = true,
+                    cardBrandFilter = DefaultCardBrandFilter,
+                    payload = EditCardPayload.create(
+                        ConsumerPaymentDetails.Card(
+                            id = "card_id_1234",
+                            last4 = "4242",
+                            expiryYear = 2500,
+                            expiryMonth = 4,
+                            brand = CardBrand.Visa,
+                            cvcCheck = CvcCheck.Pass,
+                            isDefault = false,
+                            networks = listOf("VISA"),
+                            nickname = "Fancy Card",
+                            funding = "credit",
+                            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                                name = null,
+                                line1 = null,
+                                line2 = null,
+                                locality = null,
+                                administrativeArea = null,
+                                countryCode = CountryCode.US,
+                                postalCode = "42424"
+                            )
+                        ),
+                        billingPhoneNumber = null
                     ),
-                    billingPhoneNumber = null
+                    onBrandChoiceChanged = {},
+                    onCardUpdateParamsChanged = {},
+                    addressCollectionMode = AddressCollectionMode.Automatic
                 ),
-                onBrandChoiceChanged = {},
-                onCardUpdateParamsChanged = {},
-                addressCollectionMode = AddressCollectionMode.Automatic
-            ),
-            state = UpdateCardScreenState(
-                paymentDetailsId = "card_id_1234",
-                isDefault = false,
-                cardUpdateParams = null,
-                preferredCardBrand = null,
-                error = IllegalArgumentException("Random error."),
-                processing = false,
-            ),
-            onUpdateClicked = {},
-            onCancelClicked = {},
-        )
+                state = UpdateCardScreenState(
+                    paymentDetailsId = "card_id_1234",
+                    isDefault = false,
+                    cardUpdateParams = null,
+                    preferredCardBrand = null,
+                    error = IllegalArgumentException("Random error."),
+                    processing = false,
+                ),
+                onUpdateClicked = {},
+                onCancelClicked = {},
+            )
+        }
     }
 }

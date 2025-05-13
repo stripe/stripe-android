@@ -357,6 +357,7 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton()
+            .performScrollTo()
             .assertIsEnabled()
             .performClick()
 

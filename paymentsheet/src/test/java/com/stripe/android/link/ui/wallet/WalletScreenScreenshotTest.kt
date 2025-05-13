@@ -8,12 +8,13 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -24,7 +25,10 @@ import org.junit.Test
 
 internal class WalletScreenScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule(Orientation.entries)
+    val paparazziRule = PaparazziRule(
+        Orientation.entries,
+        SystemAppearance.entries
+    )
 
     @Test
     fun testEmptyState() {
@@ -65,6 +69,16 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 userSetIsExpanded = true,
                 cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+            ),
+        )
+    }
+
+    @Test
+    fun testCollapsedStateWithExpiredCardCollection() {
+        snapshot(
+            state = walletUiState(
+                userSetIsExpanded = false,
+
             ),
         )
     }
@@ -203,7 +217,7 @@ internal class WalletScreenScreenshotTest {
 
     private fun snapshot(state: WalletUiState) {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
+            LinkScreenshotSurface {
                 WalletBody(
                     state = state,
                     onItemSelected = {},

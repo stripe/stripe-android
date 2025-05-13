@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -30,6 +31,7 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.scrim
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -40,7 +42,6 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
-import com.stripe.android.ui.core.CircularProgressIndicator
 
 @SuppressWarnings("LongMethod")
 @OptIn(ExperimentalMaterialApi::class)
@@ -63,7 +64,7 @@ internal fun LinkContent(
 ) {
     DefaultLinkTheme {
         Surface(
-            color = LinkTheme.colors.background,
+            color = LinkTheme.colors.surfacePrimary,
         ) {
             ModalBottomSheetLayout(
                 sheetContent = bottomSheetContent ?: {
@@ -77,8 +78,8 @@ internal fun LinkContent(
                     bottomStart = CornerSize(0.dp),
                     bottomEnd = CornerSize(0.dp)
                 ),
-                sheetBackgroundColor = LinkTheme.colors.background,
-                scrimColor = LinkTheme.colors.sheetScrim
+                sheetBackgroundColor = LinkTheme.colors.surfacePrimary,
+                scrimColor = LinkTheme.colors.scrim
             ) {
                 Column(
                     modifier = Modifier
@@ -297,8 +298,8 @@ internal fun Loader() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator(
-            color = LinkTheme.colors.primary,
+        LinkSpinner(
+            modifier = Modifier.size(48.dp)
         )
     }
 }
