@@ -3,10 +3,11 @@ package com.stripe.android.link.ui
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.ModalBottomSheetLayout
@@ -72,7 +73,7 @@ internal fun LinkContent(
                     // calculating its initial size
                     Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                 },
-                modifier = Modifier.fillMaxHeight(),
+                modifier = Modifier.height(IntrinsicSize.Min),
                 sheetState = sheetState,
                 sheetShape = LinkTheme.shapes.large.copy(
                     bottomStart = CornerSize(0.dp),
