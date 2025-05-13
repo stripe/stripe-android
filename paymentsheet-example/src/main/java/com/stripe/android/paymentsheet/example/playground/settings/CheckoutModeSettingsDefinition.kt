@@ -45,14 +45,13 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
         }
     },
     PAYMENT("payment") {
-        @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
+            // TODO: Add PaymentMethodOptions to IntentConfiguration
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
                 currency = playgroundState.currencyCode.value,
-                paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
         }
     },
