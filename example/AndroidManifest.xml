@@ -60,7 +60,6 @@
         <activity android:name=".activity.IDEALPaymentMethodActivity" />
         <activity android:name=".activity.UpiPaymentActivity" />
         <activity android:name=".activity.UpiWaitingActivity" />
-        <activity android:name=".activity.KlarnaSourceActivity" />
         <activity android:name=".activity.CardBrandsActivity" />
         <activity android:name=".activity.NetbankingPaymentActivity" />
         <activity android:name=".activity.SimpleConfirmationActivity" />

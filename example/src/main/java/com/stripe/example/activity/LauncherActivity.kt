@@ -82,10 +82,6 @@ class LauncherActivity : AppCompatActivity() {
                 ConfirmSepaDebitActivity::class.java
             ),
             Item(
-                activity.getString(R.string.klarna_source_example),
-                KlarnaSourceActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.confirm_with_klarna),
                 KlarnaPaymentActivity::class.java
             ),
