@@ -29,6 +29,8 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -533,6 +535,34 @@ class WalletViewModelTest {
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
         assertThat(viewModel.uiState.value.alertMessage).isEqualTo(error.stripeErrorMessage())
         assertThat(logger.errorLogs).contains("WalletViewModel: Failed to delete payment method" to error)
+    }
+
+    @Test
+    fun `onRemoveClicked shows inline indicator correctly`() = runTest(dispatcher) {
+        val error = RuntimeException("Deletion failed")
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1")
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card))
+        )
+        linkAccountManager.deletePaymentDetailsResult = Result.failure(error)
+
+        val logger = FakeLogger()
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            logger = logger
+        )
+
+        val paymentMethodsBeingUpdated = viewModel.uiState.map { it.cardBeingUpdated }.distinctUntilChanged()
+
+        paymentMethodsBeingUpdated.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.onRemoveClicked(card)
+            assertThat(awaitItem()).isEqualTo(card.id)
+
+            assertThat(awaitItem()).isNull()
+        }
     }
 
     @Test
