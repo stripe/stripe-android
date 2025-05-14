@@ -280,21 +280,24 @@ internal class WalletViewModel @Inject constructor(
 
     fun onRemoveClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         _uiState.update {
-            it.setProcessing()
+            it.copy(cardBeingUpdated = item.id)
         }
         viewModelScope.launch {
-            linkAccountManager.deletePaymentDetails(item.id)
-                .fold(
-                    onSuccess = {
-                        loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
-                    },
-                    onFailure = { error ->
-                        updateErrorMessageAndStopProcessing(
-                            error = error,
-                            loggerMessage = "Failed to delete payment method"
-                        )
-                    }
-                )
+            linkAccountManager.deletePaymentDetails(item.id).fold(
+                onSuccess = {
+                    loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
+                },
+                onFailure = { error ->
+                    updateErrorMessageAndStopProcessing(
+                        error = error,
+                        loggerMessage = "Failed to delete payment method"
+                    )
+                }
+            )
+
+            _uiState.update {
+                it.copy(cardBeingUpdated = null)
+            }
         }
     }
 
