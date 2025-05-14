@@ -12,6 +12,7 @@ object FeatureFlags {
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val enablePaymentMethodOptionsSetupFutureUsage = FeatureFlag("Enable PaymentMethodOptions SetupFutureUse")
     val linkPMsInSPM = FeatureFlag("Link PMs in SPM")
+    val linkProminenceInFlowController = FeatureFlag("Link Prominence in FlowController")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

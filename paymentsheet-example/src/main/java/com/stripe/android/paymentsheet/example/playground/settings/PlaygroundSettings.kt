@@ -458,7 +458,8 @@ internal class PlaygroundSettings private constructor(
             EmbeddedTwoStepSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage),
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
-            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.linkProminenceInFlowController),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
