@@ -179,7 +179,8 @@ internal fun PaymentDetailsListItem(
             ): Int {
                 return measurables.maxOf { it.minIntrinsicHeight(width) }
             }
-        })
+        }
+    )
 }
 
 @Preview(showBackground = true)
