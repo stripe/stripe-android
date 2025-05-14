@@ -1,24 +1,29 @@
 package com.stripe.android.link.ui.verification
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.DialogWindowProvider
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.link.theme.LinkTheme
 
 @Composable
 internal fun VerificationDialog(
@@ -71,6 +76,10 @@ internal fun VerificationDialogBody(
                 usePlatformDefaultWidth = false
             )
         ) {
+            // This is a workaround to set the dim amount to 0f in dark mode
+            // because the default dim amount is too dark for the dialog
+            val dim = if (isSystemInDarkTheme()) 0.3f else 0.8f
+            (LocalView.current.parent as? DialogWindowProvider)?.window?.setDimAmount(dim)
             DefaultLinkTheme {
                 Surface(
                     modifier = Modifier.width(360.dp),
@@ -95,22 +104,29 @@ internal fun VerificationDialogBody(
 @Preview()
 @Composable
 fun VerificationDialogPreview() {
-    VerificationDialogBody(
-        state = VerificationViewState(
-            isProcessing = false,
-            isSendingNewCode = false,
-            errorMessage = resolvableString("Test error message"),
-            didSendNewCode = false,
-            requestFocus = false,
-            redactedPhoneNumber = "(...)",
-            email = "email@email.com",
-            isDialog = true
-        ),
-        otpElement = OTPSpec.transform(),
-        onBack = {},
-        onChangeEmailClick = {},
-        onResendCodeClick = {},
-        onFocusRequested = {},
-        didShowCodeSentNotification = {},
-    )
+    DefaultLinkTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = LinkTheme.colors.surfacePrimary
+        ) {
+            VerificationDialogBody(
+                state = VerificationViewState(
+                    isProcessing = false,
+                    isSendingNewCode = false,
+                    errorMessage = resolvableString("Test error message"),
+                    didSendNewCode = false,
+                    requestFocus = false,
+                    redactedPhoneNumber = "(...)",
+                    email = "email@email.com",
+                    isDialog = true
+                ),
+                otpElement = OTPSpec.transform(),
+                onBack = {},
+                onChangeEmailClick = {},
+                onResendCodeClick = {},
+                onFocusRequested = {},
+                didShowCodeSentNotification = {},
+            )
+        }
+    }
 }

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -97,7 +96,7 @@ internal fun SignUpBody(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary
+            color = LinkTheme.colors.textPrimary
         )
         Text(
             text = stringResource(R.string.stripe_link_sign_up_message),
@@ -106,7 +105,7 @@ internal fun SignUpBody(
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textTertiary
+            color = LinkTheme.colors.textSecondary
         )
         StripeThemeForLink {
             EmailCollectionSection(

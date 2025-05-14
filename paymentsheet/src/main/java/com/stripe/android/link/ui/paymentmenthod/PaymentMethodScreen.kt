@@ -57,7 +57,7 @@ internal fun PaymentMethodBody(
                 .padding(bottom = 32.dp),
             text = stringResource(R.string.stripe_add_payment_method),
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary,
+            color = LinkTheme.colors.textPrimary,
         )
 
         StripeThemeForLink {

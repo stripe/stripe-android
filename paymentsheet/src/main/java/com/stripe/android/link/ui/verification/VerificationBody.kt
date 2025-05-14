@@ -34,8 +34,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.LinkColors
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.otpElementColors
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
@@ -43,6 +43,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
 import kotlinx.coroutines.delay
 
@@ -107,7 +108,7 @@ internal fun VerificationBody(
                 .fillMaxWidth(),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.typeSecondary
+            color = LinkTheme.colors.textSecondary
         )
 
         Spacer(modifier = Modifier.size(24.dp))
@@ -124,7 +125,11 @@ internal fun VerificationBody(
                     // 48dp per OTP box plus 8dp per space
                     .width(328.dp)
                     .testTag(VERIFICATION_OTP_TAG),
-                colors = LinkTheme.colors.otpElementColors(),
+                colors = OTPElementColors(
+                    selectedBorder = LinkTheme.colors.borderSelected,
+                    placeholder = LinkTheme.colors.textPrimary,
+                    background = LinkTheme.colors.surfaceSecondary
+                ),
                 focusRequester = focusRequester
             )
         }
@@ -184,10 +189,10 @@ private fun ContentWrapper(
                 onClick = onBackClicked
             ) {
                 Icon(
-
                     modifier = Modifier.size(16.dp),
                     painter = painterResource(R.drawable.stripe_link_close),
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel)
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel),
+                    tint = LinkTheme.colors.iconSecondary
                 )
             }
             Column(
@@ -230,7 +235,7 @@ private fun Header(
                 .testTag(VERIFICATION_TITLE_TAG),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary
+            color = LinkTheme.colors.textPrimary
         )
     } else {
         Text(
@@ -240,7 +245,7 @@ private fun Header(
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.title,
-            color = LinkTheme.colors.typePrimary
+            color = LinkTheme.colors.textPrimary
         )
     }
 }
@@ -257,7 +262,7 @@ private fun ChangeEmailRow(
         Text(
             text = email,
             modifier = Modifier.weight(weight = 1f, fill = false),
-            color = LinkTheme.colors.typeTertiary,
+            color = LinkTheme.colors.textTertiary,
             overflow = TextOverflow.Companion.Ellipsis,
             maxLines = 1,
             style = LinkTheme.typography.body
@@ -271,7 +276,7 @@ private fun ChangeEmailRow(
                     enabled = !isProcessing,
                     onClick = onChangeEmailClick
                 ),
-            color = LinkTheme.colors.typeBrand,
+            color = LinkTheme.colors.textBrand,
             maxLines = 1,
             style = LinkTheme.typography.body
         )
@@ -304,7 +309,7 @@ private fun ResendCodeButton(
         Text(
             text = stringResource(id = R.string.stripe_verification_resend),
             style = LinkTheme.typography.bodyEmphasized,
-            color = LinkTheme.colors.typeBrand,
+            color = LinkTheme.colors.textBrand,
             modifier = Modifier
                 .alpha(textAlpha),
         )
@@ -313,7 +318,7 @@ private fun ResendCodeButton(
             visible = isSendingNewCode
         ) {
             LinkSpinner(
-                filledColor = LinkTheme.colors.typePrimary,
+                filledColor = LinkTheme.colors.textPrimary,
                 strokeWidth = 3.dp,
                 modifier = Modifier
                     .testTag(VERIFICATION_RESEND_LOADER_TAG)
