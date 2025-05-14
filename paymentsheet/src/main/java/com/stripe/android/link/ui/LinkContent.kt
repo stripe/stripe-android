@@ -1,7 +1,8 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.stripe.android.common.ui.AnimatedContentHeight
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
@@ -74,9 +76,7 @@ internal fun LinkContent(
                     // calculating its initial size
                     Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                 },
-                modifier = Modifier
-                    .animateContentSize()
-                    .height(IntrinsicSize.Min),
+                modifier = Modifier.height(IntrinsicSize.Min),
                 sheetState = sheetState,
                 sheetShape = LinkTheme.shapes.large.copy(
                     bottomStart = CornerSize(0.dp),
@@ -106,22 +106,24 @@ internal fun LinkContent(
                         }
                     )
 
-                    Screens(
-                        initialDestination = initialDestination,
-                        navController = navController,
-                        goBack = goBack,
-                        moveToWeb = moveToWeb,
-                        navigateAndClearStack = { screen ->
-                            navigate(screen, true)
-                        },
-                        dismissWithResult = dismissWithResult,
-                        getLinkAccount = getLinkAccount,
-                        showBottomSheetContent = onUpdateSheetContent,
-                        changeEmail = changeEmail,
-                        hideBottomSheetContent = {
-                            onUpdateSheetContent(null)
-                        }
-                    )
+                    AnimatedContentHeight(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) {
+                        Screens(
+                            initialDestination = initialDestination,
+                            navController = navController,
+                            goBack = goBack,
+                            moveToWeb = moveToWeb,
+                            navigateAndClearStack = { screen ->
+                                navigate(screen, true)
+                            },
+                            dismissWithResult = dismissWithResult,
+                            getLinkAccount = getLinkAccount,
+                            showBottomSheetContent = onUpdateSheetContent,
+                            changeEmail = changeEmail,
+                            hideBottomSheetContent = {
+                                onUpdateSheetContent(null)
+                            }
+                        )
+                    }
                 }
             }
         }

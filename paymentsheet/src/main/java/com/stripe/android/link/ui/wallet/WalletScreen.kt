@@ -1,7 +1,8 @@
 package com.stripe.android.link.ui.wallet
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.ui.AnimatedContentHeight
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
@@ -359,7 +361,6 @@ private fun PaymentMethodPicker(
 ) {
     Column(
         modifier = modifier
-            .animateContentSize()
             .fillMaxWidth()
             .clip(LinkTheme.shapes.large)
             .background(
@@ -375,10 +376,12 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
-        if (expanded || selectedItem == null) {
-            expandedContent()
-        } else {
-            collapsedContent(selectedItem)
+        AnimatedContentHeight(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) {
+            if (expanded || selectedItem == null) {
+                expandedContent()
+            } else {
+                collapsedContent(selectedItem)
+            }
         }
     }
 }
