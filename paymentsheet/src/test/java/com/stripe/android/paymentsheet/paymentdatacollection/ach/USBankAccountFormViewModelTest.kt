@@ -1065,6 +1065,35 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
+    fun `Produces correct mandate text when hasIntentToSetup is true`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs.copy(
+                    hasIntentToSetup = true
+                )
+            )
+        )
+
+        val expectedResult = USBankAccountTextBuilder.buildMandateText(
+            merchantName = MERCHANT_NAME,
+            isSaveForFutureUseSelected = false,
+            isSetupFlow = true,
+            isInstantDebits = false,
+        )
+
+        viewModel.currentScreenState.test {
+            assertThat(awaitItem().linkedBankAccount).isNull()
+
+            viewModel.handleCollectBankAccountResult(
+                mockVerifiedBankAccount()
+            )
+
+            val mandateCollectionViewState = awaitItem()
+            assertThat(mandateCollectionViewState.linkedBankAccount?.mandateText).isEqualTo(expectedResult)
+        }
+    }
+
+    @Test
     fun `Produces correct mandate text when using microdeposits verification`() = runTest {
         val viewModel = createViewModel()
 
