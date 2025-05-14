@@ -75,7 +75,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
     private val linkHandler: LinkHandler,
-    private val linkLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
@@ -121,11 +120,6 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
-        linkLauncher.register(
-            activityResultCaller,
-            ::onLinkResult
-        )
-
         val activityResultLaunchers = setOf(
             paymentOptionActivityLauncher,
             sepaMandateActivityLauncher,
@@ -148,29 +142,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     is ConfirmationHandler.State.Complete -> onIntentResult(state.result)
                 }
             }
-        }
-    }
-
-    fun onLinkResult(linkActivityResult: LinkActivityResult) {
-        if (linkActivityResult is LinkActivityResult.Authenticated) {
-            val account = linkActivityResult.linkAccountUpdate as LinkAccountUpdate.Value?
-            linkAccountHolder.set(account?.linkAccount)
-            onPaymentOptionResult(
-                PaymentOptionResult.Succeeded(
-                    paymentSelection = PaymentSelection.Link(),
-                    paymentMethods = null,
-                )
-            )
-        } else {
-            val stateResult = currentStateForPresenting()
-            val state = stateResult.fold(
-                onSuccess = { it },
-                onFailure = {
-                    paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(it))
-                    return
-                }
-            )
-            launchPaymentOptions(state)
         }
     }
 
@@ -263,21 +234,6 @@ internal class DefaultFlowController @Inject internal constructor(
             }
         )
 
-        viewModelScope.launch {
-            val eager = linkHandler.setupLinkWithEagerLaunch(state.paymentSheetState.paymentMethodMetadata.linkState)
-            if (eager) {
-                linkLauncher.present(
-                    configuration = state.paymentSheetState.paymentMethodMetadata.linkState?.configuration!!,
-                    linkAccount = null,
-                    useLinkExpress = true
-                )
-            } else {
-                launchPaymentOptions(state)
-            }
-        }
-    }
-
-    private fun launchPaymentOptions(state: State) {
         val args = PaymentOptionContract.Args(
             state = state.paymentSheetState.copy(paymentSelection = viewModel.paymentSelection),
             configuration = state.config,
@@ -427,6 +383,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 val paymentSelection = paymentOptionResult.paymentSelection
                 paymentSelection.hasAcknowledgedSepaMandate = true
                 viewModel.paymentSelection = paymentSelection
+                if (paymentSelection is PaymentSelection.Link) {
+                    linkAccountHolder.set(paymentSelection.linkAccount)
+                }
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
                         paymentSelection

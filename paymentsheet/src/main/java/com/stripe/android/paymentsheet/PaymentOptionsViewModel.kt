@@ -10,6 +10,9 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -17,6 +20,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -41,6 +45,7 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
+    val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -100,7 +105,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(PaymentSelection.Link())
+                updateSelection(Link())
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
@@ -181,12 +186,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
 
-            _paymentOptionResult.tryEmit(
-                PaymentOptionResult.Succeeded(
-                    paymentSelection = paymentSelection,
-                    paymentMethods = customerStateHolder.paymentMethods.value
+            val configuration = linkHandler.linkConfiguration.value
+            if (paymentSelection is Link && configuration != null) {
+                linkPaymentLauncher.present(
+                    configuration = configuration,
+                    linkAccount = null,
+                    useLinkExpress = true
                 )
-            )
+            } else {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        paymentSelection = paymentSelection,
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
         }
     }
 
@@ -244,6 +258,22 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentSheetScreen.AddAnotherPaymentMethod(interactor = interactor)
                 )
             }
+        }
+    }
+
+    fun onLinkActivityResult(linkActivityResult: LinkActivityResult) {
+        if (linkActivityResult is LinkActivityResult.Authenticated) {
+            val account = linkActivityResult.linkAccountUpdate as LinkAccountUpdate.Value?
+            _paymentOptionResult.tryEmit(
+                PaymentOptionResult.Succeeded(
+                    paymentSelection = Link(
+                        linkAccount = account!!.linkAccount!!
+                    ),
+                    paymentMethods = customerStateHolder.paymentMethods.value
+                )
+            )
+        } else {
+            TODO("NOT YET DONE")
         }
     }
 

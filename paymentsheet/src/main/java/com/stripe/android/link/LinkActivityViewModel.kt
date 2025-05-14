@@ -92,7 +92,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onVerificationDialogSucceeded() {
-        dismissWithResult?.invoke(
+        dismissWithResult(
             LinkActivityResult.Authenticated(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
