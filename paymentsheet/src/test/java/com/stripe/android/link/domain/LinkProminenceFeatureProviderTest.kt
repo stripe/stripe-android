@@ -46,7 +46,7 @@ class LinkProminenceFeatureProviderTest {
         fakeLinkGate.setUseNativeLink(true)
 
         // When
-        val result = linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(state)
+        val result = linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(state)
 
         // Then
         assertFalse(result)
@@ -63,7 +63,7 @@ class LinkProminenceFeatureProviderTest {
         fakeLinkGate.setUseNativeLink(true)
 
         // When
-        val result = linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(state)
+        val result = linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(state)
 
         // Then
         assertFalse(result)
@@ -81,7 +81,7 @@ class LinkProminenceFeatureProviderTest {
         fakeLinkGate.setUseNativeLink(true)
 
         // When
-        val result = linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(state)
+        val result = linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(state)
 
         // Then
         assertFalse(result)
@@ -98,7 +98,7 @@ class LinkProminenceFeatureProviderTest {
         fakeLinkGate.setUseNativeLink(false)
 
         // When
-        val result = linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(state)
+        val result = linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(state)
 
         // Then
         assertFalse(result)
@@ -115,7 +115,7 @@ class LinkProminenceFeatureProviderTest {
         fakeLinkGate.setUseNativeLink(true)
 
         // When
-        val result = linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(state)
+        val result = linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(state)
 
         // Then
         assertTrue(result)

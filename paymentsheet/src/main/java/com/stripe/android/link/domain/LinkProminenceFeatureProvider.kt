@@ -17,15 +17,15 @@ internal interface LinkProminenceFeatureProvider {
      * In FlowController, this method determines if the 2FA
      * dialog should be shown eagerly if the user continues with Link.
      */
-    fun show2FADialogOnLinkSelectedInFlowController(linkState: LinkState): Boolean
+    fun shouldShowEarlyVerificationInFlowController(linkState: LinkState): Boolean
 }
 
 internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
     private val linkGateFactory: LinkGate.Factory,
-    private val logger: Logger,
+    private val logger: Logger
 ) : LinkProminenceFeatureProvider {
 
-    override fun show2FADialogOnLinkSelectedInFlowController(
+    override fun shouldShowEarlyVerificationInFlowController(
         linkState: LinkState,
     ): Boolean {
         val linkConfiguration = linkState.configuration

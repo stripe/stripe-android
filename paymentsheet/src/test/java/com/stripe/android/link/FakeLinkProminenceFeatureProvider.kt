@@ -5,7 +5,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 
 internal class FakeLinkProminenceFeatureProvider : LinkProminenceFeatureProvider {
 
-    override fun show2FADialogOnLinkSelectedInFlowController(linkState: LinkState): Boolean {
+    override fun shouldShowEarlyVerificationInFlowController(linkState: LinkState): Boolean {
         return false
     }
 }
