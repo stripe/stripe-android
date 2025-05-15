@@ -7,9 +7,15 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -17,6 +23,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -35,12 +42,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.security.InvalidParameterException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
+    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
+    val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -141,6 +151,37 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
+    fun onLinkActivityResult(result: LinkActivityResult) {
+        when (result) {
+            // Link verification dialog dismissed -> user canceled
+            is LinkActivityResult.Canceled -> {
+                Unit
+            }
+            // Link verification dialog failed -> show error
+            is LinkActivityResult.Failed -> {
+                onError(result.error.stripeErrorMessage())
+            }
+            // Link verification dialog completed -> close payment method selection with authenticated state
+            is LinkActivityResult.Completed -> {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        paymentSelection = Link(
+                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount
+                        ),
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
+            // This should not happen, but if it does, we should show an error
+            is LinkActivityResult.PaymentMethodObtained -> {
+                val error = InvalidParameterException(
+                    "PaymentMethodObtained is not expected from authentication only Link flows"
+                )
+                onError(error.stripeErrorMessage())
+            }
+        }
+    }
+
     override fun onUserCancel() {
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
@@ -180,13 +221,24 @@ internal class PaymentOptionsViewModel @Inject constructor(
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
-
-            _paymentOptionResult.tryEmit(
-                PaymentOptionResult.Succeeded(
-                    paymentSelection = paymentSelection,
-                    paymentMethods = customerStateHolder.paymentMethods.value
+            val linkState = args.state.paymentMethodMetadata.linkState
+            if (linkState != null && linkProminenceFeatureProvider
+                    .show2FADialogOnLinkSelectedInFlowController(linkState)
+            ) {
+                linkPaymentLauncher.present(
+                    configuration = linkState.configuration,
+                    launchMode = LinkLaunchMode.Authentication,
+                    linkAccount = null,
+                    useLinkExpress = true
                 )
-            )
+            } else {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        paymentSelection = paymentSelection,
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
         }
     }
 
