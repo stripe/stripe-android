@@ -8,7 +8,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.FakeLinkProminenceFeatureProvider
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -75,8 +80,15 @@ internal class PaymentOptionsViewModelTest {
 
     private val eventReporter = mock<EventReporter>()
     private val customerRepository = mock<CustomerRepository>()
+    private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+
+    private lateinit var linkProminenceFeatureProvider: FakeLinkProminenceFeatureProvider
 
     @Before
+    fun setUp() {
+        linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider()
+    }
+
     @After
     fun resetMainDispatcher() {
         Dispatchers.resetMain()
@@ -191,6 +203,49 @@ internal class PaymentOptionsViewModelTest {
                 ensureAllEventsConsumed()
             }
         }
+
+    @Test
+    fun `onUserSelection with Link and prominence true launches LinkPaymentLauncher`() = runTest {
+        linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController = true
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                    signupMode = null
+                )
+            ),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+        )
+
+        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.onUserSelection()
+
+        verify(linkPaymentLauncher).present(
+            configuration = any(),
+            linkAccount = eq(null),
+            launchMode = eq(LinkLaunchMode.Authentication),
+            useLinkExpress = eq(true)
+        )
+    }
+
+    @Test
+    fun `onUserSelection with Link and prominence false emits Succeeded result`() = runTest {
+        linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController = false
+        val viewModel = createViewModel(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        )
+
+        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.paymentOptionResult.test {
+            viewModel.onUserSelection()
+            val result = awaitItem()
+            assertThat(result).isInstanceOf<PaymentOptionResult.Succeeded>()
+            val succeeded = result as PaymentOptionResult.Succeeded
+            assertThat(succeeded.paymentSelection).isInstanceOf<PaymentSelection.Link>()
+            ensureAllEventsConsumed()
+        }
+    }
 
     @Test
     fun `Opens saved payment methods if no new payment method was previously selected`() = runTest {
@@ -782,6 +837,61 @@ internal class PaymentOptionsViewModelTest {
             expectedCustomerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
+    @Test
+    fun `onLinkActivityResult with Canceled does nothing`() = runTest {
+        val viewModel = createViewModel()
+        val linkAccountUpdate = LinkAccountUpdate.None
+        viewModel.paymentOptionResult.test {
+            viewModel.onLinkActivityResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult with Failed sets error`() = runTest {
+        val viewModel = createViewModel()
+        val error = Exception("link failed")
+        val linkAccountUpdate = LinkAccountUpdate.None
+        viewModel.error.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.onLinkActivityResult(
+                LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = linkAccountUpdate
+                )
+            )
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult with Completed emits Succeeded result`() = runTest {
+        val linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+        val result = LinkActivityResult.Completed(
+            launchMode = LinkLaunchMode.Authentication,
+            linkAccountUpdate = linkAccountUpdate
+        )
+        val viewModel = createViewModel()
+        viewModel.paymentOptionResult.test {
+            viewModel.onLinkActivityResult(result)
+            val succeeded = awaitItem() as PaymentOptionResult.Succeeded
+            val paymentSelection = succeeded.paymentSelection
+            assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
+            assertThat((paymentSelection as PaymentSelection.Link).linkAccount).isEqualTo(linkAccountUpdate.linkAccount)
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult with PaymentMethodObtained sets error`() = runTest {
+        val viewModel = createViewModel()
+        val result = LinkActivityResult.PaymentMethodObtained(mock())
+        viewModel.error.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.onLinkActivityResult(result)
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
     /**
      * Helper function to test user cancellation scenarios
      */
@@ -894,7 +1004,7 @@ internal class PaymentOptionsViewModelTest {
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.paymentMethodMetadata.linkState,
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        workContext: CoroutineContext = testDispatcher,
+        workContext: CoroutineContext = testDispatcher
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -910,6 +1020,8 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            linkProminenceFeatureProvider = linkProminenceFeatureProvider,
+            linkPaymentLauncher = linkPaymentLauncher
         )
     }
 
