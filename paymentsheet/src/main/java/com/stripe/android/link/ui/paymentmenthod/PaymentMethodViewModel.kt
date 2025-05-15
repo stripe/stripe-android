@@ -130,7 +130,6 @@ internal class PaymentMethodViewModel @Inject constructor(
             Result.Succeeded -> {
                 dismissWithResult(
                     LinkActivityResult.Completed(
-                        launchMode = linkLaunchMode,
                         linkAccountUpdate = LinkAccountUpdate.Value(null)
                     )
                 )

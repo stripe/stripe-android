@@ -249,7 +249,6 @@ internal class WalletViewModel @Inject constructor(
             LinkConfirmationResult.Succeeded -> {
                 dismissWithResult(
                     LinkActivityResult.Completed(
-                        launchMode = linkLaunchMode,
                         linkAccountUpdate = LinkAccountUpdate.Value(null)
                     )
                 )
