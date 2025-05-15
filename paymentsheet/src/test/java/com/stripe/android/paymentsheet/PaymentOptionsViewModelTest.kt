@@ -890,6 +890,7 @@ internal class PaymentOptionsViewModelTest {
     fun `onLinkActivityResult with Completed emits Succeeded result`() = runTest {
         val linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
         val result = LinkActivityResult.Completed(
+            launchMode = LinkLaunchMode.Authentication,
             linkAccountUpdate = linkAccountUpdate
         )
         val viewModel = createViewModel()
