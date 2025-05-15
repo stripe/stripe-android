@@ -14,9 +14,7 @@ import javax.inject.Inject
 internal interface LinkProminenceFeatureProvider {
 
     /**
-     * On FlowController, upon showing the payment method list, if the user has selects Link, this
-     * method will determine if the 2FA dialog should be shown eagerly and confirmed as selection upon successful
-     * authentication.
+     * In FlowController, this method determines if the 2FA dialog should be shown eagerly if the user continues with Link.
      */
     fun show2FADialogOnLinkSelectedInFlowController(linkState: LinkState): Boolean
 }
