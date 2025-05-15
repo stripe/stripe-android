@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -411,7 +412,9 @@ class PaymentSheetEventTest {
                 "ordered_lpms" to "card,klarna",
                 "require_cvc_recollection" to false,
                 "link_display" to "automatic",
-                "fc_sdk_availability" to "FULL"
+                "fc_sdk_availability" to "FULL",
+                "payment_method_options_setup_future_usage" to null,
+                "setup_future_usage" to null,
             )
         )
     }
@@ -555,6 +558,34 @@ class PaymentSheetEventTest {
         )
 
         assertThat(event.params).containsEntry("intent_type", "deferred_payment_intent")
+    }
+
+    @Test
+    fun `LoadSucceeded with paymentMethodOptionsSetupFutureUsage should return expected params`() {
+        val pmoSfuMap = mapOf(
+            "card" to "off_session",
+            "affirm" to "none"
+        )
+        val event = createLoadSucceededEvent(
+            paymentMethodOptionsSetupfutureUsage = pmoSfuMap
+        )
+
+        assertThat(event.params).containsEntry(
+            "payment_method_options_setup_future_usage",
+            pmoSfuMap
+        )
+    }
+
+    @Test
+    fun `LoadSucceeded with setup future usage should return expected params`() {
+        val event = createLoadSucceededEvent(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+
+        assertThat(event.params).containsEntry(
+            "setup_future_usage",
+            "off_session"
+        )
     }
 
     @Test
@@ -1715,6 +1746,8 @@ class PaymentSheetEventTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        paymentMethodOptionsSetupfutureUsage: Map<String, String>? = null,
+        setupFutureUsage: StripeIntent.Usage? = null
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1729,6 +1762,8 @@ class PaymentSheetEventTest {
             setAsDefaultEnabled = setAsDefaultEnabled,
             linkDisplay = linkDisplay,
             financialConnectionsAvailability = financialConnectionsAvailability,
+            paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupfutureUsage,
+            setupFutureUsage = setupFutureUsage
         )
     }
 

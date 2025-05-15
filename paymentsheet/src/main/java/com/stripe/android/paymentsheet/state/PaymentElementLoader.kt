@@ -27,7 +27,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
@@ -783,7 +785,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode
                 ),
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
-                setAsDefaultEnabled = setAsDefaultEnabled
+                setAsDefaultEnabled = setAsDefaultEnabled,
+                setupFutureUsage = elementsSession.stripeIntent.setupFutureUsage(),
+                paymentMethodOptionsSetupFutureUsage = elementsSession.stripeIntent
+                    .paymentMethodOptionsSetupFutureUsageMap()
             )
         }
     }
@@ -884,4 +889,17 @@ private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymen
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
+}
+
+private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Map<String, String>? {
+    return getPaymentMethodOptions().mapNotNull { (key, value) ->
+        (value as? Map<*, *>)?.get("setup_future_usage")?.let {
+            key to it.toString()
+        }
+    }.toMap().takeIf { it.isNotEmpty() }
+}
+
+private fun StripeIntent.setupFutureUsage(): StripeIntent.Usage? = when (this) {
+    is SetupIntent -> usage
+    is PaymentIntent -> setupFutureUsage
 }
