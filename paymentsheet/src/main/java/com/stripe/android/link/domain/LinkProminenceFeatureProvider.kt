@@ -14,7 +14,8 @@ import javax.inject.Inject
 internal interface LinkProminenceFeatureProvider {
 
     /**
-     * In FlowController, this method determines if the 2FA dialog should be shown eagerly if the user continues with Link.
+     * In FlowController, this method determines if the 2FA
+     * dialog should be shown eagerly if the user continues with Link.
      */
     fun show2FADialogOnLinkSelectedInFlowController(linkState: LinkState): Boolean
 }
