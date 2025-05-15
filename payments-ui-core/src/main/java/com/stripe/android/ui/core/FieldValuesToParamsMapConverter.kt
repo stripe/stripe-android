@@ -133,6 +133,9 @@ class FieldValuesToParamsMapConverter {
                     setAsDefault =
                     fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
                 )
+                PaymentMethod.Type.Link.code -> PaymentMethodExtraParams.Link(
+                    setAsDefault = fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                )
                 PaymentMethod.Type.USBankAccount.code -> PaymentMethodExtraParams.USBankAccount(
                     setAsDefault =
                     fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()

@@ -1308,7 +1308,8 @@ constructor(
         fun createLink(
             paymentDetailsId: String,
             consumerSessionClientSecret: String,
-            extraParams: Map<String, @RawValue Any>? = null
+            extraParams: Map<String, @RawValue Any>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
@@ -1316,7 +1317,8 @@ constructor(
                     paymentDetailsId,
                     consumerSessionClientSecret,
                     extraParams
-                )
+                ),
+                allowRedisplay = allowRedisplay,
             )
         }
 

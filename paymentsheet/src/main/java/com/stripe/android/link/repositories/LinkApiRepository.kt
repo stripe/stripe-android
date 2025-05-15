@@ -186,6 +186,7 @@ internal class LinkApiRepository @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = consumerSessionClientSecret,
                 extraParams = extraParams,
+                allowRedisplay = paymentMethodCreateParams.allowRedisplay
             )
 
             LinkPaymentDetails.New(

@@ -61,6 +61,23 @@ sealed class PaymentMethodOptionsParams(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Link(
+        val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Link) {
+
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
+            )
+        }
+
+        private companion object {
+            private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        }
+    }
+
     @Parcelize
     data class Blik(
         var code: String
@@ -139,8 +156,9 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.Blik -> null
         is PaymentMethodOptionsParams.Card -> setupFutureUsage
         is PaymentMethodOptionsParams.Konbini -> null
+        is PaymentMethodOptionsParams.Link -> setupFutureUsage
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
         is PaymentMethodOptionsParams.WeChatPay -> null
-        PaymentMethodOptionsParams.WeChatPayH5 -> null
+        is PaymentMethodOptionsParams.WeChatPayH5 -> null
     }
 }
