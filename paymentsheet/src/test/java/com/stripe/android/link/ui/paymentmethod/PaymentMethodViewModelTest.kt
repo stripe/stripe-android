@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -125,6 +126,7 @@ class PaymentMethodViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
+                    launchMode = LinkLaunchMode.Payment,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
                 )
             )
@@ -236,7 +238,8 @@ class PaymentMethodViewModelTest {
             formHelper = formHelper,
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
-            linkAccountManager = linkAccountManager
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Payment
         )
     }
 }

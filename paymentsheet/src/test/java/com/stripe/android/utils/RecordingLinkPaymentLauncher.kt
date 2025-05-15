@@ -39,7 +39,7 @@ internal object RecordingLinkPaymentLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any(), anyOrNull(), any()) } doAnswer { invocation ->
+            on { present(any(), anyOrNull(), any(), any()) } doAnswer { invocation ->
                 val arguments = invocation.arguments
 
                 presentCalls.add(

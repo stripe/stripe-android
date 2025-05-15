@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -39,6 +40,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val logger: Logger,
     private val formHelper: FormHelper,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val linkLaunchMode: LinkLaunchMode,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val _state = MutableStateFlow(
@@ -128,6 +130,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             Result.Succeeded -> {
                 dismissWithResult(
                     LinkActivityResult.Completed(
+                        launchMode = linkLaunchMode,
                         linkAccountUpdate = LinkAccountUpdate.Value(null)
                     )
                 )
@@ -175,6 +178,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         ),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
                         dismissWithResult = dismissWithResult
                     )
                 }
