@@ -12,11 +12,9 @@ import com.stripe.android.model.SourceParams
 import com.stripe.android.model.SourceTypeModel
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
-@Ignore("Resume after finishing investigation in #bc-earth-embargo")
 internal class SourceEndToEndTest {
     @Test
     fun createKlarnaParams_createsExpectedSourceOrderItems() {
