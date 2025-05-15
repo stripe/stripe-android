@@ -90,7 +90,6 @@ internal class LinkActivityViewModel @Inject constructor(
         when (linkLaunchMode) {
             LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Completed(
-                    launchMode = linkLaunchMode,
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate
                 )
             )

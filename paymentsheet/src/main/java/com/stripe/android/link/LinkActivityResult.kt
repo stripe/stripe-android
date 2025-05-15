@@ -11,7 +11,6 @@ internal sealed class LinkActivityResult : Parcelable {
      */
     @Parcelize
     data class Completed(
-        val launchMode: LinkLaunchMode,
         val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult()
 

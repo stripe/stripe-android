@@ -126,7 +126,6 @@ class PaymentMethodViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    launchMode = LinkLaunchMode.Payment,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
                 )
             )

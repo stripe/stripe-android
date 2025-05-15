@@ -3,7 +3,6 @@ package com.stripe.android.link.analytics
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test
 
@@ -52,8 +51,7 @@ internal class DefaultLinkAnalyticsHelperTest {
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.None,
-                launchMode = LinkLaunchMode.Payment
+                linkAccountUpdate = LinkAccountUpdate.None
             )
         )
         assertThat(eventReporter.calledCount).isEqualTo(1)
