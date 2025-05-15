@@ -6,6 +6,11 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.paymentsheet.state.LinkState
 import javax.inject.Inject
 
+/**
+ * Provider interface for Link feature prominence settings and behaviors, handling
+ * the logic for determining when to show special Link UI elements or trigger automatic
+ * behaviors to enhance the Link payment experience.
+ */
 internal interface LinkProminenceFeatureProvider {
 
     /**
