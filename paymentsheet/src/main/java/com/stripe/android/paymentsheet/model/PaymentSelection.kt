@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
@@ -67,7 +68,8 @@ internal sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     data class Link(
-        val useLinkExpress: Boolean = false
+        val useLinkExpress: Boolean = false,
+        val linkAccount: LinkAccount? = null
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
