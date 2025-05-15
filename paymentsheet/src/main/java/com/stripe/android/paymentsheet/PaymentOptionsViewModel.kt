@@ -224,7 +224,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val linkState = args.state.paymentMethodMetadata.linkState
             if (paymentSelection is Link &&
                 linkState != null &&
-                linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(linkState)
+                linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkState)
             ) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,

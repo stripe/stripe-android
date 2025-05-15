@@ -208,7 +208,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection with Link and prominence true launches LinkPaymentLauncher`() = runTest {
-        linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController = true
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 linkState = LinkState(
@@ -233,7 +233,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection with Link and prominence false emits Succeeded result`() = runTest {
-        linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController = false
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = false
         val viewModel = createViewModel(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
@@ -251,7 +251,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection with non-Link selection does not launch LinkPaymentLauncher`() = runTest {
-        linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController = true
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
         val viewModel = createViewModel(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
         )
