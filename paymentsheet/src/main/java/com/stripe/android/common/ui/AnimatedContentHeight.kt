@@ -21,10 +21,16 @@ import kotlin.math.roundToInt
 
 @Composable
 internal fun AnimatedContentHeight(
-    animationSpec: AnimationSpec<Float> = spring(),
     modifier: Modifier = Modifier,
+    animationSpec: AnimationSpec<Float> = spring(),
+    isEnabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    if (!isEnabled) {
+        content()
+        return
+    }
+
     val parentState = LocalAnimatedContentSizeState.current
     val state = remember { AnimatedContentSizeState(parentState) }
 
