@@ -3,6 +3,7 @@ package com.stripe.android.lpm
 import androidx.compose.ui.test.hasTestTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
@@ -10,8 +11,10 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FeatureFlagSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
@@ -75,6 +78,20 @@ internal class TestCashApp : BasePlaygroundTest() {
     }
 
     @Test
+    fun testCashAppPayWithPmoSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[FeatureFlagSettingsDefinition(FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage)] = true
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "cashapp:off_session"
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
+            },
+            populateCustomLpmFields = {
+                verifyMandateFieldExists()
+            }
+        )
+    }
+
+    @Test
     fun testCashAppPayWithSetupIntent() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
@@ -97,6 +114,18 @@ internal class TestCashApp : BasePlaygroundTest() {
                 settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             },
+        )
+    }
+
+    @Test
+    fun testCashAppPayDeferredCscWithPmoSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[FeatureFlagSettingsDefinition(FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage)] = true
+                settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "cashapp:off_session"
+                settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
+            }
         )
     }
 }
