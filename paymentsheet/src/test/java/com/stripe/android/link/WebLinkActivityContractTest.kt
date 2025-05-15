@@ -42,7 +42,8 @@ class WebLinkActivityContractTest {
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = false,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            launchMode = LinkLaunchMode.Payment
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)

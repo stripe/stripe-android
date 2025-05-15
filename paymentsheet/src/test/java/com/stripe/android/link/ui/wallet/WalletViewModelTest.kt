@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
@@ -360,7 +361,12 @@ class WalletViewModelTest {
         )
 
         assertThat(result)
-            .isEqualTo(LinkActivityResult.Completed(LinkAccountUpdate.Value(null)))
+            .isEqualTo(
+                LinkActivityResult.Completed(
+                    launchMode = LinkLaunchMode.Payment,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
     }
 
     @Test
@@ -705,6 +711,7 @@ class WalletViewModelTest {
             dismissWithResult = dismissWithResult,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            linkLaunchMode = LinkLaunchMode.Payment,
         )
     }
 

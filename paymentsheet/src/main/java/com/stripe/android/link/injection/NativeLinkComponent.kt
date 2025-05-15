@@ -11,6 +11,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
@@ -60,6 +61,7 @@ internal interface NativeLinkComponent {
     val eventReporter: EventReporter
     val navigationManager: NavigationManager
     val dismissalCoordinator: LinkDismissalCoordinator
+    val linkLaunchMode: LinkLaunchMode
 
     @Component.Builder
     interface Builder {
@@ -93,6 +95,9 @@ internal interface NativeLinkComponent {
         fun startWithVerificationDialog(
             @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
         ): Builder
+
+        @BindsInstance
+        fun linkLaunchMode(linkLaunchMode: LinkLaunchMode): Builder
 
         @BindsInstance
         fun linkAccount(linkAccount: LinkAccount?): Builder
