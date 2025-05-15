@@ -49,8 +49,8 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         viewModel.linkPaymentLauncher.register(
-            this,
-            viewModel::onLinkActivityResult
+            activityResultCaller = this,
+            callback = viewModel::onLinkActivityResult
         )
 
         setContent {
