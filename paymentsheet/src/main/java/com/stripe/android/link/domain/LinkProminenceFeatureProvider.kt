@@ -6,15 +6,22 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.paymentsheet.state.LinkState
 import javax.inject.Inject
 
-internal class LinkProminenceFeatureProvider @Inject constructor(
-    private val linkGateFactory: LinkGate.Factory,
-    private val logger: Logger,
-) {
+internal interface LinkProminenceFeatureProvider {
 
     /**
-     * Returns true if the Link prominence feature should be shown in the flow controller.
+     * On FlowController, upon showing the payment method list, if the user has selects Link, this
+     * method will determine if the 2FA dialog should be shown eagerly and confirmed as selection upon successful
+     * authentication.
      */
-    fun showVerificationOnFlowControllerLinkSelection(
+    fun show2FADialogOnLinkSelectedInFlowController(linkState: LinkState): Boolean
+}
+
+internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
+    private val linkGateFactory: LinkGate.Factory,
+    private val logger: Logger,
+) : LinkProminenceFeatureProvider {
+
+    override fun show2FADialogOnLinkSelectedInFlowController(
         linkState: LinkState,
     ): Boolean {
         val linkConfiguration = linkState.configuration

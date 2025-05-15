@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
@@ -38,6 +39,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -910,6 +912,8 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider(),
+            logger = FakeLogger()
         )
     }
 

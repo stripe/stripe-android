@@ -104,6 +104,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
+                linkProminenceFeatureProvider
                 updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
@@ -185,8 +186,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             if (paymentSelection is PaymentSelection.Link) {
                 val linkState = args.state.paymentMethodMetadata.linkState
                 val prominenceEnabled = linkState !== null && linkProminenceFeatureProvider
-                    .showVerificationOnFlowControllerLinkSelection(linkState)
-                logger.debug("Link prominence enabled: $prominenceEnabled")
+                    .show2FADialogOnLinkSelectedInFlowController(linkState)
+                if (prominenceEnabled) { logger.debug("should show Link 2FA") }
             }
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
