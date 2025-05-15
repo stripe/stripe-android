@@ -222,8 +222,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
             val linkState = args.state.paymentMethodMetadata.linkState
-            if (linkState != null && linkProminenceFeatureProvider
-                    .show2FADialogOnLinkSelectedInFlowController(linkState)
+            if (paymentSelection is Link &&
+                linkState != null &&
+                linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController(linkState)
             ) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,

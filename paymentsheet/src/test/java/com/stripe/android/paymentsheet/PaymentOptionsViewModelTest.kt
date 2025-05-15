@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -62,6 +63,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -245,6 +247,26 @@ internal class PaymentOptionsViewModelTest {
             assertThat(succeeded.paymentSelection).isInstanceOf<PaymentSelection.Link>()
             ensureAllEventsConsumed()
         }
+    }
+
+    @Test
+    fun `onUserSelection with non-Link selection does not launch LinkPaymentLauncher`() = runTest {
+        linkProminenceFeatureProvider.show2FADialogOnLinkSelectedInFlowController = true
+        val viewModel = createViewModel(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+        )
+
+        // Select a non-Link payment method (e.g., a saved card)
+        viewModel.updateSelection(CARD_PAYMENT_SELECTION)
+        viewModel.onUserSelection()
+
+        // Ensure LinkPaymentLauncher.present is never called
+        verify(linkPaymentLauncher, never()).present(
+            configuration = any(),
+            linkAccount = any(),
+            launchMode = any(),
+            useLinkExpress = any()
+        )
     }
 
     @Test
