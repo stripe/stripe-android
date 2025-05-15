@@ -7,9 +7,11 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -41,6 +43,8 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
+    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
+    private val logger: Logger,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -178,6 +182,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
         clearErrorMessages()
 
         selection.value?.let { paymentSelection ->
+            if (paymentSelection is PaymentSelection.Link) {
+                val linkState = args.state.paymentMethodMetadata.linkState
+                val prominenceEnabled = linkState !== null && linkProminenceFeatureProvider
+                    .showVerificationOnFlowControllerLinkSelection(linkState)
+                logger.debug("Link prominence enabled: $prominenceEnabled")
+            }
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
 
