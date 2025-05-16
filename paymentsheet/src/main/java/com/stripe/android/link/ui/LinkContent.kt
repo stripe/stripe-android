@@ -23,6 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.stripe.android.common.ui.AnimatedContentHeight
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
@@ -70,13 +71,18 @@ internal fun LinkContent(
             modifier = modifier,
             color = LinkTheme.colors.surfacePrimary,
         ) {
+            val mbsLayoutModifier =
+                if (FeatureFlags.linkDynamicBottomSheet.isEnabled)
+                    Modifier.height(IntrinsicSize.Min)
+                else
+                    Modifier.fillMaxSize()
             ModalBottomSheetLayout(
                 sheetContent = bottomSheetContent ?: {
                     // Must have some content at startup or bottom sheet crashes when
                     // calculating its initial size
                     Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                 },
-                modifier = Modifier.height(IntrinsicSize.Min),
+                modifier = mbsLayoutModifier,
                 sheetState = sheetState,
                 sheetShape = LinkTheme.shapes.large.copy(
                     bottomStart = CornerSize(0.dp),
@@ -106,7 +112,10 @@ internal fun LinkContent(
                         }
                     )
 
-                    AnimatedContentHeight(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) {
+                    AnimatedContentHeight(
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                        isEnabled = FeatureFlags.linkDynamicBottomSheet.isEnabled,
+                    ) {
                         Screens(
                             initialDestination = initialDestination,
                             navController = navController,
