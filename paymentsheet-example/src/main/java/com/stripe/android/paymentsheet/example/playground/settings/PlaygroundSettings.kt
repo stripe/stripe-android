@@ -427,7 +427,6 @@ internal class PlaygroundSettings private constructor(
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.linkDynamicBottomSheet),
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,

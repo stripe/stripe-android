@@ -8,7 +8,6 @@ object FeatureFlags {
     // Add any feature flags here
     val nativeLinkEnabled = FeatureFlag("Native Link")
     val nativeLinkAttestationEnabled = FeatureFlag("Native Link Attestation")
-    val linkDynamicBottomSheet = FeatureFlag("Link Dynamic Bottom Sheet")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val linkPMsInSPM = FeatureFlag("Link PMs in SPM")

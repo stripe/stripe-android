@@ -1,11 +1,8 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -19,8 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.stripe.android.common.ui.AnimatedContentHeight
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.common.ui.AnimatedConstraints
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
@@ -66,14 +62,9 @@ internal fun LinkContent(
             modifier = modifier,
             color = LinkTheme.colors.surfacePrimary,
         ) {
-            val mbsLayoutModifier =
-                if (FeatureFlags.linkDynamicBottomSheet.isEnabled) {
-                    Modifier.wrapContentHeight()
-                } else {
-                    Modifier.fillMaxSize()
-                }
             Column(
-                modifier = mbsLayoutModifier
+                modifier = Modifier
+                    .wrapContentHeight()
                     .fillMaxWidth()
             ) {
                 BackHandler {
@@ -93,10 +84,7 @@ internal fun LinkContent(
                     }
                 )
 
-                AnimatedContentHeight(
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                    isEnabled = FeatureFlags.linkDynamicBottomSheet.isEnabled,
-                ) {
+                AnimatedConstraints {
                     Screens(
                         initialDestination = initialDestination,
                         navController = navController,
