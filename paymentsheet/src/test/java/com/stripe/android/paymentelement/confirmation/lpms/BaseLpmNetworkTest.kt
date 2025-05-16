@@ -51,7 +51,6 @@ internal open class BaseLpmNetworkTest(
         shippingDetails: AddressDetails? = null,
         customerRequestedSave: Boolean = false,
         allowsManualConfirmation: Boolean = false,
-        assertion: suspend (LpmNetworkTestActivity, LpmAssertionParams) -> Unit,
     ) = runLpmNetworkTest(country = country, allowsManualConfirmation = allowsManualConfirmation) {
         val factory = CreateIntentFactory(
             paymentElementCallbackIdentifier = LPM_NETWORK_PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
@@ -62,7 +61,7 @@ internal open class BaseLpmNetworkTest(
         val createIntentData = testType.createIntent(country, factory)
 
         createIntentData.onSuccess { data ->
-            assertion(
+            testType.assert(
                 this,
                 LpmAssertionParams(
                     intent = data.intent,

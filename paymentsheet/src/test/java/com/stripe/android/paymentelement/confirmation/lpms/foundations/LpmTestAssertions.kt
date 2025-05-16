@@ -28,7 +28,7 @@ import kotlin.test.fail
 internal suspend fun assertIntentConfirmed(
     activity: LpmNetworkTestActivity,
     params: LpmAssertionParams
-) {
+): PaymentLauncherContract.Args.IntentConfirmationArgs {
     intendingPaymentConfirmationToBeLaunched(params.intent)
 
     val option = PaymentMethodConfirmationOption.New(
@@ -73,6 +73,27 @@ internal suspend fun assertIntentConfirmed(
     val arguments = recordedIntent.assertPaymentLauncherArgs()
 
     assertConfirmed(activity, arguments.confirmStripeIntentParams)
+
+    return arguments
+}
+
+internal suspend fun assertMandateDataAttached(
+    activity: LpmNetworkTestActivity,
+    params: LpmAssertionParams
+) {
+    val arguments = assertIntentConfirmed(activity, params)
+
+    val test = (arguments.confirmStripeIntentParams as? ConfirmPaymentIntentParams)
+    assertThat(test).isNotNull()
+    val mandateData = test?.toParamMap()?.get("mandate_data") as? Map<*, *>
+    val customerAcceptance = mandateData?.get("customer_acceptance") as? Map<*, *>
+    val type = customerAcceptance?.get("type") as? String
+    val online = customerAcceptance?.get(type) as? Map<*, *>
+    val inferFromClient = online?.get("infer_from_client")
+    assertThat(inferFromClient).isEqualTo(true)
+    assertThat(type).isEqualTo("online")
+    assertThat(customerAcceptance).isNotNull()
+    assertThat(mandateData).isNotNull()
 }
 
 private fun intendingPaymentConfirmationToBeLaunched(

@@ -1,6 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.lpms
 
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.CreateIntentFactory
+import com.stripe.android.paymentelement.confirmation.lpms.foundations.LpmAssertionParams
+import com.stripe.android.paymentelement.confirmation.lpms.foundations.LpmNetworkTestActivity
+import com.stripe.android.paymentelement.confirmation.lpms.foundations.assertIntentConfirmed
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.MerchantCountry
 
 internal interface TestType {
@@ -8,6 +11,11 @@ internal interface TestType {
         country: MerchantCountry,
         factory: CreateIntentFactory
     ): Result<CreateIntentFactory.CreateIntentData>
+
+    suspend fun assert(
+        activity: LpmNetworkTestActivity,
+        params: LpmAssertionParams
+    )
 
     companion object {
         fun all(
@@ -48,6 +56,7 @@ internal data class PaymentIntentTestType(
     private val amount: Int,
     private val currency: String,
     private val createWithSetupFutureUsage: Boolean,
+    private val createWithPmoSfu: Boolean = false
 ) : TestType {
     override suspend fun createIntent(
         country: MerchantCountry,
@@ -58,7 +67,12 @@ internal data class PaymentIntentTestType(
             amount = amount,
             currency = currency,
             createWithSetupFutureUsage = createWithSetupFutureUsage,
+            createWithPmoSfu = createWithPmoSfu
         )
+    }
+
+    override suspend fun assert(activity: LpmNetworkTestActivity, params: LpmAssertionParams) {
+        assertIntentConfirmed(activity, params)
     }
 }
 
@@ -70,6 +84,9 @@ internal data object SetupIntentTestType : TestType {
         return factory.createSetupIntent(
             country = country,
         )
+    }
+    override suspend fun assert(activity: LpmNetworkTestActivity, params: LpmAssertionParams) {
+        assertIntentConfirmed(activity, params)
     }
 }
 
@@ -89,6 +106,9 @@ internal data class DeferredPaymentIntentTestType(
             createWithSetupFutureUsage = createWithSetupFutureUsage,
         )
     }
+    override suspend fun assert(activity: LpmNetworkTestActivity, params: LpmAssertionParams) {
+        assertIntentConfirmed(activity, params)
+    }
 }
 
 internal data object DeferredSetupIntentTestType : TestType {
@@ -99,5 +119,8 @@ internal data object DeferredSetupIntentTestType : TestType {
         return factory.createDeferredSetupIntent(
             country = country,
         )
+    }
+    override suspend fun assert(activity: LpmNetworkTestActivity, params: LpmAssertionParams) {
+        assertIntentConfirmed(activity, params)
     }
 }
