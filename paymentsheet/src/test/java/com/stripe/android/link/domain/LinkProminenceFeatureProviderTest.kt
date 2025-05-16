@@ -26,7 +26,6 @@ class LinkProminenceFeatureProviderTest {
 
     @Before
     fun setUp() {
-        // Create the feature provider
         val linkGateFactory = object : LinkGate.Factory {
             override fun create(configuration: LinkConfiguration): FakeLinkGate {
                 return fakeLinkGate
