@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.lpms.foundations.network
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// here
 @Serializable
 internal data class CreatePaymentIntentRequest(
     @SerialName("create_params")
@@ -26,12 +27,27 @@ internal data class CreatePaymentIntentRequest(
         val paymentMethodId: String?,
         @SerialName("setup_future_usage")
         val setupFutureUsage: SetupFutureUsage?,
+        @SerialName("payment_method_options")
+        val paymentMethodOptions: Map<String, Map<String, String>>?
     ) {
         @Serializable
         enum class SetupFutureUsage {
             @SerialName("off_session")
             OffSession,
         }
+
+        @Serializable
+        data class PaymentMethodOptions(
+            val idk: String,
+            @SerialName("cashapp")
+            val cashapp: CashAppOptions
+        )
+
+        @Serializable
+        data class CashAppOptions(
+            @SerialName("setup_future_usage")
+            val sfu: String
+        )
     }
 
     @Serializable

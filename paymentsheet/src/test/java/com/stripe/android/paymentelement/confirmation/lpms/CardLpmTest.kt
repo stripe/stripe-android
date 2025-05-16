@@ -25,7 +25,6 @@ internal class CardLpmTest(
                 cvc = "454",
             )
         ),
-        assertion = ::assertIntentConfirmed
     )
 
     @Test
@@ -40,7 +39,6 @@ internal class CardLpmTest(
                 cvc = "454",
             )
         ),
-        assertion = ::assertIntentConfirmed
     )
 
     companion object {

@@ -19,12 +19,14 @@ internal suspend fun <T : Any, R : Any> executeFuelPostRequest(
     requestSerializer: SerializationStrategy<T>,
     responseDeserializer: DeserializationStrategy<R>,
 ): kotlin.Result<R> {
+    println("YEET requestSerializer: ${requestSerializer.toString()}")
+    val jsonBody = Json.encodeToString(
+        requestSerializer,
+        request
+    )
     return Fuel.post(url)
         .jsonBody(
-            Json.encodeToString(
-                requestSerializer,
-                request,
-            )
+            jsonBody
         )
         .execute(responseDeserializer)
 }

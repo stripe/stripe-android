@@ -21,6 +21,7 @@ internal class StripeNetworkTestClient @Inject constructor(
         paymentMethodType: PaymentMethod.Type,
         paymentMethodId: String? = null,
         createWithSetupFutureUsage: Boolean = false,
+        createWithPmoSfu: Boolean = false
     ): Result<String> {
         val result = executeFuelPostRequest(
             url = createUrl(PAYMENT_INTENT_PATH),
@@ -34,6 +35,7 @@ internal class StripeNetworkTestClient @Inject constructor(
                     setupFutureUsage = CreatePaymentIntentRequest.CreateParams.SetupFutureUsage.OffSession.takeIf {
                         createWithSetupFutureUsage
                     },
+                    paymentMethodOptions = getPmoSfu(paymentMethodType.code).takeIf { createWithPmoSfu }
                 ),
                 country = country,
                 version = STRIPE_VERSION,
@@ -111,6 +113,10 @@ internal class StripeNetworkTestClient @Inject constructor(
     private fun <T : ConfirmStripeIntentParams> T.withReturnUrl() = apply {
         // We don't need a real return URL since we won't be launching into the payment flow
         returnUrl = DEFAULT_RETURN_URL
+    }
+
+    private fun getPmoSfu(code: String): Map<String, Map<String, String>> {
+        return mapOf(code to mapOf("setup_future_usage" to "off_session"))
     }
 
     private companion object {

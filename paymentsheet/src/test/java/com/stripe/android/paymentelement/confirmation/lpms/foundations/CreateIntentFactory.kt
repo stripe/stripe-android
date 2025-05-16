@@ -21,7 +21,8 @@ internal class CreateIntentFactory(
         country: MerchantCountry,
         amount: Int,
         currency: String,
-        createWithSetupFutureUsage: Boolean
+        createWithSetupFutureUsage: Boolean,
+        createWithPmoSfu: Boolean
     ): Result<CreateIntentData> {
         return testClient.createPaymentIntent(
             country = country,
@@ -29,6 +30,7 @@ internal class CreateIntentFactory(
             currency = currency,
             paymentMethodType = paymentMethodType,
             createWithSetupFutureUsage = createWithSetupFutureUsage,
+            createWithPmoSfu = createWithPmoSfu
         ).mapCatching { clientSecret ->
             CreateIntentData(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
