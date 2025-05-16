@@ -845,7 +845,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any())
+        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1196,7 +1196,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any())
+        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test

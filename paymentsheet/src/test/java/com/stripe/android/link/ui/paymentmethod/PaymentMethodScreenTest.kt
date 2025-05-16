@@ -20,6 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -181,6 +182,7 @@ internal class PaymentMethodScreenTest {
             logger = FakeLogger(),
             formHelper = formHelper,
             dismissalCoordinator = dismissalCoordinator,
+            linkLaunchMode = LinkLaunchMode.Payment,
             dismissWithResult = {}
         )
     }

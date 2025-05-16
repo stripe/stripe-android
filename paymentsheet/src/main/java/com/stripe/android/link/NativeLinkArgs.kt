@@ -12,4 +12,5 @@ internal data class NativeLinkArgs(
     val startWithVerificationDialog: Boolean,
     val linkAccount: LinkAccount?,
     val paymentElementCallbackIdentifier: String,
+    val launchMode: LinkLaunchMode,
 ) : Parcelable
