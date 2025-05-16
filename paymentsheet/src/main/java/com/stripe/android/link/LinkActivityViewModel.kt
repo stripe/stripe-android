@@ -18,6 +18,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -45,11 +46,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @SuppressWarnings("TooManyFunctions")
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
+    linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
@@ -61,6 +64,9 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkLaunchMode: LinkLaunchMode
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
+    val linkConfirmationHandler = linkConfirmationHandlerFactory.create(
+        confirmationHandler = confirmationHandler
+    )
 
     private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
@@ -90,7 +96,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         when (linkLaunchMode) {
-            LinkLaunchMode.Authentication -> viewModelScope.launch {
+            is LinkLaunchMode.Authentication -> viewModelScope.launch {
                 dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = linkAccountManager.linkAccountUpdate,
@@ -98,7 +104,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     )
                 )
             }
-            LinkLaunchMode.Payment -> viewModelScope.launch {
+            is LinkLaunchMode.Payment -> viewModelScope.launch {
                 _linkScreenState.value = buildFullScreenState()
             }
         }
@@ -217,7 +223,13 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            if (startWithVerificationDialog) return@launch updateScreenState()
+            if (tryEagerlyConfirmPayment()) {
+                return@launch
+            }
+            if (startWithVerificationDialog) {
+                updateScreenState()
+                return@launch
+            }
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
@@ -232,6 +244,37 @@ internal class LinkActivityViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    /**
+     * Attempts to confirm payment eagerly if user is already signed in and has a default payment method was
+     * provided in [LinkLaunchMode]
+     * @return true if eager confirmation was attempted
+     */
+    private suspend fun tryEagerlyConfirmPayment(): Boolean {
+        val defaultPayment = (linkLaunchMode as? LinkLaunchMode.Payment)?.defaultLinkPayment ?: return false
+        val account = linkAccount ?: return false
+
+        val requiresRecollection = defaultPayment is ConsumerPaymentDetails.Card &&
+            defaultPayment.requiresCardDetailsRecollection
+
+        if (requiresRecollection) {
+            return false
+        }
+
+        val result = linkConfirmationHandler.confirm(
+            defaultPayment,
+            account,
+            cvc = null
+        )
+        when (result) {
+            LinkConfirmationResult.Canceled,
+            is LinkConfirmationResult.Failed -> buildFullScreenState()
+            LinkConfirmationResult.Succeeded -> dismissWithResult(
+                LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.Value(null))
+            )
+        }
+        return true
     }
 
     private suspend fun updateScreenState() {
