@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -27,4 +28,12 @@ internal inline fun <reified T : ViewModel> linkViewModel(
 @Composable
 internal fun parentActivity(): LinkActivity {
     return LocalContext.current.extractActivity() as LinkActivity
+}
+
+/**
+ * Applies [other] modifier to this modifier if [condition] is true.
+ */
+@Composable
+internal fun Modifier.thenIf(condition: Boolean, other: Modifier): Modifier {
+    return if (condition) then(other) else this
 }

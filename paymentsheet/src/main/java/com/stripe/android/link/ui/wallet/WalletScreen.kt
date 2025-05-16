@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.wallet
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -45,9 +46,11 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.AnimatedContentHeight
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.thenIf
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkDivider
@@ -361,6 +364,7 @@ private fun PaymentMethodPicker(
 ) {
     Column(
         modifier = modifier
+            .thenIf(!FeatureFlags.linkDynamicBottomSheet.isEnabled, Modifier.animateContentSize())
             .fillMaxWidth()
             .clip(LinkTheme.shapes.large)
             .background(
@@ -376,7 +380,10 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
-        AnimatedContentHeight(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) {
+        AnimatedContentHeight(
+            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            isEnabled = FeatureFlags.linkDynamicBottomSheet.isEnabled,
+        ) {
             if (expanded || selectedItem == null) {
                 expandedContent()
             } else {
