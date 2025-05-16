@@ -1,14 +1,6 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
@@ -24,7 +16,6 @@ import com.stripe.android.uicore.navigation.NavigationEffects
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun FullScreenContent(
@@ -45,24 +36,8 @@ internal fun FullScreenContent(
     getLinkAccount: () -> LinkAccount?,
     changeEmail: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-
-    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val navController = rememberNavController()
     val keyboardController = rememberKeyboardController()
-
-    LaunchedEffect(bottomSheetContent) {
-        if (bottomSheetContent != null) {
-            sheetState.show()
-        }
-    }
-
-    LaunchedEffect(sheetState.isVisible) {
-        if (!sheetState.isVisible) {
-            bottomSheetContent = null
-        }
-    }
 
     NavigationEffects(
         navigationChannel = navigationChannel,
@@ -88,17 +63,6 @@ internal fun FullScreenContent(
                 initialDestination = initialDestination,
                 navController = navController,
                 appBarState = appBarState,
-                sheetState = sheetState,
-                bottomSheetContent = bottomSheetContent,
-                onUpdateSheetContent = { content ->
-                    if (content != null) {
-                        bottomSheetContent = content
-                    } else {
-                        coroutineScope.launch {
-                            sheetState.hide()
-                        }
-                    }
-                },
                 onBackPressed = onBackPressed,
                 moveToWeb = moveToWeb,
                 handleViewAction = handleViewAction,
