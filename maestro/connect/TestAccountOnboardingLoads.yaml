@@ -1,0 +1,29 @@
+appId: com.stripe.android.connect.example
+tags:
+  - all
+---
+- startRecording: ${'/tmp/test_results/connect-testaccountonboardingloads-' + new Date().getTime()}
+- clearState
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: "settings_button"
+    timeout: 60_000
+- tapOn:
+    id: "settings_button"
+- scrollUntilVisible:
+    element:
+      id: "other_account_input"
+    speed: 80
+    timeout: 60_000
+- tapOn:
+    id: "other_account_input"
+- inputText: "acct_1RKLk9PwPtoT2bUJ"
+- "hideKeyboard"
+- tapOn:
+    id: "save_button"
+- tapOn: "Account Onboarding"
+- extendedWaitUntil:
+    visible: "Review and confirm"
+    timeout: 60_000
+- stopRecording
