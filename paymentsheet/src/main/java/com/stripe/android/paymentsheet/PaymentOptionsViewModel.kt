@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -222,9 +223,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
             val linkState = args.state.paymentMethodMetadata.linkState
-            if (paymentSelection is Link &&
-                linkState != null &&
-                linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkState)
+            if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)
             ) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
@@ -241,6 +240,15 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun shouldShowLinkVerification(
+        paymentSelection: PaymentSelection,
+        linkState: LinkState
+    ): Boolean {
+        return paymentSelection is Link &&
+            linkState.loginState == LinkState.LoginState.NeedsVerification &&
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkState.configuration)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
