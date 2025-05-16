@@ -5,7 +5,6 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
 import junit.framework.TestCase.assertTrue
@@ -37,10 +36,9 @@ class LinkProminenceFeatureProviderTest {
     }
 
     @Test
-    fun `show2FADialogOnLinkSelectedInFlowController returns false when feature flag disabled`() {
+    fun `shouldShowEarlyVerificationInFlowController returns false when feature flag disabled`() {
         // Given
-        val state = linkState(
-            loginState = LinkState.LoginState.NeedsVerification,
+        val state = linkConfiguration(
             suppress2faModal = false
         )
         fakeLinkGate.setUseNativeLink(true)
@@ -53,11 +51,10 @@ class LinkProminenceFeatureProviderTest {
     }
 
     @Test
-    fun `showVerificationOnFlowControllerLinkSelection returns false when suppress2faModal is true`() {
+    fun `shouldShowEarlyVerificationInFlowController returns false when suppress2faModal is true`() {
         // Given
         prominenceFeatureFlagRule.setEnabled(true)
-        val state = linkState(
-            loginState = LinkState.LoginState.NeedsVerification,
+        val state = linkConfiguration(
             suppress2faModal = true
         )
         fakeLinkGate.setUseNativeLink(true)
@@ -69,30 +66,11 @@ class LinkProminenceFeatureProviderTest {
         assertFalse(result)
     }
 
-    //
     @Test
-    fun `showVerificationOnFlowControllerLinkSelection returns false when loginState is not NeedsVerification`() {
+    fun `shouldShowEarlyVerificationInFlowController returns false when useNativeLink is false`() {
         // Given
         prominenceFeatureFlagRule.setEnabled(true)
-        val state = linkState(
-            loginState = LinkState.LoginState.LoggedOut,
-            suppress2faModal = false
-        )
-        fakeLinkGate.setUseNativeLink(true)
-
-        // When
-        val result = linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(state)
-
-        // Then
-        assertFalse(result)
-    }
-
-    @Test
-    fun `showVerificationOnFlowControllerLinkSelection returns false when useNativeLink is false`() {
-        // Given
-        prominenceFeatureFlagRule.setEnabled(true)
-        val state = linkState(
-            loginState = LinkState.LoginState.NeedsVerification,
+        val state = linkConfiguration(
             suppress2faModal = false
         )
         fakeLinkGate.setUseNativeLink(false)
@@ -105,11 +83,10 @@ class LinkProminenceFeatureProviderTest {
     }
 
     @Test
-    fun `showVerificationOnFlowControllerLinkSelection returns true when all conditions are met`() {
+    fun `shouldShowEarlyVerificationInFlowController returns true when all conditions are met`() {
         // Given
         prominenceFeatureFlagRule.setEnabled(true)
-        val state = linkState(
-            loginState = LinkState.LoginState.NeedsVerification,
+        val state = linkConfiguration(
             suppress2faModal = false
         )
         fakeLinkGate.setUseNativeLink(true)
@@ -121,14 +98,9 @@ class LinkProminenceFeatureProviderTest {
         assertTrue(result)
     }
 
-    private fun linkState(
-        loginState: LinkState.LoginState,
+    private fun linkConfiguration(
         suppress2faModal: Boolean
-    ) = LinkState(
-        configuration = TestFactory.LINK_CONFIGURATION.copy(
-            suppress2faModal = suppress2faModal,
-        ),
-        loginState = loginState,
-        signupMode = null
+    ) = TestFactory.LINK_CONFIGURATION.copy(
+        suppress2faModal = suppress2faModal
     )
 }

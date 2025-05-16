@@ -2,8 +2,8 @@ package com.stripe.android.link.domain
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.paymentsheet.state.LinkState
 import javax.inject.Inject
 
 /**
@@ -17,7 +17,7 @@ internal interface LinkProminenceFeatureProvider {
      * In FlowController, this method determines if the 2FA
      * dialog should be shown eagerly if the user continues with Link.
      */
-    fun shouldShowEarlyVerificationInFlowController(linkState: LinkState): Boolean
+    fun shouldShowEarlyVerificationInFlowController(linkConfiguration: LinkConfiguration): Boolean
 }
 
 internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
@@ -26,9 +26,8 @@ internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
 ) : LinkProminenceFeatureProvider {
 
     override fun shouldShowEarlyVerificationInFlowController(
-        linkState: LinkState,
+        linkConfiguration: LinkConfiguration,
     ): Boolean {
-        val linkConfiguration = linkState.configuration
 
         if (!FeatureFlags.linkProminenceInFlowController.isEnabled) {
             logger.debug("Prominence disabled: Client side feature flag is disabled")
@@ -37,11 +36,6 @@ internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
 
         if (linkConfiguration.suppress2faModal == true) {
             logger.debug("Prominence disabled: Backend kill-switch is enabled")
-            return false
-        }
-
-        if (linkState.loginState != LinkState.LoginState.NeedsVerification) {
-            logger.debug("Prominence disabled: No returning link customer available")
             return false
         }
 
