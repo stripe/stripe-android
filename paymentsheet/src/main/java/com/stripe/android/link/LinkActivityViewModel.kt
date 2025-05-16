@@ -90,16 +90,13 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         when (linkLaunchMode) {
-            LinkLaunchMode.Authentication -> {
-                viewModelScope.launch {
-                    val defaultPaymentMethod = getDefaultPaymentMethod()
-                    dismissWithResult(
-                        LinkActivityResult.Completed(
-                            linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                            defaultPaymentMethod = defaultPaymentMethod,
-                        )
+            LinkLaunchMode.Authentication -> viewModelScope.launch {
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        defaultPaymentMethod = getDefaultPaymentMethod(),
                     )
-                }
+                )
             }
             LinkLaunchMode.Payment -> viewModelScope.launch {
                 _linkScreenState.value = buildFullScreenState()
@@ -114,7 +111,9 @@ internal class LinkActivityViewModel @Inject constructor(
         val stripeIntent = linkConfiguration.stripeIntent
         val paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(requireNotNull(linkAccount))
         val consumerDetails = linkAccountManager.listPaymentDetails(paymentMethodTypes)
-        consumerDetails.getOrThrow().paymentDetails.firstOrNull { it.isDefault }
+        val paymentDetails = consumerDetails.getOrThrow().paymentDetails
+        // Return the default payment method if it exists, otherwise return the first one.
+        paymentDetails.firstOrNull { it.isDefault } ?: paymentDetails.firstOrNull()
     }.getOrNull()
 
     fun onDismissVerificationClicked() {
