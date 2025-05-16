@@ -7,24 +7,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.stripe.android.common.ui.AnimatedContentHeight
-import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
@@ -47,8 +42,6 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
-import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
-import kotlinx.coroutines.launch
 
 @SuppressWarnings("LongMethod")
 @Composable
@@ -56,6 +49,8 @@ internal fun LinkContent(
     modifier: Modifier,
     navController: NavHostController,
     appBarState: LinkAppBarState,
+    bottomSheetContent: BottomSheetContent?,
+    onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -66,26 +61,6 @@ internal fun LinkContent(
     changeEmail: () -> Unit,
     initialDestination: LinkScreen
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-    val bottomSheetState = rememberStripeBottomSheetState()
-
-    val onUpdateSheetContent: (BottomSheetContent?) -> Unit = { content ->
-        if (content != null) {
-            bottomSheetContent = content
-        } else {
-            coroutineScope.launch {
-                bottomSheetState.hide()
-            }
-        }
-    }
-
-    LaunchedEffect(bottomSheetContent) {
-        if (bottomSheetContent != null) {
-            bottomSheetState.show()
-        }
-    }
-
     DefaultLinkTheme {
         Surface(
             modifier = modifier,
@@ -141,18 +116,6 @@ internal fun LinkContent(
                 }
             }
         }
-
-        bottomSheetContent?.let { content ->
-            ElementsBottomSheetLayout(
-                state = bottomSheetState,
-                onDismissed = { bottomSheetContent = null },
-                content = {
-                    DefaultLinkTheme {
-                        Column { content() }
-                    }
-                },
-            )
-        }
     }
 }
 
@@ -170,7 +133,7 @@ private fun Screens(
     initialDestination: LinkScreen,
 ) {
     NavHost(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.wrapContentHeight(),
         navController = navController,
         startDestination = initialDestination.route,
     ) {
@@ -325,14 +288,25 @@ private fun WalletRoute(
 }
 
 @Composable
-internal fun Loader() {
+internal fun Loader(modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 64.dp),
         contentAlignment = Alignment.Center
     ) {
         LinkSpinner(
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier
+                .size(48.dp)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun LoaderPreview() {
+    DefaultLinkTheme {
+        Loader()
     }
 }
 

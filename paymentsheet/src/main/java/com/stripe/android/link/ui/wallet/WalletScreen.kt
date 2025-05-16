@@ -7,12 +7,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -54,7 +52,7 @@ import com.stripe.android.link.thenIf
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkDivider
-import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.Loader
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
@@ -118,7 +116,7 @@ internal fun WalletBody(
     hideBottomSheetContent: () -> Unit
 ) {
     if (state.paymentDetailsList.isEmpty()) {
-        Loader()
+        Loader(Modifier.testTag(WALLET_LOADER_TAG))
         return
     }
 
@@ -648,20 +646,6 @@ internal fun CardDetailsRecollectionForm(
             element = SectionElement.wrap(rowElement),
             hiddenIdentifiers = emptySet(),
             lastTextFieldIdentifier = rowElement.fields.last().identifier
-        )
-    }
-}
-
-@Composable
-private fun Loader() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag(WALLET_LOADER_TAG),
-        contentAlignment = Alignment.Center
-    ) {
-        LinkSpinner(
-            modifier = Modifier.size(48.dp)
         )
     }
 }
