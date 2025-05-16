@@ -178,21 +178,9 @@ internal class LinkInlineSignupConfirmationDefinition(
         val passthroughMode = configuration.passthroughModeEnabled
 
         val optionsParams = if (passthroughMode) {
-            when (originalParams.typeCode) {
-                PaymentMethod.Type.Card.code -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = saveOption.setupFutureUsage)
-                }
-                PaymentMethod.Type.USBankAccount.code -> {
-                    PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = saveOption.setupFutureUsage)
-                }
-                else -> {
-                    null
-                }
-            }
+            PaymentMethodOptionsParams.Card(setupFutureUsage = saveOption.setupFutureUsage)
         } else {
-            PaymentMethodOptionsParams.Link(
-                setupFutureUsage = saveOption.setupFutureUsage,
-            )
+            PaymentMethodOptionsParams.Link(setupFutureUsage = saveOption.setupFutureUsage)
         }
 
         return PaymentMethodConfirmationOption.New(
