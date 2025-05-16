@@ -1106,7 +1106,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -1168,7 +1168,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2340,7 +2340,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2373,7 +2373,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2406,7 +2406,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2437,7 +2437,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2478,7 +2478,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2519,7 +2519,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }
@@ -2739,12 +2739,6 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        val expectedPmoSfuMap = mapOf(
-            "card" to "off_session",
-            "affirm" to "none",
-            "amazon_pay" to "off_session"
-        )
-
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = anyOrNull(),
             linkEnabled = anyOrNull(),
@@ -2758,7 +2752,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
-            paymentMethodOptionsSetupFutureUsage = eq(expectedPmoSfuMap),
+            paymentMethodOptionsSetupFutureUsage = eq(true),
             setupFutureUsage = anyOrNull()
         )
     }
@@ -2927,7 +2921,7 @@ internal class DefaultPaymentElementLoaderTest {
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-            paymentMethodOptionsSetupFutureUsage = null,
+            paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
         )
     }

@@ -197,12 +197,12 @@ class DefaultEventReporterTest {
         val eventReporter = createEventReporter(EventReporter.Mode.Complete)
 
         eventReporter.simulateSuccessfulSetup(
-            paymentMethodOptionsSetupFutureUsage = mapOf("card" to "off_session")
+            paymentMethodOptionsSetupFutureUsage = true
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["payment_method_options_setup_future_usage"] == mapOf("card" to "off_session")
+                req.params["payment_method_options_setup_future_usage"] == true
             }
         )
     }
@@ -1136,7 +1136,7 @@ class DefaultEventReporterTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
-        paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null,
+        paymentMethodOptionsSetupFutureUsage: Boolean? = null,
         setupFutureUsage: StripeIntent.Usage? = null
     ) {
         simulateInit()

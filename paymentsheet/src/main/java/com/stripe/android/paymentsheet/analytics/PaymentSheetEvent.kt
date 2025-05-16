@@ -93,7 +93,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
         setupFutureUsage: StripeIntent.Usage? = null,
-        paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null,
+        paymentMethodOptionsSetupFutureUsage: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = buildMap {

@@ -115,7 +115,7 @@ internal class FakeEventReporter : EventReporter {
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
+        paymentMethodOptionsSetupFutureUsage: Boolean?,
         setupFutureUsage: StripeIntent.Usage?
     ) {
     }

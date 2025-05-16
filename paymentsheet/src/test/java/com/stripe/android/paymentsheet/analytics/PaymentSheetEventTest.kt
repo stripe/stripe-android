@@ -562,17 +562,13 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded with paymentMethodOptionsSetupFutureUsage should return expected params`() {
-        val pmoSfuMap = mapOf(
-            "card" to "off_session",
-            "affirm" to "none"
-        )
         val event = createLoadSucceededEvent(
-            paymentMethodOptionsSetupfutureUsage = pmoSfuMap
+            paymentMethodOptionsSetupfutureUsage = true
         )
 
         assertThat(event.params).containsEntry(
             "payment_method_options_setup_future_usage",
-            pmoSfuMap
+            true
         )
     }
 
@@ -1746,7 +1742,7 @@ class PaymentSheetEventTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
-        paymentMethodOptionsSetupfutureUsage: Map<String, String>? = null,
+        paymentMethodOptionsSetupfutureUsage: Boolean? = null,
         setupFutureUsage: StripeIntent.Usage? = null
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(

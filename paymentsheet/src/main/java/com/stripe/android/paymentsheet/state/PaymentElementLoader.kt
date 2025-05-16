@@ -891,12 +891,10 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
 }
 
-private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Map<String, String>? {
-    return getPaymentMethodOptions().mapNotNull { (key, value) ->
-        (value as? Map<*, *>)?.get("setup_future_usage")?.let {
-            key to it.toString()
-        }
-    }.toMap().takeIf { it.isNotEmpty() }
+private fun StripeIntent.paymentMethodOptionsSetupFutureUsageMap(): Boolean {
+    return getPaymentMethodOptions().any { (_, value) ->
+        (value as? Map<*, *>)?.get("setup_future_usage") != null
+    }
 }
 
 private fun StripeIntent.setupFutureUsage(): StripeIntent.Usage? = when (this) {
