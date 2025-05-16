@@ -28,7 +28,6 @@ internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
     override fun shouldShowEarlyVerificationInFlowController(
         linkConfiguration: LinkConfiguration,
     ): Boolean {
-
         if (!FeatureFlags.linkProminenceInFlowController.isEnabled) {
             logger.debug("Prominence disabled: Client side feature flag is disabled")
             return false
