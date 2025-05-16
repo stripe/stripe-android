@@ -18,6 +18,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
@@ -26,6 +27,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.TestNavigationManager
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.R
@@ -357,6 +359,62 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
+    fun `onVerificationSucceeded emits Completed result with default payment method`() = runTest {
+        val paymentDetailsList = listOf(
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_default", isDefault = true),
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_non_default", isDefault = false),
+        )
+        val consumerDetails = Result.success(
+            ConsumerPaymentDetails(
+                paymentDetails = paymentDetailsList
+            )
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.listPaymentDetailsResult = consumerDetails
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Authentication
+        )
+
+        vm.result.test {
+            vm.onVerificationSucceeded()
+            val result = awaitItem() as LinkActivityResult.Completed
+            assertThat(result.defaultPaymentMethod!!.id).isEqualTo("pm_default")
+        }
+    }
+
+    @Test
+    fun `onVerificationSucceeded emits Completed result with first payment method if no default`() = runTest {
+        val paymentDetailsList = listOf(
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_1", isDefault = false),
+            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_2", isDefault = false),
+        )
+        val consumerDetails = Result.success(
+            ConsumerPaymentDetails(
+                paymentDetails = paymentDetailsList
+            )
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.listPaymentDetailsResult = consumerDetails
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Authentication
+        )
+
+        vm.result.test {
+            vm.onVerificationSucceeded()
+            val result = awaitItem() as LinkActivityResult.Completed
+            assertThat(result.defaultPaymentMethod!!.id).isEqualTo("pm_1")
+        }
+    }
+
+    @Test
     fun `onCreate should dismiss 2fa on when dismissed`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
@@ -592,6 +650,7 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Payment,
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -602,7 +661,7 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            linkLaunchMode = LinkLaunchMode.Payment,
+            linkLaunchMode = linkLaunchMode,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle
