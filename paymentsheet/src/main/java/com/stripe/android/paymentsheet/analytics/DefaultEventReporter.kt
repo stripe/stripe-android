@@ -103,7 +103,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean?,
+        paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?
     ) {
         this.currency = currency

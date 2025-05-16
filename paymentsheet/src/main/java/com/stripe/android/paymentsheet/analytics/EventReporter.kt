@@ -49,7 +49,7 @@ internal interface EventReporter {
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
-        paymentMethodOptionsSetupFutureUsage: Boolean?,
+        paymentMethodOptionsSetupFutureUsage: Boolean,
         setupFutureUsage: StripeIntent.Usage?
     )
 

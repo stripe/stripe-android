@@ -413,7 +413,7 @@ class PaymentSheetEventTest {
                 "require_cvc_recollection" to false,
                 "link_display" to "automatic",
                 "fc_sdk_availability" to "FULL",
-                "payment_method_options_setup_future_usage" to null,
+                "payment_method_options_setup_future_usage" to false,
                 "setup_future_usage" to null,
             )
         )
@@ -1742,7 +1742,7 @@ class PaymentSheetEventTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
-        paymentMethodOptionsSetupfutureUsage: Boolean? = null,
+        paymentMethodOptionsSetupfutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(

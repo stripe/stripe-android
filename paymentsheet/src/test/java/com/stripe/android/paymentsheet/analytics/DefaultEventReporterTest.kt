@@ -1136,7 +1136,7 @@ class DefaultEventReporterTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
-        paymentMethodOptionsSetupFutureUsage: Boolean? = null,
+        paymentMethodOptionsSetupFutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null
     ) {
         simulateInit()
