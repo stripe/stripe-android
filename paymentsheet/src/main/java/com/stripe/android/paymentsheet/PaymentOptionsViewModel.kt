@@ -167,7 +167,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
                         paymentSelection = Link(
-                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount
+                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
+                            defaultLinkPayment = result.defaultPaymentMethod
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
@@ -223,8 +224,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
             val linkState = args.state.paymentMethodMetadata.linkState
-            if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)
-            ) {
+            if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
                     launchMode = LinkLaunchMode.Authentication,
@@ -234,11 +234,24 @@ internal class PaymentOptionsViewModel @Inject constructor(
             } else {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
-                        paymentSelection = paymentSelection,
+                        paymentSelection = paymentSelection.preserveLinkPaymentIfNeeded(),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
                 )
             }
+        }
+    }
+
+    /**
+     * If the selected payment method is Link and the payment options screen was launched with Link as a payment
+     * method and the user has not selected a default payment method, we need to preserve the default payment method
+     */
+    private fun PaymentSelection.preserveLinkPaymentIfNeeded(): PaymentSelection {
+        return if (this is Link) {
+            val previousLinkPayment = (args.state.paymentSelection as? Link)?.defaultLinkPayment
+            copy(defaultLinkPayment = defaultLinkPayment ?: previousLinkPayment)
+        } else {
+            this
         }
     }
 

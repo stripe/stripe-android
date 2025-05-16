@@ -15,10 +15,12 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -69,11 +71,15 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class Link(
         val useLinkExpress: Boolean = false,
-        val linkAccount: LinkAccount? = null
+        val linkAccount: LinkAccount? = null,
+        val defaultLinkPayment: ConsumerPaymentDetails.PaymentDetails? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
+
+        val label: ResolvableString
+            get() = defaultLinkPayment?.displayName ?: StripeR.string.stripe_link.resolvableString
 
         override fun mandateText(
             merchantName: String,
@@ -388,7 +394,7 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
+        is PaymentSelection.Link -> label
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()

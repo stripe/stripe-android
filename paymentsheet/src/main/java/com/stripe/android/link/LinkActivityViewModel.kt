@@ -22,9 +22,11 @@ import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -88,16 +90,31 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         when (linkLaunchMode) {
-            LinkLaunchMode.Authentication -> dismissWithResult(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            LinkLaunchMode.Authentication -> viewModelScope.launch {
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        defaultPaymentMethod = getDefaultPaymentMethod(),
+                    )
                 )
-            )
+            }
             LinkLaunchMode.Payment -> viewModelScope.launch {
                 _linkScreenState.value = buildFullScreenState()
             }
         }
     }
+
+    /**
+     * Returns the default payment method for the current Link account.
+     */
+    private suspend fun getDefaultPaymentMethod(): ConsumerPaymentDetails.PaymentDetails? = runCatching {
+        val stripeIntent = linkConfiguration.stripeIntent
+        val paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(requireNotNull(linkAccount))
+        val consumerDetails = linkAccountManager.listPaymentDetails(paymentMethodTypes)
+        val paymentDetails = consumerDetails.getOrThrow().paymentDetails
+        // Return the default payment method if it exists, otherwise return the first one.
+        paymentDetails.firstOrNull { it.isDefault } ?: paymentDetails.firstOrNull()
+    }.getOrNull()
 
     fun onDismissVerificationClicked() {
         dismissWithResult(
