@@ -167,7 +167,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
                         paymentSelection = Link(
-                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount
+                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
+                            defaultLinkPayment = result.defaultPaymentMethod
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
