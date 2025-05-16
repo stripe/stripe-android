@@ -541,6 +541,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         val setAsDefaultChecked = when (paymentMethodExtraParams) {
             is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.Link -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.BacsDebit, null -> false
         }
 

@@ -212,7 +212,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
+                bodyPart(urlEncode("payment_method_options[link][setup_future_usage]"), "off_session"),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
