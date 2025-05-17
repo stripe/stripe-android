@@ -20,6 +20,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -187,6 +188,36 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["set_as_default_enabled"] == true &&
                     req.params["has_default_payment_method"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with pmo sfu map`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            paymentMethodOptionsSetupFutureUsage = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["payment_method_options_setup_future_usage"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with setup future usage value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["setup_future_usage"] == "off_session"
             }
         )
     }
@@ -1105,6 +1136,8 @@ class DefaultEventReporterTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        paymentMethodOptionsSetupFutureUsage: Boolean = false,
+        setupFutureUsage: StripeIntent.Usage? = null
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -1121,6 +1154,8 @@ class DefaultEventReporterTest {
             setAsDefaultEnabled = setAsDefaultEnabled,
             financialConnectionsAvailability = financialConnectionsAvailability,
             linkDisplay = linkDisplay,
+            paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
+            setupFutureUsage = setupFutureUsage
         )
     }
 

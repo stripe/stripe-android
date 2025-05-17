@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -91,6 +92,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        setupFutureUsage: StripeIntent.Usage? = null,
+        paymentMethodOptionsSetupFutureUsage: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = buildMap {
@@ -100,6 +103,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
             put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
             put(FC_SDK_AVAILABILITY, financialConnectionsAvailability.toAnalyticsParam())
+            put(FIELD_PAYMENT_METHOD_OPTIONS_SETUP_FUTURE_USAGE, paymentMethodOptionsSetupFutureUsage)
+            put(FIELD_SETUP_FUTURE_USAGE, setupFutureUsage?.code)
             linkMode?.let { mode ->
                 put(FIELD_LINK_MODE, mode.analyticsValue)
             }
@@ -711,6 +716,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_ANALYTIC_CALLBACK_SET = "analytic_callback_set"
         const val FIELD_LINK_DISPLAY = "link_display"
+        const val FIELD_PAYMENT_METHOD_OPTIONS_SETUP_FUTURE_USAGE = "payment_method_options_setup_future_usage"
+        const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
