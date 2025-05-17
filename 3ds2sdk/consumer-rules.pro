@@ -14,3 +14,9 @@
 #-renamesourcefileattribute SourceFile
 
 -dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
+
+
+#-keep class org.bouncycastle.jcajce.provider.** { *; }
+#-keep class org.bouncycastle.jce.provider.** { *; }
+#-keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi { *; }
+#-keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi,org.bouncycastle.jce.provider.** { *; }
