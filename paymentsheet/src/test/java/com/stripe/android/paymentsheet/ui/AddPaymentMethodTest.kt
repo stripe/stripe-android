@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromP
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -164,6 +165,55 @@ internal class AddPaymentMethodTest {
         val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
         assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
         assertThat(options?.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms generic PM with PMO SFU sets requiresMandate to true`() {
+        featureFlagTestRule.setEnabled(true)
+        val formFieldValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "klarna",
+                    sfuValue = "off_session"
+                )
+            )
+        )
+        val klarna = metadataWithPmoSfu.supportedPaymentMethodForCode("klarna")!!
+        val klarnaSelection = formFieldValues.transformToPaymentSelection(
+            klarna,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.GenericPaymentMethod
+        assertThat(klarnaSelection.paymentMethodCreateParams.requiresMandate()).isTrue()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms generic PM with PMO SFU override sets requiresMandate to false`() {
+        featureFlagTestRule.setEnabled(true)
+        val formFieldValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna"),
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "klarna",
+                    sfuValue = "none"
+                )
+            )
+        )
+        val klarna = metadataWithPmoSfu.supportedPaymentMethodForCode("klarna")!!
+        val klarnaSelection = formFieldValues.transformToPaymentSelection(
+            klarna,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.GenericPaymentMethod
+        assertThat(klarnaSelection.paymentMethodCreateParams.requiresMandate()).isFalse()
     }
 
     @Test
