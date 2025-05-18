@@ -84,9 +84,6 @@ internal class TestCashApp : BasePlaygroundTest() {
                 settings[FeatureFlagSettingsDefinition(FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage)] = true
                 settings[PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition] = "cashapp:off_session"
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT
-            },
-            populateCustomLpmFields = {
-                verifyMandateFieldExists()
             }
         )
     }
