@@ -14,7 +14,6 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
@@ -59,7 +58,6 @@ internal class WalletViewModel @Inject constructor(
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     private val dismissalCoordinator: LinkDismissalCoordinator,
-    private val linkLaunchMode: LinkLaunchMode,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -399,7 +397,6 @@ internal class WalletViewModel @Inject constructor(
                         navigationManager = parentComponent.navigationManager,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkAccount = linkAccount,
-                        linkLaunchMode = parentComponent.linkLaunchMode,
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult
                     )
