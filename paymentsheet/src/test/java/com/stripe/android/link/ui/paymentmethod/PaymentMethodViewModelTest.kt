@@ -61,7 +61,10 @@ class PaymentMethodViewModelTest {
                 formArguments = TestFactory.CARD_FORM_ARGS,
                 formElements = TestFactory.CARD_FORM_ELEMENTS,
                 primaryButtonState = PrimaryButtonState.Disabled,
-                primaryButtonLabel = completePaymentButtonLabel(TestFactory.LINK_CONFIGURATION.stripeIntent)
+                primaryButtonLabel = completePaymentButtonLabel(
+                    TestFactory.LINK_CONFIGURATION.stripeIntent,
+                    LinkLaunchMode.Full
+                )
             )
         )
     }
@@ -126,7 +129,8 @@ class PaymentMethodViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    collectedCvc = "111"
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)

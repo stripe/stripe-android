@@ -52,6 +52,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
 
 @Composable
@@ -304,7 +305,7 @@ internal fun RowScope.PaymentDetails(
         is Card -> {
             CardInfo(
                 modifier = modifier,
-                title = paymentDetails.displayName,
+                title = paymentDetails.displayName.resolve(),
                 subtitle = "•••• ${paymentDetails.last4}",
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
@@ -315,7 +316,7 @@ internal fun RowScope.PaymentDetails(
         is ConsumerPaymentDetails.Passthrough -> {
             CardInfo(
                 modifier = modifier,
-                title = paymentDetails.displayName,
+                title = paymentDetails.displayName.resolve(),
                 subtitle = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
             )
@@ -352,7 +353,7 @@ private fun RowScope.BankAccountInfo(
 ) {
     PaymentMethodInfo(
         modifier = modifier,
-        title = bankAccount.displayName,
+        title = bankAccount.displayName.resolve(),
         subtitle = "•••• ${bankAccount.last4}",
         icon = {
             BankIcon(bankAccount.bankIconCode)

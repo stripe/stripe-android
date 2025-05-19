@@ -26,7 +26,9 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
@@ -144,16 +146,20 @@ internal enum class PrimaryButtonState(val isBlocking: Boolean) {
 
 internal fun completePaymentButtonLabel(
     stripeIntent: StripeIntent,
-) = when (stripeIntent) {
-    is PaymentIntent -> {
-        Amount(
-            requireNotNull(stripeIntent.amount),
-            requireNotNull(stripeIntent.currency)
-        ).buildPayButtonLabel()
+    linkLaunchMode: LinkLaunchMode,
+): ResolvableString = when (linkLaunchMode) {
+    LinkLaunchMode.Full -> when (stripeIntent) {
+        is PaymentIntent -> {
+            Amount(
+                requireNotNull(stripeIntent.amount),
+                requireNotNull(stripeIntent.currency)
+            ).buildPayButtonLabel()
+        }
+        is SetupIntent -> {
+            uiCoreR.string.stripe_continue_button_label.resolvableString
+        }
     }
-    is SetupIntent -> {
-        uiCoreR.string.stripe_continue_button_label.resolvableString
-    }
+    LinkLaunchMode.PaymentMethodSelection -> uiCoreR.string.stripe_continue_button_label.resolvableString
 }
 
 private val PrimaryButtonIconWidth = 13.dp

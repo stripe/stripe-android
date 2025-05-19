@@ -602,7 +602,6 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            linkLaunchMode = LinkLaunchMode.Full,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle

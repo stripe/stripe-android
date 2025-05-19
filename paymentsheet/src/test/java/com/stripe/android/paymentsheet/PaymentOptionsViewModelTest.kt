@@ -226,7 +226,7 @@ internal class PaymentOptionsViewModelTest {
         verify(linkPaymentLauncher).present(
             configuration = any(),
             linkAccount = eq(null),
-            launchMode = eq(LinkLaunchMode.AuthenticationOnly),
+            launchMode = eq(LinkLaunchMode.PaymentMethodSelection),
             useLinkExpress = eq(true)
         )
     }
@@ -890,7 +890,8 @@ internal class PaymentOptionsViewModelTest {
     fun `onLinkActivityResult with Completed emits Succeeded result`() = runTest {
         val linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
         val result = LinkActivityResult.Completed(
-            linkAccountUpdate = linkAccountUpdate
+            linkAccountUpdate = linkAccountUpdate,
+            collectedCvc = null
         )
         val viewModel = createViewModel()
         viewModel.paymentOptionResult.test {

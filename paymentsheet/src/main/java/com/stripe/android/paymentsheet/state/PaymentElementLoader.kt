@@ -15,6 +15,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
@@ -470,16 +471,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): LinkState {
         val accountStatus = accountStatusProvider(linkConfiguration)
 
-        val loginState = when (accountStatus) {
-            AccountStatus.Verified ->
-                LinkState.LoginState.LoggedIn
-            AccountStatus.NeedsVerification,
-            AccountStatus.VerificationStarted ->
-                LinkState.LoginState.NeedsVerification
-            AccountStatus.SignedOut,
-            AccountStatus.Error ->
-                LinkState.LoginState.LoggedOut
-        }
+        val loginState = accountStatus.toLoginState()
 
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,

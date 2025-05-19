@@ -55,8 +55,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
-    private val navigationManager: NavigationManager,
-    private val linkLaunchMode: LinkLaunchMode
+    private val navigationManager: NavigationManager
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
@@ -87,15 +86,8 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onVerificationSucceeded() {
-        when (linkLaunchMode) {
-            LinkLaunchMode.AuthenticationOnly -> dismissWithResult(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                )
-            )
-            LinkLaunchMode.Full -> viewModelScope.launch {
-                _linkScreenState.value = buildFullScreenState()
-            }
+        viewModelScope.launch {
+            _linkScreenState.value = buildFullScreenState()
         }
     }
 

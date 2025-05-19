@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
@@ -322,7 +323,8 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation dismisses with Completed result on success`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        val account = TestFactory.LINK_ACCOUNT
+        linkAccountManager.setLinkAccount(account)
         linkAccountManager.listPaymentDetailsResult = Result.success(
             value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
         )
@@ -354,7 +356,8 @@ class WalletViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(account),
+                    collectedCvc = null
                 )
             )
     }
@@ -683,7 +686,8 @@ class WalletViewModelTest {
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
-        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,
@@ -695,6 +699,7 @@ class WalletViewModelTest {
             dismissWithResult = dismissWithResult,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            linkLaunchMode = linkLaunchMode
         )
     }
 

@@ -166,7 +166,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
                         paymentSelection = Link(
-                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount
+                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
+                            selectedLinkPayment = result.selectedPaymentDetails
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
@@ -225,18 +226,31 @@ internal class PaymentOptionsViewModel @Inject constructor(
             if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
-                    launchMode = LinkLaunchMode.AuthenticationOnly,
+                    launchMode = LinkLaunchMode.PaymentMethodSelection,
                     linkAccount = null,
                     useLinkExpress = true
                 )
             } else {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
-                        paymentSelection = paymentSelection,
+                        paymentSelection = paymentSelection.preserveLinkPaymentIfNeeded(),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
                 )
             }
+        }
+    }
+
+    /**
+     * If the screen was launched with Link as the previously selected payment and that selection is kept,
+     * make sure the underlying default Link payment method is preserved.
+     */
+    private fun PaymentSelection.preserveLinkPaymentIfNeeded(): PaymentSelection {
+        return if (this is Link) {
+            val previousLinkPayment = (args.state.paymentSelection as? Link)?.selectedLinkPayment
+            copy(selectedLinkPayment = selectedLinkPayment ?: previousLinkPayment)
+        } else {
+            this
         }
     }
 

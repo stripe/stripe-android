@@ -203,7 +203,8 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                collectedCvc = null
             ),
             deferredIntentConfirmationType = null,
         )
