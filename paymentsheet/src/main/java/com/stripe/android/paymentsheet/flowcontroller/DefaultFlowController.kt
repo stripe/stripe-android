@@ -18,6 +18,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -424,14 +425,10 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun updateStateWithLinkAccount(linkAccount: LinkAccount) {
         linkAccountHolder.set(linkAccount)
         val currentState = viewModel.state ?: return
-        viewModel.state = currentState.copy(
-            paymentSheetState = currentState.paymentSheetState.copy(
-                paymentMethodMetadata = currentState.paymentSheetState.paymentMethodMetadata.copy(
-                    linkState = currentState.paymentSheetState.paymentMethodMetadata.linkState?.copy(
-                        loginState = linkAccount.accountStatus.toLoginState()
-                    )
-                )
-            ),
+        val metadata = currentState.paymentSheetState.paymentMethodMetadata
+        val linkState = metadata.linkState?.copy(loginState = linkAccount.accountStatus.toLoginState())
+        viewModel.state = currentState.copyPaymentSheetState(
+            metadata = metadata.copy(linkState = linkState),
         )
     }
 
@@ -596,10 +593,12 @@ internal class DefaultFlowController @Inject internal constructor(
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,
             customer: CustomerState? = paymentSheetState.customer,
+            metadata: PaymentMethodMetadata = paymentSheetState.paymentMethodMetadata
         ): State = copy(
             paymentSheetState = paymentSheetState.copy(
                 paymentSelection = paymentSelection,
                 customer = customer,
+                paymentMethodMetadata = metadata
             )
         )
     }
