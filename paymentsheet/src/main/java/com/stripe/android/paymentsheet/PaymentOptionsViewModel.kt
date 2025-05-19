@@ -233,7 +233,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             } else {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
-                        paymentSelection = paymentSelection,
+                        paymentSelection = paymentSelection.preserveLinkPaymentIfNeeded(),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
                 )
@@ -242,8 +242,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     /**
-     * If the selected payment method is Link and the payment options screen was launched with Link as a payment
-     * method and the user has not selected a default payment method, we need to preserve the default payment method
+     * If the screen was launched with Link as the previously selected payment and that selection is kept,
+     * make sure the underlying default Link payment method is preserved.
      */
     private fun PaymentSelection.preserveLinkPaymentIfNeeded(): PaymentSelection {
         return if (this is Link) {
