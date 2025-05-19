@@ -1705,7 +1705,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `requiresMandate respects PMO SFU if set`() {
+    fun `requiresMandate returns true for PMO SFU`() {
         featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -1713,6 +1713,21 @@ internal class PaymentMethodMetadataTest {
             ),
         )
         assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isTrue()
+    }
+
+    @Test
+    fun `requiresMandate returns false for PMO SFU none override`() {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "amazon_pay",
+                    sfuValue = "none"
+                )
+            ),
+        )
+        assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isFalse()
     }
 
     fun `Passes CBF along to Link`() {
