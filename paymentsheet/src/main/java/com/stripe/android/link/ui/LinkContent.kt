@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.SizeTransform
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Surface
@@ -22,7 +23,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.stripe.android.common.ui.AnimatedContentHeight
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
@@ -92,31 +92,29 @@ internal fun LinkContent(
                 )
 
                 BoxWithConstraints {
-                    AnimatedContentHeight {
-                        val imeHeightDp = with(LocalDensity.current) {
-                            WindowInsets.safeContent.getBottom(this).toDp()
-                        }
-                        val screensMinHeight =
-                            ((maxHeight + imeHeightDp) * MinScreensHeightRatio)
-                                .coerceAtMost(maxHeight)
-                        columnScope.Screens(
-                            modifier = Modifier.heightIn(min = screensMinHeight),
-                            initialDestination = initialDestination,
-                            navController = navController,
-                            goBack = goBack,
-                            moveToWeb = moveToWeb,
-                            navigateAndClearStack = { screen ->
-                                navigate(screen, true)
-                            },
-                            dismissWithResult = dismissWithResult,
-                            getLinkAccount = getLinkAccount,
-                            showBottomSheetContent = onUpdateSheetContent,
-                            changeEmail = changeEmail,
-                            hideBottomSheetContent = {
-                                onUpdateSheetContent(null)
-                            }
-                        )
+                    val imeHeightDp = with(LocalDensity.current) {
+                        WindowInsets.ime.getBottom(this).toDp()
                     }
+                    val screensMinHeight =
+                        ((maxHeight + imeHeightDp) * MinScreensHeightRatio)
+                            .coerceAtMost(maxHeight)
+                    columnScope.Screens(
+                        modifier = Modifier.heightIn(min = screensMinHeight),
+                        initialDestination = initialDestination,
+                        navController = navController,
+                        goBack = goBack,
+                        moveToWeb = moveToWeb,
+                        navigateAndClearStack = { screen ->
+                            navigate(screen, true)
+                        },
+                        dismissWithResult = dismissWithResult,
+                        getLinkAccount = getLinkAccount,
+                        showBottomSheetContent = onUpdateSheetContent,
+                        changeEmail = changeEmail,
+                        hideBottomSheetContent = {
+                            onUpdateSheetContent(null)
+                        }
+                    )
                 }
             }
         }
@@ -143,6 +141,7 @@ private fun ColumnScope.Screens(
         modifier = modifier,
         navController = navController,
         startDestination = initialDestination.route,
+        sizeTransform = { SizeTransform() }
     ) {
         composable(LinkScreen.Loading.route) {
             Loader()
