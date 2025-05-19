@@ -355,7 +355,8 @@ internal class DeferredIntentValidatorTest {
     @Test
     fun `PMO validation succeeds if intent and config PMO match`() {
         val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
+            paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
         )
         val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
             setupFutureUsageValues = mapOf(
@@ -374,7 +375,8 @@ internal class DeferredIntentValidatorTest {
     @Test
     fun `PMO validation fails if Config PMO does not contain entry from Intent PMO`() {
         val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
+            paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
         )
 
         val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
@@ -393,7 +395,8 @@ internal class DeferredIntentValidatorTest {
     @Test
     fun `PMO validation fails if SFU values are not the same`() {
         val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
+            paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
         )
 
         val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
@@ -412,8 +415,39 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
-    fun `PMO validation succeeds if intent PMO does not contain entry in Config PMO`() {
+    fun `PMO validation fails if config PMO not in intent PMO and PM in paymentMethodTypes`() {
         val paymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "amazon_pay", "affirm"),
+            paymentMethodOptionsJsonString = """
+                {
+                    "card": {
+                        "setup_future_usage": "off_session"
+                    },
+                    "affirm": {
+                        "setup_future_usage": "none"
+                    }
+                }
+            """.trimIndent()
+        )
+
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
+            setupFutureUsageValues = mapOf(
+                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OffSession,
+                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.OffSession,
+            )
+        )
+        paymentMethodOptionsSetupFutureUsageTest(
+            intent = paymentIntent,
+            paymentMethodOptions = paymentMethodOptions,
+            shouldValidateSucceed = false
+        )
+    }
+
+    @Test
+    fun `PMO validation succeeds if config PMO not in intent PMO and PM not in paymentMethodTypes`() {
+        val paymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "affirm"),
             paymentMethodOptionsJsonString = """
                 {
                     "card": {
