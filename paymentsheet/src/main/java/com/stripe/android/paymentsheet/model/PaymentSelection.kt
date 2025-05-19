@@ -72,14 +72,14 @@ internal sealed class PaymentSelection : Parcelable {
     data class Link(
         val useLinkExpress: Boolean = false,
         val linkAccount: LinkAccount? = null,
-        val defaultLinkPayment: ConsumerPaymentDetails.PaymentDetails? = null,
+        val selectedLinkPayment: ConsumerPaymentDetails.PaymentDetails? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
 
         val label: ResolvableString
-            get() = defaultLinkPayment?.displayName ?: StripeR.string.stripe_link.resolvableString
+            get() = selectedLinkPayment?.displayName ?: StripeR.string.stripe_link.resolvableString
 
         override fun mandateText(
             merchantName: String,

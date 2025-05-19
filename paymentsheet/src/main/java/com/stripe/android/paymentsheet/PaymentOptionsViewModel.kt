@@ -167,7 +167,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionResult.Succeeded(
                         paymentSelection = Link(
                             linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
-                            defaultLinkPayment = result.selectedPaymentDetails
+                            selectedLinkPayment = result.selectedPaymentDetails
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
@@ -247,8 +247,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
      */
     private fun PaymentSelection.preserveLinkPaymentIfNeeded(): PaymentSelection {
         return if (this is Link) {
-            val previousLinkPayment = (args.state.paymentSelection as? Link)?.defaultLinkPayment
-            copy(defaultLinkPayment = defaultLinkPayment ?: previousLinkPayment)
+            val previousLinkPayment = (args.state.paymentSelection as? Link)?.selectedLinkPayment
+            copy(selectedLinkPayment = selectedLinkPayment ?: previousLinkPayment)
         } else {
             this
         }
