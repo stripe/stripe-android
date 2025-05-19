@@ -731,7 +731,7 @@ internal class WalletScreenTest {
             navigateAndClearStack = {},
             dismissWithResult = {},
             navigationManager = navigationManager,
-            dismissalCoordinator = dismissalCoordinator,
+            dismissalCoordinator = dismissalCoordinator
         )
     }
 
