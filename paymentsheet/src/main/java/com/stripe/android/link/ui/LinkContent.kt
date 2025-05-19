@@ -121,7 +121,7 @@ internal fun LinkContent(
     }
 }
 
-private const val MinScreensHeightRatio = .5f
+private const val MinScreensHeightRatio = 1f
 
 @Composable
 private fun ColumnScope.Screens(
