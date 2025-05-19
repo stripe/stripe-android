@@ -46,7 +46,7 @@
     <ID>LongMethod:PaymentSheetScreen.kt$@Composable private fun PaymentSheetContent( viewModel: BaseSheetViewModel, headerText: ResolvableString?, walletsState: WalletsState?, walletsProcessingState: WalletsProcessingState?, error: ResolvableString?, currentScreen: PaymentSheetScreen, mandateText: MandateText?, modifier: Modifier )</ID>
     <ID>LongMethod:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`()</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
-    <ID>LongMethod:SignUpScreen.kt$@Composable private fun SecondaryFields( phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpScreenState: SignUpScreenState, onSignUpClick: () -> Unit )</ID>
+    <ID>LongMethod:SignUpScreen.kt$@Composable internal fun SignUpBody( emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpScreenState: SignUpScreenState, onSignUpClick: () -> Unit )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, enabled: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
     <ID>LongMethod:UpdatePaymentMethodUI.kt$@Composable internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier)</ID>
@@ -96,5 +96,6 @@
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt$com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
+    <ID>UnusedPrivateProperty:SignUpScreenshotTest.kt$SignUpScreenshotTest.Companion$val signUpEnabledStates = listOf(true to "SignUpEnabled", false to "")</ID>
   </CurrentIssues>
 </SmellBaseline>
