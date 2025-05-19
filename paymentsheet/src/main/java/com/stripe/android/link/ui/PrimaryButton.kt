@@ -159,7 +159,7 @@ internal fun completePaymentButtonLabel(
             uiCoreR.string.stripe_continue_button_label.resolvableString
         }
     }
-    LinkLaunchMode.PaymentSelection -> uiCoreR.string.stripe_continue_button_label.resolvableString
+    LinkLaunchMode.PaymentMethodSelection -> uiCoreR.string.stripe_continue_button_label.resolvableString
 }
 
 private val PrimaryButtonIconWidth = 13.dp

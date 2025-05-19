@@ -76,7 +76,7 @@ internal class WalletViewModel @Inject constructor(
             isProcessing = false,
             hasCompleted = false,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
-            secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel,
+            secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
             canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
         )
@@ -226,7 +226,7 @@ internal class WalletViewModel @Inject constructor(
                         cvc = cvc
                     )
                 }
-                LinkLaunchMode.PaymentSelection -> dismissWithResult(
+                LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = LinkAccountUpdate.Value(null),
                         selectedPaymentDetails = selectedPaymentDetails,
@@ -455,8 +455,12 @@ private fun StripeIntent.hasIntentToSetup(): Boolean {
     }
 }
 
-private val StripeIntent.secondaryButtonLabel: ResolvableString
-    get() = when (this) {
-        is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
-        is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
+private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString {
+    return when (linkLaunchMode) {
+        LinkLaunchMode.Full -> when (this) {
+            is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
+            is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
+        }
+        LinkLaunchMode.PaymentMethodSelection -> resolvableString(R.string.stripe_wallet_continue_another_way)
     }
+}

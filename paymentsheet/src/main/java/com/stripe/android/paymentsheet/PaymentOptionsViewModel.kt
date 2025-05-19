@@ -226,7 +226,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
-                    launchMode = LinkLaunchMode.PaymentSelection,
+                    launchMode = LinkLaunchMode.PaymentMethodSelection,
                     linkAccount = null,
                     useLinkExpress = true
                 )
