@@ -710,7 +710,7 @@ class WalletViewModelTest {
             dismissWithResult = dismissWithResult,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
-            linkLaunchMode = LinkLaunchMode.Payment,
+            linkLaunchMode = LinkLaunchMode.Full,
         )
     }
 

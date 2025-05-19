@@ -102,7 +102,7 @@ internal class LinkActivity : ComponentActivity() {
                 configuration = configuration,
                 startWithVerificationDialog = false,
                 linkAccount = null,
-                launchMode = LinkLaunchMode.Payment
+                launchMode = LinkLaunchMode.Full
             )
         )
     }

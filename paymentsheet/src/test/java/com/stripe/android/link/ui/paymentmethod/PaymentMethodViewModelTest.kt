@@ -238,7 +238,7 @@ class PaymentMethodViewModelTest {
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Payment
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 }

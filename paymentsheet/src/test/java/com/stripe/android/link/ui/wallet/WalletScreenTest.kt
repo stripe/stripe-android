@@ -733,7 +733,7 @@ internal class WalletScreenTest {
             dismissWithResult = {},
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
-            linkLaunchMode = LinkLaunchMode.Payment
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 
