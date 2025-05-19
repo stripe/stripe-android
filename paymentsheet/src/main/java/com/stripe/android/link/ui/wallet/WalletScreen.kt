@@ -38,7 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.ui.AnimatedConstraints
+import com.stripe.android.common.ui.AnimatedContentHeight
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
@@ -372,7 +372,7 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
-        AnimatedConstraints {
+        AnimatedContentHeight {
             if (expanded || selectedItem == null) {
                 expandedContent()
             } else {
