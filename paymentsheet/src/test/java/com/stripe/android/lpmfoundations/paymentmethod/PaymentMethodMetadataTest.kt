@@ -33,6 +33,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -475,6 +476,49 @@ internal class PaymentMethodMetadataTest {
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
         assertThat(identifiers).contains(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `formElementsForCode contains mandate for PMO SFU`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "cashapp",
+                    sfuValue = "off_session"
+                )
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "cashapp",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        val mandate = formElement[0] as MandateTextElement
+        assertThat(mandate.mandateText).isNotNull()
+        assertThat(mandate.identifier.v1).isEqualTo("cashapp_mandate")
+    }
+
+    @Test
+    fun `formElementsForCode does not contain mandate for PMO SFU none override`() = runTest {
+        featureFlagTestRule.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "cashapp",
+                    sfuValue = "none"
+                )
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "cashapp",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        assertThat(formElement).isEmpty()
     }
 
     @Test
