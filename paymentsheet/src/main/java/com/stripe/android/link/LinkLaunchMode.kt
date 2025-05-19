@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
  */
 internal sealed interface LinkLaunchMode : Parcelable {
     /**
-     * Link is launched with the intent to solely authenticate.
+     * Link is launched with the intent to select a payment method ready for confirmation.
      */
     @Parcelize
     data object PaymentSelection : LinkLaunchMode
