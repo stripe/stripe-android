@@ -1,16 +1,22 @@
 package com.stripe.android.link
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 /**
  * The mode in which the Link flow is launched.
  */
-internal enum class LinkLaunchMode {
+internal sealed interface LinkLaunchMode : Parcelable {
     /**
      * Link is launched with the intent to solely authenticate.
      */
-    Authentication,
+    @Parcelize
+    data object Authentication : LinkLaunchMode
 
     /**
-     * Link is launched with the intent to obtain a payment method.
+     * Link is launched in full mode, where the user can authenticate, select a Link payment method and proceed
+     * to payment,
      */
-    Payment,
+    @Parcelize
+    data object Full : LinkLaunchMode
 }

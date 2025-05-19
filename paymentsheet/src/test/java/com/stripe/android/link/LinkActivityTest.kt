@@ -152,7 +152,7 @@ internal class LinkActivityTest {
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
-                linkLaunchMode = LinkLaunchMode.Payment,
+                linkLaunchMode = LinkLaunchMode.Full,
                 navigationManager = TestNavigationManager()
             )
         }

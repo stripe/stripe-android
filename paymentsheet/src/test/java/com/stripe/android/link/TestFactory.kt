@@ -209,6 +209,6 @@ internal object TestFactory {
         startWithVerificationDialog = false,
         linkAccount = LINK_ACCOUNT,
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-        launchMode = LinkLaunchMode.Payment
+        launchMode = LinkLaunchMode.Full
     )
 }

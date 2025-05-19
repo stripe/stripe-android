@@ -93,7 +93,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate
                 )
             )
-            LinkLaunchMode.Payment -> viewModelScope.launch {
+            LinkLaunchMode.Full -> viewModelScope.launch {
                 _linkScreenState.value = buildFullScreenState()
             }
         }
