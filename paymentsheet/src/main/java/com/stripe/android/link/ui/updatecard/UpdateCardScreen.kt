@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.updatecard
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
@@ -36,7 +37,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 
 @Composable
-internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
+internal fun ColumnScope.UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
     when (val interactor = viewModel.interactor) {
         null -> Loader()
