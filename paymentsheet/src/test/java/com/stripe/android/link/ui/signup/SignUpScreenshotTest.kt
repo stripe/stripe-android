@@ -42,43 +42,42 @@ internal class SignUpScreenshotTest(
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data(): List<TestCase> {
-            val signUpEnabledStates = listOf(true to "SignUpEnabled", false to "")
             val signUpStates = SignUpState.entries
             val requiresNameCollectionStates = listOf(true to "RequiresNameCollection", false to "")
             val errorMessages = listOf("Something went wrong".resolvableString to "ErrorMessage", null to "")
 
-            return signUpEnabledStates.flatMap { (signUpEnabled, signUpEnabledName) ->
-                signUpStates.flatMap { signUpState ->
-                    requiresNameCollectionStates.flatMap { (requiresNameCollection, requiresNameCollectionName) ->
-                        errorMessages.flatMap { (errorMessage, errorMessageName) ->
-                            // Submitting is only applicable for InputtingRemainingFields.
-                            val submittingStates = if (signUpState == SignUpState.InputtingRemainingFields) {
-                                listOf(true to "Submitting", false to "Idle")
-                            } else {
-                                listOf(false to "Idle")
-                            }
+            return signUpStates.flatMap { signUpState ->
+                val signUpEnabled = signUpState == SignUpState.InputtingRemainingFields
+                val signUpEnabledName = if (signUpEnabled) "SignUpEnabled" else ""
+                requiresNameCollectionStates.flatMap { (requiresNameCollection, requiresNameCollectionName) ->
+                    errorMessages.flatMap { (errorMessage, errorMessageName) ->
+                        // Submitting is only applicable for InputtingRemainingFields.
+                        val submittingStates = if (signUpState == SignUpState.InputtingRemainingFields) {
+                            listOf(true to "Submitting", false to "Idle")
+                        } else {
+                            listOf(false to "Idle")
+                        }
 
-                            submittingStates.map { (isSubmitting, submittingStateName) ->
-                                val name = buildString {
-                                    append("SignUpScreen")
-                                    append(signUpEnabledName)
-                                    append(signUpState.name)
-                                    append(requiresNameCollectionName)
-                                    append(submittingStateName)
-                                    append(errorMessageName)
-                                }
-                                TestCase(
-                                    name = name,
-                                    state = SignUpScreenState(
-                                        merchantName = "Example Inc.",
-                                        signUpEnabled = signUpEnabled,
-                                        requiresNameCollection = requiresNameCollection,
-                                        signUpState = signUpState,
-                                        errorMessage = errorMessage,
-                                        isSubmitting = isSubmitting,
-                                    )
-                                )
+                        submittingStates.map { (isSubmitting, submittingStateName) ->
+                            val name = buildString {
+                                append("SignUpScreen")
+                                append(signUpEnabledName)
+                                append(signUpState.name)
+                                append(requiresNameCollectionName)
+                                append(submittingStateName)
+                                append(errorMessageName)
                             }
+                            TestCase(
+                                name = name,
+                                state = SignUpScreenState(
+                                    merchantName = "Example Inc.",
+                                    signUpEnabled = signUpEnabled,
+                                    requiresNameCollection = requiresNameCollection,
+                                    signUpState = signUpState,
+                                    errorMessage = errorMessage,
+                                    isSubmitting = isSubmitting,
+                                )
+                            )
                         }
                     }
                 }
