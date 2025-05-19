@@ -356,7 +356,7 @@ class WalletViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.None,
+                    linkAccountUpdate = LinkAccountUpdate.Value(account),
                     collectedCvc = null
                 )
             )
