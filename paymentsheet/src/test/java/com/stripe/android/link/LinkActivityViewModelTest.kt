@@ -650,7 +650,7 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Payment,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -661,7 +661,7 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            linkLaunchMode = LinkLaunchMode.Full,
+            linkLaunchMode = linkLaunchMode,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle

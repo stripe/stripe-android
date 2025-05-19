@@ -90,11 +90,14 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         when (linkLaunchMode) {
-            LinkLaunchMode.Authentication -> dismissWithResult(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            LinkLaunchMode.Authentication -> viewModelScope.launch {
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        defaultPaymentMethod = getDefaultPaymentMethod()
+                    )
                 )
-            )
+            }
             LinkLaunchMode.Full -> viewModelScope.launch {
                 _linkScreenState.value = buildFullScreenState()
             }
