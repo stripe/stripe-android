@@ -376,7 +376,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Authentication
+            linkLaunchMode = LinkLaunchMode.AuthenticationOnly
         )
 
         vm.result.test {
@@ -404,7 +404,7 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Authentication
+            linkLaunchMode = LinkLaunchMode.AuthenticationOnly
         )
 
         vm.result.test {
