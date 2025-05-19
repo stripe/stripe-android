@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.14.0 - 2025-05-19
+
 ### PaymentSheet
 * [ADDED][10827](https://github.com/stripe/stripe-android/pull/10827) PaymentMethodOptions SetupFutureUsage is now in public preview.
 
