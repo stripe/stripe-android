@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.LinkAccount
 import org.mockito.kotlin.any
@@ -46,7 +47,8 @@ internal object RecordingLinkPaymentLauncher {
                     PresentCall(
                         configuration = arguments[0] as LinkConfiguration,
                         linkAccount = arguments[1] as? LinkAccount,
-                        useLinkExpress = arguments[2] as Boolean
+                        launchMode = arguments[2] as LinkLaunchMode,
+                        useLinkExpress = arguments[3] as Boolean
                     )
                 )
             }
@@ -81,6 +83,7 @@ internal object RecordingLinkPaymentLauncher {
     data class PresentCall(
         val configuration: LinkConfiguration,
         val linkAccount: LinkAccount?,
-        val useLinkExpress: Boolean
+        val launchMode: LinkLaunchMode,
+        val useLinkExpress: Boolean,
     )
 }
