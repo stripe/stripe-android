@@ -43,7 +43,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.security.InvalidParameterException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -152,7 +151,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    fun onLinkActivityResult(result: LinkActivityResult) {
+    fun onLinkAuthenticationResult(result: LinkActivityResult) {
         when (result) {
             // Link verification dialog dismissed -> user canceled
             is LinkActivityResult.Canceled -> {
@@ -175,7 +174,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             // This should not happen, but if it does, we should show an error
             is LinkActivityResult.PaymentMethodObtained -> {
-                val error = InvalidParameterException(
+                val error = IllegalStateException(
                     "PaymentMethodObtained is not expected from authentication only Link flows"
                 )
                 onError(error.stripeErrorMessage())
@@ -223,11 +222,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
             val linkState = args.state.paymentMethodMetadata.linkState
-            if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)
-            ) {
+            if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
-                    launchMode = LinkLaunchMode.Authentication,
+                    launchMode = LinkLaunchMode.AuthenticationOnly,
                     linkAccount = null,
                     useLinkExpress = true
                 )

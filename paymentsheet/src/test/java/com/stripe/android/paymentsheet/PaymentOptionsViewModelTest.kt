@@ -226,7 +226,7 @@ internal class PaymentOptionsViewModelTest {
         verify(linkPaymentLauncher).present(
             configuration = any(),
             linkAccount = eq(null),
-            launchMode = eq(LinkLaunchMode.Authentication),
+            launchMode = eq(LinkLaunchMode.AuthenticationOnly),
             useLinkExpress = eq(true)
         )
     }
@@ -864,7 +864,7 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createViewModel()
         val linkAccountUpdate = LinkAccountUpdate.None
         viewModel.paymentOptionResult.test {
-            viewModel.onLinkActivityResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
+            viewModel.onLinkAuthenticationResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
             expectNoEvents()
         }
     }
@@ -876,7 +876,7 @@ internal class PaymentOptionsViewModelTest {
         val linkAccountUpdate = LinkAccountUpdate.None
         viewModel.error.test {
             assertThat(awaitItem()).isNull()
-            viewModel.onLinkActivityResult(
+            viewModel.onLinkAuthenticationResult(
                 LinkActivityResult.Failed(
                     error = error,
                     linkAccountUpdate = linkAccountUpdate
@@ -894,7 +894,7 @@ internal class PaymentOptionsViewModelTest {
         )
         val viewModel = createViewModel()
         viewModel.paymentOptionResult.test {
-            viewModel.onLinkActivityResult(result)
+            viewModel.onLinkAuthenticationResult(result)
             val succeeded = awaitItem() as PaymentOptionResult.Succeeded
             val paymentSelection = succeeded.paymentSelection
             assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
@@ -908,7 +908,7 @@ internal class PaymentOptionsViewModelTest {
         val result = LinkActivityResult.PaymentMethodObtained(mock())
         viewModel.error.test {
             assertThat(awaitItem()).isNull()
-            viewModel.onLinkActivityResult(result)
+            viewModel.onLinkAuthenticationResult(result)
             assertThat(awaitItem()).isNotNull()
         }
     }

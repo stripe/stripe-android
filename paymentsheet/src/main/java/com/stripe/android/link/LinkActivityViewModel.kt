@@ -88,7 +88,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         when (linkLaunchMode) {
-            LinkLaunchMode.Authentication -> dismissWithResult(
+            LinkLaunchMode.AuthenticationOnly -> dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate
                 )
