@@ -130,7 +130,7 @@ class PaymentMethodViewModelTest {
             .isEqualTo(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null),
-                    collectedCvc = null
+                    collectedCvc = "111"
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)

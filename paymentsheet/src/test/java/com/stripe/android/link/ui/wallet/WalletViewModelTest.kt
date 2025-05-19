@@ -331,7 +331,8 @@ class WalletViewModelTest {
     fun `performPaymentConfirmation dismisses with Completed result on success`() = runTest(dispatcher) {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        val account = TestFactory.LINK_ACCOUNT
+        linkAccountManager.setLinkAccount(account)
         linkAccountManager.listPaymentDetailsResult = Result.success(
             value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
         )
@@ -363,7 +364,7 @@ class WalletViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    linkAccountUpdate = LinkAccountUpdate.Value(account),
                     collectedCvc = null
                 )
             )
