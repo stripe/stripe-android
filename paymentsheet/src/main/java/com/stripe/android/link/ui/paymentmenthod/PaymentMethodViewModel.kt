@@ -48,7 +48,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             formElements = formHelper.formElementsForCode(PaymentMethod.Type.Card.code),
             formArguments = formHelper.createFormArguments(PaymentMethod.Type.Card.code),
             primaryButtonState = PrimaryButtonState.Disabled,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
         )
     )
 
@@ -130,7 +130,8 @@ internal class PaymentMethodViewModel @Inject constructor(
             Result.Succeeded -> {
                 dismissWithResult(
                     LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(null)
+                        linkAccountUpdate = LinkAccountUpdate.Value(null),
+                        collectedCvc = cvc
                     )
                 )
             }

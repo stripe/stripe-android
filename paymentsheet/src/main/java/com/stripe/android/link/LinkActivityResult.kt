@@ -13,7 +13,8 @@ internal sealed class LinkActivityResult : Parcelable {
     @Parcelize
     data class Completed(
         val linkAccountUpdate: LinkAccountUpdate,
-        val defaultPaymentMethod: ConsumerPaymentDetails.PaymentDetails? = null,
+        val selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails? = null,
+        val collectedCvc: String?,
     ) : LinkActivityResult()
 
     /**

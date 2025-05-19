@@ -137,7 +137,8 @@ internal class LinkPaymentLauncherTest {
     fun `ActivityResultRegistry callback should handle Completed result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
             linkActivityResult = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                collectedCvc = null
             ),
             expectedMarkAsUsedCalls = 1,
         )
@@ -176,7 +177,8 @@ internal class LinkPaymentLauncherTest {
     fun `ActivityResultCaller callback should handle Completed result correctly`() {
         testActivityResultCallbackWithResultCaller(
             linkActivityResult = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                collectedCvc = null
             ),
             expectedMarkAsUsedCalls = 1,
         )

@@ -376,13 +376,13 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.AuthenticationOnly
+            linkLaunchMode = LinkLaunchMode.PaymentSelection
         )
 
         vm.result.test {
             vm.onVerificationSucceeded()
             val result = awaitItem() as LinkActivityResult.Completed
-            assertThat(result.defaultPaymentMethod!!.id).isEqualTo("pm_default")
+            assertThat(result.selectedPaymentDetails!!.id).isEqualTo("pm_default")
         }
     }
 
@@ -404,13 +404,13 @@ internal class LinkActivityViewModelTest {
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.AuthenticationOnly
+            linkLaunchMode = LinkLaunchMode.PaymentSelection
         )
 
         vm.result.test {
             vm.onVerificationSucceeded()
             val result = awaitItem() as LinkActivityResult.Completed
-            assertThat(result.defaultPaymentMethod!!.id).isEqualTo("pm_1")
+            assertThat(result.selectedPaymentDetails!!.id).isEqualTo("pm_1")
         }
     }
 

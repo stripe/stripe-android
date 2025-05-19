@@ -167,7 +167,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionResult.Succeeded(
                         paymentSelection = Link(
                             linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
-                            defaultLinkPayment = result.defaultPaymentMethod
+                            defaultLinkPayment = result.selectedPaymentDetails
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
@@ -226,7 +226,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
-                    launchMode = LinkLaunchMode.AuthenticationOnly,
+                    launchMode = LinkLaunchMode.PaymentSelection,
                     linkAccount = null,
                     useLinkExpress = true
                 )
