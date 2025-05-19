@@ -2,9 +2,12 @@ package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Surface
@@ -67,6 +70,7 @@ internal fun LinkContent(
                     .wrapContentHeight()
                     .fillMaxWidth()
             ) {
+                val columnScope = this
                 BackHandler {
                     if (bottomSheetContent != null) {
                         onUpdateSheetContent(null)
@@ -84,23 +88,26 @@ internal fun LinkContent(
                     }
                 )
 
-                AnimatedConstraints {
-                    Screens(
-                        initialDestination = initialDestination,
-                        navController = navController,
-                        goBack = goBack,
-                        moveToWeb = moveToWeb,
-                        navigateAndClearStack = { screen ->
-                            navigate(screen, true)
-                        },
-                        dismissWithResult = dismissWithResult,
-                        getLinkAccount = getLinkAccount,
-                        showBottomSheetContent = onUpdateSheetContent,
-                        changeEmail = changeEmail,
-                        hideBottomSheetContent = {
-                            onUpdateSheetContent(null)
-                        }
-                    )
+                BoxWithConstraints {
+                    AnimatedConstraints {
+                        columnScope.Screens(
+                            modifier = Modifier.heightIn(min = maxHeight * .6f),
+                            initialDestination = initialDestination,
+                            navController = navController,
+                            goBack = goBack,
+                            moveToWeb = moveToWeb,
+                            navigateAndClearStack = { screen ->
+                                navigate(screen, true)
+                            },
+                            dismissWithResult = dismissWithResult,
+                            getLinkAccount = getLinkAccount,
+                            showBottomSheetContent = onUpdateSheetContent,
+                            changeEmail = changeEmail,
+                            hideBottomSheetContent = {
+                                onUpdateSheetContent(null)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -108,7 +115,8 @@ internal fun LinkContent(
 }
 
 @Composable
-private fun Screens(
+private fun ColumnScope.Screens(
+    modifier: Modifier,
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
     goBack: () -> Unit,
@@ -121,7 +129,7 @@ private fun Screens(
     initialDestination: LinkScreen,
 ) {
     NavHost(
-        modifier = Modifier.wrapContentHeight(),
+        modifier = modifier,
         navController = navController,
         startDestination = initialDestination.route,
     ) {
@@ -221,7 +229,7 @@ private fun VerificationRoute(
 }
 
 @Composable
-private fun UpdateCardRoute(paymentDetailsId: String) {
+private fun ColumnScope.UpdateCardRoute(paymentDetailsId: String) {
     val viewModel: UpdateCardScreenViewModel = linkViewModel { parentComponent ->
         UpdateCardScreenViewModel.factory(
             parentComponent = parentComponent,
@@ -253,7 +261,7 @@ private fun PaymentMethodRoute(
 }
 
 @Composable
-private fun WalletRoute(
+private fun ColumnScope.WalletRoute(
     linkAccount: LinkAccount,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -276,11 +284,11 @@ private fun WalletRoute(
 }
 
 @Composable
-internal fun Loader(modifier: Modifier = Modifier) {
+internal fun ColumnScope.Loader(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 64.dp),
+            .weight(1f)
+            .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
         LinkSpinner(
@@ -294,7 +302,9 @@ internal fun Loader(modifier: Modifier = Modifier) {
 @Composable
 private fun LoaderPreview() {
     DefaultLinkTheme {
-        Loader()
+        Column(modifier = Modifier.height(500.dp)) {
+            Loader()
+        }
     }
 }
 

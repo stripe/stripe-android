@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -68,7 +69,7 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Composable
-internal fun WalletScreen(
+internal fun ColumnScope.WalletScreen(
     viewModel: WalletViewModel,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
@@ -93,7 +94,7 @@ internal fun WalletScreen(
 }
 
 @Composable
-internal fun WalletBody(
+internal fun ColumnScope.WalletBody(
     state: WalletUiState,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
