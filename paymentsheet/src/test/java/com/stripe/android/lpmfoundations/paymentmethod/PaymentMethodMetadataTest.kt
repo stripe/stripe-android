@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -27,7 +26,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -43,7 +41,6 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -53,11 +50,6 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -87,7 +79,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `hasIntentToSetup returns true for payment_intent with PMO SFU set to off_session`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -98,7 +89,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `hasIntentToSetup returns false for payment_intent with top level SFU and PMO SFU set to none`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
@@ -110,7 +100,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `hasIntentToSetup returns top level SFU if PMO SFU is not set`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession
@@ -480,7 +469,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `formElementsForCode contains mandate for PMO SFU`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
@@ -502,7 +490,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `formElementsForCode does not contain mandate for PMO SFU none override`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("cashapp"),
@@ -1352,7 +1339,6 @@ internal class PaymentMethodMetadataTest {
             expectedValue = PaymentMethod.AllowRedisplay.UNSPECIFIED
         )
 
-        featureFlagTestRule.setEnabled(true)
         val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1395,7 +1381,6 @@ internal class PaymentMethodMetadataTest {
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
-            featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1454,7 +1439,6 @@ internal class PaymentMethodMetadataTest {
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
-            featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1559,7 +1543,6 @@ internal class PaymentMethodMetadataTest {
             expectedValue = PaymentMethod.AllowRedisplay.LIMITED
         )
 
-        featureFlagTestRule.setEnabled(true)
         val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1604,7 +1587,6 @@ internal class PaymentMethodMetadataTest {
                 expectedValue = PaymentMethod.AllowRedisplay.UNSPECIFIED
             )
 
-            featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1706,7 +1688,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `requiresMandate returns true for PMO SFU`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1717,7 +1698,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `requiresMandate returns false for PMO SFU none override`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,

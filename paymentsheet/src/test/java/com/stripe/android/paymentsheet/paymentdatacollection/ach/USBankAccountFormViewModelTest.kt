@@ -7,7 +7,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -33,7 +32,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -56,12 +54,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class USBankAccountFormViewModelTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
         instantDebits = false,
@@ -230,7 +222,6 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `when hasIntentToSetup, paymentMethodOptionsParams does not send SFU`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
@@ -1358,7 +1349,6 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `PaymentMethodOptionsParams does not contain SFU for RequestNoReuse if hasIntentToSetup`() = runTest {
-        featureFlagTestRule.setEnabled(true)
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,

@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -13,10 +12,8 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import org.junit.Rule
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
@@ -25,12 +22,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
         clientSecret = CLIENT_SECRET,
         intent = createPaymentIntent(),
         shipping = null,
-    )
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
     )
 
     @Test
@@ -276,7 +267,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with 'OffSession' PMO SFU should contain any mandate data`() {
-        featureFlagTestRule.setEnabled(true)
         mandateDataTest(
             setupFutureUsage = null,
             expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
@@ -286,7 +276,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with 'OnSession' PMO SFU should contain any mandate data`() {
-        featureFlagTestRule.setEnabled(true)
         mandateDataTest(
             setupFutureUsage = null,
             expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
@@ -296,7 +285,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     @Test
     fun `create() with top level 'OffSession' and 'None' PMO SFU should not contain any mandate data`() {
-        featureFlagTestRule.setEnabled(true)
         mandateDataTest(
             setupFutureUsage = StripeIntent.Usage.OffSession,
             expectedMandateDataParams = null,

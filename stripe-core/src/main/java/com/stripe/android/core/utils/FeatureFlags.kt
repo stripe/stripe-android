@@ -10,7 +10,6 @@ object FeatureFlags {
     val nativeLinkAttestationEnabled = FeatureFlag("Native Link Attestation")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
-    val enablePaymentMethodOptionsSetupFutureUsage = FeatureFlag("Enable PaymentMethodOptions SetupFutureUse")
     val linkPMsInSPM = FeatureFlag("Link PMs in SPM")
     val linkProminenceInFlowController = FeatureFlag("Link Prominence in FlowController")
 }

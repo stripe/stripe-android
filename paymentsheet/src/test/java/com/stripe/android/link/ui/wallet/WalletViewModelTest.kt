@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -25,7 +24,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.delay
@@ -47,12 +45,6 @@ class WalletViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
@@ -571,7 +563,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects card PMO SFU off session in passthrough mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -591,7 +582,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects card PMO SFU on session in passthrough mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -611,7 +601,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state does not respect card PMO SFU in payment method mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -631,7 +620,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state does not respect link PMO SFU in passthrough mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -651,7 +639,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects link PMO SFU off session in payment method mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
@@ -671,7 +658,6 @@ class WalletViewModelTest {
 
     @Test
     fun `state respects link PMO SFU on session in payment method mode`() = runTest(dispatcher) {
-        featureFlagTestRule.setEnabled(true)
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
