@@ -1,6 +1,12 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -38,7 +44,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.common.ui.AnimatedContentHeight
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
@@ -372,11 +377,22 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
-        AnimatedContentHeight {
-            if (expanded || selectedItem == null) {
+        AnimatedContent(
+            targetState = expanded || selectedItem == null,
+            transitionSpec = {
+                if (targetState) {
+                    // Expanding
+                    (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
+                } else {
+                    // Collapsing
+                    fadeIn() togetherWith (fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top))
+                }
+            }
+        ) { showExpanded ->
+            if (showExpanded) {
                 expandedContent()
             } else {
-                collapsedContent(selectedItem)
+                collapsedContent(selectedItem!!)
             }
         }
     }
