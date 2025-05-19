@@ -90,7 +90,8 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                useLinkExpress = true
+                useLinkExpress = true,
+                launchMode = LinkLaunchMode.Full
             )
 
             val launchCall = awaitLaunchCall()
@@ -101,6 +102,7 @@ internal class LinkPaymentLauncherTest {
                         configuration = TestFactory.LINK_CONFIGURATION,
                         startWithVerificationDialog = true,
                         linkAccount = TestFactory.LINK_ACCOUNT,
+                        launchMode = LinkLaunchMode.Full
                     )
                 )
 
@@ -121,7 +123,8 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                useLinkExpress = false
+                useLinkExpress = false,
+                launchMode = LinkLaunchMode.Full
             )
 
             val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
@@ -227,7 +230,8 @@ internal class LinkPaymentLauncherTest {
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                useLinkExpress = true
+                useLinkExpress = true,
+                launchMode = LinkLaunchMode.Full
             )
 
             verifyActivityResultCallback(
@@ -258,7 +262,8 @@ internal class LinkPaymentLauncherTest {
                 linkPaymentLauncher.present(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     linkAccount = TestFactory.LINK_ACCOUNT,
-                    useLinkExpress = true
+                    useLinkExpress = true,
+                    launchMode = LinkLaunchMode.Full
                 )
 
                 val registerCall = awaitRegisterCall()

@@ -360,7 +360,11 @@ class WalletViewModelTest {
         )
 
         assertThat(result)
-            .isEqualTo(LinkActivityResult.Completed(LinkAccountUpdate.Value(null)))
+            .isEqualTo(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
     }
 
     @Test
