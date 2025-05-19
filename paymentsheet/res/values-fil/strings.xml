@@ -239,6 +239,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka na pahintulutan ang mga pagbabayad alinsunod sa <terms>mga tuntunin</terms> na ito.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagbabayad</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Magpatuloy sa ibang paraan</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Default</string>
   <string name="stripe_wallet_expand_accessibility">Palitan ang pinili</string>
