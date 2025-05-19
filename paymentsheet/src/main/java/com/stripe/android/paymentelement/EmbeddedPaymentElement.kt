@@ -595,7 +595,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Describes how you handle row selections in EmbeddedPaymentElement
      */
     @ExperimentalEmbeddedPaymentElementApi
-    abstract class RowSelectionBehavior internal constructor(){
+    abstract class RowSelectionBehavior internal constructor() {
         /**
          * When a payment option is selected, the customer taps a button to continue or confirm payment.
          * This is the default recommended integration.
@@ -610,9 +610,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * Note that certain payment options like Apple Pay and saved payment methods are disabled in this mode if
          * you set [EmbeddedPaymentElement.Configuration.formSheetAction] to [FormSheetAction.Confirm].
          */
-        class ImmediateAction (
+        class ImmediateAction(
             internal val didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit
-        ): RowSelectionBehavior()
+        ) : RowSelectionBehavior()
     }
 
     /**
