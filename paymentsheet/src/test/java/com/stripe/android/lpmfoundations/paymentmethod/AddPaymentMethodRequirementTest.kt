@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
 import com.stripe.android.model.Address
@@ -16,17 +15,10 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
-import org.junit.Rule
 import org.junit.Test
 
 internal class AddPaymentMethodRequirementTest {
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun testUnsupportedReturnsFalse() {
@@ -52,7 +44,6 @@ internal class AddPaymentMethodRequirementTest {
 
     @Test
     fun testUnsupportedForSetupReturnsReturnsTrueForPaymentIntentsWithSetupFutureUsageAndPMOSFUOverride() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
@@ -71,7 +62,6 @@ internal class AddPaymentMethodRequirementTest {
 
     @Test
     fun testUnsupportedForSetupReturnsReturnsFalseForPaymentIntentsWithSetupFutureUsageAndNoPMOSFUOverride() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,

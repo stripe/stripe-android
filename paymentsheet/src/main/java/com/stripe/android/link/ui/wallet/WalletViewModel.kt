@@ -9,7 +9,6 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -418,23 +417,12 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
 internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean): Boolean {
     return when (this) {
         is PaymentIntent -> {
-            if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-                if (passthroughModeEnabled) {
-                    isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
-                } else {
-                    isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
-                }
+            if (passthroughModeEnabled) {
+                isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
             } else {
-                hasIntentToSetup()
+                isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
             }
         }
-        is SetupIntent -> true
-    }
-}
-
-private fun StripeIntent.hasIntentToSetup(): Boolean {
-    return when (this) {
-        is PaymentIntent -> setupFutureUsage != null
         is SetupIntent -> true
     }
 }
