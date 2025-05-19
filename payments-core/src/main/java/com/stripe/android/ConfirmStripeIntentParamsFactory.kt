@@ -1,7 +1,6 @@
 package com.stripe.android
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -150,16 +149,7 @@ private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.T
 }
 
 private fun PaymentIntent.canSetupFutureUsage(paymentMethodCode: PaymentMethodCode): Boolean {
-    return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-        isSetupFutureUsageSet(paymentMethodCode)
-    } else {
-        when (setupFutureUsage) {
-            null,
-            StripeIntent.Usage.OneTime -> false
-            StripeIntent.Usage.OnSession,
-            StripeIntent.Usage.OffSession -> true
-        }
-    }
+    return isSetupFutureUsageSet(paymentMethodCode)
 }
 
 private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraParams(): Boolean? {

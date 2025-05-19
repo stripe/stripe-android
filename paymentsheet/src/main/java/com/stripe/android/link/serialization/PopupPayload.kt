@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import android.util.Base64
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -206,14 +205,10 @@ internal data class PopupPayload(
         private fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean): Boolean {
             return when (this) {
                 is PaymentIntent -> {
-                    if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-                        if (passthroughModeEnabled) {
-                            isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
-                        } else {
-                            isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
-                        }
+                    if (passthroughModeEnabled) {
+                        isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
                     } else {
-                        setupFutureUsage.isSetupForFutureUsage()
+                        isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
                     }
                 }
                 is SetupIntent -> true

@@ -71,11 +71,7 @@ internal data class PaymentMethodMetadata(
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
-            is PaymentIntent -> if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-                stripeIntent.isSetupFutureUsageSet(code)
-            } else {
-                stripeIntent.setupFutureUsage != null
-            }
+            is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
             is SetupIntent -> true
         }
     }

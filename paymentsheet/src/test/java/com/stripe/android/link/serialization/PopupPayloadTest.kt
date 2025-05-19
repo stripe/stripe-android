@@ -5,16 +5,13 @@ import android.os.LocaleList
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -24,12 +21,6 @@ import java.util.UUID
 @RunWith(RobolectricTestRunner::class)
 @Suppress("MaxLineLength")
 internal class PopupPayloadTest {
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun testJsonSerialization() {
@@ -197,7 +188,6 @@ internal class PopupPayloadTest {
 
     @Test
     fun `on 'create' with link PMO SFU on session usage, 'setupForFutureUsage' should be true`() {
-        featureFlagTestRule.setEnabled(true)
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
                 customerCountryCode = null,
@@ -219,7 +209,6 @@ internal class PopupPayloadTest {
 
     @Test
     fun `on 'create' with link PMO SFU off session usage, 'setupForFutureUsage' should be true`() {
-        featureFlagTestRule.setEnabled(true)
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
                 customerCountryCode = null,
@@ -241,7 +230,6 @@ internal class PopupPayloadTest {
 
     @Test
     fun `on 'create' with card PMO SFU with on session usage, 'setupForFutureUsage' should be true`() {
-        featureFlagTestRule.setEnabled(true)
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
                 customerCountryCode = null,
@@ -264,7 +252,6 @@ internal class PopupPayloadTest {
 
     @Test
     fun `on 'create' with card PMO SFU with off session usage, 'setupForFutureUsage' should be true`() {
-        featureFlagTestRule.setEnabled(true)
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
                 customerCountryCode = null,
@@ -287,7 +274,6 @@ internal class PopupPayloadTest {
 
     @Test
     fun `on 'create' with card PMO SFU in payment method mode, 'setupForFutureUsage' should be false`() {
-        featureFlagTestRule.setEnabled(true)
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
                 customerCountryCode = null,
@@ -309,7 +295,6 @@ internal class PopupPayloadTest {
 
     @Test
     fun `on 'create' with link PMO SFU in payment method mode, 'setupForFutureUsage' should be true`() {
-        featureFlagTestRule.setEnabled(true)
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
                 customerCountryCode = null,

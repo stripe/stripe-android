@@ -3,7 +3,6 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
@@ -229,12 +228,8 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-            (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
-                !isPaymentMethodOptionsSetupFutureUsageNone(code)
-        } else {
-            isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
-        }
+        return (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
+            !isPaymentMethodOptionsSetupFutureUsageNone(code)
     }
 
     /**
