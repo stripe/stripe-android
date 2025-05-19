@@ -41,8 +41,7 @@ internal object LinkViewModelModule {
             linkAttestationCheck = linkAttestationCheck,
             savedStateHandle = savedStateHandle,
             navigationManager = navigationManager,
-            startWithVerificationDialog = startWithVerificationDialog,
-            linkLaunchMode = linkLaunchMode
+            startWithVerificationDialog = startWithVerificationDialog
         )
     }
 }

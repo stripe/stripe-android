@@ -359,62 +359,6 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onVerificationSucceeded emits Completed result with default payment method`() = runTest {
-        val paymentDetailsList = listOf(
-            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_default", isDefault = true),
-            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_non_default", isDefault = false),
-        )
-        val consumerDetails = Result.success(
-            ConsumerPaymentDetails(
-                paymentDetails = paymentDetailsList
-            )
-        )
-
-        val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
-        linkAccountManager.listPaymentDetailsResult = consumerDetails
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.PaymentSelection
-        )
-
-        vm.result.test {
-            vm.onVerificationSucceeded()
-            val result = awaitItem() as LinkActivityResult.Completed
-            assertThat(result.selectedPaymentDetails!!.id).isEqualTo("pm_default")
-        }
-    }
-
-    @Test
-    fun `onVerificationSucceeded emits Completed result with first payment method if no default`() = runTest {
-        val paymentDetailsList = listOf(
-            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_1", isDefault = false),
-            CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "pm_2", isDefault = false),
-        )
-        val consumerDetails = Result.success(
-            ConsumerPaymentDetails(
-                paymentDetails = paymentDetailsList
-            )
-        )
-
-        val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
-        linkAccountManager.listPaymentDetailsResult = consumerDetails
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.PaymentSelection
-        )
-
-        vm.result.test {
-            vm.onVerificationSucceeded()
-            val result = awaitItem() as LinkActivityResult.Completed
-            assertThat(result.selectedPaymentDetails!!.id).isEqualTo("pm_1")
-        }
-    }
-
-    @Test
     fun `onCreate should dismiss 2fa on when dismissed`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
@@ -650,7 +594,6 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -661,7 +604,6 @@ internal class LinkActivityViewModelTest {
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
-            linkLaunchMode = linkLaunchMode,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle
