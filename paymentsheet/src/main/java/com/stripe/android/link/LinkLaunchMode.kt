@@ -11,7 +11,7 @@ internal sealed interface LinkLaunchMode : Parcelable {
      * Link is launched with the intent to solely authenticate.
      */
     @Parcelize
-    data object Authentication : LinkLaunchMode
+    data object AuthenticationOnly : LinkLaunchMode
 
     /**
      * Link is launched in full mode, where the user can authenticate, select a Link payment method and proceed
