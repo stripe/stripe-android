@@ -239,6 +239,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Kontynuując, wyrażasz zgodę na autoryzowanie płatności zgodnie z tymi <terms>warunkami</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Płatność</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Kontynuuj w inny sposób</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Domyślne</string>
   <string name="stripe_wallet_expand_accessibility">Zmień wybór</string>
