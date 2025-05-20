@@ -75,12 +75,20 @@ internal class WalletViewModel @Inject constructor(
             cardBrandFilter = configuration.cardBrandFilter,
             isProcessing = false,
             hasCompleted = false,
+            // initially expand the wallet if a payment method is preselected.
+            userSetIsExpanded = linkLaunchMode.selectedItemId != null,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
             canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
         )
     )
+
+    val LinkLaunchMode.selectedItemId
+        get() = when (this) {
+            is LinkLaunchMode.Full -> null
+            is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
+        }
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
@@ -111,7 +119,7 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            loadPaymentDetails(selectedItemId = null)
+            loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
         }
 
         viewModelScope.launch {
@@ -226,7 +234,7 @@ internal class WalletViewModel @Inject constructor(
                         cvc = cvc
                     )
                 }
-                LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
+                is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                         selectedPayment = LinkPaymentMethod(

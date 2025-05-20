@@ -254,7 +254,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 configuration = configuration,
                 linkAccount = linkAccount,
                 useLinkExpress = false,
-                launchMode = LinkLaunchMode.PaymentMethodSelection
+                launchMode = LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = paymentSelection.selectedPayment?.details
+                )
             )
         } else {
             showPaymentOptionList(state, paymentSelection)
@@ -300,7 +302,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 val paymentSelection = viewModel.paymentSelection
                 if (paymentSelection is Link) {
                     val updatedPaymentSelection = paymentSelection.copy(
-                        selectedPayment = paymentSelection.selectedPayment,
+                        selectedPayment = result.selectedPayment,
                     )
                     viewModel.paymentSelection = updatedPaymentSelection
                     paymentOptionCallback.onPaymentOption(paymentOptionFactory.create(updatedPaymentSelection))
