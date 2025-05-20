@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.updatecard
 
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Surface
@@ -19,7 +18,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
-import com.stripe.android.link.ui.Loader
+import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
@@ -37,10 +36,10 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
 
 @Composable
-internal fun ColumnScope.UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
+internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
     when (val interactor = viewModel.interactor) {
-        null -> Loader()
+        null -> LinkLoadingScreen()
         else -> UpdateCardScreenBody(
             interactor = interactor,
             state = state,
