@@ -20,6 +20,8 @@ internal data class SupportedPaymentMethod(
      */
     val code: PaymentMethodCode,
 
+    val syntheticCode: String = code,
+
     /** This describes the name that appears under the selector. */
     val displayName: ResolvableString,
 
@@ -57,6 +59,7 @@ internal data class SupportedPaymentMethod(
 
     constructor(
         code: PaymentMethodCode,
+        syntheticCode: PaymentMethodCode = code,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
         iconRequiresTinting: Boolean = false,
@@ -65,6 +68,7 @@ internal data class SupportedPaymentMethod(
         subtitle: ResolvableString? = null,
     ) : this(
         code = code,
+        syntheticCode = syntheticCode,
         displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
         lightThemeIconUrl = lightThemeIconUrl,
@@ -104,6 +108,7 @@ internal data class SupportedPaymentMethod(
 
         return DisplayablePaymentMethod(
             code = code,
+            syntheticCode = syntheticCode,
             displayName = displayName,
             iconResource = iconResource,
             lightThemeIconUrl = lightThemeIconUrl,

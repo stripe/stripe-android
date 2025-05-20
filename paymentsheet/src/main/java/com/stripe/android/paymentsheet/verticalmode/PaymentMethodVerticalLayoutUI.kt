@@ -129,7 +129,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         val selectedIndex = remember(selection, paymentMethods) {
             if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
                 val code = selection.code
-                paymentMethods.indexOfFirst { it.code == code }
+                paymentMethods.indexOfFirst { it.syntheticCode == code }
             } else {
                 -1
             }
