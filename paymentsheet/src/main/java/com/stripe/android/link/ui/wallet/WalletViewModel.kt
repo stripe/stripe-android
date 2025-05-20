@@ -260,7 +260,9 @@ internal class WalletViewModel @Inject constructor(
             LinkConfirmationResult.Succeeded -> {
                 dismissWithResult(
                     LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                        // After confirmation, clear the link account state so further launches
+                        // require authenticating again.
+                        linkAccountUpdate = LinkAccountUpdate.Value(null),
                         collectedCvc = cvc
                     )
                 )
