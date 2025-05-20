@@ -70,9 +70,7 @@ internal fun FullScreenContent(
         }
     }
 
-    EventReporterProvider(
-        eventReporter = eventReporter
-    ) {
+    EventReporterProvider(eventReporter) {
         ElementsBottomSheetLayout(
             state = bottomSheetState,
             onDismissed = dismiss,
