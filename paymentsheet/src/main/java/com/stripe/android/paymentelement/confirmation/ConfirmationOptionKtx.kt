@@ -123,7 +123,8 @@ private fun PaymentSelection.Link.toConfirmationOption(
     return linkConfiguration?.let {
         LinkConfirmationOption(
             configuration = linkConfiguration,
-            useLinkExpress = useLinkExpress
+            useLinkExpress = useLinkExpress,
+            selectedLinkPayment = selectedPayment
         )
     }
 }

@@ -59,7 +59,9 @@ internal class LinkConfirmationDefinition @Inject constructor(
             configuration = confirmationOption.configuration,
             linkAccount = linkAccountHolder.linkAccount.value,
             useLinkExpress = confirmationOption.useLinkExpress,
-            launchMode = LinkLaunchMode.Full
+            launchMode = LinkLaunchMode.Full(
+                confirmationOption.selectedLinkPayment
+            )
         )
     }
 

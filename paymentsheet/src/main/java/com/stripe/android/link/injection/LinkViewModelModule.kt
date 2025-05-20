@@ -3,9 +3,11 @@ package com.stripe.android.link.injection
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -25,8 +27,10 @@ internal object LinkViewModelModule {
         eventReporter: EventReporter,
         linkConfiguration: LinkConfiguration,
         linkAttestationCheck: LinkAttestationCheck,
+        linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory,
         navigationManager: NavigationManager,
         savedStateHandle: SavedStateHandle,
+        linkLaunchMode: LinkLaunchMode,
         @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -39,7 +43,9 @@ internal object LinkViewModelModule {
             linkAttestationCheck = linkAttestationCheck,
             savedStateHandle = savedStateHandle,
             navigationManager = navigationManager,
-            startWithVerificationDialog = startWithVerificationDialog
+            startWithVerificationDialog = startWithVerificationDialog,
+            linkConfirmationHandlerFactory = linkConfirmationHandlerFactory,
+            linkLaunchMode = linkLaunchMode
         )
     }
 }

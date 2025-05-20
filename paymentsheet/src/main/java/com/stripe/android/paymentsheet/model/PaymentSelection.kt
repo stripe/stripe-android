@@ -12,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.wallet.displayName
@@ -19,7 +20,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -71,14 +71,14 @@ internal sealed class PaymentSelection : Parcelable {
     data class Link(
         val useLinkExpress: Boolean = false,
         val linkAccount: LinkAccount? = null,
-        val selectedLinkPayment: ConsumerPaymentDetails.PaymentDetails? = null,
+        val selectedPayment: LinkPaymentMethod? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
 
         val label: ResolvableString
-            get() = selectedLinkPayment?.displayName ?: StripeR.string.stripe_link.resolvableString
+            get() = selectedPayment?.details?.displayName ?: StripeR.string.stripe_link.resolvableString
 
         override fun mandateText(
             merchantName: String,

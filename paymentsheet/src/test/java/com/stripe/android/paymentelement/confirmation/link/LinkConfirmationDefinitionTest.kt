@@ -203,8 +203,7 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                collectedCvc = null
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
             deferredIntentConfirmationType = null,
         )
@@ -356,7 +355,8 @@ internal class LinkConfirmationDefinitionTest {
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
-            useLinkExpress = true
+            useLinkExpress = true,
+            selectedLinkPayment = null
         )
     }
 }

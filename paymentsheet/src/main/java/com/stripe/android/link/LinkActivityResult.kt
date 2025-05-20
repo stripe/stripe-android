@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
@@ -11,17 +10,16 @@ internal sealed class LinkActivityResult : Parcelable {
      * Indicates that the flow was completed successfully.
      */
     @Parcelize
-    data class Completed(
+    internal data class Completed(
         val linkAccountUpdate: LinkAccountUpdate,
-        val selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails? = null,
-        val collectedCvc: String?,
+        val selectedPayment: LinkPaymentMethod? = null,
     ) : LinkActivityResult()
 
     /**
      * Indicates that the user selected a payment method. This payment method has not yet been confirmed.
      */
     @Parcelize
-    data class PaymentMethodObtained(
+    internal data class PaymentMethodObtained(
         val paymentMethod: PaymentMethod
     ) : LinkActivityResult()
 
@@ -29,7 +27,7 @@ internal sealed class LinkActivityResult : Parcelable {
      * The user cancelled the Link flow without completing it.
      */
     @Parcelize
-    data class Canceled(
+    internal data class Canceled(
         val reason: Reason = Reason.BackPressed,
         val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult() {
@@ -44,7 +42,7 @@ internal sealed class LinkActivityResult : Parcelable {
      * Something went wrong. See [error] for more information.
      */
     @Parcelize
-    data class Failed(
+    internal data class Failed(
         val error: Throwable,
         val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult()

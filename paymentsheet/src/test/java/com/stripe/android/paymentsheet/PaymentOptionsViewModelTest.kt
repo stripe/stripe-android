@@ -891,7 +891,7 @@ internal class PaymentOptionsViewModelTest {
         val linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
         val result = LinkActivityResult.Completed(
             linkAccountUpdate = linkAccountUpdate,
-            collectedCvc = null
+            selectedPayment = null
         )
         val viewModel = createViewModel()
         viewModel.paymentOptionResult.test {

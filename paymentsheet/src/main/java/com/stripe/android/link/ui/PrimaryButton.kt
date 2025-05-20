@@ -148,7 +148,7 @@ internal fun completePaymentButtonLabel(
     stripeIntent: StripeIntent,
     linkLaunchMode: LinkLaunchMode,
 ): ResolvableString = when (linkLaunchMode) {
-    LinkLaunchMode.Full -> when (stripeIntent) {
+    is LinkLaunchMode.Full -> when (stripeIntent) {
         is PaymentIntent -> {
             Amount(
                 requireNotNull(stripeIntent.amount),
@@ -159,7 +159,7 @@ internal fun completePaymentButtonLabel(
             uiCoreR.string.stripe_continue_button_label.resolvableString
         }
     }
-    LinkLaunchMode.PaymentMethodSelection -> uiCoreR.string.stripe_continue_button_label.resolvableString
+    is LinkLaunchMode.PaymentMethodSelection -> uiCoreR.string.stripe_continue_button_label.resolvableString
 }
 
 private val PrimaryButtonIconWidth = 13.dp
