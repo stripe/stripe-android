@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentMethodCode
 
 internal data class DisplayablePaymentMethod(
     val code: PaymentMethodCode,
+    val syntheticCode: String = code,
     val displayName: ResolvableString,
     @DrawableRes val iconResource: Int,
     val lightThemeIconUrl: String?,
