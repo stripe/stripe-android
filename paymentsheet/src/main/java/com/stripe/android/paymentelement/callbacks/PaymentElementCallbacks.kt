@@ -2,8 +2,11 @@ package com.stripe.android.paymentelement.callbacks
 
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 
@@ -13,12 +16,14 @@ internal data class PaymentElementCallbacks private constructor(
     val confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?,
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
+    val rowSelectionCallback: InternalRowSelectionCallback?
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
         private var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
         private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
         private var analyticEventCallback: AnalyticEventCallback? = null
+        private var rowSelectionCallback: InternalRowSelectionCallback? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -40,12 +45,25 @@ internal data class PaymentElementCallbacks private constructor(
             this.analyticEventCallback = analyticEventCallback
         }
 
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        fun rowSelectionImmediateActionCallback(
+            rowSelectionBehavior: EmbeddedPaymentElement.RowSelectionBehavior,
+            element: EmbeddedPaymentElement,
+        ) = apply {
+            if (rowSelectionBehavior is EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction) {
+                this.rowSelectionCallback = {
+                    rowSelectionBehavior.didSelectPaymentOption(element)
+                }
+            }
+        }
+
         fun build(): PaymentElementCallbacks {
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
                 confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 analyticEventCallback = analyticEventCallback,
+                rowSelectionCallback = rowSelectionCallback
             )
         }
     }
