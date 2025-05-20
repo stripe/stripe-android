@@ -213,7 +213,7 @@ internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
         sepaDebit?.last4
     )
     PaymentMethod.Type.USBankAccount -> resolvableString(
-        R.string.stripe_paymentsheet_bank_account_last_4,
+        R.string.stripe_paymentsheet_payment_method_item_card_number,
         usBankAccount?.last4
     )
     PaymentMethod.Type.Link -> {

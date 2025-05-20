@@ -65,9 +65,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             is SavedPaymentMethod.Link -> {
                 when (savedPaymentMethod.paymentDetails) {
                     is LinkPaymentDetails.BankAccount -> {
-                        USBankAccountUI(
-                            name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
-                            email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
+                        BankAccountUI(
+                            name = null,
+                            email = null,
                             bankName = savedPaymentMethod.paymentDetails.bankName,
                             last4 = savedPaymentMethod.paymentDetails.last4,
                         )
@@ -84,9 +84,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
                 sepaDebit = savedPaymentMethod.sepaDebit,
             )
-            is SavedPaymentMethod.USBankAccount -> USBankAccountUI(
-                name = null,
-                email = null,
+            is SavedPaymentMethod.USBankAccount -> BankAccountUI(
+                name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
+                email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
                 bankName = savedPaymentMethod.usBankAccount.bankName,
                 last4 = savedPaymentMethod.usBankAccount.last4,
             )
@@ -186,7 +186,7 @@ private fun UpdatePaymentMethodButtons(
 }
 
 @Composable
-private fun USBankAccountUI(
+private fun BankAccountUI(
     name: String?,
     email: String?,
     bankName: String?,
