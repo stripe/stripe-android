@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
@@ -518,12 +519,15 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `presentPaymentOptions shows Link picker when shouldShowLinkPicker is true`() = runTest {
+    fun `presentPaymentOptions shows Link picker when a Link payment method is already selected`() = runTest {
         val verifiedLinkAccount = TestFactory.LINK_ACCOUNT
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link(
                 linkAccount = verifiedLinkAccount,
-                selectedPayment = null
+                selectedPayment = LinkPaymentMethod(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = null
+                )
             )
         )
         linkAccountHolder.set(verifiedLinkAccount)
@@ -2408,7 +2412,7 @@ internal class DefaultFlowControllerTest {
             linkHandler = mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
-            linkPaymentLauncher = mock(),
+            linkPaymentLauncher = linkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             confirmationHandler = createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,

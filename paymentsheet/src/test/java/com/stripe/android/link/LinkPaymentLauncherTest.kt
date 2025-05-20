@@ -321,7 +321,7 @@ internal class LinkPaymentLauncherTest {
         linkActivityContract: LinkActivityContract
     ) {
         verify(activityResultRegistry).register(
-            eq("LinkPaymentLauncher"),
+            eq("PaymentElementCallbackIdentifier_LinkPaymentLauncher"),
             eq(linkActivityContract),
             any()
         )

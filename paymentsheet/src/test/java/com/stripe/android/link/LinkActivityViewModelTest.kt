@@ -206,11 +206,13 @@ internal class LinkActivityViewModelTest {
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
             linkAccountManager = linkAccountManager
         )
-        vm.onCreate(mock())
 
         advanceUntilIdle()
-        // Should not emit Completed result, should proceed to attestation check and update screen state
-        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+
+        vm.result.test {
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Failed::class.java)
+        }
     }
 
     @Test
@@ -239,7 +241,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate does not emit Completed when confirmation is canceled or failed`() = runTest {
+    fun `onCreate does not emit Completed when confirmation is failed`() = runTest {
         val selectedPayment = LinkPaymentMethod(
             details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             collectedCvc = null
@@ -260,11 +262,12 @@ internal class LinkActivityViewModelTest {
             linkConfirmationHandler = linkConfirmationHandler
         )
 
-        vm.onCreate(mock())
-
         advanceUntilIdle()
-        // Should not emit Completed, should build full screen state
-        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+
+        vm.result.test {
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Failed::class.java)
+        }
     }
 
     @Test

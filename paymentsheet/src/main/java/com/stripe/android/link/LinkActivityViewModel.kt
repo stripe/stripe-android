@@ -228,14 +228,14 @@ internal class LinkActivityViewModel @Inject constructor(
     /**
      * Attempts to confirm payment eagerly if the Link flow was launched in confirmation mode.
      */
-    private suspend fun confirmLinkPayment(selectedPayment: LinkPaymentMethod) {
+    private suspend fun confirmLinkPayment(selectedPayment: LinkPaymentMethod) = runCatching {
         require(selectedPayment.readyForConfirmation()) { "LinkPaymentMethod must be ready for confirmation" }
-        val account = requireNotNull(linkAccount)
-        val confirmResult = linkConfirmationHandler.confirm(
+        linkConfirmationHandler.confirm(
             paymentDetails = selectedPayment.details,
             cvc = selectedPayment.collectedCvc,
-            linkAccount = account,
+            linkAccount = requireNotNull(linkAccount) { "LinkAccount must not be null for confirmation" },
         )
+    }.onSuccess { confirmResult ->
         dismissWithResult(
             when (confirmResult) {
                 LinkConfirmationResult.Canceled -> LinkActivityResult.Canceled(
@@ -250,6 +250,13 @@ internal class LinkActivityViewModel @Inject constructor(
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
                 )
             }
+        )
+    }.onFailure {
+        dismissWithResult(
+            LinkActivityResult.Failed(
+                IllegalStateException("Failed to confirm Link payment: "),
+                linkAccountUpdate = LinkAccountUpdate.None
+            )
         )
     }
 
