@@ -33,5 +33,8 @@ internal sealed interface PaymentSheetState : Parcelable {
 
         val stripeIntent: StripeIntent
             get() = paymentMethodMetadata.stripeIntent
+
+        val linkConfiguration
+            get() = paymentMethodMetadata.linkState?.configuration
     }
 }

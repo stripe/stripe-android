@@ -40,7 +40,7 @@ internal class LinkPaymentLauncherTest {
 
         setupActivityResultRegistryMock(activityResultRegistry, activityResultLauncher)
 
-        linkPaymentLauncher.register(activityResultRegistry) {}
+        linkPaymentLauncher.register(activityResultRegistry = activityResultRegistry) {}
 
         verifyActivityResultRegistryRegister(activityResultRegistry, linkActivityContract)
     }
@@ -227,7 +227,7 @@ internal class LinkPaymentLauncherTest {
             )
 
             var callbackParam: LinkActivityResult? = null
-            linkPaymentLauncher.register(activityResultRegistry) { callbackParam = it }
+            linkPaymentLauncher.register(activityResultRegistry = activityResultRegistry) { callbackParam = it }
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
@@ -339,7 +339,8 @@ internal class LinkPaymentLauncherTest {
                 }
             },
             linkActivityContract = linkActivityContract,
-            linkStore = linkStore
+            linkStore = linkStore,
+            paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier"
         )
     }
 }

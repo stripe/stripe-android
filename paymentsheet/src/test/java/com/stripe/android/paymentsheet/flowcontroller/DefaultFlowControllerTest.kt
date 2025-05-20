@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -172,6 +173,8 @@ internal class DefaultFlowControllerTest {
 
     private var paymentLauncherResultCallback: ((InternalPaymentResult) -> Unit)? = null
     private var googlePayLauncherResultCallback: ((GooglePayPaymentMethodLauncher.Result) -> Unit)? = null
+
+    private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
@@ -512,6 +515,31 @@ internal class DefaultFlowControllerTest {
 
         assertThat(resultCaptor.firstValue.error).hasMessageThat()
             .isEqualTo("The host activity is not in a valid state (DESTROYED).")
+    }
+
+    @Test
+    fun `presentPaymentOptions shows Link picker when shouldShowLinkPicker is true`() = runTest {
+        val verifiedLinkAccount = TestFactory.LINK_ACCOUNT
+        val flowController = createFlowController(
+            paymentSelection = PaymentSelection.Link(
+                linkAccount = verifiedLinkAccount,
+                selectedPayment = null
+            )
+        )
+        linkAccountHolder.set(verifiedLinkAccount)
+
+        flowController.configureExpectingSuccess()
+
+        flowController.presentPaymentOptions()
+
+        verify(linkPaymentLauncher).present(
+            configuration = any(),
+            linkAccount = anyOrNull(),
+            launchMode = any(),
+            useLinkExpress = any()
+        )
+
+        verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
     }
 
     @Test
@@ -2348,54 +2376,58 @@ internal class DefaultFlowControllerTest {
         cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
-    ) = DefaultFlowController(
-        viewModelScope = testScope,
-        lifecycleOwner = lifecycleOwner,
-        activityResultCaller = activityResultCaller,
-        paymentOptionFactory = PaymentOptionFactory(
-            iconLoader = PaymentSelection.IconLoader(
-                resources = context.resources,
-                imageLoader = StripeImageLoader(context),
+    ): DefaultFlowController {
+        return DefaultFlowController(
+            viewModelScope = testScope,
+            lifecycleOwner = lifecycleOwner,
+            activityResultCaller = activityResultCaller,
+            paymentOptionFactory = PaymentOptionFactory(
+                iconLoader = PaymentSelection.IconLoader(
+                    resources = context.resources,
+                    imageLoader = StripeImageLoader(context),
+                ),
+                context = context,
             ),
+            paymentOptionCallback = paymentOptionCallback,
+            paymentResultCallback = paymentResultCallback,
             context = context,
-        ),
-        paymentOptionCallback = paymentOptionCallback,
-        paymentResultCallback = paymentResultCallback,
-        context = context,
-        eventReporter = eventReporter,
-        viewModel = viewModel,
-        enableLogging = ENABLE_LOGGING,
-        productUsage = PRODUCT_USAGE,
-        prefsRepositoryFactory = { prefsRepository },
-        configurationHandler = FlowControllerConfigurationHandler(
-            paymentElementLoader = paymentElementLoader,
-            uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
-        ),
-        errorReporter = errorReporter,
-        initializedViaCompose = false,
-        linkHandler = mock(),
-        paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-        linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-        confirmationHandler = createTestConfirmationHandlerFactory(
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
-            googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
-            intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
-            stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
-            cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
-            paymentConfiguration = PaymentConfiguration.getInstance(context),
-            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
-                accountStatus = AccountStatus.Verified,
+            enableLogging = ENABLE_LOGGING,
+            productUsage = PRODUCT_USAGE,
+            prefsRepositoryFactory = { prefsRepository },
+            configurationHandler = FlowControllerConfigurationHandler(
+                paymentElementLoader = paymentElementLoader,
+                uiContext = testDispatcher,
+                eventReporter = eventReporter,
+                viewModel = viewModel,
+                paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
             ),
-            linkLauncher = linkPaymentLauncher,
             errorReporter = errorReporter,
-            savedStateHandle = viewModel.handle,
-            statusBarColor = STATUS_BAR_COLOR,
-        ).create(testScope),
-    )
+            initializedViaCompose = false,
+            linkHandler = mock(),
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+            linkAccountHolder = linkAccountHolder,
+            linkPaymentLauncher = mock(),
+            activityResultRegistryOwner = mock(),
+            confirmationHandler = createTestConfirmationHandlerFactory(
+                paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+                bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
+                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
+                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                stripePaymentLauncherAssistedFactory = paymentLauncherAssistedFactory,
+                cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
+                paymentConfiguration = PaymentConfiguration.getInstance(context),
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+                    accountStatus = AccountStatus.Verified,
+                ),
+                linkLauncher = linkPaymentLauncher,
+                errorReporter = errorReporter,
+                savedStateHandle = viewModel.handle,
+                statusBarColor = STATUS_BAR_COLOR,
+            ).create(testScope),
+        )
+    }
 
     private fun createViewModel(): FlowControllerViewModel {
         return FlowControllerViewModel(

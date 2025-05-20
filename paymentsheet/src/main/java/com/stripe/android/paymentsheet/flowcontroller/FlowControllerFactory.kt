@@ -54,6 +54,7 @@ internal class FlowControllerFactory(
                 key = "FlowController(instance = $paymentElementCallbackIdentifier)",
                 registryOwner = activityResultRegistryOwner,
             ),
+            activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = statusBarColor,
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,

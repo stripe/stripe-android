@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +17,7 @@ import javax.inject.Singleton
 @Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore,
 ) {
@@ -25,11 +27,12 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
     fun register(
+        key: String = "LinkPaymentLauncher",
         activityResultRegistry: ActivityResultRegistry,
         callback: (LinkActivityResult) -> Unit,
     ) {
         linkActivityResultLauncher = activityResultRegistry.register(
-            "LinkPaymentLauncher",
+            "${paymentElementCallbackIdentifier}_$key",
             linkActivityContract,
         ) { linkActivityResult ->
             handleActivityResult(linkActivityResult, callback)
