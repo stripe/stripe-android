@@ -102,58 +102,6 @@ fun rememberPaymentSheetFlowController(
     )
 }
 
-/**
- * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
- *
- * @param builder which contains required [PaymentOptionCallback] and [PaymentSheetResultCallback] as well as
- * other optional callbacks.
- */
-@Composable
-internal fun rememberPaymentSheetFlowController(
-    builder: PaymentSheet.FlowController.Builder
-): PaymentSheet.FlowController {
-    return internalRememberPaymentSheetFlowController(
-        paymentOptionCallback = builder.paymentOptionCallback,
-        paymentResultCallback = builder.resultCallback
-    )
-}
-
-@Composable
-private fun internalRememberPaymentSheetFlowController(
-    paymentOptionCallback: PaymentOptionCallback,
-    paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet.FlowController {
-    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
-        "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
-    }
-
-    val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
-        "PaymentSheet.FlowController must be created with access to a ActivityResultRegistryOwner"
-    }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    val activity = rememberActivity {
-        "PaymentSheet.FlowController must be created in the context of an Activity"
-    }
-
-    val paymentElementCallbackIdentifier = rememberSaveable {
-        UUID.randomUUID().toString()
-    }
-
-    return remember(paymentOptionCallback, paymentResultCallback) {
-        FlowControllerFactory(
-            viewModelStoreOwner = viewModelStoreOwner,
-            lifecycleOwner = lifecycleOwner,
-            activityResultRegistryOwner = activityResultRegistryOwner,
-            statusBarColor = { activity.window?.statusBarColor },
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            paymentOptionCallback = paymentOptionCallback,
-            paymentResultCallback = paymentResultCallback,
-        ).create()
-    }
-}
-
 @Composable
 internal fun internalRememberPaymentSheetFlowController(
     callbacks: PaymentElementCallbacks,
