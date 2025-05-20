@@ -134,10 +134,6 @@ internal class LinkActivity : ComponentActivity() {
                 .putExtra(EXTRA_ARGS, args)
         }
 
-        internal fun getArgs(intent: Intent): NativeLinkArgs? {
-            return intent.getParcelableExtra<NativeLinkArgs>(EXTRA_ARGS)
-        }
-
         internal fun getArgs(savedStateHandle: SavedStateHandle): NativeLinkArgs? {
             return savedStateHandle.get<NativeLinkArgs>(EXTRA_ARGS)
         }
