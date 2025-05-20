@@ -16,6 +16,8 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
@@ -25,6 +27,7 @@ import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
+import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
 import com.stripe.android.model.parsers.UpdateAvailableIncentivesJsonParser
 import java.util.Locale
@@ -108,6 +111,14 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<UpdateAvailableIncentives>
+
+    suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -385,6 +396,31 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<FinancialConnectionsSession> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = createLinkAccountSession,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "link_mode" to linkMode.value,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ),
+            ),
+            responseJsonParser = FinancialConnectionsSessionJsonParser(),
+        )
+    }
+
     internal companion object {
 
         /**
@@ -433,6 +469,11 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
         private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
+         */
+        private val createLinkAccountSession: String = getApiUrl("consumers/link_account_sessions")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`

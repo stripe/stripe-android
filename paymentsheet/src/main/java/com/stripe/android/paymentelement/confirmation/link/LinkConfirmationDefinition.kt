@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -17,7 +18,8 @@ import javax.inject.Inject
 internal class LinkConfirmationDefinition @Inject constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkStore: LinkStore,
-    private val linkAccountHolder: LinkAccountHolder
+    private val linkAccountHolder: LinkAccountHolder,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator
 ) : ConfirmationDefinition<LinkConfirmationOption, LinkPaymentLauncher, Unit, LinkActivityResult> {
     override val key: String = "Link"
 
@@ -59,6 +61,8 @@ internal class LinkConfirmationDefinition @Inject constructor(
             configuration = confirmationOption.configuration,
             linkAccount = linkAccountHolder.linkAccount.value,
             useLinkExpress = confirmationOption.useLinkExpress,
+            consumerSessionPublishableKey = linkConfigurationCoordinator
+                .getComponent(confirmationOption.configuration).linkAccountManager.consumerPublishableKey,
             launchMode = LinkLaunchMode.Full
         )
     }

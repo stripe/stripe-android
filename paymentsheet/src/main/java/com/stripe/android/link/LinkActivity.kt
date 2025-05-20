@@ -101,6 +101,7 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.Args(
                 configuration = configuration,
                 startWithVerificationDialog = false,
+                consumerSessionPublishableKey = null,
                 linkAccount = null,
                 launchMode = LinkLaunchMode.Full
             )

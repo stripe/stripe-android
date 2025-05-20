@@ -228,6 +228,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     configuration = linkState.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection,
                     linkAccount = null,
+                    consumerSessionPublishableKey = null,
                     useLinkExpress = true
                 )
             } else {
