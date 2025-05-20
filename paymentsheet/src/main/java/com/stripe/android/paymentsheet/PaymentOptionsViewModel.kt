@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFac
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,7 +94,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
-        linkHandler.linkConfigurationCoordinator.emailFlow,
+        linkHandler.linkConfiguration.mapAsStateFlow { it?.customerInfo?.email },
         buttonsEnabled,
     ) { isLinkAvailable, linkEmail, buttonsEnabled ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
