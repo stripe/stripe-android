@@ -23,12 +23,20 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
             )
         }
         PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
-        PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
+        PaymentMethod.Type.USBankAccount -> TransformToBankIcon(usBankAccount?.bankName)
         PaymentMethod.Type.Link -> {
-            linkPaymentDetails?.getSavedPaymentMethodIcon(
-                forVerticalMode = forVerticalMode,
-                showNightIcon = showNightIcon
-            )
+            when (val linkDetails = linkPaymentDetails) {
+                is LinkPaymentDetails.BankAccount -> {
+                    TransformToBankIcon(linkDetails.bankName)
+                }
+                is LinkPaymentDetails.Card -> {
+                    linkDetails.getSavedPaymentMethodIcon(
+                        forVerticalMode = forVerticalMode,
+                        showNightIcon = showNightIcon
+                    )
+                }
+                null -> null
+            }
         }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
@@ -49,7 +57,7 @@ internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
 }
 
 @DrawableRes
-internal fun LinkPaymentDetails.getSavedPaymentMethodIcon(
+internal fun LinkPaymentDetails.Card.getSavedPaymentMethodIcon(
     forVerticalMode: Boolean = false,
     showNightIcon: Boolean? = null,
 ): Int {
@@ -205,13 +213,19 @@ internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
         sepaDebit?.last4
     )
     PaymentMethod.Type.USBankAccount -> resolvableString(
-        R.string.stripe_paymentsheet_payment_method_item_card_number,
+        R.string.stripe_paymentsheet_bank_account_last_4,
         usBankAccount?.last4
     )
-    PaymentMethod.Type.Link -> resolvableString(
-        R.string.stripe_paymentsheet_payment_method_item_card_number,
-        linkPaymentDetails?.last4
-    )
+    PaymentMethod.Type.Link -> {
+        when (val linkDetails = linkPaymentDetails) {
+            is LinkPaymentDetails.BankAccount -> resolvableString(
+                R.string.stripe_paymentsheet_bank_account_last_4,
+                linkDetails.last4
+            )
+            is LinkPaymentDetails.Card -> createCardLabel(linkDetails.last4)
+            null -> null
+        }
+    }
     else -> null
 }
 

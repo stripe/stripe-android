@@ -27,6 +27,7 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -62,9 +63,21 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                 )
             }
             is SavedPaymentMethod.Link -> {
-                CardDetailsEditUI(
-                    editCardDetailsInteractor = interactor.editCardDetailsInteractor,
-                )
+                when (savedPaymentMethod.paymentDetails) {
+                    is LinkPaymentDetails.BankAccount -> {
+                        USBankAccountUI(
+                            name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
+                            email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
+                            bankName = savedPaymentMethod.paymentDetails.bankName,
+                            last4 = savedPaymentMethod.paymentDetails.last4,
+                        )
+                    }
+                    is LinkPaymentDetails.Card -> {
+                        CardDetailsEditUI(
+                            editCardDetailsInteractor = interactor.editCardDetailsInteractor,
+                        )
+                    }
+                }
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
@@ -72,9 +85,10 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                 sepaDebit = savedPaymentMethod.sepaDebit,
             )
             is SavedPaymentMethod.USBankAccount -> USBankAccountUI(
-                name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
-                email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
-                usBankAccount = savedPaymentMethod.usBankAccount,
+                name = null,
+                email = null,
+                bankName = savedPaymentMethod.usBankAccount.bankName,
+                last4 = savedPaymentMethod.usBankAccount.last4,
             )
             SavedPaymentMethod.Unexpected -> {}
         }
@@ -175,15 +189,16 @@ private fun UpdatePaymentMethodButtons(
 private fun USBankAccountUI(
     name: String?,
     email: String?,
-    usBankAccount: PaymentMethod.USBankAccount,
+    bankName: String?,
+    last4: String?,
 ) {
     BankAccountUI(
         name = name,
         email = email,
         bankAccountFieldText = resolvableString(
             PaymentSheetR.string.stripe_paymentsheet_bank_account_info,
-            usBankAccount.bankName,
-            usBankAccount.last4,
+            bankName,
+            last4,
         ).resolve(),
         bankAccountFieldLabel = stringResource(R.string.stripe_title_bank_account),
         modifier = Modifier.testTag(UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG),
@@ -219,15 +234,19 @@ private fun BankAccountUI(
     Column(
         modifier = modifier,
     ) {
-        BankAccountTextField(
-            value = name ?: "",
-            label = stringResource(id = com.stripe.android.core.R.string.stripe_address_label_full_name),
-        )
-        BankAccountTextField(
-            value = email ?: "",
-            label = stringResource(com.stripe.android.uicore.R.string.stripe_email),
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
+        if (name != null) {
+            BankAccountTextField(
+                value = name,
+                label = stringResource(id = com.stripe.android.core.R.string.stripe_address_label_full_name),
+            )
+        }
+        if (email != null) {
+            BankAccountTextField(
+                value = email,
+                label = stringResource(com.stripe.android.uicore.R.string.stripe_email),
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
+        }
         BankAccountTextField(
             value = bankAccountFieldText,
             label = bankAccountFieldLabel,
@@ -340,8 +359,12 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                 } else {
                     PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
                 }
-            is SavedPaymentMethod.Link ->
-                PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+            is SavedPaymentMethod.Link -> {
+                when (savedPaymentMethod.paymentDetails) {
+                    is LinkPaymentDetails.BankAccount -> PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
+                    is LinkPaymentDetails.Card -> PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                }
+            }
             is SavedPaymentMethod.USBankAccount ->
                 PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
             is SavedPaymentMethod.SepaDebit ->
