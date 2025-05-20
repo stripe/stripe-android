@@ -417,7 +417,6 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-
     fun onDismissAlert() {
         _uiState.update {
             it.copy(alertMessage = null)

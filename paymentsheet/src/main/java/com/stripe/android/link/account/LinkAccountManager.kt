@@ -112,7 +112,7 @@ internal interface LinkAccountManager {
 
     suspend fun createLinkAccountSession(
         linkMode: LinkMode
-    ) : Result<FinancialConnectionsSession>
+    ): Result<FinancialConnectionsSession>
 
     /**
      * Triggers sending a verification code to the user.
