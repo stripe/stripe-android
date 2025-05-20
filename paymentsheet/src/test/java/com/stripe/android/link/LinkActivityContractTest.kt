@@ -23,7 +23,7 @@ class LinkActivityContractTest {
         configuration = TestFactory.LINK_CONFIGURATION,
         startWithVerificationDialog = false,
         linkAccount = null,
-        launchMode = LinkLaunchMode.Full()
+        launchMode = LinkLaunchMode.Full
     )
 
     @Test

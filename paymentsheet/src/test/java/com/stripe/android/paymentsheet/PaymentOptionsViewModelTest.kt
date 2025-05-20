@@ -226,7 +226,7 @@ internal class PaymentOptionsViewModelTest {
         verify(linkPaymentLauncher).present(
             configuration = any(),
             linkAccount = eq(null),
-            launchMode = eq(LinkLaunchMode.PaymentMethodSelection),
+            launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             useLinkExpress = eq(true)
         )
     }

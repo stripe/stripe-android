@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -124,7 +125,12 @@ private fun PaymentSelection.Link.toConfirmationOption(
         LinkConfirmationOption(
             configuration = linkConfiguration,
             useLinkExpress = useLinkExpress,
-            selectedLinkPayment = selectedPayment
+            linkLaunchMode = when {
+                // If a payment is included in the confirmation option, launch confirmation right away
+                selectedPayment != null -> LinkLaunchMode.Confirmation(selectedPayment)
+                // If a payment is not included, launch the link flow regularly
+                else -> LinkLaunchMode.Full
+            },
         )
     }
 }

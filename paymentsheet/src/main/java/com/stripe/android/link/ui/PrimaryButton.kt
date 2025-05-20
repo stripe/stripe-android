@@ -148,7 +148,8 @@ internal fun completePaymentButtonLabel(
     stripeIntent: StripeIntent,
     linkLaunchMode: LinkLaunchMode,
 ): ResolvableString = when (linkLaunchMode) {
-    is LinkLaunchMode.Full -> when (stripeIntent) {
+    is LinkLaunchMode.Full,
+    is LinkLaunchMode.Confirmation -> when (stripeIntent) {
         is PaymentIntent -> {
             Amount(
                 requireNotNull(stripeIntent.amount),

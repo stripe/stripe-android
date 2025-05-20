@@ -197,16 +197,10 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            val confirmResult = confirmPreselectedLinkPaymentIfAvailable()
-            when (confirmResult) {
-                // if no confirmation required or something fails confirming, render Link normally.
-                null,
-                is LinkConfirmationResult.Canceled,
-                is LinkConfirmationResult.Failed -> loadLink()
-                // if successfully confirmed the preselected payment, complete before rendering.
-                is LinkConfirmationResult.Succeeded -> dismissWithResult(
-                    LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.Value(null))
-                )
+            when (linkLaunchMode) {
+                is LinkLaunchMode.Full,
+                is LinkLaunchMode.PaymentMethodSelection -> loadLink()
+                is LinkLaunchMode.Confirmation -> confirmLinkPayment(linkLaunchMode.selectedPayment)
             }
         }
     }
@@ -232,21 +226,31 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     /**
-     * Attempts to confirm payment eagerly if the Link flow was launched with an authenticated user and a preselected
-     * Link payment method.
-     * @return The result of the confirmation attempt, or null if no confirmation was attempted.
+     * Attempts to confirm payment eagerly if the Link flow was launched in confirmation mode.
      */
-    private suspend fun confirmPreselectedLinkPaymentIfAvailable(): LinkConfirmationResult? {
-        val selectedPayment = (linkLaunchMode as? LinkLaunchMode.Full)?.selectedPayment
-        val paymentReadyForConfirmation = selectedPayment?.takeIf { it.readyForConfirmation() }
-        val account = linkAccount ?: return null
-        return paymentReadyForConfirmation?.let {
-            linkConfirmationHandler.confirm(
-                paymentDetails = it.details,
-                cvc = it.collectedCvc,
-                linkAccount = account,
-            )
-        }
+    private suspend fun confirmLinkPayment(selectedPayment: LinkPaymentMethod) {
+        require(selectedPayment.readyForConfirmation()) { "LinkPaymentMethod must be ready for confirmation" }
+        val account = requireNotNull(linkAccount)
+        val confirmResult = linkConfirmationHandler.confirm(
+            paymentDetails = selectedPayment.details,
+            cvc = selectedPayment.collectedCvc,
+            linkAccount = account,
+        )
+        dismissWithResult(
+            when (confirmResult) {
+                LinkConfirmationResult.Canceled -> LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+                is LinkConfirmationResult.Failed -> LinkActivityResult.Failed(
+                    IllegalStateException("Failed to confirm Link payment: ${confirmResult.message}"),
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+                LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            }
+        )
     }
 
     private suspend fun updateScreenState() {

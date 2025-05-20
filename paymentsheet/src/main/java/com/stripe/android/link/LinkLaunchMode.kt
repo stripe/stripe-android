@@ -21,13 +21,16 @@ internal sealed interface LinkLaunchMode : Parcelable {
 
     /**
      * Link is launched in full mode, where the user can authenticate, select a Link payment method and proceed
-     * to payment,
+     * to payment.
      */
     @Parcelize
-    data class Full(
+    data object Full : LinkLaunchMode
+
+    @Parcelize
+    data class Confirmation(
         /**
          * The selected Link payment method to be used for confirmation.
          */
-        val selectedPayment: LinkPaymentMethod? = null
+        val selectedPayment: LinkPaymentMethod
     ) : LinkLaunchMode
 }

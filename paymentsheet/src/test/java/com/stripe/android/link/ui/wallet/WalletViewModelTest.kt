@@ -687,7 +687,7 @@ class WalletViewModelTest {
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full()
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,

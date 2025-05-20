@@ -131,7 +131,7 @@ internal class LinkActivityViewModelTest {
             startWithVerificationDialog = false,
             linkAccount = null,
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-            launchMode = LinkLaunchMode.Full()
+            launchMode = LinkLaunchMode.Full
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -185,7 +185,7 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `onCreate does not confirm when paymentReadyForConfirmation returns null`() = runTest {
-        val vm = createViewModel(linkLaunchMode = LinkLaunchMode.Full(selectedPayment = null))
+        val vm = createViewModel(linkLaunchMode = LinkLaunchMode.Full)
         vm.onCreate(mock())
         advanceUntilIdle()
         // Should not emit Completed result, should proceed to attestation check and update screen state
@@ -203,7 +203,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(null)
 
         val vm = createViewModel(
-            linkLaunchMode = LinkLaunchMode.Full(selectedPayment = selectedPayment),
+            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
             linkAccountManager = linkAccountManager
         )
         vm.onCreate(mock())
@@ -227,7 +227,7 @@ internal class LinkActivityViewModelTest {
         confirmationHandler.confirmWithLinkPaymentDetailsResult = Result.Succeeded
 
         val vm = createViewModel(
-            linkLaunchMode = LinkLaunchMode.Full(selectedPayment = selectedPayment),
+            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = confirmationHandler
         )
@@ -255,7 +255,7 @@ internal class LinkActivityViewModelTest {
         linkConfirmationHandler.confirmResult = Result.Failed("something went wrong".resolvableString)
 
         val vm = createViewModel(
-            linkLaunchMode = LinkLaunchMode.Full(selectedPayment = selectedPayment),
+            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler
         )
@@ -680,7 +680,7 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(),
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {

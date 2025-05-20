@@ -86,7 +86,8 @@ internal class WalletViewModel @Inject constructor(
 
     val LinkLaunchMode.selectedItemId
         get() = when (this) {
-            is LinkLaunchMode.Full -> null
+            is LinkLaunchMode.Full,
+            is LinkLaunchMode.Confirmation -> null
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
         }
 
@@ -228,7 +229,8 @@ internal class WalletViewModel @Inject constructor(
             // Confirm payment with LinkConfirmationHandler
             val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
             when (linkLaunchMode) {
-                is LinkLaunchMode.Full -> {
+                is LinkLaunchMode.Full,
+                is LinkLaunchMode.Confirmation -> {
                     performPaymentConfirmationWithCvc(
                         selectedPaymentDetails = selectedPaymentDetails,
                         cvc = cvc
@@ -458,7 +460,8 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
 
 private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString {
     return when (linkLaunchMode) {
-        is LinkLaunchMode.Full -> when (this) {
+        is LinkLaunchMode.Full,
+        is LinkLaunchMode.Confirmation -> when (this) {
             is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
             is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
         }
