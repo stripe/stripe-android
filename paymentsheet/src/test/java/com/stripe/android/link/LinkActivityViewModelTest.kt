@@ -18,10 +18,14 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -127,7 +131,7 @@ internal class LinkActivityViewModelTest {
             startWithVerificationDialog = false,
             linkAccount = null,
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-            launchMode = LinkLaunchMode.Full
+            launchMode = LinkLaunchMode.Full()
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -177,6 +181,90 @@ internal class LinkActivityViewModelTest {
             route = LinkScreen.Wallet.route,
             popUpTo = null,
         )
+    }
+
+    @Test
+    fun `onCreate does not confirm when paymentReadyForConfirmation returns null`() = runTest {
+        val vm = createViewModel(linkLaunchMode = LinkLaunchMode.Full(selectedPayment = null))
+        vm.onCreate(mock())
+        advanceUntilIdle()
+        // Should not emit Completed result, should proceed to attestation check and update screen state
+        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+    }
+
+    @Test
+    fun `onCreate does not confirm when linkAccount is null`() = runTest {
+        val selectedPayment = LinkPaymentMethod(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(null)
+
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Full(selectedPayment = selectedPayment),
+            linkAccountManager = linkAccountManager
+        )
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+        // Should not emit Completed result, should proceed to attestation check and update screen state
+        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+    }
+
+    @Test
+    fun `onCreate confirms preselected Link payment when provided and emits Completed`() = runTest {
+        val selectedPayment = LinkPaymentMethod(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        val confirmationHandler = FakeLinkConfirmationHandler()
+        confirmationHandler.confirmWithLinkPaymentDetailsResult = Result.Succeeded
+
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Full(selectedPayment = selectedPayment),
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = confirmationHandler
+        )
+
+        vm.result.test {
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Completed::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreate does not emit Completed when confirmation is canceled or failed`() = runTest {
+        val selectedPayment = LinkPaymentMethod(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
+
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
+            Result.Failed("something went wrong".resolvableString)
+        linkConfirmationHandler.confirmResult = Result.Failed("something went wrong".resolvableString)
+
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Full(selectedPayment = selectedPayment),
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler
+        )
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+        // Should not emit Completed, should build full screen state
+        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
     }
 
     @Test
@@ -592,6 +680,8 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(),
+        linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -604,7 +694,9 @@ internal class LinkActivityViewModelTest {
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
+            linkLaunchMode = linkLaunchMode,
+            linkConfirmationHandlerFactory = { linkConfirmationHandler }
         ).apply {
             this.launchWebFlow = launchWeb
         }

@@ -722,7 +722,7 @@ internal class WalletScreenTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         navigationManager: TestNavigationManager = TestNavigationManager(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full()
     ): WalletViewModel {
         return WalletViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,

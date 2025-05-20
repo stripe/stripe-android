@@ -18,6 +18,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -43,11 +44,13 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @SuppressWarnings("TooManyFunctions")
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
+    linkConfirmationHandlerFactory: LinkConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
@@ -55,9 +58,11 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    val linkLaunchMode: LinkLaunchMode,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
+    val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
 
     private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
@@ -192,7 +197,24 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            if (startWithVerificationDialog) return@launch updateScreenState()
+            val confirmResult = confirmPreselectedLinkPaymentIfAvailable()
+            when (confirmResult) {
+                // if no confirmation required or something fails confirming, render Link normally.
+                null,
+                is LinkConfirmationResult.Canceled,
+                is LinkConfirmationResult.Failed -> loadLink()
+                // if successfully confirmed the preselected payment, complete before rendering.
+                is LinkConfirmationResult.Succeeded -> dismissWithResult(
+                    LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.Value(null))
+                )
+            }
+        }
+    }
+
+    private suspend fun loadLink() {
+        if (startWithVerificationDialog) {
+            updateScreenState()
+        } else {
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
@@ -206,6 +228,24 @@ internal class LinkActivityViewModel @Inject constructor(
                     handleAccountError()
                 }
             }
+        }
+    }
+
+    /**
+     * Attempts to confirm payment eagerly if the Link flow was launched with an authenticated user and a preselected
+     * Link payment method.
+     * @return The result of the confirmation attempt, or null if no confirmation was attempted.
+     */
+    private suspend fun confirmPreselectedLinkPaymentIfAvailable(): LinkConfirmationResult? {
+        val selectedPayment = (linkLaunchMode as? LinkLaunchMode.Full)?.selectedPayment
+        val paymentReadyForConfirmation = selectedPayment?.takeIf { it.readyForConfirmation() }
+        val account = linkAccount ?: return null
+        return paymentReadyForConfirmation?.let {
+            linkConfirmationHandler.confirm(
+                paymentDetails = it.details,
+                cvc = it.collectedCvc,
+                linkAccount = account,
+            )
         }
     }
 
@@ -274,7 +314,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
-
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)

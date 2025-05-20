@@ -151,7 +151,8 @@ class LinkConfirmationFlowTest {
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
-            useLinkExpress = true
+            useLinkExpress = true,
+            selectedLinkPayment = null
         )
     }
 }

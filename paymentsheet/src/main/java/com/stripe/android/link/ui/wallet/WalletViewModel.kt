@@ -14,6 +14,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
@@ -219,7 +220,7 @@ internal class WalletViewModel @Inject constructor(
             // Confirm payment with LinkConfirmationHandler
             val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
             when (linkLaunchMode) {
-                LinkLaunchMode.Full -> {
+                is LinkLaunchMode.Full -> {
                     performPaymentConfirmationWithCvc(
                         selectedPaymentDetails = selectedPaymentDetails,
                         cvc = cvc
@@ -227,9 +228,11 @@ internal class WalletViewModel @Inject constructor(
                 }
                 LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                     LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(null),
-                        selectedPaymentDetails = selectedPaymentDetails,
-                        collectedCvc = cvc
+                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                        selectedPayment = LinkPaymentMethod(
+                            details = selectedPaymentDetails,
+                            collectedCvc = cvc
+                        ),
                     )
                 )
             }
@@ -263,7 +266,7 @@ internal class WalletViewModel @Inject constructor(
                         // After confirmation, clear the link account state so further launches
                         // require authenticating again.
                         linkAccountUpdate = LinkAccountUpdate.Value(null),
-                        collectedCvc = cvc
+                        selectedPayment = null,
                     )
                 )
             }
@@ -447,10 +450,10 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
 
 private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString {
     return when (linkLaunchMode) {
-        LinkLaunchMode.Full -> when (this) {
+        is LinkLaunchMode.Full -> when (this) {
             is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
             is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
         }
-        LinkLaunchMode.PaymentMethodSelection -> resolvableString(R.string.stripe_wallet_continue_another_way)
+        is LinkLaunchMode.PaymentMethodSelection -> resolvableString(R.string.stripe_wallet_continue_another_way)
     }
 }

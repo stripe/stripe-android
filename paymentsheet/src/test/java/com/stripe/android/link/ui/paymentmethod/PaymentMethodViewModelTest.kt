@@ -63,7 +63,7 @@ class PaymentMethodViewModelTest {
                 primaryButtonState = PrimaryButtonState.Disabled,
                 primaryButtonLabel = completePaymentButtonLabel(
                     TestFactory.LINK_CONFIGURATION.stripeIntent,
-                    LinkLaunchMode.Full
+                    LinkLaunchMode.Full()
                 )
             )
         )
@@ -123,14 +123,14 @@ class PaymentMethodViewModelTest {
 
         assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
         val call = linkConfirmationHandler.confirmWithLinkPaymentDetailsCall.first()
-        assertThat(call.paymentDetails)
-            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+        val paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        assertThat(call.paymentDetails).isEqualTo(paymentDetails)
         assertThat(call.cvc).isEqualTo("111")
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null),
-                    collectedCvc = "111"
+                    selectedPayment = null,
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -242,7 +242,7 @@ class PaymentMethodViewModelTest {
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Full
+            linkLaunchMode = LinkLaunchMode.Full()
         )
     }
 }

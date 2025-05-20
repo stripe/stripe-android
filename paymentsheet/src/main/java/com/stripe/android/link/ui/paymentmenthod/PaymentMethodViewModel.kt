@@ -131,7 +131,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                 dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = LinkAccountUpdate.Value(null),
-                        collectedCvc = cvc
+                        selectedPayment = null
                     )
                 )
             }
