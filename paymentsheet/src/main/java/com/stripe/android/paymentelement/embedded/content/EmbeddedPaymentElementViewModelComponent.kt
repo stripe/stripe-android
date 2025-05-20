@@ -16,7 +16,9 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -210,6 +212,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
         ): () -> EmbeddedConfirmationStateHolder.State? {
             return { confirmationStateHolder.state }
+        }
+
+        @Provides
+        fun providesInternalRowSelectionCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): InternalRowSelectionCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
         }
     }
 }

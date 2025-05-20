@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
+internal typealias InternalRowSelectionCallback = () -> Unit
+
 @ExperimentalEmbeddedPaymentElementApi
 @EmbeddedPaymentElementScope
 class EmbeddedPaymentElement @Inject internal constructor(
