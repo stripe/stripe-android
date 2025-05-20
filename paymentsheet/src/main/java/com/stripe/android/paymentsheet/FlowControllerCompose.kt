@@ -21,6 +21,7 @@ import java.util.UUID
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(message = "This will be removed in a future release. Use FlowController.Builder instead.")
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
@@ -49,6 +50,7 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(message = "This will be removed in a future release. Use FlowController.Builder instead.")
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback,
     paymentOptionCallback: PaymentOptionCallback,
@@ -82,6 +84,7 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(message = "This will be removed in a future release. Use FlowController.Builder instead.")
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
