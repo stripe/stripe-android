@@ -210,7 +210,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
-            private var formSheetAction: FormSheetAction = FormSheetAction.Confirm
+            private var formSheetAction: FormSheetAction = FormSheetAction.Continue
 
             /**
              * If set, the customer can select a previously saved payment method.

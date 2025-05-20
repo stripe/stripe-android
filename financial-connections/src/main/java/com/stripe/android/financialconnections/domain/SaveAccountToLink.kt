@@ -132,7 +132,8 @@ internal class SaveAccountToLink @Inject constructor(
                 ?.let { TextResource.Text(it) }
                 // If not, build a Link success message locally
                 ?: TextResource.PluralId(
-                    value = R.plurals.stripe_success_pane_desc_link_success,
+                    singular = R.string.stripe_success_pane_desc_link_success_singular,
+                    plural = R.string.stripe_success_pane_desc_link_success_plural,
                     // No selected accounts means a manually entered account was already attached.
                     count = max(1, selectedAccounts),
                 )
@@ -142,7 +143,8 @@ internal class SaveAccountToLink @Inject constructor(
     private fun storeFailedToSaveToLinkMessage(selectedAccounts: Int) {
         successContentRepository.set(
             message = TextResource.PluralId(
-                value = R.plurals.stripe_success_pane_desc_link_error,
+                singular = R.string.stripe_success_pane_desc_link_error_singular,
+                plural = R.string.stripe_success_pane_desc_link_error_plural,
                 // No selected accounts means a manually entered account was already attached.
                 count = max(1, selectedAccounts),
             )

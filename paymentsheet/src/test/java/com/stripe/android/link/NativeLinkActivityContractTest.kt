@@ -36,7 +36,8 @@ class NativeLinkActivityContractTest {
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = false,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            launchMode = LinkLaunchMode.Full
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -54,6 +55,7 @@ class NativeLinkActivityContractTest {
                 startWithVerificationDialog = false,
                 linkAccount = TestFactory.LINK_ACCOUNT,
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
+                launchMode = LinkLaunchMode.Full
             )
         )
     }

@@ -2790,6 +2790,7 @@ internal class StripeApiRepositoryTest {
                         currency = "usd",
                         captureMethod = PaymentIntent.CaptureMethod.Automatic,
                         setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = null
                     ),
                     paymentMethodTypes = listOf("card", "link"),
                     paymentMethodConfigurationId = "pmc_234",

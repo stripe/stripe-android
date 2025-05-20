@@ -452,12 +452,13 @@ internal class PlaygroundSettings private constructor(
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
             FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
-            FeatureFlagSettingsDefinition(FeatureFlags.enableCardEditInLinkNative),
+            FeatureFlagSettingsDefinition(FeatureFlags.linkPMsInSPM),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
-            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.linkProminenceInFlowController),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

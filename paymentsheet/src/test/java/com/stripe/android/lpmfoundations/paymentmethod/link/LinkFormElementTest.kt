@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -20,6 +21,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkInlineSignupAssistedViewModelFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.inline.LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -59,7 +61,9 @@ class LinkFormElementTest {
         )
 
         composeTestRule.setContent {
-            element.ComposeUI(enabled = true)
+            DefaultLinkTheme {
+                element.ComposeUI(enabled = true)
+            }
         }
 
         composeTestRule.waitForRemainingLinkFields()
@@ -83,7 +87,9 @@ class LinkFormElementTest {
         )
 
         composeTestRule.setContent {
-            element.ComposeUI(enabled = true)
+            DefaultLinkTheme {
+                element.ComposeUI(enabled = true)
+            }
         }
 
         composeTestRule.waitForRemainingLinkFields()
@@ -135,6 +141,7 @@ class LinkFormElementTest {
                 shippingDetails = null,
                 passthroughModeEnabled = false,
                 cardBrandChoice = null,
+                cardBrandFilter = DefaultCardBrandFilter,
                 flags = mapOf(),
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,

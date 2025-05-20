@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
@@ -11,7 +12,9 @@ internal sealed class LinkActivityResult : Parcelable {
      */
     @Parcelize
     data class Completed(
-        val linkAccountUpdate: LinkAccountUpdate
+        val linkAccountUpdate: LinkAccountUpdate,
+        val selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails? = null,
+        val collectedCvc: String?,
     ) : LinkActivityResult()
 
     /**

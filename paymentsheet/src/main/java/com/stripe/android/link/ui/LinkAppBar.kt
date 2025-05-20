@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
@@ -23,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -72,7 +71,7 @@ private fun BackIcon(
         Icon(
             painter = painterResource(icon),
             contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
-            tint = MaterialTheme.linkColors.closeButton
+            tint = LinkTheme.colors.iconSecondary
         )
     }
 }
@@ -123,7 +122,7 @@ private fun LinkAppBarAction(
         Icon(
             imageVector = Icons.Default.MoreVert,
             contentDescription = stringResource(R.string.stripe_show_menu),
-            tint = MaterialTheme.linkColors.closeButton
+            tint = LinkTheme.colors.iconSecondary
         )
     }
 }

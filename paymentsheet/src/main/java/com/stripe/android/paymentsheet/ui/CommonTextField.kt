@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.elements.TextFieldColors
-import com.stripe.android.uicore.stripeColors
 
 @Composable
 internal fun CommonTextField(
@@ -59,7 +57,6 @@ private fun Label(
 ) {
     Text(
         text = text,
-        color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
         style = MaterialTheme.typography.subtitle1
     )
 }

@@ -14,6 +14,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -35,6 +36,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -42,6 +44,8 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -187,6 +191,15 @@ internal interface EmbeddedPaymentElementViewModelModule {
             @ViewModelScope coroutineScope: CoroutineScope,
         ): ConfirmationHandler {
             return confirmationHandlerFactory.create(coroutineScope)
+        }
+
+        @Provides
+        fun providePaymentMethodMetadata(
+            confirmationStateHolder: EmbeddedConfirmationStateHolder
+        ): StateFlow<PaymentMethodMetadata?> {
+            return confirmationStateHolder.stateFlow.mapAsStateFlow {
+                it?.paymentMethodMetadata
+            }
         }
 
         @Provides

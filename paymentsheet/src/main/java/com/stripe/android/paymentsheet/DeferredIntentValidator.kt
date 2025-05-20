@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import org.json.JSONObject
 
 internal object DeferredIntentValidator {
 
@@ -46,6 +48,18 @@ internal object DeferredIntentValidator {
                 require(stripeIntent.confirmationMethod != Manual || allowsManualConfirmation) {
                     "Your PaymentIntent confirmationMethod (${stripeIntent.confirmationMethod}) " +
                         "can only be used with PaymentSheet.FlowController."
+                }
+
+                require(
+                    validatePaymentMethodOptionsSetupFutureUsage(
+                        paramsPaymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString,
+                        stripeIntent = stripeIntent
+                    )
+                ) {
+                    "Your PaymentIntent payment_method_options setup_future_usage values " +
+                        "(${stripeIntent.getPaymentMethodOptions()} do not match the values provided in " +
+                        "PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions " +
+                        "(${paymentMode.paymentMethodOptionsJsonString})"
                 }
             }
             is SetupIntent -> {
@@ -124,6 +138,22 @@ internal object DeferredIntentValidator {
         }
 
         return firstFingerprint == secondFingerprint
+    }
+
+    private fun validatePaymentMethodOptionsSetupFutureUsage(
+        paramsPaymentMethodOptionsJsonString: String?,
+        stripeIntent: StripeIntent,
+    ): Boolean {
+        val paramsMap = paramsPaymentMethodOptionsJsonString?.let {
+            StripeJsonUtils.jsonObjectToMap(JSONObject(it))
+        } ?: emptyMap()
+
+        return paramsMap.entries.all { (key, value) ->
+            val paramsSfu = (value as? Map<*, *>?)?.get("setup_future_usage") as? String
+            val intentSfu = (stripeIntent.getPaymentMethodOptions()[key] as? Map<*, *>?)?.get("setup_future_usage")
+            val isPaymentMethodInIntent = stripeIntent.paymentMethodTypes.contains(key)
+            if (isPaymentMethodInIntent) intentSfu == paramsSfu else true
+        }
     }
 }
 

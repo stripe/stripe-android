@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.verification
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,17 +10,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -34,16 +32,22 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.CircularProgressIndicator
+import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun VerificationScreen(
@@ -64,6 +68,7 @@ internal fun VerificationScreen(
 
     LaunchedEffect(state.requestFocus) {
         if (state.requestFocus) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
             focusRequester.requestFocus()
             keyboardController?.show()
             viewModel.onFocusRequested()
@@ -81,7 +86,10 @@ internal fun VerificationScreen(
         state = state,
         otpElement = viewModel.otpElement,
         focusRequester = focusRequester,
-        onBack = viewModel::onBack,
+        onBack = {
+            focusManager.clearFocus(true)
+            viewModel.onBack()
+        },
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode
     )
@@ -109,21 +117,15 @@ internal fun VerificationBody(
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 20.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSecondary
+            style = LinkTheme.typography.body,
+            color = LinkTheme.colors.textSecondary,
         )
 
-        StripeThemeForLink {
-            OTPElementUI(
-                enabled = !state.isProcessing,
-                element = otpElement,
-                modifier = Modifier
-                    .testTag(VERIFICATION_OTP_TAG)
-                    .padding(vertical = 10.dp),
-                colors = MaterialTheme.linkColors.otpElementColors,
-                focusRequester = focusRequester
-            )
-        }
+        OTPView(
+            state = state,
+            otpElement = otpElement,
+            focusRequester = focusRequester
+        )
 
         if (state.isDialog.not()) {
             ChangeEmailRow(
@@ -152,10 +154,35 @@ internal fun VerificationBody(
             Text(
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
                 text = state.email,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onSecondary,
+                style = LinkTheme.typography.detail,
+                color = LinkTheme.colors.textTertiary,
             )
         }
+    }
+}
+
+@Composable
+private fun OTPView(
+    state: VerificationViewState,
+    otpElement: OTPElement,
+    focusRequester: FocusRequester
+) {
+    StripeThemeForLink {
+        OTPElementUI(
+            enabled = !state.isProcessing,
+            element = otpElement,
+            otpInputPlaceholder = " ",
+            middleSpacing = 8.dp,
+            modifier = Modifier
+                .testTag(VERIFICATION_OTP_TAG)
+                .padding(vertical = 10.dp),
+            colors = OTPElementColors(
+                selectedBorder = LinkTheme.colors.borderSelected,
+                placeholder = LinkTheme.colors.textPrimary,
+                background = LinkTheme.colors.surfaceSecondary
+            ),
+            focusRequester = focusRequester
+        )
     }
 }
 
@@ -188,7 +215,8 @@ private fun Header(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.stripe_link_close),
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel)
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel),
+                    tint = LinkTheme.colors.iconSecondary,
                 )
             }
         }
@@ -199,8 +227,8 @@ private fun Header(
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onPrimary
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary,
         )
     } else {
         Text(
@@ -209,8 +237,8 @@ private fun Header(
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h2,
-            color = MaterialTheme.colors.onPrimary
+            style = LinkTheme.typography.title,
+            color = LinkTheme.colors.textPrimary,
         )
     }
 }
@@ -228,10 +256,10 @@ private fun ChangeEmailRow(
         Text(
             text = stringResource(id = R.string.stripe_verification_not_email, email),
             modifier = Modifier.weight(weight = 1f, fill = false),
-            color = MaterialTheme.colors.onSecondary,
+            color = LinkTheme.colors.textTertiary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            style = MaterialTheme.typography.body2
+            style = LinkTheme.typography.detail,
         )
         Text(
             text = stringResource(id = R.string.stripe_verification_change_email),
@@ -242,13 +270,14 @@ private fun ChangeEmailRow(
                     enabled = !isProcessing,
                     onClick = onChangeEmailClick
                 ),
-            color = MaterialTheme.linkColors.actionLabel,
+            color = LinkTheme.colors.textBrand,
             maxLines = 1,
-            style = MaterialTheme.typography.body2
+            style = LinkTheme.typography.detail,
         )
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun ResendCodeButton(
     isProcessing: Boolean,
@@ -259,12 +288,7 @@ private fun ResendCodeButton(
         modifier = Modifier
             .testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
             .padding(top = 12.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.extraSmall,
-            )
-            .clip(shape = MaterialTheme.linkShapes.extraSmall)
+            .clip(shape = LinkTheme.shapes.extraSmall)
             .clickable(
                 enabled = !isProcessing && !isSendingNewCode,
                 onClick = onClick,
@@ -281,8 +305,8 @@ private fun ResendCodeButton(
 
         Text(
             text = stringResource(id = R.string.stripe_verification_resend),
-            style = MaterialTheme.typography.button,
-            color = MaterialTheme.colors.onPrimary,
+            style = LinkTheme.typography.detailEmphasized,
+            color = LinkTheme.colors.textBrand,
             modifier = Modifier
                 .padding(horizontal = 12.dp, vertical = 4.dp)
                 .alpha(textAlpha),
@@ -292,13 +316,36 @@ private fun ResendCodeButton(
             visible = isSendingNewCode
         ) {
             CircularProgressIndicator(
-                color = MaterialTheme.colors.onPrimary,
+                color = LinkTheme.colors.textPrimary,
                 strokeWidth = 2.dp,
                 modifier = Modifier
                     .testTag(VERIFICATION_RESEND_LOADER_TAG)
                     .size(18.dp)
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun VerificationBodyPreview() {
+    DefaultLinkTheme {
+        VerificationBody(
+            state = VerificationViewState(
+                isDialog = true,
+                redactedPhoneNumber = "123-456-7890",
+                email = "",
+                isProcessing = false,
+                errorMessage = null,
+                isSendingNewCode = true,
+                didSendNewCode = false,
+                requestFocus = false,
+            ),
+            otpElement = OTPSpec.transform(),
+            onBack = {},
+            onChangeEmailClick = {},
+            onResendCodeClick = {}
+        )
     }
 }
 

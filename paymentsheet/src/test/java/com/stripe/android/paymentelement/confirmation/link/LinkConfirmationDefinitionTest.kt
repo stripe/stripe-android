@@ -189,6 +189,7 @@ internal class LinkConfirmationDefinitionTest {
         val savedOption = nextStepResult.confirmationOption.asSaved()
 
         assertThat(savedOption.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(savedOption.originatedFromWallet).isTrue()
         assertThat(savedOption.optionsParams).isNull()
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
@@ -202,7 +203,8 @@ internal class LinkConfirmationDefinitionTest {
             confirmationOption = LINK_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
             result = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                collectedCvc = null
             ),
             deferredIntentConfirmationType = null,
         )

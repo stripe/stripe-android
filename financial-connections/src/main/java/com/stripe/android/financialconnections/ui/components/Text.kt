@@ -5,6 +5,7 @@ import android.text.Annotation
 import android.text.SpannedString
 import android.text.style.StyleSpan
 import android.text.style.URLSpan
+import androidx.annotation.StringRes
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -137,6 +139,21 @@ private fun annotatedStringResource(
             }
         }
     return resultBuilder.toAnnotatedString()
+}
+
+@Composable
+internal fun pluralStringResource(
+    @StringRes singular: Int,
+    @StringRes plural: Int,
+    count: Int,
+    vararg formatArgs: Any
+): String {
+    val quantityString = if (count == 1) {
+        stringResource(singular, *formatArgs)
+    } else {
+        stringResource(plural, *formatArgs)
+    }
+    return quantityString
 }
 
 internal enum class StringAnnotation(val value: String) {

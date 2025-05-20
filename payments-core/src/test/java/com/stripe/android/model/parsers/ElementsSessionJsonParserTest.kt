@@ -1,12 +1,14 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFixtures
+import com.stripe.android.model.ElementsSessionFixtures.PAYMENT_METHODS_WITH_LINK_DETAILS
 import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
 import com.stripe.android.model.ElementsSessionFixtures.createWithCustomPaymentMethods
 import com.stripe.android.model.ElementsSessionParams
@@ -26,6 +28,12 @@ class ElementsSessionJsonParserTest {
     @get:Rule
     val incentivesFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.instantDebitsIncentives,
+        isEnabled = false,
+    )
+
+    @get:Rule
+    val linkInSpmFeatureFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.linkPMsInSPM,
         isEnabled = false,
     )
 
@@ -379,6 +387,14 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Test deferred PaymentIntent`() {
+        val pmoMap = mapOf(
+            "card" to mapOf(
+                "setup_future_usage" to "off_session"
+            ),
+            "affirm" to mapOf(
+                "setup_future_usage" to "none"
+            )
+        )
         val data = ElementsSessionJsonParser(
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
@@ -387,6 +403,7 @@ class ElementsSessionJsonParserTest {
                         currency = "usd",
                         captureMethod = PaymentIntent.CaptureMethod.Automatic,
                         setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmoMap).toString()
                     ),
                     paymentMethodTypes = emptyList(),
                     paymentMethodConfigurationId = null,
@@ -419,7 +436,9 @@ class ElementsSessionJsonParserTest {
                 setupFutureUsage = null,
                 unactivatedPaymentMethods = listOf(),
                 paymentMethodTypes = listOf("card", "link", "cashapp"),
-                linkFundingSources = listOf("card")
+                linkFundingSources = listOf("card"),
+                paymentMethodOptionsJsonString = "{\"affirm\":{\"setup_future_usage\":\"none\"}," +
+                    "\"card\":{\"setup_future_usage\":\"off_session\"}}"
             )
         )
     }
@@ -1122,6 +1141,65 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.linkSettings?.useAttestationEndpoints).isFalse()
         assertThat(elementsSession?.linkSettings?.suppress2faModal).isFalse()
+    }
+
+    @Test
+    fun `Parses payment_methods_with_link_details if feature is enabled locally and for merchant`() {
+        testPaymentMethodsAndLinkDetails(
+            featureEnabled = true,
+            merchantEnabled = true,
+            expectedPaymentMethods = 2,
+            expectLinkPaymentDetails = true,
+        )
+    }
+
+    @Test
+    fun `Does not parse payment_methods_with_link_details if feature is enabled locally but disabled for merchant`() {
+        testPaymentMethodsAndLinkDetails(
+            featureEnabled = true,
+            merchantEnabled = false,
+            expectedPaymentMethods = 1,
+            expectLinkPaymentDetails = false,
+        )
+    }
+
+    @Test
+    fun `Does not parse payment_methods_with_link_details if feature is enabled for merchant but disabled locally`() {
+        testPaymentMethodsAndLinkDetails(
+            featureEnabled = false,
+            merchantEnabled = true,
+            expectedPaymentMethods = 1,
+            expectLinkPaymentDetails = false,
+        )
+    }
+
+    private fun testPaymentMethodsAndLinkDetails(
+        featureEnabled: Boolean,
+        merchantEnabled: Boolean,
+        expectedPaymentMethods: Int,
+        expectLinkPaymentDetails: Boolean,
+    ) {
+        linkInSpmFeatureFlagRule.setEnabled(featureEnabled)
+
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = listOf(),
+                customPaymentMethods = listOf(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            enableLinkSpm = merchantEnabled,
+            paymentMethodsWithLinkDetails = PAYMENT_METHODS_WITH_LINK_DETAILS,
+        )
+        val session = parser.parse(intent)
+        val paymentMethods = session!!.customer!!.paymentMethods
+
+        assertThat(paymentMethods).hasSize(expectedPaymentMethods)
+        assertThat(paymentMethods.first().linkPaymentDetails != null).isEqualTo(expectLinkPaymentDetails)
     }
 
     private fun allowRedisplayTest(

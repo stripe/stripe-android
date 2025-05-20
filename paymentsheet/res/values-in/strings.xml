@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">Anda ingin menutup formulir ini?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Simpan info Anda untuk checkout aman dengan 1 klik dengan Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">Kredit %1$s</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">Debit %1$s</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">Prabayar %1$s</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">Kartu %1$s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Setuju dan lanjutkan</string>
   <!-- Title for the Link signup screen -->
@@ -34,8 +42,16 @@
   <string name="stripe_link_sign_up_message">Simpan informasi pembayaran Anda dengan Link, dan proses pembayaran secara aman dalam sekali klik pada situs yang didukung Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Dengan melanjutkan, berarti Anda menyetujui <terms>Ketentuan</terms> dan <privacy>Kebijakan Privasi</privacy>.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Perbarui kartu</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">Ini default Anda</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Perbarui kartu</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Masukkan kode yang dikirim ke %s untuk menggunakan informasi tersimpan Anda.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Perbarui kartu</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Keluar dari Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -223,6 +239,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Dengan melanjutkan, berarti Anda setuju untuk mengotorisasi pembayaran sesuai dengan <terms>ketentuan</terms> ini.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pembayaran</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Lanjutkan dengan cara lain</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Default</string>
   <string name="stripe_wallet_expand_accessibility">Ubah pilihan</string>

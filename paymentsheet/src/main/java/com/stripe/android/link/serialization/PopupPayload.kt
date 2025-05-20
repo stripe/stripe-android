@@ -6,6 +6,7 @@ import android.util.Base64
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import kotlinx.serialization.SerialName
@@ -168,7 +169,7 @@ internal data class PopupPayload(
                 paymentUserAgent = paymentUserAgent,
                 paymentObject = paymentObject(),
                 intentMode = stripeIntent.toIntentMode().type,
-                setupFutureUsage = stripeIntent.isSetupForFutureUsage(),
+                setupFutureUsage = stripeIntent.isSetupForFutureUsage(passthroughModeEnabled),
                 flags = flags,
                 linkFundingSources = stripeIntent.linkFundingSources.map { it.uppercase() },
             )
@@ -201,9 +202,15 @@ internal data class PopupPayload(
             }
         }
 
-        private fun StripeIntent.isSetupForFutureUsage(): Boolean {
+        private fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean): Boolean {
             return when (this) {
-                is PaymentIntent -> setupFutureUsage.isSetupForFutureUsage()
+                is PaymentIntent -> {
+                    if (passthroughModeEnabled) {
+                        isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
+                    } else {
+                        isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
+                    }
+                }
                 is SetupIntent -> true
             }
         }

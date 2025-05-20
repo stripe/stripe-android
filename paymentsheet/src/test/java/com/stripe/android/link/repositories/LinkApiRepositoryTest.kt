@@ -300,6 +300,38 @@ class LinkApiRepositoryTest {
     }
 
     @Test
+    fun `createPaymentDetails passes allowRedisplay correctly`() = runTest {
+        val secret = "secret"
+        val email = "email@stripe.com"
+        val consumerKey = "key"
+
+        for (allowRedisplay in PaymentMethod.AllowRedisplay.entries) {
+            val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
+            whenever(
+                consumersApiService.createPaymentDetails(
+                    consumerSessionClientSecret = any(),
+                    paymentDetailsCreateParams = any(),
+                    requestSurface = any(),
+                    requestOptions = any(),
+                )
+            ).thenReturn(Result.success(paymentDetails))
+
+            val createParams = cardPaymentMethodCreateParams.copy(allowRedisplay = allowRedisplay)
+
+            val linkDetails = linkRepository.createCardPaymentDetails(
+                paymentMethodCreateParams = createParams,
+                userEmail = email,
+                stripeIntent = paymentIntent,
+                consumerSessionClientSecret = secret,
+                consumerPublishableKey = consumerKey,
+                active = false,
+            ).getOrThrow()
+
+            assertThat(linkDetails.paymentMethodCreateParams.allowRedisplay).isEqualTo(allowRedisplay)
+        }
+    }
+
+    @Test
     fun `createPaymentDetails for card without consumerPublishableKey sends correct parameters`() =
         runTest {
             val secret = "secret"

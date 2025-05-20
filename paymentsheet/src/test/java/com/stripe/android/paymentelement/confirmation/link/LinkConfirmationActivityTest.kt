@@ -17,6 +17,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -121,6 +122,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                     PaymentMethodConfirmationOption.Saved(
                         paymentMethod = paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
                     )
                 )
 
@@ -202,7 +204,8 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             stripeAccountId = null,
                             startWithVerificationDialog = true,
                             linkAccount = null,
-                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier"
+                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
+                            launchMode = LinkLaunchMode.Full
                         )
                     )
                 )
@@ -224,7 +227,11 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
             arrayOf(false),
         )
 
-        val PAYMENT_INTENT = PaymentIntentFactory.create().copy(
+        val PAYMENT_INTENT = PaymentIntentFactory.create(
+            paymentMethodOptionsJsonString = """
+                {"card": {"require_cvc_recollection": true}}
+            """.trimIndent()
+        ).copy(
             id = "pm_1",
             amount = 5000,
             currency = "CAD",

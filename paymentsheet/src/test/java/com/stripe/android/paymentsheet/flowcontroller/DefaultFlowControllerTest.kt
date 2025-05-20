@@ -21,6 +21,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
@@ -845,7 +846,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any())
+        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1196,7 +1197,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any())
+        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -2377,6 +2378,7 @@ internal class DefaultFlowControllerTest {
         initializedViaCompose = false,
         linkHandler = mock(),
         paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+        linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         confirmationHandler = createTestConfirmationHandlerFactory(
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

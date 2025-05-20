@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
@@ -23,6 +24,12 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
         }
         PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
+        PaymentMethod.Type.Link -> {
+            linkPaymentDetails?.getSavedPaymentMethodIcon(
+                forVerticalMode = forVerticalMode,
+                showNightIcon = showNightIcon
+            )
+        }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
 }
@@ -38,11 +45,27 @@ internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
         Unknown
     }
 
+    return brand.getSavedPaymentMethodIcon(forVerticalMode, showNightIcon)
+}
+
+@DrawableRes
+internal fun LinkPaymentDetails.getSavedPaymentMethodIcon(
+    forVerticalMode: Boolean = false,
+    showNightIcon: Boolean? = null,
+): Int {
+    return brand.getSavedPaymentMethodIcon(forVerticalMode, showNightIcon)
+}
+
+@DrawableRes
+private fun CardBrand.getSavedPaymentMethodIcon(
+    forVerticalMode: Boolean = false,
+    showNightIcon: Boolean? = null,
+): Int {
     // Vertical mode icons are the same for light & dark
     return if (forVerticalMode) {
-        brand.getCardBrandIconForVerticalMode()
+        getCardBrandIconForVerticalMode()
     } else {
-        brand.getCardBrandIconForHorizontalMode(
+        getCardBrandIconForHorizontalMode(
             showNightIcon = showNightIcon,
         )
     }
@@ -78,7 +101,7 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     CardBrand.MasterCard -> com.stripe.payments.model.R.drawable.stripe_ic_mastercard_unpadded
     CardBrand.UnionPay -> com.stripe.payments.model.R.drawable.stripe_ic_unionpay_unpadded
     CardBrand.CartesBancaires -> com.stripe.payments.model.R.drawable.stripe_ic_cartes_bancaires_unpadded
-    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_ref
+    Unknown -> com.stripe.payments.model.R.drawable.stripe_ic_unknown_brand_unpadded
 }
 
 @DrawableRes
@@ -185,13 +208,21 @@ internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         usBankAccount?.last4
     )
+    PaymentMethod.Type.Link -> resolvableString(
+        R.string.stripe_paymentsheet_payment_method_item_card_number,
+        linkPaymentDetails?.last4
+    )
     else -> null
 }
 
 internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
     PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_paymentsheet_bank
+    PaymentMethod.Type.Link -> R.drawable.stripe_ic_paymentsheet_link_arrow
     else -> null
 }
+
+internal val PaymentMethod.shouldTintLabelIcon: Boolean
+    get() = type != PaymentMethod.Type.Link
 
 internal fun createCardLabel(last4: String?): ResolvableString? {
     return last4?.let {

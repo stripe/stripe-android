@@ -10,12 +10,15 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -73,6 +76,131 @@ internal class AddPaymentMethodTest {
         assertThat(cardPaymentSelection.brand.code).isEqualTo(cardBrand)
         assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
         assertThat(getNameFromParams(cardPaymentSelection.paymentMethodCreateParams)).isEqualTo(name)
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms cards with PMO SFU correctly for RequestNoReuse`() {
+        val cardBrand = "visa"
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            )
+        )
+        val cardPaymentMethod = metadataWithPmoSfu.supportedPaymentMethodForCode("card")!!
+        val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
+            cardPaymentMethod,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.Card
+        val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
+        assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+        assertThat(options?.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms cards with PMO SFU correctly for RequestReuse`() {
+        val cardBrand = "visa"
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            )
+        )
+        val cardPaymentMethod = metadataWithPmoSfu.supportedPaymentMethodForCode("card")!!
+        val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
+            cardPaymentMethod,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.Card
+        val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
+        assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+        assertThat(options?.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms cards with PMO SFU correctly for NoRequest`() {
+        val cardBrand = "visa"
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry(cardBrand, true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            )
+        )
+        val cardPaymentMethod = metadataWithPmoSfu.supportedPaymentMethodForCode("card")!!
+        val cardPaymentSelection = formFieldValues.transformToPaymentSelection(
+            cardPaymentMethod,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.Card
+        val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
+        assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+        assertThat(options?.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms generic PM with PMO SFU sets requiresMandate to true`() {
+        val formFieldValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "klarna",
+                    sfuValue = "off_session"
+                )
+            )
+        )
+        val klarna = metadataWithPmoSfu.supportedPaymentMethodForCode("klarna")!!
+        val klarnaSelection = formFieldValues.transformToPaymentSelection(
+            klarna,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.GenericPaymentMethod
+        assertThat(klarnaSelection.paymentMethodCreateParams.requiresMandate()).isTrue()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms generic PM with PMO SFU override sets requiresMandate to false`() {
+        val formFieldValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna"),
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "klarna",
+                    sfuValue = "none"
+                )
+            )
+        )
+        val klarna = metadataWithPmoSfu.supportedPaymentMethodForCode("klarna")!!
+        val klarnaSelection = formFieldValues.transformToPaymentSelection(
+            klarna,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.GenericPaymentMethod
+        assertThat(klarnaSelection.paymentMethodCreateParams.requiresMandate()).isFalse()
     }
 
     @Test
@@ -265,6 +393,50 @@ internal class AddPaymentMethodTest {
         )
 
         assertThat(params.toParamMap()).containsEntry("allow_redisplay", "limited")
+    }
+
+    @Test
+    fun `when customer reuse is not requested with pmo sfu, should have allow_redisplay in params`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            )
+        )
+
+        val formValues = FormFieldValues(
+            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+
+        val params = formValues.transformToPaymentMethodCreateParams(
+            paymentMethodCode = "card",
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(params.toParamMap()).containsEntry("allow_redisplay", "limited")
+    }
+
+    @Test
+    fun `when customer reuse is requested with reuse and pmo sfu, should have allow_redisplay in params`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            )
+        )
+
+        val formValues = FormFieldValues(
+            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry("test", true)),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+        )
+
+        val params = formValues.transformToPaymentMethodCreateParams(
+            paymentMethodCode = "card",
+            paymentMethodMetadata = metadata,
+        )
+
+        assertThat(params.toParamMap()).containsEntry("allow_redisplay", "always")
     }
 
     private fun runScenario(

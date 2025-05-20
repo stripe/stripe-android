@@ -40,16 +40,11 @@ internal class CvcRecollectionHandlerImpl : CvcRecollectionHandler {
         initializationMode: PaymentElementLoader.InitializationMode,
     ): Boolean {
         return paymentMethod.isCard() &&
-            paymentMethod.hasNoWallet() &&
             cvcRecollectionEnabled(stripeIntent, initializationMode)
     }
 
     private fun PaymentMethod.isCard(): Boolean {
         return type == PaymentMethod.Type.Card
-    }
-
-    private fun PaymentMethod.hasNoWallet(): Boolean {
-        return card?.wallet == null
     }
 
     private fun StripeIntent.supportsCvcRecollection(): Boolean {

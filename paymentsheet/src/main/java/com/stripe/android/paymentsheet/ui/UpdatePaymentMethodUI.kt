@@ -61,6 +61,11 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                     editCardDetailsInteractor = interactor.editCardDetailsInteractor,
                 )
             }
+            is SavedPaymentMethod.Link -> {
+                CardDetailsEditUI(
+                    editCardDetailsInteractor = interactor.editCardDetailsInteractor,
+                )
+            }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
@@ -335,6 +340,8 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                 } else {
                     PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
                 }
+            is SavedPaymentMethod.Link ->
+                PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
             is SavedPaymentMethod.USBankAccount ->
                 PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
             is SavedPaymentMethod.SepaDebit ->

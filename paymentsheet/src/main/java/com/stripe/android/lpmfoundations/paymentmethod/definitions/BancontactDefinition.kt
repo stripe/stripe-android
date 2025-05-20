@@ -23,7 +23,7 @@ internal object BancontactDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.takeIf { hasIntentToSetup },
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = BancontactUiDefinitionFactory
 }
@@ -47,7 +47,7 @@ private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         return transformSpecToElements.transform(
             metadata = metadata,
             specs = sharedDataSpec.fields,
-            placeholderOverrideList = if (metadata.hasIntentToSetup()) {
+            placeholderOverrideList = if (metadata.hasIntentToSetup(BancontactDefinition.type.code)) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)
             } else {
                 emptyList()

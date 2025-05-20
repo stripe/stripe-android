@@ -52,6 +52,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = true,
                 isSelected = false,
+                isAvailable = true,
                 isUpdating = false
             )
         )
@@ -84,6 +85,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = true,
                 isSelected = true,
+                isAvailable = true,
                 isUpdating = false
             )
         )
@@ -116,6 +118,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = true,
                 isSelected = false,
+                isAvailable = true,
                 isUpdating = true
             )
         )
@@ -148,6 +151,40 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = false,
                 isSelected = true,
+                isAvailable = true,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testCardEnabledAndUnavailable() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Card(
+                    id = "QAAAKJ6",
+                    expiryYear = 2023,
+                    expiryMonth = 12,
+                    isDefault = true,
+                    brand = CardBrand.MasterCard,
+                    last4 = "4444",
+                    cvcCheck = CvcCheck.Pass,
+                    networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
+                    billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = null,
+                        line1 = null,
+                        line2 = null,
+                        locality = null,
+                        administrativeArea = null,
+                        countryCode = CountryCode.US,
+                        postalCode = "12312"
+                    )
+                ),
+                enabled = true,
+                isSelected = true,
+                isAvailable = false,
                 isUpdating = false
             )
         )
@@ -167,6 +204,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = true,
                 isSelected = false,
+                isAvailable = true,
                 isUpdating = false
             )
         )
@@ -186,6 +224,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = true,
                 isSelected = false,
+                isAvailable = true,
                 isUpdating = false
             )
         )
@@ -201,6 +240,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                 ),
                 enabled = true,
                 isSelected = false,
+                isAvailable = true,
                 isUpdating = false
             )
         )
@@ -211,7 +251,9 @@ internal class PaymentDetailsListItemScreenShotTest {
             DefaultLinkTheme {
                 PaymentDetailsListItem(
                     paymentDetails = state.details,
-                    enabled = state.enabled,
+                    isClickable = state.enabled,
+                    isMenuButtonClickable = true,
+                    isAvailable = state.isAvailable,
                     isSelected = state.isSelected,
                     isUpdating = state.isUpdating,
                     onClick = {},
@@ -225,6 +267,7 @@ internal class PaymentDetailsListItemScreenShotTest {
         val details: ConsumerPaymentDetails.PaymentDetails,
         val enabled: Boolean,
         val isSelected: Boolean,
+        val isAvailable: Boolean,
         val isUpdating: Boolean,
     )
 }

@@ -197,6 +197,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             currency = deferredIntentParams.mode.currency,
             isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
+            paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,

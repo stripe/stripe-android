@@ -9,9 +9,13 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
@@ -20,11 +24,17 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.completePaymentButtonLabel
+import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.elements.CvcController
@@ -49,6 +59,8 @@ internal class WalletViewModel @Inject constructor(
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
+    private val linkLaunchMode: LinkLaunchMode,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -58,10 +70,14 @@ internal class WalletViewModel @Inject constructor(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
             email = linkAccount.email,
+            isSettingUp = stripeIntent.isSetupForFutureUsage(configuration.passthroughModeEnabled),
+            merchantName = configuration.merchantName,
             selectedItemId = null,
+            cardBrandFilter = configuration.cardBrandFilter,
             isProcessing = false,
             hasCompleted = false,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
+            secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
             canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
         )
@@ -153,14 +169,14 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedItemId = item.id,
-                isExpanded = false,
+                userSetIsExpanded = null,
             )
         }
     }
 
     fun onExpandedChanged(expanded: Boolean) {
         _uiState.update {
-            it.copy(isExpanded = expanded)
+            it.copy(userSetIsExpanded = expanded)
         }
     }
 
@@ -203,10 +219,22 @@ internal class WalletViewModel @Inject constructor(
             )
         } else {
             // Confirm payment with LinkConfirmationHandler
-            performPaymentConfirmationWithCvc(
-                selectedPaymentDetails = selectedPaymentDetails,
-                cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
-            )
+            val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
+            when (linkLaunchMode) {
+                LinkLaunchMode.Full -> {
+                    performPaymentConfirmationWithCvc(
+                        selectedPaymentDetails = selectedPaymentDetails,
+                        cvc = cvc
+                    )
+                }
+                LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(null),
+                        selectedPaymentDetails = selectedPaymentDetails,
+                        collectedCvc = cvc
+                    )
+                )
+            }
         }
     }
 
@@ -214,11 +242,13 @@ internal class WalletViewModel @Inject constructor(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
         cvc: String?
     ) {
-        val result = linkConfirmationHandler.confirm(
-            paymentDetails = selectedPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc
-        )
+        val result = dismissalCoordinator.withDismissalDisabled {
+            linkConfirmationHandler.confirm(
+                paymentDetails = selectedPaymentDetails,
+                linkAccount = linkAccount,
+                cvc = cvc
+            )
+        }
         when (result) {
             LinkConfirmationResult.Canceled -> Unit
             is LinkConfirmationResult.Failed -> {
@@ -232,7 +262,10 @@ internal class WalletViewModel @Inject constructor(
             LinkConfirmationResult.Succeeded -> {
                 dismissWithResult(
                     LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(null)
+                        // After confirmation, clear the link account state so further launches
+                        // require authenticating again.
+                        linkAccountUpdate = LinkAccountUpdate.Value(null),
+                        collectedCvc = cvc
                     )
                 )
             }
@@ -244,13 +277,14 @@ internal class WalletViewModel @Inject constructor(
     ): Result<ConsumerPaymentDetails> {
         val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
 
-        val updateParams = ConsumerPaymentDetailsUpdateParams(
-            id = selectedPaymentDetails.id,
-            isDefault = selectedPaymentDetails.isDefault,
-            cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
-        )
-
-        return linkAccountManager.updatePaymentDetails(updateParams)
+        return dismissalCoordinator.withDismissalDisabled {
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = selectedPaymentDetails.id,
+                isDefault = selectedPaymentDetails.isDefault,
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+            )
+            linkAccountManager.updatePaymentDetails(updateParams)
+        }
     }
 
     fun onPayAnotherWayClicked() {
@@ -264,21 +298,24 @@ internal class WalletViewModel @Inject constructor(
 
     fun onRemoveClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         _uiState.update {
-            it.setProcessing()
+            it.copy(cardBeingUpdated = item.id)
         }
         viewModelScope.launch {
-            linkAccountManager.deletePaymentDetails(item.id)
-                .fold(
-                    onSuccess = {
-                        loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
-                    },
-                    onFailure = { error ->
-                        updateErrorMessageAndStopProcessing(
-                            error = error,
-                            loggerMessage = "Failed to delete payment method"
-                        )
-                    }
-                )
+            linkAccountManager.deletePaymentDetails(item.id).fold(
+                onSuccess = {
+                    loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
+                },
+                onFailure = { error ->
+                    updateErrorMessageAndStopProcessing(
+                        error = error,
+                        loggerMessage = "Failed to delete payment method"
+                    )
+                }
+            )
+
+            _uiState.update {
+                it.copy(cardBeingUpdated = null)
+            }
         }
     }
 
@@ -421,8 +458,10 @@ internal class WalletViewModel @Inject constructor(
                         ),
                         logger = parentComponent.logger,
                         navigationManager = parentComponent.navigationManager,
+                        dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkAccount = linkAccount,
                         navigateAndClearStack = navigateAndClearStack,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
                         dismissWithResult = dismissWithResult
                     )
                 }
@@ -438,4 +477,27 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
         code = Card.code,
         requiresMandate = false
     )
+}
+
+internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean): Boolean {
+    return when (this) {
+        is PaymentIntent -> {
+            if (passthroughModeEnabled) {
+                isSetupFutureUsageSet(PaymentMethod.Type.Card.code)
+            } else {
+                isSetupFutureUsageSet(PaymentMethod.Type.Link.code)
+            }
+        }
+        is SetupIntent -> true
+    }
+}
+
+private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString {
+    return when (linkLaunchMode) {
+        LinkLaunchMode.Full -> when (this) {
+            is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
+            is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
+        }
+        LinkLaunchMode.PaymentMethodSelection -> resolvableString(R.string.stripe_wallet_continue_another_way)
+    }
 }

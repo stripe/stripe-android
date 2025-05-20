@@ -5,6 +5,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -62,7 +63,8 @@ internal class LinkConfirmationDefinition @Inject constructor(
             linkAccount = linkAccountHolder.linkAccount.value,
             useLinkExpress = confirmationOption.useLinkExpress,
             consumerSessionPublishableKey = linkConfigurationCoordinator
-                .getComponent(confirmationOption.configuration).linkAccountManager.consumerPublishableKey
+                .getComponent(confirmationOption.configuration).linkAccountManager.consumerPublishableKey,
+            launchMode = LinkLaunchMode.Full
         )
     }
 
@@ -85,6 +87,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
                     confirmationOption = PaymentMethodConfirmationOption.Saved(
                         paymentMethod = result.paymentMethod,
                         optionsParams = null,
+                        originatedFromWallet = true,
                     ),
                     parameters = confirmationParameters,
                 )

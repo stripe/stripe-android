@@ -10,6 +10,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     data class Saved(
         val paymentMethod: com.stripe.android.model.PaymentMethod,
         val optionsParams: PaymentMethodOptionsParams?,
+        val originatedFromWallet: Boolean = false,
     ) : PaymentMethodConfirmationOption
 
     @Parcelize

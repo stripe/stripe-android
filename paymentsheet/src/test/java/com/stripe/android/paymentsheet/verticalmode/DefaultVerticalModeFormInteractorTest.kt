@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -30,11 +31,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoMoreInteractions
 
 internal class DefaultVerticalModeFormInteractorTest {
+
+    @get:Rule
+    val rule: TestRule = CoroutineTestRule()
+
     @Test
     fun `state is updated when processing emits`() = runScenario(selectedPaymentMethodCode = "card") {
         interactor.state.test {

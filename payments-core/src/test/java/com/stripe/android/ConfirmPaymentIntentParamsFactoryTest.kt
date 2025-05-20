@@ -265,15 +265,44 @@ class ConfirmPaymentIntentParamsFactoryTest {
         expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
     )
 
+    @Test
+    fun `create() with 'OffSession' PMO SFU should contain any mandate data`() {
+        mandateDataTest(
+            setupFutureUsage = null,
+            expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+            paymentMethodOptionsJsonString = getPaymentMethodOptionsJsonString("off_session")
+        )
+    }
+
+    @Test
+    fun `create() with 'OnSession' PMO SFU should contain any mandate data`() {
+        mandateDataTest(
+            setupFutureUsage = null,
+            expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+            paymentMethodOptionsJsonString = getPaymentMethodOptionsJsonString("on_session")
+        )
+    }
+
+    @Test
+    fun `create() with top level 'OffSession' and 'None' PMO SFU should not contain any mandate data`() {
+        mandateDataTest(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+            expectedMandateDataParams = null,
+            paymentMethodOptionsJsonString = getPaymentMethodOptionsJsonString("none")
+        )
+    }
+
     private fun mandateDataTest(
         setupFutureUsage: StripeIntent.Usage?,
         expectedMandateDataParams: MandateDataParams?,
         paymentMethod: PaymentMethod = PaymentMethodFactory.cashAppPay(),
+        paymentMethodOptionsJsonString: String? = null
     ) {
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
             intent = createPaymentIntent(
                 setupFutureUsage = setupFutureUsage,
+                paymentMethodOptionsJsonString = paymentMethodOptionsJsonString
             ),
             shipping = null,
         )
@@ -293,10 +322,22 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     private fun createPaymentIntent(
         setupFutureUsage: StripeIntent.Usage? = null,
+        paymentMethodOptionsJsonString: String? = null
     ): PaymentIntent {
         return PaymentIntentFactory.create(
             setupFutureUsage = setupFutureUsage,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString
         )
+    }
+
+    private fun getPaymentMethodOptionsJsonString(sfuValue: String): String {
+        return """
+                {
+                    "cashapp": {
+                        "setup_future_usage": "$sfuValue"
+                    }
+                }
+        """.trimIndent()
     }
 
     private fun ConfirmStripeIntentParams.asConfirmPaymentIntentParams(): ConfirmPaymentIntentParams {

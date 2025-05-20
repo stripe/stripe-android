@@ -33,8 +33,11 @@ import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -52,12 +55,15 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
-    private val navigationManager: NavigationManager,
+    private val navigationManager: NavigationManager
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
+
+    private val _result = MutableSharedFlow<LinkActivityResult>(extraBufferCapacity = 1)
+    val result: SharedFlow<LinkActivityResult> = _result.asSharedFlow()
 
     val navigationFlow = navigationManager.navigationFlow
 
@@ -67,8 +73,10 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
 
-    var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+
+    val canDismissSheet: Boolean
+        get() = activityRetainedComponent.dismissalCoordinator.canDismiss
 
     init {
         linkAccountManager.consumerPublishableKey = getArgs(savedStateHandle)?.consumerPublishableKey
@@ -88,11 +96,25 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onDismissVerificationClicked() {
-        dismissWithResult?.invoke(
+        dismissWithResult(
             LinkActivityResult.Canceled(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
+    }
+
+    fun handleResult(result: LinkActivityResult) {
+        dismissWithResult(result)
+    }
+
+    fun dismissSheet() {
+        if (canDismissSheet) {
+            dismissWithResult(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                )
+            )
+        }
     }
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -100,7 +122,8 @@ internal class LinkActivityViewModel @Inject constructor(
         GlobalScope.launch {
             linkAccountManager.logOut()
         }
-        dismissWithResult?.invoke(
+
+        dismissWithResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -132,7 +155,7 @@ internal class LinkActivityViewModel @Inject constructor(
      * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
      */
     fun handleBackPressed() {
-        dismissWithResult?.invoke(
+        dismissWithResult(
             LinkActivityResult.Canceled(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
@@ -156,7 +179,9 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun goBack() {
-        navigationManager.tryNavigateBack()
+        if (canDismissSheet) {
+            navigationManager.tryNavigateBack()
+        }
     }
 
     fun changeEmail() {
@@ -165,7 +190,6 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun unregisterActivity() {
-        dismissWithResult = null
         launchWebFlow = null
     }
 
@@ -242,6 +266,12 @@ internal class LinkActivityViewModel @Inject constructor(
         updateScreenState()
     }
 
+    private fun dismissWithResult(result: LinkActivityResult) {
+        viewModelScope.launch {
+            _result.emit(result)
+        }
+    }
+
     companion object {
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -259,6 +289,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .context(app)
                     .application(app)
                     .startWithVerificationDialog(args.startWithVerificationDialog)
+                    .linkLaunchMode(args.launchMode)
                     .linkAccount(args.linkAccount)
                     .build()
                     .viewModel

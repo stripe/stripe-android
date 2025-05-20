@@ -5,6 +5,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -58,7 +61,10 @@ class PaymentMethodViewModelTest {
                 formArguments = TestFactory.CARD_FORM_ARGS,
                 formElements = TestFactory.CARD_FORM_ELEMENTS,
                 primaryButtonState = PrimaryButtonState.Disabled,
-                primaryButtonLabel = completePaymentButtonLabel(TestFactory.LINK_CONFIGURATION.stripeIntent)
+                primaryButtonLabel = completePaymentButtonLabel(
+                    TestFactory.LINK_CONFIGURATION.stripeIntent,
+                    LinkLaunchMode.Full
+                )
             )
         )
     }
@@ -123,7 +129,8 @@ class PaymentMethodViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    collectedCvc = "111"
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -223,6 +230,7 @@ class PaymentMethodViewModelTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         logger: Logger = FakeLogger(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
@@ -232,7 +240,9 @@ class PaymentMethodViewModelTest {
             dismissWithResult = dismissWithResult,
             formHelper = formHelper,
             logger = logger,
-            linkAccountManager = linkAccountManager
+            dismissalCoordinator = dismissalCoordinator,
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 }

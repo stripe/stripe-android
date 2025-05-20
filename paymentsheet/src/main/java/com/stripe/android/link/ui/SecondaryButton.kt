@@ -4,16 +4,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
 
 @Composable
 internal fun SecondaryButton(
@@ -28,16 +26,17 @@ internal fun SecondaryButton(
             .fillMaxWidth()
             .height(PrimaryButtonHeight),
         enabled = enabled,
-        shape = MaterialTheme.linkShapes.medium,
+        shape = LinkTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondary,
-            disabledBackgroundColor = MaterialTheme.colors.secondary
+            backgroundColor = LinkTheme.colors.buttonSecondary,
+            disabledBackgroundColor = LinkTheme.colors.buttonSecondary
         )
     ) {
         Text(
             text = label,
-            color = MaterialTheme.linkColors.secondaryButtonLabel
-                .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled)
+            color = LinkTheme.colors.textPrimary
+                .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled),
+            style = LinkTheme.typography.bodyEmphasized,
         )
     }
 }

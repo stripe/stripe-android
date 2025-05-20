@@ -8,8 +8,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -32,6 +34,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAccountManager: LinkAccountManager,
     private val navigationManager: NavigationManager,
+    private val dismissalCoordinator: LinkDismissalCoordinator,
     paymentDetailsId: String,
 ) : ViewModel() {
 
@@ -64,24 +67,26 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
     fun onUpdateClicked() {
         viewModelScope.launch {
-            runCatching {
-                _state.update { it.copy(processing = true, error = null) }
-                val cardParams = requireNotNull(state.value.cardUpdateParams)
-                val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
-                val updateParams = ConsumerPaymentDetailsUpdateParams(
-                    id = paymentDetailsId,
-                    // When updating a card that is not the default and you send isDefault=false to the server you get
-                    // "Can't unset payment details when it's not the default", so send nil instead of false
-                    isDefault = state.value.isDefault.takeIf { it == true },
-                    cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
-                )
-                linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
-                _state.update { it.copy(processing = false, error = null) }
-            }.onFailure { throwable ->
-                logger.error("Failed to update payment details", throwable)
-                _state.update { it.copy(processing = false, error = throwable) }
-            }.onSuccess {
-                navigationManager.tryNavigateBack()
+            dismissalCoordinator.withDismissalDisabled {
+                runCatching {
+                    _state.update { it.copy(processing = true, error = null) }
+                    val cardParams = requireNotNull(state.value.cardUpdateParams)
+                    val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
+                    val updateParams = ConsumerPaymentDetailsUpdateParams(
+                        id = paymentDetailsId,
+                        // When updating a card that is not the default and you send isDefault=false to the server,
+                        // you get "Can't unset payment details when it's not the default", so send nil instead of false
+                        isDefault = state.value.isDefault.takeIf { it == true },
+                        cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
+                    )
+                    linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
+                    _state.update { it.copy(processing = false, error = null) }
+                }.onFailure { throwable ->
+                    logger.error("Failed to update payment details", throwable)
+                    _state.update { it.copy(processing = false, error = throwable) }
+                }.onSuccess {
+                    navigationManager.tryNavigateBack()
+                }
             }
         }
     }
@@ -98,7 +103,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     )
 
     fun onCancelClicked() {
-        logger.info("Cancel button clicked")
+        navigationManager.tryNavigateBack()
     }
 
     private fun initializeInteractor(
@@ -138,6 +143,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAccountManager = parentComponent.linkAccountManager,
                         navigationManager = parentComponent.navigationManager,
+                        dismissalCoordinator = parentComponent.dismissalCoordinator,
                         paymentDetailsId = paymentDetailsId
                     )
                 }

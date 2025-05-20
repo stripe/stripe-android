@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -97,7 +98,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
     private val canShowWalletButtons: Boolean,
-    private val canUpdateFullPaymentMethodDetails: Boolean,
+    private val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -211,11 +212,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         displayedSavedPaymentMethod,
         canRemove,
-    ) { paymentMethods, displayedSavedPaymentMethod, canRemove ->
+        canUpdateFullPaymentMethodDetails,
+    ) { paymentMethods, displayedSavedPaymentMethod, canRemove, canUpdateFullPaymentMethodDetails ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
-            canRemove = canRemove
+            canRemove = canRemove,
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
         )
     }
 
@@ -378,6 +381,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canRemove: Boolean,
+        canUpdateFullPaymentMethodDetails: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -389,6 +393,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 getSavedPaymentMethodActionForOnePaymentMethod(
                     canRemove = canRemove,
                     savedPaymentMethod = savedPaymentMethod,
+                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
                 )
             }
             else ->
@@ -399,6 +404,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getSavedPaymentMethodActionForOnePaymentMethod(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
+        canUpdateFullPaymentMethodDetails: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails) == true || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
@@ -455,7 +461,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
         } else {
             val savedSelection = selection as? PaymentSelection.Saved?
-            savedSelection?.mandateText(paymentMethodMetadata.merchantName, paymentMethodMetadata.hasIntentToSetup())
+            savedSelection?.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata)
         }
     }
 

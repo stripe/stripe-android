@@ -12,10 +12,14 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -65,11 +69,16 @@ internal sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     data class Link(
-        val useLinkExpress: Boolean = false
+        val useLinkExpress: Boolean = false,
+        val linkAccount: LinkAccount? = null,
+        val selectedLinkPayment: ConsumerPaymentDetails.PaymentDetails? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
+
+        val label: ResolvableString
+            get() = selectedLinkPayment?.displayName ?: StripeR.string.stripe_link.resolvableString
 
         override fun mandateText(
             merchantName: String,
@@ -384,7 +393,7 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
+        is PaymentSelection.Link -> label
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
@@ -436,4 +445,29 @@ internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): Paymen
         name = name,
         phone = phone
     )
+}
+
+internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
+    metadata: PaymentMethodMetadata
+): ResolvableString? = mandateText(
+    metadata.merchantName,
+    metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
+)
+
+/**
+ * If setup_future_usage is set at the top level to "off_session" the payment method will
+ * inherit this value so sending [ConfirmPaymentIntentParams.SetupFutureUsage.OnSession] and
+ * [ConfirmPaymentIntentParams.SetupFutureUsage.Blank] have no effect.
+ * If setup_future_usage is set to "on_session" at either the top level or payment_method_options level it can
+ * only be updated to "off_session". This method will always return the [ConfirmPaymentIntentParams.SetupFutureUsage]
+ * value if it is [ConfirmPaymentIntentParams.SetupFutureUsage.OffSession]. Otherwise it will return null if
+ * @param hasIntentToSetup is true
+ */
+internal fun PaymentSelection.CustomerRequestedSave.getSetupFutureUseValue(
+    hasIntentToSetup: Boolean
+): ConfirmPaymentIntentParams.SetupFutureUsage? {
+    return when (setupFutureUsage) {
+        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> setupFutureUsage
+        else -> setupFutureUsage.takeIf { !hasIntentToSetup }
+    }
 }

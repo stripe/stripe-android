@@ -228,7 +228,8 @@ constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
-        return isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)
+        return (isTopLevelSetupFutureUsageSet() || isLpmLevelSetupFutureUsageSet(code)) &&
+            !isPaymentMethodOptionsSetupFutureUsageNone(code)
     }
 
     /**
@@ -243,10 +244,16 @@ constructor(
         }
     }
 
+    private fun isPaymentMethodOptionsSetupFutureUsageNone(code: PaymentMethodCode): Boolean {
+        return paymentMethodOptionsJsonString?.let { json ->
+            JSONObject(json).optJSONObject(code)?.optString(SETUP_FUTURE_USAGE) == NONE
+        } ?: false
+    }
+
     private fun isLpmLevelSetupFutureUsageSet(code: PaymentMethodCode): Boolean {
         return paymentMethodOptionsJsonString?.let { json ->
             val pmOptions = JSONObject(json).optJSONObject(code)
-            pmOptions?.has("setup_future_usage") ?: false
+            pmOptions?.has(SETUP_FUTURE_USAGE) ?: false
         } ?: false
     }
 
@@ -463,5 +470,9 @@ constructor(
 
         internal const val CARD = "card"
         internal const val REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
+        internal const val SETUP_FUTURE_USAGE = "setup_future_usage"
+        internal const val NONE = "none"
+        internal const val OFF_SESSION = "off_session"
+        internal const val ON_SESSION = "on_session"
     }
 }

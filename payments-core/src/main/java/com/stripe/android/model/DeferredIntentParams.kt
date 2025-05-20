@@ -28,6 +28,7 @@ data class DeferredIntentParams(
             override val currency: String,
             override val setupFutureUsage: StripeIntent.Usage?,
             val captureMethod: PaymentIntent.CaptureMethod,
+            val paymentMethodOptionsJsonString: String?
         ) : Mode {
             override val code: String get() = "payment"
         }

@@ -276,6 +276,55 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun `Determines SFU correctly if setup_future_usage is none in payment method options`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+            paymentMethodOptionsJsonString = """
+                {
+                  "affirm": {
+                    "setup_future_usage": "none"
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("affirm")
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage exists in PMO with feature enabled`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "setup_future_usage": "off_session"
+                  }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("card")
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `Determines SFU correctly if setup_future_usage does not exists in PMO with PMO SFU feature enabled`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                    "card": {
+                        "some_other_key_that_has_nothing_to_do_with_sfu": "some value"
+                    }
+                }
+            """.trimIndent()
+        )
+
+        val result = paymentIntent.isSetupFutureUsageSet("card")
+        assertThat(result).isFalse()
+    }
+
+    @Test
     fun `getPaymentMethodOptions returns expected results`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodOptionsJsonString = """

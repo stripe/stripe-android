@@ -1,17 +1,20 @@
 package com.stripe.android.link.ui.wallet
 
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
@@ -22,7 +25,10 @@ import org.junit.Test
 
 internal class WalletScreenScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule(Orientation.entries)
+    val paparazziRule = PaparazziRule(
+        Orientation.entries,
+        SystemAppearance.entries
+    )
 
     @Test
     fun testEmptyState() {
@@ -42,16 +48,45 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testCollapsedStateWithUnavailable() {
+        snapshot(
+            state = walletUiState(
+                cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+            )
+        )
+    }
+
+    @Test
     fun testExpandedState() {
         snapshot(
-            state = walletUiState(isExpanded = true),
+            state = walletUiState(userSetIsExpanded = true),
+        )
+    }
+
+    @Test
+    fun testExpandedStateWithUnavailable() {
+        snapshot(
+            state = walletUiState(
+                userSetIsExpanded = true,
+                cardBrandFilter = RejectCardBrands(CardBrand.Visa)
+            ),
+        )
+    }
+
+    @Test
+    fun testCollapsedStateWithExpiredCardCollection() {
+        snapshot(
+            state = walletUiState(
+                userSetIsExpanded = false,
+
+            ),
         )
     }
 
     @Test
     fun testPayButtonCompletedState() {
         snapshot(
-            state = walletUiState(isExpanded = true),
+            state = walletUiState(userSetIsExpanded = true),
         )
     }
 
@@ -60,7 +95,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 isProcessing = true,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -78,7 +113,7 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -96,7 +131,7 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -108,7 +143,7 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
                     it is ConsumerPaymentDetails.BankAccount
                 },
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -118,7 +153,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 alertMessage = "Something went wrong".resolvableString,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -133,7 +168,7 @@ internal class WalletScreenScreenshotTest {
                         id = "${card.id}_$index"
                     )
                 },
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -143,7 +178,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 canAddNewPaymentMethod = false,
-                isExpanded = true,
+                userSetIsExpanded = true,
             ),
         )
     }
@@ -152,32 +187,37 @@ internal class WalletScreenScreenshotTest {
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
         selectedItem: ConsumerPaymentDetails.PaymentDetails? = paymentDetailsList.firstOrNull(),
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         hasCompleted: Boolean = false,
         isProcessing: Boolean = false,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         alertMessage: ResolvableString? = null,
         canAddNewPaymentMethod: Boolean = true,
-        isExpanded: Boolean = false,
+        userSetIsExpanded: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
             selectedItemId = selectedItem?.id,
+            cardBrandFilter = cardBrandFilter,
             hasCompleted = hasCompleted,
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
+            secondaryButtonLabel = secondaryButtonLabel,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
             canAddNewPaymentMethod = canAddNewPaymentMethod,
-            isExpanded = isExpanded,
+            userSetIsExpanded = userSetIsExpanded,
+            isSettingUp = false,
+            merchantName = "Example Inc.",
         )
     }
 
     private fun snapshot(state: WalletUiState) {
         paparazziRule.snapshot {
-            DefaultLinkTheme {
+            LinkScreenshotSurface {
                 WalletBody(
                     state = state,
                     onItemSelected = {},
@@ -202,5 +242,6 @@ internal class WalletScreenScreenshotTest {
 
     companion object {
         private val primaryButtonLabel = "Pay $50".resolvableString
+        private val secondaryButtonLabel = "Pay another way".resolvableString
     }
 }

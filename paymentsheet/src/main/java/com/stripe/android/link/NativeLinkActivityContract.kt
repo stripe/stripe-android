@@ -27,6 +27,7 @@ internal class NativeLinkActivityContract @Inject constructor(
                 publishableKey = paymentConfiguration.publishableKey,
                 consumerPublishableKey = input.consumerSessionPublishableKey,
                 startWithVerificationDialog = input.startWithVerificationDialog,
+                launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccount = input.linkAccount
             )

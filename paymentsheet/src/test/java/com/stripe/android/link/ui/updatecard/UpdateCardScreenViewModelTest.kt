@@ -2,6 +2,8 @@ package com.stripe.android.link.ui.updatecard
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.utils.TestNavigationManager
@@ -53,12 +55,14 @@ class UpdateCardScreenViewModelTest {
     @Test
     fun `onUpdateClicked updates payment details successfully`() = runTest(dispatcher) {
         val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        val navigationManager = TestNavigationManager()
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setConsumerPaymentDetails(ConsumerPaymentDetails(listOf(card)))
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            paymentDetailsId = card.id
+            paymentDetailsId = card.id,
+            navigationManager = navigationManager,
         )
 
         val cardUpdateParams = CardUpdateParams(
@@ -77,29 +81,32 @@ class UpdateCardScreenViewModelTest {
         assertThat(state.error).isNull()
         assertThat(call.id).isEqualTo(state.paymentDetailsId)
         assertThat(call).isNotNull()
+
+        navigationManager.assertNavigatedBack()
     }
 
     @Test
-    fun `onCancelClicked logs cancel action`() = runTest(dispatcher) {
-        val logger = FakeLogger()
-        val viewModel = createViewModel(logger = logger)
+    fun `onCancelClicked navigates back`() = runTest(dispatcher) {
+        val navigationManager = TestNavigationManager()
+        val viewModel = createViewModel(navigationManager = navigationManager)
 
         viewModel.onCancelClicked()
-
-        assertThat(logger.infoLogs).contains("Cancel button clicked")
+        navigationManager.assertNavigatedBack()
     }
 
     private fun createViewModel(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
+        dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         paymentDetailsId: String = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id
     ): UpdateCardScreenViewModel {
         return UpdateCardScreenViewModel(
             logger = logger,
             linkAccountManager = linkAccountManager,
             navigationManager = navigationManager,
-            paymentDetailsId = paymentDetailsId
+            dismissalCoordinator = dismissalCoordinator,
+            paymentDetailsId = paymentDetailsId,
         )
     }
 }

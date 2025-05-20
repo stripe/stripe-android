@@ -20,7 +20,8 @@ fun NavigationEffects(
     navigationChannel: SharedFlow<NavigationIntent>,
     navHostController: NavHostController,
     keyboardController: KeyboardController,
-    onBackStackEntryUpdated: (NavBackStackEntryUpdate) -> Unit
+    onPopBackStackResult: (Boolean) -> Unit = {},
+    onBackStackEntryUpdated: (NavBackStackEntryUpdate) -> Unit,
 ) {
     val activity = (LocalContext.current as? Activity)
     val backStackEntry by navHostController.currentBackStackEntryAsState()
@@ -62,7 +63,8 @@ fun NavigationEffects(
                 }
 
                 NavigationIntent.NavigateBack -> {
-                    navHostController.popBackStack()
+                    val handled = navHostController.popBackStack()
+                    onPopBackStackResult(handled)
                 }
             }
         }.launchIn(this)

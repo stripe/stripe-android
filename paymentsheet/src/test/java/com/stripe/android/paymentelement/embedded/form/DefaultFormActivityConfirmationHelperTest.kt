@@ -101,6 +101,7 @@ class DefaultFormActivityConfirmationHelperTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             .configurationModifier()
             .build()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()

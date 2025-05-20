@@ -344,6 +344,22 @@ public final class com/stripe/android/link/LinkConfiguration$CustomerInfo$Creato
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/LinkLaunchMode$Full$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkLaunchMode$Full;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/LinkLaunchMode$Full;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/LinkLaunchMode$PaymentMethodSelection$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkLaunchMode$PaymentMethodSelection;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/LinkLaunchMode$PaymentMethodSelection;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/link/LinkPaymentDetails$New$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentDetails$New;
@@ -376,6 +392,12 @@ public final class com/stripe/android/link/model/LinkAccount$Creator : android/o
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/ui/ComposableSingletons$ErrorTextKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$ErrorTextKt;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkAppBarKt;
 	public fun <init> ()V
@@ -399,6 +421,12 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkContentKt
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+}
+
+public final class com/stripe/android/link/ui/ComposableSingletons$LinkSpinnerKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkSpinnerKt;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkTermsKt {
@@ -473,6 +501,7 @@ public final class com/stripe/android/link/ui/updatecard/ComposableSingletons$Up
 	public static final field INSTANCE Lcom/stripe/android/link/ui/updatecard/ComposableSingletons$UpdateCardScreenKt;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationScreenKt {
@@ -480,6 +509,7 @@ public final class com/stripe/android/link/ui/verification/ComposableSingletons$
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt {
@@ -489,17 +519,19 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Paymen
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/ui/wallet/ComposableSingletons$WalletScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$WalletScreenKt;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
 public final class com/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Permissions$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Permissions;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Permissions;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -826,6 +858,9 @@ public abstract interface annotation class com/stripe/android/paymentelement/Exp
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalEmbeddedPaymentElementApi : java/lang/annotation/Annotation {
+}
+
+public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/paymentelement/confirmation/ConfirmationDefinition$Parameters$Creator : android/os/Parcelable$Creator {
@@ -1953,10 +1988,12 @@ public abstract class com/stripe/android/paymentsheet/PaymentSheet$IntentConfigu
 public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment : com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (JLjava/lang/String;)V
-	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;)V
+	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions;)V
 	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;)V
 	public synthetic fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions;)V
+	public synthetic fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$CaptureMethod;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (JLjava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAmount ()J
@@ -1971,6 +2008,25 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfigurat
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/util/Map;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$Mode$Payment$PaymentMethodOptions;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1998,6 +2054,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfigurat
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse : java/lang/Enum {
+	public static final field None Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
 	public static final field OffSession Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
 	public static final field OnSession Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration$SetupFutureUse;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
@@ -2942,14 +2999,6 @@ public final class com/stripe/android/paymentsheet/state/CustomerState$DefaultPa
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/CustomerState$DefaultPaymentMethodState$Enabled;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/CustomerState$DefaultPaymentMethodState$Enabled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/state/CustomerState$Permissions$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/state/CustomerState$Permissions;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/state/CustomerState$Permissions;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

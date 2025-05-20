@@ -8,6 +8,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -186,6 +187,12 @@ internal class ManageActivityTest {
     private fun launch(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf()),
+            customerMetadataPermissions = CustomerMetadata.Permissions(
+                canRemoveDuplicates = false,
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = true,
+                canUpdateFullPaymentMethodDetails = false,
+            )
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,

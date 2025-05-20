@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">Ali želite zapreti ta obrazec?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Shranite svoje podatke za varno izvedbo plačila z enim klikom s storitvijo Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">Kreditna kartica %1$s</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">Debetna kartica %1$s</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">Predplačniška kartica %1$s</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">Kartica %1$s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Strinjam se in nadaljuj</string>
   <!-- Title for the Link signup screen -->
@@ -34,8 +42,16 @@
   <string name="stripe_link_sign_up_message">Shranite svoje podatke o plačilu v storitev Link za varno izvedbo plačila z enim klikom na spletnih mestih, ki podpirajo Link.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Če nadaljujete postopek, se strinjate s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti</privacy>.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Posodobite kartico</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">To je vaš privzeti način plačila</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Posodobite kartico</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Vnesite kodo, ki smo jo poslali na telefonsko številko %s, da boste lahko uporabili shranjene podatke.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Posodobite kartico</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odjava iz storitve Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -223,6 +239,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s temi <terms>pogoji</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Plačilo</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Nadaljuj na drug način</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Privzeto</string>
   <string name="stripe_wallet_expand_accessibility">Spremenite izbor</string>

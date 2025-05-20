@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -17,6 +18,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -46,6 +48,7 @@ internal data class PaymentMethodMetadata(
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
+    val allowsLinkInSavedPaymentMethods: Boolean,
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
@@ -66,9 +69,9 @@ internal data class PaymentMethodMetadata(
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String
 ) : Parcelable {
-    fun hasIntentToSetup(): Boolean {
+    fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
-            is PaymentIntent -> stripeIntent.setupFutureUsage != null
+            is PaymentIntent -> stripeIntent.isSetupFutureUsageSet(code)
             is SetupIntent -> true
         }
     }
@@ -94,10 +97,16 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
-        return supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
+        val supportedTypes = supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
             paymentMethodDefinition.supportedAsSavedPaymentMethod
         }.map {
             it.type
+        }
+
+        return if (allowsLinkInSavedPaymentMethods && FeatureFlags.linkPMsInSPM.isEnabled) {
+            supportedTypes + listOf(PaymentMethod.Type.Link)
+        } else {
+            supportedTypes
         }
     }
 
@@ -261,9 +270,10 @@ internal data class PaymentMethodMetadata(
 
     fun allowRedisplay(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
+        code: PaymentMethodCode
     ): PaymentMethod.AllowRedisplay {
         return paymentMethodSaveConsentBehavior.allowRedisplay(
-            isSetupIntent = hasIntentToSetup(),
+            isSetupIntent = hasIntentToSetup(code),
             customerRequestedSave = customerRequestedSave,
         )
     }
@@ -277,13 +287,11 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             linkInlineConfiguration: LinkInlineConfiguration?,
             linkState: LinkState?,
+            customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
-            val customerMetadata =
-                CustomerMetadata(
-                    hasCustomerConfiguration = configuration.customer != null,
-                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
-                )
+
+            val allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled
 
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -291,6 +299,7 @@ internal data class PaymentMethodMetadata(
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = configuration
                     .allowsPaymentMethodsRequiringShippingAddress,
+                allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -322,13 +331,14 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isPaymentMethodSyncDefaultEnabled: Boolean,
+            customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
+                allowsLinkInSavedPaymentMethods = false,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -337,10 +347,7 @@ internal data class PaymentMethodMetadata(
                 merchantName = configuration.merchantDisplayName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
-                customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = true,
-                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-                ),
+                customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
@@ -365,6 +372,7 @@ internal data class PaymentMethodMetadata(
                 billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
+                allowsLinkInSavedPaymentMethods = false,
                 paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = configuration.cardBrandChoice?.eligible == true,
@@ -378,6 +386,7 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
                     isPaymentMethodSetAsDefaultEnabled = false,
+                    permissions = CustomerMetadata.Permissions.createForNativeLink(),
                 ),
                 sharedDataSpecs = emptyList(),
                 externalPaymentMethodSpecs = emptyList(),
@@ -389,17 +398,10 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
                 displayableCustomPaymentMethods = emptyList(),
-                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
-        }
-
-        private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
-            val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
-                as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
-            return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
-                ?: false
         }
     }
 }

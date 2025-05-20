@@ -7,9 +7,15 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -17,10 +23,12 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -41,6 +49,8 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
+    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
+    val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -141,6 +151,38 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
+    fun onLinkAuthenticationResult(result: LinkActivityResult) {
+        when (result) {
+            // Link verification dialog dismissed -> user canceled
+            is LinkActivityResult.Canceled -> {
+                Unit
+            }
+            // Link verification dialog failed -> show error
+            is LinkActivityResult.Failed -> {
+                onError(result.error.stripeErrorMessage())
+            }
+            // Link verification dialog completed -> close payment method selection with authenticated state
+            is LinkActivityResult.Completed -> {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        paymentSelection = Link(
+                            linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
+                            selectedLinkPayment = result.selectedPaymentDetails
+                        ),
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
+            // This should not happen, but if it does, we should show an error
+            is LinkActivityResult.PaymentMethodObtained -> {
+                val error = IllegalStateException(
+                    "PaymentMethodObtained is not expected from authentication only Link flows"
+                )
+                onError(error.stripeErrorMessage())
+            }
+        }
+    }
+
     override fun onUserCancel() {
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
@@ -180,14 +222,45 @@ internal class PaymentOptionsViewModel @Inject constructor(
         selection.value?.let { paymentSelection ->
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
-
-            _paymentOptionResult.tryEmit(
-                PaymentOptionResult.Succeeded(
-                    paymentSelection = paymentSelection,
-                    paymentMethods = customerStateHolder.paymentMethods.value
+            val linkState = args.state.paymentMethodMetadata.linkState
+            if (linkState != null && shouldShowLinkVerification(paymentSelection, linkState)) {
+                linkPaymentLauncher.present(
+                    configuration = linkState.configuration,
+                    launchMode = LinkLaunchMode.PaymentMethodSelection,
+                    linkAccount = null,
+                    useLinkExpress = true
                 )
-            )
+            } else {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        paymentSelection = paymentSelection.preserveLinkPaymentIfNeeded(),
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
         }
+    }
+
+    /**
+     * If the screen was launched with Link as the previously selected payment and that selection is kept,
+     * make sure the underlying default Link payment method is preserved.
+     */
+    private fun PaymentSelection.preserveLinkPaymentIfNeeded(): PaymentSelection {
+        return if (this is Link) {
+            val previousLinkPayment = (args.state.paymentSelection as? Link)?.selectedLinkPayment
+            copy(selectedLinkPayment = selectedLinkPayment ?: previousLinkPayment)
+        } else {
+            this
+        }
+    }
+
+    private fun shouldShowLinkVerification(
+        paymentSelection: PaymentSelection,
+        linkState: LinkState
+    ): Boolean {
+        return paymentSelection is Link &&
+            linkState.loginState == LinkState.LoginState.NeedsVerification &&
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkState.configuration)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

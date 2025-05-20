@@ -1,6 +1,8 @@
 package com.stripe.android.link
 
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -22,6 +24,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -162,6 +165,7 @@ internal object TestFactory {
         shippingDetails = null,
         flags = emptyMap(),
         cardBrandChoice = null,
+        cardBrandFilter = DefaultCardBrandFilter,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
@@ -174,6 +178,8 @@ internal object TestFactory {
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.amount),
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.currency)
     ).buildPayButtonLabel()
+
+    val LINK_WALLET_SECONDARY_BUTTON_LABEL = resolvableString(R.string.stripe_wallet_pay_another_way)
 
     val CARD_FORM_ARGS = FormArguments(
         paymentMethodCode = PaymentMethod.Type.Card.code,
@@ -203,5 +209,6 @@ internal object TestFactory {
         startWithVerificationDialog = false,
         linkAccount = LINK_ACCOUNT,
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
+        launchMode = LinkLaunchMode.Full
     )
 }

@@ -4,7 +4,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,13 +15,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -33,7 +30,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -54,15 +50,17 @@ import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.link.theme.HorizontalPadding
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkDivider
+import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -72,6 +70,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -151,12 +150,7 @@ internal fun WalletBody(
         }
     }
 
-    ScrollableColumn(
-        modifier = Modifier
-            .testTag(WALLET_SCREEN_BOX)
-            .fillMaxSize()
-            .padding(16.dp),
-    ) {
+    ScrollableTopLevelColumn {
         PaymentDetailsSection(
             modifier = Modifier,
             state = state,
@@ -215,8 +209,10 @@ private fun PaymentDetailsSection(
             hideBottomSheetContent = hideBottomSheetContent
         )
 
-        AnimatedVisibility(state.showBankAccountTerms) {
-            BankAccountTerms()
+        AnimatedVisibility(visible = state.mandate != null) {
+            state.mandate?.let { mandate ->
+                LinkMandate(mandate.resolve())
+            }
         }
 
         ErrorSection(state.errorMessage)
@@ -224,13 +220,14 @@ private fun PaymentDetailsSection(
         state.selectedCard?.let { selectedCard ->
             if (selectedCard.requiresCardDetailsRecollection) {
                 Spacer(modifier = Modifier.height(16.dp))
-
-                CardDetailsRecollectionForm(
-                    paymentDetails = selectedCard,
-                    expiryDateController = expiryDateController,
-                    cvcController = cvcController,
-                    isCardExpired = selectedCard.isExpired
-                )
+                StripeThemeForLink {
+                    CardDetailsRecollectionForm(
+                        paymentDetails = selectedCard,
+                        expiryDateController = expiryDateController,
+                        cvcController = cvcController,
+                        isCardExpired = selectedCard.isExpired
+                    )
+                }
             }
         }
     }
@@ -264,7 +261,7 @@ private fun ActionSection(
             modifier = Modifier
                 .testTag(WALLET_SCREEN_PAY_BUTTON)
                 .padding(top = 16.dp, bottom = 8.dp),
-            label = state.primaryButtonLabel.resolve(LocalContext.current),
+            label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
             iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
@@ -274,7 +271,7 @@ private fun ActionSection(
             modifier = Modifier
                 .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
             enabled = !state.primaryButtonState.isBlocking,
-            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            label = state.secondaryButtonLabel.resolve(),
             onClick = onPayAnotherWayClicked
         )
     }
@@ -382,15 +379,10 @@ private fun PaymentMethodPicker(
         modifier = modifier
             .animateContentSize()
             .fillMaxWidth()
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.large
-            )
-            .clip(MaterialTheme.linkShapes.large)
+            .clip(LinkTheme.shapes.large)
             .background(
-                color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.linkShapes.large
+                color = LinkTheme.colors.surfaceSecondary,
+                shape = LinkTheme.shapes.large
             )
     ) {
         EmailDetails(
@@ -399,10 +391,7 @@ private fun PaymentMethodPicker(
             labelMaxWidth = labelMaxWidth
         )
 
-        Divider(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.linkColors.componentBorder,
-        )
+        LinkDivider()
 
         if (expanded || selectedItem == null) {
             expandedContent()
@@ -439,7 +428,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_HEADER_TAG)
                 .width(labelMaxWidth),
-            color = MaterialTheme.linkColors.disabledText,
+            color = LinkTheme.colors.textTertiary,
         )
 
         PaymentDetails(
@@ -453,7 +442,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .padding(end = 22.dp)
                 .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
-            tint = MaterialTheme.linkColors.disabledText
+            tint = LinkTheme.colors.iconTertiary
         )
     }
 }
@@ -478,15 +467,15 @@ private fun EmailDetails(
         Text(
             modifier = Modifier.width(labelMaxWidth),
             text = label,
-            color = MaterialTheme.linkColors.disabledText,
+            color = LinkTheme.colors.textTertiary,
         )
 
         Text(
             text = email,
-            color = MaterialTheme.colors.onPrimary,
+            color = LinkTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            style = MaterialTheme.typography.h6,
+            style = LinkTheme.typography.bodyEmphasized,
             modifier = Modifier.weight(1f),
         )
     }
@@ -500,20 +489,23 @@ private fun ExpandedPaymentDetails(
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
-    val isEnabled = !uiState.primaryButtonState.isBlocking
+    val isInteractionEnabled = !uiState.primaryButtonState.isBlocking
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(
-            isEnabled = isEnabled,
+            isEnabled = isInteractionEnabled,
             onCollapse = onCollapse
         )
 
         uiState.paymentDetailsList.forEachIndexed { index, item ->
+            val isItemAvailable = uiState.isItemAvailable(item)
             PaymentDetailsListItem(
                 modifier = Modifier
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
                 paymentDetails = item,
-                enabled = isEnabled,
+                isClickable = isInteractionEnabled && isItemAvailable,
+                isMenuButtonClickable = isInteractionEnabled,
+                isAvailable = isItemAvailable,
                 isSelected = uiState.selectedItem?.id == item.id,
                 isUpdating = uiState.cardBeingUpdated == item.id,
                 onClick = { onItemSelected(item) },
@@ -521,8 +513,7 @@ private fun ExpandedPaymentDetails(
             )
 
             if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
-                Divider(
-                    color = MaterialTheme.linkColors.componentBorder,
+                LinkDivider(
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
             }
@@ -530,7 +521,7 @@ private fun ExpandedPaymentDetails(
 
         if (uiState.canAddNewPaymentMethod) {
             AddPaymentMethodRow(
-                isEnabled = isEnabled,
+                isEnabled = isInteractionEnabled,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
             )
         }
@@ -557,14 +548,13 @@ private fun ExpandedRowHeader(
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            color = MaterialTheme.colors.onPrimary,
-            style = MaterialTheme.typography.button
+            color = LinkTheme.colors.textTertiary
         )
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
             contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
-            tint = MaterialTheme.colors.onPrimary
+            tint = LinkTheme.colors.iconTertiary,
         )
     }
 }
@@ -582,34 +572,28 @@ private fun AddPaymentMethodRow(
             .clickable(enabled = isEnabled, onClick = onAddNewPaymentMethodClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            painter = painterResource(R.drawable.stripe_link_add_green),
-            contentDescription = null,
-            modifier = Modifier.padding(start = HorizontalPadding, end = 12.dp),
-            tint = Color.Unspecified
-        )
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
-            modifier = Modifier.padding(end = HorizontalPadding),
-            color = MaterialTheme.linkColors.actionLabel,
-            style = MaterialTheme.typography.button
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            color = LinkTheme.colors.textBrand,
+            style = LinkTheme.typography.bodyEmphasized,
         )
     }
 }
 
 @Composable
-private fun BankAccountTerms() {
+private fun LinkMandate(text: String) {
     Html(
-        html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
-        color = MaterialTheme.colors.onSecondary,
-        style = MaterialTheme.typography.caption.copy(
+        html = text.replaceHyperlinks(),
+        color = LinkTheme.colors.textTertiary,
+        style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
         ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
-            color = MaterialTheme.colors.primary
+            color = LinkTheme.colors.textBrand,
         )
     )
 }
@@ -684,7 +668,9 @@ private fun Loader() {
             .testTag(WALLET_LOADER_TAG),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        LinkSpinner(
+            modifier = Modifier.size(48.dp)
+        )
     }
 }
 
@@ -697,7 +683,14 @@ private fun AlertMessage(
     AlertDialog(
         modifier = Modifier
             .testTag(WALLET_SCREEN_DIALOG_TAG),
-        text = { Text(alertMessage.resolve(context)) },
+        text = {
+            Text(
+                text = alertMessage.resolve(),
+                style = LinkTheme.typography.body,
+                color = LinkTheme.colors.textPrimary,
+            )
+        },
+        backgroundColor = LinkTheme.colors.surfacePrimary,
         onDismissRequest = onDismissAlert,
         confirmButton = {
             TextButton(
@@ -707,7 +700,7 @@ private fun AlertMessage(
             ) {
                 Text(
                     text = android.R.string.ok.resolvableString.resolve(context),
-                    color = MaterialTheme.linkColors.actionLabel
+                    color = LinkTheme.colors.textBrand
                 )
             }
         }
@@ -748,7 +741,6 @@ internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
 internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"
 internal const val WALLET_SCREEN_RECOLLECTION_FORM_ERROR = "wallet_screen_recollection_form_error"
 internal const val WALLET_SCREEN_RECOLLECTION_FORM_FIELDS = "wallet_screen_recollection_form_fields"
-internal const val WALLET_SCREEN_BOX = "wallet_screen_box"
 internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
 internal const val WALLET_SCREEN_DIALOG_TAG = "wallet_screen_dialog_tag"
 internal const val WALLET_SCREEN_DIALOG_BUTTON_TAG = "wallet_screen_dialog_button_tag"

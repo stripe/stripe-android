@@ -7,6 +7,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -19,6 +21,7 @@ import java.util.UUID
 @RunWith(RobolectricTestRunner::class)
 @Suppress("MaxLineLength")
 internal class PopupPayloadTest {
+
     @Test
     fun testJsonSerialization() {
         val currentSessionId = AnalyticsRequestFactory.sessionId
@@ -184,6 +187,134 @@ internal class PopupPayloadTest {
     }
 
     @Test
+    fun `on 'create' with link PMO SFU on session usage, 'setupForFutureUsage' should be true`() {
+        val payload = PopupPayload.create(
+            configuration = createLinkConfiguration(
+                customerCountryCode = null,
+                intent = PaymentIntentFactory.create(
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                        code = PaymentMethod.Type.Link.code,
+                        sfuValue = "on_session"
+                    )
+                )
+            ),
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.setupFutureUsage).isTrue()
+    }
+
+    @Test
+    fun `on 'create' with link PMO SFU off session usage, 'setupForFutureUsage' should be true`() {
+        val payload = PopupPayload.create(
+            configuration = createLinkConfiguration(
+                customerCountryCode = null,
+                intent = PaymentIntentFactory.create(
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                        code = PaymentMethod.Type.Link.code,
+                        sfuValue = "off_session"
+                    )
+                )
+            ),
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.setupFutureUsage).isTrue()
+    }
+
+    @Test
+    fun `on 'create' with card PMO SFU with on session usage, 'setupForFutureUsage' should be true`() {
+        val payload = PopupPayload.create(
+            configuration = createLinkConfiguration(
+                customerCountryCode = null,
+                intent = PaymentIntentFactory.create(
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                        code = PaymentMethod.Type.Card.code,
+                        sfuValue = "on_session"
+                    )
+                ),
+                passthroughModeEnabled = true
+            ),
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.setupFutureUsage).isTrue()
+    }
+
+    @Test
+    fun `on 'create' with card PMO SFU with off session usage, 'setupForFutureUsage' should be true`() {
+        val payload = PopupPayload.create(
+            configuration = createLinkConfiguration(
+                customerCountryCode = null,
+                intent = PaymentIntentFactory.create(
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                        code = PaymentMethod.Type.Card.code,
+                        sfuValue = "off_session"
+                    )
+                ),
+                passthroughModeEnabled = true
+            ),
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.setupFutureUsage).isTrue()
+    }
+
+    @Test
+    fun `on 'create' with card PMO SFU in payment method mode, 'setupForFutureUsage' should be false`() {
+        val payload = PopupPayload.create(
+            configuration = createLinkConfiguration(
+                customerCountryCode = null,
+                intent = PaymentIntentFactory.create(
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                        code = PaymentMethod.Type.Card.code,
+                        sfuValue = "on_session"
+                    )
+                )
+            ),
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.setupFutureUsage).isFalse()
+    }
+
+    @Test
+    fun `on 'create' with link PMO SFU in payment method mode, 'setupForFutureUsage' should be true`() {
+        val payload = PopupPayload.create(
+            configuration = createLinkConfiguration(
+                customerCountryCode = null,
+                intent = PaymentIntentFactory.create(
+                    paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                        code = PaymentMethod.Type.Link.code,
+                        sfuValue = "off_session"
+                    )
+                )
+            ),
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123"
+        )
+
+        assertThat(payload.setupFutureUsage).isTrue()
+    }
+
+    @Test
     fun `on 'create' with card brand choice, should contain expected card brand choice values`() {
         val payload = PopupPayload.create(
             configuration = createLinkConfiguration(
@@ -245,14 +376,16 @@ internal class PopupPayloadTest {
     private fun createLinkConfiguration(
         customerCountryCode: String?,
         cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
-        intent: StripeIntent = PaymentIntentFactory.create()
+        intent: StripeIntent = PaymentIntentFactory.create(),
+        passthroughModeEnabled: Boolean = false
     ): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
                 billingCountryCode = customerCountryCode
             ),
             cardBrandChoice = cardBrandChoice,
-            stripeIntent = intent
+            stripeIntent = intent,
+            passthroughModeEnabled = passthroughModeEnabled
         )
     }
 

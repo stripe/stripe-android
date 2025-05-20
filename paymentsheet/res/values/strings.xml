@@ -34,6 +34,8 @@
   <string name="stripe_link_card_type_prepaid">%1$s Prepaid</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s Card</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Log in or sign up</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Agree and continue</string>
   <!-- Title for the Link signup screen -->
@@ -239,6 +241,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[By continuing, you agree to authorize payments pursuant to these <terms>terms</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Payment</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Continue another way</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Default</string>
   <string name="stripe_wallet_expand_accessibility">Change selection</string>

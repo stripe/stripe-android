@@ -23,7 +23,8 @@ internal fun LpmSelectorText(
     text: String,
     textColor: Color,
     modifier: Modifier,
-    isEnabled: Boolean
+    isEnabled: Boolean,
+    shouldTintIcon: Boolean = true,
 ) {
     Row(
         modifier = modifier,
@@ -58,7 +59,11 @@ internal fun LpmSelectorText(
                                 .fillMaxSize(),
                             painter = painterResource(it),
                             contentDescription = null,
-                            tint = textColor.copy(alpha = 0.6f)
+                            tint = if (shouldTintIcon) {
+                                textColor.copy(alpha = 0.6f)
+                            } else {
+                                Color.Unspecified
+                            },
                         )
                     }
                     addSpacer(

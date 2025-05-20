@@ -47,7 +47,8 @@ class DeferredPaymentIntentJsonParser(
             created = timeProvider(),
             setupFutureUsage = paymentMode.setupFutureUsage,
             amount = paymentMode.amount,
-            currency = paymentMode.currency
+            currency = paymentMode.currency,
+            paymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString
         )
     }
 

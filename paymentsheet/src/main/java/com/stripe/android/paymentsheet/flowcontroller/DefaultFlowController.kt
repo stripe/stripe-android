@@ -15,6 +15,10 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.toLoginState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -71,6 +75,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
     private val linkHandler: LinkHandler,
+    private val linkAccountHolder: LinkAccountHolder,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
@@ -379,6 +384,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 val paymentSelection = paymentOptionResult.paymentSelection
                 paymentSelection.hasAcknowledgedSepaMandate = true
                 viewModel.paymentSelection = paymentSelection
+                if (paymentSelection is PaymentSelection.Link) {
+                    paymentSelection.linkAccount?.let { updateStateWithLinkAccount(it) }
+                }
                 paymentOptionCallback.onPaymentOption(
                     paymentOptionFactory.create(
                         paymentSelection
@@ -404,6 +412,24 @@ internal class DefaultFlowController @Inject internal constructor(
                 paymentOptionCallback.onPaymentOption(null)
             }
         }
+    }
+
+    /**
+     * 1. Updates [com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.State]
+     *    with the given link account. This ensures subsequent payment method options launches will take
+     *    into account the last Link login state.
+     * 2. Updates [LinkAccountHolder] with the given link account. This ensures
+     *   [com.stripe.android.paymentelement.confirmation.link.LinkConfirmationDefinition] executions
+     *   take into account the last login / verification state.
+     */
+    private fun updateStateWithLinkAccount(linkAccount: LinkAccount) {
+        linkAccountHolder.set(linkAccount)
+        val currentState = viewModel.state ?: return
+        val metadata = currentState.paymentSheetState.paymentMethodMetadata
+        val linkState = metadata.linkState?.copy(loginState = linkAccount.accountStatus.toLoginState())
+        viewModel.state = currentState.copyPaymentSheetState(
+            metadata = metadata.copy(linkState = linkState),
+        )
     }
 
     private fun onIntentResult(result: ConfirmationHandler.Result) {
@@ -567,10 +593,12 @@ internal class DefaultFlowController @Inject internal constructor(
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,
             customer: CustomerState? = paymentSheetState.customer,
+            metadata: PaymentMethodMetadata = paymentSheetState.paymentMethodMetadata
         ): State = copy(
             paymentSheetState = paymentSheetState.copy(
                 paymentSelection = paymentSelection,
                 customer = customer,
+                paymentMethodMetadata = metadata
             )
         )
     }

@@ -1,68 +1,58 @@
 package com.stripe.android.link.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.Colors
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.elements.OTPElementColors
 
-private val LinkTeal = Color(0xFF00D66F)
-private val ActionLightGreen = Color(0xFF00A355)
-private val ActionGreen = Color(0xFF05A87F)
-private val ButtonLabel = Color(0xFF011E0F)
-private val ErrorText = Color(0xFFFF2F4C)
-private val ErrorBackground = Color(0x2EFE87A1)
+// Neutral Colors
+private val Neutral900 = Color(0xFF171717)
+private val Neutral800 = Color(0xFF262626)
+private val Neutral700 = Color(0xFF404040)
+private val Neutral500 = Color(0xFF707070)
+private val Neutral400 = Color(0xFFA3A3A3)
+private val Neutral300 = Color(0xFFD4D4D4)
+private val Neutral200 = Color(0xFFE5E5E5)
+private val Neutral100 = Color(0xFFF5F5F5)
+private val Neutral0 = Color(0xFFFFFFFF)
 
-private val LightComponentBackground = Color.White
-private val LightComponentBorder = Color(0xFFE0E6EB)
-private val LightComponentDivider = Color(0xFFEFF2F4)
-private val LightTextPrimary = Color(0xFF30313D)
-private val LightTextSecondary = Color(0xFF6A7383)
-private val LightTextDisabled = Color(0xFFA3ACBA)
-private val LightBackground = Color.White
-private val LightFill = Color(0xFFF6F8FA)
-private val LightProgressIndicator = Color(0xFF1D3944)
-private val LightSheetScrim = Color(0x1F0A2348)
-private val LightSecondaryButtonLabel = Color(0xFF1D3944)
-private val LightCloseButton = Color(0xFF30313D)
-private val LightLinkLogo = Color(0xFF1D3944)
-private val LightOtpPlaceholder = Color(0xFFEBEEF1)
+// Brand Colors
+private val Brand600 = Color(0xFF006635)
+private val Brand400 = Color(0xFF00A355)
+private val Brand200 = Color(0xFF00D66F)
 
-private val DarkComponentBackground = Color(0x2E747480)
-private val DarkComponentBorder = Color(0x5C787880)
-private val DarkComponentDivider = Color(0x33787880)
-private val DarkTextPrimary = Color.White
-private val DarkTextSecondary = Color(0x99EBEBF5)
-private val DarkTextDisabled = Color(0x61FFFFFF)
-private val DarkBackground = Color(0xFF2E2E2E)
-private val DarkFill = Color(0x33787880)
-private val DarkCloseButton = Color(0x99EBEBF5)
-private val DarkLinkLogo = Color.White
-private val DarkProgressIndicator = LinkTeal
-private val DarkSecondaryButtonLabel = ActionGreen
-private val DarkOtpPlaceholder = Color(0x61FFFFFF)
+// Critical Colors
+private val Critical600 = Color(0xFFC0123C)
+private val Critical500 = Color(0xFFE61947)
+private val Critical400 = Color(0xFFFA4A67)
 
 internal data class LinkColors(
-    val componentBackground: Color,
-    val componentBorder: Color,
-    val componentDivider: Color,
-    val actionLabel: Color,
-    val buttonLabel: Color,
-    val actionLabelLight: Color,
-    val errorText: Color,
-    val disabledText: Color,
-    val errorComponentBackground: Color,
-    val progressIndicator: Color,
-    val materialColors: Colors,
-    val secondaryButtonLabel: Color,
-    val sheetScrim: Color,
-    val closeButton: Color,
-    val linkLogo: Color,
-    val otpElementColors: OTPElementColors,
+    val surfacePrimary: Color,
+    val surfaceSecondary: Color,
+    val surfaceTertiary: Color,
+    val surfaceBackdrop: Color,
+    val borderDefault: Color,
+    val borderSelected: Color,
+    val borderCritical: Color,
+    val buttonPrimary: Color,
+    val buttonSecondary: Color,
+    val buttonTertiary: Color,
+    val buttonBrand: Color,
+    val buttonCritical: Color,
+    val textPrimary: Color,
+    val textSecondary: Color,
+    val textTertiary: Color,
+    val textWhite: Color,
+    val textBrand: Color,
+    val textCritical: Color,
+    val iconPrimary: Color,
+    val iconSecondary: Color,
+    val iconTertiary: Color,
+    val iconWhite: Color,
+    val iconBrand: Color,
+    val iconCritical: Color,
 )
 
 internal object LinkThemeConfig {
@@ -71,56 +61,91 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
-        componentBackground = LightComponentBackground,
-        componentBorder = LightComponentBorder,
-        componentDivider = LightComponentDivider,
-        buttonLabel = ButtonLabel,
-        actionLabelLight = ActionLightGreen,
-        errorText = ErrorText,
-        errorComponentBackground = ErrorBackground,
-        progressIndicator = LightProgressIndicator,
-        secondaryButtonLabel = LightSecondaryButtonLabel,
-        sheetScrim = LightSheetScrim,
-        linkLogo = LightLinkLogo,
-        closeButton = LightCloseButton,
-        disabledText = LightTextDisabled,
-        otpElementColors = OTPElementColors(
-            selectedBorder = LinkTeal,
-            placeholder = LightOtpPlaceholder
-        ),
-        actionLabel = ActionGreen,
-        materialColors = lightColors(
-            primary = LinkTeal,
-            secondary = LightFill,
-            background = LightBackground,
-            surface = LightBackground,
-            onPrimary = LightTextPrimary,
-            onSecondary = LightTextSecondary,
-        )
+        surfacePrimary = Neutral0,
+        surfaceSecondary = Neutral100,
+        surfaceTertiary = Neutral200,
+        surfaceBackdrop = Neutral900,
+        borderDefault = Neutral300,
+        borderSelected = Neutral900,
+        borderCritical = Critical500,
+        buttonPrimary = Neutral900,
+        buttonSecondary = Neutral100,
+        buttonTertiary = Neutral0,
+        buttonBrand = Brand200,
+        buttonCritical = Critical500,
+        textPrimary = Neutral900,
+        textSecondary = Neutral700,
+        textTertiary = Neutral500,
+        textWhite = Neutral0,
+        textBrand = Brand600,
+        textCritical = Critical600,
+        iconPrimary = Neutral900,
+        iconSecondary = Neutral700,
+        iconTertiary = Neutral500,
+        iconWhite = Neutral0,
+        iconBrand = Brand200,
+        iconCritical = Critical500
     )
 
-    private val colorsDark = colorsLight.copy(
-        componentBackground = DarkComponentBackground,
-        componentBorder = DarkComponentBorder,
-        componentDivider = DarkComponentDivider,
-        progressIndicator = DarkProgressIndicator,
-        linkLogo = DarkLinkLogo,
-        closeButton = DarkCloseButton,
-        disabledText = DarkTextDisabled,
-        secondaryButtonLabel = DarkSecondaryButtonLabel,
-        otpElementColors = OTPElementColors(
-            selectedBorder = LinkTeal,
-            placeholder = DarkOtpPlaceholder
-        ),
-        materialColors = darkColors(
-            primary = LinkTeal,
-            secondary = DarkFill,
-            background = DarkBackground,
-            surface = DarkBackground,
-            onPrimary = DarkTextPrimary,
-            onSecondary = DarkTextSecondary,
-        )
+    private val colorsDark = LinkColors(
+        surfacePrimary = Neutral900,
+        surfaceSecondary = Neutral800,
+        surfaceTertiary = Neutral700,
+        surfaceBackdrop = Neutral900,
+        borderDefault = Neutral900,
+        borderSelected = Brand200,
+        borderCritical = Critical500,
+        buttonPrimary = Neutral200,
+        buttonSecondary = Neutral700,
+        buttonTertiary = Neutral800,
+        buttonBrand = Brand200,
+        buttonCritical = Critical600,
+        textPrimary = Neutral0,
+        textSecondary = Neutral300,
+        textTertiary = Neutral400,
+        textWhite = Neutral0,
+        textBrand = Brand200,
+        textCritical = Critical400,
+        iconPrimary = Neutral100,
+        iconSecondary = Neutral500,
+        iconTertiary = Neutral500,
+        iconWhite = Neutral0,
+        iconBrand = Brand200,
+        iconCritical = Critical500
     )
+
+    /**
+     * Workaround:
+     *
+     * - The new Link theme primary button uses white on dark mode and dark on light mode
+     * - But we're still using Link green theming for buttons, regardless of dark mode
+     * - This means that the fixed button color is not consistent with variable text / divider colors,
+     *   so we need to keep them fixed until we migrate to the updated primary color styling.
+     */
+    internal val LinkColors.contentOnPrimaryButton
+        get() = Neutral900
+    internal val LinkColors.separatorOnPrimaryButton
+        get() = Brand400
+
+    /**
+     * Workaround:
+     *
+     * Border color doesn't look great for radio buttons on dark mode. We give it a clearer
+     * color here.
+     *
+     */
+    internal val LinkColors.radioButtonColors
+        @Composable
+        get() = RadioButtonDefaults.colors(
+            selectedColor = LinkTheme.colors.buttonBrand,
+            unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
+        )
+
+    /**
+     * Scrim color does not have a match in the Link theme, so we use a default color matching Elements.
+     */
+    internal val LinkColors.scrim: Color
+        get() = Color.Black.copy(alpha = 0.32f)
 }
 
 @Composable
@@ -131,8 +156,14 @@ internal fun StripeThemeForLink(
 
     StripeTheme(
         colors = stripeDefaultColors.copy(
+            component = LinkTheme.colors.surfaceSecondary,
+            onComponent = LinkTheme.colors.textPrimary,
+            placeholderText = LinkTheme.colors.textTertiary,
+            componentDivider = LinkTheme.colors.borderDefault,
+            componentBorder = LinkTheme.colors.surfaceSecondary,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = ActionGreen
+                primary = LinkTheme.colors.borderSelected,
+                error = LinkTheme.colors.textCritical,
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
