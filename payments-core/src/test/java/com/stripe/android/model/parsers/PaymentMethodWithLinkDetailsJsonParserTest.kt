@@ -47,7 +47,7 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
     }
 
     @Test
-    fun `Does not support method that has Link payment details of type other than CARD`() {
+    fun `Does not support method that has Link payment details of unsupported type`() {
         val linkPaymentDetails = JSONObject().apply {
             put("type", "KLARNA")
         }
