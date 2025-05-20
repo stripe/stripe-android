@@ -707,7 +707,7 @@ private fun AlertMessage(
 }
 
 @Composable
-fun rememberFinancialConnectionsSheet(
+private fun rememberFinancialConnectionsSheet(
     callback: (FinancialConnectionsSheetResult) -> Unit
 ): FinancialConnectionsSheetForDataLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
