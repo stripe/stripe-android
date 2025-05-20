@@ -32,18 +32,6 @@ fun rememberEmbeddedPaymentElement(
         UUID.randomUUID().toString()
     }
 
-    val callbacks = remember(builder) {
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
-        PaymentElementCallbacks.Builder()
-            .createIntentCallback(builder.createIntentCallback)
-            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
-            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
-            .analyticEventCallback(builder.analyticEventCallback)
-            .build()
-    }
-
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
-
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
         "EmbeddedPaymentElement must have an ActivityResultRegistryOwner."
@@ -55,17 +43,36 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must be created in the context of an Activity."
     }
 
-    return remember {
-        EmbeddedPaymentElement.create(
-            activity = activity,
-            activityResultCaller = PaymentElementActivityResultCaller(
-                key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
-                registryOwner = activityResultRegistryOwner,
-            ),
-            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            lifecycleOwner = lifecycleOwner,
-            viewModelStoreOwner = viewModelStoreOwner,
-            resultCallback = onResult,
-        )
+    val embeddedPaymentElement = EmbeddedPaymentElement.create(
+        activity = activity,
+        activityResultCaller = PaymentElementActivityResultCaller(
+            key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
+            registryOwner = activityResultRegistryOwner,
+        ),
+        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+        lifecycleOwner = lifecycleOwner,
+        viewModelStoreOwner = viewModelStoreOwner,
+        resultCallback = onResult,
+    )
+
+    val callbacks = remember(builder) {
+        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(builder.createIntentCallback)
+            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
+            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
+            .analyticEventCallback(builder.analyticEventCallback)
+            .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
+            .build()
     }
+
+    if (
+        builder.rowSelectionBehavior is EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction
+    ) {
+        embeddedPaymentElement.clearPaymentOption()
+    }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+
+    return remember { embeddedPaymentElement }
 }
