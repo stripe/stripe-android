@@ -3,7 +3,6 @@ package com.stripe.android.link.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
@@ -34,7 +33,6 @@ internal class LinkContentScreenshotTest {
             .fillMaxWidth(),
     )
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Test
     fun testLinkContentScreenHasOpaqueBackground() {
         paparazziRule.snapshot {
@@ -50,15 +48,12 @@ internal class LinkContentScreenshotTest {
                         text = "Hello!"
                     )
                     LinkContent(
+                        modifier = Modifier,
                         navController = navController,
                         appBarState = LinkAppBarState(
                             navigationIcon = R.drawable.stripe_link_close,
                             showHeader = false,
                             showOverflowMenu = false,
-                        ),
-                        sheetState = ModalBottomSheetState(
-                            initialValue = ModalBottomSheetValue.Hidden,
-                            density = Density(1f)
                         ),
                         bottomSheetContent = null,
                         initialDestination = LinkScreen.Loading,
