@@ -35,8 +35,12 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (payment
     PaymentMethod.Type.Card -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
     PaymentMethod.Type.Link -> {
         when (paymentMethod.linkPaymentDetails) {
-            is LinkPaymentDetails.BankAccount -> resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
-            is LinkPaymentDetails.Card -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+            is LinkPaymentDetails.BankAccount -> {
+                resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
+            }
+            is LinkPaymentDetails.Card -> {
+                resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+            }
             null -> resolvableString("")
         }
     }

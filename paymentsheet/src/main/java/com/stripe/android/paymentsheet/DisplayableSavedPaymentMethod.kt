@@ -17,7 +17,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val shouldShowDefaultBadge: Boolean = false
 ) {
     val isCard: Boolean
-        get() = savedPaymentMethod is Card || (savedPaymentMethod is Link && savedPaymentMethod.paymentDetails is LinkPaymentDetails.Card)
+        get() = savedPaymentMethod is Card ||
+            (savedPaymentMethod is Link && savedPaymentMethod.paymentDetails is LinkPaymentDetails.Card)
 
     fun canChangeCbc(): Boolean {
         return when (savedPaymentMethod) {

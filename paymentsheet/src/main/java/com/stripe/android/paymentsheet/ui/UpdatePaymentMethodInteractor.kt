@@ -71,8 +71,12 @@ internal interface UpdatePaymentMethodInteractor {
                 is SavedPaymentMethod.Card -> R.string.stripe_paymentsheet_manage_card
                 is SavedPaymentMethod.Link -> {
                     when (displayableSavedPaymentMethod.paymentMethod.linkPaymentDetails) {
-                        is LinkPaymentDetails.BankAccount -> R.string.stripe_paymentsheet_manage_international_bank_account
-                        is LinkPaymentDetails.Card -> R.string.stripe_paymentsheet_manage_card
+                        is LinkPaymentDetails.BankAccount -> {
+                            R.string.stripe_paymentsheet_manage_international_bank_account
+                        }
+                        is LinkPaymentDetails.Card -> {
+                            R.string.stripe_paymentsheet_manage_card
+                        }
                         null -> null
                     }
                 }

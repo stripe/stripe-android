@@ -361,8 +361,12 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                 }
             is SavedPaymentMethod.Link -> {
                 when (savedPaymentMethod.paymentDetails) {
-                    is LinkPaymentDetails.BankAccount -> PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
-                    is LinkPaymentDetails.Card -> PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                    is LinkPaymentDetails.BankAccount -> {
+                        PaymentSheetR.string.stripe_paymentsheet_bank_account_details_cannot_be_changed
+                    }
+                    is LinkPaymentDetails.Card -> {
+                        PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                    }
                 }
             }
             is SavedPaymentMethod.USBankAccount ->

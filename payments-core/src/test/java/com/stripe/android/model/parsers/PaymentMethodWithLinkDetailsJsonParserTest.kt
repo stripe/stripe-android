@@ -34,8 +34,23 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
     }
 
     @Test
-    fun `Does not support method that has Link payment details of type other than CARD`() {
+    fun `Supports payment method that has Link payment details of type BANK_ACCOUNT`() {
         val linkPaymentDetails = CONSUMER_PAYMENT_DETAILS_JSON.getJSONArray("redacted_payment_details").getJSONObject(2)
+        val json = JSONObject().apply {
+            put("payment_method", ALLOW_REDISPLAY_UNSPECIFIED_JSON)
+            put("link_payment_details", linkPaymentDetails)
+        }
+        val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
+
+        assertThat(paymentMethod).isNotNull()
+        assertThat(paymentMethod?.linkPaymentDetails).isNotNull()
+    }
+
+    @Test
+    fun `Does not support method that has Link payment details of type other than CARD`() {
+        val linkPaymentDetails = JSONObject().apply {
+            put("type", "KLARNA")
+        }
         val json = JSONObject().apply {
             put("payment_method", ALLOW_REDISPLAY_UNSPECIFIED_JSON)
             put("link_payment_details", linkPaymentDetails)
