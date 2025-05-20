@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -28,7 +29,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        renderEdgeToEdge()
 
         try {
             viewModel = ViewModelProvider(this, viewModelFactory)[LinkActivityViewModel::class.java]
@@ -39,6 +39,9 @@ internal class LinkActivity : ComponentActivity() {
         }
 
         val vm = viewModel ?: return
+
+        vm.linkLaunchMode.setTheme()
+
         vm.registerActivityForConfirmation(
             activityResultCaller = this,
             lifecycleOwner = this,
@@ -69,6 +72,18 @@ internal class LinkActivity : ComponentActivity() {
                 bottomSheetState = bottomSheetState,
             )
         }
+    }
+
+    /**
+     * Set the theme to transparent if [LinkActivity] launches in confirmation mode.
+     */
+    private fun LinkLaunchMode.setTheme() {
+        if ((this as? LinkLaunchMode.Full)?.selectedPayment?.readyForConfirmation() == true) {
+            setTheme(R.style.StripeTransparentTheme)
+        } else {
+            setTheme(R.style.StripePaymentSheetDefaultTheme)
+        }
+        renderEdgeToEdge()
     }
 
     private fun observeBackPress() {
@@ -117,6 +132,10 @@ internal class LinkActivity : ComponentActivity() {
         ): Intent {
             return Intent(context, LinkActivity::class.java)
                 .putExtra(EXTRA_ARGS, args)
+        }
+
+        internal fun getArgs(intent: Intent): NativeLinkArgs? {
+            return intent.getParcelableExtra<NativeLinkArgs>(EXTRA_ARGS)
         }
 
         internal fun getArgs(savedStateHandle: SavedStateHandle): NativeLinkArgs? {

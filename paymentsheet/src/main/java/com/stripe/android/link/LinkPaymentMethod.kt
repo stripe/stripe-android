@@ -11,4 +11,14 @@ import kotlinx.parcelize.Parcelize
 internal data class LinkPaymentMethod(
     val details: ConsumerPaymentDetails.PaymentDetails,
     val collectedCvc: String?
-) : Parcelable
+) : Parcelable {
+
+    fun readyForConfirmation(): Boolean = when (details) {
+        is ConsumerPaymentDetails.BankAccount -> true
+        is ConsumerPaymentDetails.Card -> {
+            val cvcReady = !details.cvcCheck.requiresRecollection || collectedCvc?.isNotEmpty() == true
+            !details.isExpired && cvcReady
+        }
+        is ConsumerPaymentDetails.Passthrough -> true
+    }
+}

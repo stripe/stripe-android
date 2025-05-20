@@ -26,7 +26,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -60,7 +59,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
     private val navigationManager: NavigationManager,
-    private val linkLaunchMode: LinkLaunchMode,
+    val linkLaunchMode: LinkLaunchMode,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
@@ -239,11 +238,8 @@ internal class LinkActivityViewModel @Inject constructor(
      */
     private suspend fun confirmPreselectedLinkPaymentIfAvailable(): LinkConfirmationResult? {
         val selectedPayment = (linkLaunchMode as? LinkLaunchMode.Full)?.selectedPayment
-        val requiresRecollection = selectedPayment?.details is ConsumerPaymentDetails.Card &&
-            selectedPayment.details.requiresCardDetailsRecollection == true
-        val paymentReadyForConfirmation = selectedPayment.takeIf { requiresRecollection.not() }
+        val paymentReadyForConfirmation = selectedPayment?.takeIf { it.readyForConfirmation() }
         val account = linkAccount ?: return null
-
         return paymentReadyForConfirmation?.let {
             linkConfirmationHandler.confirm(
                 paymentDetails = it.details,
@@ -318,7 +314,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
                 val args: NativeLinkArgs = getArgs(handle) ?: throw NoArgsException()
-
                 DaggerNativeLinkComponent
                     .builder()
                     .configuration(args.configuration)
