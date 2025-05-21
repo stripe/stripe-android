@@ -12,6 +12,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -30,7 +31,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
@@ -229,7 +229,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val linkAccount = linkAccountHolder.linkAccount.value
             val shouldShowLinkConfiguration = linkState != null && shouldShowLinkVerification(
                 paymentSelection = paymentSelection,
-                linkState = linkState,
+                linkConfiguration = linkState.configuration,
                 linkAccount = linkAccount
             )
             if (shouldShowLinkConfiguration) {
@@ -272,12 +272,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun shouldShowLinkVerification(
         paymentSelection: PaymentSelection,
-        linkState: LinkState,
+        linkConfiguration: LinkConfiguration,
         linkAccount: LinkAccount?
     ): Boolean {
         return paymentSelection is Link &&
             linkAccount != null && linkAccount.isVerified.not() &&
-            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkState.configuration)
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
