@@ -111,7 +111,7 @@ internal class DefaultWalletButtonsInteractor(
     companion object {
         fun create(
             flowControllerViewModel: FlowControllerViewModel
-        ): DefaultWalletButtonsInteractor {
+        ): WalletButtonsInteractor {
             val linkHandler = flowControllerViewModel.flowControllerStateComponent.linkHandler
 
             return DefaultWalletButtonsInteractor(
