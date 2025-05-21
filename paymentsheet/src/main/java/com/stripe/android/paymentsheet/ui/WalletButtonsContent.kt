@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -23,7 +24,22 @@ internal class WalletButtonsContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     state.walletButtons.forEach { button ->
-                        button.Content(state.buttonsEnabled)
+                        when (button) {
+                            is GooglePayWalletButton -> GooglePayButton(
+                                state = PrimaryButton.State.Ready,
+                                allowCreditCards = button.allowCreditCards,
+                                buttonType = button.googlePayButtonType,
+                                billingAddressParameters = button.billingAddressParameters,
+                                isEnabled = state.buttonsEnabled,
+                                cardBrandFilter = button.cardBrandFilter,
+                                onPressed = button.onPressed,
+                            )
+                            is LinkWalletButton -> LinkButton(
+                                email = button.email,
+                                enabled = state.buttonsEnabled,
+                                onClick = button.onPressed,
+                            )
+                        }
                     }
                 }
             }

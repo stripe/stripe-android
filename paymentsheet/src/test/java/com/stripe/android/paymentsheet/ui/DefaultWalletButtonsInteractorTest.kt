@@ -1,22 +1,13 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.ui.semantics.getOrNull
-import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.isNotEnabled
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.performClick
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -27,30 +18,16 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
-@OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class DefaultWalletButtonsInteractorTest {
-    private val paymentConfigurationTestRule = PaymentConfigurationTestRule(
-        context = ApplicationProvider.getApplicationContext(),
-    )
-
-    private val composeTestRule = createComposeRule()
-
-    @get:Rule
-    val rules: RuleChain = RuleChain.outerRule(composeTestRule)
-        .around(paymentConfigurationTestRule)
-
     @Test
     fun `on init with no arguments, state should be empty`() = runTest {
         val interactor = createInteractor(arguments = null)
@@ -151,7 +128,7 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
-    fun `on Link button render without an email, should have expected text`() = runTest {
+    fun `on Link button without an email, should have expected text`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
                 isLinkEnabled = true,
@@ -168,16 +145,12 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            composeTestRule.setContent {
-                button.Content(enabled = true)
-            }
-
-            composeTestRule.waitUntilExactlyOneExists(hasText(text = "Pay with", substring = true))
+            assertThat(button.email).isNull()
         }
     }
 
     @Test
-    fun `on Link button render with an email, should have expected text`() = runTest {
+    fun `on Link button with an email, should have expected text`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
                 isLinkEnabled = true,
@@ -194,37 +167,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            composeTestRule.setContent {
-                button.Content(enabled = true)
-            }
-
-            composeTestRule.waitUntilExactlyOneExists(hasText(text = "email@email.com", substring = true))
-        }
-    }
-
-    @Test
-    fun `on Link button rendered and disabled, should have expected state`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                isLinkEnabled = true,
-                linkEmail = "email@email.com",
-                isGooglePayReady = false,
-            )
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<LinkWalletButton>()
-
-            val button = state.walletButtons.first().asLinkWalletButton()
-
-            composeTestRule.setContent {
-                button.Content(enabled = false)
-            }
-
-            composeTestRule.waitUntilExactlyOneExists(hasTestTag(LinkButtonTestTag).and(isNotEnabled()))
+            assertThat(button.email).isEqualTo("email@email.com")
         }
     }
 
@@ -253,13 +196,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            composeTestRule.setContent {
-                button.Content(enabled = true)
-            }
-
-            composeTestRule.waitForIdle()
-            composeTestRule.onNode(hasTestTag(LinkButtonTestTag)).performClick()
-            composeTestRule.waitForIdle()
+            button.onPressed()
 
             val arguments = confirmationHandler.startTurbine.awaitItem()
 
@@ -274,26 +211,24 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
-    fun `on Google Pay button render, should have expected state`() = googlePayButtonRenderTest(
+    fun `on Google Pay button, should have expected state`() = googlePayButtonRenderTest(
         arguments = createArguments(
             isLinkEnabled = false,
             linkEmail = null,
             isGooglePayReady = true,
         ),
-        expectedConfig = GooglePayButtonConfig(
-            allowCreditCards = true,
-            buttonType = GooglePayButtonType.Pay,
-            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = false,
-                format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
-                isPhoneNumberRequired = false
-            ),
-            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
-        )
+        expectedAllowCreditCards = true,
+        expectedGooglePayButtonType = GooglePayButtonType.Pay,
+        expectedBillingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+            isRequired = false,
+            format = GooglePayJsonFactory.BillingAddressParameters.Format.Min,
+            isPhoneNumberRequired = false
+        ),
+        expectedCardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
     )
 
     @Test
-    fun `on Google Pay button render with configuration for GPay & card acceptance, should have expected state`() =
+    fun `on Google Pay button with configuration for GPay & card acceptance, should have expected state`() =
         googlePayButtonRenderTest(
             arguments = createArguments(
                 isLinkEnabled = false,
@@ -315,20 +250,18 @@ class DefaultWalletButtonsInteractorTest {
                     phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 )
             ),
-            expectedConfig = GooglePayButtonConfig(
-                allowCreditCards = true,
-                buttonType = GooglePayButtonType.Book,
-                billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
-                    isRequired = true,
-                    format = GooglePayJsonFactory.BillingAddressParameters.Format.Full,
-                    isPhoneNumberRequired = true
-                ),
-                cardBrandFilter = PaymentSheetCardBrandFilter(
-                    PaymentSheet.CardBrandAcceptance.disallowed(
-                        brands = listOf(
-                            PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
-                            PaymentSheet.CardBrandAcceptance.BrandCategory.Discover,
-                        )
+            expectedAllowCreditCards = true,
+            expectedGooglePayButtonType = GooglePayButtonType.Book,
+            expectedBillingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+                format = GooglePayJsonFactory.BillingAddressParameters.Format.Full,
+                isPhoneNumberRequired = true
+            ),
+            expectedCardBrandFilter = PaymentSheetCardBrandFilter(
+                PaymentSheet.CardBrandAcceptance.disallowed(
+                    brands = listOf(
+                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
+                        PaymentSheet.CardBrandAcceptance.BrandCategory.Discover,
                     )
                 )
             )
@@ -371,13 +304,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asGooglePayWalletButton()
 
-            composeTestRule.setContent {
-                button.Content(enabled = true)
-            }
-
-            composeTestRule.waitForIdle()
-            composeTestRule.onNode(hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG)).performClick()
-            composeTestRule.waitForIdle()
+            button.onPressed()
 
             val arguments = confirmationHandler.startTurbine.awaitItem()
 
@@ -400,7 +327,10 @@ class DefaultWalletButtonsInteractorTest {
 
     private fun googlePayButtonRenderTest(
         arguments: DefaultWalletButtonsInteractor.Arguments,
-        expectedConfig: GooglePayButtonConfig,
+        expectedGooglePayButtonType: GooglePayButtonType,
+        expectedAllowCreditCards: Boolean,
+        expectedCardBrandFilter: CardBrandFilter,
+        expectedBillingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     ) = runTest {
         val interactor = createInteractor(
             arguments = arguments,
@@ -412,13 +342,12 @@ class DefaultWalletButtonsInteractorTest {
             assertThat(state.walletButtons).hasSize(1)
             assertThat(state.walletButtons.firstOrNull()).isInstanceOf<GooglePayWalletButton>()
 
-            val button = state.walletButtons.first().asGooglePayWalletButton()
+            val actualButton = state.walletButtons.first().asGooglePayWalletButton()
 
-            composeTestRule.setContent {
-                button.Content(enabled = true)
-            }
-
-            composeTestRule.waitUntilExactlyOneExists(hasGooglePayButtonConfig(expectedConfig))
+            assertThat(actualButton.googlePayButtonType).isEqualTo(expectedGooglePayButtonType)
+            assertThat(actualButton.allowCreditCards).isEqualTo(expectedAllowCreditCards)
+            assertThat(actualButton.cardBrandFilter).isEqualTo(expectedCardBrandFilter)
+            assertThat(actualButton.billingAddressParameters).isEqualTo(expectedBillingAddressParameters)
         }
     }
 
@@ -461,16 +390,6 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
         )
-    }
-
-    private fun hasGooglePayButtonConfig(
-        expectedConfig: GooglePayButtonConfig
-    ) = SemanticsMatcher(
-        description = "google_pay_button_config"
-    ) { node ->
-        val actualConfig = node.config.getOrNull(GPayButtonConfig)
-
-        expectedConfig == actualConfig
     }
 
     private fun WalletButtonsInteractor.WalletButton.asLinkWalletButton() = this as LinkWalletButton

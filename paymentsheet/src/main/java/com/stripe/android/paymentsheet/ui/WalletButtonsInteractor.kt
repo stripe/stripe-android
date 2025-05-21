@@ -1,11 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -28,9 +26,8 @@ internal interface WalletButtonsInteractor {
         val buttonsEnabled: Boolean,
     )
 
-    interface WalletButton {
-        @Composable
-        fun Content(enabled: Boolean)
+    sealed interface WalletButton {
+        val onPressed: () -> Unit
     }
 }
 
@@ -147,41 +144,20 @@ internal class DefaultWalletButtonsInteractor(
 @Immutable
 internal class GooglePayWalletButton(
     buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
-    private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    private val allowCreditCards: Boolean,
-    private val cardBrandFilter: CardBrandFilter,
-    private val onPressed: () -> Unit,
+    billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val allowCreditCards: Boolean,
+    val cardBrandFilter: CardBrandFilter,
+    override val onPressed: () -> Unit,
 ) : WalletButtonsInteractor.WalletButton {
-    private val googlePayButtonType = buttonType.asGooglePayButtonType
-    private val billingAddressParameters by lazy {
-        billingDetailsCollectionConfiguration.toBillingAddressParameters()
-    }
+    val googlePayButtonType = buttonType.asGooglePayButtonType
 
-    @Composable
-    override fun Content(enabled: Boolean) {
-        GooglePayButton(
-            state = PrimaryButton.State.Ready,
-            allowCreditCards = allowCreditCards,
-            buttonType = googlePayButtonType,
-            billingAddressParameters = billingAddressParameters,
-            isEnabled = enabled,
-            cardBrandFilter = cardBrandFilter,
-            onPressed = onPressed,
-        )
+    val billingAddressParameters by lazy {
+        billingDetailsCollectionConfiguration.toBillingAddressParameters()
     }
 }
 
 @Immutable
 internal class LinkWalletButton(
-    private val email: String?,
-    private val onPressed: () -> Unit,
-) : WalletButtonsInteractor.WalletButton {
-    @Composable
-    override fun Content(enabled: Boolean) {
-        LinkButton(
-            email = email,
-            enabled = enabled,
-            onClick = onPressed,
-        )
-    }
-}
+    val email: String?,
+    override val onPressed: () -> Unit,
+) : WalletButtonsInteractor.WalletButton
