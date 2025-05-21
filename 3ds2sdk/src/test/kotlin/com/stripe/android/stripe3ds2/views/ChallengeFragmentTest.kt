@@ -280,7 +280,8 @@ class ChallengeFragmentTest {
         ) { fragment ->
             fragment.challengeZoneView.setWhitelistChecked(true)
             fragment.clickSubmitButton()
-            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
 
             assertThat(action?.whitelistingValue).isTrue()
         }
@@ -293,7 +294,8 @@ class ChallengeFragmentTest {
         ) { fragment ->
             fragment.challengeZoneView.setWhitelistChecked(true)
             fragment.clickSubmitButton()
-            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
 
             assertThat(action?.whitelistingValue).isTrue()
         }
@@ -306,7 +308,8 @@ class ChallengeFragmentTest {
         ) { fragment ->
             fragment.challengeZoneView.setWhitelistChecked(true)
             fragment.clickSubmitButton()
-            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
 
             assertThat(action?.whitelistingValue).isNull()
         }
@@ -319,7 +322,8 @@ class ChallengeFragmentTest {
         ) { fragment ->
             fragment.challengeZoneView.setWhitelistChecked(true)
             fragment.clickSubmitButton()
-            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
 
             assertThat(action?.whitelistingValue).isNull()
         }
@@ -332,7 +336,8 @@ class ChallengeFragmentTest {
         ) { fragment ->
             fragment.challengeZoneView.setWhitelistChecked(false)
             fragment.clickSubmitButton()
-            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
 
             assertThat(action?.whitelistingValue).isFalse()
         }
@@ -345,7 +350,8 @@ class ChallengeFragmentTest {
         ) { fragment ->
             fragment.challengeZoneView.setWhitelistChecked(false)
             fragment.clickSubmitButton()
-            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
 
             assertThat(action?.whitelistingValue).isFalse()
         }
