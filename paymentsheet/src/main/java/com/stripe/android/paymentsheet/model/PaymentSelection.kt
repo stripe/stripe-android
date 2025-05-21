@@ -12,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
@@ -358,6 +359,13 @@ private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
                 else -> resourceId
             }
         }
+        R.drawable.stripe_ic_paymentsheet_link_ref -> {
+            if (FeatureFlags.linkPMsInSPM.isEnabled) {
+                R.drawable.stripe_ic_paymentsheet_link_arrow
+            } else {
+                R.drawable.stripe_ic_paymentsheet_link_ref
+            }
+        }
         else -> resourceId
     }
 }
@@ -402,7 +410,7 @@ internal val PaymentSelection.label: ResolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel() ?: run {
+    return selection.paymentMethod.getLabel(canShowSublabel = true) ?: run {
         when (selection.walletType) {
             PaymentSelection.Saved.WalletType.Link -> StripeR.string.stripe_link.resolvableString
             PaymentSelection.Saved.WalletType.GooglePay -> StripeR.string.stripe_google_pay.resolvableString

@@ -25,10 +25,12 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
         val linkPaymentDetails = when (consumerPaymentDetails) {
             is ConsumerPaymentDetails.Card -> {
                 LinkPaymentDetails.Card(
+                    nickname = consumerPaymentDetails.nickname,
                     expMonth = consumerPaymentDetails.expiryMonth,
                     expYear = consumerPaymentDetails.expiryYear,
                     last4 = consumerPaymentDetails.last4,
                     brand = consumerPaymentDetails.brand,
+                    funding = consumerPaymentDetails.funding,
                 )
             }
             is ConsumerPaymentDetails.BankAccount -> {

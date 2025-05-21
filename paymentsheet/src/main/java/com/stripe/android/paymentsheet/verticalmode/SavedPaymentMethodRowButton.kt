@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -37,7 +38,6 @@ internal fun SavedPaymentMethodRowButton(
     isSelected: Boolean,
     modifier: Modifier = Modifier,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
-    canShowLinkIcon: Boolean = false,
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -46,7 +46,7 @@ internal fun SavedPaymentMethodRowButton(
         .resolve()
         .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
-        displayableSavedPaymentMethod.paymentMethod.getLabel()
+        displayableSavedPaymentMethod.paymentMethod.getLabel(canShowSublabel = true)
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
@@ -66,9 +66,8 @@ internal fun SavedPaymentMethodRowButton(
             )
         },
         title = paymentMethodTitle.resolve(),
-        subtitle = null,
+        subtitle = displayableSavedPaymentMethod.paymentMethod.linkPaymentDetails?.sublabel?.resolve(),
         promoText = null,
-        showLinkIcon = displayableSavedPaymentMethod.paymentMethod.isLinkPaymentMethod && canShowLinkIcon,
         onClick = onClick,
         modifier = modifier
             .testTag(
