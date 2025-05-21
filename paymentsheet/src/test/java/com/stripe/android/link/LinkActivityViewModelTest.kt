@@ -194,8 +194,8 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `onCreate does not confirm when linkAccount is null`() = runTest {
-        val selectedPayment = LinkPaymentMethod(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+        val selectedPayment = LinkPaymentMethod.Consumer(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             collectedCvc = null
         )
 
@@ -217,8 +217,8 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `onCreate confirms preselected Link payment when provided and emits Completed`() = runTest {
-        val selectedPayment = LinkPaymentMethod(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+        val selectedPayment = LinkPaymentMethod.Consumer(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             collectedCvc = null
         )
 
@@ -242,8 +242,8 @@ internal class LinkActivityViewModelTest {
 
     @Test
     fun `onCreate does not emit Completed when confirmation is failed`() = runTest {
-        val selectedPayment = LinkPaymentMethod(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+        val selectedPayment = LinkPaymentMethod.Consumer(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             collectedCvc = null
         )
 

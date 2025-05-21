@@ -13,7 +13,9 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -117,24 +119,38 @@ internal class PaymentMethodViewModel @Inject constructor(
         paymentDetails: LinkPaymentDetails,
         cvc: String?
     ) {
-        val result = linkConfirmationHandler.confirm(
-            paymentDetails = paymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc
-        )
-        when (result) {
-            Result.Canceled -> Unit
-            is Result.Failed -> {
-                _state.update { it.copy(errorMessage = result.message) }
+        when (linkLaunchMode) {
+            is LinkLaunchMode.Confirmation,
+            is LinkLaunchMode.Full -> {
+                val result = linkConfirmationHandler.confirm(
+                    paymentDetails = paymentDetails,
+                    linkAccount = linkAccount,
+                    cvc = cvc
+                )
+                when (result) {
+                    Result.Canceled -> Unit
+                    is Result.Failed -> {
+                        _state.update { it.copy(errorMessage = result.message) }
+                    }
+                    Result.Succeeded -> {
+                        dismissWithResult(
+                            LinkActivityResult.Completed(
+                                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                                selectedPayment = null
+                            )
+                        )
+                    }
+                }
             }
-            Result.Succeeded -> {
-                dismissWithResult(
-                    LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(null),
-                        selectedPayment = null
+            is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                    selectedPayment = LinkPaymentMethod.Link(
+                        linkPaymentDetails = paymentDetails,
+                        collectedCvc = cvc,
                     )
                 )
-            }
+            )
         }
     }
 
