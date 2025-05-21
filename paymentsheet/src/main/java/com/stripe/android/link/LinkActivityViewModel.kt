@@ -251,10 +251,10 @@ internal class LinkActivityViewModel @Inject constructor(
                 )
             }
         )
-    }.onFailure {
+    }.onFailure { error ->
         dismissWithResult(
             LinkActivityResult.Failed(
-                IllegalStateException("Failed to confirm Link payment: "),
+                error,
                 linkAccountUpdate = LinkAccountUpdate.None
             )
         )

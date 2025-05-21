@@ -294,8 +294,8 @@ internal class DefaultFlowController @Inject internal constructor(
             is LinkActivityResult.PaymentMethodObtained,
             is LinkActivityResult.Failed -> Unit
             is LinkActivityResult.Canceled -> when (result.reason) {
-                Reason.BackPressed,
-                Reason.LoggedOut -> Unit
+                Reason.BackPressed -> Unit
+                Reason.LoggedOut,
                 Reason.PayAnotherWay -> withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
             }
             is LinkActivityResult.Completed -> {
