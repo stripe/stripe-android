@@ -34,9 +34,10 @@ internal fun SettingsUi(
 ) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
     val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
-    val filteredDefinitions = remember(displayableDefinitions, searchQuery) {
+    val trimmedSearchQuery = searchQuery.trim()
+    val filteredDefinitions = remember(displayableDefinitions, trimmedSearchQuery) {
         displayableDefinitions.filter {
-            it.displayName.contains(searchQuery, ignoreCase = true)
+            it.displayName.contains(trimmedSearchQuery, ignoreCase = true)
         }
     }
 
@@ -44,11 +45,13 @@ internal fun SettingsUi(
         modifier = Modifier.padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row {
-            IntegrationTypeConfigurableSetting(
-                configurationData,
-                playgroundSettings::updateConfigurationData
-            )
+        if (searchQuery.isBlank()) {
+            Row {
+                IntegrationTypeConfigurableSetting(
+                    configurationData,
+                    playgroundSettings::updateConfigurationData
+                )
+            }
         }
 
         for (settingDefinition in filteredDefinitions) {
