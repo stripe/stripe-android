@@ -272,12 +272,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun shouldShowLinkVerification(
         paymentSelection: PaymentSelection,
-        linkState: LinkState,
+        linkConfiguration: LinkConfiguration,
         linkAccount: LinkAccount?
     ): Boolean {
         return paymentSelection is Link &&
             linkAccount != null && linkAccount.isVerified.not() &&
-            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkState.configuration)
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
