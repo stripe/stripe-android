@@ -54,6 +54,10 @@ class PaymentSheet internal constructor(
      * @param activity The Activity that is presenting [PaymentSheet].
      * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith("Builder(callback).build(activity)")
+    )
     constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback
@@ -69,6 +73,14 @@ class PaymentSheet internal constructor(
      * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith(
+            "Builder(callback)" +
+                ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                ".build(activity)"
+        )
+    )
     constructor(
         activity: ComponentActivity,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -92,6 +104,14 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith(
+            "Builder(paymentResultCallback)" +
+                ".createIntentCallback(createIntentCallback)" +
+                ".build(activity)"
+        )
+    )
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
@@ -117,6 +137,15 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith(
+            "Builder(paymentResultCallback)" +
+                ".createIntentCallback(createIntentCallback)" +
+                ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                ".build(activity)"
+        )
+    )
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
@@ -139,6 +168,10 @@ class PaymentSheet internal constructor(
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith("Builder(callback).build(fragment)")
+    )
     constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback
@@ -154,6 +187,14 @@ class PaymentSheet internal constructor(
      * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith(
+            "Builder(callback)" +
+                ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                ".build(fragment)"
+        )
+    )
     constructor(
         fragment: Fragment,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -177,6 +218,14 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith(
+            "Builder(paymentResultCallback)" +
+                ".createIntentCallback(createIntentCallback)" +
+                ".build(fragment)"
+        )
+    )
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
@@ -202,6 +251,15 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
+    @Deprecated(
+        message = "This will be removed in a future release.",
+        replaceWith = ReplaceWith(
+            "Builder(paymentResultCallback)" +
+                ".createIntentCallback(createIntentCallback)" +
+                ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                ".build(fragment)"
+        )
+    )
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
@@ -2430,6 +2488,12 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback).build(activity)"
+                )
+            )
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -2457,6 +2521,14 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+                        ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                        ".build(activity)"
+                )
+            )
             fun create(
                 activity: ComponentActivity,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -2487,6 +2559,14 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+                        ".createIntentCallback(createIntentCallback)" +
+                        ".build(activity)"
+                )
+            )
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -2521,6 +2601,15 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+                        ".createIntentCallback(createIntentCallback)" +
+                        ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                        ".build(activity)"
+                )
+            )
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -2550,6 +2639,12 @@ class PaymentSheet internal constructor(
              * @param paymentResultCallback called when a [PaymentSheetResult] is available.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback).build(fragment)"
+                )
+            )
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -2575,6 +2670,14 @@ class PaymentSheet internal constructor(
              * @param paymentResultCallback called when a [PaymentSheetResult] is available.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+                        ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                        ".build(fragment)"
+                )
+            )
             fun create(
                 fragment: Fragment,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -2605,6 +2708,14 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+                        ".createIntentCallback(createIntentCallback)" +
+                        ".build(fragment)"
+                )
+            )
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -2639,6 +2750,15 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
+            @Deprecated(
+                message = "This will be removed in a future release.",
+                replaceWith = ReplaceWith(
+                    "FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+                        ".createIntentCallback(createIntentCallback)" +
+                        ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
+                        ".build(fragment)"
+                )
+            )
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,

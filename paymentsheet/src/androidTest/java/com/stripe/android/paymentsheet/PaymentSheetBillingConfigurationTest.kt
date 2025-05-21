@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.PaymentSheet.Builder
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
@@ -53,10 +54,10 @@ internal class PaymentSheetBillingConfigurationTest {
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
+            paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
-            }
+            }.build(it)
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.onActivity {
@@ -130,10 +131,10 @@ internal class PaymentSheetBillingConfigurationTest {
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
-            paymentSheet = PaymentSheet(it) { result ->
+            paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
-            }
+            }.build(it)
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
         scenario.onActivity {
