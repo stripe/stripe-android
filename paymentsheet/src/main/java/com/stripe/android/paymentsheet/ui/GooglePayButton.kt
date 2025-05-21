@@ -11,6 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import com.google.pay.button.ButtonTheme
@@ -66,6 +68,13 @@ internal fun GooglePayButton(
             modifier = modifier
                 .fillMaxWidth()
                 .semantics {
+                    googlePayButtonConfig = GooglePayButtonConfig(
+                        allowCreditCards = allowCreditCards,
+                        buttonType = buttonType,
+                        billingAddressParameters = billingAddressParameters,
+                        cardBrandFilter = cardBrandFilter,
+                    )
+
                     onClick {
                         onPressed()
 
@@ -130,6 +139,24 @@ private fun GooglePrimaryButton(
         }
     }
 }
+
+internal var SemanticsPropertyReceiver.googlePayButtonConfig: GooglePayButtonConfig
+    get() = throw IllegalAccessException(
+        "You cannot retrieve a semantics property directly - " +
+            "use one of the SemanticsConfiguration.getOr* methods instead"
+    )
+    set(value) = set(GPayButtonConfig, value)
+
+internal val GPayButtonConfig = SemanticsPropertyKey<GooglePayButtonConfig>(
+    name = "GPayButtonConfig",
+)
+
+internal data class GooglePayButtonConfig(
+    val allowCreditCards: Boolean,
+    val buttonType: GooglePayButtonType,
+    val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
+    val cardBrandFilter: CardBrandFilter
+)
 
 private fun GooglePayButtonType.toComposeButtonType(): ButtonType {
     return when (this) {

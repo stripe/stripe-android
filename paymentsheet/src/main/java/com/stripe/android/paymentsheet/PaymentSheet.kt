@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -28,6 +29,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.WalletsButtonPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -1880,10 +1882,28 @@ class PaymentSheet internal constructor(
                 email == CollectionMode.Always ||
                 address == AddressCollectionMode.Full
 
-        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
-            val collectAddress = address == AddressCollectionMode.Full
-            val collectPhone = phone == CollectionMode.Always
+        private val collectsFullAddress: Boolean
+            get() = address == AddressCollectionMode.Full
 
+        internal fun toBillingAddressParameters(): GooglePayJsonFactory.BillingAddressParameters {
+            val format = when (address) {
+                AddressCollectionMode.Never,
+                AddressCollectionMode.Automatic -> {
+                    GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                }
+                AddressCollectionMode.Full -> {
+                    GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                }
+            }
+
+            return GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = collectsFullAddress || collectsPhone,
+                format = format,
+                isPhoneNumberRequired = collectsPhone,
+            )
+        }
+
+        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
             val format = when (address) {
                 AddressCollectionMode.Never,
                 AddressCollectionMode.Automatic -> {
@@ -1895,9 +1915,9 @@ class PaymentSheet internal constructor(
             }
 
             return GooglePayPaymentMethodLauncher.BillingAddressConfig(
-                isRequired = collectAddress || collectPhone,
+                isRequired = collectsFullAddress || collectsPhone,
                 format = format,
-                isPhoneNumberRequired = collectPhone,
+                isPhoneNumberRequired = collectsPhone,
             )
         }
 
@@ -2263,6 +2283,14 @@ class PaymentSheet internal constructor(
     interface FlowController {
 
         var shippingDetails: AddressDetails?
+
+        /**
+         * Displays a list of wallet buttons that can be used for express checkout
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @WalletsButtonPreview
+        @Composable
+        fun WalletButtons()
 
         /**
          * Configure the FlowController to process a [PaymentIntent].

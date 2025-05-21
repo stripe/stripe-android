@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
+import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
@@ -43,6 +44,7 @@ internal interface FlowControllerStateComponent {
     val flowControllerComponentBuilder: FlowControllerComponent.Builder
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler
+    val walletButtonsContent: WalletButtonsContent
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 

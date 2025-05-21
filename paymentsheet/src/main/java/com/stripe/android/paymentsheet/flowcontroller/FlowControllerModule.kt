@@ -15,6 +15,8 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.LINK_LAUNCHER_KEY
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
+import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
 import dagger.Provides
@@ -77,6 +79,16 @@ internal object FlowControllerModule {
         viewModel: FlowControllerViewModel,
     ): ConfirmationHandler {
         return confirmationHandlerFactory.create(viewModel.viewModelScope)
+    }
+
+    @Provides
+    @Singleton
+    fun providesExpressCheckoutContent(
+        viewModel: FlowControllerViewModel,
+    ): WalletButtonsContent {
+        return WalletButtonsContent(
+            interactor = DefaultWalletButtonsInteractor.create(viewModel)
+        )
     }
 
     @Provides

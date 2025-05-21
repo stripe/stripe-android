@@ -97,6 +97,5 @@
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt$com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
-    <ID>UnusedPrivateProperty:SignUpScreenshotTest.kt$SignUpScreenshotTest.Companion$val signUpEnabledStates = listOf(true to "SignUpEnabled", false to "")</ID>
   </CurrentIssues>
 </SmellBaseline>
