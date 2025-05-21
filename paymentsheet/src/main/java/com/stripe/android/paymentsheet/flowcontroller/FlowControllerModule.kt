@@ -83,7 +83,7 @@ internal object FlowControllerModule {
 
     @Provides
     @Singleton
-    fun providesExpressCheckoutContent(
+    fun providesWalletButtonsContent(
         viewModel: FlowControllerViewModel,
     ): WalletButtonsContent {
         return WalletButtonsContent(

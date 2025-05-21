@@ -2285,7 +2285,7 @@ class PaymentSheet internal constructor(
         var shippingDetails: AddressDetails?
 
         /**
-         * Displays a list of wallet buttons that can be used for express checkout
+         * Displays a list of wallet buttons that can be used to checkout instantly
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @WalletsButtonPreview
