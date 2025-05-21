@@ -22,13 +22,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-internal fun SettingsUi(playgroundSettings: PlaygroundSettings) {
+internal fun SettingsUi(
+    playgroundSettings: PlaygroundSettings,
+    searchQuery: String,
+) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
     val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
+    val filteredDefinitions = remember(displayableDefinitions, searchQuery) {
+        displayableDefinitions.filter {
+            it.displayName.contains(searchQuery, ignoreCase = true)
+        }
+    }
 
     Column(
         modifier = Modifier.padding(bottom = 16.dp),
@@ -41,12 +51,25 @@ internal fun SettingsUi(playgroundSettings: PlaygroundSettings) {
             )
         }
 
-        for (settingDefinition in displayableDefinitions) {
-            Row {
-                Setting(settingDefinition, playgroundSettings)
-            }
+        for (settingDefinition in filteredDefinitions) {
+            Setting(settingDefinition, playgroundSettings)
         }
     }
+}
+
+@Preview
+@Composable
+private fun SettingsUiPreview() {
+    PlaygroundTheme(
+        content = {
+            SettingsUi(
+                playgroundSettings = PlaygroundSettings.createFromDefaults(),
+                searchQuery = "",
+            )
+        },
+        bottomBarContent = {},
+        topBarContent = {}
+    )
 }
 
 @Composable
@@ -56,7 +79,7 @@ private fun <T> Setting(
 ) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
 
-    val options = remember(configurationData) {
+    val options = remember(settingDefinition, configurationData) {
         settingDefinition.createOptions(configurationData)
     }
 
