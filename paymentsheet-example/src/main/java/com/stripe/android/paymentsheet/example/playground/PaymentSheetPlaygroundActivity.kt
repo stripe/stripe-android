@@ -13,7 +13,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardActions
@@ -265,6 +271,13 @@ internal class PaymentSheetPlaygroundActivity :
                             )
                         }
                     }
+
+                    Spacer(
+                        Modifier.padding(
+                            WindowInsets.ime.exclude(WindowInsets.navigationBars)
+                                .asPaddingValues()
+                        )
+                    )
                 },
             )
 
@@ -407,8 +420,10 @@ internal class PaymentSheetPlaygroundActivity :
 
     @Composable
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
+        val keyboardController = LocalSoftwareKeyboardController.current
         Button(
             onClick = {
+                keyboardController?.hide()
                 viewModel.prepare(
                     playgroundSettings = playgroundSettings,
                 )
