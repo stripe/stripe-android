@@ -63,7 +63,7 @@ class PaymentMethodViewModelTest {
                 primaryButtonState = PrimaryButtonState.Disabled,
                 primaryButtonLabel = completePaymentButtonLabel(
                     TestFactory.LINK_CONFIGURATION.stripeIntent,
-                    LinkLaunchMode.Full()
+                    LinkLaunchMode.Full
                 )
             )
         )
@@ -242,7 +242,7 @@ class PaymentMethodViewModelTest {
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Full()
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 }

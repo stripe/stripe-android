@@ -40,5 +40,5 @@ internal class FakeNativeLinkComponent(
     override val eventReporter: EventReporter = FakeEventReporter(),
     override val navigationManager: NavigationManager = TestNavigationManager(),
     override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-    override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(),
+    override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
 ) : NativeLinkComponent

@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
@@ -59,9 +58,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
             configuration = confirmationOption.configuration,
             linkAccount = linkAccountHolder.linkAccount.value,
             useLinkExpress = confirmationOption.useLinkExpress,
-            launchMode = LinkLaunchMode.Full(
-                confirmationOption.selectedLinkPayment
-            )
+            launchMode = confirmationOption.linkLaunchMode
         )
     }
 

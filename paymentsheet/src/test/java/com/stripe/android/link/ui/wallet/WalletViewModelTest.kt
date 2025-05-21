@@ -68,6 +68,7 @@ class WalletViewModelTest {
                 cardBrandFilter = TestFactory.LINK_CONFIGURATION.cardBrandFilter,
                 isProcessing = false,
                 hasCompleted = false,
+                userSetIsExpanded = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,
                 secondaryButtonLabel = TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL,
                 expiryDateInput = FormFieldEntry(""),
@@ -687,7 +688,7 @@ class WalletViewModelTest {
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full()
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,

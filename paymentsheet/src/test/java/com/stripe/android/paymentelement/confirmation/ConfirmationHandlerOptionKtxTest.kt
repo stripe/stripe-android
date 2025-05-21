@@ -272,7 +272,6 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
-                selectedLinkPayment = null,
                 useLinkExpress = false
             )
         )
@@ -290,7 +289,6 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             LinkConfirmationOption(
                 configuration = LINK_CONFIGURATION,
-                selectedLinkPayment = null,
                 useLinkExpress = true
             )
         )

@@ -78,10 +78,10 @@ internal class LinkActivity : ComponentActivity() {
      * Set the theme to transparent if [LinkActivity] launches in confirmation mode.
      */
     private fun LinkLaunchMode.setTheme() {
-        if ((this as? LinkLaunchMode.Full)?.selectedPayment?.readyForConfirmation() == true) {
-            setTheme(R.style.StripeTransparentTheme)
-        } else {
-            setTheme(R.style.StripePaymentSheetDefaultTheme)
+        when (this) {
+            is LinkLaunchMode.Full,
+            is LinkLaunchMode.PaymentMethodSelection -> setTheme(R.style.StripePaymentSheetDefaultTheme)
+            is LinkLaunchMode.Confirmation -> setTheme(R.style.StripeTransparentTheme)
         }
         renderEdgeToEdge()
     }
@@ -117,7 +117,7 @@ internal class LinkActivity : ComponentActivity() {
                 configuration = configuration,
                 startWithVerificationDialog = false,
                 linkAccount = null,
-                launchMode = LinkLaunchMode.Full()
+                launchMode = LinkLaunchMode.Full
             )
         )
     }

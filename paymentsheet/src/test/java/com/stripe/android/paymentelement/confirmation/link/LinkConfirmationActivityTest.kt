@@ -205,7 +205,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             startWithVerificationDialog = true,
                             linkAccount = null,
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
-                            launchMode = LinkLaunchMode.Full()
+                            launchMode = LinkLaunchMode.Full
                         )
                     )
                 )
@@ -240,7 +240,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
             useLinkExpress = true,
-            selectedLinkPayment = null
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
