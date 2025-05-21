@@ -246,6 +246,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL(
             partialEventName = "embedded.embedded_sheet_launcher.embedded_state_is_null"
         ),
+        WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM(
+            partialEventName = "wallet_buttons.wallet_arguments.null_on_confirm"
+        ),
+        WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
+            partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
+        ),
         ;
 
         override val eventName: String

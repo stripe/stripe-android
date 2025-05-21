@@ -14,9 +14,8 @@ class WalletButtonsScreenshotTest {
     fun oneButton() {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
-                LinkWalletButton(
+                WalletButtonsInteractor.WalletButton.Link(
                     email = "email@email.com",
-                    onPressed = {},
                 )
             ),
             buttonsEnabled = true,
@@ -28,65 +27,14 @@ class WalletButtonsScreenshotTest {
     }
 
     @Test
-    fun twoButtons() {
+    fun oneButtonDisabled() {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
-                LinkWalletButton(
+                WalletButtonsInteractor.WalletButton.Link(
                     email = "email@email.com",
-                    onPressed = {},
                 ),
-                LinkWalletButton(
-                    email = null,
-                    onPressed = {},
-                )
-            ),
-            buttonsEnabled = true,
-        )
-
-        paparazziRule.snapshot {
-            walletButtonsContent.Content()
-        }
-    }
-
-    @Test
-    fun twoButtonsDisabled() {
-        val walletButtonsContent = createWalletButtonsContent(
-            walletButtons = listOf(
-                LinkWalletButton(
-                    email = "email@email.com",
-                    onPressed = {},
-                ),
-                LinkWalletButton(
-                    email = null,
-                    onPressed = {},
-                )
             ),
             buttonsEnabled = false,
-        )
-
-        paparazziRule.snapshot {
-            walletButtonsContent.Content()
-        }
-    }
-
-    @Test
-    fun threeButtons() {
-        val walletButtonsContent = createWalletButtonsContent(
-            walletButtons = listOf(
-                LinkWalletButton(
-                    email = "email@email.com",
-                    onPressed = {},
-                ),
-                LinkWalletButton(
-                    email = null,
-                    onPressed = {},
-                ),
-                LinkWalletButton(
-                    email = "link@link.com",
-                    onPressed = {},
-                )
-            ),
-            buttonsEnabled = true,
         )
 
         paparazziRule.snapshot {
@@ -110,5 +58,9 @@ class WalletButtonsScreenshotTest {
         state: WalletButtonsInteractor.State,
     ) : WalletButtonsInteractor {
         override val state: StateFlow<WalletButtonsInteractor.State> = stateFlowOf(state)
+
+        override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
+            error("Should not be called!")
+        }
     }
 }

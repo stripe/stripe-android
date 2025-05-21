@@ -25,19 +25,27 @@ internal class WalletButtonsContent(
                 ) {
                     state.walletButtons.forEach { button ->
                         when (button) {
-                            is GooglePayWalletButton -> GooglePayButton(
+                            is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
                                 state = PrimaryButton.State.Ready,
                                 allowCreditCards = button.allowCreditCards,
                                 buttonType = button.googlePayButtonType,
                                 billingAddressParameters = button.billingAddressParameters,
                                 isEnabled = state.buttonsEnabled,
                                 cardBrandFilter = button.cardBrandFilter,
-                                onPressed = button.onPressed,
+                                onPressed = {
+                                    interactor.handleViewAction(
+                                        WalletButtonsInteractor.ViewAction.OnButtonPressed(button)
+                                    )
+                                },
                             )
-                            is LinkWalletButton -> LinkButton(
+                            is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
                                 email = button.email,
                                 enabled = state.buttonsEnabled,
-                                onClick = button.onPressed,
+                                onClick = {
+                                    interactor.handleViewAction(
+                                        WalletButtonsInteractor.ViewAction.OnButtonPressed(button)
+                                    )
+                                },
                             )
                         }
                     }

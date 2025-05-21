@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -14,19 +13,19 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 
-@RunWith(AndroidJUnit4::class)
 class DefaultWalletButtonsInteractorTest {
     @Test
     fun `on init with no arguments, state should be empty`() = runTest {
@@ -54,7 +53,8 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<GooglePayWalletButton>()
+            assertThat(state.walletButtons.firstOrNull())
+                .isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
 
             assertThat(state.buttonsEnabled).isTrue()
         }
@@ -74,7 +74,7 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<LinkWalletButton>()
+            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
 
             assertThat(state.buttonsEnabled).isTrue()
         }
@@ -94,11 +94,58 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(2)
-            assertThat(state.walletButtons[0]).isInstanceOf<LinkWalletButton>()
-            assertThat(state.walletButtons[1]).isInstanceOf<GooglePayWalletButton>()
+            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+            assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
 
             assertThat(state.buttonsEnabled).isTrue()
         }
+    }
+
+    @Test
+    fun `on button pressed with no arguments, should report unexpected error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val interactor = createInteractor(
+            arguments = null,
+            errorReporter = errorReporter,
+        )
+
+        interactor.handleViewAction(
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(WalletButtonsInteractor.WalletButton.Link(email = null))
+        )
+
+        val call = errorReporter.awaitCall()
+
+        assertThat(call.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM)
+        assertThat(call.stripeException).isNull()
+        assertThat(call.additionalNonPiiParams).isEmpty()
+
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `on button pressed with no confirmation option, should report unexpected error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val interactor = createInteractor(
+            arguments = createArguments(
+                isLinkEnabled = true,
+                linkState = null,
+            ),
+            errorReporter = errorReporter,
+        )
+
+        interactor.handleViewAction(
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(WalletButtonsInteractor.WalletButton.Link(email = null))
+        )
+
+        val call = errorReporter.awaitCall()
+
+        assertThat(call.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM)
+        assertThat(call.stripeException).isNull()
+        assertThat(call.additionalNonPiiParams).isEmpty()
+
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -141,7 +188,7 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<LinkWalletButton>()
+            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
@@ -163,7 +210,7 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<LinkWalletButton>()
+            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
@@ -192,11 +239,11 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<LinkWalletButton>()
+            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
 
-            val button = state.walletButtons.first().asLinkWalletButton()
-
-            button.onPressed()
+            interactor.handleViewAction(
+                WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first())
+            )
 
             val arguments = confirmationHandler.startTurbine.awaitItem()
 
@@ -300,11 +347,12 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons[0]).isInstanceOf<GooglePayWalletButton>()
+            assertThat(state.walletButtons.firstOrNull())
+                .isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
 
-            val button = state.walletButtons.first().asGooglePayWalletButton()
-
-            button.onPressed()
+            interactor.handleViewAction(
+                WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first())
+            )
 
             val arguments = confirmationHandler.startTurbine.awaitItem()
 
@@ -340,7 +388,8 @@ class DefaultWalletButtonsInteractorTest {
             val state = awaitItem()
 
             assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<GooglePayWalletButton>()
+            assertThat(state.walletButtons.firstOrNull())
+                .isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
 
             val actualButton = state.walletButtons.first().asGooglePayWalletButton()
 
@@ -383,16 +432,20 @@ class DefaultWalletButtonsInteractorTest {
 
     private fun createInteractor(
         arguments: DefaultWalletButtonsInteractor.Arguments? = null,
-        confirmationHandler: ConfirmationHandler = FakeConfirmationHandler()
+        confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ): DefaultWalletButtonsInteractor {
         return DefaultWalletButtonsInteractor(
             arguments = stateFlowOf(arguments),
             confirmationHandler = confirmationHandler,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher())
+            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            errorReporter = errorReporter,
         )
     }
 
-    private fun WalletButtonsInteractor.WalletButton.asLinkWalletButton() = this as LinkWalletButton
+    private fun WalletButtonsInteractor.WalletButton.asLinkWalletButton() =
+        this as WalletButtonsInteractor.WalletButton.Link
 
-    private fun WalletButtonsInteractor.WalletButton.asGooglePayWalletButton() = this as GooglePayWalletButton
+    private fun WalletButtonsInteractor.WalletButton.asGooglePayWalletButton() =
+        this as WalletButtonsInteractor.WalletButton.GooglePay
 }

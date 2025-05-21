@@ -1,15 +1,19 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
@@ -26,15 +30,57 @@ internal interface WalletButtonsInteractor {
         val buttonsEnabled: Boolean,
     )
 
+    fun handleViewAction(action: ViewAction)
+
     sealed interface WalletButton {
-        val onPressed: () -> Unit
+        fun createSelection(): PaymentSelection
+
+        @Immutable
+        @Stable
+        data class Link(
+            val email: String?,
+        ) : WalletButton {
+            override fun createSelection(): PaymentSelection {
+                return PaymentSelection.Link(useLinkExpress = false)
+            }
+        }
+
+        @Immutable
+        @Stable
+        data class GooglePay private constructor(
+            val googlePayButtonType: GooglePayButtonType,
+            val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
+            val allowCreditCards: Boolean,
+            val cardBrandFilter: CardBrandFilter,
+        ) : WalletButton {
+            constructor(
+                buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
+                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+                allowCreditCards: Boolean,
+                cardBrandFilter: CardBrandFilter,
+            ) : this(
+                googlePayButtonType = buttonType.asGooglePayButtonType,
+                billingAddressParameters = billingDetailsCollectionConfiguration.toBillingAddressParameters(),
+                allowCreditCards = allowCreditCards,
+                cardBrandFilter = cardBrandFilter,
+            )
+
+            override fun createSelection(): PaymentSelection {
+                return PaymentSelection.GooglePay
+            }
+        }
+    }
+
+    sealed interface ViewAction {
+        data class OnButtonPressed(val button: WalletButton) : ViewAction
     }
 }
 
 internal class DefaultWalletButtonsInteractor(
-    arguments: StateFlow<Arguments?>,
+    private val arguments: StateFlow<Arguments?>,
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
+    private val errorReporter: ErrorReporter,
 ) : WalletButtonsInteractor {
     override val state: StateFlow<WalletButtonsInteractor.State> = combineAsStateFlow(
         arguments,
@@ -45,21 +91,19 @@ internal class DefaultWalletButtonsInteractor(
         arguments?.run {
             if (isLinkEnabled) {
                 walletButtons.add(
-                    LinkWalletButton(
+                    WalletButtonsInteractor.WalletButton.Link(
                         email = linkEmail,
-                        onPressed = createOnPressed(PaymentSelection.Link(useLinkExpress = false)),
                     )
                 )
             }
 
             if (arguments.paymentMethodMetadata.isGooglePayReady) {
                 walletButtons.add(
-                    GooglePayWalletButton(
+                    WalletButtonsInteractor.WalletButton.GooglePay(
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                        onPressed = createOnPressed(PaymentSelection.GooglePay),
                     )
                 )
             }
@@ -69,6 +113,28 @@ internal class DefaultWalletButtonsInteractor(
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
         )
+    }
+
+    override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
+        when (action) {
+            is WalletButtonsInteractor.ViewAction.OnButtonPressed -> {
+                arguments.value?.let { arguments ->
+                    confirmationArgs(action.button.createSelection(), arguments)?.let {
+                        coroutineScope.launch {
+                            confirmationHandler.start(it)
+                        }
+                    } ?: run {
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+                        )
+                    }
+                } ?: run {
+                    errorReporter.report(
+                        ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_WALLET_ARGUMENTS_ON_CONFIRM
+                    )
+                }
+            }
+        }
     }
 
     private fun confirmationArgs(
@@ -89,16 +155,6 @@ internal class DefaultWalletButtonsInteractor(
         )
     }
 
-    private fun Arguments.createOnPressed(
-        selection: PaymentSelection
-    ): () -> Unit = {
-        confirmationArgs(selection, this)?.let {
-            coroutineScope.launch {
-                confirmationHandler.start(it)
-            }
-        }
-    }
-
     data class Arguments(
         val isLinkEnabled: Boolean,
         val linkEmail: String?,
@@ -115,6 +171,7 @@ internal class DefaultWalletButtonsInteractor(
             val linkHandler = flowControllerViewModel.flowControllerStateComponent.linkHandler
 
             return DefaultWalletButtonsInteractor(
+                errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
                 arguments = combineAsStateFlow(
                     linkHandler.isLinkEnabled,
                     linkHandler.linkConfigurationCoordinator.emailFlow,
@@ -140,24 +197,3 @@ internal class DefaultWalletButtonsInteractor(
         }
     }
 }
-
-@Immutable
-internal class GooglePayWalletButton(
-    buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
-    billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    val allowCreditCards: Boolean,
-    val cardBrandFilter: CardBrandFilter,
-    override val onPressed: () -> Unit,
-) : WalletButtonsInteractor.WalletButton {
-    val googlePayButtonType = buttonType.asGooglePayButtonType
-
-    val billingAddressParameters by lazy {
-        billingDetailsCollectionConfiguration.toBillingAddressParameters()
-    }
-}
-
-@Immutable
-internal class LinkWalletButton(
-    val email: String?,
-    override val onPressed: () -> Unit,
-) : WalletButtonsInteractor.WalletButton

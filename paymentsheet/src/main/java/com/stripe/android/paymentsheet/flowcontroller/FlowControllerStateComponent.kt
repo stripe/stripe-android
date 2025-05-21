@@ -9,6 +9,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
@@ -44,6 +45,7 @@ internal interface FlowControllerStateComponent {
     val flowControllerComponentBuilder: FlowControllerComponent.Builder
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler
+    val errorReporter: ErrorReporter
     val walletButtonsContent: WalletButtonsContent
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
