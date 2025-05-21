@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFac
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,7 +96,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
-        linkAccountHolder.linkAccount.mapAsStateFlow { it?.email },
+        linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
     ) { isLinkAvailable, linkEmail, buttonsEnabled ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
@@ -135,8 +134,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
         linkAccountHolder.set(args.linkAccount)
+        linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
         // would not be the case.
