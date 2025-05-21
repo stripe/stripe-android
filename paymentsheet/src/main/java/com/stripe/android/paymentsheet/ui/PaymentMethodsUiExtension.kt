@@ -199,7 +199,7 @@ private fun getOverridableIcon(
     }
 }
 
-internal fun PaymentMethod.getLabel(canShowSublabel: Boolean): ResolvableString? = when (type) {
+internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> createCardLabel(card?.last4)
     PaymentMethod.Type.SepaDebit -> resolvableString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
