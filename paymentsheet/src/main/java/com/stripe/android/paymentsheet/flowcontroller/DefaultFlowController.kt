@@ -18,13 +18,16 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.updateLinkAccount
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.AccountStatus.Verified
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -289,6 +292,7 @@ internal class DefaultFlowController @Inject internal constructor(
             configuration = state.config,
             enableLogging = enableLogging,
             productUsage = productUsage,
+            linkAccount = linkAccountHolder.linkAccount.value,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 
@@ -307,24 +311,67 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     fun onLinkPaymentMethodSelected(result: LinkActivityResult) {
+        result.linkAccountUpdate?.updateLinkAccount()
         when (result) {
             is LinkActivityResult.PaymentMethodObtained,
             is LinkActivityResult.Failed -> Unit
             is LinkActivityResult.Canceled -> when (result.reason) {
                 Reason.BackPressed -> Unit
-                Reason.LoggedOut,
-                Reason.PayAnotherWay -> withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
-            }
-            is LinkActivityResult.Completed -> {
-                val paymentSelection = viewModel.paymentSelection
-                if (paymentSelection is Link) {
-                    val updatedPaymentSelection = paymentSelection.copy(
-                        selectedPayment = result.selectedPayment,
-                    )
-                    viewModel.paymentSelection = updatedPaymentSelection
-                    paymentOptionCallback.onPaymentOption(paymentOptionFactory.create(updatedPaymentSelection))
+                Reason.LoggedOut -> {
+                    updateLinkPaymentSelection(result.linkAccountUpdate, null)
+                    withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
+                }
+                Reason.PayAnotherWay -> {
+                    withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
                 }
             }
+
+            is LinkActivityResult.Completed -> {
+                updateLinkPaymentSelection(result.linkAccountUpdate, result.selectedPayment)
+            }
+        }
+    }
+
+    /**
+     * Updates the Link account state in FlowController after receiving a [LinkAccountUpdate]
+     *
+     * - Calls [LinkAccountHolder.set] to update the Link account state
+     * - Updates the Link account state in the [PaymentSheetState] with the latest [AccountStatus]
+     */
+    private fun LinkAccountUpdate.updateLinkAccount() {
+        updateLinkAccount(linkAccountHolder)
+        when (this) {
+            is LinkAccountUpdate.Value -> {
+                val currentState = viewModel.state ?: return
+                val metadata = currentState.paymentSheetState.paymentMethodMetadata
+                val accountStatus = linkAccount?.accountStatus ?: AccountStatus.SignedOut
+                val linkState = metadata.linkState?.copy(loginState = accountStatus.toLoginState())
+                viewModel.state = currentState.copyPaymentSheetState(
+                    metadata = metadata.copy(linkState = linkState),
+                )
+            }
+            LinkAccountUpdate.None -> Unit
+        }
+    }
+
+    /**
+     * If the current payment selection is Link and Link details changed, update the payment selection accordingly.
+     */
+    private fun updateLinkPaymentSelection(
+        linkAccountUpdate: LinkAccountUpdate,
+        linkPaymentMethod: LinkPaymentMethod?
+    ) {
+        val paymentSelection = viewModel.paymentSelection
+        if (paymentSelection is Link) {
+            val updated = paymentSelection.copy(
+                selectedPayment = linkPaymentMethod,
+                linkAccount = when (linkAccountUpdate) {
+                    is LinkAccountUpdate.Value -> linkAccountUpdate.linkAccount
+                    LinkAccountUpdate.None -> paymentSelection.linkAccount
+                }
+            )
+            viewModel.paymentSelection = updated
+            paymentOptionCallback.onPaymentOption(paymentOptionFactory.create(updated))
         }
     }
 
@@ -441,66 +488,33 @@ internal class DefaultFlowController @Inject internal constructor(
 
     @JvmSynthetic
     internal fun onPaymentOptionResult(
-        paymentOptionResult: PaymentOptionResult?
+        result: PaymentOptionResult?
     ) {
-        paymentOptionResult?.paymentMethods?.let {
+        result?.paymentMethods?.let {
             val currentState = viewModel.state
 
             viewModel.state = currentState?.copyPaymentSheetState(
                 customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
             )
         }
-        when (paymentOptionResult) {
-            is PaymentOptionResult.Succeeded -> {
-                val paymentSelection = paymentOptionResult.paymentSelection
-                paymentSelection.hasAcknowledgedSepaMandate = true
-                viewModel.paymentSelection = paymentSelection
-                if (paymentSelection is Link) {
-                    paymentSelection.linkAccount?.let { updateStateWithLinkAccount(it) }
-                }
-                paymentOptionCallback.onPaymentOption(
-                    paymentOptionFactory.create(
-                        paymentSelection
-                    )
-                )
-            }
-            is PaymentOptionResult.Failed -> {
-                paymentOptionCallback.onPaymentOption(
-                    viewModel.paymentSelection?.let {
-                        paymentOptionFactory.create(it)
-                    }
-                )
-            }
-            is PaymentOptionResult.Canceled -> {
-                val paymentSelection = paymentOptionResult.paymentSelection
-                viewModel.paymentSelection = paymentSelection
-
-                val paymentOption = paymentSelection?.let { paymentOptionFactory.create(it) }
-                paymentOptionCallback.onPaymentOption(paymentOption)
-            }
-            null -> {
-                viewModel.paymentSelection = null
-                paymentOptionCallback.onPaymentOption(null)
-            }
+        when (result) {
+            is PaymentOptionResult.Succeeded -> setAsSelected(
+                result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
+            )
+            is PaymentOptionResult.Failed -> setAsSelected(viewModel.paymentSelection)
+            is PaymentOptionResult.Canceled -> setAsSelected(result.paymentSelection)
+            null -> setAsSelected(null)
         }
     }
 
-    /**
-     * 1. Updates [com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.State]
-     *    with the given link account. This ensures subsequent payment method options launches will take
-     *    into account the last Link login state.
-     * 2. Updates [LinkAccountHolder] with the given link account. This ensures
-     *   [com.stripe.android.paymentelement.confirmation.link.LinkConfirmationDefinition] executions
-     *   take into account the last login / verification state.
-     */
-    private fun updateStateWithLinkAccount(linkAccount: LinkAccount) {
-        linkAccountHolder.set(linkAccount)
-        val currentState = viewModel.state ?: return
-        val metadata = currentState.paymentSheetState.paymentMethodMetadata
-        val linkState = metadata.linkState?.copy(loginState = linkAccount.accountStatus.toLoginState())
-        viewModel.state = currentState.copyPaymentSheetState(
-            metadata = metadata.copy(linkState = linkState),
-        )
+    private fun setAsSelected(paymentSelection: PaymentSelection?) {
+        viewModel.paymentSelection = paymentSelection
+        // update the current Link account state if the selected Link payment method includes an account update.
+        if (paymentSelection is Link) {
+            LinkAccountUpdate.Value(paymentSelection.linkAccount).updateLinkAccount()
+        }
+        val paymentOption = paymentSelection?.let { paymentOptionFactory.create(it) }
+        paymentOptionCallback.onPaymentOption(paymentOption)
     }
 
     private fun onIntentResult(result: ConfirmationHandler.Result) {
