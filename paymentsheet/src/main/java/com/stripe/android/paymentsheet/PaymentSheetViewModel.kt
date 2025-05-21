@@ -27,6 +27,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -296,10 +297,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 when (state) {
                     is ConfirmationHandler.State.Idle -> Unit
                     is ConfirmationHandler.State.Confirming -> {
-                        if (state.option is GooglePayConfirmationOption) {
-                            setContentVisible(false)
-                        } else {
-                            setContentVisible(true)
+                        when (state.option) {
+                            is GooglePayConfirmationOption,
+                            is LinkConfirmationOption -> {
+                                setContentVisible(false)
+                            }
+                            else -> {
+                                setContentVisible(true)
+                            }
                         }
 
                         startProcessing(checkoutIdentifier)
