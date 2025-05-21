@@ -14,17 +14,35 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
@@ -204,7 +222,17 @@ internal class PaymentSheetPlaygroundActivity :
                 )
             }
 
+            var settingsSearchQuery by rememberSaveable { mutableStateOf("") }
             PlaygroundTheme(
+                topBarContent = {
+                    SearchSettingsField(
+                        modifier = Modifier
+                            .statusBarsPadding()
+                            .padding(horizontal = 16.dp),
+                        query = settingsSearchQuery,
+                        onQueryChanged = { settingsSearchQuery = it }
+                    )
+                },
                 content = {
                     playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
                         Text(
@@ -222,7 +250,10 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
-                    SettingsUi(playgroundSettings = localPlaygroundSettings)
+                    SettingsUi(
+                        searchQuery = settingsSearchQuery,
+                        playgroundSettings = localPlaygroundSettings,
+                    )
 
                     AppearanceButton()
 
@@ -259,6 +290,74 @@ internal class PaymentSheetPlaygroundActivity :
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
         }
+    }
+
+    @Composable
+    private fun SearchSettingsField(
+        query: String,
+        onQueryChanged: (String) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        var hasFocus by remember { mutableStateOf(false) }
+        val keyboardController = LocalSoftwareKeyboardController.current
+        TextField(
+            modifier = modifier
+                .onFocusChanged { hasFocus = it.isFocused }
+                .onKeyEvent {
+                    if (it.key == Key.Enter) {
+                        keyboardController?.hide()
+                        true
+                    } else {
+                        false
+                    }
+                }
+                .fillMaxWidth(),
+            value = query,
+            placeholder = if (hasFocus) {
+                null
+            } else {
+                @Composable {
+                    Text(text = "Search")
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { keyboardController?.show() }
+            ),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = null,
+                )
+            },
+            trailingIcon = if (query.isEmpty()) {
+                null
+            } else {
+                @Composable {
+                    IconButton(onClick = { onQueryChanged("") }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                        )
+                    }
+                }
+            },
+            onValueChange = onQueryChanged,
+        )
+    }
+
+    @Preview(showBackground = true)
+    @Composable
+    private fun SearchSettingsFieldPreview() {
+        var query by remember { mutableStateOf("") }
+        SearchSettingsField(
+            query = query,
+            onQueryChanged = { query = it },
+        )
     }
 
     @Composable
