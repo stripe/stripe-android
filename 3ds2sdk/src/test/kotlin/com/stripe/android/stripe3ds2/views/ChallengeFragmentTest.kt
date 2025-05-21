@@ -273,6 +273,45 @@ class ChallengeFragmentTest {
         }
     }
 
+    @Test
+    fun `whitelisting value is true if whitelistingInfoText is present and button checked`() {
+        createFragment(
+            cres = CRES_TEXT_DATA
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(true)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+
+            assertThat(action?.whitelistingValue).isTrue()
+        }
+    }
+
+    @Test
+    fun `whitelisting value is null if whitelistingInfoText is null and button checked`() {
+        createFragment(
+            cres = CRES_TEXT_DATA.copy(whitelistingInfoText = null)
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(true)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+
+            assertThat(action?.whitelistingValue).isNull()
+        }
+    }
+
+    @Test
+    fun `whitelisting value is false if whitelistingInfoText is present and button not checked`() {
+        createFragment(
+            cres = CRES_TEXT_DATA
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(false)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler.actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+
+            assertThat(action?.whitelistingValue).isFalse()
+        }
+    }
+
     private fun createFragment(
         cres: ChallengeResponseData? = ChallengeMessageFixtures.CRES_TEXT_DATA,
         onFragment: (ChallengeFragment) -> Unit
