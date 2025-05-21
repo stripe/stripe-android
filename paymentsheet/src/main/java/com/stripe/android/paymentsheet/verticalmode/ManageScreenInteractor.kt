@@ -8,7 +8,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -40,9 +39,7 @@ internal interface ManageScreenInteractor {
         val canEdit: Boolean,
     ) {
         private val containsOnlyCards: Boolean by lazy {
-            paymentMethods.isNotEmpty() && paymentMethods.all { displayable ->
-                displayable.savedPaymentMethod is SavedPaymentMethod.Card
-            }
+            paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
         }
 
         private val manageTitle: ResolvableString

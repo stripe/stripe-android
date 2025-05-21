@@ -20,7 +20,7 @@ internal object TransformToBankIcon {
             Regex("PNC\\s?BANK|PNC Bank", RegexOption.IGNORE_CASE) to "pnc",
             Regex("SUNTRUST|SunTrust Bank", RegexOption.IGNORE_CASE) to "suntrust",
             Regex("Silicon Valley Bank", RegexOption.IGNORE_CASE) to "svb",
-            Regex("Stripe|TestInstitution", RegexOption.IGNORE_CASE) to "stripe",
+            Regex("Stripe|TestInstitution|Test Institution", RegexOption.IGNORE_CASE) to "stripe",
             Regex("TD Bank", RegexOption.IGNORE_CASE) to "td",
             Regex("USAA FEDERAL SAVINGS BANK|USAA Bank", RegexOption.IGNORE_CASE) to "usaa",
             Regex("U\\.?S\\. BANK|US Bank", RegexOption.IGNORE_CASE) to "usbank",

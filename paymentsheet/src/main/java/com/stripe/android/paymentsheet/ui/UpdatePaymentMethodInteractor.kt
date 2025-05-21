@@ -6,6 +6,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -68,7 +69,17 @@ internal interface UpdatePaymentMethodInteractor {
                 is SavedPaymentMethod.SepaDebit -> R.string.stripe_paymentsheet_manage_sepa_debit
                 is SavedPaymentMethod.USBankAccount -> R.string.stripe_paymentsheet_manage_bank_account
                 is SavedPaymentMethod.Card -> R.string.stripe_paymentsheet_manage_card
-                is SavedPaymentMethod.Link -> R.string.stripe_paymentsheet_manage_card
+                is SavedPaymentMethod.Link -> {
+                    when (displayableSavedPaymentMethod.paymentMethod.linkPaymentDetails) {
+                        is LinkPaymentDetails.BankAccount -> {
+                            R.string.stripe_paymentsheet_manage_international_bank_account
+                        }
+                        is LinkPaymentDetails.Card -> {
+                            R.string.stripe_paymentsheet_manage_card
+                        }
+                        null -> null
+                    }
+                }
                 SavedPaymentMethod.Unexpected -> null
             }
             )?.resolvableString
@@ -143,7 +154,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 createEditCardDetailsInteractorForCard(paymentMethod)
             }
             is SavedPaymentMethod.Link -> {
-                createEditCardDetailsInteractorForLink(paymentMethod)
+                val linkPaymentDetails = paymentMethod.paymentDetails as? LinkPaymentDetails.Card
+                    ?: throw IllegalArgumentException("Link payment method is not a card")
+                createEditCardDetailsInteractorForLink(linkPaymentDetails)
             }
             else -> {
                 throw IllegalArgumentException(
@@ -173,9 +186,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun createEditCardDetailsInteractorForLink(
-        savedPaymentMethodCard: SavedPaymentMethod.Link,
+        savedPaymentMethodCard: LinkPaymentDetails.Card,
     ): EditCardDetailsInteractor {
-        val payload = EditCardPayload.create(savedPaymentMethodCard.paymentDetails)
+        val payload = EditCardPayload.create(savedPaymentMethodCard)
         return editCardDetailsInteractorFactory.create(
             payload = payload,
             onCardUpdateParamsChanged = { cardUpdateParams ->

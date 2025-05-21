@@ -6,6 +6,8 @@ import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.SavedPaymentMethod.Card
+import com.stripe.android.paymentsheet.SavedPaymentMethod.Link
 
 internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
@@ -14,6 +16,10 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val isCbcEligible: Boolean = false,
     val shouldShowDefaultBadge: Boolean = false
 ) {
+    val isCard: Boolean
+        get() = savedPaymentMethod is Card ||
+            (savedPaymentMethod is Link && savedPaymentMethod.paymentDetails is LinkPaymentDetails.Card)
+
     fun canChangeCbc(): Boolean {
         return when (savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
@@ -58,11 +64,23 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             R.string.stripe_bank_account_ending_in,
             savedPaymentMethod.usBankAccount.last4
         )
-        is SavedPaymentMethod.Link -> resolvableString(
-            com.stripe.android.R.string.stripe_card_ending_in,
-            brandDisplayName(),
-            savedPaymentMethod.paymentDetails.last4
-        )
+        is SavedPaymentMethod.Link -> {
+            when (savedPaymentMethod.paymentDetails) {
+                is LinkPaymentDetails.BankAccount -> {
+                    resolvableString(
+                        R.string.stripe_bank_account_ending_in,
+                        savedPaymentMethod.paymentDetails.last4
+                    )
+                }
+                is LinkPaymentDetails.Card -> {
+                    resolvableString(
+                        com.stripe.android.R.string.stripe_card_ending_in,
+                        brandDisplayName(),
+                        savedPaymentMethod.paymentDetails.last4
+                    )
+                }
+            }
+        }
         is SavedPaymentMethod.Unexpected -> resolvableString("")
     }
 
@@ -86,7 +104,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 return brand.displayName
             }
             is SavedPaymentMethod.Link -> {
-                return savedPaymentMethod.paymentDetails.brand.displayName
+                val cardDetails = savedPaymentMethod.paymentDetails as? LinkPaymentDetails.Card
+                return cardDetails?.brand?.displayName
             }
             is SavedPaymentMethod.USBankAccount,
             is SavedPaymentMethod.SepaDebit,
