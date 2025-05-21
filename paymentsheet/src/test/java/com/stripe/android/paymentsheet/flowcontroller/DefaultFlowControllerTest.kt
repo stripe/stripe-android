@@ -481,6 +481,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
+            linkAccount = null,
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
         )
 
@@ -1287,7 +1288,7 @@ internal class DefaultFlowControllerTest {
         val previousPaymentSelection = NEW_CARD_PAYMENT_SELECTION
 
         flowController.onPaymentOptionResult(
-            paymentOptionResult = PaymentOptionResult.Succeeded(previousPaymentSelection),
+            result = PaymentOptionResult.Succeeded(previousPaymentSelection),
         )
 
         flowController.presentPaymentOptions()
