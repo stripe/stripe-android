@@ -239,8 +239,8 @@ internal class WalletViewModel @Inject constructor(
                 is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
-                        selectedPayment = LinkPaymentMethod(
-                            details = selectedPaymentDetails,
+                        selectedPayment = LinkPaymentMethod.Consumer(
+                            paymentDetails = selectedPaymentDetails,
                             collectedCvc = cvc
                         ),
                     )
