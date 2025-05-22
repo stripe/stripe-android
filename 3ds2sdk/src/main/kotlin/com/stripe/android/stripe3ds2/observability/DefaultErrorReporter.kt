@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.stripe3ds2.BuildConfig
-import com.stripe.android.stripe3ds2.SdkVersion.VERSION_CODE
 import com.stripe.android.stripe3ds2.SdkVersion.VERSION_NAME
 import com.stripe.android.stripe3ds2.transaction.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -112,7 +111,7 @@ internal class DefaultErrorReporter(
         t: Throwable
     ): JSONObject {
         return JSONObject()
-            .put("release", "${BuildConfig.LIBRARY_PACKAGE_NAME}@$VERSION_NAME+$VERSION_CODE")
+            .put("release", "${BuildConfig.LIBRARY_PACKAGE_NAME}@$VERSION_NAME")
             .put(
                 "exception",
                 JSONObject()
