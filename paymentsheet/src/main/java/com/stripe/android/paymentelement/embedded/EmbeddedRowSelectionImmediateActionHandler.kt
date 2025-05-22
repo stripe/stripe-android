@@ -85,7 +85,6 @@ internal class DefaultEmbeddedRowSelectionImmediateActionHandler @Inject constru
         }
     }
 
-
     private fun prepareRowSelectionCallback(isReselectedPredicate: () -> Boolean) {
         savedStateHandle[EMBEDDED_ROW_SELECTION_SHOULD_INVOKE_KEY] = true
         if (isReselectedPredicate()) {
