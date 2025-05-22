@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkLaunchMode
@@ -251,23 +252,31 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    override fun presentPaymentOptions() = withCurrentState { state: State ->
-        // If the user previously selected Link and authenticated,
-        // show the link wallet instead of the payment option list.
-        val configuration = state.paymentSheetState.linkConfiguration
-        val paymentSelection = viewModel.paymentSelection
-        val linkAccount = linkAccountHolder.linkAccount.value
-        if (paymentSelection is Link && configuration != null && linkAccount?.accountStatus == Verified) {
-            linkPaymentLauncher.present(
-                configuration = configuration,
-                linkAccount = linkAccount,
-                useLinkExpress = false,
-                launchMode = LinkLaunchMode.PaymentMethodSelection(
-                    selectedPayment = paymentSelection.selectedPayment?.details
+    override fun presentPaymentOptions() {
+        withCurrentState { state ->
+            // If the user previously selected Link and authenticated,
+            // show the link wallet instead of the payment option list.
+            val linkConfiguration = state.paymentSheetState.linkConfiguration
+            val paymentSelection = viewModel.paymentSelection
+            val linkAccount = linkAccountHolder.linkAccount.value
+
+            val shouldPresentLinkInsteadOfPaymentOptions = FeatureFlags.linkProminenceInFlowController.isEnabled &&
+                paymentSelection is Link &&
+                linkConfiguration != null &&
+                linkAccount?.accountStatus == Verified
+
+            if (shouldPresentLinkInsteadOfPaymentOptions) {
+                linkPaymentLauncher.present(
+                    configuration = linkConfiguration,
+                    linkAccount = linkAccount,
+                    useLinkExpress = false,
+                    launchMode = LinkLaunchMode.PaymentMethodSelection(
+                        selectedPayment = paymentSelection.selectedPayment?.details
+                    )
                 )
-            )
-        } else {
-            showPaymentOptionList(state, paymentSelection)
+            } else {
+                showPaymentOptionList(state, paymentSelection)
+            }
         }
     }
 
