@@ -11,10 +11,12 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@Ignore("Ignore failing tests until #ir-mahogany-eventful is resolved")
 internal class TestWeChatPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "wechat_pay",
