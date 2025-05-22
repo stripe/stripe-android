@@ -38,7 +38,7 @@ internal class FormActivityViewModel @Inject constructor(
                 savedStateHandle = extras.createSavedStateHandle(),
             )
 
-            component.selectionHolder.set(args.paymentSelection)
+            component.selectionHolder.set(args.paymentSelection)// not click
 
             return component.viewModel as T
         }

@@ -35,7 +35,7 @@ internal class ManageViewModel @Inject constructor(
             )
 
             component.customerStateHolder.setCustomerState(args.customerState)
-            component.selectionHolder.set(args.selection)
+            component.selectionHolder.set(args.selection)//not click
 
             return component.viewModel as T
         }

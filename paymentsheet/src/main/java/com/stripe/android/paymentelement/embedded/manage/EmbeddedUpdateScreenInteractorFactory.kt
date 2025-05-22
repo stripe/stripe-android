@@ -41,7 +41,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 if (result == null) {
                     val currentSelection = selectionHolder.selection.value
                     if (method.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                        selectionHolder.set(null)
+                        selectionHolder.set(null)// weird path
                     }
                 }
                 result
@@ -53,7 +53,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     onSuccess = { paymentMethod ->
                         val currentSelection = selectionHolder.selection.value
                         if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                            selectionHolder.set(PaymentSelection.Saved(paymentMethod))
+                            selectionHolder.set(PaymentSelection.Saved(paymentMethod)) //weird path2
                         }
                     },
                 )

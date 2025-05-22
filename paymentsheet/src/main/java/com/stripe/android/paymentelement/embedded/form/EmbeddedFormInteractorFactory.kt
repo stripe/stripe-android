@@ -31,7 +31,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = {
-                embeddedSelectionHolder.set(it)
+                embeddedSelectionHolder.set(it) // this is covered by formFieldsChanged
             },
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
@@ -41,7 +41,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set,
+            setSelection = embeddedSelectionHolder::set, // covered by FormResult
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
