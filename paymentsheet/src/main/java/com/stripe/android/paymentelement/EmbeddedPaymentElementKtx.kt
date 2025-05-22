@@ -43,17 +43,19 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must be created in the context of an Activity."
     }
 
-    val embeddedPaymentElement = EmbeddedPaymentElement.create(
-        activity = activity,
-        activityResultCaller = PaymentElementActivityResultCaller(
-            key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
-            registryOwner = activityResultRegistryOwner,
-        ),
-        paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-        lifecycleOwner = lifecycleOwner,
-        viewModelStoreOwner = viewModelStoreOwner,
-        resultCallback = onResult,
-    )
+    val embeddedPaymentElement = remember {
+        EmbeddedPaymentElement.create(
+            activity = activity,
+            activityResultCaller = PaymentElementActivityResultCaller(
+                key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
+                registryOwner = activityResultRegistryOwner,
+            ),
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            lifecycleOwner = lifecycleOwner,
+            viewModelStoreOwner = viewModelStoreOwner,
+            resultCallback = onResult,
+        )
+    }
 
     val callbacks = remember(builder) {
         @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
@@ -74,5 +76,5 @@ fun rememberEmbeddedPaymentElement(
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
-    return remember { embeddedPaymentElement }
+    return embeddedPaymentElement
 }
