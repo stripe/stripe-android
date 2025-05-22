@@ -10,7 +10,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.Configuration
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent

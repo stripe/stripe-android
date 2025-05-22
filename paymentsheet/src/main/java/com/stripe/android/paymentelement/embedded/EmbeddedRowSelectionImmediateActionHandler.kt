@@ -14,6 +14,8 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
+internal typealias InternalRowSelectionCallback = () -> Unit
+
 @Singleton
 internal interface EmbeddedRowSelectionImmediateActionHandler {
     fun prepareRowSelectionCallbackFromForm(formResult: FormResult.Complete)
