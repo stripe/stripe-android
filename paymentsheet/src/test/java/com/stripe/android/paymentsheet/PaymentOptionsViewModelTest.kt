@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -15,7 +16,9 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -209,14 +212,17 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `onUserSelection with Link and prominence true launches LinkPaymentLauncher`() = runTest {
         linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        val unverifiedAccount = LinkAccount(TestFactory.CONSUMER_SESSION.copy(verificationSessions = emptyList()))
         val viewModel = createViewModel(
-            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                linkState = LinkState(
-                    configuration = TestFactory.LINK_CONFIGURATION,
-                    loginState = LinkState.LoginState.NeedsVerification,
-                    signupMode = null
-                )
-            ),
+            args = PAYMENT_OPTION_CONTRACT_ARGS
+                .copy(linkAccount = unverifiedAccount)
+                .updateState(
+                    linkState = LinkState(
+                        configuration = TestFactory.LINK_CONFIGURATION,
+                        loginState = LinkState.LoginState.NeedsVerification,
+                        signupMode = null
+                    )
+                ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
         )
 
@@ -225,7 +231,7 @@ internal class PaymentOptionsViewModelTest {
 
         verify(linkPaymentLauncher).present(
             configuration = any(),
-            linkAccount = eq(null),
+            linkAccount = eq(unverifiedAccount),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             useLinkExpress = eq(true)
         )
@@ -1043,7 +1049,8 @@ internal class PaymentOptionsViewModelTest {
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkProminenceFeatureProvider = linkProminenceFeatureProvider,
-            linkPaymentLauncher = linkPaymentLauncher
+            linkPaymentLauncher = linkPaymentLauncher,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )
     }
 
@@ -1090,6 +1097,7 @@ internal class PaymentOptionsViewModelTest {
             enableLogging = false,
             productUsage = mock(),
             paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
+            linkAccount = null
         )
     }
 
