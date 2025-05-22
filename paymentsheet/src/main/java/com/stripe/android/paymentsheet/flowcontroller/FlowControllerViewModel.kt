@@ -12,6 +12,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -35,8 +38,11 @@ internal class FlowControllerViewModel(
     var paymentSelection: PaymentSelection? = null
 
     // Used to determine if we need to reload the flow controller configuration.
-    @Volatile
-    var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest? = null
+    var previousConfigureRequest: FlowControllerConfigurationHandler.ConfigureRequest?
+        get() = _configureRequest.value
+        set(value) {
+            _configureRequest.value = value
+        }
 
     var state: DefaultFlowController.State?
         get() = handle[STATE_KEY]
@@ -44,12 +50,16 @@ internal class FlowControllerViewModel(
             handle[STATE_KEY] = value
         }
 
-    private val flowControllerStateFlow = handle.getStateFlow<DefaultFlowController.State?>(STATE_KEY, null)
+    private val _configureRequest = MutableStateFlow<FlowControllerConfigurationHandler.ConfigureRequest?>(null)
+    val configureRequest: StateFlow<FlowControllerConfigurationHandler.ConfigureRequest?> =
+        _configureRequest.asStateFlow()
+
+    val stateFlow = handle.getStateFlow<DefaultFlowController.State?>(STATE_KEY, null)
     private val restartSession = SessionSavedStateHandler.attachTo(this, handle)
 
     init {
         viewModelScope.launch {
-            flowControllerStateFlow.collectLatest { state ->
+            stateFlow.collectLatest { state ->
                 flowControllerStateComponent.linkHandler.setupLink(
                     state = state?.paymentSheetState?.paymentMethodMetadata?.linkState
                 )
