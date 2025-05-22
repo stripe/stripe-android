@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -44,8 +45,8 @@ internal class ManageNavigator private constructor(
     val canGoBack: Boolean
         get() = navigationHandler.canGoBack
 
-    private val _result = MutableSharedFlow<Unit>(replay = 1)
-    val result: SharedFlow<Unit> = _result.asSharedFlow()
+    private val _result = MutableSharedFlow<PaymentSelection.Saved?>(replay = 1)
+    val result: SharedFlow<PaymentSelection.Saved?> = _result.asSharedFlow()
 
     init {
         onScreenShown(screen.value)
@@ -58,12 +59,12 @@ internal class ManageNavigator private constructor(
                 if (navigationHandler.canGoBack) {
                     navigationHandler.pop()
                 } else {
-                    _result.tryEmit(Unit)
+                    _result.tryEmit(null)
                 }
             }
             is Action.Close -> {
                 onScreenHidden(screen.value)
-                _result.tryEmit(Unit)
+                _result.tryEmit(action.updatedSelection)
             }
             is Action.GoToScreen -> {
                 navigationHandler.transitionToWithDelay(action.screen)
@@ -154,7 +155,9 @@ internal class ManageNavigator private constructor(
     sealed class Action {
         object Back : Action()
 
-        object Close : Action()
+        // Only pass in updatedSelection if selection changed and not selection properties updated
+        // Passing in updatedSelection is for purposes of rowSelectionCallback
+        data class Close(val updatedSelection: PaymentSelection.Saved? = null) : Action()
 
         data class GoToScreen(val screen: Screen) : Action()
     }

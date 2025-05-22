@@ -24,6 +24,8 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
@@ -84,7 +86,7 @@ internal class ManageActivity : AppCompatActivity() {
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = {
-                        setManageResult()
+                        setManageResult(false)
                         finish()
                     }
                 ) {
@@ -95,7 +97,7 @@ internal class ManageActivity : AppCompatActivity() {
                         }
                         LaunchedEffect(screen) {
                             manageNavigator.result.collect { result ->
-                                setManageResult()
+                                setManageResult(result != null)
                                 finish()
                                 hasResult = true
                             }
@@ -156,10 +158,11 @@ internal class ManageActivity : AppCompatActivity() {
         fadeOut()
     }
 
-    private fun setManageResult() {
+    private fun setManageResult(shouldInvokeSelectionCallback: Boolean) {
         val result = ManageResult.Complete(
             customerState = requireNotNull(customerStateHolder.customer.value),
             selection = selectionHolder.selection.value,
+            shouldInvokeSelectionCallback = shouldInvokeSelectionCallback
         )
         setResult(
             RESULT_OK,
