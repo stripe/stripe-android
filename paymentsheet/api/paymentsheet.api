@@ -1030,6 +1030,14 @@ public final class com/stripe/android/paymentelement/confirmation/linkinline/Lin
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentelement/confirmation/shoppay/ShopPayConfirmationOption$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/shoppay/ShopPayConfirmationOption;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/shoppay/ShopPayConfirmationOption;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$Arguments$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/embedded/content/DefaultEmbeddedConfigurationHandler$Arguments;
@@ -3146,5 +3154,45 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-4$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/shoppay/ComposableSingletons$ShopPayActivityKt {
+	public static final field INSTANCE Lcom/stripe/android/shoppay/ComposableSingletons$ShopPayActivityKt;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/shoppay/ShopPayActivityResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/shoppay/ShopPayActivityResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/shoppay/ShopPayActivityResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/shoppay/ShopPayActivityResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/shoppay/ShopPayActivityResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/shoppay/ShopPayActivityResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/shoppay/ShopPayActivityResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/shoppay/ShopPayActivityResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/shoppay/ShopPayActivityResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/shoppay/ShopPayArgs$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/shoppay/ShopPayArgs;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/shoppay/ShopPayArgs;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
