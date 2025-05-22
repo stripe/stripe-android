@@ -160,7 +160,6 @@ class DefaultWalletButtonsInteractorTest {
                 state.value = ConfirmationHandler.State.Confirming(
                     LinkConfirmationOption(
                         useLinkExpress = false,
-                        selectedLinkPayment = null,
                         configuration = mock()
                     )
                 )
@@ -250,7 +249,6 @@ class DefaultWalletButtonsInteractorTest {
             assertThat(arguments.confirmationOption).isEqualTo(
                 LinkConfirmationOption(
                     useLinkExpress = false,
-                    selectedLinkPayment = null,
                     configuration = linkConfiguration,
                 )
             )
