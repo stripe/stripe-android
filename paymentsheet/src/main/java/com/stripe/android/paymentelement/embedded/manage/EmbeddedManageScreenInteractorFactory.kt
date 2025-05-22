@@ -36,7 +36,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                 selectionHolder.set(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
-                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Close(savedPmSelection)) // pass it to defaultEmbeddedSheetLauncher
+                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Close(savedPmSelection))
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {

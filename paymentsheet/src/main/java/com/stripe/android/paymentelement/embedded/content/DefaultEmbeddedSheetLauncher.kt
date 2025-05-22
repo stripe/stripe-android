@@ -89,7 +89,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 is ManageResult.Complete -> {
                     customerStateHolder.setCustomerState(result.customerState)
                     if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                        // happyPath1
                         rowSelectionImmediateActionHandler.prepareRowSelectionCallbackSavedPaymentRow(result.selection)
                     }
                     selectionHolder.set(result.selection)
