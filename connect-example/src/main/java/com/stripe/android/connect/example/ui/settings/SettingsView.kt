@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.example.R
@@ -33,6 +34,7 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel.SettingsState.DemoMerchant
 
 @Composable
+@Suppress("LongMethod")
 fun SettingsView(
     viewModel: SettingsViewModel,
     onDismiss: () -> Unit,
@@ -56,6 +58,7 @@ fun SettingsView(
         },
         actions = {
             IconButton(
+                modifier = Modifier.testTag("save_button"),
                 enabled = state.saveEnabled,
                 onClick = {
                     viewModel.saveSettings()
@@ -144,11 +147,13 @@ private fun SelectAnAccount(
                             onClick = null, // onClick handled by row
                         )
                         OutlinedTextField(
+                            modifier = Modifier
+                                .testTag("other_account_input")
+                                .fillMaxWidth(),
                             value = merchant.merchantId,
                             onValueChange = onOtherAccountInputChanged,
                             label = { Text(stringResource(R.string.other)) },
                             placeholder = { Text(stringResource(R.string.account_id_placeholder)) },
-                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }
