@@ -54,6 +54,7 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.PaymentSheetVisibility
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
 import com.stripe.android.paymentsheet.model.MandateText
@@ -80,9 +81,26 @@ import kotlinx.coroutines.delay
 internal fun PaymentSheetScreen(
     viewModel: PaymentSheetViewModel,
 ) {
-    val contentVisible by viewModel.contentVisible.collectAsState()
+    val visibility by viewModel.visibility.collectAsState()
     val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
+
+    var lastVisibility by remember { mutableStateOf(visibility) }
+    val contentVisible = remember(visibility) {
+        when (visibility) {
+            PaymentSheetVisibility.Visible ->
+                true
+            PaymentSheetVisibility.ContentHidden ->
+                false
+            PaymentSheetVisibility.SheetHidden ->
+                lastVisibility == PaymentSheetVisibility.Visible
+        }.also { lastVisibility = visibility }
+    }
+
+    PaymentSheetScreen(
+        viewModel = viewModel,
+        scrollState = scrollState,
+        hide = visibility == PaymentSheetVisibility.SheetHidden
+    ) {
         AnimatedVisibility(visible = contentVisible, modifier = Modifier.fillMaxWidth()) {
             PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
         }
@@ -114,6 +132,7 @@ internal fun PaymentSheetScreen(
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     scrollState: ScrollState,
+    hide: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val processing by viewModel.processing.collectAsState()
@@ -126,6 +145,11 @@ private fun PaymentSheetScreen(
     DismissKeyboardOnProcessing(processing)
 
     BottomSheetScaffold(
+        modifier = Modifier
+            .onGloballyPositioned {
+                contentHeight = with(density) { it.size.height.toDp() }
+            }
+            .fillMaxWidth(),
         topBar = {
             val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
@@ -140,14 +164,13 @@ private fun PaymentSheetScreen(
             )
         },
         content = content,
-        modifier = Modifier.onGloballyPositioned {
-            contentHeight = with(density) { it.size.height.toDp() }
-        },
         scrollState = scrollState,
+        hideWithoutDismissing = hide,
     )
 
     AnimatedVisibility(
-        visible = walletsProcessingState != null &&
+        visible = !hide &&
+            walletsProcessingState != null &&
             walletsProcessingState !is WalletsProcessingState.Idle,
         enter = fadeIn(),
         exit = fadeOut(),
