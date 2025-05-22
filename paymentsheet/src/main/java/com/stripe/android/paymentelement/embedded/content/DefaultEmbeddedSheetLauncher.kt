@@ -71,6 +71,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
+                //Happypath 2,2b Sadpath 2 shouldInvokeRowSelectionCallback !HasBeenConfirmed
+                rowSelectionImmediateActionHandler.prepareRowSelectionCallbackFromForm(result)
                 selectionHolder.set(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
