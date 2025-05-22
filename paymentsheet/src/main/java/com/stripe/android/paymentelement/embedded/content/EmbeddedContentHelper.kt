@@ -191,9 +191,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
             onSelectSavedPaymentMethod = {
-                // there is never a form for saved paymentMethods
                 val selection = PaymentSelection.Saved(it)
-                prepareRowSelectionCallbackSavedPaymentRow(selection) //HappyPath1 shouldInvokeSavedPaymentMethod true
+                prepareRowSelectionCallbackSavedPaymentRow(selection)
                 setSelection(selection)
             },
             walletsState = walletsState,
@@ -218,11 +217,11 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 }
             },
             linkRowClicked = { updatedSelection ->
-                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!) // HappyPath 1
+                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!)
                 setSelection(updatedSelection)
             },
             googlePayRowClicked = { updatedSelection ->
-                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!) // HappyPath 1
+                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!)
                 setSelection(updatedSelection)
             }
         )
@@ -258,7 +257,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
-        selectionHolder.set(paymentSelection) // Weird Paths when savedPMM, is covered by onFormFieldValuesChanged, savedPMSelected, updatePaymentSelection
+        selectionHolder.set(paymentSelection)
     }
 
     private fun prepareRowSelectionCallbackSavedPaymentRow(paymentSelection: PaymentSelection.Saved) {

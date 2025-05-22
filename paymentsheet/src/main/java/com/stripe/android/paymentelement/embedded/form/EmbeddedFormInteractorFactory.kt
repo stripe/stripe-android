@@ -41,7 +41,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set, // covered by FormResult
+            setSelection = embeddedSelectionHolder::set,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
