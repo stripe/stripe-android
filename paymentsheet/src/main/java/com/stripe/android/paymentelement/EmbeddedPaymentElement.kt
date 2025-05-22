@@ -112,7 +112,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Sets the current [paymentOption] to `null`.
      */
     fun clearPaymentOption() {
-        selectionHolder.set(null) // not click
+        selectionHolder.set(null)
     }
 
     /**
