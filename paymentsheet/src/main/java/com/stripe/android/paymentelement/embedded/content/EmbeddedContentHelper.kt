@@ -231,7 +231,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 val selection = PaymentSelection.Saved(it)
                 prepareRowSelectionCallbackSavedPaymentRow(selection) //HappyPath1 shouldInvokeSavedPaymentMethod true
                 setSelection(selection)
-                val paymentMethodID = it.id
             },
             walletsState = walletsState,
             canShowWalletsInline = true,
