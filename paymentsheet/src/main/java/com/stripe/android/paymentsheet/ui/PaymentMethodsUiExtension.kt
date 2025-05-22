@@ -210,7 +210,6 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
         usBankAccount?.last4
     )
     PaymentMethod.Type.Link -> {
-        // TODO(branding)
         if (canShowSublabel) {
             linkPaymentDetails?.label
         } else {
