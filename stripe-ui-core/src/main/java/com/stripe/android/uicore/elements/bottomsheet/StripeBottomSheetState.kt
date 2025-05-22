@@ -7,14 +7,10 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import com.stripe.android.uicore.BuildConfig
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlin.coroutines.cancellation.CancellationException
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -23,42 +19,30 @@ fun rememberStripeBottomSheetState(
     initialValue: ModalBottomSheetValue = ModalBottomSheetValue.Hidden,
     confirmValueChange: (ModalBottomSheetValue) -> Boolean = { true },
 ): StripeBottomSheetState {
-    val dismissalType = remember { mutableStateOf<StripeBottomSheetState.DismissalType?>(null) }
-
-    val wrappedConfirmValueChange: (ModalBottomSheetValue) -> Boolean = { value ->
-        confirmValueChange(value).also { confirmed ->
-            if (confirmed) {
-                dismissalType.value = StripeBottomSheetState.DismissalType.UserAction
-            }
-        }
-    }
-
     val modalBottomSheetState = rememberModalBottomSheetState(
         initialValue = initialValue,
-        confirmValueChange = wrappedConfirmValueChange,
+        confirmValueChange = confirmValueChange,
         skipHalfExpanded = true,
         animationSpec = tween(),
     )
 
     val keyboardHandler = rememberStripeBottomSheetKeyboardHandler()
 
-    val stripeBottomSheetState = remember {
+    return remember {
         StripeBottomSheetState(
             modalBottomSheetState = modalBottomSheetState,
             keyboardHandler = keyboardHandler,
-            dismissalType = dismissalType,
         )
     }
-
-    return stripeBottomSheetState
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class StripeBottomSheetState internal constructor(
     val modalBottomSheetState: ModalBottomSheetState,
     private val keyboardHandler: StripeBottomSheetKeyboardHandler,
-    private val dismissalType: MutableState<DismissalType?>,
 ) {
+
+    private var dismissalType: DismissalType? = null
 
     var skipHideAnimation: Boolean = false
 
@@ -74,9 +58,8 @@ class StripeBottomSheetState internal constructor(
     }
 
     suspend fun awaitDismissal(): DismissalType {
-        return snapshotFlow { dismissalType.value?.takeIf { !modalBottomSheetState.isVisible } }
-            .filterNotNull()
-            .first()
+        snapshotFlow { modalBottomSheetState.isVisible }.first { isVisible -> !isVisible }
+        return dismissalType ?: DismissalType.SwipedDownByUser
     }
 
     suspend fun hide() {
@@ -84,7 +67,7 @@ class StripeBottomSheetState internal constructor(
             return
         }
 
-        dismissalType.value = DismissalType.Programmatically
+        dismissalType = DismissalType.Programmatically
 
         // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
         // a CancellationException.
@@ -102,7 +85,7 @@ class StripeBottomSheetState internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class DismissalType {
         Programmatically,
-        UserAction,
+        SwipedDownByUser,
     }
 }
 

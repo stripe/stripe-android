@@ -40,7 +40,7 @@ fun StripeBottomSheetLayout(
         }
 
         val dismissalType = state.awaitDismissal()
-        if (dismissalType == DismissalType.UserAction) {
+        if (dismissalType == DismissalType.SwipedDownByUser) {
             onDismissed()
         }
     }
