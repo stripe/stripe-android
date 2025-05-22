@@ -118,20 +118,24 @@ internal class PaymentSheetPlaygroundActivity :
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
             }
-            val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
-                .externalPaymentMethodConfirmHandler(this)
-                .confirmCustomPaymentMethodCallback(this)
-                .createIntentCallback(viewModel::createIntentCallback)
-                .analyticEventCallback(viewModel::analyticCallback)
+            val paymentSheet = remember {
+                PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+                    .externalPaymentMethodConfirmHandler(this)
+                    .confirmCustomPaymentMethodCallback(this)
+                    .createIntentCallback(viewModel::createIntentCallback)
+                    .analyticEventCallback(viewModel::analyticCallback)
+            }
                 .build()
-            val flowController = PaymentSheet.FlowController.Builder(
-                viewModel::onPaymentSheetResult,
-                viewModel::onPaymentOptionSelected
-            )
-                .externalPaymentMethodConfirmHandler(this)
-                .confirmCustomPaymentMethodCallback(this)
-                .createIntentCallback(viewModel::createIntentCallback)
-                .analyticEventCallback(viewModel::analyticCallback)
+            val flowController = remember {
+                PaymentSheet.FlowController.Builder(
+                    viewModel::onPaymentSheetResult,
+                    viewModel::onPaymentOptionSelected
+                )
+                    .externalPaymentMethodConfirmHandler(this)
+                    .confirmCustomPaymentMethodCallback(this)
+                    .createIntentCallback(viewModel::createIntentCallback)
+                    .analyticEventCallback(viewModel::analyticCallback)
+            }
                 .build()
             val embeddedPaymentElementBuilder = remember {
                 EmbeddedPaymentElement.Builder(
