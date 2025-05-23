@@ -20,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
@@ -71,6 +72,7 @@ internal sealed class PaymentSelection : Parcelable {
     data class Link(
         val useLinkExpress: Boolean = false,
         val selectedPayment: LinkPaymentMethod? = null,
+        val shippingAddress: ConsumerShippingAddress? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean

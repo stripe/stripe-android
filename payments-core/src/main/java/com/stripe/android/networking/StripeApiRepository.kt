@@ -55,8 +55,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerShippingAddress
-import com.stripe.android.model.ConsumerShippingAddressesResponse
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -1518,7 +1517,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun listShippingAddresses(
         clientSecret: String,
         requestOptions: ApiRequest.Options
-    ): Result<ConsumerShippingAddressesResponse> {
+    ): Result<ConsumerShippingAddresses> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 listShippingAddresses,
