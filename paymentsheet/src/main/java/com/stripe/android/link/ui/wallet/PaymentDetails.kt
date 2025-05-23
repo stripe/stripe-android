@@ -28,13 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -123,48 +130,58 @@ internal fun PaymentDetailsListItem(
                     style = ErrorTextStyle.Small
                 )
             }
+        },
+        measurePolicy = object : MeasurePolicy {
+            override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): MeasureResult {
+                val componentConstraints = constraints.copy(minHeight = 0)
+
+                // Measure each component.
+                val radioButton = measurables[0].measure(componentConstraints)
+                val menuAndLoader = measurables[2].measure(componentConstraints)
+                val descriptionWidth = constraints.maxWidth - radioButton.width - menuAndLoader.width
+                val description = measurables[1].measure(
+                    componentConstraints.copy(
+                        minWidth = descriptionWidth,
+                        maxWidth = descriptionWidth,
+                    )
+                )
+
+                @Suppress("MagicNumber")
+                val errorText = measurables.getOrNull(3)?.measure(componentConstraints)
+
+                // Calculate heights.
+                val topRowHeight = maxOf(
+                    radioButton.height,
+                    description.height,
+                    menuAndLoader.height
+                )
+                val fullHeight = maxOf(
+                    constraints.minHeight,
+                    topRowHeight + (errorText?.height ?: 0)
+                )
+
+                return layout(constraints.maxWidth, fullHeight) {
+                    // Place top row.
+                    var x = 0
+                    radioButton.placeRelative(x, (topRowHeight - radioButton.height) / 2)
+                    x += radioButton.width
+                    description.placeRelative(x, (topRowHeight - description.height) / 2)
+                    x += description.width
+                    menuAndLoader.placeRelative(x, (topRowHeight - menuAndLoader.height) / 2)
+
+                    // Place error text start-aligned and below the description.
+                    errorText?.placeRelative(radioButton.width, topRowHeight)
+                }
+            }
+
+            override fun IntrinsicMeasureScope.minIntrinsicHeight(
+                measurables: List<IntrinsicMeasurable>,
+                width: Int
+            ): Int {
+                return measurables.maxOf { it.minIntrinsicHeight(width) }
+            }
         }
-    ) { measurable, constraints ->
-        val componentConstraints = constraints.copy(minHeight = 0)
-
-        // Measure each component.
-        val radioButton = measurable[0].measure(componentConstraints)
-        val menuAndLoader = measurable[2].measure(componentConstraints)
-        val descriptionWidth = constraints.maxWidth - radioButton.width - menuAndLoader.width
-        val description = measurable[1].measure(
-            componentConstraints.copy(
-                minWidth = descriptionWidth,
-                maxWidth = descriptionWidth,
-            )
-        )
-
-        @Suppress("MagicNumber")
-        val errorText = measurable.getOrNull(3)?.measure(componentConstraints)
-
-        // Calculate heights.
-        val topRowHeight = maxOf(
-            radioButton.height,
-            description.height,
-            menuAndLoader.height
-        )
-        val fullHeight = maxOf(
-            constraints.minHeight,
-            topRowHeight + (errorText?.height ?: 0)
-        )
-
-        layout(constraints.maxWidth, fullHeight) {
-            // Place top row.
-            var x = 0
-            radioButton.placeRelative(x, (topRowHeight - radioButton.height) / 2)
-            x += radioButton.width
-            description.placeRelative(x, (topRowHeight - description.height) / 2)
-            x += description.width
-            menuAndLoader.placeRelative(x, (topRowHeight - menuAndLoader.height) / 2)
-
-            // Place error text start-aligned and below the description.
-            errorText?.placeRelative(radioButton.width, topRowHeight)
-        }
-    }
+    )
 }
 
 @Preview(showBackground = true)

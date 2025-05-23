@@ -1,22 +1,22 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.foundation.layout.imeAnimationSource
+import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.unit.IntSize
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -31,7 +31,6 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.scrim
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -42,14 +41,14 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
+import com.stripe.android.link.utils.LinkScreenTransition
 
 @SuppressWarnings("LongMethod")
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun LinkContent(
+    modifier: Modifier,
     navController: NavHostController,
     appBarState: LinkAppBarState,
-    sheetState: ModalBottomSheetState,
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     handleViewAction: (LinkAction) -> Unit,
@@ -64,61 +63,43 @@ internal fun LinkContent(
 ) {
     DefaultLinkTheme {
         Surface(
+            modifier = modifier,
             color = LinkTheme.colors.surfacePrimary,
         ) {
-            ModalBottomSheetLayout(
-                sheetContent = bottomSheetContent ?: {
-                    // Must have some content at startup or bottom sheet crashes when
-                    // calculating its initial size
-                    Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
-                },
-                modifier = Modifier.fillMaxHeight(),
-                sheetState = sheetState,
-                sheetShape = LinkTheme.shapes.large.copy(
-                    bottomStart = CornerSize(0.dp),
-                    bottomEnd = CornerSize(0.dp)
-                ),
-                sheetBackgroundColor = LinkTheme.colors.surfacePrimary,
-                scrimColor = LinkTheme.colors.scrim
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    BackHandler {
-                        if (bottomSheetContent != null) {
-                            onUpdateSheetContent(null)
-                        } else if (navController.popBackStack().not()) {
-                            handleViewAction(LinkAction.BackPressed)
-                        }
+            Column(modifier = Modifier.fillMaxWidth()) {
+                BackHandler {
+                    if (bottomSheetContent != null) {
+                        onUpdateSheetContent(null)
+                    } else if (navController.popBackStack().not()) {
+                        handleViewAction(LinkAction.BackPressed)
                     }
-
-                    LinkAppBar(
-                        state = appBarState,
-                        onBackPressed = onBackPressed,
-                        showBottomSheetContent = onUpdateSheetContent,
-                        onLogoutClicked = {
-                            handleViewAction(LinkAction.LogoutClicked)
-                        }
-                    )
-
-                    Screens(
-                        initialDestination = initialDestination,
-                        navController = navController,
-                        goBack = goBack,
-                        moveToWeb = moveToWeb,
-                        navigateAndClearStack = { screen ->
-                            navigate(screen, true)
-                        },
-                        dismissWithResult = dismissWithResult,
-                        getLinkAccount = getLinkAccount,
-                        showBottomSheetContent = onUpdateSheetContent,
-                        changeEmail = changeEmail,
-                        hideBottomSheetContent = {
-                            onUpdateSheetContent(null)
-                        }
-                    )
                 }
+
+                LinkAppBar(
+                    state = appBarState,
+                    onBackPressed = onBackPressed,
+                    showBottomSheetContent = onUpdateSheetContent,
+                    onLogoutClicked = {
+                        handleViewAction(LinkAction.LogoutClicked)
+                    }
+                )
+
+                Screens(
+                    initialDestination = initialDestination,
+                    navController = navController,
+                    goBack = goBack,
+                    moveToWeb = moveToWeb,
+                    navigateAndClearStack = { screen ->
+                        navigate(screen, true)
+                    },
+                    dismissWithResult = dismissWithResult,
+                    getLinkAccount = getLinkAccount,
+                    showBottomSheetContent = onUpdateSheetContent,
+                    changeEmail = changeEmail,
+                    hideBottomSheetContent = {
+                        onUpdateSheetContent(null)
+                    }
+                )
             }
         }
     }
@@ -137,20 +118,23 @@ private fun Screens(
     changeEmail: () -> Unit,
     initialDestination: LinkScreen,
 ) {
-    NavHost(
-        modifier = Modifier.fillMaxSize(),
+    LinkNavHost(
         navController = navController,
-        startDestination = initialDestination.route,
+        initialDestination = initialDestination,
     ) {
         composable(LinkScreen.Loading.route) {
-            Loader()
+            LinkLoadingScreen()
         }
 
         composable(LinkScreen.SignUp.route) {
-            SignUpRoute(
-                navigateAndClearStack = navigateAndClearStack,
-                moveToWeb = moveToWeb
-            )
+            // Keep height fixed to reduce animations caused by IME toggling on both
+            // this screen and Verification screen.
+            MinScreenHeightBox {
+                SignUpRoute(
+                    navigateAndClearStack = navigateAndClearStack,
+                    moveToWeb = moveToWeb
+                )
+            }
         }
 
         composable(
@@ -164,14 +148,18 @@ private fun Screens(
         }
 
         composable(LinkScreen.Verification.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
-            VerificationRoute(
-                linkAccount = linkAccount,
-                changeEmail = changeEmail,
-                navigateAndClearStack = navigateAndClearStack,
-                goBack = goBack
-            )
+            // Keep height fixed to reduce animations caused by IME toggling on both
+            // this screen and SignUp screen.
+            MinScreenHeightBox {
+                val linkAccount = getLinkAccount()
+                    ?: return@MinScreenHeightBox dismissWithResult(noLinkAccountResult())
+                VerificationRoute(
+                    linkAccount = linkAccount,
+                    changeEmail = changeEmail,
+                    navigateAndClearStack = navigateAndClearStack,
+                    goBack = goBack
+                )
+            }
         }
 
         composable(LinkScreen.Wallet.route) {
@@ -195,6 +183,42 @@ private fun Screens(
                 goBack = goBack
             )
         }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LinkNavHost(
+    navController: NavHostController,
+    initialDestination: LinkScreen,
+    modifier: Modifier = Modifier,
+    builder: NavGraphBuilder.() -> Unit
+) {
+    // True if the IME (soft keyboard) is animating.
+    val isImeAnimating = WindowInsets.imeAnimationSource != WindowInsets.imeAnimationTarget
+
+    // Cache the current screen size so we can size `LinkLoadingScreen` to match, reducing
+    // screen size animation jumps.
+    var screenSize by remember { mutableStateOf<IntSize?>(null) }
+    ProvideLinkScreenSize(screenSize) {
+        NavHost(
+            modifier = modifier.onSizeChanged { screenSize = it },
+            navController = navController,
+            startDestination = initialDestination.route,
+            enterTransition = { LinkScreenTransition.targetContentEnter },
+            exitTransition = { LinkScreenTransition.initialContentExit },
+            // Workaround a race condition where the route changes while the soft keyboard is
+            // animating in/out. Imagine navigating from screen A to B, where both screens are
+            // supposed to be equal height. If the soft keyboard closes immediately after the
+            // screen transition starts, the target height of screen B, which is locked in at
+            // the start of the animation, will be too short.
+            sizeTransform = if (isImeAnimating) {
+                null
+            } else {
+                { LinkScreenTransition.sizeTransform }
+            },
+            builder = builder,
+        )
     }
 }
 
@@ -290,18 +314,6 @@ private fun WalletRoute(
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent
     )
-}
-
-@Composable
-internal fun Loader() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        LinkSpinner(
-            modifier = Modifier.size(48.dp)
-        )
-    }
 }
 
 private fun noLinkAccountResult(): LinkActivityResult {
