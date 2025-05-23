@@ -167,7 +167,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionResult.Succeeded(
                         paymentSelection = Link(
                             linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
-                            selectedPayment = result.selectedPayment
+                            selectedPayment = result.selectedPayment,
+                            shippingAddress = result.shippingAddress,
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
