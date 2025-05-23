@@ -85,7 +85,7 @@ internal class ManageActivity : AppCompatActivity() {
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = {
-                        setManageResult()
+                        setManageResult(false)
                         finish()
                     }
                 ) {
@@ -96,7 +96,7 @@ internal class ManageActivity : AppCompatActivity() {
                         }
                         LaunchedEffect(screen) {
                             manageNavigator.result.collect { result ->
-                                setManageResult()
+                                setManageResult(result != null)
                                 finish()
                                 hasResult = true
                             }
@@ -157,10 +157,11 @@ internal class ManageActivity : AppCompatActivity() {
         fadeOut()
     }
 
-    private fun setManageResult() {
+    private fun setManageResult(shouldInvokeSelectionCallback: Boolean) {
         val result = ManageResult.Complete(
             customerState = requireNotNull(customerStateHolder.customer.value),
             selection = selectionHolder.selection.value,
+            shouldInvokeSelectionCallback = shouldInvokeSelectionCallback
         )
         setResult(
             RESULT_OK,

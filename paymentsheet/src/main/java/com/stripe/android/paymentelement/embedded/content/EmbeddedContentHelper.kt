@@ -10,12 +10,14 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -63,6 +65,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -161,7 +164,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             formTypeForCode = { code ->
                 formHelper.formTypeForCode(code)
             },
-            onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
+            onFormFieldValuesChanged = { formFieldValues, selectedPaymentMethodCode ->
+                prepareRowSelectionCallbackNonFormRows(selectedPaymentMethodCode)
+                formHelper.onFormFieldValuesChanged(formFieldValues, selectedPaymentMethodCode)
+            },
             transitionToManageScreen = {
                 sheetLauncher?.launchManage(
                     paymentMethodMetadata = paymentMethodMetadata,
@@ -185,7 +191,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
             onSelectSavedPaymentMethod = {
-                setSelection(PaymentSelection.Saved(it))
+                val selection = PaymentSelection.Saved(it)
+                prepareRowSelectionCallbackSavedPaymentRow(selection)
+                setSelection(selection)
             },
             walletsState = walletsState,
             canShowWalletsInline = true,
@@ -207,6 +215,14 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 } else {
                     true
                 }
+            },
+            linkRowClicked = { updatedSelection ->
+                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!)
+                setSelection(updatedSelection)
+            },
+            googlePayRowClicked = { updatedSelection ->
+                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!)
+                setSelection(updatedSelection)
             }
         )
     }
@@ -242,6 +258,14 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
         selectionHolder.set(paymentSelection)
+    }
+
+    private fun prepareRowSelectionCallbackSavedPaymentRow(paymentSelection: PaymentSelection.Saved) {
+        rowSelectionImmediateActionHandler.prepareRowSelectionCallbackSavedPaymentRow(paymentSelection)
+    }
+
+    private fun prepareRowSelectionCallbackNonFormRows(selectionCode: String) {
+        rowSelectionImmediateActionHandler.prepareRowSelectionCallbackNonFormRows(selectionCode)
     }
 
     @Parcelize

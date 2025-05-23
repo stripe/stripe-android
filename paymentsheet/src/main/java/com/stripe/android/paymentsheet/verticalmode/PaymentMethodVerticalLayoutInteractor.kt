@@ -105,6 +105,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
+    private val linkRowClicked: (PaymentSelection.Link) -> Unit = updateSelection,
+    private val googlePayRowClicked: (PaymentSelection.GooglePay) -> Unit = updateSelection,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -336,7 +338,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     iconRequiresTinting = false,
                     subtitle = PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString,
                     onClick = {
-                        updateSelection(PaymentSelection.Link())
+                        linkRowClicked(PaymentSelection.Link())
                     },
                 )
             }
@@ -351,7 +353,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     iconRequiresTinting = false,
                     subtitle = null,
                     onClick = {
-                        updateSelection(PaymentSelection.GooglePay)
+                        googlePayRowClicked(PaymentSelection.GooglePay)
                     },
                 )
             }
