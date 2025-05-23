@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerShippingAddressesResponse
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
@@ -124,6 +125,14 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails>
+
+    /**
+     * Fetch all shipping addresses for the signed in consumer.
+     */
+    suspend fun listShippingAddresses(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerShippingAddressesResponse>
 
     /**
      * Delete the payment method from the consumer account.
