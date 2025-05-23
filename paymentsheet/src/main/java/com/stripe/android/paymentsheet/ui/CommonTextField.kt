@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
@@ -10,9 +11,11 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 internal fun CommonTextField(
@@ -28,8 +31,9 @@ internal fun CommonTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
-    colors: TextFieldColors = TextFieldColors(
+    colors: TextFieldColors = commonTextFieldColors(
         shouldShowError = shouldShowError,
+        enabled = enabled
     ),
 ) {
     TextField(
@@ -58,5 +62,29 @@ private fun Label(
     Text(
         text = text,
         style = MaterialTheme.typography.subtitle1
+    )
+}
+
+@Composable
+private fun disabledBackgroundColor(): Color {
+    return if (isSystemInDarkTheme()) {
+        Color.White.copy(alpha = 0.04f)
+    } else {
+        Color.Black.copy(alpha = 0.04f)
+    }
+}
+
+@Composable
+internal fun commonTextFieldColors(
+    shouldShowError: Boolean,
+    enabled: Boolean
+): TextFieldColors {
+    return TextFieldColors(
+        shouldShowError = shouldShowError,
+        backgroundColor = if (enabled) {
+            MaterialTheme.stripeColors.component
+        } else {
+            disabledBackgroundColor()
+        }
     )
 }
