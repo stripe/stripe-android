@@ -6,19 +6,19 @@ import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerShippingAddress
-import com.stripe.android.model.ConsumerShippingAddressesResponse
+import com.stripe.android.model.ConsumerShippingAddresses
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object ConsumerShippingAddressesParser : ModelJsonParser<ConsumerShippingAddressesResponse> {
+object ConsumerShippingAddressesParser : ModelJsonParser<ConsumerShippingAddresses> {
 
-    override fun parse(json: JSONObject): ConsumerShippingAddressesResponse? {
+    override fun parse(json: JSONObject): ConsumerShippingAddresses? {
         val shippingAddresses = json.optJSONArray("shipping_addresses") ?: return null
         val addresses = (0 until shippingAddresses.length()).mapNotNull { index ->
             val jsonObject = shippingAddresses.getJSONObject(index)
             parseShippingAddress(jsonObject)
         }
-        return ConsumerShippingAddressesResponse(addresses)
+        return ConsumerShippingAddresses(addresses)
     }
 
     private fun parseShippingAddress(json: JSONObject): ConsumerShippingAddress? {

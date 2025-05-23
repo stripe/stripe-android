@@ -16,8 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerShippingAddress
-import com.stripe.android.model.ConsumerShippingAddressesResponse
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
@@ -333,7 +332,7 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun listShippingAddresses(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
-    ): Result<ConsumerShippingAddressesResponse> {
+    ): Result<ConsumerShippingAddresses> {
         return stripeRepository.listShippingAddresses(
             clientSecret = consumerSessionClientSecret,
             requestOptions = consumerPublishableKey?.let {

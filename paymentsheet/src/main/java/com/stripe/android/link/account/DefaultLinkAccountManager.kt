@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -49,6 +50,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     private val _consumerPaymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
+
+    override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
     /**
      * The publishable key for the signed in Link account.
@@ -346,6 +349,15 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun listShippingAddresses(): Result<ConsumerShippingAddresses> {
+        val clientSecret = linkAccountHolder.linkAccount.value?.clientSecret
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.listShippingAddresses(
+            consumerSessionClientSecret = clientSecret,
+            consumerPublishableKey = consumerPublishableKey,
+        )
+    }
+
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
         val clientSecret = linkAccountHolder.linkAccount.value?.clientSecret
             ?: return Result.failure(NoLinkAccountFoundException())
@@ -395,6 +407,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 _consumerPaymentDetails.value = null
             }
             consumerPublishableKey = null
+            cachedShippingAddresses = null
             null
         }
     }

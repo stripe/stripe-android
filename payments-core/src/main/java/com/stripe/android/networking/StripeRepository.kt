@@ -13,7 +13,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.ConsumerShippingAddressesResponse
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -416,7 +416,7 @@ interface StripeRepository {
     suspend fun listShippingAddresses(
         clientSecret: String,
         requestOptions: ApiRequest.Options
-    ): Result<ConsumerShippingAddressesResponse>
+    ): Result<ConsumerShippingAddresses>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun deletePaymentDetails(

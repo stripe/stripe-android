@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
-data class ConsumerShippingAddressesResponse(
+data class ConsumerShippingAddresses(
     val addresses: List<ConsumerShippingAddress>,
 ) : StripeModel
 

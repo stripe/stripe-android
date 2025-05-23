@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -27,6 +28,11 @@ internal interface LinkAccountManager {
      * [updatePaymentDetails] calls will refresh the edited payment details on the list.
      */
     val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?>
+
+    /**
+     * Cached shipping addresses for the current Link account.
+     */
+    var cachedShippingAddresses: ConsumerShippingAddresses?
 
     /**
      * Retrieves the Link account associated with the email if it exists.
@@ -118,6 +124,11 @@ internal interface LinkAccountManager {
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails>
+
+    /**
+     * Fetch all shipping addresses for the signed in consumer.
+     */
+    suspend fun listShippingAddresses(): Result<ConsumerShippingAddresses>
 
     /**
      * Delete the payment method from the signed in consumer account.
