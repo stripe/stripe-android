@@ -156,12 +156,7 @@ internal fun getLinkIcon(
     iconOnly: Boolean = false,
 ): Int {
     if (iconOnly) {
-        return getOverridableIcon(
-            showNightIcon = showNightIcon,
-            systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_arrow,
-            nightIcon = R.drawable.stripe_ic_paymentsheet_link_arrow,
-            dayIcon = R.drawable.stripe_ic_paymentsheet_link_arrow,
-        )
+        return R.drawable.stripe_ic_paymentsheet_link_arrow
     }
 
     return getOverridableIcon(
