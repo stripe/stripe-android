@@ -89,7 +89,6 @@ internal fun NewPaymentMethodRowButton(
         title = title,
         subtitle = subtitle,
         promoText = promoText,
-        showLinkIcon = false,
         onClick = onClick,
         modifier = modifier,
         style = rowStyle,

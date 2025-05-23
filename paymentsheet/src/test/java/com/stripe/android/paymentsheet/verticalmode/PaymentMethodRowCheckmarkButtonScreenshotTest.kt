@@ -129,13 +129,6 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         )
     }
 
-    @Test
-    fun testLinkPaymentMethod() {
-        testPaymentMethodRowButton_Checkmark(
-            showLinkIcon = true,
-        )
-    }
-
     private fun testPaymentMethodRowButton_Checkmark(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
@@ -148,7 +141,6 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
-        showLinkIcon: Boolean = false,
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -159,7 +151,6 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            showLinkIcon = showLinkIcon,
             rowStyle = rowStyle,
             paparazziRule = paparazziRule,
         )

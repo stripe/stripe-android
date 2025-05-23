@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.ui
 import androidx.annotation.DrawableRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.wallet.label
+import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.LinkPaymentDetails
@@ -24,20 +26,7 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
         }
         PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
         PaymentMethod.Type.USBankAccount -> TransformToBankIcon(usBankAccount?.bankName)
-        PaymentMethod.Type.Link -> {
-            when (val linkDetails = linkPaymentDetails) {
-                is LinkPaymentDetails.BankAccount -> {
-                    TransformToBankIcon(linkDetails.bankName)
-                }
-                is LinkPaymentDetails.Card -> {
-                    linkDetails.getSavedPaymentMethodIcon(
-                        forVerticalMode = forVerticalMode,
-                        showNightIcon = showNightIcon
-                    )
-                }
-                null -> null
-            }
-        }
+        PaymentMethod.Type.Link -> getLinkIcon(showNightIcon = showNightIcon, iconOnly = forVerticalMode)
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
 }
@@ -53,14 +42,6 @@ internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
         Unknown
     }
 
-    return brand.getSavedPaymentMethodIcon(forVerticalMode, showNightIcon)
-}
-
-@DrawableRes
-internal fun LinkPaymentDetails.Card.getSavedPaymentMethodIcon(
-    forVerticalMode: Boolean = false,
-    showNightIcon: Boolean? = null,
-): Int {
     return brand.getSavedPaymentMethodIcon(forVerticalMode, showNightIcon)
 }
 
@@ -170,7 +151,14 @@ private fun CardBrand.getDayIcon(): Int {
 }
 
 @DrawableRes
-internal fun getLinkIcon(showNightIcon: Boolean? = null): Int {
+internal fun getLinkIcon(
+    showNightIcon: Boolean? = null,
+    iconOnly: Boolean = false,
+): Int {
+    if (iconOnly) {
+        return R.drawable.stripe_ic_paymentsheet_link_arrow
+    }
+
     return getOverridableIcon(
         showNightIcon = showNightIcon,
         systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
@@ -206,7 +194,7 @@ private fun getOverridableIcon(
     }
 }
 
-internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
+internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> createCardLabel(card?.last4)
     PaymentMethod.Type.SepaDebit -> resolvableString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
@@ -217,13 +205,10 @@ internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
         usBankAccount?.last4
     )
     PaymentMethod.Type.Link -> {
-        when (val linkDetails = linkPaymentDetails) {
-            is LinkPaymentDetails.BankAccount -> resolvableString(
-                R.string.stripe_paymentsheet_bank_account_last_4,
-                linkDetails.last4
-            )
-            is LinkPaymentDetails.Card -> createCardLabel(linkDetails.last4)
-            null -> null
+        if (canShowSublabel) {
+            linkPaymentDetails?.label
+        } else {
+            linkPaymentDetails?.sublabel
         }
     }
     else -> null
@@ -231,7 +216,12 @@ internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {
 
 internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
     PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_paymentsheet_bank
-    PaymentMethod.Type.Link -> R.drawable.stripe_ic_paymentsheet_link_arrow
+    PaymentMethod.Type.Link -> {
+        when (linkPaymentDetails) {
+            is LinkPaymentDetails.BankAccount -> R.drawable.stripe_ic_paymentsheet_bank
+            is LinkPaymentDetails.Card, null -> null
+        }
+    }
     else -> null
 }
 

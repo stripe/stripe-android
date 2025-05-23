@@ -10,10 +10,12 @@ sealed interface LinkPaymentDetails : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Card(
+        val nickname: String?,
         val expMonth: Int,
         val expYear: Int,
         val last4: String,
         val brand: CardBrand,
+        val funding: String,
     ) : LinkPaymentDetails
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
