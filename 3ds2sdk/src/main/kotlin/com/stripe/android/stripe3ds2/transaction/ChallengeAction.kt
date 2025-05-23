@@ -7,7 +7,7 @@ internal sealed class ChallengeAction : Parcelable {
     @Parcelize
     data class NativeForm(
         internal val userEntry: String,
-        internal val whitelistingValue: Boolean
+        internal val whitelistingValue: Boolean?
     ) : ChallengeAction()
 
     @Parcelize
@@ -17,7 +17,7 @@ internal sealed class ChallengeAction : Parcelable {
 
     @Parcelize
     data class Oob(
-        internal val whitelistingValue: Boolean
+        internal val whitelistingValue: Boolean?
     ) : ChallengeAction()
 
     @Parcelize

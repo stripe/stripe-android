@@ -102,10 +102,16 @@ internal class ChallengeFragment(
 
     private val challengeAction: ChallengeAction
         get() {
+            val whitelistingSelection = if (cresData.whitelistingInfoText.isNullOrEmpty()) {
+                null
+            } else {
+                challengeZoneView.whitelistingSelection
+            }
+
             return when (cresData.uiType) {
-                UiType.OutOfBand -> ChallengeAction.Oob(challengeZoneView.whitelistingSelection)
+                UiType.OutOfBand -> ChallengeAction.Oob(whitelistingSelection)
                 UiType.Html -> ChallengeAction.HtmlForm(userEntry)
-                else -> ChallengeAction.NativeForm(userEntry, challengeZoneView.whitelistingSelection)
+                else -> ChallengeAction.NativeForm(userEntry, whitelistingSelection)
             }
         }
 
