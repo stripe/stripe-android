@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.PaymentMethod
@@ -15,6 +16,7 @@ internal sealed class LinkActivityResult : Parcelable {
         val linkAccountUpdate: LinkAccountUpdate,
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
+        val mandate: ResolvableString? = null,
     ) : LinkActivityResult()
 
     /**

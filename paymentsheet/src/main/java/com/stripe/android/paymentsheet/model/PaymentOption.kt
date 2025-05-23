@@ -31,6 +31,12 @@ data class PaymentOption internal constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val shippingAddress: AddressDetails?,
 
+    /**
+     * The mandate that might need to be displayed for the payment option.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val mandate: String?,
+
     private val imageLoader: suspend () -> Drawable,
 ) {
     @Deprecated("Not intended for public use.")
@@ -42,6 +48,7 @@ data class PaymentOption internal constructor(
         drawableResourceId = drawableResourceId,
         label = label,
         shippingAddress = null,
+        mandate = null,
         imageLoader = errorImageLoader,
     )
 
