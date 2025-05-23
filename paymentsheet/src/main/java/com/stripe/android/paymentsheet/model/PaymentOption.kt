@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -25,6 +26,7 @@ data class PaymentOption internal constructor(
      */
     val label: String,
     private val _shippingDetails: AddressDetails?,
+    private val _mandateText: AnnotatedString?,
 
     private val imageLoader: suspend () -> Drawable,
 ) {
@@ -36,6 +38,13 @@ data class PaymentOption internal constructor(
     val shippingDetails: AddressDetails?
         get() = _shippingDetails
 
+    /**
+     * A mandate that might need to be displayed for the payment option.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val mandateText: AnnotatedString?
+        get() = _mandateText
+
     @Deprecated("Not intended for public use.")
     constructor(
         @DrawableRes
@@ -45,6 +54,7 @@ data class PaymentOption internal constructor(
         drawableResourceId = drawableResourceId,
         label = label,
         _shippingDetails = null,
+        _mandateText = null,
         imageLoader = errorImageLoader,
     )
 

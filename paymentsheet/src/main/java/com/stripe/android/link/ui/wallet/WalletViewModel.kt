@@ -245,6 +245,7 @@ internal class WalletViewModel @Inject constructor(
                             collectedCvc = cvc
                         ),
                         shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
+                        mandate = uiState.value.mandate,
                     )
                 )
             }

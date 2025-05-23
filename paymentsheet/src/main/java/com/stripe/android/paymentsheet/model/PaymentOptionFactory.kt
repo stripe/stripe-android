@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import javax.inject.Inject
@@ -13,7 +15,8 @@ internal class PaymentOptionFactory @Inject constructor(
         return PaymentOption(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
-            _shippingDetails = selection.shippingAddress,
+            _shippingDetails = selection.shippingDetails,
+            _mandateText = selection.mandate?.resolve(context)?.let { AnnotatedString(it) },
             imageLoader = {
                 iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
@@ -25,7 +28,7 @@ internal class PaymentOptionFactory @Inject constructor(
     }
 }
 
-private val PaymentSelection.shippingAddress: AddressDetails?
+private val PaymentSelection.shippingDetails: AddressDetails?
     get() = when (this) {
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,
@@ -57,3 +60,20 @@ private fun PaymentSelection.Link.makeAddressDetails(): AddressDetails? {
         isCheckboxSelected = null,
     )
 }
+
+private val PaymentSelection.mandate: ResolvableString?
+    get() = when (this) {
+        is PaymentSelection.CustomPaymentMethod,
+        is PaymentSelection.ExternalPaymentMethod,
+        is PaymentSelection.GooglePay,
+        is PaymentSelection.New.Card,
+        is PaymentSelection.New.GenericPaymentMethod,
+        is PaymentSelection.New.LinkInline,
+        is PaymentSelection.New.USBankAccount,
+        is PaymentSelection.Saved -> {
+            null
+        }
+        is PaymentSelection.Link -> {
+            mandate
+        }
+    }

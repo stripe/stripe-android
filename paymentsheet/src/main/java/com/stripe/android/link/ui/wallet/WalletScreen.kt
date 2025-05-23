@@ -566,7 +566,7 @@ private fun AddPaymentMethodRow(
 @Composable
 private fun LinkMandate(text: String) {
     Html(
-        html = text.replaceHyperlinks(),
+        html = text,
         color = LinkTheme.colors.textTertiary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
@@ -688,11 +688,6 @@ private fun AlertMessage(
         }
     )
 }
-
-private fun String.replaceHyperlinks() = this.replace(
-    "<terms>",
-    "<a href=\"https://link.com/terms/ach-authorization\">"
-).replace("</terms>", "</a>")
 
 private const val CHEVRON_ICON_ROTATION = 180f
 internal const val WALLET_LOADER_TAG = "wallet_screen_loader_tag"

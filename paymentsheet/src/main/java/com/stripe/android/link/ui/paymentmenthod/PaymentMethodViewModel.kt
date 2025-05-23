@@ -23,6 +23,8 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
+import com.stripe.android.link.ui.wallet.isSetupForFutureUsage
+import com.stripe.android.link.ui.wallet.makeMandateText
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -151,6 +153,10 @@ internal class PaymentMethodViewModel @Inject constructor(
                         collectedCvc = cvc,
                     ),
                     shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
+                    mandate = paymentDetails.paymentDetails.makeMandateText(
+                        isSettingUp = configuration.stripeIntent.isSetupForFutureUsage(configuration.passthroughModeEnabled),
+                        merchantName = configuration.merchantName,
+                    ),
                 )
             )
         }
