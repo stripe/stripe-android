@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import javax.inject.Inject
@@ -14,6 +15,7 @@ internal class PaymentOptionFactory @Inject constructor(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
             shippingAddress = selection.shippingAddress,
+            mandate = selection.mandate?.resolve(context),
             imageLoader = {
                 iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
@@ -57,3 +59,20 @@ private fun PaymentSelection.Link.makeAddressDetails(): AddressDetails? {
         isCheckboxSelected = null,
     )
 }
+
+private val PaymentSelection.mandate: ResolvableString?
+    get() = when (this) {
+        is PaymentSelection.CustomPaymentMethod,
+        is PaymentSelection.ExternalPaymentMethod,
+        is PaymentSelection.GooglePay,
+        is PaymentSelection.New.Card,
+        is PaymentSelection.New.GenericPaymentMethod,
+        is PaymentSelection.New.LinkInline,
+        is PaymentSelection.New.USBankAccount,
+        is PaymentSelection.Saved -> {
+            null
+        }
+        is PaymentSelection.Link -> {
+            mandate
+        }
+    }

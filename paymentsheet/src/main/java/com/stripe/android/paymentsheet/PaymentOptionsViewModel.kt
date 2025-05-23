@@ -169,6 +169,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                             linkAccount = (result.linkAccountUpdate as? LinkAccountUpdate.Value)?.linkAccount,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
+                            mandate = result.mandate,
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
