@@ -34,6 +34,8 @@
   <string name="stripe_link_card_type_prepaid">Predplatená platba %1$s</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">Karta %1$s</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Prihlásiť sa alebo zaregistrovať</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Súhlasiť a pokračovať</string>
   <!-- Title for the Link signup screen -->

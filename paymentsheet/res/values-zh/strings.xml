@@ -34,6 +34,8 @@
   <string name="stripe_link_card_type_prepaid">%1$s 预付卡</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s 银行卡</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">登录或注册</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">同意并继续</string>
   <!-- Title for the Link signup screen -->
