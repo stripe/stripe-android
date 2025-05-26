@@ -96,7 +96,7 @@ internal class ManageActivity : AppCompatActivity() {
                         }
                         LaunchedEffect(screen) {
                             manageNavigator.result.collect { result ->
-                                setManageResult(result != null)
+                                setManageResult(result == true)
                                 finish()
                                 hasResult = true
                             }
