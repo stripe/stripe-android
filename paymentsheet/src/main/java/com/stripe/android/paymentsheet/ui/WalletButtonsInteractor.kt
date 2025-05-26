@@ -87,38 +87,24 @@ internal class DefaultWalletButtonsInteractor(
         arguments,
         confirmationHandler.state,
     ) { arguments, confirmationState ->
-        val walletButtons = mutableListOf<WalletButtonsInteractor.WalletButton>()
-
-        arguments?.run {
-            arguments.paymentMethodMetadata.availableWalletTypes.forEach { wallet ->
+        val walletButtons = arguments?.run {
+            arguments.paymentMethodMetadata.availableWallets.map { wallet ->
                 when (wallet) {
-                    WalletType.Link -> {
-                        if (isLinkEnabled) {
-                            walletButtons.add(
-                                WalletButtonsInteractor.WalletButton.Link(
-                                    email = linkEmail,
-                                )
-                            )
-                        }
-                    }
-                    WalletType.GooglePay -> {
-                        if (arguments.paymentMethodMetadata.isGooglePayReady) {
-                            walletButtons.add(
-                                WalletButtonsInteractor.WalletButton.GooglePay(
-                                    allowCreditCards = true,
-                                    buttonType = configuration.googlePay?.buttonType,
-                                    cardBrandFilter = PaymentSheetCardBrandFilter(
-                                        cardBrandAcceptance = configuration.cardBrandAcceptance,
-                                    ),
-                                    billingDetailsCollectionConfiguration = configuration
-                                        .billingDetailsCollectionConfiguration,
-                                )
-                            )
-                        }
-                    }
+                    WalletType.GooglePay -> WalletButtonsInteractor.WalletButton.GooglePay(
+                        allowCreditCards = true,
+                        buttonType = configuration.googlePay?.buttonType,
+                        cardBrandFilter = PaymentSheetCardBrandFilter(
+                            cardBrandAcceptance = configuration.cardBrandAcceptance,
+                        ),
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
+                    )
+                    WalletType.Link -> WalletButtonsInteractor.WalletButton.Link(
+                        email = linkEmail,
+                    )
                 }
             }
-        }
+        } ?: emptyList()
 
         WalletButtonsInteractor.State(
             walletButtons = walletButtons,
@@ -167,7 +153,6 @@ internal class DefaultWalletButtonsInteractor(
     }
 
     data class Arguments(
-        val isLinkEnabled: Boolean,
         val linkEmail: String?,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val configuration: CommonConfiguration,
@@ -184,14 +169,12 @@ internal class DefaultWalletButtonsInteractor(
             return DefaultWalletButtonsInteractor(
                 errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
                 arguments = combineAsStateFlow(
-                    linkHandler.isLinkEnabled,
                     linkHandler.linkConfigurationCoordinator.emailFlow,
                     flowControllerViewModel.stateFlow,
                     flowControllerViewModel.configureRequest,
-                ) { isLinkEnabled, linkEmail, flowControllerState, configureRequest ->
+                ) { linkEmail, flowControllerState, configureRequest ->
                     if (flowControllerState != null && configureRequest != null) {
                         Arguments(
-                            isLinkEnabled = isLinkEnabled == true,
                             linkEmail = linkEmail,
                             configuration = flowControllerState.paymentSheetState.config,
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,

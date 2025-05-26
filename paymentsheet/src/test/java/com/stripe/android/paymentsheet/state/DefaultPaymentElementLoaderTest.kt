@@ -21,7 +21,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -150,7 +149,7 @@ internal class DefaultPaymentElementLoaderTest {
                     sharedDataSpecs = emptyList(),
                     isGooglePayReady = true,
                     linkMode = null,
-                    availableWalletTypes = emptyList(),
+                    availableWallets = emptyList(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
                     financialConnectionsAvailability = FinancialConnectionsAvailability.Full,

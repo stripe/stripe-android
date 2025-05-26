@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -43,6 +44,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFails
 import com.stripe.android.core.R as CoreR
@@ -1077,7 +1079,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
-            availableWalletTypes = listOf(WalletType.Link),
+            availableWallets = emptyList(),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(
@@ -1168,7 +1170,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
-            availableWalletTypes = listOf(WalletType.Link),
+            availableWallets = emptyList(),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
@@ -1715,31 +1717,65 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `availableWalletTypes contains all wallet types`() = availableWalletTypesTest(
+    fun `availableWallets contains all wallet types`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "card"),
+        isGooglePayReady = true,
+        hasLinkState = true,
         expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
     )
 
     @Test
-    fun `availableWalletTypes contains all wallet types in order`() = availableWalletTypesTest(
+    fun `availableWallets contains all wallet types in order`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("link", "card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = true,
         expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
-    fun `availableWalletTypes contains only Google Pay`() = availableWalletTypesTest(
+    fun `availableWallets contains only Google Pay`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = false,
         expectedWalletTypes = listOf(WalletType.GooglePay),
     )
 
     @Test
-    fun `availableWalletTypes contains only Link`() = availableWalletTypesTest(
+    fun `availableWallets does not contain Google Pay if not ready`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = false,
+        hasLinkState = false,
+        expectedWalletTypes = emptyList(),
+    )
+
+    @Test
+    fun `availableWallets contains only Link`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "link"),
+        isGooglePayReady = false,
+        hasLinkState = true,
         expectedWalletTypes = listOf(WalletType.Link),
     )
 
-    private fun availableWalletTypesTest(
+    @Test
+    fun `availableWallets contains Link if state is available but not in types`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = false,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets order respected if Link available but not in types`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+    )
+
+    private fun availableWalletsTest(
         orderedPaymentMethodTypesAndWallets: List<String>,
+        isGooglePayReady: Boolean,
+        hasLinkState: Boolean,
         expectedWalletTypes: List<WalletType>,
     ) {
         val elementsSession = createElementsSession(
@@ -1764,13 +1800,21 @@ internal class PaymentMethodMetadataTest {
             configuration = configuration.asCommonConfiguration(),
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = false,
+            isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = null,
-            linkState = null,
+            linkState = if (hasLinkState) {
+                LinkState(
+                    configuration = mock(),
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                )
+            } else {
+                null
+            },
             customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
-        assertThat(metadata.availableWalletTypes).containsExactlyElementsIn(expectedWalletTypes)
+        assertThat(metadata.availableWallets).containsExactlyElementsIn(expectedWalletTypes)
     }
 
     fun `Passes CBF along to Link`() {
