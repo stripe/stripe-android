@@ -8,6 +8,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -89,23 +90,33 @@ internal class DefaultWalletButtonsInteractor(
         val walletButtons = mutableListOf<WalletButtonsInteractor.WalletButton>()
 
         arguments?.run {
-            if (isLinkEnabled) {
-                walletButtons.add(
-                    WalletButtonsInteractor.WalletButton.Link(
-                        email = linkEmail,
-                    )
-                )
-            }
-
-            if (arguments.paymentMethodMetadata.isGooglePayReady) {
-                walletButtons.add(
-                    WalletButtonsInteractor.WalletButton.GooglePay(
-                        allowCreditCards = true,
-                        buttonType = configuration.googlePay?.buttonType,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                    )
-                )
+            arguments.paymentMethodMetadata.availableWalletTypes.forEach { wallet ->
+                when (wallet) {
+                    WalletType.Link -> {
+                        if (isLinkEnabled) {
+                            walletButtons.add(
+                                WalletButtonsInteractor.WalletButton.Link(
+                                    email = linkEmail,
+                                )
+                            )
+                        }
+                    }
+                    WalletType.GooglePay -> {
+                        if (arguments.paymentMethodMetadata.isGooglePayReady) {
+                            walletButtons.add(
+                                WalletButtonsInteractor.WalletButton.GooglePay(
+                                    allowCreditCards = true,
+                                    buttonType = configuration.googlePay?.buttonType,
+                                    cardBrandFilter = PaymentSheetCardBrandFilter(
+                                        cardBrandAcceptance = configuration.cardBrandAcceptance,
+                                    ),
+                                    billingDetailsCollectionConfiguration = configuration
+                                        .billingDetailsCollectionConfiguration,
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
 

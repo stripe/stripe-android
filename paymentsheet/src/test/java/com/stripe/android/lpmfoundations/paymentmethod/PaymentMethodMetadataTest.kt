@@ -1077,6 +1077,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
+            availableWalletTypes = listOf(WalletType.Link),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(
@@ -1167,6 +1168,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
+            availableWalletTypes = listOf(WalletType.Link),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
@@ -1270,6 +1272,7 @@ internal class PaymentMethodMetadataTest {
             eligible = true,
             preferredNetworks = listOf("cartes_bancaires")
         ),
+        orderedPaymentMethodTypesAndWallets: List<String> = intent.paymentMethodTypes,
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
     ): ElementsSession {
@@ -1301,6 +1304,7 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap(),
+            orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null
         )
     }
@@ -1708,6 +1712,65 @@ internal class PaymentMethodMetadataTest {
             ),
         )
         assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isFalse()
+    }
+
+    @Test
+    fun `availableWalletTypes contains all wallet types`() = availableWalletTypesTest(
+        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "card"),
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+    )
+
+    @Test
+    fun `availableWalletTypes contains all wallet types in order`() = availableWalletTypesTest(
+        orderedPaymentMethodTypesAndWallets = listOf("link", "card", "google_pay"),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
+    )
+
+    @Test
+    fun `availableWalletTypes contains only Google Pay`() = availableWalletTypesTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        expectedWalletTypes = listOf(WalletType.GooglePay),
+    )
+
+    @Test
+    fun `availableWalletTypes contains only Link`() = availableWalletTypesTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "link"),
+        expectedWalletTypes = listOf(WalletType.Link),
+    )
+
+    private fun availableWalletTypesTest(
+        orderedPaymentMethodTypesAndWallets: List<String>,
+        expectedWalletTypes: List<WalletType>,
+    ) {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires")
+            ),
+        )
+
+        val configuration = createPaymentSheetConfiguration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            shippingDetails = AddressDetails(),
+            billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
+            customPaymentMethods = listOf(),
+            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = configuration.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkInlineConfiguration = null,
+            linkState = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
+        )
+
+        assertThat(metadata.availableWalletTypes).containsExactlyElementsIn(expectedWalletTypes)
     }
 
     fun `Passes CBF along to Link`() {

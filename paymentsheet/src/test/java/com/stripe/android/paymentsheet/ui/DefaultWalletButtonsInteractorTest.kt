@@ -9,6 +9,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -100,6 +101,31 @@ class DefaultWalletButtonsInteractorTest {
             assertThat(state.buttonsEnabled).isTrue()
         }
     }
+
+    @Test
+    fun `on init with GPay enabled, Link enabled, & different wallet type order, state should reflect the order`() =
+        runTest {
+            val interactor = createInteractor(
+                arguments = createArguments(
+                    availableWalletTypes = listOf(
+                        WalletType.GooglePay,
+                        WalletType.Link,
+                    ),
+                    isLinkEnabled = true,
+                    isGooglePayReady = true,
+                )
+            )
+
+            interactor.state.test {
+                val state = awaitItem()
+
+                assertThat(state.walletButtons).hasSize(2)
+                assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
+                assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+
+                assertThat(state.buttonsEnabled).isTrue()
+            }
+        }
 
     @Test
     fun `on button pressed with no arguments, should report unexpected error`() = runTest {
@@ -399,6 +425,7 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     private fun createArguments(
+        availableWalletTypes: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay),
         isLinkEnabled: Boolean = true,
         linkEmail: String? = null,
         isGooglePayReady: Boolean = true,
@@ -415,6 +442,7 @@ class DefaultWalletButtonsInteractorTest {
             isLinkEnabled = isLinkEnabled,
             linkEmail = linkEmail,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWalletTypes = availableWalletTypes,
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState,
             ),

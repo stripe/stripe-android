@@ -49,6 +49,7 @@ internal data class PaymentMethodMetadata(
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val allowsLinkInSavedPaymentMethods: Boolean,
+    val availableWalletTypes: List<WalletType>,
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
@@ -300,6 +301,7 @@ internal data class PaymentMethodMetadata(
                 allowsPaymentMethodsRequiringShippingAddress = configuration
                     .allowsPaymentMethodsRequiringShippingAddress,
                 allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
+                availableWalletTypes = WalletType.listFrom(elementsSession),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -339,6 +341,7 @@ internal data class PaymentMethodMetadata(
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
+                availableWalletTypes = WalletType.listFrom(elementsSession),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -373,6 +376,7 @@ internal data class PaymentMethodMetadata(
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
+                availableWalletTypes = emptyList(),
                 paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = configuration.cardBrandChoice?.eligible == true,
