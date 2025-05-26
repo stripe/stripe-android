@@ -34,6 +34,8 @@
   <string name="stripe_link_card_type_prepaid">%1$s Förbetalt</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s Kort</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Logga in eller registrera dig</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Godkänn och fortsätt</string>
   <!-- Title for the Link signup screen -->

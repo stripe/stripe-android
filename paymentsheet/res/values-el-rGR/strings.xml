@@ -34,6 +34,8 @@
   <string name="stripe_link_card_type_prepaid">Προπληρωμένη κάρτα %1$s</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">Κάρτα %1$s</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Σύνδεση ή εγγραφή</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Αποδοχή και συνέχεια</string>
   <!-- Title for the Link signup screen -->
