@@ -232,12 +232,12 @@ internal class LinkActivityViewModel @Inject constructor(
         require(selectedPayment.readyForConfirmation()) { "LinkPaymentMethod must be ready for confirmation" }
         val linkAccount = requireNotNull(linkAccount) { "LinkAccount must not be null for confirmation" }
         when (selectedPayment) {
-            is LinkPaymentMethod.Consumer -> linkConfirmationHandler.confirm(
+            is LinkPaymentMethod.ConsumerPaymentDetails -> linkConfirmationHandler.confirm(
                 paymentDetails = selectedPayment.details,
                 cvc = selectedPayment.collectedCvc,
                 linkAccount = linkAccount,
             )
-            is LinkPaymentMethod.Link -> linkConfirmationHandler.confirm(
+            is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
                 paymentDetails = selectedPayment.linkPaymentDetails,
                 cvc = selectedPayment.collectedCvc,
                 linkAccount = linkAccount,

@@ -9,10 +9,9 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 internal sealed class LinkPaymentMethod(
+    open val details: ConsumerPaymentDetails.PaymentDetails,
     open val collectedCvc: String?,
 ) : Parcelable {
-
-    internal abstract val details: ConsumerPaymentDetails.PaymentDetails
 
     internal fun readyForConfirmation(): Boolean = when (val currentDetails = details) {
         is ConsumerPaymentDetails.BankAccount -> true
@@ -23,22 +22,29 @@ internal sealed class LinkPaymentMethod(
         is ConsumerPaymentDetails.Passthrough -> true
     }
 
+    /**
+     * The payment method selected by the user within their Link account.
+     *
+     * @see [com.stripe.android.link.confirmation.LinkConfirmationHandler.confirm]
+     * via [com.stripe.android.model.ConsumerPaymentDetails]
+     */
     @Parcelize
-    internal data class Consumer(
-        val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    internal data class ConsumerPaymentDetails(
+        override val details: ConsumerPaymentDetails.PaymentDetails,
         override val collectedCvc: String?
-    ) : LinkPaymentMethod(collectedCvc) {
-        override val details
-            get() = paymentDetails
-    }
+    ) : LinkPaymentMethod(details, collectedCvc)
 
+    /**
+     * The payment method selected by the user within their Link account, including the parameters
+     * needed to confirm the Stripe Intent
+     *
+     * @see [com.stripe.android.link.confirmation.LinkConfirmationHandler.confirm]
+     * via [com.stripe.android.link.LinkPaymentDetails]
+     *
+     */
     @Parcelize
-    internal data class Link(
-        val linkPaymentDetails: LinkPaymentDetails,
+    internal data class LinkPaymentDetails(
+        val linkPaymentDetails: com.stripe.android.link.LinkPaymentDetails,
         override val collectedCvc: String?
-    ) : LinkPaymentMethod(collectedCvc) {
-
-        override val details
-            get() = linkPaymentDetails.paymentDetails
-    }
+    ) : LinkPaymentMethod(linkPaymentDetails.paymentDetails, collectedCvc)
 }

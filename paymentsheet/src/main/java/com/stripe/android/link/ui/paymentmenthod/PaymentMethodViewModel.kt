@@ -145,7 +145,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                    selectedPayment = LinkPaymentMethod.Link(
+                    selectedPayment = LinkPaymentMethod.LinkPaymentDetails(
                         linkPaymentDetails = paymentDetails,
                         collectedCvc = cvc,
                     )

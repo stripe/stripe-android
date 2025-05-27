@@ -534,7 +534,7 @@ internal class DefaultFlowControllerTest {
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link(
                 linkAccount = verifiedLinkAccount,
-                selectedPayment = LinkPaymentMethod.Consumer(
+                selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null
                 )

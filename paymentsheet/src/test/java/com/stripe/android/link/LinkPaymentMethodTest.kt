@@ -12,14 +12,14 @@ class LinkPaymentMethodTest {
     @Test
     fun `readyForConfirmation returns true for BankAccount`() {
         val bankAccount = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
-        val paymentMethod = LinkPaymentMethod.Consumer(bankAccount, collectedCvc = null)
+        val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(bankAccount, collectedCvc = null)
         assertThat(paymentMethod.readyForConfirmation()).isTrue()
     }
 
     @Test
     fun `readyForConfirmation returns true for Passthrough`() {
         val passthrough = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-        val paymentMethod = LinkPaymentMethod.Consumer(passthrough, collectedCvc = null)
+        val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(passthrough, collectedCvc = null)
         assertThat(paymentMethod.readyForConfirmation()).isTrue()
     }
 
@@ -30,7 +30,7 @@ class LinkPaymentMethodTest {
             expiryMonth = 12,
             cvcCheck = CvcCheck.Pass
         )
-        val paymentMethod = LinkPaymentMethod.Consumer(card, collectedCvc = "123")
+        val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(card, collectedCvc = "123")
         assertThat(paymentMethod.readyForConfirmation()).isFalse()
     }
 
@@ -41,7 +41,7 @@ class LinkPaymentMethodTest {
             expiryMonth = 12,
             cvcCheck = CvcCheck.Fail
         )
-        val paymentMethod = LinkPaymentMethod.Consumer(card, collectedCvc = "")
+        val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(card, collectedCvc = "")
         assertThat(paymentMethod.readyForConfirmation()).isFalse()
     }
 
@@ -52,7 +52,7 @@ class LinkPaymentMethodTest {
             expiryMonth = 12,
             cvcCheck = CvcCheck.Fail
         )
-        val paymentMethod = LinkPaymentMethod.Consumer(card, collectedCvc = "123")
+        val paymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(card, collectedCvc = "123")
         assertThat(paymentMethod.readyForConfirmation()).isTrue()
     }
 }
