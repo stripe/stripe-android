@@ -25,7 +25,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissi
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
@@ -302,7 +301,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
-            linkInlineConfiguration = createLinkInlineConfiguration(linkState),
             linkState = linkState,
             customerMetadata = getCustomerMetadata(
                 configuration = configuration,
@@ -698,17 +696,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isGooglePayAvailable = isGooglePayReady,
             isLinkAvailable = isLinkAvailable,
         )
-    }
-
-    private fun createLinkInlineConfiguration(state: LinkState?): LinkInlineConfiguration? {
-        return state?.run {
-            signupMode?.let { linkSignupMode ->
-                LinkInlineConfiguration(
-                    linkConfiguration = configuration,
-                    signupMode = linkSignupMode,
-                )
-            }
-        }
     }
 
     private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {

@@ -116,41 +116,37 @@ class LinkFormElementTest {
         initialLinkUserInput: UserInput?,
     ): LinkFormElement {
         return LinkFormElement(
-            configuration = createLinkInlineConfiguration(signupMode),
+            signupMode = signupMode,
+            configuration = createConfiguration(),
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
             onLinkInlineSignupStateChanged = {},
         )
     }
 
-    private fun createLinkInlineConfiguration(
-        signupMode: LinkSignupMode,
-    ): LinkInlineConfiguration {
-        return LinkInlineConfiguration(
-            signupMode = signupMode,
-            linkConfiguration = LinkConfiguration(
-                stripeIntent = PaymentIntentFactory.create(),
-                merchantName = "Merchant, Inc.",
-                merchantCountryCode = "CA",
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    name = "John Doe",
-                    email = null,
-                    phone = null,
-                    billingCountryCode = "CA",
-                ),
-                shippingDetails = null,
-                passthroughModeEnabled = false,
-                cardBrandChoice = null,
-                cardBrandFilter = DefaultCardBrandFilter,
-                flags = mapOf(),
-                useAttestationEndpointsForLink = false,
-                suppress2faModal = false,
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = "pi_123_secret_123",
-                ),
-                elementsSessionId = "session_1234",
-                linkMode = LinkMode.LinkPaymentMethod,
+    private fun createConfiguration(): LinkConfiguration {
+        return LinkConfiguration(
+            stripeIntent = PaymentIntentFactory.create(),
+            merchantName = "Merchant, Inc.",
+            merchantCountryCode = "CA",
+            customerInfo = LinkConfiguration.CustomerInfo(
+                name = "John Doe",
+                email = null,
+                phone = null,
+                billingCountryCode = "CA",
             ),
+            shippingDetails = null,
+            passthroughModeEnabled = false,
+            cardBrandChoice = null,
+            cardBrandFilter = DefaultCardBrandFilter,
+            flags = mapOf(),
+            useAttestationEndpointsForLink = false,
+            suppress2faModal = false,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "pi_123_secret_123",
+            ),
+            elementsSessionId = "session_1234",
+            linkMode = LinkMode.LinkPaymentMethod,
         )
     }
 

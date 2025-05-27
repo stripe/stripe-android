@@ -11,7 +11,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -1007,7 +1006,6 @@ internal class PaymentMethodMetadataTest {
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
         val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
-        val linkInlineConfiguration = createLinkInlineConfiguration()
         val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
             listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
         )
@@ -1068,8 +1066,11 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
-            linkInlineConfiguration = linkInlineConfiguration,
-            linkState = null,
+            linkState = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
             customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
@@ -1114,9 +1115,12 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
-            linkInlineConfiguration = linkInlineConfiguration,
             linkMode = null,
-            linkState = null,
+            linkState = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
@@ -1187,7 +1191,6 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
-            linkInlineConfiguration = null,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
             linkState = null,
@@ -1262,7 +1265,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
-            linkInlineConfiguration = null,
             linkState = null,
             customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
         )
@@ -1827,33 +1829,30 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
     }
 
-    private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
-        return LinkInlineConfiguration(
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            linkConfiguration = LinkConfiguration(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    email = "john@email.com",
-                    name = "John Doe",
-                    billingCountryCode = "CA",
-                    phone = "1234567890"
-                ),
-                merchantName = "Merchant Inc.",
-                merchantCountryCode = "CA",
-                shippingDetails = null,
-                flags = mapOf(),
-                cardBrandChoice = LinkConfiguration.CardBrandChoice(
-                    eligible = true,
-                    preferredNetworks = listOf("cartes_bancaires")
-                ),
-                cardBrandFilter = DefaultCardBrandFilter,
-                passthroughModeEnabled = false,
-                useAttestationEndpointsForLink = false,
-                suppress2faModal = false,
-                initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementsSessionId = "session_1234",
-                linkMode = LinkMode.LinkPaymentMethod,
+    private fun createLinkConfiguration(): LinkConfiguration {
+        return LinkConfiguration(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = "john@email.com",
+                name = "John Doe",
+                billingCountryCode = "CA",
+                phone = "1234567890"
             ),
+            merchantName = "Merchant Inc.",
+            merchantCountryCode = "CA",
+            shippingDetails = null,
+            flags = mapOf(),
+            cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires")
+            ),
+            cardBrandFilter = DefaultCardBrandFilter,
+            passthroughModeEnabled = false,
+            useAttestationEndpointsForLink = false,
+            suppress2faModal = false,
+            initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
+            elementsSessionId = "session_1234",
+            linkMode = LinkMode.LinkPaymentMethod,
         )
     }
 

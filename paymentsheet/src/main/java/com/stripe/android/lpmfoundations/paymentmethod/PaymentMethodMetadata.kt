@@ -12,7 +12,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -61,7 +60,6 @@ internal data class PaymentMethodMetadata(
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
-    val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val linkState: LinkState?,
@@ -286,7 +284,6 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
-            linkInlineConfiguration: LinkInlineConfiguration?,
             linkState: LinkState?,
             customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
@@ -318,7 +315,6 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
-                linkInlineConfiguration = linkInlineConfiguration,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkState = linkState,
@@ -361,7 +357,6 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
-                linkInlineConfiguration = null,
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
@@ -403,7 +398,6 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = emptyList(),
                 externalPaymentMethodSpecs = emptyList(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
-                linkInlineConfiguration = null,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = null,
                 linkState = null,

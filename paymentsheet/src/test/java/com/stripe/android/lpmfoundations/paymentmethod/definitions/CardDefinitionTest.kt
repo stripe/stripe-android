@@ -8,7 +8,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -17,6 +16,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
@@ -240,10 +240,11 @@ class CardDefinitionTest {
     fun `createFormElements returns link_form`() {
         val formElements = CardDefinition.formElements(
             PaymentMethodMetadataFactory.create(
-                linkInlineConfiguration = LinkInlineConfiguration(
+                linkState = LinkState(
                     signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                    linkConfiguration = createLinkConfiguration()
-                )
+                    configuration = createLinkConfiguration(),
+                    loginState = LinkState.LoginState.LoggedOut,
+                ),
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
@@ -257,19 +258,21 @@ class CardDefinitionTest {
     fun `createFormElements returns mandate below link_form when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-            linkInlineConfiguration = LinkInlineConfiguration(
+            linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                linkConfiguration = createLinkConfiguration()
-            )
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
         )
 
         val formElements = CardDefinition.formElements(
             PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
-                linkInlineConfiguration = LinkInlineConfiguration(
+                linkState = LinkState(
                     signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                    linkConfiguration = createLinkConfiguration()
-                )
+                    configuration = createLinkConfiguration(),
+                    loginState = LinkState.LoginState.LoggedOut,
+                ),
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )

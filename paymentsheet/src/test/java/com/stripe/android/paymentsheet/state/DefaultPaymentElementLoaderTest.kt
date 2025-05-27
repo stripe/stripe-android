@@ -838,7 +838,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -864,7 +863,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -883,7 +881,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -899,7 +896,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -915,7 +911,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -931,7 +926,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -950,8 +944,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -967,8 +959,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1291,8 +1281,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1316,8 +1304,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1336,8 +1322,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1356,8 +1340,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1378,7 +1360,6 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 
     @Test
