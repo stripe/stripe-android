@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED][10843](https://github.com/stripe/stripe-android/pull/10843) Fix 3DS2 Whitelisting Encoding Issue.
+
 ## 21.14.0 - 2025-05-19
 
 ### PaymentSheet
