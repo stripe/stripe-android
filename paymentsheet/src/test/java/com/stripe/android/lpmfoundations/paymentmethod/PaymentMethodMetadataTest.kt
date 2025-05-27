@@ -1080,7 +1080,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
-            availableWallets = emptyList(),
+            availableWallets = listOf(WalletType.Link),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(
@@ -1803,7 +1803,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = emptyList(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = isGooglePayReady,
-            linkInlineConfiguration = null,
             linkState = if (hasLinkState) {
                 LinkState(
                     configuration = mock(),
