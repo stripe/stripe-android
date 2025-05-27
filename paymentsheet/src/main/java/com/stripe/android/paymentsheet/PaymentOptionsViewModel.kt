@@ -134,7 +134,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        linkAccountHolder.set(args.linkAccount, args.linkAccountUpdateReason)
+        linkAccountHolder.set(args.linkAccount)
         linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
@@ -169,7 +169,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             is LinkActivityResult.Completed -> {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
-                        linkAccountInfo = getInfo(),
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
                             selectedPayment = result.selectedPayment
                         ),
@@ -191,7 +191,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
-                linkAccountInfo = getInfo(),
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
@@ -227,8 +227,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             val linkState = args.state.paymentMethodMetadata.linkState
-            val linkAccount = linkAccountHolder.linkAccount.value
-            val linkAccountUpdateReason = linkAccountHolder.updateReason.value
             val shouldShowLinkConfiguration = linkState != null && shouldShowLinkVerification(
                 paymentSelection = paymentSelection,
                 linkConfiguration = linkState.configuration
@@ -237,14 +235,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
-                    linkAccount = linkAccount,
-                    linkAccountUpdateReason = linkAccountUpdateReason,
+                    linkAccount = linkAccountHolder.linkAccountInfo.value,
                     useLinkExpress = true
                 )
             } else {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
-                        linkAccountInfo = getInfo(),
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
@@ -258,7 +255,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
      * - Preserves the previously selected payment method, if any, in case none is selected in this launch.
      */
     private fun PaymentSelection.withLinkDetails(): PaymentSelection = when (this) {
-        is Link -> when (val linkAccount = linkAccountHolder.linkAccount.value) {
+        is Link -> when (linkAccountHolder.linkAccountInfo.value.linkAccount) {
             // If link account is null, clear account status and selected payment from payment selection
             null -> copy(
                 selectedPayment = null
@@ -335,11 +332,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
         }
     }
-
-    fun getInfo(): LinkAccountInfo = LinkAccountInfo(
-        linkAccount = linkAccountHolder.linkAccount.value,
-        lastUpdateReason = linkAccountHolder.updateReason.value,
-    )
 
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentOptionContract.Args,

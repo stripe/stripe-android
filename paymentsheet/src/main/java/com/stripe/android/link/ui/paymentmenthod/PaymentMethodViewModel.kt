@@ -27,6 +27,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.LinkAccountInfo
+import com.stripe.android.paymentsheet.LinkAccountInfo.UpdateReason.PaymentConfirmed
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -135,7 +137,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                     Result.Succeeded -> {
                         dismissWithResult(
                             LinkActivityResult.Completed(
-                                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                                linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(null, PaymentConfirmed)),
                                 selectedPayment = null
                             )
                         )

@@ -33,6 +33,8 @@ import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.LinkAccountInfo
+import com.stripe.android.paymentsheet.LinkAccountInfo.UpdateReason.PaymentConfirmed
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
@@ -238,7 +240,7 @@ internal class WalletViewModel @Inject constructor(
                 }
                 is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                     LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                        linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(linkAccount)),
                         selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                             details = selectedPaymentDetails,
                             collectedCvc = cvc
@@ -275,7 +277,7 @@ internal class WalletViewModel @Inject constructor(
                     LinkActivityResult.Completed(
                         // After confirmation, clear the link account state so further launches
                         // require authenticating again.
-                        linkAccountUpdate = LinkAccountUpdate.Value(null),
+                        linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(null, PaymentConfirmed)),
                         selectedPayment = null,
                     )
                 )

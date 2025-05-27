@@ -13,7 +13,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
-import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -28,6 +27,8 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.LinkAccountInfo
+import com.stripe.android.paymentsheet.LinkAccountInfo.UpdateReason.LoggedOut
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -77,7 +78,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
 
     val linkAccount: LinkAccount?
-        get() = linkAccountManager.linkAccount.value
+        get() = linkAccountManager.linkAccountInfo.value.linkAccount
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
@@ -128,7 +129,7 @@ internal class LinkActivityViewModel @Inject constructor(
         dismissWithResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(null, LoggedOut))
             )
         )
     }
@@ -256,7 +257,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
                 LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(null, LoggedOut))
                 )
             }
         )
@@ -271,7 +272,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun updateScreenState() {
         val accountStatus = linkAccountManager.accountStatus.first()
-        val linkAccount = linkAccountManager.linkAccount.value
+        val linkAccount = linkAccountManager.linkAccountInfo.value.linkAccount
         when (accountStatus) {
             AccountStatus.Verified,
             AccountStatus.SignedOut,
@@ -318,7 +319,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun handleAccountError() {
         linkAccountManager.logOut()
-        linkAccountHolder.set(null, LoggedOut)
+        linkAccountHolder.set(LinkAccountInfo(linkAccount = null, lastUpdateReason = LoggedOut))
         updateScreenState()
     }
 
@@ -345,8 +346,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .application(app)
                     .startWithVerificationDialog(args.startWithVerificationDialog)
                     .linkLaunchMode(args.launchMode)
-                    .linkAccount(args.linkAccount)
-                    .linkAccountUpdateReason(args.linkAccountUpdateReason)
+                    .linkAccountInfo(args.linkAccount)
                     .build()
                     .viewModel
             }

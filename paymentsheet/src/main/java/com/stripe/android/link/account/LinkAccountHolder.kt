@@ -1,19 +1,22 @@
 package com.stripe.android.link.account
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
-import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentsheet.LinkAccountInfo
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class LinkAccountHolder(
     private val savedStateHandle: SavedStateHandle
 ) {
-    val linkAccount: StateFlow<LinkAccount?> = savedStateHandle.getStateFlow(LINK_ACCOUNT_HOLDER_STATE, null)
-    val updateReason: StateFlow<UpdateReason?> = savedStateHandle.getStateFlow(LINK_ACCOUNT_HOLDER_UPDATE_REASON, null)
+    val linkAccountInfo: StateFlow<LinkAccountInfo> = combineAsStateFlow(
+        savedStateHandle.getStateFlow(LINK_ACCOUNT_HOLDER_STATE, null),
+        savedStateHandle.getStateFlow(LINK_ACCOUNT_HOLDER_UPDATE_REASON, null),
+        ::LinkAccountInfo
+    )
 
-    fun set(account: LinkAccount?, updateReason: UpdateReason? = null) {
-        savedStateHandle[LINK_ACCOUNT_HOLDER_STATE] = account
-        savedStateHandle[LINK_ACCOUNT_HOLDER_UPDATE_REASON] = updateReason
+    fun set(info: LinkAccountInfo) {
+        savedStateHandle[LINK_ACCOUNT_HOLDER_STATE] = info.linkAccount
+        savedStateHandle[LINK_ACCOUNT_HOLDER_UPDATE_REASON] = info.lastUpdateReason
     }
 
     companion object {

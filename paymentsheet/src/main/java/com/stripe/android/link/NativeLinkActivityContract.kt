@@ -28,7 +28,6 @@ internal class NativeLinkActivityContract @Inject constructor(
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccount = input.linkAccount,
-                linkAccountUpdateReason = input.linkAccountUpdateReason
             )
         )
     }

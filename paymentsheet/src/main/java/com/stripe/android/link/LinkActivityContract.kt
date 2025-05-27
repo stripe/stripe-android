@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentsheet.LinkAccountInfo
 import javax.inject.Inject
 
 /**
@@ -39,9 +39,8 @@ internal class LinkActivityContract @Inject internal constructor(
     data class Args internal constructor(
         internal val configuration: LinkConfiguration,
         internal val startWithVerificationDialog: Boolean,
-        internal val linkAccount: LinkAccount?,
-        internal val launchMode: LinkLaunchMode,
-        internal val linkAccountUpdateReason: LinkAccountUpdate.Value.UpdateReason?
+        internal val linkAccount: LinkAccountInfo,
+        internal val launchMode: LinkLaunchMode
     )
 
     data class Result(

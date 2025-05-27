@@ -261,19 +261,17 @@ internal class DefaultFlowController @Inject internal constructor(
             // show the link wallet instead of the payment option list.
             val linkConfiguration = state.paymentSheetState.linkConfiguration
             val paymentSelection = viewModel.paymentSelection
-            val linkAccount = linkAccountHolder.linkAccount.value
-            val linkAccountUpdateReason = linkAccountHolder.updateReason.value
+            val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
             val shouldPresentLinkInsteadOfPaymentOptions = FeatureFlags.linkProminenceInFlowController.isEnabled &&
                 paymentSelection is Link &&
                 linkConfiguration != null &&
-                linkAccount?.accountStatus == Verified
+                linkAccountInfo.linkAccount?.accountStatus == Verified
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(
                     configuration = linkConfiguration,
-                    linkAccount = linkAccount,
-                    linkAccountUpdateReason = linkAccountUpdateReason,
+                    linkAccount = linkAccountInfo,
                     useLinkExpress = false,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = paymentSelection.selectedPayment?.details
@@ -294,8 +292,7 @@ internal class DefaultFlowController @Inject internal constructor(
             configuration = state.config,
             enableLogging = enableLogging,
             productUsage = productUsage,
-            linkAccount = linkAccountHolder.linkAccount.value,
-            linkAccountUpdateReason = linkAccountHolder.updateReason.value,
+            linkAccount = linkAccountHolder.linkAccountInfo.value,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 
@@ -347,7 +344,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is LinkAccountUpdate.Value -> {
                 val currentState = viewModel.state ?: return
                 val metadata = currentState.paymentSheetState.paymentMethodMetadata
-                val accountStatus = linkAccount?.accountStatus ?: AccountStatus.SignedOut
+                val accountStatus = linkAccountInfo.linkAccount?.accountStatus ?: AccountStatus.SignedOut
                 val linkState = metadata.linkState?.copy(loginState = accountStatus.toLoginState())
                 viewModel.state = currentState.copyPaymentSheetState(
                     metadata = metadata.copy(linkState = linkState),
@@ -489,12 +486,7 @@ internal class DefaultFlowController @Inject internal constructor(
         result: PaymentOptionResult?
     ) {
         // update the current Link account state if the selected Link payment method includes an account update.
-        result?.linkAccountInfo?.let {
-            linkAccountHolder.set(
-                account = it.linkAccount,
-                updateReason = it.lastUpdateReason
-            )
-        }
+        result?.linkAccountInfo?.let { linkAccountHolder.set(it) }
         result?.paymentMethods?.let {
             val currentState = viewModel.state
             viewModel.state = currentState?.copyPaymentSheetState(

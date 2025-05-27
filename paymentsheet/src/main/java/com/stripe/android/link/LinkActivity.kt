@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.LinkAccountInfo
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
@@ -116,9 +117,11 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.Args(
                 configuration = configuration,
                 startWithVerificationDialog = false,
-                linkAccount = null,
+                linkAccount = LinkAccountInfo(
+                    linkAccount = null,
+                    lastUpdateReason = null
+                ),
                 launchMode = LinkLaunchMode.Full,
-                linkAccountUpdateReason = null
             )
         )
     }

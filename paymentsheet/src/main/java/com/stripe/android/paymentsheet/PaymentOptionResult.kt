@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -67,4 +66,16 @@ internal sealed class PaymentOptionResult(
 internal data class LinkAccountInfo(
     val linkAccount: LinkAccount?,
     val lastUpdateReason: UpdateReason? = null
-) : Parcelable
+) : Parcelable {
+    enum class UpdateReason {
+        /**
+         * The user has logged out of Link.
+         */
+        LoggedOut,
+
+        /**
+         * The user has confirmed a payment method in Link.
+         */
+        PaymentConfirmed
+    }
+}

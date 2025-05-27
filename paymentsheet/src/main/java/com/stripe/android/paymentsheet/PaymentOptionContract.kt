@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -30,8 +28,7 @@ internal class PaymentOptionContract :
     internal data class Args(
         val state: PaymentSheetState.Full,
         val configuration: PaymentSheet.Configuration,
-        val linkAccount: LinkAccount?,
-        val linkAccountUpdateReason: LinkAccountUpdate.Value.UpdateReason?,
+        val linkAccount: LinkAccountInfo,
         val enableLogging: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
