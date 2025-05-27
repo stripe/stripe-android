@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.view.ActivityStarter
@@ -30,6 +31,7 @@ internal class PaymentOptionContract :
         val state: PaymentSheetState.Full,
         val configuration: PaymentSheet.Configuration,
         val linkAccount: LinkAccount?,
+        val linkAccountUpdateReason: LinkAccountUpdate.Value.UpdateReason?,
         val enableLogging: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
@@ -46,3 +48,4 @@ internal class PaymentOptionContract :
         internal const val EXTRA_ARGS: String = "extra_activity_args"
     }
 }
+

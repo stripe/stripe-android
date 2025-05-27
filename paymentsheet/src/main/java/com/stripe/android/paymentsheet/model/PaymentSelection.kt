@@ -71,7 +71,6 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class Link(
         val useLinkExpress: Boolean = false,
-        val linkAccount: LinkAccount? = null,
         val selectedPayment: LinkPaymentMethod? = null,
     ) : PaymentSelection() {
 

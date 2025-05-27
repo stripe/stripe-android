@@ -58,7 +58,17 @@ internal sealed class LinkActivityResult : Parcelable {
 @Parcelize
 internal sealed interface LinkAccountUpdate : Parcelable {
     @Parcelize
-    data class Value(val linkAccount: LinkAccount?) : LinkAccountUpdate
+    data class Value(
+        val linkAccount: LinkAccount?,
+        val updateReason: UpdateReason? = null,
+    ) : LinkAccountUpdate {
+        enum class UpdateReason {
+            /**
+             * The user has logged out of Link.
+             */
+            LoggedOut
+        }
+    }
 
     @Parcelize
     data object None : LinkAccountUpdate

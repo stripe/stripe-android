@@ -117,7 +117,8 @@ internal class LinkActivity : ComponentActivity() {
                 configuration = configuration,
                 startWithVerificationDialog = false,
                 linkAccount = null,
-                launchMode = LinkLaunchMode.Full
+                launchMode = LinkLaunchMode.Full,
+                linkAccountUpdateReason = null
             )
         )
     }

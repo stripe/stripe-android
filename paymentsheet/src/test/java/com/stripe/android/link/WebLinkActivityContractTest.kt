@@ -43,7 +43,8 @@ class WebLinkActivityContractTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = false,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            launchMode = LinkLaunchMode.Full
+            launchMode = LinkLaunchMode.Full,
+            linkAccountUpdateReason = linkAccountUpdateReason
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)

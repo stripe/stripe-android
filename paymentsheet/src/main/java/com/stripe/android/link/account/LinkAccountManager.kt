@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 @SuppressWarnings("TooManyFunctions")
 internal interface LinkAccountManager {
     val linkAccount: StateFlow<LinkAccount?>
+    val linkAccountUpdateReason: StateFlow<LinkAccountUpdate.Value.UpdateReason?>
     val accountStatus: Flow<AccountStatus>
     var consumerPublishableKey: String?
 

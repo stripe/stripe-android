@@ -8,6 +8,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -101,6 +102,11 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun linkAccount(linkAccount: LinkAccount?): Builder
+
+        @BindsInstance
+        fun linkAccountUpdateReason(
+            linkAccountUpdateReason: LinkAccountUpdate.Value.UpdateReason?
+        ): Builder
 
         fun build(): NativeLinkComponent
     }

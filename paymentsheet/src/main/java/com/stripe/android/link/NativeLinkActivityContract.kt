@@ -27,7 +27,8 @@ internal class NativeLinkActivityContract @Inject constructor(
                 startWithVerificationDialog = input.startWithVerificationDialog,
                 launchMode = input.launchMode,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-                linkAccount = input.linkAccount
+                linkAccount = input.linkAccount,
+                linkAccountUpdateReason = input.linkAccountUpdateReason
             )
         )
     }

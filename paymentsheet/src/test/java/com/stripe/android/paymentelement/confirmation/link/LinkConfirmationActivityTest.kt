@@ -205,7 +205,8 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             startWithVerificationDialog = true,
                             linkAccount = null,
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
-                            launchMode = LinkLaunchMode.Full
+                            launchMode = LinkLaunchMode.Full,
+                            linkAccountUpdateReason = input.linkAccountUpdateReason
                         )
                     )
                 )

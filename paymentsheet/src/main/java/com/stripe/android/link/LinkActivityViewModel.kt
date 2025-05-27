@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -127,7 +128,7 @@ internal class LinkActivityViewModel @Inject constructor(
         dismissWithResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null)
+                linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
             )
         )
     }
@@ -317,7 +318,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun handleAccountError() {
         linkAccountManager.logOut()
-        linkAccountHolder.set(null)
+        linkAccountHolder.set(null, LoggedOut)
         updateScreenState()
     }
 
@@ -345,6 +346,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .startWithVerificationDialog(args.startWithVerificationDialog)
                     .linkLaunchMode(args.launchMode)
                     .linkAccount(args.linkAccount)
+                    .linkAccountUpdateReason(args.linkAccountUpdateReason)
                     .build()
                     .viewModel
             }

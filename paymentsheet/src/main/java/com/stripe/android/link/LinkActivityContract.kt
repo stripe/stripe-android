@@ -40,7 +40,8 @@ internal class LinkActivityContract @Inject internal constructor(
         internal val configuration: LinkConfiguration,
         internal val startWithVerificationDialog: Boolean,
         internal val linkAccount: LinkAccount?,
-        internal val launchMode: LinkLaunchMode
+        internal val launchMode: LinkLaunchMode,
+        internal val linkAccountUpdateReason: LinkAccountUpdate.Value.UpdateReason?
     )
 
     data class Result(

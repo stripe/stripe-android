@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -130,10 +131,11 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         fun providesLinkAccountHolder(
             savedStateHandle: SavedStateHandle,
-            linkAccount: LinkAccount?
+            linkAccount: LinkAccount?,
+            updateReason: LinkAccountUpdate.Value.UpdateReason?
         ): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle).apply {
-                set(linkAccount)
+                set(linkAccount, updateReason)
             }
         }
 

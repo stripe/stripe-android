@@ -131,7 +131,8 @@ internal class LinkActivityViewModelTest {
             startWithVerificationDialog = false,
             linkAccount = null,
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-            launchMode = LinkLaunchMode.Full
+            launchMode = LinkLaunchMode.Full,
+            linkAccountUpdateReason = input.linkAccountUpdateReason
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)

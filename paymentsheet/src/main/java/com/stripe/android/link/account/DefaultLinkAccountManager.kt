@@ -3,6 +3,7 @@ package com.stripe.android.link.account
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -46,6 +47,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 ) : LinkAccountManager {
 
     override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
+    override val linkAccountUpdateReason: StateFlow<LinkAccountUpdate.Value.UpdateReason?> = linkAccountHolder.updateReason
 
     private val _consumerPaymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
@@ -422,17 +424,20 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     private suspend fun LinkAccount?.fetchAccountStatus(): AccountStatus =
         /**
-         * If we already fetched an account, return its status, otherwise if a customer email was passed in,
-         * lookup the account.
+         * If we already fetched an account, return its status, otherwise if a customer
+         * email was passed in (and the user hasn't logged out) lookup the account.
          */
         this?.accountStatus
-            ?: config.customerInfo.email?.let { customerEmail ->
-                lookupConsumer(customerEmail).map {
-                    it?.accountStatus
-                }.getOrElse {
-                    AccountStatus.Error
-                }
-            } ?: AccountStatus.SignedOut
+            ?: config.customerInfo.email
+                ?.takeIf {
+                    linkAccountHolder.updateReason.value != LinkAccountUpdate.Value.UpdateReason.LoggedOut
+                }?.let { customerEmail ->
+                    lookupConsumer(customerEmail).map {
+                        it?.accountStatus
+                    }.getOrElse {
+                        AccountStatus.Error
+                    }
+                } ?: AccountStatus.SignedOut
 
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
         get() = when (this) {
