@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -450,7 +451,9 @@ internal class SavedPaymentMethodMutator(
                         setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                     )
                 },
-                isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
+                isLinkEnabled = viewModel.paymentMethodMetadata.mapAsStateFlow {
+                    it?.availableWallets?.contains(WalletType.Link)
+                },
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
             ).apply {
                 viewModel.viewModelScope.launch {

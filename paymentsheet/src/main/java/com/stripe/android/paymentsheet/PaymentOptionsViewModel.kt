@@ -17,6 +17,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -92,13 +93,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
-        linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+    ) { linkEmail, buttonsEnabled ->
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
+            isLinkAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
             buttonsEnabled = buttonsEnabled,

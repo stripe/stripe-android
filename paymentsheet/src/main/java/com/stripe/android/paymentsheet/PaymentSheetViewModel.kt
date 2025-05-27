@@ -21,6 +21,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -169,13 +170,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override val error: StateFlow<ResolvableString?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
-        linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
         buttonsEnabled,
         paymentMethodMetadata,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodMetadata ->
+    ) { linkEmail, buttonsEnabled, paymentMethodMetadata ->
         WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
+            isLinkAvailable = paymentMethodMetadata?.availableWallets?.contains(WalletType.Link),
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             buttonsEnabled = buttonsEnabled,
@@ -454,7 +454,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 paymentSelectionWithCvcIfEnabled(paymentSelection)
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
-                        linkConfiguration = linkHandler.linkConfiguration.value,
+                        linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration,
                     )
             }
 

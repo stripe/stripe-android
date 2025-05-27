@@ -484,7 +484,10 @@ internal class DefaultFlowControllerTest {
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
                 paymentSelection = null,
                 validationError = null,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    allowsDelayedPaymentMethods = false,
+                    availableWallets = emptyList(),
+                ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,

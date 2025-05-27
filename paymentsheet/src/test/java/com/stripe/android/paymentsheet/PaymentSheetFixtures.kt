@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
@@ -176,6 +177,7 @@ internal object PaymentSheetFixtures {
         config: PaymentSheet.Configuration = configuration,
         paymentSelection: PaymentSelection? = state.paymentSelection,
         linkState: LinkState? = state.paymentMethodMetadata.linkState,
+        availableWallets: List<WalletType> = state.paymentMethodMetadata.availableWallets,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
@@ -189,6 +191,7 @@ internal object PaymentSheetFixtures {
                 config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    availableWallets = availableWallets,
                     stripeIntent = stripeIntent,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkState,

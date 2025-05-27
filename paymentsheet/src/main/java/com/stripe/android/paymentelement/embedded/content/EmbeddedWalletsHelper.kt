@@ -1,11 +1,12 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
@@ -19,14 +20,11 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
     override fun walletsState(paymentMethodMetadata: PaymentMethodMetadata): StateFlow<WalletsState?> {
         linkHandler.setupLink(paymentMethodMetadata.linkState)
 
-        return combineAsStateFlow(
-            linkHandler.isLinkEnabled,
-            linkHandler.linkConfigurationCoordinator.emailFlow,
-        ) { isLinkAvailable, linkEmail ->
+        return linkHandler.linkConfigurationCoordinator.emailFlow.mapAsStateFlow { linkEmail ->
             WalletsState.create(
-                isLinkAvailable = isLinkAvailable,
+                isLinkAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.Link),
                 linkEmail = linkEmail,
-                isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
+                isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
                 buttonsEnabled = true,
                 paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
                 googlePayLauncherConfig = null, // This isn't used for embedded.

@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -19,6 +20,7 @@ internal class FakePaymentElementLoader(
     private val shouldFail: Boolean = false,
     private var customer: CustomerState? = null,
     private var paymentSelection: PaymentSelection? = null,
+    private val availableWallets: List<WalletType> = emptyList(),
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val linkState: LinkState? = null,
@@ -52,6 +54,7 @@ internal class FakePaymentElementLoader(
                     paymentSelection = paymentSelection,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        availableWallets = availableWallets,
                         stripeIntent = stripeIntent,
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
