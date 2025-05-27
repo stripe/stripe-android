@@ -91,7 +91,7 @@ class ChallengeFragmentTest {
 
             assertThat(challengeActionHandler.actions)
                 .containsExactly(
-                    ChallengeAction.NativeForm("123456", whitelistingValue = false)
+                    ChallengeAction.NativeForm("123456", whitelistingValue = null)
                 )
         }
     }
@@ -270,6 +270,90 @@ class ChallengeFragmentTest {
             ).isEqualTo(
                 "Could not start challenge screen. Challenge response data was null."
             )
+        }
+    }
+
+    @Test
+    fun `native form whitelisting value is true if whitelistingInfoText is present and button checked`() {
+        createFragment(
+            cres = CRES_TEXT_DATA
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(true)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+
+            assertThat(action?.whitelistingValue).isTrue()
+        }
+    }
+
+    @Test
+    fun `oob whitelisting value is true if whitelistingInfoText is present and button checked`() {
+        createFragment(
+            cres = CRES_OOB_DATA.copy(whitelistingInfoText = "Whitelisting text is present")
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(true)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
+
+            assertThat(action?.whitelistingValue).isTrue()
+        }
+    }
+
+    @Test
+    fun `native form whitelisting value is null if whitelistingInfoText is null and button checked`() {
+        createFragment(
+            cres = CRES_TEXT_DATA.copy(whitelistingInfoText = null)
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(true)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+
+            assertThat(action?.whitelistingValue).isNull()
+        }
+    }
+
+    @Test
+    fun `OOB whitelisting value is null if whitelistingInfoText is null and button checked`() {
+        createFragment(
+            cres = CRES_OOB_DATA.copy(whitelistingInfoText = null)
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(true)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
+
+            assertThat(action?.whitelistingValue).isNull()
+        }
+    }
+
+    @Test
+    fun `native form whitelisting value is false if whitelistingInfoText is present and button not checked`() {
+        createFragment(
+            cres = CRES_TEXT_DATA
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(false)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.NativeForm
+
+            assertThat(action?.whitelistingValue).isFalse()
+        }
+    }
+
+    @Test
+    fun `oob whitelisting value is false if whitelistingInfoText is present and button not checked`() {
+        createFragment(
+            cres = CRES_OOB_DATA.copy(whitelistingInfoText = "Whitelisting text exists")
+        ) { fragment ->
+            fragment.challengeZoneView.setWhitelistChecked(false)
+            fragment.clickSubmitButton()
+            val action = challengeActionHandler
+                .actions[challengeActionHandler.actions.lastIndex] as? ChallengeAction.Oob
+
+            assertThat(action?.whitelistingValue).isFalse()
         }
     }
 
