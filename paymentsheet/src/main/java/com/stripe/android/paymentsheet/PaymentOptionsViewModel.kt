@@ -276,7 +276,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkAccount: LinkAccount?
     ): Boolean {
         return paymentSelection is Link &&
-            linkAccount != null && linkAccount.isVerified.not() &&
+            linkAccount != null &&
             linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
     }
 
