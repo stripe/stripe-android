@@ -58,6 +58,7 @@ internal class FakeElementsSessionRepository(
                     customPaymentMethods = this.customPaymentMethods,
                     elementsSessionId = "session_1234",
                     flags = emptyMap(),
+                    orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
                     experimentsData = null
                 )
             )

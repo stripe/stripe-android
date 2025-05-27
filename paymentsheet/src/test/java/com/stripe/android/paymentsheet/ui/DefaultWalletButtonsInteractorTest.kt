@@ -9,6 +9,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -43,9 +44,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on init with GPay enabled in arguments, state should have only GPay button`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = false,
+                availableWallets = listOf(WalletType.GooglePay),
                 linkEmail = null,
-                isGooglePayReady = true,
             )
         )
 
@@ -64,9 +64,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on init with Link enabled in arguments, state should have only Link button`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
+                availableWallets = listOf(WalletType.Link),
                 linkEmail = null,
-                isGooglePayReady = false,
             )
         )
 
@@ -84,9 +83,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on init with GPay & Link enabled in arguments, state should have both GPay & Link buttons`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
+                availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
                 linkEmail = null,
-                isGooglePayReady = true,
             )
         )
 
@@ -100,6 +98,26 @@ class DefaultWalletButtonsInteractorTest {
             assertThat(state.buttonsEnabled).isTrue()
         }
     }
+
+    @Test
+    fun `on init with GPay enabled, Link enabled, & different wallet type order, state should reflect the order`() =
+        runTest {
+            val interactor = createInteractor(
+                arguments = createArguments(
+                    availableWallets = listOf(WalletType.GooglePay, WalletType.Link),
+                )
+            )
+
+            interactor.state.test {
+                val state = awaitItem()
+
+                assertThat(state.walletButtons).hasSize(2)
+                assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
+                assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+
+                assertThat(state.buttonsEnabled).isTrue()
+            }
+        }
 
     @Test
     fun `on button pressed with no arguments, should report unexpected error`() = runTest {
@@ -128,7 +146,7 @@ class DefaultWalletButtonsInteractorTest {
         val errorReporter = FakeErrorReporter()
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
+                availableWallets = listOf(WalletType.Link),
                 linkState = null,
             ),
             errorReporter = errorReporter,
@@ -152,9 +170,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on confirmation handler processing, state for buttons should be disabled`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
+                availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
                 linkEmail = null,
-                isGooglePayReady = true,
             ),
             confirmationHandler = FakeConfirmationHandler().apply {
                 state.value = ConfirmationHandler.State.Confirming(
@@ -177,9 +194,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on Link button without an email, should have expected text`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
+                availableWallets = listOf(WalletType.Link),
                 linkEmail = null,
-                isGooglePayReady = false,
             )
         )
 
@@ -199,9 +215,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on Link button with an email, should have expected text`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
+                availableWallets = listOf(WalletType.Link),
                 linkEmail = "email@email.com",
-                isGooglePayReady = false,
             )
         )
 
@@ -223,8 +238,7 @@ class DefaultWalletButtonsInteractorTest {
         val linkConfiguration = mock<LinkConfiguration>()
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = true,
-                isGooglePayReady = false,
+                availableWallets = listOf(WalletType.Link),
                 linkState = LinkState(
                     configuration = linkConfiguration,
                     loginState = LinkState.LoginState.LoggedOut,
@@ -258,9 +272,8 @@ class DefaultWalletButtonsInteractorTest {
     @Test
     fun `on Google Pay button, should have expected state`() = googlePayButtonRenderTest(
         arguments = createArguments(
-            isLinkEnabled = false,
+            availableWallets = listOf(WalletType.GooglePay),
             linkEmail = null,
-            isGooglePayReady = true,
         ),
         expectedAllowCreditCards = true,
         expectedGooglePayButtonType = GooglePayButtonType.Pay,
@@ -276,9 +289,8 @@ class DefaultWalletButtonsInteractorTest {
     fun `on Google Pay button with configuration for GPay & card acceptance, should have expected state`() =
         googlePayButtonRenderTest(
             arguments = createArguments(
-                isLinkEnabled = false,
+                availableWallets = listOf(WalletType.GooglePay),
                 linkEmail = null,
-                isGooglePayReady = true,
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                     countryCode = "US",
@@ -326,8 +338,7 @@ class DefaultWalletButtonsInteractorTest {
         )
         val interactor = createInteractor(
             arguments = createArguments(
-                isLinkEnabled = false,
-                isGooglePayReady = true,
+                availableWallets = listOf(WalletType.GooglePay),
                 googlePay = PaymentSheet.GooglePayConfiguration(
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
                     countryCode = "CA",
@@ -399,9 +410,8 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     private fun createArguments(
-        isLinkEnabled: Boolean = true,
+        availableWallets: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay),
         linkEmail: String? = null,
-        isGooglePayReady: Boolean = true,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         googlePay: PaymentSheet.GooglePayConfiguration? = null,
         linkState: LinkState? = null,
@@ -412,10 +422,9 @@ class DefaultWalletButtonsInteractorTest {
             PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "seti_123_secret_123")
     ): DefaultWalletButtonsInteractor.Arguments {
         return DefaultWalletButtonsInteractor.Arguments(
-            isLinkEnabled = isLinkEnabled,
             linkEmail = linkEmail,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                isGooglePayReady = isGooglePayReady,
+                availableWallets = availableWallets,
                 linkState = linkState,
             ),
             configuration = CommonConfigurationFactory.create(

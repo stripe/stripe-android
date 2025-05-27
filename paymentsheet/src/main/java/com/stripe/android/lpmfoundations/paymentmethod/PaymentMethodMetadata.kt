@@ -49,6 +49,7 @@ internal data class PaymentMethodMetadata(
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val allowsLinkInSavedPaymentMethods: Boolean,
+    val availableWallets: List<WalletType>,
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
@@ -300,6 +301,11 @@ internal data class PaymentMethodMetadata(
                 allowsPaymentMethodsRequiringShippingAddress = configuration
                     .allowsPaymentMethodsRequiringShippingAddress,
                 allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
+                availableWallets = WalletType.listFrom(
+                    elementsSession = elementsSession,
+                    isGooglePayReady = isGooglePayReady,
+                    linkState = linkState,
+                ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -339,6 +345,11 @@ internal data class PaymentMethodMetadata(
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
+                availableWallets = WalletType.listFrom(
+                    elementsSession = elementsSession,
+                    isGooglePayReady = isGooglePayReady,
+                    linkState = null
+                ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = elementsSession.cardBrandChoice?.eligible ?: false,
@@ -373,6 +384,7 @@ internal data class PaymentMethodMetadata(
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
+                availableWallets = emptyList(),
                 paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
                     isEligible = configuration.cardBrandChoice?.eligible == true,

@@ -355,6 +355,7 @@ class LogLinkGlobalHoldbackExposureTest {
             isGooglePayEnabled = false,
             customer = customer,
             linkSettings = null,
+            orderedPaymentMethodTypesAndWallets = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
             customPaymentMethods = emptyList(),
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,

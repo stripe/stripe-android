@@ -603,6 +603,30 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession has ordered payment method types and wallets when in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = JSONObject(ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS)
+        val session = parser.parse(intent)
+
+        assertThat(session?.orderedPaymentMethodTypesAndWallets).containsExactly(
+            "card",
+            "apple_pay",
+            "google_pay",
+            "afterpay_clearpay",
+            "au_becs_debit",
+        )
+    }
+
+    @Test
     fun `ElementsSession has custom payment methods when they are included in response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(

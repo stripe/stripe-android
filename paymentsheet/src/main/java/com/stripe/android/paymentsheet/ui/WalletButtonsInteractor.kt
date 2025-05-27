@@ -8,6 +8,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -86,28 +87,24 @@ internal class DefaultWalletButtonsInteractor(
         arguments,
         confirmationHandler.state,
     ) { arguments, confirmationState ->
-        val walletButtons = mutableListOf<WalletButtonsInteractor.WalletButton>()
-
-        arguments?.run {
-            if (isLinkEnabled) {
-                walletButtons.add(
-                    WalletButtonsInteractor.WalletButton.Link(
-                        email = linkEmail,
-                    )
-                )
-            }
-
-            if (arguments.paymentMethodMetadata.isGooglePayReady) {
-                walletButtons.add(
-                    WalletButtonsInteractor.WalletButton.GooglePay(
+        val walletButtons = arguments?.run {
+            arguments.paymentMethodMetadata.availableWallets.map { wallet ->
+                when (wallet) {
+                    WalletType.GooglePay -> WalletButtonsInteractor.WalletButton.GooglePay(
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
-                        cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+                        cardBrandFilter = PaymentSheetCardBrandFilter(
+                            cardBrandAcceptance = configuration.cardBrandAcceptance,
+                        ),
+                        billingDetailsCollectionConfiguration = configuration
+                            .billingDetailsCollectionConfiguration,
                     )
-                )
+                    WalletType.Link -> WalletButtonsInteractor.WalletButton.Link(
+                        email = linkEmail,
+                    )
+                }
             }
-        }
+        } ?: emptyList()
 
         WalletButtonsInteractor.State(
             walletButtons = walletButtons,
@@ -156,7 +153,6 @@ internal class DefaultWalletButtonsInteractor(
     }
 
     data class Arguments(
-        val isLinkEnabled: Boolean,
         val linkEmail: String?,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val configuration: CommonConfiguration,
@@ -173,14 +169,12 @@ internal class DefaultWalletButtonsInteractor(
             return DefaultWalletButtonsInteractor(
                 errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
                 arguments = combineAsStateFlow(
-                    linkHandler.isLinkEnabled,
                     linkHandler.linkConfigurationCoordinator.emailFlow,
                     flowControllerViewModel.stateFlow,
                     flowControllerViewModel.configureRequest,
-                ) { isLinkEnabled, linkEmail, flowControllerState, configureRequest ->
+                ) { linkEmail, flowControllerState, configureRequest ->
                     if (flowControllerState != null && configureRequest != null) {
                         Arguments(
-                            isLinkEnabled = isLinkEnabled == true,
                             linkEmail = linkEmail,
                             configuration = flowControllerState.paymentSheetState.config,
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
