@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.PaymentMethod
@@ -18,6 +17,7 @@ internal sealed class PaymentOptionResult(
 ) : Parcelable {
 
     abstract val paymentMethods: List<PaymentMethod>?
+
     /**
      * Contains information about changes on the Link account during the payment method selection flow, regardless
      * of the payment method selection (e.g. if the user Logged in / out to Link).
