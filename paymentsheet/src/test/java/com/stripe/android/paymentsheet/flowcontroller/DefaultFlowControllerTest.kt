@@ -535,7 +535,7 @@ internal class DefaultFlowControllerTest {
             paymentSelection = PaymentSelection.Link(
                 linkAccount = verifiedLinkAccount,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
-                    paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null
                 )
             )
