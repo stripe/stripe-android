@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
+import androidx.annotation.DimenRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -1126,23 +1127,23 @@ class PaymentSheet internal constructor(
                 ) : RowStyle() {
                     constructor(
                         context: Context,
-                        separatorThicknessDp: Int,
-                        startSeparatorInsetDp: Int,
-                        endSeparatorInsetDp: Int,
+                        @DimenRes separatorThicknessRes: Int,
+                        @DimenRes startSeparatorInsetRes: Int,
+                        @DimenRes endSeparatorInsetRes: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int,
+                        @DimenRes additionalVerticalInsetsRes: Int,
+                        @DimenRes horizontalInsetsRes: Int,
                         colorsLight: Colors,
                         colorsDark: Colors
                     ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
+                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
+                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
                         colorsDark = colorsDark
                     )
@@ -1255,25 +1256,25 @@ class PaymentSheet internal constructor(
                 ) : RowStyle() {
                     constructor(
                         context: Context,
-                        separatorThicknessDp: Int,
-                        startSeparatorInsetDp: Int,
-                        endSeparatorInsetDp: Int,
+                        @DimenRes separatorThicknessRes: Int,
+                        @DimenRes startSeparatorInsetRes: Int,
+                        @DimenRes endSeparatorInsetRes: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        checkmarkInsetDp: Int,
-                        additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int,
+                        @DimenRes checkmarkInsetRes: Int,
+                        @DimenRes additionalVerticalInsetsRes: Int,
+                        @DimenRes horizontalInsetsRes: Int,
                         colorsLight: Colors,
                         colorsDark: Colors
                     ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
+                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
+                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetRes),
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
                         colorsDark = colorsDark
                     )
@@ -1337,11 +1338,11 @@ class PaymentSheet internal constructor(
                 ) : RowStyle() {
                     constructor(
                         context: Context,
-                        spacingDp: Int,
-                        additionalInsetsDp: Int
+                        @DimenRes spacingRes: Int,
+                        @DimenRes additionalInsetsRes: Int
                     ) : this(
-                        spacingDp = context.getRawValueFromDimenResource(spacingDp),
-                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                        spacingDp = context.getRawValueFromDimenResource(spacingRes),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsRes)
                     )
 
                     override fun hasSeparators() = false

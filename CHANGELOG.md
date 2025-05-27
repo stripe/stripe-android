@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+* [BREAKING][10854](https://github.com/stripe/stripe-android/pull/10854) Applicable to `ExperimentalEmbeddedPaymentElementApi`, fixed misnaming of `EmbeddedRowStyle` constructor params.
 
 ### Payments
 * [FIXED][10843](https://github.com/stripe/stripe-android/pull/10843) Fix 3DS2 Whitelisting Encoding Issue.
