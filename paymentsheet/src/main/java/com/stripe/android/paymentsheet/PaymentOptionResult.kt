@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -17,6 +18,10 @@ internal sealed class PaymentOptionResult(
 ) : Parcelable {
 
     abstract val paymentMethods: List<PaymentMethod>?
+    /**
+     * Contains information about changes on the Link account during the payment method selection flow, regardless
+     * of the payment method selection (e.g. if the user Logged in / out to Link).
+     */
     abstract val linkAccountInfo: LinkAccountInfo
 
     @Parcelize
@@ -41,7 +46,7 @@ internal sealed class PaymentOptionResult(
         // the list of paymentMethods
         override val paymentMethods: List<PaymentMethod>? = null,
         override val linkAccountInfo: LinkAccountInfo
-        ) : PaymentOptionResult(Activity.RESULT_CANCELED)
+    ) : PaymentOptionResult(Activity.RESULT_CANCELED)
 
     fun toBundle(): Bundle {
         return bundleOf(EXTRA_RESULT to this)
@@ -61,5 +66,5 @@ internal sealed class PaymentOptionResult(
 @Parcelize
 internal data class LinkAccountInfo(
     val linkAccount: LinkAccount?,
-    val lastUpdateReason: LinkAccountUpdate.Value.UpdateReason? = null
-): Parcelable
+    val lastUpdateReason: UpdateReason? = null
+) : Parcelable

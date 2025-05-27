@@ -48,4 +48,3 @@ internal class PaymentOptionContract :
         internal const val EXTRA_ARGS: String = "extra_activity_args"
     }
 }
-
