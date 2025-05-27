@@ -100,8 +100,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
                     paymentElementLoader.load(
                         initializationMode = initializationMode,
                         configuration = targetConfiguration,
-                        isReloadingAfterProcessDeath = false,
-                        initializedViaCompose = true,
+                        metadata = PaymentElementLoader.Metadata(
+                            isReloadingAfterProcessDeath = false,
+                            initializedViaCompose = true,
+                        ),
                     ).onSuccess { state ->
                         cache = ConfigurationCache(
                             arguments = Arguments(
