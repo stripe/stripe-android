@@ -65,9 +65,13 @@ internal interface PaymentElementLoader {
     suspend fun load(
         initializationMode: InitializationMode,
         configuration: CommonConfiguration,
-        isReloadingAfterProcessDeath: Boolean = false,
-        initializedViaCompose: Boolean,
+        metadata: Metadata,
     ): Result<State>
+
+    data class Metadata(
+        val isReloadingAfterProcessDeath: Boolean = false,
+        val initializedViaCompose: Boolean,
+    )
 
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
@@ -149,10 +153,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
-        isReloadingAfterProcessDeath: Boolean,
-        initializedViaCompose: Boolean,
+        metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
-        eventReporter.onLoadStarted(initializedViaCompose)
+        eventReporter.onLoadStarted(metadata.initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = retrieveElementsSession(
@@ -187,7 +190,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
         }
 
-        val metadata = async {
+        val paymentMethodMetadata = async {
             createPaymentMethodMetadata(
                 configuration = configuration,
                 elementsSession = elementsSession,
@@ -200,7 +203,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val customer = async {
             createCustomerState(
                 customerInfo = customerInfo,
-                metadata = metadata.await(),
+                metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
@@ -209,18 +212,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val initialPaymentSelection = async {
             retrieveInitialPaymentSelection(
                 savedSelection = savedSelection,
-                metadata = metadata.await(),
+                metadata = paymentMethodMetadata.await(),
                 customer = customer.await(),
                 isGooglePayReady = isGooglePayReady,
             )
         }
 
         val stripeIntent = elementsSession.stripeIntent
-        val paymentMethodMetadata = metadata.await()
+        val pmMetadata = paymentMethodMetadata.await()
 
         warnUnactivatedIfNeeded(stripeIntent)
 
-        if (!supportsIntent(paymentMethodMetadata)) {
+        if (!supportsIntent(pmMetadata)) {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
         }
@@ -230,7 +233,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customer = customer.await(),
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
-            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethodMetadata = pmMetadata,
         )
 
         logLinkGlobalHoldbackExposure(
@@ -241,12 +244,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         reportSuccessfulLoad(
             elementsSession = elementsSession,
             state = state,
-            isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+            isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
             isGooglePaySupported = isGooglePaySupported(),
             linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
-            paymentMethodMetadata = paymentMethodMetadata
+            paymentMethodMetadata = pmMetadata,
         )
 
         return@runCatching state

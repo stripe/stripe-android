@@ -368,8 +368,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         override suspend fun load(
             initializationMode: PaymentElementLoader.InitializationMode,
             configuration: CommonConfiguration,
-            isReloadingAfterProcessDeath: Boolean,
-            initializedViaCompose: Boolean,
+            metadata: PaymentElementLoader.Metadata,
         ): Result<PaymentElementLoader.State> {
             loadCalledTurbine.add(initializationMode)
             return resultTurbine.awaitItem()

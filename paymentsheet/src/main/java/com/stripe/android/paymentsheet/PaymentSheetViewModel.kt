@@ -224,8 +224,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             paymentElementLoader.load(
                 initializationMode = args.initializationMode,
                 configuration = args.config.asCommonConfiguration(),
-                isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
-                initializedViaCompose = args.initializedViaCompose,
+                metadata = PaymentElementLoader.Metadata(
+                    isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
+                    initializedViaCompose = args.initializedViaCompose,
+                )
             )
         }
 
