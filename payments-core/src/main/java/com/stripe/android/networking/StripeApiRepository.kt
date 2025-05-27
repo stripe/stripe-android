@@ -1579,6 +1579,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
+            params.legacyCustomerEphemeralKey?.let { this["legacy_customer_ephemeral_key"] = it }
             params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
             params.customPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["custom_payment_methods"] = it }
             params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
