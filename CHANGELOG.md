@@ -3,6 +3,8 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ## 21.15.0 - 2025-05-27
+
+### PaymentSheet
 * [BREAKING][10854](https://github.com/stripe/stripe-android/pull/10854) Applicable to `ExperimentalEmbeddedPaymentElementApi`, fixed misnaming of `EmbeddedRowStyle` constructor params.
 
 ### Payments
