@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
-* [BREAKING][10831](https://github.com/stripe/stripe-android/pull/10831) Applicable to ExperimentalEmbeddedPaymentElementApi, Fixed misnaming of EmbeddedRowStyle constructor params
+* [BREAKING][10854](https://github.com/stripe/stripe-android/pull/10854) Applicable to `ExperimentalEmbeddedPaymentElementApi`, fixed misnaming of `EmbeddedRowStyle` constructor params.
 
 ## 21.14.0 - 2025-05-19
 
