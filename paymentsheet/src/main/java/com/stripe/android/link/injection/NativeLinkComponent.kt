@@ -8,6 +8,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -22,7 +23,6 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.paymentsheet.LinkAccountInfo
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -100,7 +100,7 @@ internal interface NativeLinkComponent {
         fun linkLaunchMode(linkLaunchMode: LinkLaunchMode): Builder
 
         @BindsInstance
-        fun linkAccountInfo(linkAccountInfo: LinkAccountInfo): Builder
+        fun linkAccountUpdate(linkAccountUpdate: LinkAccountUpdate.Value): Builder
 
         fun build(): NativeLinkComponent
     }

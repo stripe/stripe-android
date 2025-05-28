@@ -10,6 +10,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -33,8 +34,6 @@ import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.LinkAccountInfo
-import com.stripe.android.paymentsheet.LinkAccountInfo.UpdateReason.PaymentConfirmed
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
@@ -240,7 +239,7 @@ internal class WalletViewModel @Inject constructor(
                 }
                 is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
                     LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(linkAccount)),
+                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                         selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                             details = selectedPaymentDetails,
                             collectedCvc = cvc
@@ -277,7 +276,7 @@ internal class WalletViewModel @Inject constructor(
                     LinkActivityResult.Completed(
                         // After confirmation, clear the link account state so further launches
                         // require authenticating again.
-                        linkAccountUpdate = LinkAccountUpdate.Value(LinkAccountInfo(null, PaymentConfirmed)),
+                        linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                         selectedPayment = null,
                     )
                 )

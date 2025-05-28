@@ -113,7 +113,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
     private fun LinkAccountUpdate.updateLinkAccount() {
         when (this) {
             is LinkAccountUpdate.Value -> {
-                linkAccountHolder.set(linkAccountInfo)
+                linkAccountHolder.set(this)
             }
             LinkAccountUpdate.None -> Unit
         }

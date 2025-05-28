@@ -255,7 +255,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
      * - Preserves the previously selected payment method, if any, in case none is selected in this launch.
      */
     private fun PaymentSelection.withLinkDetails(): PaymentSelection = when (this) {
-        is Link -> when (linkAccountHolder.linkAccountInfo.value.linkAccount) {
+        is Link -> when (linkAccountHolder.linkAccountInfo.value.account) {
             // If link account is null, clear account status and selected payment from payment selection
             null -> copy(
                 selectedPayment = null

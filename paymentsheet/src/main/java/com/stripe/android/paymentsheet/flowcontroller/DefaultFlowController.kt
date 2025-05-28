@@ -266,7 +266,7 @@ internal class DefaultFlowController @Inject internal constructor(
             val shouldPresentLinkInsteadOfPaymentOptions = FeatureFlags.linkProminenceInFlowController.isEnabled &&
                 paymentSelection is Link &&
                 linkConfiguration != null &&
-                linkAccountInfo.linkAccount?.accountStatus == Verified
+                linkAccountInfo.account?.accountStatus == Verified
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(
@@ -344,7 +344,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is LinkAccountUpdate.Value -> {
                 val currentState = viewModel.state ?: return
                 val metadata = currentState.paymentSheetState.paymentMethodMetadata
-                val accountStatus = linkAccountInfo.linkAccount?.accountStatus ?: AccountStatus.SignedOut
+                val accountStatus = account?.accountStatus ?: AccountStatus.SignedOut
                 val linkState = metadata.linkState?.copy(loginState = accountStatus.toLoginState())
                 viewModel.state = currentState.copyPaymentSheetState(
                     metadata = metadata.copy(linkState = linkState),

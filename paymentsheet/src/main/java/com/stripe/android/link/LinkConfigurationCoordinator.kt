@@ -13,7 +13,6 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,7 +52,7 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     override val emailFlow: StateFlow<String?> = componentFlow
         .flatMapLatestAsStateFlow { component ->
             if (component?.linkAccountManager?.linkAccountInfo != null) {
-                component.linkAccountManager.linkAccountInfo.mapAsStateFlow { it.linkAccount }
+                component.linkAccountManager.linkAccountInfo.mapAsStateFlow { it.account }
             } else {
                 stateFlowOf(null)
             }

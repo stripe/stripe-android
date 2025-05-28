@@ -1,8 +1,8 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.LinkAccountInfo
 import kotlinx.parcelize.Parcelize
 
 internal sealed class LinkActivityResult : Parcelable {
@@ -59,8 +59,21 @@ internal sealed class LinkActivityResult : Parcelable {
 internal sealed interface LinkAccountUpdate : Parcelable {
     @Parcelize
     data class Value(
-        val linkAccountInfo: LinkAccountInfo
-    ) : LinkAccountUpdate
+        val account: LinkAccount?,
+        val lastUpdateReason: UpdateReason? = null
+    ) : LinkAccountUpdate {
+        enum class UpdateReason {
+            /**
+             * The user has logged out of Link.
+             */
+            LoggedOut,
+
+            /**
+             * The user has confirmed a payment method in Link.
+             */
+            PaymentConfirmed
+        }
+    }
 
     @Parcelize
     data object None : LinkAccountUpdate

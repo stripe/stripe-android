@@ -115,7 +115,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         cardBrandFilter = DefaultCardBrandFilter,
         payload = EditCardPayload.create(
             card = cardPaymentDetails,
-            billingPhoneNumber = linkAccountManager.linkAccountInfo.value.linkAccount?.unredactedPhoneNumber
+            billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
         ),
         addressCollectionMode = AddressCollectionMode.Automatic,
         onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
