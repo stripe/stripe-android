@@ -24,15 +24,18 @@ data class PaymentOption internal constructor(
      * For example, "···· 4242" for a Visa ending in 4242.
      */
     val label: String,
+    private val _shippingDetails: AddressDetails?,
+
+    private val imageLoader: suspend () -> Drawable,
+) {
 
     /**
      * A shipping address that the user provided during checkout.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val shippingDetails: AddressDetails?,
+    val shippingDetails: AddressDetails?
+        get() = _shippingDetails
 
-    private val imageLoader: suspend () -> Drawable,
-) {
     @Deprecated("Not intended for public use.")
     constructor(
         @DrawableRes
@@ -41,7 +44,7 @@ data class PaymentOption internal constructor(
     ) : this(
         drawableResourceId = drawableResourceId,
         label = label,
-        shippingDetails = null,
+        _shippingDetails = null,
         imageLoader = errorImageLoader,
     )
 
