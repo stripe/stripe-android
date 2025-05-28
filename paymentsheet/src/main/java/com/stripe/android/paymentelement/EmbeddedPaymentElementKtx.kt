@@ -68,12 +68,6 @@ fun rememberEmbeddedPaymentElement(
             .build()
     }
 
-    if (
-        builder.rowSelectionBehavior is EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction
-    ) {
-        embeddedPaymentElement.clearPaymentOption()
-    }
-
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     return embeddedPaymentElement
