@@ -8,7 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.FetchClientSecret
-import com.stripe.android.connect.PrivateBetaConnectSDK
+
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
@@ -32,7 +32,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(PrivateBetaConnectSDK::class)
+
 @RunWith(RobolectricTestRunner::class)
 class EmbeddedComponentCoordinatorTest {
 

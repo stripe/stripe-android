@@ -1,6 +1,6 @@
 package com.stripe.android.connect
 
-@OptIn(PrivateBetaConnectSDK::class)
+
 internal class AccountOnboardingDialogFragment :
     StripeComponentDialogFragment<AccountOnboardingView, AccountOnboardingListener, AccountOnboardingProps>() {
 

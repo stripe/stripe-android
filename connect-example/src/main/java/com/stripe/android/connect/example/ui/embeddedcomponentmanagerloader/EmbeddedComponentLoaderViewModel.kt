@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
-import com.stripe.android.connect.PrivateBetaConnectSDK
+
 import com.stripe.android.connect.example.core.Fail
 import com.stripe.android.connect.example.core.Loading
 import com.stripe.android.connect.example.core.Success
@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@OptIn(PrivateBetaConnectSDK::class)
+
 @HiltViewModel
 class EmbeddedComponentLoaderViewModel @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,

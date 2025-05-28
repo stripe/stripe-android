@@ -8,7 +8,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 
-@OptIn(PrivateBetaConnectSDK::class)
 internal fun Any.toComponentPropsJsonObject(): JsonObject {
     return when (this) {
         EmptyProps -> JsonObject(emptyMap())
@@ -20,6 +19,5 @@ internal fun Any.toComponentPropsJsonObject(): JsonObject {
 /**
  * Empty props.
  */
-@PrivateBetaConnectSDK
 @Parcelize
 internal data object EmptyProps : Parcelable

@@ -1,7 +1,7 @@
 package com.stripe.android.connect.webview.serialization
 
 import android.content.Context
-import com.stripe.android.connect.PrivateBetaConnectSDK
+
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import kotlinx.serialization.Serializable
 import java.io.IOException
@@ -14,7 +14,7 @@ internal data class CustomFontSourceJs(
     val src: String,
 )
 
-@OptIn(PrivateBetaConnectSDK::class)
+
 internal fun CustomFontSource.toJs(context: Context): CustomFontSourceJs {
     val base64FontData = convertFontFileToBase64String(context, assetsFilePath)
     return CustomFontSourceJs(

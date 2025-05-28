@@ -18,7 +18,7 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(PrivateBetaConnectSDK::class)
+
 class StripeComponentDialogFragmentViewTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
