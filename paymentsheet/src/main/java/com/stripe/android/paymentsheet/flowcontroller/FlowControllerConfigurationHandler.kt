@@ -131,6 +131,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             previousConfig = viewModel.state?.config,
             newState = state,
             newConfig = configuration,
+            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
         )
 
         withContext(uiContext) {

@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.WalletsButtonPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -391,6 +392,7 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
+    @OptIn(WalletsButtonPreview::class)
     @Composable
     fun FlowControllerUi(
         flowController: PaymentSheet.FlowController,
@@ -420,6 +422,8 @@ internal class PaymentSheetPlaygroundActivity :
         LaunchedEffect(localFlowControllerState?.addressDetails) {
             flowController.shippingDetails = localFlowControllerState?.addressDetails
         }
+
+        flowController.WalletButtons()
 
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,

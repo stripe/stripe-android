@@ -29,6 +29,7 @@ internal class PaymentOptionContract :
         val state: PaymentSheetState.Full,
         val configuration: PaymentSheet.Configuration,
         val enableLogging: Boolean,
+        val walletButtonsAlreadyShown: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
     ) : ActivityStarter.Args {
