@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -256,7 +257,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     linkAccountUpdate = LinkAccountUpdate.None
                 )
                 LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed)
                 )
             }
         )
