@@ -71,8 +71,14 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
-                rowSelectionImmediateActionHandler.prepareRowSelectionCallbackFromForm(result)
+                val oldSelection = selectionHolder.selection.value
                 selectionHolder.set(result.selection)
+                result.selection?.let {
+                    rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback(
+                        oldSelection = oldSelection,
+                        newSelection = result.selection
+                    )
+                }
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
@@ -88,10 +94,14 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 is ManageResult.Error -> Unit
                 is ManageResult.Complete -> {
                     customerStateHolder.setCustomerState(result.customerState)
-                    if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                        rowSelectionImmediateActionHandler.prepareRowSelectionCallbackSavedPaymentRow(result.selection)
-                    }
+                    val oldSelection = selectionHolder.selection.value
                     selectionHolder.set(result.selection)
+                    if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
+                        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback(
+                            oldSelection = oldSelection,
+                            newSelection = result.selection
+                        )
+                    }
                 }
             }
         }
