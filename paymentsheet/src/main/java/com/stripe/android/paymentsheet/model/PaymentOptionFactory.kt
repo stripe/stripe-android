@@ -13,7 +13,7 @@ internal class PaymentOptionFactory @Inject constructor(
         return PaymentOption(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
-            shippingAddress = selection.shippingAddress,
+            shippingDetails = selection.shippingAddress,
             imageLoader = {
                 iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
