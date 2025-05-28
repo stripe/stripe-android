@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -140,7 +139,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = ::setSelection,
+            selectionUpdater = ::setSelectionAfterUserClick,
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
@@ -164,10 +163,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             formTypeForCode = { code ->
                 formHelper.formTypeForCode(code)
             },
-            onFormFieldValuesChanged = { formFieldValues, selectedPaymentMethodCode ->
-                prepareRowSelectionCallbackNonFormRows(selectedPaymentMethodCode)
-                formHelper.onFormFieldValuesChanged(formFieldValues, selectedPaymentMethodCode)
-            },
+            onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = {
                 sheetLauncher?.launchManage(
                     paymentMethodMetadata = paymentMethodMetadata,
@@ -191,9 +187,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
             onSelectSavedPaymentMethod = {
-                val selection = PaymentSelection.Saved(it)
-                prepareRowSelectionCallbackSavedPaymentRow(selection)
-                setSelection(selection)
+                setSelectionAfterUserClick(PaymentSelection.Saved(it))
             },
             walletsState = walletsState,
             canShowWalletsInline = true,
@@ -217,12 +211,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 }
             },
             linkRowClicked = { updatedSelection ->
-                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!)
-                setSelection(updatedSelection)
+                setSelectionAfterUserClick(updatedSelection)
             },
             googlePayRowClicked = { updatedSelection ->
-                prepareRowSelectionCallbackNonFormRows(updatedSelection.code()!!)
-                setSelection(updatedSelection)
+                setSelectionAfterUserClick(updatedSelection)
             }
         )
     }
@@ -256,16 +248,18 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         )
     }
 
+    private fun setSelectionAfterUserClick(paymentSelection: PaymentSelection?) {
+        val oldSelection = selectionHolder.selection.value
+        selectionHolder.set(paymentSelection)
+
+        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback(
+            oldSelection = oldSelection,
+            newSelection = paymentSelection
+        )
+    }
+
     private fun setSelection(paymentSelection: PaymentSelection?) {
         selectionHolder.set(paymentSelection)
-    }
-
-    private fun prepareRowSelectionCallbackSavedPaymentRow(paymentSelection: PaymentSelection.Saved) {
-        rowSelectionImmediateActionHandler.prepareRowSelectionCallbackSavedPaymentRow(paymentSelection)
-    }
-
-    private fun prepareRowSelectionCallbackNonFormRows(selectionCode: String) {
-        rowSelectionImmediateActionHandler.prepareRowSelectionCallbackNonFormRows(selectionCode)
     }
 
     @Parcelize
