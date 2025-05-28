@@ -352,7 +352,7 @@ internal class PaymentSheetPlaygroundViewModel(
         flowControllerState.update { existingState ->
             existingState?.copy(
                 selectedPaymentOption = paymentOption,
-                addressDetails = paymentOption?.shippingAddress,
+                addressDetails = paymentOption?.shippingDetails,
             )
         }
     }

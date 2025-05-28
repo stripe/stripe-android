@@ -29,7 +29,7 @@ data class PaymentOption internal constructor(
      * A shipping address that the user provided during checkout.
      */
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val shippingAddress: AddressDetails?,
+    val shippingDetails: AddressDetails?,
 
     private val imageLoader: suspend () -> Drawable,
 ) {
@@ -41,7 +41,7 @@ data class PaymentOption internal constructor(
     ) : this(
         drawableResourceId = drawableResourceId,
         label = label,
-        shippingAddress = null,
+        shippingDetails = null,
         imageLoader = errorImageLoader,
     )
 
