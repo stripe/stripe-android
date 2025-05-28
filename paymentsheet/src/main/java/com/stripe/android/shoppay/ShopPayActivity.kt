@@ -94,10 +94,10 @@ internal class ShopPayActivity : ComponentActivity() {
 
                         Button(
                             onClick = {
-                                dismissWithResult(ShopPayActivityResult.Canceled)
+                                dismissWithResult(ShopPayActivityResult.Failed(Throwable("Failed")))
                             }
                         ) {
-                            Text("Cancel")
+                            Text("Fail")
                         }
                     }
                 }
