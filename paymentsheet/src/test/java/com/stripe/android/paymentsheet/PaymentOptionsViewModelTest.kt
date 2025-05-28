@@ -21,6 +21,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -321,15 +322,18 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `Does not select Link when user is logged out of their Link account`() = runTest {
         val viewModel = createViewModel(
-            linkState = LinkState(
-                configuration = mock(),
-                signupMode = null,
-                loginState = LinkState.LoginState.LoggedOut,
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                availableWallets = listOf(WalletType.Link),
+                linkState = LinkState(
+                    configuration = mock(),
+                    signupMode = null,
+                    loginState = LinkState.LoginState.LoggedOut,
+                )
             ),
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.paymentMethodMetadata.value?.availableWallets).contains(WalletType.Link)
     }
 
     @Test
@@ -339,7 +343,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
+        assertThat(viewModel.paymentMethodMetadata.value?.availableWallets).doesNotContain(WalletType.Link)
     }
 
     @Test
@@ -830,11 +834,7 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `Displays Link wallet button if customer has not saved PMs and Google Pay is not available`() = runTest {
         val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-            linkState = LinkState(
-                configuration = mock(),
-                signupMode = null,
-                loginState = LinkState.LoginState.NeedsVerification,
-            ),
+            availableWallets = listOf(WalletType.Link),
             isGooglePayReady = false,
         )
 

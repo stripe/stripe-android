@@ -7,8 +7,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -17,18 +15,12 @@ import javax.inject.Singleton
 internal class LinkHandler @Inject constructor(
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
 ) {
-    private val _isLinkEnabled = MutableStateFlow<Boolean?>(null)
-    val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
-
-    private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
-    val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
+    private val linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
 
     fun setupLink(state: LinkState?) {
-        _isLinkEnabled.value = state != null
-
         if (state == null) return
 
-        _linkConfiguration.value = state.configuration
+        linkConfiguration.value = state.configuration
     }
 
     suspend fun setupLinkWithEagerLaunch(state: LinkState?): Boolean {

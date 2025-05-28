@@ -46,6 +46,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -222,7 +223,10 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `link button should not be enabled when editing`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
+        val viewModel = createViewModel(
+            availableWallets = listOf(WalletType.Link),
+            isLinkAvailable = true,
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
@@ -240,7 +244,10 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `link button should not be enabled when processing`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
+        val viewModel = createViewModel(
+            availableWallets = listOf(WalletType.Link),
+            isLinkAvailable = true
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
@@ -312,7 +319,10 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Errors are cleared when checking out with Link`() {
-        val viewModel = createViewModel(isLinkAvailable = true)
+        val viewModel = createViewModel(
+            availableWallets = listOf(WalletType.Link),
+            isLinkAvailable = true,
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
@@ -731,7 +741,11 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `link flow updates the payment sheet before and after`() = runTest {
         RecordingLinkPaymentLauncher.test {
-            val viewModel = createViewModel(isLinkAvailable = true, linkPaymentLauncher = launcher)
+            val viewModel = createViewModel(
+                availableWallets = listOf(WalletType.Link),
+                isLinkAvailable = true,
+                linkPaymentLauncher = launcher
+            )
             val scenario = activityScenario(viewModel)
 
             scenario.launch(intent).onActivity {
@@ -1213,6 +1227,7 @@ internal class PaymentSheetActivityTest {
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         loadDelay: Duration = Duration.ZERO,
+        availableWallets: List<WalletType> = emptyList(),
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
         linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
@@ -1236,6 +1251,7 @@ internal class PaymentSheetActivityTest {
                     stripeIntent = paymentIntent,
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
                     isGooglePayAvailable = isGooglePayAvailable,
+                    availableWallets = availableWallets,
                     linkState = LinkState(
                         configuration = mock(),
                         loginState = LinkState.LoginState.LoggedOut,

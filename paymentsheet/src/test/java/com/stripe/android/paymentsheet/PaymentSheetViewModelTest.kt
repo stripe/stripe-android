@@ -37,6 +37,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -635,6 +636,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Enables Link when user is logged out of their Link account`() = runTest {
         val viewModel = createViewModel(
+            availableWallets = listOf(WalletType.Link),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedOut,
@@ -642,7 +644,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
+        assertThat(viewModel.paymentMethodMetadata.value?.availableWallets).contains(WalletType.Link)
     }
 
     @Test
@@ -651,7 +653,7 @@ internal class PaymentSheetViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
+        assertThat(viewModel.paymentMethodMetadata.value?.availableWallets).doesNotContain(WalletType.Link)
     }
 
     @Test
@@ -1943,6 +1945,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Hides Google Pay wallet button if Google Pay is not available`() = runTest {
         val viewModel = createViewModel(
+            availableWallets = listOf(WalletType.Link),
             isGooglePayReady = false,
             linkState = LinkState(
                 configuration = mock(),
@@ -1961,6 +1964,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Shows Link wallet button if Link is available`() = runTest {
         val viewModel = createViewModel(
+            availableWallets = listOf(WalletType.Link),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedOut,
@@ -3514,6 +3518,7 @@ internal class PaymentSheetViewModelTest {
         linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
         customerRepository: CustomerRepository = FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
         shouldFailLoad: Boolean = false,
+        availableWallets: List<WalletType> = emptyList(),
         linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
@@ -3526,6 +3531,7 @@ internal class PaymentSheetViewModelTest {
         paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
             stripeIntent = stripeIntent,
             shouldFail = shouldFailLoad,
+            availableWallets = availableWallets,
             linkState = linkState,
             customer = customer,
             delay = delay,

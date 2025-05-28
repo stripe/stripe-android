@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_SELECTION
 import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -42,7 +41,6 @@ class LinkHandlerTest {
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse
             )
         )
-        assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
 
@@ -55,7 +53,6 @@ class LinkHandlerTest {
                 signupMode = LinkSignupMode.AlongsideSaveForFutureUse
             )
         )
-        assertThat(handler.isLinkEnabled.first()).isTrue()
         assertThat(savedStateHandle.get<PaymentSelection>(SAVE_SELECTION)).isNull()
     }
 
