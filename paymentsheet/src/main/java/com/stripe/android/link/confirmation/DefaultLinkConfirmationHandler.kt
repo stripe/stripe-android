@@ -128,7 +128,9 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc
                 ),
                 extraParams = null,
-                optionsParams = null,
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    cvc = cvc
+                ),
                 shouldSave = false
             )
         }
