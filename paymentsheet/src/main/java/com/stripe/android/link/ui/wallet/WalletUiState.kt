@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.strings.transformations.Replace
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
@@ -97,13 +98,23 @@ internal data class WalletUiState(
     }
 }
 
-private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
+internal fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
     isSettingUp: Boolean,
     merchantName: String,
 ): ResolvableString? {
     return when (this) {
         is ConsumerPaymentDetails.BankAccount -> {
-            resolvableString(R.string.stripe_wallet_bank_account_terms)
+            val transformations = listOf(
+                Replace(
+                    original = "<terms>",
+                    replacement = "<a href=\"https://stripe.com/ach-payments/authorization\">",
+                ),
+                Replace(
+                    original = "</terms>",
+                    replacement = "</a>",
+                ),
+            )
+            resolvableString(R.string.stripe_wallet_bank_account_terms, transformations = transformations)
         }
         is Card,
         is ConsumerPaymentDetails.Passthrough -> {

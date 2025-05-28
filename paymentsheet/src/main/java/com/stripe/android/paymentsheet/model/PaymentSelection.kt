@@ -75,6 +75,7 @@ internal sealed class PaymentSelection : Parcelable {
         val linkAccount: LinkAccount? = null,
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
+        val mandate: ResolvableString? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
