@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.15.1 - 2025-05-28
+
+### PaymentSheet
+* [FIXED][10870](https://github.com/stripe/stripe-android/pull/10870) Fixed an issue with `EmbeddedPaymentElement` where `View more` and `Edit` buttons would completely fill the parent's height if `height` modifier is used by the parent composable.
+
 ## 21.15.0 - 2025-05-27
 
 ### PaymentSheet
