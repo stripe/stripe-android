@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -13,6 +14,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -34,6 +36,8 @@ internal open class FakeLinkAccountManager(
         MutableStateFlow<ConsumerPaymentDetails?>(TestFactory.CONSUMER_PAYMENT_DETAILS)
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
+    override var cachedShippingAddresses: ConsumerShippingAddresses? = null
+
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
@@ -53,6 +57,11 @@ internal open class FakeLinkAccountManager(
         set(value) {
             field = value
             _consumerPaymentDetails.value = value.getOrNull()
+        }
+    var listShippingAddressesResult: Result<ConsumerShippingAddresses> = Result.success(CONSUMER_SHIPPING_ADDRESSES)
+        set(value) {
+            field = value
+            cachedShippingAddresses = value.getOrNull()
         }
 
     private val lookupTurbine = Turbine<LookupCall>()
@@ -188,6 +197,10 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
         return listPaymentDetailsResult
+    }
+
+    override suspend fun listShippingAddresses(): Result<ConsumerShippingAddresses> {
+        return listShippingAddressesResult
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String) = deletePaymentDetailsResult
