@@ -104,6 +104,12 @@ class PhoneNumberController private constructor(
 
     fun getLocalNumber() = _fieldValue.value.removePrefix(phoneNumberFormatter.value.prefix)
 
+    fun formatLocalNumber(): String {
+        val localNumber = getLocalNumber()
+        val regionFormatter = phoneNumberFormatter.value as? PhoneNumberFormatter.WithRegion
+        return regionFormatter?.formatNumberNational(localNumber) ?: localNumber
+    }
+
     fun onValueChange(displayFormatted: String) {
         _fieldValue.value = phoneNumberFormatter.value.userInputFilter(displayFormatted)
     }

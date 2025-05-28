@@ -12,6 +12,7 @@ object FeatureFlags {
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val linkPMsInSPM = FeatureFlag("Link PMs in SPM")
     val linkProminenceInFlowController = FeatureFlag("Link Prominence in FlowController")
+    val linkDoi = FeatureFlag("Link DOI")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

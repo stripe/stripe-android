@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.requiresNameCollection
@@ -22,6 +23,8 @@ constructor(
     val signupMode: LinkSignupMode?,
     val fields: List<LinkSignupField>,
     val prefillEligibleFields: Set<LinkSignupField>,
+    val allowsDefaultOptIn: Boolean,
+    val didAskToChangeSignupDetails: Boolean = false,
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,
     internal val signUpState: SignUpState = SignUpState.InputtingPrimaryField,
@@ -39,7 +42,13 @@ constructor(
     val useLink: Boolean
         get() = when (signupMode) {
             LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null && !apiFailed
-            LinkSignupMode.InsteadOfSaveForFutureUse -> isExpanded && !apiFailed
+            LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                if (allowsDefaultOptIn) {
+                    userInput != null && !apiFailed
+                } else {
+                    isExpanded && !apiFailed
+                }
+            }
             null -> false
         }
 
@@ -48,6 +57,8 @@ constructor(
         fun create(
             signupMode: LinkSignupMode,
             config: LinkConfiguration,
+            initialEmail: String? = null,
+            initialPhone: String? = null,
             isExpanded: Boolean = false,
         ): InlineSignupViewState {
             val isAlternativeFlow = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
@@ -83,13 +94,28 @@ constructor(
                 }
             }
 
+            val allowsDefaultOptIn = FeatureFlags.linkDoi.isEnabled &&
+                config.stripeIntent.countryCode == "US" &&
+                config.allowDefaultOptIn &&
+                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
+
+            val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()
+
+            val signupState = if (allowsDefaultOptIn && missingDataForDefaultOptIn) {
+                SignUpState.InputtingRemainingFields
+            } else {
+                SignUpState.InputtingPrimaryField
+            }
+
             return InlineSignupViewState(
                 userInput = null,
                 merchantName = config.merchantName,
                 signupMode = signupMode,
                 fields = fields,
                 prefillEligibleFields = prefillEligibleFields,
-                isExpanded = isExpanded,
+                isExpanded = isExpanded || allowsDefaultOptIn,
+                allowsDefaultOptIn = allowsDefaultOptIn,
+                signUpState = signupState,
             )
         }
     }

@@ -570,6 +570,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
+            allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
         )
 
         // CBF isn't currently supported in the web flow.

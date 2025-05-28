@@ -446,5 +446,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 ConsumerSignUpConsentAction.Implied
             SignUpConsentAction.ImpliedWithPrefilledEmail ->
                 ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
+            SignUpConsentAction.DefaultOptIn ->
+                ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledAll
         }
 }

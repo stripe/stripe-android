@@ -14,15 +14,12 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -78,25 +75,25 @@ sealed class EmbeddableImage {
 @Composable
 private fun rememberDrawableImages(
     drawableImageLoader: Map<String, EmbeddableImage.Drawable>,
-    imageAlign: PlaceholderVerticalAlign
+    imageAlign: PlaceholderVerticalAlign,
+    textStyle: TextStyle,
 ): Map<String, InlineTextContent> {
     return drawableImageLoader.entries.associate { (key, value) ->
         val painter = painterResource(value.id)
         val height = painter.intrinsicSize.height
         val width = painter.intrinsicSize.width
-        val newWidth = MaterialTheme.typography.body1.fontSize * (width / height)
+
+        val lineHeight = textStyle.fontSize
+        val newWidth = lineHeight * (width / height)
 
         key to InlineTextContent(
-            Placeholder(
-                newWidth,
-                MaterialTheme.typography.body1.fontSize,
-                imageAlign
+            placeholder = Placeholder(
+                width = newWidth,
+                height = lineHeight,
+                placeholderVerticalAlign = imageAlign
             ),
             children = {
                 Image(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(),
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
@@ -298,7 +295,8 @@ fun HtmlWithCustomOnClick(
         drawableImageLoader = imageLoader.filterValues {
             it is EmbeddableImage.Drawable
         } as Map<String, EmbeddableImage.Drawable>,
-        imageAlign = imageAlign
+        imageAlign = imageAlign,
+        textStyle = style,
     )
 
     @Suppress("UNCHECKED_CAST")

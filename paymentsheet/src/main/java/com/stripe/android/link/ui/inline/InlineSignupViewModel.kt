@@ -38,7 +38,7 @@ internal const val LOOKUP_DEBOUNCE_MS = 1000L
 internal class InlineSignupViewModel(
     val initialUserInput: UserInput?,
     val signupMode: LinkSignupMode,
-    config: LinkConfiguration,
+    private val config: LinkConfiguration,
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
@@ -63,17 +63,23 @@ internal class InlineSignupViewModel(
 
     private val hasInitialUserInput = initialUserInput != null
 
-    private val initialViewState = InlineSignupViewState.create(signupMode, config, hasInitialUserInput)
+    private val initialEmail = initialUserInput?.email()
+    private val initialPhone = initialUserInput?.phone()
+    private val initialName = initialUserInput?.name()
+    private val initialCountry = initialUserInput?.country()
+
+    private val initialViewState = InlineSignupViewState.create(
+        signupMode = signupMode,
+        config = config,
+        initialEmail = initialEmail,
+        initialPhone = initialPhone,
+        isExpanded = hasInitialUserInput,
+    )
     private val _viewState = MutableStateFlow(initialViewState)
     val viewState: StateFlow<InlineSignupViewState> = _viewState
 
     private val showOptionalLabel = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
     private val prefillEligibleFields = initialViewState.prefillEligibleFields
-
-    private val initialEmail = initialUserInput?.email()
-    private val initialPhone = initialUserInput?.phone()
-    private val initialName = initialUserInput?.name()
-    private val initialCountry = initialUserInput?.country()
 
     private val prefilledEmail = config.customerInfo.email.takeIf { Email in prefillEligibleFields }
     private val prefilledPhone = config.customerInfo.phone.takeIf { Phone in prefillEligibleFields }.orEmpty()
@@ -144,6 +150,12 @@ internal class InlineSignupViewModel(
         }
     }
 
+    fun changeSignupDetails() {
+        _viewState.update {
+            it.copy(didAskToChangeSignupDetails = true)
+        }
+    }
+
     private fun watchUserInput() {
         viewModelScope.launch {
             if (initialViewState.isShowingPhoneFirst) {
@@ -202,7 +214,7 @@ internal class InlineSignupViewModel(
                 onStateChanged(SignUpState.VerifyingEmail)
                 lookupConsumerEmail(email)
             } else {
-                onStateChanged(SignUpState.InputtingPrimaryField)
+                onStateChanged(initialViewState.signUpState)
             }
         }
     }
@@ -226,6 +238,7 @@ internal class InlineSignupViewModel(
                 consentAction = signUpMode.toConsentAction(
                     hasPrefilledEmail = prefilledEmail != null,
                     hasPrefilledPhone = prefilledPhone.isNotBlank(),
+                    defaultOptIn = initialViewState.allowsDefaultOptIn,
                 )
             ).takeIf { isNameValid }
         } else {
@@ -308,7 +321,8 @@ internal class InlineSignupViewModel(
 
     private fun LinkSignupMode.toConsentAction(
         hasPrefilledEmail: Boolean,
-        hasPrefilledPhone: Boolean
+        hasPrefilledPhone: Boolean,
+        defaultOptIn: Boolean,
     ): SignUpConsentAction {
         return when (this) {
             LinkSignupMode.AlongsideSaveForFutureUse -> {
@@ -319,6 +333,8 @@ internal class InlineSignupViewModel(
             }
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
+                    defaultOptIn ->
+                        SignUpConsentAction.DefaultOptIn
                     hasPrefilledEmail && hasPrefilledPhone ->
                         SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
                     hasPrefilledEmail ->
