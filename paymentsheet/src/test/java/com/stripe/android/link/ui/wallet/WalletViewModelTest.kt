@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -15,6 +16,7 @@ import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -677,6 +679,97 @@ class WalletViewModelTest {
         )
 
         assertThat(viewModel.uiState.value.isSettingUp).isTrue()
+    }
+
+    @Test
+    fun `Loads default shipping address in payment method selection mode`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        linkAccountManager.listShippingAddressesResult = Result.success(CONSUMER_SHIPPING_ADDRESSES)
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            passthroughModeEnabled = false,
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+            ),
+            dismissWithResult = ::dismissWithResult,
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult?.shippingAddress).isEqualTo(CONSUMER_SHIPPING_ADDRESSES.addresses.first())
+    }
+
+    @Test
+    fun `Does not load default shipping address if not payment method selection mode`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        linkAccountManager.listShippingAddressesResult = Result.success(CONSUMER_SHIPPING_ADDRESSES)
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            passthroughModeEnabled = false,
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.Full,
+            dismissWithResult = ::dismissWithResult,
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult?.shippingAddress).isNull()
+    }
+
+    @Test
+    fun `Failure while loading default shipping address still allows completion`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+        linkAccountManager.listShippingAddressesResult = Result.failure(APIConnectionException())
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            passthroughModeEnabled = false,
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+            ),
+            dismissWithResult = ::dismissWithResult,
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult?.shippingAddress).isNull()
     }
 
     private fun createViewModel(
