@@ -28,6 +28,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.FakeLinkProminenceFeatureProvider
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -106,7 +107,7 @@ internal class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(it.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, null, listOf())
+                PaymentOptionResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
             )
         }
     }
@@ -141,7 +142,7 @@ internal class PaymentOptionsActivityTest {
 
             val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
             assertThat(result).isEqualTo(
-                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods)
+                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods, LinkAccountUpdate.Value(null))
             )
         }
     }
@@ -251,6 +252,7 @@ internal class PaymentOptionsActivityTest {
                 PaymentOptionResult.Succeeded(
                     paymentSelection = PaymentSelection.GooglePay,
                     paymentMethods = emptyList(),
+                    linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
             )
         }

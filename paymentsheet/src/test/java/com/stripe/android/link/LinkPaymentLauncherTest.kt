@@ -89,7 +89,7 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT,
+                linkAccount = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 useLinkExpress = true,
                 launchMode = LinkLaunchMode.Full
             )
@@ -101,9 +101,8 @@ internal class LinkPaymentLauncherTest {
                     LinkActivityContract.Args(
                         configuration = TestFactory.LINK_CONFIGURATION,
                         startWithVerificationDialog = true,
-                        linkAccount = TestFactory.LINK_ACCOUNT,
+                        linkAccount = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         launchMode = LinkLaunchMode.Full,
-                        linkAccountUpdateReason = linkAccountUpdateReason
                     )
                 )
 
@@ -123,7 +122,7 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT,
+                linkAccount = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 useLinkExpress = false,
                 launchMode = LinkLaunchMode.Full
             )
@@ -232,7 +231,7 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.present(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                linkAccount = TestFactory.LINK_ACCOUNT,
+                linkAccount = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 useLinkExpress = true,
                 launchMode = LinkLaunchMode.Full
             )
@@ -264,7 +263,7 @@ internal class LinkPaymentLauncherTest {
 
                 linkPaymentLauncher.present(
                     configuration = TestFactory.LINK_CONFIGURATION,
-                    linkAccount = TestFactory.LINK_ACCOUNT,
+                    linkAccount = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     useLinkExpress = true,
                     launchMode = LinkLaunchMode.Full
                 )

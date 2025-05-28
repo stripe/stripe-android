@@ -187,7 +187,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.signInWithUserInput(UserInput.SignIn(TestFactory.EMAIL))
 
         assertThat(linkRepository.callCount).isEqualTo(1)
-        assertThat(accountManager.linkAccount.value).isNotNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
     }
 
     @Test
@@ -233,7 +233,7 @@ class DefaultLinkAccountManagerTest {
         )
 
         assertThat(linkRepository.callCount).isEqualTo(1)
-        assertThat(accountManager.linkAccount.value).isNotNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
     }
 
     @Test
@@ -567,7 +567,7 @@ class DefaultLinkAccountManagerTest {
 
         assertThat(linkRepository.createCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
-        assertThat(accountManager.linkAccount.value).isNotNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
     }
 
     @Test
@@ -587,7 +587,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.lookupConsumer(TestFactory.EMAIL, false)
 
         assertThat(linkRepository.callCount).isEqualTo(0)
-        assertThat(accountManager.linkAccount.value).isNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNull()
     }
 
     @Test
@@ -603,7 +603,7 @@ class DefaultLinkAccountManagerTest {
 
         accountManager.startVerification()
 
-        assertThat(accountManager.linkAccount.value).isNotNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
     }
 
@@ -850,7 +850,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(call.sessionId).isEqualTo(TestFactory.LINK_CONFIGURATION.elementsSessionId)
 
         assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
-        assertThat(accountManager.linkAccount.value).isNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNull()
 
         linkRepository.ensureAllEventsConsumed()
     }
@@ -874,7 +874,7 @@ class DefaultLinkAccountManagerTest {
         linkRepository.awaitMobileLookup()
 
         assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
-        assertThat(accountManager.linkAccount.value?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+        assertThat(accountManager.linkAccountInfo.value.account!!.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
 
         linkRepository.ensureAllEventsConsumed()
     }
@@ -904,7 +904,7 @@ class DefaultLinkAccountManagerTest {
         val analyticsCall = linkEventsReporter.awaitLookupFailureCall()
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
-        assertThat(accountManager.linkAccount.value).isNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNull()
         assertThat(analyticsCall).isEqualTo(error)
 
         linkRepository.ensureAllEventsConsumed()
@@ -939,7 +939,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(call.consentAction).isEqualTo(ConsumerSignUpConsentAction.Implied)
 
         assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
-        assertThat(accountManager.linkAccount.value?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+        assertThat(accountManager.linkAccountInfo.value.account?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
 
         linkRepository.ensureAllEventsConsumed()
     }
@@ -967,7 +967,7 @@ class DefaultLinkAccountManagerTest {
         linkRepository.awaitMobileSignup()
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
-        assertThat(accountManager.linkAccount.value).isNull()
+        assertThat(accountManager.linkAccountInfo.value.account).isNull()
 
         linkRepository.ensureAllEventsConsumed()
     }

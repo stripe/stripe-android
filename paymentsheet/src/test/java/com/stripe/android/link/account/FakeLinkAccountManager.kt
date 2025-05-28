@@ -2,6 +2,7 @@ package com.stripe.android.link.account
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.AccountStatus
@@ -24,7 +25,7 @@ internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     accountStatusOverride: Flow<AccountStatus>? = null
 ) : LinkAccountManager {
-    override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
+    override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value> = linkAccountHolder.linkAccountInfo
 
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
@@ -69,7 +70,7 @@ internal open class FakeLinkAccountManager(
         _consumerPaymentDetails.value = consumerPaymentDetails
     }
 
-    fun setLinkAccount(account: LinkAccount?) {
+    fun setLinkAccount(account: LinkAccountUpdate.Value) {
         linkAccountHolder.set(account)
     }
 

@@ -130,6 +130,79 @@ internal class SignUpViewModel @Inject constructor(
 
         updateSignUpState(SignUpState.InputtingPrimaryField)
 
+        handleLookupResult(
+            lookupResult = lookupResult,
+            onNoLinkAccountFound = {
+                // No Link account found -> display remaining fields for signup.
+                updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(null)
+            }
+        )
+    }
+
+    fun onSignUpClick() {
+        clearError()
+        viewModelScope.launch {
+            updateState {
+                it.copy(isSubmitting = true)
+            }
+            val email = emailController.fieldValue.value
+            val lookupResult = dismissalCoordinator.withDismissalDisabled {
+                linkAuth.lookUp(
+                    email = email,
+                    emailSource = EmailSource.USER_ACTION,
+                    startSession = true
+                )
+            }
+            handleLookupResult(
+                lookupResult = lookupResult,
+                onNoLinkAccountFound = { performSignup() }
+            )
+        }
+
+        updateState {
+            it.copy(isSubmitting = false)
+        }
+    }
+
+    private suspend fun performSignup() {
+        val signupResult = dismissalCoordinator.withDismissalDisabled {
+            linkAuth.signUp(
+                email = emailController.fieldValue.value,
+                phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+                country = phoneNumberController.getCountryCode(),
+                name = nameController.fieldValue.value,
+                consentAction = SignUpConsentAction.Implied
+            )
+        }
+
+        when (signupResult) {
+            is LinkAuthResult.AttestationFailed -> {
+                moveToWeb()
+            }
+            is LinkAuthResult.Error -> {
+                onError(signupResult.error)
+                linkEventsReporter.onSignupFailure(error = signupResult.error)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(signupResult.account)
+                linkEventsReporter.onSignupCompleted()
+            }
+            LinkAuthResult.NoLinkAccountFound -> {
+                onError(NoLinkAccountFoundException())
+                linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
+            }
+            is LinkAuthResult.AccountError -> {
+                signupResult.handle()
+            }
+        }
+    }
+
+    // Extracted common result handling with custom handler for NoLinkAccountFound
+    private suspend fun handleLookupResult(
+        lookupResult: LinkAuthResult,
+        onNoLinkAccountFound: suspend () -> Unit
+    ) {
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
                 moveToWeb()
@@ -143,55 +216,10 @@ internal class SignUpViewModel @Inject constructor(
                 linkEventsReporter.onSignupCompleted()
             }
             LinkAuthResult.NoLinkAccountFound -> {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
-                onError(null)
+                onNoLinkAccountFound()
             }
             is LinkAuthResult.AccountError -> {
                 lookupResult.handle()
-            }
-        }
-    }
-
-    fun onSignUpClick() {
-        clearError()
-        viewModelScope.launch {
-            updateState {
-                it.copy(isSubmitting = true)
-            }
-
-            val signupResult = dismissalCoordinator.withDismissalDisabled {
-                linkAuth.signUp(
-                    email = emailController.fieldValue.value,
-                    phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
-                    country = phoneNumberController.getCountryCode(),
-                    name = nameController.fieldValue.value,
-                    consentAction = SignUpConsentAction.Implied
-                )
-            }
-
-            when (signupResult) {
-                is LinkAuthResult.AttestationFailed -> {
-                    moveToWeb()
-                }
-                is LinkAuthResult.Error -> {
-                    onError(signupResult.error)
-                    linkEventsReporter.onSignupFailure(error = signupResult.error)
-                }
-                is LinkAuthResult.Success -> {
-                    onAccountFetched(signupResult.account)
-                    linkEventsReporter.onSignupCompleted()
-                }
-                LinkAuthResult.NoLinkAccountFound -> {
-                    onError(NoLinkAccountFoundException())
-                    linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
-                }
-                is LinkAuthResult.AccountError -> {
-                    signupResult.handle()
-                }
-            }
-
-            updateState {
-                it.copy(isSubmitting = false)
             }
         }
     }

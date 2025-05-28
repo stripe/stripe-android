@@ -6,6 +6,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -85,7 +86,7 @@ class WalletViewModelTest {
     fun `viewmodel should dismiss with failure on load payment method failure`() = runTest(dispatcher) {
         val error = Throwable("oops")
         val linkAccountManager = WalletLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.listPaymentDetailsResult = Result.failure(error)
 
         var linkActivityResult: LinkActivityResult? = null
@@ -325,7 +326,7 @@ class WalletViewModelTest {
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
         val account = TestFactory.LINK_ACCOUNT
-        linkAccountManager.setLinkAccount(account)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(account))
         linkAccountManager.listPaymentDetailsResult = Result.success(
             value = ConsumerPaymentDetails(paymentDetails = listOf(validCard))
         )
@@ -357,7 +358,7 @@ class WalletViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                     selectedPayment = null
                 )
             )
