@@ -287,6 +287,51 @@ internal class ElementsSessionRepositoryTest {
         )
     }
 
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `Verify legacy customer ephemeral key is passed to 'StripeRepository'`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val repository = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+            { MOBILE_SESSION_ID },
+            appId = APP_ID
+        )
+
+        repository.get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = "legacy_customer_ephemeral_key"
+            ),
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+        )
+
+        val captor = argumentCaptor<ElementsSessionParams.PaymentIntentType>()
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = captor.capture(),
+            options = any()
+        )
+
+        assertThat(captor.firstValue.legacyCustomerEphemeralKey).isEqualTo("legacy_customer_ephemeral_key")
+    }
+
     @Test
     fun `Verify default payment method id is passed to 'StripeRepository'`() = runTest {
         whenever(

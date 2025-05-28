@@ -12,6 +12,7 @@ sealed interface ElementsSessionParams : Parcelable {
     val type: String
     val clientSecret: String?
     val customerSessionClientSecret: String?
+    val legacyCustomerEphemeralKey: String?
     val mobileSessionId: String?
     val locale: String?
     val expandFields: List<String>
@@ -26,6 +27,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
+        override val legacyCustomerEphemeralKey: String? = null,
         override val savedPaymentMethodSelectionId: String? = null,
         override val mobileSessionId: String? = null,
         override val customPaymentMethods: List<String>,
@@ -46,6 +48,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
+        override val legacyCustomerEphemeralKey: String? = null,
         override val savedPaymentMethodSelectionId: String? = null,
         override val mobileSessionId: String? = null,
         override val customPaymentMethods: List<String>,
@@ -69,6 +72,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val externalPaymentMethods: List<String>,
         override val savedPaymentMethodSelectionId: String? = null,
         override val customerSessionClientSecret: String? = null,
+        override val legacyCustomerEphemeralKey: String? = null,
         override val mobileSessionId: String? = null,
         override val appId: String,
     ) : ElementsSessionParams {
