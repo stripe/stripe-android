@@ -230,11 +230,19 @@ internal class LinkActivityViewModel @Inject constructor(
      */
     private suspend fun confirmLinkPayment(selectedPayment: LinkPaymentMethod) = runCatching {
         require(selectedPayment.readyForConfirmation()) { "LinkPaymentMethod must be ready for confirmation" }
-        linkConfirmationHandler.confirm(
-            paymentDetails = selectedPayment.details,
-            cvc = selectedPayment.collectedCvc,
-            linkAccount = requireNotNull(linkAccount) { "LinkAccount must not be null for confirmation" },
-        )
+        val linkAccount = requireNotNull(linkAccount) { "LinkAccount must not be null for confirmation" }
+        when (selectedPayment) {
+            is LinkPaymentMethod.ConsumerPaymentDetails -> linkConfirmationHandler.confirm(
+                paymentDetails = selectedPayment.details,
+                cvc = selectedPayment.collectedCvc,
+                linkAccount = linkAccount,
+            )
+            is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
+                paymentDetails = selectedPayment.linkPaymentDetails,
+                cvc = selectedPayment.collectedCvc,
+                linkAccount = linkAccount,
+            )
+        }
     }.onSuccess { confirmResult ->
         dismissWithResult(
             when (confirmResult) {

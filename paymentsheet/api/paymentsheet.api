@@ -384,11 +384,19 @@ public final class com/stripe/android/link/LinkPaymentDetails$Saved$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/LinkPaymentMethod$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/link/LinkPaymentMethod$ConsumerPaymentDetails$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentMethod;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentMethod$ConsumerPaymentDetails;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentMethod;
+	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentMethod$ConsumerPaymentDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/LinkPaymentMethod$LinkPaymentDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentMethod$LinkPaymentDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/LinkPaymentMethod$LinkPaymentDetails;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
