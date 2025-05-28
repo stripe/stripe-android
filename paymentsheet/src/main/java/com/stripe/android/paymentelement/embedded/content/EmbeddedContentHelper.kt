@@ -222,9 +222,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
-            onSelectSavedPaymentMethod = {
-                setSelectionAfterUserClick(PaymentSelection.Saved(it))
-            },
+            onSelectSavedPaymentMethod = ::setSelectionAfterUserClick,
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,
@@ -246,12 +244,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     true
                 }
             },
-            linkRowClicked = { updatedSelection ->
-                setSelectionAfterUserClick(updatedSelection)
-            },
-            googlePayRowClicked = { updatedSelection ->
-                setSelectionAfterUserClick(updatedSelection)
-            }
+            linkRowClicked = ::setSelectionAfterUserClick,
+            googlePayRowClicked = ::setSelectionAfterUserClick,
         )
     }
 
@@ -285,13 +279,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     }
 
     private fun setSelectionAfterUserClick(paymentSelection: PaymentSelection?) {
-        val oldSelection = selectionHolder.selection.value
         selectionHolder.set(paymentSelection)
-
-        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback(
-            oldSelection = oldSelection,
-            newSelection = paymentSelection
-        )
+        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback()
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
