@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 
-@OptIn(PrivateBetaConnectSDK::class)
 class EmptyEmbeddedComponentActivity : FragmentActivity() {
     lateinit var manager: EmbeddedComponentManager
     lateinit var controller: AccountOnboardingController

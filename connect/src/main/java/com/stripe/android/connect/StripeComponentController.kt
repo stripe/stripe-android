@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 /**
  * Controller for a full screen component.
  */
-@PrivateBetaConnectSDK
 abstract class StripeComponentController<Listener, Props> internal constructor(
     private val activity: FragmentActivity,
     private val embeddedComponentManager: EmbeddedComponentManager,

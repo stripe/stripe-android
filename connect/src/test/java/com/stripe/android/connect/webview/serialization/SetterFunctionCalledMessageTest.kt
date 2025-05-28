@@ -1,7 +1,6 @@
 package com.stripe.android.connect.webview.serialization
 
 import com.google.common.truth.Truth.assertThat
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Test
 

@@ -26,7 +26,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.util.isInInstrumentationTest
@@ -60,7 +59,6 @@ import kotlinx.serialization.json.put
  */
 @SuppressLint("ViewConstructor")
 @Suppress("TooManyFunctions")
-@OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebView private constructor(
     private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,

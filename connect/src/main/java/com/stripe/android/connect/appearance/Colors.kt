@@ -2,11 +2,9 @@ package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
 import androidx.annotation.ColorInt
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
-@PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class Colors private constructor(
@@ -26,29 +24,41 @@ class Colors private constructor(
 
     @Suppress("TooManyFunctions")
     class Builder {
-        @ColorInt private var primary: Int? = null
+        @ColorInt
+        private var primary: Int? = null
 
-        @ColorInt private var background: Int? = null
+        @ColorInt
+        private var background: Int? = null
 
-        @ColorInt private var text: Int? = null
+        @ColorInt
+        private var text: Int? = null
 
-        @ColorInt private var secondaryText: Int? = null
+        @ColorInt
+        private var secondaryText: Int? = null
 
-        @ColorInt private var danger: Int? = null
+        @ColorInt
+        private var danger: Int? = null
 
-        @ColorInt private var border: Int? = null
+        @ColorInt
+        private var border: Int? = null
 
-        @ColorInt private var actionPrimaryText: Int? = null
+        @ColorInt
+        private var actionPrimaryText: Int? = null
 
-        @ColorInt private var actionSecondaryText: Int? = null
+        @ColorInt
+        private var actionSecondaryText: Int? = null
 
-        @ColorInt private var offsetBackground: Int? = null
+        @ColorInt
+        private var offsetBackground: Int? = null
 
-        @ColorInt private var formBackground: Int? = null
+        @ColorInt
+        private var formBackground: Int? = null
 
-        @ColorInt private var formHighlightBorder: Int? = null
+        @ColorInt
+        private var formHighlightBorder: Int? = null
 
-        @ColorInt private var formAccent: Int? = null
+        @ColorInt
+        private var formAccent: Int? = null
 
         /**
          * The primary color used throughout the components. If null the default will be used.

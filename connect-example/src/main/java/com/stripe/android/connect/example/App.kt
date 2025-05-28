@@ -16,9 +16,11 @@ import javax.inject.Inject
 @OptIn(DelicateCoroutinesApi::class)
 class App : Application() {
 
-    @Inject lateinit var embeddedComponentService: EmbeddedComponentService
+    @Inject
+    lateinit var embeddedComponentService: EmbeddedComponentService
 
-    @Inject lateinit var logger: Logger
+    @Inject
+    lateinit var logger: Logger
 
     override fun onCreate() {
         super.onCreate()

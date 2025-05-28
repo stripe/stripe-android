@@ -1,5 +1,3 @@
-@file:OptIn(PrivateBetaConnectSDK::class)
-
 package com.stripe.android.connect
 
 import android.view.ViewGroup

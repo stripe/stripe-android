@@ -7,7 +7,6 @@ import kotlin.coroutines.suspendCoroutine
  * Lambda to fetch the Connect SDK client secret from your server.
  * Implement [invoke] to provide your client secret to the Connect SDK.
  */
-@PrivateBetaConnectSDK
 fun interface FetchClientSecret {
 
     /**
@@ -22,7 +21,6 @@ fun interface FetchClientSecret {
  * Task implementing [FetchClientSecret] to be used by consumers who don't wish to use
  * coroutines in their applications, or who are calling the SDK from Java.
  */
-@PrivateBetaConnectSDK
 abstract class FetchClientSecretTask : FetchClientSecret {
     override suspend fun invoke(): String? {
         return suspendCoroutine { continuation ->
@@ -45,7 +43,6 @@ abstract class FetchClientSecretTask : FetchClientSecret {
     /**
      * The interface used to pass your client secret to the SDK.
      */
-    @PrivateBetaConnectSDK
     fun interface ResultCallback {
         /**
          * Once you have retrieved your client Secret, call [onResult] with the client secret
