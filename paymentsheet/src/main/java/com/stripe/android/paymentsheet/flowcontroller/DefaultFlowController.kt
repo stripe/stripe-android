@@ -289,6 +289,7 @@ internal class DefaultFlowController @Inject internal constructor(
             configuration = state.config,
             enableLogging = enableLogging,
             productUsage = productUsage,
+            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 

@@ -14,6 +14,7 @@ internal fun interface PaymentSelectionUpdater {
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
+        walletButtonsAlreadyShown: Boolean,
     ): PaymentSelection?
 }
 
@@ -24,17 +25,21 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
+        walletButtonsAlreadyShown: Boolean,
     ): PaymentSelection? {
-        return currentSelection?.takeIf { selection ->
-            canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
+        val availableSelection = currentSelection ?: newState.paymentSelection
+
+        return availableSelection?.takeIf { selection ->
+            canUseSelection(selection, newState, walletButtonsAlreadyShown) && previousConfig?.let { previousConfig ->
                 !previousConfig.asCommonConfiguration().containsVolatileDifferences(newConfig.asCommonConfiguration())
             } != false
-        } ?: newState.paymentSelection
+        }
     }
 
     private fun canUseSelection(
         selection: PaymentSelection,
         state: PaymentSheetState.Full,
+        walletButtonsAlreadyShown: Boolean,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
         val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
@@ -54,10 +59,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
-                state.paymentMethodMetadata.isGooglePayReady
+                state.paymentMethodMetadata.isGooglePayReady && !walletButtonsAlreadyShown
             }
             is PaymentSelection.Link -> {
-                state.paymentMethodMetadata.linkState != null
+                state.paymentMethodMetadata.linkState != null && !walletButtonsAlreadyShown
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
