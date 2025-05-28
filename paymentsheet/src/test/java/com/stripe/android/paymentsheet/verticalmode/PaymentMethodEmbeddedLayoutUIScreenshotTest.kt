@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -163,6 +166,24 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testWithSavedPaymentMethodsSetHeightAndCanManageAll() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithSetHeight(
+                action = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            )
+        }
+    }
+
+    @Test
+    fun testWithSavedPaymentMethodsSetHeightAndCanManageOnlyOne() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithSetHeight(
+                action = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE,
+            )
+        }
+    }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
         rowStyle: Embedded.RowStyle,
@@ -207,6 +228,28 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             rowStyle = rowStyle,
             modifier = Modifier.verticalScroll(scrollState),
         )
+    }
+
+    @Composable
+    private fun TestPaymentMethodLayoutUiWithSetHeight(
+        action: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    ) {
+        Box(
+            modifier = Modifier.requiredHeight(450.dp)
+        ) {
+            PaymentMethodEmbeddedLayoutUI(
+                paymentMethods = emptyList(),
+                displayedSavedPaymentMethod = savedPaymentMethod,
+                savedPaymentMethodAction = action,
+                selection = null,
+                isEnabled = true,
+                onViewMorePaymentMethods = {},
+                onSelectSavedPaymentMethod = {},
+                onManageOneSavedPaymentMethod = {},
+                imageLoader = mock(),
+                rowStyle = getRowStyle(FloatingButton::class),
+            )
+        }
     }
 
     @Suppress("CyclomaticComplexMethod")

@@ -3,9 +3,10 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -176,7 +177,7 @@ private fun EditButton(onClick: () -> Unit) {
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp)
-            .fillMaxHeight()
+            .height(IntrinsicSize.Max)
     )
 }
 
@@ -191,7 +192,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(vertical = 4.dp)
-            .fillMaxHeight()
+            .height(IntrinsicSize.Max)
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
