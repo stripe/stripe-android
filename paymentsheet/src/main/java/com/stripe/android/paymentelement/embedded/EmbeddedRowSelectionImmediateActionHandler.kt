@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
