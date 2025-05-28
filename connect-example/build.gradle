@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 apply from: configs.androidApplication
 
 apply plugin: 'com.google.devtools.ksp'
@@ -78,7 +80,7 @@ dependencies {
     androidTestImplementation testLibs.androidx.truth
     androidTestImplementation testLibs.androidx.uiAutomator
     androidTestImplementation testLibs.espresso.core
-    androidTestImplementation(testLibs.espresso.contrib) {
+    androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
     androidTestImplementation testLibs.hilt.androidTesting
