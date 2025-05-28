@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.connect.EmbeddedComponentManager
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Async
 import com.stripe.android.connect.example.core.Fail
@@ -27,7 +27,7 @@ import com.stripe.android.connect.example.core.Uninitialized
  * Manages the UI for loading an [EmbeddedComponentManager], including error states.
  * Calls [content] with a successful manager instance when available.
  */
-
+@OptIn(PrivateBetaConnectSDK::class)
 @Composable
 fun EmbeddedComponentManagerLoader(
     embeddedComponentAsync: Async<EmbeddedComponentManager>,
@@ -102,7 +102,7 @@ private fun ErrorScreen(
 
 // Previews
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
 private fun EmbeddedComponentLoaderLoadingPreview() {
@@ -114,7 +114,7 @@ private fun EmbeddedComponentLoaderLoadingPreview() {
     )
 }
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 @Preview(showBackground = true)
 @Composable
 private fun EmbeddedComponentLoaderErrorPreview() {

@@ -10,6 +10,7 @@ import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMess
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+@PrivateBetaConnectSDK
 internal class AccountOnboardingView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -69,6 +70,7 @@ internal class AccountOnboardingView internal constructor(
     }
 }
 
+@PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class AccountOnboardingProps(
@@ -121,6 +123,7 @@ class AccountOnboardingProps(
     }
 }
 
+@PrivateBetaConnectSDK
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     /**
      * The connected account has exited the onboarding process.
@@ -128,6 +131,7 @@ interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     fun onExit() {}
 }
 
+@OptIn(PrivateBetaConnectSDK::class)
 internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener>() {
     override fun delegate(listener: AccountOnboardingListener, message: SetterFunctionCalledMessage) {
         when (message.value) {

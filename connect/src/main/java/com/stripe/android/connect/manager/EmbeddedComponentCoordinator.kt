@@ -15,7 +15,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.FetchClientSecret
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsService
@@ -38,7 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 @EmbeddedComponentManagerScope
 internal class EmbeddedComponentCoordinator @Inject constructor(
     @PublishableKey private val publishableKey: String,

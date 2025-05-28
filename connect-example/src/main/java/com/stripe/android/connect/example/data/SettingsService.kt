@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.stripe.android.connect.AccountOnboardingProps
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
@@ -162,7 +162,7 @@ data class OnboardingSettings(
     val fieldOption: FieldOption = FieldOption.DEFAULT,
     val futureRequirement: FutureRequirement = FutureRequirement.DEFAULT,
 ) {
-    
+    @OptIn(PrivateBetaConnectSDK::class)
     fun toProps(): AccountOnboardingProps {
         return AccountOnboardingProps(
             fullTermsOfServiceUrl = fullTermsOfServiceString,

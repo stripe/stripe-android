@@ -17,7 +17,7 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.webview.MobileInput
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 internal open class StripeComponentDialogFragmentView<ComponentView : StripeComponentView<*, *>>(
     layoutInflater: LayoutInflater
 ) : LinearLayout(layoutInflater.context) {

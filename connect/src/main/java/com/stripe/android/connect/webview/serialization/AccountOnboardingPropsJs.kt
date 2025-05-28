@@ -1,7 +1,7 @@
 package com.stripe.android.connect.webview.serialization
 
 import com.stripe.android.connect.AccountOnboardingProps
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -19,7 +19,7 @@ internal data class AccountOnboardingPropsJs(
     )
 }
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 internal fun AccountOnboardingProps.toJs(): AccountOnboardingPropsJs {
     return AccountOnboardingPropsJs(
         setFullTermsOfServiceUrl = fullTermsOfServiceUrl,

@@ -91,6 +91,7 @@ import kotlinx.coroutines.launch
  * [StripeConnectWebViewContainer] is re-created but [StripeConnectWebView] is not -- it's simply re-added to the
  * re-created container view.
  */
+@PrivateBetaConnectSDK
 internal abstract class StripeComponentDialogFragment<ComponentView, Listener, Props> : DialogFragment()
     where ComponentView : StripeComponentView<Listener, Props>,
           Listener : StripeEmbeddedComponentListener,
@@ -272,7 +273,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 }
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 internal class StripeComponentDialogFragmentViewModel : ViewModel() {
     var embeddedComponentManager = MutableStateFlow<EmbeddedComponentManager?>(null)
 }

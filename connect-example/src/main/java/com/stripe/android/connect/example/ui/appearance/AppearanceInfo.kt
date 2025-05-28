@@ -5,7 +5,7 @@ import android.os.Parcelable
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Badge
 import com.stripe.android.connect.appearance.Button
@@ -15,7 +15,7 @@ import com.stripe.android.connect.appearance.Typography
 import com.stripe.android.connect.example.R
 import kotlinx.parcelize.Parcelize
 
-
+@OptIn(PrivateBetaConnectSDK::class)
 @Parcelize
 data class AppearanceInfo(
     val appearanceId: AppearanceId,

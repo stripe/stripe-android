@@ -36,6 +36,7 @@ import org.junit.Test
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
+@OptIn(PrivateBetaConnectSDK::class)
 class FullScreenComponentTest {
     private val title = "Test title"
 

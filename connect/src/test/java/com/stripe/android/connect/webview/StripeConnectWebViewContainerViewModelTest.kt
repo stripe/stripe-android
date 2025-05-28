@@ -12,7 +12,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.ComponentEvent
 import com.stripe.android.connect.EmbeddedComponentManager
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
@@ -60,7 +60,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @Suppress("TooManyFunctions")
-
+@OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewContainerViewModelTest {
 

@@ -5,6 +5,7 @@ import androidx.fragment.app.FragmentActivity
 /**
  * Controller for a full screen Account Onboarding component.
  */
+@PrivateBetaConnectSDK
 class AccountOnboardingController internal constructor(
     activity: FragmentActivity,
     embeddedComponentManager: EmbeddedComponentManager,

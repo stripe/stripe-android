@@ -1,11 +1,12 @@
 package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
-
+import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+@PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class Typography private constructor(
@@ -133,6 +134,7 @@ class Typography private constructor(
      *  If null the default will be used.
      * @param textTransform The text transformation applied (e.g., uppercase, lowercase). Default is 'none'.
      */
+    @PrivateBetaConnectSDK
     @Parcelize
     @Poko
     class Style(
