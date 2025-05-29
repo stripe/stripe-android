@@ -13,7 +13,7 @@ class InlineSignupViewStateTest {
 
     @get:Rule
     val defaultOptInRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkDoi,
+        featureFlag = FeatureFlags.linkDefaultOptIn,
         isEnabled = false,
     )
 

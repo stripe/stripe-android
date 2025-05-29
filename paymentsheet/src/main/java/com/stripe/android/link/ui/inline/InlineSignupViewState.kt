@@ -40,16 +40,22 @@ constructor(
      * Whether the view is active and the payment should be processed through Link.
      */
     val useLink: Boolean
-        get() = when (signupMode) {
-            LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null && !apiFailed
-            LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                if (allowsDefaultOptIn) {
-                    userInput != null && !apiFailed
-                } else {
-                    isExpanded && !apiFailed
-                }
+        get() {
+            if (apiFailed) {
+                return false
             }
-            null -> false
+
+            return when (signupMode) {
+                LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null
+                LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                    if (allowsDefaultOptIn) {
+                        userInput != null
+                    } else {
+                        isExpanded
+                    }
+                }
+                null -> false
+            }
         }
 
     companion object {
@@ -94,7 +100,7 @@ constructor(
                 }
             }
 
-            val allowsDefaultOptIn = FeatureFlags.linkDoi.isEnabled &&
+            val allowsDefaultOptIn = FeatureFlags.linkDefaultOptIn.isEnabled &&
                 config.stripeIntent.countryCode == "US" &&
                 config.allowDefaultOptIn &&
                 signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
