@@ -2,23 +2,11 @@ package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imeAnimationSource
-import androidx.compose.foundation.layout.imeAnimationTarget
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.unit.IntSize
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
@@ -41,7 +29,6 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
-import com.stripe.android.link.utils.LinkScreenTransition
 
 @SuppressWarnings("LongMethod")
 @Composable
@@ -120,7 +107,7 @@ private fun Screens(
 ) {
     LinkNavHost(
         navController = navController,
-        initialDestination = initialDestination,
+        startDestination = initialDestination.route,
     ) {
         composable(LinkScreen.Loading.route) {
             LinkLoadingScreen()
@@ -183,42 +170,6 @@ private fun Screens(
                 goBack = goBack
             )
         }
-    }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun LinkNavHost(
-    navController: NavHostController,
-    initialDestination: LinkScreen,
-    modifier: Modifier = Modifier,
-    builder: NavGraphBuilder.() -> Unit
-) {
-    // True if the IME (soft keyboard) is animating.
-    val isImeAnimating = WindowInsets.imeAnimationSource != WindowInsets.imeAnimationTarget
-
-    // Cache the current screen size so we can size `LinkLoadingScreen` to match, reducing
-    // screen size animation jumps.
-    var screenSize by remember { mutableStateOf<IntSize?>(null) }
-    ProvideLinkScreenSize(screenSize) {
-        NavHost(
-            modifier = modifier.onSizeChanged { screenSize = it },
-            navController = navController,
-            startDestination = initialDestination.route,
-            enterTransition = { LinkScreenTransition.targetContentEnter },
-            exitTransition = { LinkScreenTransition.initialContentExit },
-            // Workaround a race condition where the route changes while the soft keyboard is
-            // animating in/out. Imagine navigating from screen A to B, where both screens are
-            // supposed to be equal height. If the soft keyboard closes immediately after the
-            // screen transition starts, the target height of screen B, which is locked in at
-            // the start of the animation, will be too short.
-            sizeTransform = if (isImeAnimating) {
-                null
-            } else {
-                { LinkScreenTransition.sizeTransform }
-            },
-            builder = builder,
-        )
     }
 }
 
