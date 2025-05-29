@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imeAnimationSource
@@ -68,8 +69,9 @@ private val LocalLinkScreenSizeInternal = compositionLocalOf<DpSize?> { null }
  */
 internal val LocalLinkScreenSize: CompositionLocal<DpSize?> = LocalLinkScreenSizeInternal
 
+@VisibleForTesting
 @Composable
-private fun ProvideLinkScreenSize(size: IntSize?, content: @Composable () -> Unit) {
+internal fun ProvideLinkScreenSize(size: IntSize?, content: @Composable () -> Unit) {
     val dpSize = with(LocalDensity.current) {
         size?.let { DpSize(it.width.toDp(), it.height.toDp()) }
     }

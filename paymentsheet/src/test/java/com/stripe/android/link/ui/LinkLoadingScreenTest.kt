@@ -12,7 +12,7 @@ import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-class LinkLoadingScreenKtTest {
+class LinkLoadingScreenTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         listOf(SystemAppearance.DarkTheme),
