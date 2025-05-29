@@ -17,7 +17,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.utils.FeatureFlags.linkProminenceInFlowController
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -26,6 +25,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
+import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -88,6 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
+    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
     @Named(LINK_LAUNCHER_KEY) private val linkPaymentLauncher: LinkPaymentLauncher,
@@ -260,13 +261,15 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLinkInsteadOfPaymentOptions = linkProminenceInFlowController.isEnabled &&
+            val shouldPresentLinkInsteadOfPaymentOptions =
                 // The current payment selection is Link
                 paymentSelection?.isLink == true &&
-                // Link is enabled and available
-                linkConfiguration != null &&
-                // The current user has a Link account (not necessarily logged in)
-                linkAccountInfo.account != null
+                    // The current user has a Link account (not necessarily logged in)
+                    linkAccountInfo.account != null &&
+                    // Link is enabled and available
+                    linkConfiguration != null &&
+                    // feature flag and other conditions are met
+                    linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(
