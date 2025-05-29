@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
+import com.stripe.android.paymentelement.WalletsButtonPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
@@ -40,6 +42,7 @@ internal class CustomFlowActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomFlowViewModel>()
 
+    @OptIn(WalletsButtonPreview::class)
     @SuppressWarnings("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,23 +87,26 @@ internal class CustomFlowActivity : AppCompatActivity() {
                     if (uiState.isError) {
                         ErrorScreen(onRetry = viewModel::retry)
                     } else {
-                        Receipt(
-                            isLoading = uiState.isProcessing,
-                            cartState = uiState.cartState,
-                        ) {
-                            PaymentMethodSelector(
-                                isEnabled = uiState.isPaymentMethodButtonEnabled,
-                                paymentMethodLabel = paymentMethodLabel,
-                                paymentMethodPainter = uiState.paymentOption?.iconPainter,
-                                onClick = flowController::presentPaymentOptions,
-                            )
-                            BuyButton(
-                                buyButtonEnabled = uiState.isBuyButtonEnabled,
-                                onClick = {
-                                    viewModel.handleBuyButtonPressed()
-                                    flowController.confirm()
-                                }
-                            )
+                        Column {
+                            flowController.WalletButtons()
+                            Receipt(
+                                isLoading = uiState.isProcessing,
+                                cartState = uiState.cartState,
+                            ) {
+                                PaymentMethodSelector(
+                                    isEnabled = uiState.isPaymentMethodButtonEnabled,
+                                    paymentMethodLabel = paymentMethodLabel,
+                                    paymentMethodPainter = uiState.paymentOption?.iconPainter,
+                                    onClick = flowController::presentPaymentOptions,
+                                )
+                                BuyButton(
+                                    buyButtonEnabled = uiState.isBuyButtonEnabled,
+                                    onClick = {
+                                        viewModel.handleBuyButtonPressed()
+                                        flowController.confirm()
+                                    }
+                                )
+                            }
                         }
                     }
                 }

@@ -2,11 +2,14 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -47,6 +50,13 @@ internal class WalletButtonsContent(
                                     )
                                 },
                             )
+                            is WalletButtonsInteractor.WalletButton.ShopPay -> {
+                                ShopPayButton {
+                                    interactor.handleViewAction(
+                                        WalletButtonsInteractor.ViewAction.OnButtonPressed(button)
+                                    )
+                                }
+                            }
                         }
                     }
                 }

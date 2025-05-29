@@ -24,6 +24,13 @@ sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = false
     }
 
+    internal data class ShopPay(
+        val checkoutUrl: String,
+    ) : PaymentOptionsItem() {
+        override val viewType: ViewType = ViewType.ShopPay
+        override val isEnabledDuringEditing: Boolean = false
+    }
+
     /**
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */
@@ -48,6 +55,7 @@ sealed class PaymentOptionsItem {
         AddCard,
         GooglePay,
         Link,
+        ShopPay,
     }
 }
 
