@@ -56,7 +56,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
-            linkAccount = linkAccountHolder.linkAccount.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             useLinkExpress = confirmationOption.useLinkExpress,
             launchMode = confirmationOption.linkLaunchMode
         )
@@ -113,7 +113,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
     private fun LinkAccountUpdate.updateLinkAccount() {
         when (this) {
             is LinkAccountUpdate.Value -> {
-                linkAccountHolder.set(linkAccount)
+                linkAccountHolder.set(this)
             }
             LinkAccountUpdate.None -> Unit
         }

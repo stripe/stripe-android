@@ -238,6 +238,8 @@ internal class SignUpViewModelTest {
     @Test
     fun `signUp sends correct ConsumerSignUpConsentAction`() = runTest(dispatcher) {
         val linkAuth = FakeLinkAuth()
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
+
         val viewModel = createViewModel(
             linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
@@ -247,6 +249,7 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
+        linkAuth.awaitLookupCall()
         val call = linkAuth.awaitSignUpCall()
         assertThat(call.consentAction).isEqualTo(SignUpConsentAction.Implied)
         linkAuth.ensureAllItemsConsumed()
@@ -324,6 +327,8 @@ internal class SignUpViewModelTest {
                 ConsumerSession.VerificationSession.SessionState.Started
             )
         )
+
+        linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
         linkAuth.signupResult = LinkAuthResult.Success(linkAccount)
 
         viewModel.performValidSignup()

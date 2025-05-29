@@ -128,7 +128,7 @@ internal class LinkConfirmationDefinitionTest {
     @Test
     fun `'launch', when linkAccount is provided, should launch properly with provided parameters`() = test {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        linkAccountHolder.set(TestFactory.LINK_ACCOUNT)
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val definition = createLinkConfirmationDefinition(
             linkAccountHolder = linkAccountHolder
@@ -248,7 +248,7 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
-        verify(linkAccountHolder).set(null)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
     }
 
     @Test
@@ -277,7 +277,7 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(failedResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
-        verify(linkAccountHolder).set(TestFactory.LINK_ACCOUNT)
+        verify(linkAccountHolder).set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
     }
 
     @Test

@@ -42,7 +42,7 @@ class WebLinkActivityContractTest {
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = false,
-            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             launchMode = LinkLaunchMode.Full
         )
 

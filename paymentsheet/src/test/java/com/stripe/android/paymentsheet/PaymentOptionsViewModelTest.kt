@@ -109,7 +109,8 @@ internal class PaymentOptionsViewModelTest {
                 assertThat(awaitItem()).isEqualTo(
                     PaymentOptionResult.Succeeded(
                         SELECTION_SAVED_PAYMENT_METHOD,
-                        listOf()
+                        LinkAccountUpdate.Value(null),
+                        listOf(),
                     )
                 )
                 ensureAllEventsConsumed()
@@ -132,6 +133,7 @@ internal class PaymentOptionsViewModelTest {
                     .isEqualTo(
                         PaymentOptionResult.Succeeded(
                             NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                            LinkAccountUpdate.Value(null),
                             listOf()
                         )
                     )
@@ -155,6 +157,7 @@ internal class PaymentOptionsViewModelTest {
                     .isEqualTo(
                         PaymentOptionResult.Succeeded(
                             EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
+                            LinkAccountUpdate.Value(null),
                             listOf()
                         )
                     )
@@ -178,6 +181,7 @@ internal class PaymentOptionsViewModelTest {
                     .isEqualTo(
                         PaymentOptionResult.Succeeded(
                             CUSTOM_PAYMENT_METHOD_SELECTION,
+                            LinkAccountUpdate.Value(null),
                             listOf()
                         )
                     )
@@ -215,7 +219,7 @@ internal class PaymentOptionsViewModelTest {
         val unverifiedAccount = LinkAccount(TestFactory.CONSUMER_SESSION.copy(verificationSessions = emptyList()))
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS
-                .copy(linkAccount = unverifiedAccount)
+                .copy(linkAccountInfo = LinkAccountUpdate.Value(unverifiedAccount))
                 .updateState(
                     linkState = LinkState(
                         configuration = TestFactory.LINK_CONFIGURATION,
@@ -231,7 +235,7 @@ internal class PaymentOptionsViewModelTest {
 
         verify(linkPaymentLauncher).present(
             configuration = any(),
-            linkAccount = eq(unverifiedAccount),
+            linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             useLinkExpress = eq(true)
         )
@@ -269,7 +273,7 @@ internal class PaymentOptionsViewModelTest {
         // Ensure LinkPaymentLauncher.present is never called
         verify(linkPaymentLauncher, never()).present(
             configuration = any(),
-            linkAccount = any(),
+            linkAccountInfo = any(),
             launchMode = any(),
             useLinkExpress = any()
         )
@@ -684,6 +688,7 @@ internal class PaymentOptionsViewModelTest {
                     mostRecentError = null,
                     paymentSelection = null,
                     paymentMethods = paymentMethods - selection.paymentMethod,
+                    linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
             )
         }
@@ -724,6 +729,7 @@ internal class PaymentOptionsViewModelTest {
                 PaymentOptionResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = selection,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                     paymentMethods = emptyList(),
                 )
             )
@@ -905,7 +911,7 @@ internal class PaymentOptionsViewModelTest {
             val succeeded = awaitItem() as PaymentOptionResult.Succeeded
             val paymentSelection = succeeded.paymentSelection
             assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
-            assertThat((paymentSelection as PaymentSelection.Link).linkAccount).isEqualTo(linkAccountUpdate.linkAccount)
+            assertThat(succeeded.linkAccountInfo.account).isEqualTo(linkAccountUpdate.account)
         }
     }
 
@@ -948,6 +954,7 @@ internal class PaymentOptionsViewModelTest {
                 PaymentOptionResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = expectedSelection,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                     paymentMethods = expectedPaymentMethods,
                 )
             )
@@ -1097,7 +1104,10 @@ internal class PaymentOptionsViewModelTest {
             enableLogging = false,
             productUsage = mock(),
             paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
-            linkAccount = null
+            linkAccountInfo = LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = null
+            ),
         )
     }
 

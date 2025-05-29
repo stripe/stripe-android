@@ -22,8 +22,11 @@ class LinkActivityContractTest {
     private val args = LinkActivityContract.Args(
         configuration = TestFactory.LINK_CONFIGURATION,
         startWithVerificationDialog = false,
-        linkAccount = null,
-        launchMode = LinkLaunchMode.Full
+        linkAccountInfo = LinkAccountUpdate.Value(
+            account = null,
+            lastUpdateReason = null
+        ),
+        launchMode = LinkLaunchMode.Full,
     )
 
     @Test

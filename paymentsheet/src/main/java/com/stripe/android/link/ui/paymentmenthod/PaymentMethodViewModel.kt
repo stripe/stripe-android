@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -135,7 +136,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                     Result.Succeeded -> {
                         dismissWithResult(
                             LinkActivityResult.Completed(
-                                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                                linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                                 selectedPayment = null
                             )
                         )

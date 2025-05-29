@@ -134,7 +134,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        linkAccountHolder.set(args.linkAccount)
+        linkAccountHolder.set(args.linkAccountInfo)
         linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
@@ -169,8 +169,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
             is LinkActivityResult.Completed -> {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
-                            linkAccount = linkAccountHolder.linkAccount.value,
                             selectedPayment = result.selectedPayment
                         ),
                         paymentMethods = customerStateHolder.paymentMethods.value
@@ -191,6 +191,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
@@ -226,22 +227,21 @@ internal class PaymentOptionsViewModel @Inject constructor(
         selection.value?.let { paymentSelection ->
             eventReporter.onSelectPaymentOption(paymentSelection)
             val linkState = args.state.paymentMethodMetadata.linkState
-            val linkAccount = linkAccountHolder.linkAccount.value
             val shouldShowLinkConfiguration = linkState != null && shouldShowLinkVerification(
                 paymentSelection = paymentSelection,
-                linkConfiguration = linkState.configuration,
-                linkAccount = linkAccount
+                linkConfiguration = linkState.configuration
             )
             if (shouldShowLinkConfiguration) {
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
-                    linkAccount = linkAccount,
+                    linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     useLinkExpress = true
                 )
             } else {
                 _paymentOptionResult.tryEmit(
                     PaymentOptionResult.Succeeded(
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = paymentSelection.withLinkDetails(),
                         paymentMethods = customerStateHolder.paymentMethods.value
                     )
@@ -255,15 +255,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
      * - Preserves the previously selected payment method, if any, in case none is selected in this launch.
      */
     private fun PaymentSelection.withLinkDetails(): PaymentSelection = when (this) {
-        is Link -> when (val linkAccount = linkAccountHolder.linkAccount.value) {
+        is Link -> when (linkAccountHolder.linkAccountInfo.value.account) {
             // If link account is null, clear account status and selected payment from payment selection
             null -> copy(
-                linkAccount = null,
                 selectedPayment = null
             )
             // If link account exists, include it in the payment selection and keep the previously selected payment.
             else -> copy(
-                linkAccount = linkAccount,
                 selectedPayment = (selectedPayment ?: (args.state.paymentSelection as? Link)?.selectedPayment)
             )
         }
@@ -272,11 +270,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun shouldShowLinkVerification(
         paymentSelection: PaymentSelection,
-        linkConfiguration: LinkConfiguration,
-        linkAccount: LinkAccount?
+        linkConfiguration: LinkConfiguration
     ): Boolean {
         return paymentSelection is Link &&
-            linkAccount != null &&
             linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
     }
 

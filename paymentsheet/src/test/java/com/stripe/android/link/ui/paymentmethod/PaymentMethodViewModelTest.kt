@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -103,7 +104,7 @@ class PaymentMethodViewModelTest {
     fun `onPayClicked confirms payment successfully`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         var result: LinkActivityResult? = null
         val viewModel = createViewModel(
@@ -129,7 +130,7 @@ class PaymentMethodViewModelTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                     selectedPayment = null,
                 )
             )

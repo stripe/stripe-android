@@ -2,6 +2,7 @@ package com.stripe.android.link.attestation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -42,7 +43,7 @@ internal class DefaultLinkAttestationCheckTest {
         val linkGate = FakeLinkGate()
         val linkAccountManager = FakeLinkAccountManager()
         linkGate.setUseAttestationEndpoints(true)
-        linkAccountManager.setLinkAccount(null)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(null))
 
         val attestationCheck = attestationCheck(
             linkGate = linkGate,

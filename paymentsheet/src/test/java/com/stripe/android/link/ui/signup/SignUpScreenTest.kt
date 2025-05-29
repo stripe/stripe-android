@@ -127,6 +127,7 @@ internal class SignUpScreenTest {
                 }
             }
 
+            linkAuth.lookupResult = LinkAuthResult.NoLinkAccountFound
             linkAuth.signupResult = LinkAuthResult.Error(error)
             viewModel.onSignUpClick()
 

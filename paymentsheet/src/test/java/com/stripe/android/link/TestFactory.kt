@@ -208,8 +208,8 @@ internal object TestFactory {
         publishableKey = "",
         stripeAccountId = "",
         startWithVerificationDialog = false,
-        linkAccount = LINK_ACCOUNT,
+        linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
-        launchMode = LinkLaunchMode.Full
+        launchMode = LinkLaunchMode.Full,
     )
 }

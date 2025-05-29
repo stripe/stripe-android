@@ -8,6 +8,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -17,7 +18,6 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
@@ -100,7 +100,7 @@ internal interface NativeLinkComponent {
         fun linkLaunchMode(linkLaunchMode: LinkLaunchMode): Builder
 
         @BindsInstance
-        fun linkAccount(linkAccount: LinkAccount?): Builder
+        fun linkAccountUpdate(linkAccountUpdate: LinkAccountUpdate.Value): Builder
 
         fun build(): NativeLinkComponent
     }
