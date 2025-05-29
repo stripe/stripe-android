@@ -97,6 +97,7 @@ internal interface LinkAccountManager {
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        cvc: String?,
     ): Result<SharePaymentDetails>
 
     suspend fun setLinkAccountFromLookupResult(
