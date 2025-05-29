@@ -1,5 +1,3 @@
-@file:OptIn(PrivateBetaConnectSDK::class)
-
 package com.stripe.android.connect.test
 
 import android.content.Context
@@ -7,7 +5,6 @@ import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.EmptyProps
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.StripeComponentDialogFragment
 import com.stripe.android.connect.StripeComponentView

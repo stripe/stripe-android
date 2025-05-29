@@ -1,8 +1,5 @@
 package com.stripe.android.connect.appearance
 
-import com.stripe.android.connect.PrivateBetaConnectSDK
-
-@PrivateBetaConnectSDK
 enum class TextTransform {
     /**
      * No text transformation applied.

@@ -11,7 +11,6 @@ import android.webkit.WebChromeClient
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.AppInfoJs
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
@@ -42,7 +41,6 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
-@OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewTest {
     private val testUrl = "http://stripe.com"

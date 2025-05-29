@@ -1,11 +1,9 @@
 package com.stripe.android.connect.appearance
 
 import android.os.Parcelable
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
-@PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class CornerRadius private constructor(

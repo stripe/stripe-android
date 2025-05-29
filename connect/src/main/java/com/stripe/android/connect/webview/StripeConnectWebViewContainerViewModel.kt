@@ -23,7 +23,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.connect.ComponentEvent
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
@@ -72,7 +71,6 @@ import kotlinx.serialization.json.JsonObject
  *
  * @see https://developer.android.com/develop/ui/compose/quick-guides/content/manage-webview-state
  */
-@OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerViewModel(
     private val application: Application,
     private val clock: Clock,
