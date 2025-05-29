@@ -232,6 +232,7 @@ internal class DefaultManageScreenInteractor(
                 is PaymentSelection.Link,
                 is PaymentSelection.New -> return null
                 is PaymentSelection.Saved -> selection.paymentMethod.id
+                is PaymentSelection.ShopPay -> return null
             }
             return displayableSavedPaymentMethods.find { it.paymentMethod.id == currentSelectionId }
         }

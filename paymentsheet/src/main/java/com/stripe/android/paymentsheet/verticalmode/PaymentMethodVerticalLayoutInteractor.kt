@@ -479,6 +479,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
         is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
         is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
+        is PaymentSelection.ShopPay -> PaymentMethodVerticalLayoutInteractor.Selection.New("shoppay")
     }
 
     private fun PaymentSelection.New.changeDetails(): String? = when (this) {

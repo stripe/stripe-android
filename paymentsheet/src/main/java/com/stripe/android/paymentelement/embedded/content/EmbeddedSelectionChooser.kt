@@ -134,6 +134,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             is PaymentSelection.CustomPaymentMethod -> {
                 paymentMethodMetadata.isCustomPaymentMethod(previousSelection.id)
             }
+            is PaymentSelection.ShopPay -> {
+                true
+            }
         }
     }
 
