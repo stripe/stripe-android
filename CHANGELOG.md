@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Connect
+* [CHANGED][10871](https://github.com/stripe/stripe-android/pull/10871) Removed `PrivateBetaConnectSDK` annotation and all usages. Connect SDK is now GA.
+
 ## 21.15.1 - 2025-05-28
 
 ### PaymentSheet
