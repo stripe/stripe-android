@@ -511,10 +511,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun onPaymentSelection() {
         val paymentSelection = viewModel.paymentSelection
-        // update the current Link account state if the selected Link payment method includes an account update.
-        if (paymentSelection is Link) {
-            LinkAccountUpdate.Value(paymentSelection.linkAccount).updateLinkAccount()
-        }
         val paymentOption = paymentSelection?.let { paymentOptionFactory.create(it) }
         paymentOptionCallback.onPaymentOption(paymentOption)
     }
