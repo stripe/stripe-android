@@ -1,6 +1,5 @@
 package com.stripe.android.connect.appearance
 
-
 enum class TextTransform {
     /**
      * No text transformation applied.
