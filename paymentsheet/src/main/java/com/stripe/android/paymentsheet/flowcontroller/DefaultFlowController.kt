@@ -492,23 +492,29 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         result?.paymentMethods?.let {
             val currentState = viewModel.state
-
             viewModel.state = currentState?.copyPaymentSheetState(
                 customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
             )
         }
         when (result) {
-            is PaymentOptionResult.Succeeded -> setAsSelected(
-                result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
+            is PaymentOptionResult.Succeeded -> onPaymentSelection(
+                paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true },
+                updateCurrent = true
             )
-            is PaymentOptionResult.Failed -> setAsSelected(viewModel.paymentSelection)
-            is PaymentOptionResult.Canceled -> setAsSelected(result.paymentSelection)
-            null -> setAsSelected(null)
+            null,
+            is PaymentOptionResult.Canceled -> onPaymentSelection(
+                paymentSelection = result?.paymentSelection,
+                updateCurrent = true
+            )
+            is PaymentOptionResult.Failed -> onPaymentSelection(
+                paymentSelection = viewModel.paymentSelection,
+                updateCurrent = false
+            )
         }
     }
 
-    private fun setAsSelected(paymentSelection: PaymentSelection?) {
-        viewModel.paymentSelection = paymentSelection
+    private fun onPaymentSelection(paymentSelection: PaymentSelection?, updateCurrent: Boolean = true) {
+        if (updateCurrent) viewModel.paymentSelection = paymentSelection
         // update the current Link account state if the selected Link payment method includes an account update.
         if (paymentSelection is Link) {
             LinkAccountUpdate.Value(paymentSelection.linkAccount).updateLinkAccount()
