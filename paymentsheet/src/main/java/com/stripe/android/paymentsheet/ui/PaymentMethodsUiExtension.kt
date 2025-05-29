@@ -19,10 +19,18 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
 ): Int {
     return when (type) {
         PaymentMethod.Type.Card -> {
-            card?.getSavedPaymentMethodIcon(
-                forVerticalMode = forVerticalMode,
-                showNightIcon = showNightIcon
-            )
+            if (isLinkPaymentMethod) {
+                // Link card brand
+                getLinkIcon(
+                    showNightIcon = showNightIcon,
+                    iconOnly = forVerticalMode
+                )
+            } else {
+                card?.getSavedPaymentMethodIcon(
+                    forVerticalMode = forVerticalMode,
+                    showNightIcon = showNightIcon
+                )
+            }
         }
         PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
         PaymentMethod.Type.USBankAccount -> TransformToBankIcon(usBankAccount?.bankName)
@@ -195,7 +203,17 @@ private fun getOverridableIcon(
 }
 
 internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
-    PaymentMethod.Type.Card -> createCardLabel(card?.last4)
+    PaymentMethod.Type.Card -> {
+        if (isLinkPaymentMethod) {
+            if (canShowSublabel) {
+                linkPaymentDetails?.label
+            } else {
+                linkPaymentDetails?.sublabel
+            }
+        } else {
+            createCardLabel(card?.last4)
+        }
+    }
     PaymentMethod.Type.SepaDebit -> resolvableString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
@@ -215,6 +233,12 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
 }
 
 internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
+    PaymentMethod.Type.Card -> {
+        when (linkPaymentDetails) {
+            is LinkPaymentDetails.BankAccount -> R.drawable.stripe_ic_paymentsheet_bank
+            is LinkPaymentDetails.Card, null -> null
+        }
+    }
     PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_paymentsheet_bank
     PaymentMethod.Type.Link -> {
         when (linkPaymentDetails) {

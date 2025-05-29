@@ -6,8 +6,6 @@ import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.SavedPaymentMethod.Card
-import com.stripe.android.paymentsheet.SavedPaymentMethod.Link
 
 internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
@@ -17,8 +15,18 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val shouldShowDefaultBadge: Boolean = false
 ) {
     val isCard: Boolean
-        get() = savedPaymentMethod is Card ||
-            (savedPaymentMethod is Link && savedPaymentMethod.paymentDetails is LinkPaymentDetails.Card)
+        get() = when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                // If this is a Link payment method, it's Link card brand
+                !paymentMethod.isLinkPaymentMethod
+            }
+            is SavedPaymentMethod.Link -> {
+                savedPaymentMethod.paymentDetails is LinkPaymentDetails.Card
+            }
+            is SavedPaymentMethod.SepaDebit,
+            is SavedPaymentMethod.USBankAccount,
+            SavedPaymentMethod.Unexpected -> false
+        }
 
     fun canChangeCbc(): Boolean {
         return when (savedPaymentMethod) {
@@ -126,7 +134,10 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> {
-                    paymentMethod.card?.let { card ->
+                    paymentMethod.linkPaymentDetails?.let {
+                        // This is Link card brand
+                        SavedPaymentMethod.Link(it)
+                    } ?: paymentMethod.card?.let { card ->
                         SavedPaymentMethod.Card(
                             card = card,
                             billingDetails = paymentMethod.billingDetails
