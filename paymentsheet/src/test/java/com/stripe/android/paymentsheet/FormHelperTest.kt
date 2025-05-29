@@ -305,6 +305,7 @@ internal class FormHelperTest {
                 fields = emptyList(),
                 prefillEligibleFields = emptySet(),
                 userInput = userInput,
+                allowsDefaultOptIn = false,
             ),
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -353,6 +354,7 @@ internal class FormHelperTest {
                     consentAction = SignUpConsentAction.Checkbox,
                 ),
                 isExpanded = false,
+                allowsDefaultOptIn = false,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -405,6 +407,7 @@ internal class FormHelperTest {
                     name = "John Doe",
                     consentAction = SignUpConsentAction.Checkbox,
                 ),
+                allowsDefaultOptIn = false,
             )
         ) {
             assertThat(expectMostRecentItem()).isEqualTo(
@@ -483,6 +486,7 @@ internal class FormHelperTest {
                     prefillEligibleFields = emptySet(),
                     userInput = null,
                     isExpanded = true,
+                    allowsDefaultOptIn = false,
                 )
             )
 

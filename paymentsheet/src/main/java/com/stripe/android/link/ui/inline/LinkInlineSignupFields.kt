@@ -51,6 +51,7 @@ internal fun LinkInlineSignupFields(
     enabled: Boolean,
     isShowingPhoneFirst: Boolean,
     requiresNameCollection: Boolean,
+    allowsDefaultOptIn: Boolean,
     errorMessage: String?,
     didShowAllFields: Boolean,
     onShowingAllFields: () -> Unit,
@@ -75,8 +76,12 @@ internal fun LinkInlineSignupFields(
                     ImeAction.Done
                 },
                 focusRequester = phoneFocusRequester,
-                trailingIcon = {
-                    LinkLogo(LinkLogoModifier)
+                trailingIcon = if (!allowsDefaultOptIn) {
+                    {
+                        LinkLogo(LinkLogoModifier)
+                    }
+                } else {
+                    null
                 },
             )
         } else {
@@ -90,7 +95,13 @@ internal fun LinkInlineSignupFields(
                     ImeAction.Done
                 },
                 focusRequester = emailFocusRequester,
-                trailingIcon = { LinkLogo(LinkLogoModifier) },
+                trailingIcon = if (!allowsDefaultOptIn) {
+                    {
+                        LinkLogo(LinkLogoModifier)
+                    }
+                } else {
+                    null
+                },
             )
         }
 
@@ -143,7 +154,8 @@ internal fun LinkInlineSignupFields(
                         enabled = enabled,
                         controller = phoneNumberController,
                         moveToNextFieldOnceComplete = requiresNameCollection,
-                        requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                        requestFocusWhenShown = !allowsDefaultOptIn &&
+                            phoneNumberController.initialPhoneNumber.isEmpty(),
                         imeAction = if (requiresNameCollection) {
                             ImeAction.Next
                         } else {
@@ -229,6 +241,7 @@ internal fun PreviewLinkInlineSignupFields() {
         requiresNameCollection = false,
         errorMessage = "This is a large error!",
         didShowAllFields = false,
+        allowsDefaultOptIn = false,
         onShowingAllFields = {},
     )
 }

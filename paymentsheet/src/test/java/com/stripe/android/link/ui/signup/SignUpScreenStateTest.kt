@@ -92,6 +92,7 @@ class SignUpScreenStateTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_secret_456"),
             elementsSessionId = "elements_session_id_123",
             linkMode = LinkMode.Passthrough,
+            allowDefaultOptIn = false,
         )
     }
 

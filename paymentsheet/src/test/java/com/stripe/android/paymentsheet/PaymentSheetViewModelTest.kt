@@ -974,6 +974,7 @@ internal class PaymentSheetViewModelTest {
                 initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
                 elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
+                allowDefaultOptIn = false,
             )
 
             val viewModel = createViewModel(

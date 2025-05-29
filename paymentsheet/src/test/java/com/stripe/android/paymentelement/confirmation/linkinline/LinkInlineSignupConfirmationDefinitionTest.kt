@@ -706,6 +706,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 ),
                 elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
+                allowDefaultOptIn = false,
             ),
             userInput = userInput,
         )

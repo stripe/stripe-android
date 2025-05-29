@@ -147,6 +147,7 @@ class LinkFormElementTest {
             ),
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
+            allowDefaultOptIn = false,
         )
     }
 

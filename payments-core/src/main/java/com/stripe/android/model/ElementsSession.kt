@@ -52,6 +52,9 @@ data class ElementsSession(
     val enableLinkInSpm: Boolean
         get() = flags[Flag.ELEMENTS_ENABLE_LINK_SPM] == true
 
+    val allowLinkDefaultOptIn: Boolean
+        get() = linkSettings?.linkFlags?.get("link_mobile_disable_default_opt_in") != true
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(

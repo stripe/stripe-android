@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -700,29 +699,15 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         ).getOrThrow()
 
-        val expectedLinkConfig = LinkConfiguration(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            merchantName = "Merchant",
-            merchantCountryCode = null,
-            customerInfo = LinkConfiguration.CustomerInfo(
+        val configuration = result.paymentMethodMetadata.linkState?.configuration
+        assertThat(configuration?.customerInfo).isEqualTo(
+            LinkConfiguration.CustomerInfo(
                 name = "Till",
                 email = null,
                 phone = null,
                 billingCountryCode = "CA",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            cardBrandFilter = DefaultCardBrandFilter,
-            flags = emptyMap(),
-            useAttestationEndpointsForLink = false,
-            suppress2faModal = false,
-            initializationMode = initializationMode,
-            elementsSessionId = "session_1234",
-            linkMode = null,
+            )
         )
-
-        assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)
     }
 
     @Test

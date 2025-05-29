@@ -37,6 +37,8 @@ class LinkFieldsScreenshotTest {
                 enabled = true,
                 signUpState = SignUpState.InputtingPrimaryField,
                 requiresNameCollection = false,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
                 emailController = EmailConfig.createController(
@@ -44,7 +46,8 @@ class LinkFieldsScreenshotTest {
                 ),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController(),
                 nameController = NameConfig.createController(null),
-                emailFocusRequester = focusRequester
+                emailFocusRequester = focusRequester,
+                changeSignupDetails = {},
             )
         }
     }
@@ -58,6 +61,8 @@ class LinkFieldsScreenshotTest {
                 enabled = true,
                 signUpState = SignUpState.VerifyingEmail,
                 requiresNameCollection = false,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
                 emailController = EmailConfig.createController(
@@ -65,7 +70,8 @@ class LinkFieldsScreenshotTest {
                 ),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController(),
                 nameController = NameConfig.createController(null),
-                emailFocusRequester = focusRequester
+                emailFocusRequester = focusRequester,
+                changeSignupDetails = {},
             )
         }
     }
@@ -80,6 +86,8 @@ class LinkFieldsScreenshotTest {
                 enabled = true,
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = false,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
                 emailController = EmailConfig.createController(
@@ -89,7 +97,8 @@ class LinkFieldsScreenshotTest {
                     "123456"
                 ),
                 nameController = NameConfig.createController(null),
-                emailFocusRequester = focusRequester
+                emailFocusRequester = focusRequester,
+                changeSignupDetails = {},
             )
         }
     }
@@ -104,6 +113,8 @@ class LinkFieldsScreenshotTest {
                 enabled = true,
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 sectionController = SectionController(null, listOf()),
                 emailController = EmailConfig.createController(
@@ -115,7 +126,8 @@ class LinkFieldsScreenshotTest {
                 nameController = NameConfig.createController(
                     initialValue = "James Doe"
                 ),
-                emailFocusRequester = focusRequester
+                emailFocusRequester = focusRequester,
+                changeSignupDetails = {},
             )
         }
     }
@@ -130,6 +142,8 @@ class LinkFieldsScreenshotTest {
                 enabled = true,
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = "Something went wrong",
                 sectionController = SectionController(null, listOf()),
                 emailController = EmailConfig.createController(
@@ -141,7 +155,8 @@ class LinkFieldsScreenshotTest {
                 nameController = NameConfig.createController(
                     initialValue = "James Doe"
                 ),
-                emailFocusRequester = focusRequester
+                emailFocusRequester = focusRequester,
+                changeSignupDetails = {},
             )
         }
     }

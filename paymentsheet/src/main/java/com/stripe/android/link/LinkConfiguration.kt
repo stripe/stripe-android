@@ -24,6 +24,7 @@ internal data class LinkConfiguration(
     val initializationMode: PaymentElementLoader.InitializationMode,
     val elementsSessionId: String,
     val linkMode: LinkMode?,
+    val allowDefaultOptIn: Boolean,
 ) : Parcelable {
     @Parcelize
     data class CustomerInfo(

@@ -89,6 +89,7 @@ internal object LinkTestUtils {
             initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
+            allowDefaultOptIn = false,
         )
     }
 }
