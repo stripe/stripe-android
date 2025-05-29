@@ -91,6 +91,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
             is PaymentSelection.New,
             is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.ExternalPaymentMethod -> false
+            is PaymentSelection.ShopPay -> item is PaymentOptionsItem.ShopPay
         }
     }
 }
@@ -101,5 +102,6 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
         is PaymentOptionsItem.Link -> PaymentSelection.Link()
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
+        is PaymentOptionsItem.ShopPay -> PaymentSelection.ShopPay(checkoutUrl)
     }
 }

@@ -196,6 +196,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             is PaymentSelection.New,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
+            is PaymentSelection.ShopPay,
             null -> savedSelection?.let {
                 PaymentSelection.Saved(it)
             }
