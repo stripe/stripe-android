@@ -11,6 +11,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -97,6 +98,7 @@ internal interface LinkAccountManager {
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        optionsParams: PaymentMethodOptionsParams,
     ): Result<SharePaymentDetails>
 
     suspend fun setLinkAccountFromLookupResult(

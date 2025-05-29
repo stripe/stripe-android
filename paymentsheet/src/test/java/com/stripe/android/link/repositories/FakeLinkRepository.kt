@@ -11,6 +11,7 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 
 internal open class FakeLinkRepository : LinkRepository {
@@ -128,7 +129,8 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String
+        expectedPaymentMethodType: String,
+        optionsParams: PaymentMethodOptionsParams?
     ) = sharePaymentDetails
 
     override suspend fun logOut(

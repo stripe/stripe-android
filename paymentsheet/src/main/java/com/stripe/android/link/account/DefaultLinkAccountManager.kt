@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -269,6 +270,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        optionsParams: PaymentMethodOptionsParams,
     ): Result<SharePaymentDetails> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccount.value)
@@ -277,6 +279,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 paymentDetailsId = paymentDetailsId,
                 consumerSessionClientSecret = account.clientSecret,
                 expectedPaymentMethodType = expectedPaymentMethodType,
+                optionsParams = optionsParams,
             ).getOrThrow()
         }
     }

@@ -11,6 +11,7 @@ import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
 
@@ -92,6 +93,7 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        optionsParams: PaymentMethodOptionsParams?,
     ): Result<SharePaymentDetails>
 
     suspend fun logOut(

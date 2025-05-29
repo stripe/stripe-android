@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -165,7 +166,8 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
-        expectedPaymentMethodType: String
+        expectedPaymentMethodType: String,
+        optionsParams: PaymentMethodOptionsParams
     ): Result<SharePaymentDetails> {
         return sharePaymentDetails
     }
