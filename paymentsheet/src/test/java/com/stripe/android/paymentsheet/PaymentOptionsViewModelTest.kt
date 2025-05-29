@@ -219,7 +219,7 @@ internal class PaymentOptionsViewModelTest {
         val unverifiedAccount = LinkAccount(TestFactory.CONSUMER_SESSION.copy(verificationSessions = emptyList()))
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS
-                .copy(linkAccount = LinkAccountUpdate.Value(unverifiedAccount))
+                .copy(linkAccountInfo = LinkAccountUpdate.Value(unverifiedAccount))
                 .updateState(
                     linkState = LinkState(
                         configuration = TestFactory.LINK_CONFIGURATION,
@@ -235,7 +235,7 @@ internal class PaymentOptionsViewModelTest {
 
         verify(linkPaymentLauncher).present(
             configuration = any(),
-            linkAccount = eq(LinkAccountUpdate.Value(unverifiedAccount)),
+            linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
             launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
             useLinkExpress = eq(true)
         )
@@ -273,7 +273,7 @@ internal class PaymentOptionsViewModelTest {
         // Ensure LinkPaymentLauncher.present is never called
         verify(linkPaymentLauncher, never()).present(
             configuration = any(),
-            linkAccount = any(),
+            linkAccountInfo = any(),
             launchMode = any(),
             useLinkExpress = any()
         )
@@ -1104,7 +1104,7 @@ internal class PaymentOptionsViewModelTest {
             enableLogging = false,
             productUsage = mock(),
             paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
-            linkAccount = LinkAccountUpdate.Value(
+            linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
                 lastUpdateReason = null
             ),

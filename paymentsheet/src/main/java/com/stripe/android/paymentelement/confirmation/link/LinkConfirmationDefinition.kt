@@ -56,7 +56,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
     ) {
         launcher.present(
             configuration = confirmationOption.configuration,
-            linkAccount = linkAccountHolder.linkAccountInfo.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             useLinkExpress = confirmationOption.useLinkExpress,
             launchMode = confirmationOption.linkLaunchMode
         )

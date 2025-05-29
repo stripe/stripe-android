@@ -491,7 +491,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
-            linkAccount = LinkAccountUpdate.Value(null),
+            linkAccountInfo = LinkAccountUpdate.Value(null),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
         )
 
@@ -550,7 +550,7 @@ internal class DefaultFlowControllerTest {
 
         verify(linkPaymentLauncher).present(
             configuration = any(),
-            linkAccount = anyOrNull(),
+            linkAccountInfo = anyOrNull(),
             launchMode = any(),
             useLinkExpress = any()
         )

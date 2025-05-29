@@ -130,7 +130,7 @@ internal class LinkActivityViewModelTest {
             publishableKey = "",
             stripeAccountId = null,
             startWithVerificationDialog = false,
-            linkAccount = LinkAccountUpdate.Value(
+            linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
                 lastUpdateReason = null
             ),

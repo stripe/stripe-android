@@ -29,7 +29,7 @@ internal class PaymentOptionContract :
     internal data class Args(
         val state: PaymentSheetState.Full,
         val configuration: PaymentSheet.Configuration,
-        val linkAccount: LinkAccountUpdate.Value,
+        val linkAccountInfo: LinkAccountUpdate.Value,
         val enableLogging: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,

@@ -346,7 +346,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     .application(app)
                     .startWithVerificationDialog(args.startWithVerificationDialog)
                     .linkLaunchMode(args.launchMode)
-                    .linkAccountUpdate(args.linkAccount)
+                    .linkAccountUpdate(args.linkAccountInfo)
                     .build()
                     .viewModel
             }

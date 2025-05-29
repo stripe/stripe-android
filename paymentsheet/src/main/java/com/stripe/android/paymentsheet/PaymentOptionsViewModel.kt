@@ -134,7 +134,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        linkAccountHolder.set(args.linkAccount)
+        linkAccountHolder.set(args.linkAccountInfo)
         linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
@@ -235,7 +235,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 linkPaymentLauncher.present(
                     configuration = linkState.configuration,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
-                    linkAccount = linkAccountHolder.linkAccountInfo.value,
+                    linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     useLinkExpress = true
                 )
             } else {

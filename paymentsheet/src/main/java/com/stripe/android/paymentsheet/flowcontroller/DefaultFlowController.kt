@@ -271,7 +271,7 @@ internal class DefaultFlowController @Inject internal constructor(
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(
                     configuration = linkConfiguration,
-                    linkAccount = linkAccountInfo,
+                    linkAccountInfo = linkAccountInfo,
                     useLinkExpress = false,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = paymentSelection.selectedPayment?.details
@@ -292,7 +292,7 @@ internal class DefaultFlowController @Inject internal constructor(
             configuration = state.config,
             enableLogging = enableLogging,
             productUsage = productUsage,
-            linkAccount = linkAccountHolder.linkAccountInfo.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 

@@ -116,7 +116,7 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.Args(
                 configuration = configuration,
                 startWithVerificationDialog = false,
-                linkAccount = LinkAccountUpdate.Value(
+                linkAccountInfo = LinkAccountUpdate.Value(
                     account = null,
                     lastUpdateReason = null
                 ),

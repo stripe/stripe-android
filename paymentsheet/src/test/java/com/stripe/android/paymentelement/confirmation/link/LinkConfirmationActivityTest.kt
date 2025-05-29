@@ -204,7 +204,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             publishableKey = PUBLISHABLE_KEY,
                             stripeAccountId = null,
                             startWithVerificationDialog = true,
-                            linkAccount = LinkAccountUpdate.Value(null),
+                            linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
                             launchMode = LinkLaunchMode.Full,
                         )
