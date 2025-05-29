@@ -17,7 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.utils.FeatureFlags.linkProminenceInFlowController
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -27,7 +27,6 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.AccountStatus.Verified
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -263,10 +262,10 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLinkInsteadOfPaymentOptions = FeatureFlags.linkProminenceInFlowController.isEnabled &&
-                paymentSelection is Link &&
+            val shouldPresentLinkInsteadOfPaymentOptions = linkProminenceInFlowController.isEnabled &&
+                paymentSelection?.isLink == true &&
                 linkConfiguration != null &&
-                linkAccountInfo.account?.accountStatus == Verified
+                linkAccountInfo?.account != null
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(
@@ -274,7 +273,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     linkAccountInfo = linkAccountInfo,
                     useLinkExpress = false,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
-                        selectedPayment = paymentSelection.selectedPayment?.details
+                        selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     )
                 )
             } else {
@@ -316,7 +315,13 @@ internal class DefaultFlowController @Inject internal constructor(
             is LinkActivityResult.PaymentMethodObtained,
             is LinkActivityResult.Failed -> Unit
             is LinkActivityResult.Canceled -> when (result.reason) {
-                Reason.BackPressed -> Unit
+                Reason.BackPressed -> withCurrentState {
+                    // just show the payment option list if
+                    // the user didn't have any preselected Link payment details
+                    if (viewModel.paymentSelection?.readyToPayWithLink() == false) {
+                        showPaymentOptionList(it, viewModel.paymentSelection)
+                    }
+                }
                 Reason.LoggedOut -> {
                     updateLinkPaymentSelection(null)
                     withCurrentState { showPaymentOptionList(it, viewModel.paymentSelection) }
@@ -330,6 +335,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 updateLinkPaymentSelection(result.selectedPayment)
             }
         }
+    }
+
+    fun PaymentSelection.readyToPayWithLink(): Boolean = when (this) {
+        is Link -> selectedPayment != null
+        else -> isLink
     }
 
     /**
