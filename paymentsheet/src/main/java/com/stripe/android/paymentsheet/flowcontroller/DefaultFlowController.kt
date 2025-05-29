@@ -256,22 +256,23 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun presentPaymentOptions() {
         withCurrentState { state ->
-            // If the user previously selected Link and authenticated,
-            // show the link wallet instead of the payment option list.
             val linkConfiguration = state.paymentSheetState.linkConfiguration
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
             val shouldPresentLinkInsteadOfPaymentOptions = linkProminenceInFlowController.isEnabled &&
+                // The current payment selection is Link
                 paymentSelection?.isLink == true &&
+                // Link is enabled and available
                 linkConfiguration != null &&
-                linkAccountInfo?.account != null
+                // The current user has a Link account (not necessarily logged in)
+                linkAccountInfo.account != null
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
-                    useLinkExpress = false,
+                    useLinkExpress = true,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     )
