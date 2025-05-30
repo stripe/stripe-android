@@ -915,7 +915,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         var selectedSavedPaymentMethod: PaymentMethod? = null
         var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
         runScenario(
-            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it },
+            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it.paymentMethod },
             reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it }
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
@@ -1413,7 +1413,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
-        onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
+        onSelectSavedPaymentMethod: (PaymentSelection.Saved) -> Unit = { notImplemented() },
         onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         canShowWalletsInline: Boolean = false,
         canShowWalletButtons: Boolean = true,

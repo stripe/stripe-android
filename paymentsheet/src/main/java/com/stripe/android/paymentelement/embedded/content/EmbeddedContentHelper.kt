@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
@@ -63,6 +64,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -137,7 +139,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = ::setSelection,
+            selectionUpdater = ::setSelectionAfterUserClick,
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
@@ -184,9 +186,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
-            onSelectSavedPaymentMethod = {
-                setSelection(PaymentSelection.Saved(it))
-            },
+            onSelectSavedPaymentMethod = ::setSelectionAfterUserClick,
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,
@@ -207,7 +207,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 } else {
                     true
                 }
-            }
+            },
+            linkRowClicked = ::setSelectionAfterUserClick,
+            googlePayRowClicked = ::setSelectionAfterUserClick,
         )
     }
 
@@ -238,6 +240,11 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
         )
+    }
+
+    private fun setSelectionAfterUserClick(paymentSelection: PaymentSelection?) {
+        selectionHolder.set(paymentSelection)
+        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback()
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
