@@ -78,6 +78,7 @@ dependencies {
     implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
+    implementation "androidx.navigation:navigation-compose:2.8.5"
 
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest

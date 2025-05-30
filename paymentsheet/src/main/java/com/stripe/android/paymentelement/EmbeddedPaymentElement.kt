@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
@@ -37,6 +38,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import javax.inject.Inject
 
 @ExperimentalEmbeddedPaymentElementApi
@@ -49,7 +51,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
     stateHelper: EmbeddedStateHelper,
 ) {
-
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.
@@ -77,6 +78,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
         return configurationCoordinator.configure(intentConfiguration, configuration)
     }
 
+    fun createNavigator(
+        onNavigate: (routeType: Route.Type) -> Unit,
+        onBack: () -> Unit,
+    ): Navigator {
+        return Navigator(
+            contentHelper = contentHelper,
+            onNavigate = onNavigate,
+            onBack = onBack,
+        )
+    }
+
     /**
      * A composable function that displays payment methods.
      *
@@ -84,7 +96,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
      */
     @Composable
     fun Content() {
-        val embeddedContent by contentHelper.embeddedContent.collectAsState()
+        val embeddedContentFlow = remember {
+            contentHelper.createEmbeddedContentFlow(
+                Route.PaymentMethods,
+                useSheets = true,
+                onNavigate = {},
+                onBack = {},
+            )
+        }
+
+        val embeddedContent by embeddedContentFlow.collectAsState()
+
         embeddedContent?.Content()
     }
 
@@ -102,6 +124,66 @@ class EmbeddedPaymentElement @Inject internal constructor(
      */
     fun clearPaymentOption() {
         selectionHolder.set(null)
+    }
+
+    @Poko
+    class Navigator internal constructor(
+        private val contentHelper: EmbeddedContentHelper,
+        private val onNavigate: (routeType: Route.Type) -> Unit,
+        private val onBack: () -> Unit,
+    ) {
+        val startingRoute: Route = Route.PaymentMethods
+
+        val possibleRouteTypes = listOf(
+            Route.Type.PaymentMethods,
+            Route.Type.AddPaymentMethod,
+        )
+
+        fun findRoute(type: Route.Type): Route? {
+            return contentHelper.routes.value.firstOrNull {
+                it.type == type
+            }
+        }
+
+        @Composable
+        fun Content(route: Route) {
+            val embeddedContentFlow = remember {
+                contentHelper.createEmbeddedContentFlow(
+                    route,
+                    useSheets = false,
+                    onNavigate,
+                    onBack
+                )
+            }
+
+            val embeddedContent by embeddedContentFlow.collectAsState()
+
+            embeddedContent?.Content()
+        }
+
+        fun goBack() {
+            contentHelper.goBack()
+        }
+    }
+
+    @Serializable
+    sealed class Route(val type: Type) : Parcelable {
+        @Serializable
+        sealed class Type(val name: String) {
+            @Serializable
+            internal data object PaymentMethods : Type(name = "StripeEmbeddedPaymentMethods")
+
+            @Serializable
+            internal data object AddPaymentMethod : Type(name = "StripeEmbeddedAddPaymentMethod")
+        }
+
+        @Serializable
+        @Parcelize
+        internal data object PaymentMethods : Route(Type.PaymentMethods)
+
+        @Serializable
+        @Parcelize
+        internal data class AddPaymentMethod(val code: String) : Route(Type.AddPaymentMethod)
     }
 
     /**

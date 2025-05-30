@@ -5,6 +5,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener.Companion.PREVIOUSLY_SENT_DEEP_LINK_EVENT
 import javax.inject.Inject
@@ -16,6 +17,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
+    private val callbackHelper: EmbeddedResultCallbackHelper,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
     private var previouslySentDeepLinkEvent: Boolean
@@ -31,12 +33,14 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
         }
 
         contentHelper.setSheetLauncher(sheetLauncher)
+        contentHelper.setCallbackHelper(callbackHelper)
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     contentHelper.clearSheetLauncher()
+                    contentHelper.clearCallbackHelper()
                 }
             }
         )

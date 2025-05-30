@@ -10,7 +10,12 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateHelper
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -38,7 +43,16 @@ import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface EmbeddedContentHelper {
-    val embeddedContent: StateFlow<EmbeddedContent?>
+    val routes: StateFlow<List<EmbeddedPaymentElement.Route>>
+
+    fun createEmbeddedContentFlow(
+        route: EmbeddedPaymentElement.Route,
+        useSheets: Boolean,
+        onNavigate: (EmbeddedPaymentElement.Route.Type) -> Unit,
+        onBack: () -> Unit,
+    ): StateFlow<EmbeddedContent?>
+
+    fun goBack()
 
     fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -48,9 +62,13 @@ internal interface EmbeddedContentHelper {
 
     fun clearEmbeddedContent()
 
+    fun setCallbackHelper(callbackHelper: EmbeddedResultCallbackHelper)
+
     fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
     fun clearSheetLauncher()
+
+    fun clearCallbackHelper()
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -63,6 +81,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val sheetStateHolder: SheetStateHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -75,28 +94,116 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         initialValue = null
     )
 
-    private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
-    override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
+    private val _routes = MutableStateFlow<List<EmbeddedPaymentElement.Route>>(emptyList())
+    override val routes: StateFlow<List<EmbeddedPaymentElement.Route>> = _routes.asStateFlow()
 
+    private var callbackHelper: EmbeddedResultCallbackHelper? = null
     private var sheetLauncher: EmbeddedSheetLauncher? = null
 
     init {
         coroutineScope.launch {
-            state.collect { state ->
-                _embeddedContent.value = if (state == null) {
-                    null
-                } else {
-                    EmbeddedContent(
-                        interactor = createInteractor(
-                            coroutineScope = coroutineScope,
-                            paymentMethodMetadata = state.paymentMethodMetadata,
-                            walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
-                        ),
-                        embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
-                        rowStyle = state.rowStyle,
+            state.collect {
+                if (it == null) {
+                    _routes.value = emptyList()
+                } else if (_routes.value.isEmpty()) {
+                    _routes.value = listOf(EmbeddedPaymentElement.Route.PaymentMethods)
+                }
+            }
+        }
+    }
+
+    override fun createEmbeddedContentFlow(
+        route: EmbeddedPaymentElement.Route,
+        useSheets: Boolean,
+        onNavigate: (EmbeddedPaymentElement.Route.Type) -> Unit,
+        onBack: () -> Unit,
+    ): StateFlow<EmbeddedContent?> {
+        return state.mapAsStateFlow { currentState ->
+            if (currentState == null) {
+                return@mapAsStateFlow null
+            }
+
+            when (route) {
+                is EmbeddedPaymentElement.Route.PaymentMethods -> EmbeddedContent.PaymentMethods(
+                    interactor = createLayoutInteractor(
+                        coroutineScope = coroutineScope,
+                        paymentMethodMetadata = currentState.paymentMethodMetadata,
+                        walletsState = embeddedWalletsHelper.walletsState(currentState.paymentMethodMetadata),
+                        useSheets = useSheets,
+                        onNavigate = onNavigate,
+                    ),
+                    embeddedViewDisplaysMandateText = currentState.embeddedViewDisplaysMandateText,
+                    rowStyle = currentState.rowStyle,
+                )
+                is EmbeddedPaymentElement.Route.AddPaymentMethod -> {
+                    val embeddedConfirmationState = confirmationStateHolder.state ?: throw Exception("LOL")
+
+                    val onClickDelegate = OnClickDelegateOverrideImpl()
+                    val stateHelper = DefaultFormActivityStateHelper(
+                        paymentMethodMetadata = currentState.paymentMethodMetadata,
+                        selectionHolder = selectionHolder,
+                        configuration = embeddedConfirmationState.configuration,
+                        coroutineScope = coroutineScope,
+                        onClickDelegate = onClickDelegate,
+                        eventReporter = eventReporter,
+                    )
+
+                    EmbeddedContent.AddPaymentMethod(
+                        interactor = EmbeddedFormInteractorFactory(
+                            paymentMethodMetadata = currentState.paymentMethodMetadata,
+                            paymentMethodCode = route.code,
+                            embeddedFormHelperFactory = embeddedFormHelperFactory,
+                            viewModelScope = coroutineScope,
+                            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                                it.type?.code == route.code
+                            },
+                            embeddedSelectionHolder = selectionHolder,
+                            formActivityStateHelper = stateHelper,
+                            eventReporter = eventReporter
+                        ).create(),
+                        formActivityStateHelper = stateHelper,
+                        onClickDelegate = onClickDelegate,
+                        selectionHolder = selectionHolder,
+                        paymentMethodMetadata = currentState.paymentMethodMetadata,
+                        initializationMode = embeddedConfirmationState.initializationMode,
+                        configuration = embeddedConfirmationState.configuration,
+                        coroutineScope = coroutineScope,
+                        confirmationHandler = confirmationHandler,
+                        eventReporter = eventReporter,
+                        onResult = { result ->
+                            sheetStateHolder.sheetIsOpen = false
+                            selectionHolder.setTemporary(null)
+
+                            if (result is FormResult.Complete) {
+                                selectionHolder.set(result.selection)
+
+                                if (!useSheets) {
+                                    onBack()
+                                }
+
+                                if (result.hasBeenConfirmed) {
+                                    callbackHelper?.setResult(
+                                        EmbeddedPaymentElement.Result.Completed()
+                                    )
+                                }
+                            }
+                        }
                     )
                 }
             }
+        }
+    }
+
+    override fun goBack() {
+        _routes.value = _routes.value.run {
+            val lastElement = lastOrNull()
+
+            if (lastElement is EmbeddedPaymentElement.Route.AddPaymentMethod) {
+                sheetStateHolder.sheetIsOpen = false
+                selectionHolder.setTemporary(null)
+            }
+
+            dropLast(1)
         }
     }
 
@@ -117,6 +224,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = null
     }
 
+    override fun setCallbackHelper(callbackHelper: EmbeddedResultCallbackHelper) {
+        this.callbackHelper = callbackHelper
+    }
+
     override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
         this.sheetLauncher = sheetLauncher
     }
@@ -125,10 +236,16 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         sheetLauncher = null
     }
 
-    private fun createInteractor(
+    override fun clearCallbackHelper() {
+        callbackHelper = null
+    }
+
+    private fun createLayoutInteractor(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
         walletsState: StateFlow<WalletsState?>,
+        useSheets: Boolean,
+        onNavigate: (EmbeddedPaymentElement.Route.Type) -> Unit,
     ): PaymentMethodVerticalLayoutInteractor {
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(
             incentive = paymentMethodMetadata.paymentMethodIncentive,
@@ -170,14 +287,24 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 )
             },
             transitionToFormScreen = { code ->
-                sheetLauncher?.launchForm(
-                    code = code,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
-                        it.type?.code == code
-                    },
-                    embeddedConfirmationState = confirmationStateHolder.state
-                )
+                if (sheetStateHolder.sheetIsOpen) return@DefaultPaymentMethodVerticalLayoutInteractor
+
+                sheetStateHolder.sheetIsOpen = true
+                selectionHolder.setTemporary(code)
+
+                if (useSheets) {
+                    sheetLauncher?.launchForm(
+                        code = code,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                            it.type?.code == code
+                        },
+                        embeddedConfirmationState = confirmationStateHolder.state
+                    )
+                } else {
+                    _routes.value = _routes.value + EmbeddedPaymentElement.Route.AddPaymentMethod(code)
+                    onNavigate(EmbeddedPaymentElement.Route.Type.AddPaymentMethod)
+                }
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,

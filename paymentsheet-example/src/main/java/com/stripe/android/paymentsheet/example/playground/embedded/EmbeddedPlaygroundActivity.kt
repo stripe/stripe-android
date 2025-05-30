@@ -6,9 +6,17 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -36,6 +46,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.attachEmbeddedPaymentElement
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -54,6 +65,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 
 @OptIn(
     ExperimentalEmbeddedPaymentElementApi::class,
@@ -334,7 +346,49 @@ internal class EmbeddedPlaygroundActivity :
         Complete {
             @Composable
             override fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit) {
-                embeddedPaymentElement.Content()
+                val navController = rememberNavController()
+
+                val navigator = remember {
+                    embeddedPaymentElement.createNavigator(
+                        onNavigate = {
+                            navController.navigate(it.name)
+                        },
+                        onBack = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                BackHandler {
+                    navigator.goBack()
+                }
+
+                NavHost(
+                    navController = navController,
+                    startDestination = "CheckoutRoute",
+                    enterTransition = {
+                        fadeIn(
+                            animationSpec = tween(
+                                300, easing = LinearEasing
+                            )
+                        ) + slideIntoContainer(
+                            animationSpec = tween(300, easing = EaseIn),
+                            towards = AnimatedContentTransitionScope.SlideDirection.Start
+                        )
+                    },
+                    exitTransition = {
+                        fadeOut(
+                            animationSpec = tween(
+                                300, easing = LinearEasing
+                            )
+                        ) + slideOutOfContainer(
+                            animationSpec = tween(300, easing = EaseOut),
+                            towards = AnimatedContentTransitionScope.SlideDirection.End
+                        )
+                    }
+                ) {
+                    attachEmbeddedPaymentElement(navigator)
+                }
             }
         },
         Failed {

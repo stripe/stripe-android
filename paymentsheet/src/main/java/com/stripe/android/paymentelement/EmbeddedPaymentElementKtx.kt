@@ -8,6 +8,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -67,5 +70,23 @@ fun rememberEmbeddedPaymentElement(
             viewModelStoreOwner = viewModelStoreOwner,
             resultCallback = onResult,
         )
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+fun NavGraphBuilder.attachEmbeddedPaymentElement(
+    embeddedNavigator: EmbeddedPaymentElement.Navigator,
+) {
+    navigation(
+        startDestination = embeddedNavigator.startingRoute.type.name,
+        route = "CheckoutRoute"
+    ) {
+        embeddedNavigator.possibleRouteTypes.forEach { routeType ->
+            composable(routeType.name) {
+                embeddedNavigator.findRoute(routeType)?.let {
+                    embeddedNavigator.Content(it)
+                }
+            }
+        }
     }
 }

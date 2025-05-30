@@ -102,9 +102,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             )
             return
         }
-        if (sheetStateHolder.sheetIsOpen) return
-        sheetStateHolder.sheetIsOpen = true
-        selectionHolder.setTemporary(code)
         val currentSelection = selectionHolder.selection.value as? PaymentSelection.New?
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
