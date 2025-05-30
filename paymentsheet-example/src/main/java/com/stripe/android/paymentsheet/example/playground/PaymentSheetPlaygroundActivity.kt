@@ -306,74 +306,6 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
-    private fun SearchSettingsField(
-        query: String,
-        onQueryChanged: (String) -> Unit,
-        modifier: Modifier = Modifier,
-    ) {
-        var hasFocus by remember { mutableStateOf(false) }
-        val keyboardController = LocalSoftwareKeyboardController.current
-        TextField(
-            modifier = modifier
-                .onFocusChanged { hasFocus = it.isFocused }
-                .onKeyEvent {
-                    if (it.key == Key.Enter) {
-                        keyboardController?.hide()
-                        true
-                    } else {
-                        false
-                    }
-                }
-                .fillMaxWidth(),
-            value = query,
-            placeholder = if (hasFocus) {
-                null
-            } else {
-                @Composable {
-                    Text(text = "Search")
-                }
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { keyboardController?.show() }
-            ),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                )
-            },
-            trailingIcon = if (query.isEmpty()) {
-                null
-            } else {
-                @Composable {
-                    IconButton(onClick = { onQueryChanged("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = null,
-                        )
-                    }
-                }
-            },
-            onValueChange = onQueryChanged,
-        )
-    }
-
-    @Preview(showBackground = true)
-    @Composable
-    private fun SearchSettingsFieldPreview() {
-        var query by remember { mutableStateOf("") }
-        SearchSettingsField(
-            query = query,
-            onQueryChanged = { query = it },
-        )
-    }
-
-    @Composable
     private fun AppearanceButton() {
         Button(
             onClick = {
@@ -804,6 +736,74 @@ internal class PaymentSheetPlaygroundActivity :
                 .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
+}
+
+@Composable
+private fun SearchSettingsField(
+    query: String,
+    onQueryChanged: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var hasFocus by remember { mutableStateOf(false) }
+    val keyboardController = LocalSoftwareKeyboardController.current
+    TextField(
+        modifier = modifier
+            .onFocusChanged { hasFocus = it.isFocused }
+            .onKeyEvent {
+                if (it.key == Key.Enter) {
+                    keyboardController?.hide()
+                    true
+                } else {
+                    false
+                }
+            }
+            .fillMaxWidth(),
+        value = query,
+        placeholder = if (hasFocus) {
+            null
+        } else {
+            @Composable {
+                Text(text = "Search")
+            }
+        },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { keyboardController?.show() }
+        ),
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+            )
+        },
+        trailingIcon = if (query.isEmpty()) {
+            null
+        } else {
+            @Composable {
+                IconButton(onClick = { onQueryChanged("") }) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = null,
+                    )
+                }
+            }
+        },
+        onValueChange = onQueryChanged,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SearchSettingsFieldPreview() {
+    var query by remember { mutableStateOf("") }
+    SearchSettingsField(
+        query = query,
+        onQueryChanged = { query = it },
+    )
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"
