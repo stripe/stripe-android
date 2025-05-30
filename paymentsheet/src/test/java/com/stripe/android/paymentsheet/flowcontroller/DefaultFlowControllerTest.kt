@@ -20,6 +20,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
+import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
@@ -174,6 +175,8 @@ internal class DefaultFlowControllerTest {
     private val activityResultCaller: ActivityResultCaller = mock()
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
+
+    private val linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider()
 
     private var paymentLauncherResultCallback: ((InternalPaymentResult) -> Unit)? = null
     private var googlePayLauncherResultCallback: ((GooglePayPaymentMethodLauncher.Result) -> Unit)? = null
@@ -531,7 +534,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions shows Link picker when a Link payment method is already selected`() = runTest {
-        linkProminenceFeatureRule.setEnabled(true)
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
 
         val verifiedLinkAccount = TestFactory.LINK_ACCOUNT
         val flowController = createFlowController(
@@ -2483,6 +2486,7 @@ internal class DefaultFlowControllerTest {
             linkAccountHolder = linkAccountHolder,
             linkPaymentLauncher = linkPaymentLauncher,
             activityResultRegistryOwner = mock(),
+            linkProminenceFeatureProvider = linkProminenceFeatureProvider,
             confirmationHandler = createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
