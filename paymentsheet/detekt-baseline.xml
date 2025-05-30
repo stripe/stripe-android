@@ -3,6 +3,7 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>ConstructorParameterNaming:BankFormScreenState.kt$BankFormScreenState$private val _isProcessing: Boolean = false</ID>
+    <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _shippingDetails: AddressDetails?</ID>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
     <ID>CyclomaticComplexMethod:TransformBankIconCodeToBankIcon.kt$internal fun transformBankIconCodeToBankIcon( iconCode: String?, fallbackIcon: Int, ): Int</ID>
@@ -27,6 +28,7 @@
     <ID>LargeClass:USBankAccountFormViewModel.kt$USBankAccountFormViewModel : ViewModel</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LargeClass:WalletScreenTest.kt$WalletScreenTest</ID>
+    <ID>LargeClass:WalletViewModelTest.kt$WalletViewModelTest</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest$private fun test( someDefinitionAction: ConfirmationDefinition.Action&lt;SomeConfirmationDefinition.LauncherArgs> = ConfirmationDefinition.Action.Fail( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someDefinitionResult: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Failed( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, type = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someDefinitionIsConfirmable: Boolean = true, someOtherDefinitionAction: ConfirmationDefinition.Action&lt;SomeOtherConfirmationDefinition.LauncherArgs> = ConfirmationDefinition.Action.Fail( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), someOtherDefinitionResult: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Failed( cause = IllegalStateException("Failed!"), message = R.string.stripe_something_went_wrong.resolvableString, type = ConfirmationHandler.Result.Failed.ErrorType.Internal, ), shouldRegister: Boolean = true, savedStateHandle: SavedStateHandle = SavedStateHandle(), dispatcher: CoroutineDispatcher = StandardTestDispatcher(), scenarioTest: suspend Scenario.() -> Unit )</ID>

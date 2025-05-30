@@ -13,6 +13,8 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
@@ -147,6 +149,24 @@ internal object TestFactory {
             CONSUMER_PAYMENT_DETAILS_CARD,
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
             CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+        )
+    )
+
+    val CONSUMER_SHIPPING_ADDRESSES: ConsumerShippingAddresses = ConsumerShippingAddresses(
+        addresses = listOf(
+            ConsumerShippingAddress(
+                id = "adr_123",
+                isDefault = true,
+                address = ConsumerPaymentDetails.BillingAddress(
+                    name = "John Doe",
+                    line1 = "123 Main St",
+                    line2 = "Apt 4B",
+                    locality = "San Francisco",
+                    administrativeArea = "CA",
+                    postalCode = "94105",
+                    countryCode = CountryCode.US,
+                ),
+            )
         )
     )
 

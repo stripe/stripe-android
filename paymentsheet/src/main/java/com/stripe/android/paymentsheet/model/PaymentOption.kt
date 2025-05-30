@@ -5,6 +5,8 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
 /**
@@ -22,8 +24,18 @@ data class PaymentOption internal constructor(
      * For example, "···· 4242" for a Visa ending in 4242.
      */
     val label: String,
+    private val _shippingDetails: AddressDetails?,
+
     private val imageLoader: suspend () -> Drawable,
 ) {
+
+    /**
+     * A shipping address that the user provided during checkout.
+     */
+    @ShippingDetailsInPaymentOptionPreview
+    val shippingDetails: AddressDetails?
+        get() = _shippingDetails
+
     @Deprecated("Not intended for public use.")
     constructor(
         @DrawableRes
@@ -32,6 +44,7 @@ data class PaymentOption internal constructor(
     ) : this(
         drawableResourceId = drawableResourceId,
         label = label,
+        _shippingDetails = null,
         imageLoader = errorImageLoader,
     )
 

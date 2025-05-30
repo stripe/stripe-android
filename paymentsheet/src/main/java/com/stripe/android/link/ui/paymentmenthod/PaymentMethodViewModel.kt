@@ -17,6 +17,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
+import com.stripe.android.link.account.loadDefaultShippingAddress
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -149,7 +150,8 @@ internal class PaymentMethodViewModel @Inject constructor(
                     selectedPayment = LinkPaymentMethod.LinkPaymentDetails(
                         linkPaymentDetails = paymentDetails,
                         collectedCvc = cvc,
-                    )
+                    ),
+                    shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
                 )
             )
         }
