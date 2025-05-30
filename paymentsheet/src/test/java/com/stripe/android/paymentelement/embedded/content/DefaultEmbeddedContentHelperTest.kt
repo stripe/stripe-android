@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
@@ -21,6 +22,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
@@ -112,6 +114,11 @@ internal class DefaultEmbeddedContentHelperTest {
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
+        val immediateActionHandler = DefaultEmbeddedRowSelectionImmediateActionHandler(
+            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            internalRowSelectionCallback = { null }
+        )
+
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             savedStateHandle = savedStateHandle,
@@ -135,6 +142,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 selectionHolder = selectionHolder,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),
+            rowSelectionImmediateActionHandler = immediateActionHandler
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

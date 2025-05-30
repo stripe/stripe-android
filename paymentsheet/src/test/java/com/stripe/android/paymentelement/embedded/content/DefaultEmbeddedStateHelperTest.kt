@@ -8,9 +8,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -98,7 +100,55 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
     }
 
+    @Test
+    fun `selection state retained if rowSelectionCallback null and action = confirm`() {
+        testScenario(
+            internalRowSelectionCallback = null
+        ) {
+            setState(
+                selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            ) {
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            }
+
+            assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `selection state cleared if rowSelectionCallback not null and action = confirm`() {
+        testScenario(
+            internalRowSelectionCallback = {}
+        ) {
+            setState(
+                selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            ) {
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            }
+
+            assertThat(selectionHolder.selection.value).isNull()
+            assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `selection state retained if rowSelectionCallback not null and action = continue`() {
+        testScenario(
+            internalRowSelectionCallback = {}
+        ) {
+            setState(
+                selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            ) {
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            }
+            assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        }
+    }
+
     private fun testScenario(
+        internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -121,6 +171,7 @@ internal class DefaultEmbeddedStateHelperTest {
             customerStateHolder = customerStateHolder,
             confirmationStateHolder = confirmationStateHolder,
             embeddedContentHelper = embeddedContentHelper,
+            internalRowSelectionCallback = { internalRowSelectionCallback },
         )
 
         Scenario(
