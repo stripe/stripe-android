@@ -5,16 +5,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import javax.inject.Singleton
 
 internal typealias InternalRowSelectionCallback = () -> Unit
 
-@Singleton
 internal interface EmbeddedRowSelectionImmediateActionHandler {
     fun handleImmediateRowSelectionCallback()
 }
 
-@Singleton
 internal class DefaultEmbeddedRowSelectionImmediateActionHandler @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
