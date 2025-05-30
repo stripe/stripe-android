@@ -333,8 +333,15 @@ internal class InlineSignupViewModel(
             }
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
-                    defaultOptIn ->
-                        SignUpConsentAction.DefaultOptIn
+                    defaultOptIn -> {
+                        if (hasPrefilledEmail && hasPrefilledPhone) {
+                            SignUpConsentAction.DefaultOptInWithAllPrefilled
+                        } else if (hasPrefilledEmail || hasPrefilledPhone) {
+                            SignUpConsentAction.DefaultOptInWithSomePrefilled
+                        } else {
+                            SignUpConsentAction.DefaultOptInWithNonePrefilled
+                        }
+                    }
                     hasPrefilledEmail && hasPrefilledPhone ->
                         SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
                     hasPrefilledEmail ->

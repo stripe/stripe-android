@@ -11,7 +11,6 @@ object FeatureFlags {
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val linkProminenceInFlowController = FeatureFlag("Link Prominence in FlowController")
-    val linkDefaultOptIn = FeatureFlag("Link Default Opt-In")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

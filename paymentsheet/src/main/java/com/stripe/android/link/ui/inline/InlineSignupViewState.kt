@@ -1,7 +1,6 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.requiresNameCollection
@@ -100,9 +99,8 @@ constructor(
                 }
             }
 
-            val allowsDefaultOptIn = FeatureFlags.linkDefaultOptIn.isEnabled &&
+            val allowsDefaultOptIn = config.allowDefaultOptIn &&
                 config.stripeIntent.countryCode == "US" &&
-                config.allowDefaultOptIn &&
                 signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
 
             val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()

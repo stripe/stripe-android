@@ -1,21 +1,12 @@
 package com.stripe.android.link.ui.inline
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
-import org.junit.Rule
 import org.junit.Test
 
 class InlineSignupViewStateTest {
-
-    @get:Rule
-    val defaultOptInRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkDefaultOptIn,
-        isEnabled = false,
-    )
 
     @Test
     fun `Allows full prefill if showing instead of save-for-future-use for US customers`() {
@@ -88,10 +79,9 @@ class InlineSignupViewStateTest {
     }
 
     @Test
-    fun `Allows default opt-in for eligible users if feature flag is turned on`() {
+    fun `Allows default opt-in for eligible users`() {
         testDefaultOptInAllowed(
             countryCode = "US",
-            featureFlagEnabled = true,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             merchantEligible = true,
             expectedResult = true
@@ -102,7 +92,6 @@ class InlineSignupViewStateTest {
     fun `Disables default opt-in if showing the save-future-use checkbox`() {
         testDefaultOptInAllowed(
             countryCode = "US",
-            featureFlagEnabled = false,
             signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
             merchantEligible = true,
             expectedResult = false
@@ -113,7 +102,6 @@ class InlineSignupViewStateTest {
     fun `Disables default opt-in if outside US`() {
         testDefaultOptInAllowed(
             countryCode = "CA",
-            featureFlagEnabled = true,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             merchantEligible = true,
             expectedResult = false
@@ -124,7 +112,6 @@ class InlineSignupViewStateTest {
     fun `Disables default opt-in if merchant is not eligible`() {
         testDefaultOptInAllowed(
             countryCode = "US",
-            featureFlagEnabled = false,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             merchantEligible = false,
             expectedResult = false
@@ -132,20 +119,7 @@ class InlineSignupViewStateTest {
     }
 
     @Test
-    fun `Disables default opt-in for eligible users if feature flag is turned off`() {
-        testDefaultOptInAllowed(
-            countryCode = "US",
-            featureFlagEnabled = false,
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            merchantEligible = true,
-            expectedResult = false
-        )
-    }
-
-    @Test
     fun `Uses Link if using default opt-in and all fields filled out`() {
-        defaultOptInRule.setEnabled(true)
-
         val linkConfig = createLinkConfig(
             countryCode = "US",
             allowsDefaultOptIn = true,
@@ -160,7 +134,7 @@ class InlineSignupViewStateTest {
                 phone = "5555555555",
                 name = null,
                 country = "US",
-                consentAction = SignUpConsentAction.DefaultOptIn,
+                consentAction = SignUpConsentAction.DefaultOptInWithAllPrefilled,
             )
         )
 
@@ -169,8 +143,6 @@ class InlineSignupViewStateTest {
 
     @Test
     fun `Does not use Link if using default opt-in but not filling out all fields`() {
-        defaultOptInRule.setEnabled(true)
-
         val linkConfig = createLinkConfig(
             countryCode = "US",
             allowsDefaultOptIn = true,
@@ -188,13 +160,10 @@ class InlineSignupViewStateTest {
 
     private fun testDefaultOptInAllowed(
         countryCode: String,
-        featureFlagEnabled: Boolean,
         signupMode: LinkSignupMode,
         merchantEligible: Boolean,
         expectedResult: Boolean,
     ) {
-        defaultOptInRule.setEnabled(featureFlagEnabled)
-
         val linkConfig = createLinkConfig(
             countryCode = countryCode,
             allowsDefaultOptIn = merchantEligible,
