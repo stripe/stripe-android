@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import com.stripe.android.Stripe
-import com.stripe.android.common.analytics.experiment.DefaultLogLinkGlobalHoldbackExposure
-import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
+import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -42,8 +42,8 @@ internal class LinkHoldbackExposureModule {
 
     @Provides
     fun providesLogLinkGlobalHoldbackExposure(
-        default: DefaultLogLinkGlobalHoldbackExposure
-    ): LogLinkGlobalHoldbackExposure {
+        default: DefaultLogLinkHoldbackExperiment
+    ): LogLinkHoldbackExperiment {
         return default
     }
 

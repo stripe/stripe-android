@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
+import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
@@ -141,7 +141,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val accountStatusProvider: LinkAccountStatusProvider,
-    private val logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure,
+    private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
     private val linkStore: LinkStore,
     private val linkGateFactory: LinkGate.Factory,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
@@ -236,7 +236,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
-        logLinkGlobalHoldbackExposure(
+        logLinkExperimentExposures(
             elementsSession = elementsSession,
             state = state
         )
@@ -253,6 +253,27 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private fun logLinkExperimentExposures(
+        elementsSession: ElementsSession,
+        state: PaymentElementLoader.State
+    ) {
+        logLinkHoldbackExperiment(
+            experimentAssignment = ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+            elementsSession = elementsSession,
+            state = state
+        )
+
+        // Only log Link AB Test if Link is enabled
+        val linkEnabled = state.paymentMethodMetadata.linkState != null
+        if (linkEnabled) {
+            logLinkHoldbackExperiment(
+                elementsSession = elementsSession,
+                state = state,
+                experimentAssignment = ElementsSession.ExperimentAssignment.LINK_AB_TEST
+            )
+        }
     }
 
     private suspend fun retrieveElementsSession(
@@ -411,9 +432,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
                         savedSelection = savedSelection,
                         defaultPaymentMethodId = state.defaultPaymentMethodId,
-                        isPaymentMethodSetAsDefaultEnabled =
-                        metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                        isPaymentMethodSetAsDefaultEnabled = metadata.customerMetadata
+                            ?.isPaymentMethodSetAsDefaultEnabled
+                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
                     ).filter { cardBrandFilter.isAccepted(it) },
             )
         }

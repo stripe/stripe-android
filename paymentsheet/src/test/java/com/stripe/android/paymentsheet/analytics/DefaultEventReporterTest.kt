@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -16,6 +16,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -664,13 +665,14 @@ class DefaultEventReporterTest {
                 simulateSuccessfulSetup()
             }
 
-            val experiment = LoggableExperiment.LinkGlobalHoldback(
+            val experiment = LoggableExperiment.LinkHoldback(
+                experiment = LINK_GLOBAL_HOLD_BACK,
                 arbId = "random_arb_id",
                 isReturningLinkUser = false,
                 group = "holdback",
                 useLinkNative = true,
                 emailRecognitionSource = EmailRecognitionSource.EMAIL,
-                providedDefaultValues = LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues(
+                providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
                     email = true,
                     name = false,
                     phone = true,
