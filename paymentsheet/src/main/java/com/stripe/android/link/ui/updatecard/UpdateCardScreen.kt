@@ -18,7 +18,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
-import com.stripe.android.link.ui.Loader
+import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
@@ -39,7 +39,7 @@ import com.stripe.android.R as StripeR
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
     when (val interactor = viewModel.interactor) {
-        null -> Loader()
+        null -> LinkLoadingScreen()
         else -> UpdateCardScreenBody(
             interactor = interactor,
             state = state,

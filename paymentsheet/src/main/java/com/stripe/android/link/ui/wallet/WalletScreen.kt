@@ -1,20 +1,22 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
@@ -49,10 +51,11 @@ import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkDivider
-import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
@@ -112,50 +115,54 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
-    if (state.paymentDetailsList.isEmpty()) {
-        Loader()
-        return
-    }
+    AnimatedContent(
+        targetState = state.paymentDetailsList.isEmpty(),
+        transitionSpec = { LinkScreenTransition },
+    ) { isLoading ->
+        if (isLoading) {
+            LinkLoadingScreen(Modifier.testTag(WALLET_LOADER_TAG))
+        } else {
+            if (state.alertMessage != null) {
+                AlertMessage(
+                    alertMessage = state.alertMessage,
+                    onDismissAlert = onDismissAlert
+                )
+            }
 
-    if (state.alertMessage != null) {
-        AlertMessage(
-            alertMessage = state.alertMessage,
-            onDismissAlert = onDismissAlert
-        )
-    }
+            val focusManager = LocalFocusManager.current
 
-    val focusManager = LocalFocusManager.current
+            LaunchedEffect(state.isProcessing) {
+                if (state.isProcessing) {
+                    focusManager.clearFocus()
+                }
+            }
 
-    LaunchedEffect(state.isProcessing) {
-        if (state.isProcessing) {
-            focusManager.clearFocus()
+            ScrollableTopLevelColumn {
+                PaymentDetailsSection(
+                    modifier = Modifier,
+                    state = state,
+                    isExpanded = state.isExpanded,
+                    expiryDateController = expiryDateController,
+                    cvcController = cvcController,
+                    onItemSelected = onItemSelected,
+                    onExpandedChanged = onExpandedChanged,
+                    showBottomSheetContent = showBottomSheetContent,
+                    onRemoveClicked = onRemoveClicked,
+                    onUpdateClicked = onUpdateClicked,
+                    onSetDefaultClicked = onSetDefaultClicked,
+                    onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
+                    hideBottomSheetContent = hideBottomSheetContent
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                ActionSection(
+                    state = state,
+                    onPrimaryButtonClick = onPrimaryButtonClick,
+                    onPayAnotherWayClicked = onPayAnotherWayClicked
+                )
+            }
         }
-    }
-
-    ScrollableTopLevelColumn {
-        PaymentDetailsSection(
-            modifier = Modifier,
-            state = state,
-            isExpanded = state.isExpanded,
-            expiryDateController = expiryDateController,
-            cvcController = cvcController,
-            onItemSelected = onItemSelected,
-            onExpandedChanged = onExpandedChanged,
-            showBottomSheetContent = showBottomSheetContent,
-            onRemoveClicked = onRemoveClicked,
-            onUpdateClicked = onUpdateClicked,
-            onSetDefaultClicked = onSetDefaultClicked,
-            onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
-            hideBottomSheetContent = hideBottomSheetContent
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActionSection(
-            state = state,
-            onPrimaryButtonClick = onPrimaryButtonClick,
-            onPayAnotherWayClicked = onPayAnotherWayClicked
-        )
     }
 }
 
@@ -359,7 +366,6 @@ private fun PaymentMethodPicker(
 ) {
     Column(
         modifier = modifier
-            .animateContentSize()
             .fillMaxWidth()
             .clip(LinkTheme.shapes.large)
             .background(
@@ -375,10 +381,23 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
-        if (expanded || selectedItem == null) {
-            expandedContent()
-        } else {
-            collapsedContent(selectedItem)
+        AnimatedContent(
+            targetState = expanded || selectedItem == null,
+            transitionSpec = {
+                if (targetState) {
+                    // Expanding
+                    (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
+                } else {
+                    // Collapsing
+                    fadeIn() togetherWith (fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top))
+                }
+            }
+        ) { showExpanded ->
+            if (showExpanded) {
+                expandedContent()
+            } else {
+                collapsedContent(selectedItem!!)
+            }
         }
     }
 }
@@ -638,20 +657,6 @@ internal fun CardDetailsRecollectionForm(
             element = SectionElement.wrap(rowElement),
             hiddenIdentifiers = emptySet(),
             lastTextFieldIdentifier = rowElement.fields.last().identifier
-        )
-    }
-}
-
-@Composable
-private fun Loader() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .testTag(WALLET_LOADER_TAG),
-        contentAlignment = Alignment.Center
-    ) {
-        LinkSpinner(
-            modifier = Modifier.size(48.dp)
         )
     }
 }
