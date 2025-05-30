@@ -4,12 +4,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -30,12 +28,6 @@ class LinkInlineSignupScreenshotTest {
 
     @get:Rule
     val localeRule = LocaleTestRule(Locale.US)
-
-    @get:Rule
-    val defaultOptInRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkDefaultOptIn,
-        isEnabled = false,
-    )
 
     @Test
     fun testCollapsed() {
@@ -144,8 +136,6 @@ class LinkInlineSignupScreenshotTest {
 
     @Test
     fun testDefaultOptIn() {
-        defaultOptInRule.setEnabled(true)
-
         val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(initialValue = "5555555555")
         val nameController = NameConfig.createController(initialValue = null)
@@ -181,8 +171,6 @@ class LinkInlineSignupScreenshotTest {
 
     @Test
     fun testDefaultOptInWithPartialValues() {
-        defaultOptInRule.setEnabled(true)
-
         val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(initialValue = "")
         val nameController = NameConfig.createController(initialValue = null)
@@ -218,8 +206,6 @@ class LinkInlineSignupScreenshotTest {
 
     @Test
     fun testDefaultOptInAfterChangingSignupData() {
-        defaultOptInRule.setEnabled(true)
-
         val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(initialValue = "5555555555")
         val nameController = NameConfig.createController(initialValue = null)
