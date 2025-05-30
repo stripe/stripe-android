@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl
@@ -16,7 +15,6 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import javax.inject.Inject
 
-@ExperimentalEmbeddedPaymentElementApi
 internal class PaymentOptionDisplayDataFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val context: Context,

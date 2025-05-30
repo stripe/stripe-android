@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.lifecycle.SavedStateHandle
@@ -8,7 +6,6 @@ import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter

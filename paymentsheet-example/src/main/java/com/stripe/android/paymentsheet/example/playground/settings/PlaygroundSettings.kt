@@ -9,7 +9,6 @@ import androidx.core.content.edit
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -148,7 +147,6 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
-        @ExperimentalEmbeddedPaymentElementApi
         fun embeddedConfiguration(
             playgroundState: PlaygroundState.Payment
         ): EmbeddedPaymentElement.Configuration {
@@ -191,7 +189,6 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
-        @ExperimentalEmbeddedPaymentElementApi
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             value: Any?,
             configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,

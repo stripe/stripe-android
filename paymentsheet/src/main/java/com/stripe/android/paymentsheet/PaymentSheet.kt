@@ -28,7 +28,6 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.WalletsButtonPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -1054,27 +1053,23 @@ class PaymentSheet internal constructor(
         }
 
         @Parcelize
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         @Poko
         class Embedded(
             internal val style: RowStyle
         ) : Parcelable {
 
             internal companion object {
-                @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
                 val default = Embedded(
                     style = RowStyle.FlatWithRadio.default
                 )
             }
 
-            @ExperimentalEmbeddedPaymentElementApi
             @Parcelize
             sealed class RowStyle : Parcelable {
 
                 internal abstract fun hasSeparators(): Boolean
                 internal abstract fun startSeparatorHasDefaultInset(): Boolean
 
-                @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 @Poko
                 class FlatWithRadio(
@@ -1152,7 +1147,6 @@ class PaymentSheet internal constructor(
                     override fun startSeparatorHasDefaultInset() = true
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
-                    @ExperimentalEmbeddedPaymentElementApi
                     @Parcelize
                     @Poko
                     class Colors(
@@ -1198,7 +1192,6 @@ class PaymentSheet internal constructor(
                     }
                 }
 
-                @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 @Poko
                 class FlatWithCheckmark(
@@ -1279,7 +1272,6 @@ class PaymentSheet internal constructor(
                         colorsDark = colorsDark
                     )
 
-                    @ExperimentalEmbeddedPaymentElementApi
                     @Parcelize
                     @Poko
                     class Colors(
@@ -1322,7 +1314,6 @@ class PaymentSheet internal constructor(
                     }
                 }
 
-                @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 @Poko
                 class FloatingButton(
@@ -1365,7 +1356,6 @@ class PaymentSheet internal constructor(
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
 
-            @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
                 Embedded.default
 
@@ -1389,12 +1379,10 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
-            @ExperimentalEmbeddedPaymentElementApi
             fun embeddedAppearance(embeddedAppearance: Embedded) = apply {
                 this.embeddedAppearance = embeddedAppearance
             }
 
-            @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
             fun build(): Appearance {
                 return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, embeddedAppearance)
             }
