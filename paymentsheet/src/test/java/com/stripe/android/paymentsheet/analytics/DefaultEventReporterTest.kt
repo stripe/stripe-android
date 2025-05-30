@@ -16,6 +16,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -665,6 +666,7 @@ class DefaultEventReporterTest {
             }
 
             val experiment = LoggableExperiment.LinkHoldback(
+                experiment = LINK_GLOBAL_HOLD_BACK,
                 arbId = "random_arb_id",
                 isReturningLinkUser = false,
                 group = "holdback",
