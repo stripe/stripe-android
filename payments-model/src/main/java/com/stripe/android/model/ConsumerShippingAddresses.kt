@@ -16,4 +16,5 @@ data class ConsumerShippingAddress(
     val id: String,
     val isDefault: Boolean,
     val address: ConsumerPaymentDetails.BillingAddress,
+    val unredactedPhoneNumber: String? = null,
 ) : StripeModel

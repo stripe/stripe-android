@@ -354,7 +354,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun listShippingAddresses(): Result<ConsumerShippingAddresses> {
-        val clientSecret = linkAccountHolder.linkAccount.value?.clientSecret
+        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listShippingAddresses(
             consumerSessionClientSecret = clientSecret,

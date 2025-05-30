@@ -45,7 +45,7 @@ private val PaymentSelection.shippingAddress: AddressDetails?
 private fun PaymentSelection.Link.makeAddressDetails(): AddressDetails? {
     return AddressDetails(
         name = shippingAddress?.address?.name,
-        phoneNumber = linkAccount?.unredactedPhoneNumber,
+        phoneNumber = shippingAddress?.unredactedPhoneNumber,
         address = PaymentSheet.Address(
             line1 = shippingAddress?.address?.line1,
             line2 = shippingAddress?.address?.line2,
