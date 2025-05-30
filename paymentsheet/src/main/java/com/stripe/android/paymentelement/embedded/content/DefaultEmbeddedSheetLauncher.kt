@@ -72,11 +72,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
                 selectionHolder.set(result.selection)
-                result.selection?.let { rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback() }
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
                     )
+                } else {
+                    result.selection?.let { rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback() }
                 }
             }
         }
