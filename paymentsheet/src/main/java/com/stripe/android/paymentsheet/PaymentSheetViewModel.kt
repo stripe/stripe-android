@@ -240,7 +240,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
-            isAwaitingEagerLaunchResult.update { it ?: false }
+            isAwaitingEagerLaunchResult.update {
+                // If null at this point, then we're not awaiting a result.
+                it ?: false
+            }
         }
     }
 
