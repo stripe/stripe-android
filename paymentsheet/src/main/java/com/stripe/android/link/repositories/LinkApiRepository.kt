@@ -239,13 +239,9 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
-        cvc: String?,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
-        val optionsParams = cvc?.let {
-            mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to it)))
-        } ?: emptyMap()
 
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -253,7 +249,7 @@ internal class LinkApiRepository @Inject constructor(
             expectedPaymentMethodType = expectedPaymentMethodType,
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,
-            extraParams = paymentMethodParams + fraudParams + optionsParams,
+            extraParams = paymentMethodParams + fraudParams,
             billingPhone = null,
         )
     }

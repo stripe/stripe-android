@@ -130,8 +130,7 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
-        cvc: String?
+        expectedPaymentMethodType: String
     ) = sharePaymentDetails
 
     override suspend fun logOut(

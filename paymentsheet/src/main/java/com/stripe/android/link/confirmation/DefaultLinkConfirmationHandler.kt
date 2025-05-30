@@ -119,7 +119,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(paymentDetails),
-                cvc = cvc
             )
         } else {
             PaymentMethodConfirmationOption.New(

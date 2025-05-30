@@ -85,7 +85,6 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         return linkAccountManager.sharePaymentDetails(
             paymentDetailsId = confirmationOption.paymentDetailsId,
             expectedPaymentMethodType = confirmationOption.expectedPaymentMethodType,
-            cvc = confirmationOption.cvc,
         ).mapCatching {
             requireNotNull(it.encodedPaymentMethod.parsePaymentMethod())
         }.map { paymentMethod ->
