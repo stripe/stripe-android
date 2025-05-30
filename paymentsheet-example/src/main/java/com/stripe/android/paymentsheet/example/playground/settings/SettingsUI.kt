@@ -36,16 +36,14 @@ internal fun SettingsUi(
     val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
     val trimmedSearchQuery = searchQuery.trim()
     val filteredDefinitions = remember(displayableDefinitions, trimmedSearchQuery) {
-        displayableDefinitions.filter {
-            it.displayName.contains(trimmedSearchQuery, ignoreCase = true)
-        }
+        displayableDefinitions.filter { it.displayName.matchesQuery(trimmedSearchQuery) }
     }
 
     Column(
         modifier = Modifier.padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (searchQuery.isBlank()) {
+        if (IntegrationTypeSettingName.matchesQuery(trimmedSearchQuery)) {
             Row {
                 IntegrationTypeConfigurableSetting(
                     configurationData,
@@ -58,6 +56,10 @@ internal fun SettingsUi(
             Setting(settingDefinition, playgroundSettings)
         }
     }
+}
+
+private fun String.matchesQuery(query: String): Boolean {
+    return this.contains(query, ignoreCase = true)
 }
 
 @Preview
@@ -127,13 +129,15 @@ private fun <T> Setting(
     }
 }
 
+private const val IntegrationTypeSettingName = "Integration Type"
+
 @Composable
 private fun IntegrationTypeConfigurableSetting(
     configurationData: PlaygroundConfigurationData,
     updateConfigurationData: (updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData) -> Unit
 ) {
     DropdownSetting(
-        name = "Integration Type",
+        name = IntegrationTypeSettingName,
         options = listOf(
             PlaygroundSettingDefinition.Displayable.Option(
                 name = "Payment Sheet",
