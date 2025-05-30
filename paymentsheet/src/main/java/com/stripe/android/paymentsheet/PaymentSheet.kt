@@ -1692,8 +1692,8 @@ class PaymentSheet internal constructor(
          */
         val borderStrokeWidthDp: Float? = null,
         /**
-         * The height of the primary button
-         * Note: If 'null', the default height is 48dp
+         * The height of the primary button.
+         * Note: If 'null', the default height is 48dp.
          */
         val heightDp: Float? = null
     ) : Parcelable {
