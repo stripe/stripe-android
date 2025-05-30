@@ -27,10 +27,10 @@ class MinScreenHeightBoxTest {
     )
 
     @Test
-    fun testDefault() {
+    fun testFull() {
         paparazziRule.snapshot {
             DefaultLinkTheme {
-                MinScreenHeightBox {
+                MinScreenHeightBox(1f) {
                     Square()
                 }
             }
