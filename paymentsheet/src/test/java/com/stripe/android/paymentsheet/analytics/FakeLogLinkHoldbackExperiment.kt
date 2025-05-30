@@ -8,14 +8,22 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal class FakeLogLinkHoldbackExperiment : LogLinkHoldbackExperiment {
 
-    private val _calls = Turbine<Unit>()
-    val calls: ReceiveTurbine<Unit> = _calls
+    private val _calls = Turbine<ExperimentCall>()
+    val calls: ReceiveTurbine<ExperimentCall> = _calls
 
     override fun invoke(
         experiment: ElementsSession.ExperimentAssignment,
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
-        _calls.add(Unit)
+        _calls.add(
+            ExperimentCall(
+                experiment = experiment
+            )
+        )
     }
 }
+
+data class ExperimentCall(
+    val experiment: ElementsSession.ExperimentAssignment
+)

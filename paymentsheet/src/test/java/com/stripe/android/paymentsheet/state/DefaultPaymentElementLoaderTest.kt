@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -2280,30 +2281,32 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() = runTest {
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
-            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
-        )
+    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() =
+        runTest {
+            val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+                lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+                defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+            )
 
-        val observedElements = result.customer?.paymentMethods
-        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
-        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
-    }
+            val observedElements = result.customer?.paymentMethods
+            val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+            assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+        }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() = runTest {
-        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() =
+        runTest {
+            val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
 
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
-            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = defaultPaymentMethod,
-        )
+            val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+                lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+                defaultPaymentMethod = defaultPaymentMethod,
+            )
 
-        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            defaultPaymentMethod
-        )
-    }
+            assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+                defaultPaymentMethod
+            )
+        }
 
     @Test
     fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runTest {
@@ -2994,6 +2997,52 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
     }
 
+    @Test
+    fun `Just Link holdback experiment is triggered when loading PaymentSheet and Link unavailable`() = runTest {
+        val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
+
+        val loader = createPaymentElementLoader(
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            )
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        val item = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(item.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        logLinkHoldbackExperiment.calls.expectNoEvents()
+    }
+
+    @Test
+    fun `Both Link holdback experiments are triggered when loading PaymentSheet`() = runTest {
+        val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
+
+        val loader = createPaymentElementLoader(
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
+        )
+
+        val globalHoldback = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(globalHoldback.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        val abTest = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(abTest.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_AB_TEST)
+    }
+
     private fun testCustomPaymentMethods(
         requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
@@ -3139,6 +3188,7 @@ internal class DefaultPaymentElementLoaderTest {
         linkStore: LinkStore = mock(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
+        logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
@@ -3172,7 +3222,7 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
-            logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo)
         )
     }
