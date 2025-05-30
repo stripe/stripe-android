@@ -12,7 +12,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.wallet.displayName
@@ -22,6 +21,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -342,7 +342,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        is PaymentSelection.Link -> getLinkIcon(iconOnly = FeatureFlags.linkPMsInSPM.isEnabled)
+        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
@@ -351,19 +351,16 @@ internal val PaymentSelection.drawableResourceId: Int
     }
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
+    if (selection.paymentMethod.isLinkCardBrand) {
+        return R.drawable.stripe_ic_paymentsheet_link_arrow
+    }
+
     return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
         R.drawable.stripe_ic_paymentsheet_card_unknown_ref -> {
             when (selection.walletType) {
                 PaymentSelection.Saved.WalletType.Link -> getLinkIcon()
                 PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark
                 else -> resourceId
-            }
-        }
-        R.drawable.stripe_ic_paymentsheet_link_ref -> {
-            if (FeatureFlags.linkPMsInSPM.isEnabled) {
-                R.drawable.stripe_ic_paymentsheet_link_arrow
-            } else {
-                R.drawable.stripe_ic_paymentsheet_link_ref
             }
         }
         else -> resourceId
@@ -479,3 +476,6 @@ internal fun PaymentSelection.CustomerRequestedSave.getSetupFutureUseValue(
         else -> setupFutureUsage.takeIf { !hasIntentToSetup }
     }
 }
+
+private val PaymentMethod.isLinkCardBrand: Boolean
+    get() = type == PaymentMethod.Type.Card && linkPaymentDetails is LinkPaymentDetails.BankAccount
