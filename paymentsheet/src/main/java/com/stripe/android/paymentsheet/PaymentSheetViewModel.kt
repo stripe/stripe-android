@@ -67,6 +67,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -98,9 +99,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = true,
 ) {
-
-    private val _contentVisible = MutableStateFlow(true)
-    internal val contentVisible: StateFlow<Boolean> = _contentVisible
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -202,6 +200,31 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
+    private val isAwaitingEagerLaunchResult = MutableStateFlow<Boolean?>(null)
+
+    internal val contentVisible: StateFlow<Boolean> = combineAsStateFlow(
+        isAwaitingEagerLaunchResult,
+        confirmationHandler.state.mapAsStateFlow { contentVisibleFromConfirmationState(it) }
+    ) { isAwaitingEagerLaunchResult, contentVisibleFromConfirmationState ->
+        isAwaitingEagerLaunchResult == false && contentVisibleFromConfirmationState
+    }
+
+    private fun contentVisibleFromConfirmationState(state: ConfirmationHandler.State) =
+        when (state) {
+            ConfirmationHandler.State.Idle,
+            is ConfirmationHandler.State.Complete ->
+                true
+            is ConfirmationHandler.State.Confirming -> {
+                when (state.option) {
+                    is GooglePayConfirmationOption,
+                    is LinkConfirmationOption ->
+                        false
+                    else ->
+                        true
+                }
+            }
+        }
+
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
@@ -217,6 +240,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
+            isAwaitingEagerLaunchResult.update { it ?: false }
         }
     }
 
@@ -273,8 +297,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
-
             val pendingFailedPaymentResult = confirmationHandler.awaitResult()
                 as? ConfirmationHandler.Result.Failed
             val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
@@ -287,7 +309,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             )
 
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
             if (shouldLaunchEagerly) {
+                isAwaitingEagerLaunchResult.update { true }
                 checkoutWithLinkExpress()
             }
         }
@@ -297,16 +321,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 when (state) {
                     is ConfirmationHandler.State.Idle -> Unit
                     is ConfirmationHandler.State.Confirming -> {
-                        when (state.option) {
-                            is GooglePayConfirmationOption,
-                            is LinkConfirmationOption -> {
-                                setContentVisible(false)
-                            }
-                            else -> {
-                                setContentVisible(true)
-                            }
-                        }
-
                         startProcessing(checkoutIdentifier)
 
                         if (viewState.value !is PaymentSheetViewState.StartProcessing) {
@@ -314,8 +328,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         }
                     }
                     is ConfirmationHandler.State.Complete -> {
-                        setContentVisible(true)
                         processConfirmationResult(state.result)
+                        isAwaitingEagerLaunchResult.update { false }
                     }
                 }
             }
@@ -661,10 +675,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         } else {
             viewState
         }
-    }
-
-    private fun setContentVisible(visible: Boolean) {
-        _contentVisible.value = visible
     }
 
     internal class Factory(
