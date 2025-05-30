@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui.wallet
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -20,6 +21,12 @@ internal val LinkPaymentDetails.sublabel: ResolvableString?
     get() = when (this) {
         is Card -> "•••• $last4".resolvableString
         is BankAccount -> if (bankName != null) "••••$last4".resolvableString else null
+    }
+
+internal val LinkPaymentDetails.paymentOptionLabel: ResolvableString
+    get() {
+        val components = listOfNotNull(label, sublabel)
+        return components.joinToString(separator = " ")
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
@@ -48,5 +55,11 @@ private fun makeFallbackCardName(funding: String, brand: String): ResolvableStri
         "PREPAID" -> resolvableString(R.string.stripe_link_card_type_prepaid, brand)
         "CHARGE", "FUNDING_INVALID" -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
         else -> resolvableString(R.string.stripe_link_card_type_unknown, brand)
+    }
+}
+
+private fun List<ResolvableString>.joinToString(separator: String): ResolvableString {
+    return reduce { acc, text ->
+        acc + separator.resolvableString + text
     }
 }

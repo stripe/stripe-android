@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.label
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
@@ -228,6 +229,28 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
         } else {
             linkPaymentDetails?.sublabel
         }
+    }
+    else -> null
+}
+
+internal fun PaymentMethod.getPaymentOptionLabel(): ResolvableString? = when (type) {
+    PaymentMethod.Type.Card -> {
+        if (isLinkPaymentMethod) {
+            linkPaymentDetails?.paymentOptionLabel
+        } else {
+            createCardLabel(card?.last4)
+        }
+    }
+    PaymentMethod.Type.SepaDebit -> resolvableString(
+        R.string.stripe_paymentsheet_payment_method_item_card_number,
+        sepaDebit?.last4
+    )
+    PaymentMethod.Type.USBankAccount -> resolvableString(
+        R.string.stripe_paymentsheet_payment_method_item_card_number,
+        usBankAccount?.last4
+    )
+    PaymentMethod.Type.Link -> {
+        linkPaymentDetails?.paymentOptionLabel
     }
     else -> null
 }

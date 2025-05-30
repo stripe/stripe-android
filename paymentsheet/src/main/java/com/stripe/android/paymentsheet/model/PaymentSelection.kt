@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.ui.getPaymentOptionLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
@@ -407,7 +408,7 @@ internal val PaymentSelection.label: ResolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel(canShowSublabel = true) ?: run {
+    return selection.paymentMethod.getPaymentOptionLabel() ?: run {
         when (selection.walletType) {
             PaymentSelection.Saved.WalletType.Link -> StripeR.string.stripe_link.resolvableString
             PaymentSelection.Saved.WalletType.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
