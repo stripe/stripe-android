@@ -1690,8 +1690,14 @@ class PaymentSheet internal constructor(
          * The border width of the primary button.
          * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
          */
-        val borderStrokeWidthDp: Float? = null
+        val borderStrokeWidthDp: Float? = null,
+        /**
+         * The height of the primary button
+         * Note: If 'null', the default height is 48dp
+         */
+        val heightDp: Float? = null
     ) : Parcelable {
+        @Deprecated("Use @DimenRes constructor")
         constructor(
             context: Context,
             cornerRadiusDp: Int? = null,
@@ -1701,6 +1707,23 @@ class PaymentSheet internal constructor(
                 context.getRawValueFromDimenResource(it)
             },
             borderStrokeWidthDp = borderStrokeWidthDp?.let {
+                context.getRawValueFromDimenResource(it)
+            }
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes cornerRadiusRes: Int? = null,
+            @DimenRes borderStrokeWidthRes: Int? = null,
+            @DimenRes heightRes: Int? = null
+        ) : this(
+            cornerRadiusDp = cornerRadiusRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            borderStrokeWidthDp = borderStrokeWidthRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            heightDp = heightRes?.let {
                 context.getRawValueFromDimenResource(it)
             }
         )

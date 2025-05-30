@@ -81,6 +81,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     )
     private var borderStrokeColor =
         StripeThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
+    private var height = context.convertDpToPx(StripeThemeDefaults.primaryButtonStyle.shape.height.dp)
 
     private var finishedBackgroundColor =
         StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(context)
@@ -115,6 +116,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         backgroundTintList = tintList
         finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
         finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
+        layoutParams?.height = context.convertDpToPx(primaryButtonStyle.shape.height.dp).toInt()
     }
 
     fun setDefaultLabelColor(@ColorInt color: Int) {
