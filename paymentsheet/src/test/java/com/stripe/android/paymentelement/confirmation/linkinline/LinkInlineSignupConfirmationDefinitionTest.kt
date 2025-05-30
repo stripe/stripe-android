@@ -707,6 +707,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
                 allowDefaultOptIn = false,
+                disableRuxInFlowController = false,
             ),
             userInput = userInput,
         )

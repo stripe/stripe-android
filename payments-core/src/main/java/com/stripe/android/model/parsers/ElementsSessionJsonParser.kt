@@ -168,6 +168,7 @@ internal class ElementsSessionJsonParser(
         val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
         val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
+        val disableLinkRuxInFlowController = json?.optBoolean(FIELD_LINK_MOBILE_DISABLE_RUX_IN_FLOW_CONTROLLER) == true
         val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
@@ -193,7 +194,8 @@ internal class ElementsSessionJsonParser(
             disableLinkSignup = disableLinkSignup,
             linkConsumerIncentive = linkConsumerIncentive,
             useAttestationEndpoints = useLinkAttestationEndpoints,
-            suppress2faModal = suppressLink2faModal
+            suppress2faModal = suppressLink2faModal,
+            disableLinkRuxInFlowController = disableLinkRuxInFlowController
         )
     }
 
@@ -439,6 +441,8 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
+        private const val FIELD_LINK_MOBILE_DISABLE_RUX_IN_FLOW_CONTROLLER =
+            "link_mobile_disable_rux_in_flow_controller"
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"

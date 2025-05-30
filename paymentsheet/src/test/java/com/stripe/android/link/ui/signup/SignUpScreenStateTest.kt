@@ -93,6 +93,7 @@ class SignUpScreenStateTest {
             elementsSessionId = "elements_session_id_123",
             linkMode = LinkMode.Passthrough,
             allowDefaultOptIn = false,
+            disableRuxInFlowController = false,
         )
     }
 

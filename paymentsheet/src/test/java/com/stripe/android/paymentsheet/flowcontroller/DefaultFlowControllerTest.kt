@@ -17,7 +17,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.link.FakeLinkProminenceFeatureProvider
@@ -100,7 +99,6 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -194,12 +192,6 @@ internal class DefaultFlowControllerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
-
-    @get:Rule
-    val linkProminenceFeatureRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkProminenceInFlowController,
-        isEnabled = false,
-    )
 
     @Suppress("LongMethod")
     @BeforeTest
