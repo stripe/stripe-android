@@ -27,9 +27,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -459,8 +459,8 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
+                linkGateFactory = { FakeLinkGate() },
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
             )
