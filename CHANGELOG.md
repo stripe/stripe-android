@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][10885](https://github.com/stripe/stripe-android/pull/10885) Add `heightDp` to `PrimaryButtonShape`.
+
 ### Connect
 * [CHANGED][10871](https://github.com/stripe/stripe-android/pull/10871) Removed `PrivateBetaConnectSDK` annotation and all usages. Connect SDK is now GA.
 
