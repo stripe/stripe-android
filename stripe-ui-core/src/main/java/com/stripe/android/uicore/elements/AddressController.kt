@@ -43,7 +43,8 @@ class AddressController(
             enabled,
             this,
             hiddenIdentifiers,
-            lastTextFieldIdentifier
+            lastTextFieldIdentifier,
+            modifier,
         )
     }
 }
