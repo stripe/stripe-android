@@ -217,7 +217,7 @@ internal class ElementsSessionJsonParser(
             return null
         }
 
-        val paymentMethods = if (enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled) {
+        val paymentMethods = if (enableLinkInSpm) {
             parsePaymentMethodsWithLinkDetails(json)
         } else {
             parsePaymentMethods(json)

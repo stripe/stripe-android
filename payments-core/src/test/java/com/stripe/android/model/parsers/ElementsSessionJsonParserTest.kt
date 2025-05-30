@@ -31,12 +31,6 @@ class ElementsSessionJsonParserTest {
         isEnabled = false,
     )
 
-    @get:Rule
-    val linkInSpmFeatureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkPMsInSPM,
-        isEnabled = false,
-    )
-
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
@@ -1168,9 +1162,8 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses payment_methods_with_link_details if feature is enabled locally and for merchant`() {
+    fun `Parses payment_methods_with_link_details if feature is enabled for merchant`() {
         testPaymentMethodsAndLinkDetails(
-            featureEnabled = true,
             merchantEnabled = true,
             expectedPaymentMethods = 2,
             expectLinkPaymentDetails = true,
@@ -1178,33 +1171,19 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Does not parse payment_methods_with_link_details if feature is enabled locally but disabled for merchant`() {
+    fun `Does not parse payment_methods_with_link_details if feature is disabled for merchant`() {
         testPaymentMethodsAndLinkDetails(
-            featureEnabled = true,
             merchantEnabled = false,
             expectedPaymentMethods = 1,
             expectLinkPaymentDetails = false,
         )
     }
 
-    @Test
-    fun `Does not parse payment_methods_with_link_details if feature is enabled for merchant but disabled locally`() {
-        testPaymentMethodsAndLinkDetails(
-            featureEnabled = false,
-            merchantEnabled = true,
-            expectedPaymentMethods = 1,
-            expectLinkPaymentDetails = false,
-        )
-    }
-
     private fun testPaymentMethodsAndLinkDetails(
-        featureEnabled: Boolean,
         merchantEnabled: Boolean,
         expectedPaymentMethods: Int,
         expectLinkPaymentDetails: Boolean,
     ) {
-        linkInSpmFeatureFlagRule.setEnabled(featureEnabled)
-
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",

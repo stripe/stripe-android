@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -102,7 +101,7 @@ internal data class PaymentMethodMetadata(
             it.type
         }
 
-        return if (allowsLinkInSavedPaymentMethods && FeatureFlags.linkPMsInSPM.isEnabled) {
+        return if (allowsLinkInSavedPaymentMethods) {
             supportedTypes + listOf(PaymentMethod.Type.Link)
         } else {
             supportedTypes
@@ -288,16 +287,13 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
-
-            val allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled
-
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = configuration
                     .allowsPaymentMethodsRequiringShippingAddress,
-                allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
+                allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm,
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
