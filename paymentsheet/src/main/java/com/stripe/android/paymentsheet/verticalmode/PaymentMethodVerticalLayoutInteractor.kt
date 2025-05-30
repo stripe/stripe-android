@@ -105,8 +105,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
-    private val linkRowClicked: (PaymentSelection.Link) -> Unit = updateSelection,
-    private val googlePayRowClicked: (PaymentSelection.GooglePay) -> Unit = updateSelection,
+    private val invokeRowSelectionCallback: (() -> Unit)? = null,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -336,7 +335,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     iconRequiresTinting = false,
                     subtitle = PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString,
                     onClick = {
-                        linkRowClicked(PaymentSelection.Link())
+                        updateSelection(PaymentSelection.Link())
+                        invokeRowSelectionCallback?.invoke()
                     },
                 )
             }
@@ -351,7 +351,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     iconRequiresTinting = false,
                     subtitle = null,
                     onClick = {
-                        googlePayRowClicked(PaymentSelection.GooglePay)
+                        updateSelection(PaymentSelection.GooglePay)
+                        invokeRowSelectionCallback?.invoke()
                     },
                 )
             }
@@ -428,7 +429,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.SavedPaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected("saved")
-                onSelectSavedPaymentMethod(PaymentSelection.Saved(viewAction.savedPaymentMethod))
+                val selection = PaymentSelection.Saved(viewAction.savedPaymentMethod)
+                onSelectSavedPaymentMethod(selection)
+                invokeRowSelectionCallback?.invoke()
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()

@@ -175,7 +175,12 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = ::setSelectionAfterUserClick,
+            selectionUpdater = {
+                setSelection(it)
+                if (it !is PaymentSelection.New.LinkInline) {
+                    invokeRowSelectionCallback()
+                }
+            },
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
@@ -222,7 +227,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
-            onSelectSavedPaymentMethod = ::setSelectionAfterUserClick,
+            onSelectSavedPaymentMethod = ::setSelection,
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,
@@ -244,8 +249,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     true
                 }
             },
-            linkRowClicked = ::setSelectionAfterUserClick,
-            googlePayRowClicked = ::setSelectionAfterUserClick,
+            invokeRowSelectionCallback = ::invokeRowSelectionCallback
         )
     }
 
@@ -278,8 +282,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         )
     }
 
-    private fun setSelectionAfterUserClick(paymentSelection: PaymentSelection?) {
-        selectionHolder.set(paymentSelection)
+    private fun invokeRowSelectionCallback() {
         rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback()
     }
 
