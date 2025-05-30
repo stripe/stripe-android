@@ -61,6 +61,7 @@ data class StripeColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeShapes(
     val cornerRadius: Float,
+    val bottomSheetCornerRadius: Float,
     val borderStrokeWidth: Float,
 ) {
 
@@ -202,6 +203,7 @@ object StripeThemeDefaults {
 
     val shapes = StripeShapes(
         cornerRadius = 6.0f,
+        bottomSheetCornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
     )
 
