@@ -81,7 +81,6 @@ internal class PrimaryButton @JvmOverloads constructor(
     )
     private var borderStrokeColor =
         StripeThemeDefaults.primaryButtonStyle.getBorderStrokeColor(context)
-    private var height = context.convertDpToPx(StripeThemeDefaults.primaryButtonStyle.shape.height.dp)
 
     private var finishedBackgroundColor =
         StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(context)
