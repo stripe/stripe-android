@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.model
 
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
 
@@ -32,7 +32,7 @@ data class PaymentOption internal constructor(
     /**
      * A shipping address that the user provided during checkout.
      */
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ShippingDetailsInPaymentOptionPreview
     val shippingDetails: AddressDetails?
         get() = _shippingDetails
 

@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -348,6 +349,7 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    @OptIn(ShippingDetailsInPaymentOptionPreview::class)
     fun onPaymentOptionSelected(paymentOption: PaymentOption?) {
         flowControllerState.update { existingState ->
             existingState?.copy(

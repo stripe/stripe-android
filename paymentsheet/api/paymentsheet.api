@@ -2732,6 +2732,7 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public final fun getDrawableResourceId ()I
 	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
 	public final fun getLabel ()Ljava/lang/String;
+	public final fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public fun hashCode ()I
 	public final fun icon ()Landroid/graphics/drawable/Drawable;
 	public fun toString ()Ljava/lang/String;
