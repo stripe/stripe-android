@@ -1853,6 +1853,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
+            disableRuxInFlowController = false
         )
     }
 

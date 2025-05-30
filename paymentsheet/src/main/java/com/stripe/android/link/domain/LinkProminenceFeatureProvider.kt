@@ -1,7 +1,6 @@
 package com.stripe.android.link.domain
 
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.gate.LinkGate
 import javax.inject.Inject
@@ -28,12 +27,7 @@ internal class DefaultLinkProminenceFeatureProvider @Inject constructor(
     override fun shouldShowEarlyVerificationInFlowController(
         linkConfiguration: LinkConfiguration,
     ): Boolean {
-        if (!FeatureFlags.linkProminenceInFlowController.isEnabled) {
-            logger.debug("Prominence disabled: Client side feature flag is disabled")
-            return false
-        }
-
-        if (linkConfiguration.suppress2faModal == true) {
+        if (linkConfiguration.disableRuxInFlowController == true) {
             logger.debug("Prominence disabled: Backend kill-switch is enabled")
             return false
         }
