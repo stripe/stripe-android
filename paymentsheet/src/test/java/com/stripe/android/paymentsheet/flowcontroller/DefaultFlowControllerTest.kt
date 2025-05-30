@@ -17,16 +17,15 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
-import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
@@ -93,7 +92,6 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -176,7 +174,7 @@ internal class DefaultFlowControllerTest {
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
-    private val linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider()
+    private val linkGate = FakeLinkGate()
 
     private var paymentLauncherResultCallback: ((InternalPaymentResult) -> Unit)? = null
     private var googlePayLauncherResultCallback: ((GooglePayPaymentMethodLauncher.Result) -> Unit)? = null
@@ -185,12 +183,6 @@ internal class DefaultFlowControllerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
-
-    @get:Rule
-    val linkProminenceFeatureRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkProminenceInFlowController,
-        isEnabled = false,
-    )
 
     @Suppress("LongMethod")
     @BeforeTest
@@ -534,7 +526,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions shows Link picker when a Link payment method is already selected`() = runTest {
-        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        linkGate.setShowRuxInFlowController(true)
 
         val verifiedLinkAccount = TestFactory.LINK_ACCOUNT
         val flowController = createFlowController(
@@ -2486,7 +2478,7 @@ internal class DefaultFlowControllerTest {
             linkAccountHolder = linkAccountHolder,
             linkPaymentLauncher = linkPaymentLauncher,
             activityResultRegistryOwner = mock(),
-            linkProminenceFeatureProvider = linkProminenceFeatureProvider,
+            linkGateFactory = { linkGate },
             confirmationHandler = createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

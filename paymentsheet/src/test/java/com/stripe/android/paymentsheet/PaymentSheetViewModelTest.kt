@@ -975,6 +975,7 @@ internal class PaymentSheetViewModelTest {
                 elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
                 allowDefaultOptIn = false,
+                disableRuxInFlowController = false,
             )
 
             val viewModel = createViewModel(

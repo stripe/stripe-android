@@ -21,6 +21,7 @@ internal data class LinkConfiguration(
     val cardBrandFilter: CardBrandFilter,
     val useAttestationEndpointsForLink: Boolean,
     val suppress2faModal: Boolean,
+    val disableRuxInFlowController: Boolean,
     val initializationMode: PaymentElementLoader.InitializationMode,
     val elementsSessionId: String,
     val linkMode: LinkMode?,

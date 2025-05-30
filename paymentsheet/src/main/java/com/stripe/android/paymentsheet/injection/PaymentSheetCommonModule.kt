@@ -17,8 +17,6 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.domain.DefaultLinkProminenceFeatureProvider
-import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
@@ -114,9 +112,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
-
-    @Binds
-    abstract fun bindLinkProminence(provider: DefaultLinkProminenceFeatureProvider): LinkProminenceFeatureProvider
 
     @Binds
     abstract fun bindsCardAccountRangeRepositoryFactory(
