@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentAlpha
@@ -24,12 +23,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.getComposeTextStyle
+import com.stripe.android.uicore.stripeShapes
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val REMOVE_BUTTON_LOADING = "REMOVE_BUTTON_LOADING"
@@ -44,7 +46,6 @@ internal fun RemoveButton(
     onRemove: () -> Unit,
     testTag: String,
 ) {
-    val shape = PrimaryButtonTheme.shape
     CompositionLocalProvider(
         LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
         LocalRippleConfiguration provides ErrorRippleConfiguration,
@@ -59,12 +60,12 @@ internal fun RemoveButton(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .fillMaxWidth()
-                        .height(height = shape.height),
+                        .height(height = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)),
                     border = BorderStroke(
-                        width = shape.borderStrokeWidth.coerceAtLeast(2.dp),
+                        width = MaterialTheme.getBorderStrokeWidth(isSelected = true),
                         color = borderColor,
                     ),
-                    shape = RoundedCornerShape(shape.cornerRadius),
+                    shape = MaterialTheme.stripeShapes.roundedCornerShape,
                     enabled = idle && !removing,
                     onClick = onRemove,
                 ) {
