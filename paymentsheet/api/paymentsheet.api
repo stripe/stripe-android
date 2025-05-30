@@ -875,6 +875,9 @@ public abstract interface annotation class com/stripe/android/paymentelement/Exp
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalEmbeddedPaymentElementApi : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/ExtendedAppearancePreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
 }
 
@@ -2251,14 +2254,19 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes : android
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes$Companion;
 	public fun <init> (FF)V
+	public fun <init> (FFF)V
+	public synthetic fun <init> (FFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroid/content/Context;II)V
+	public fun <init> (Landroid/content/Context;III)V
 	public final fun component1 ()F
 	public final fun component2 ()F
-	public final fun copy (FF)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;FFILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;
+	public final fun component3 ()F
+	public final fun copy (FFF)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;FFFILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBorderStrokeWidthDp ()F
+	public final fun getBottomSheetCornerRadiusDp ()F
 	public final fun getCornerRadiusDp ()F
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
