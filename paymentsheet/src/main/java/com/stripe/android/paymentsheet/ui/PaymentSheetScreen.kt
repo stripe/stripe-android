@@ -82,10 +82,12 @@ internal fun PaymentSheetScreen(
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
     val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
-        AnimatedVisibility(visible = contentVisible, modifier = Modifier.fillMaxWidth()) {
-            PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
-        }
+    PaymentSheetScreen(
+        viewModel = viewModel,
+        scrollState = scrollState,
+        contentVisible = contentVisible
+    ) {
+        PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
     }
 }
 
@@ -114,6 +116,7 @@ internal fun PaymentSheetScreen(
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     scrollState: ScrollState,
+    contentVisible: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val processing by viewModel.processing.collectAsState()
@@ -139,7 +142,13 @@ private fun PaymentSheetScreen(
                 handleBackPressed = viewModel::handleBackPressed,
             )
         },
-        content = content,
+        content = {
+            AnimatedVisibility(
+                visible = contentVisible,
+                modifier = Modifier.fillMaxWidth(),
+                content = { content() }
+            )
+        },
         modifier = Modifier.onGloballyPositioned {
             contentHeight = with(density) { it.size.height.toDp() }
         },
@@ -147,8 +156,8 @@ private fun PaymentSheetScreen(
     )
 
     AnimatedVisibility(
-        visible = walletsProcessingState != null &&
-            walletsProcessingState !is WalletsProcessingState.Idle,
+        visible = !contentVisible ||
+            (walletsProcessingState != null && walletsProcessingState !is WalletsProcessingState.Idle),
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
