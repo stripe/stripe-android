@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
+import androidx.annotation.DimenRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -1023,7 +1024,12 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the Embedded Payment Element
          */
-        internal val embeddedAppearance: Embedded = Embedded.default
+        internal val embeddedAppearance: Embedded = Embedded.default,
+
+        /**
+         * Describes the inset values used for all forms
+         */
+        internal val formInsetValues: Insets = Insets(40f,40f,40f,40f)
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1033,19 +1039,23 @@ class PaymentSheet internal constructor(
             primaryButton = PrimaryButton(),
         )
 
+        fun getInsets() = formInsetValues
+
         constructor(
             colorsLight: Colors = Colors.defaultLight,
             colorsDark: Colors = Colors.defaultDark,
             shapes: Shapes = Shapes.default,
             typography: Typography = Typography.default,
             primaryButton: PrimaryButton = PrimaryButton(),
+            formInsetValues: Insets = Insets(40f,40f,40f,40f)
         ) : this(
             colorsLight = colorsLight,
             colorsDark = colorsDark,
             shapes = shapes,
             typography = typography,
             primaryButton = primaryButton,
-            embeddedAppearance = Embedded.default
+            embeddedAppearance = Embedded.default,
+            formInsetValues = formInsetValues
         )
 
         fun getColors(isDark: Boolean): Colors {
@@ -1056,13 +1066,13 @@ class PaymentSheet internal constructor(
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         @Poko
         class Embedded(
-            internal val style: RowStyle
+            internal val style: RowStyle,
         ) : Parcelable {
 
             internal companion object {
                 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
                 val default = Embedded(
-                    style = RowStyle.FlatWithRadio.default
+                    style = RowStyle.FlatWithRadio.default,
                 )
             }
 
@@ -1689,12 +1699,19 @@ class PaymentSheet internal constructor(
          * The border width of the primary button.
          * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
          */
-        val borderStrokeWidthDp: Float? = null
+        val borderStrokeWidthDp: Float? = null,
+
+        /**
+         * The height of the primary button
+         * Note: If 'null', the default height is 48dp
+         */
+        val heightDp: Float? = null
     ) : Parcelable {
+        @Deprecated("")
         constructor(
             context: Context,
             cornerRadiusDp: Int? = null,
-            borderStrokeWidthDp: Int? = null
+            borderStrokeWidthDp: Int? = null,
         ) : this(
             cornerRadiusDp = cornerRadiusDp?.let {
                 context.getRawValueFromDimenResource(it)
@@ -1702,6 +1719,65 @@ class PaymentSheet internal constructor(
             borderStrokeWidthDp = borderStrokeWidthDp?.let {
                 context.getRawValueFromDimenResource(it)
             }
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes cornerRadiusRes: Int? = null,
+            @DimenRes borderStrokeWidthRes: Int? = null,
+            @DimenRes heightRes: Int? = null
+        ) : this(
+            cornerRadiusDp = cornerRadiusRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            borderStrokeWidthDp = borderStrokeWidthRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            heightDp = heightRes?.let {
+                context.getRawValueFromDimenResource(it)
+            }
+        )
+    }
+
+    @Parcelize
+    data class Insets(
+        val topDp: Float,
+        val bottomDp: Float,
+        val startDp: Float,
+        val endDp: Float
+    ) : Parcelable {
+        constructor(
+            context: Context,
+            @DimenRes topRes: Int,
+            @DimenRes bottomRes: Int,
+            @DimenRes startRes: Int,
+            @DimenRes endRes: Int,
+        ) : this(
+            topDp = context.getRawValueFromDimenResource(topRes),
+            bottomDp = context.getRawValueFromDimenResource(bottomRes),
+            startDp = context.getRawValueFromDimenResource(startRes),
+            endDp = context.getRawValueFromDimenResource(endRes),
+        )
+
+        constructor(
+            horizontalDp: Float,
+            verticalDp: Float
+        ) : this(
+            topDp = verticalDp,
+            bottomDp = verticalDp,
+            startDp = horizontalDp,
+            endDp = horizontalDp,
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes horizontalRes: Int,
+            @DimenRes verticalRes: Int
+        ) : this(
+            topDp = context.getRawValueFromDimenResource(verticalRes),
+            bottomDp = context.getRawValueFromDimenResource(verticalRes),
+            startDp = context.getRawValueFromDimenResource(horizontalRes),
+            endDp = context.getRawValueFromDimenResource(horizontalRes)
         )
     }
 

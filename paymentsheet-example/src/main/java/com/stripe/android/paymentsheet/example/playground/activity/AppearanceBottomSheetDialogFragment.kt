@@ -191,6 +191,12 @@ private fun AppearancePicker(
                     updateEmbedded = updateEmbedded
                 )
             }
+            CustomizationCard("Insets") {
+                Insets(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -431,6 +437,34 @@ private fun Shapes(
 }
 
 @Composable
+private fun Insets(
+    currentAppearance: PaymentSheet.Appearance,
+    updateAppearance: (PaymentSheet.Appearance) -> Unit
+) {
+    IncrementDecrementItem("horizontalInset", currentAppearance.getInsets().startDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                formInsetValues = PaymentSheet.Insets(
+                    horizontalDp = it,
+                    verticalDp = currentAppearance.getInsets().topDp
+                )
+            )
+        )
+    }
+    Divider()
+    IncrementDecrementItem("verticalInset", currentAppearance.getInsets().topDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                formInsetValues = PaymentSheet.Insets(
+                    horizontalDp = currentAppearance.getInsets().startDp,
+                    verticalDp = it
+                )
+            )
+        )
+    }
+}
+
+@Composable
 private fun Typography(
     currentAppearance: PaymentSheet.Appearance,
     updateAppearance: (PaymentSheet.Appearance) -> Unit,
@@ -622,6 +656,22 @@ private fun PrimaryButton(
                 primaryButton = currentButton.copy(
                     typography = currentButton.typography.copy(
                         fontResId = it
+                    )
+                )
+            )
+        )
+    }
+
+    Divider()
+
+    val currentButtonHeight = currentButton.shape.heightDp
+        ?: 48f
+    IncrementDecrementItem("buttonHeightDp", currentButtonHeight) {
+        updateAppearance(
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    shape = currentButton.shape.copy(
+                        heightDp = it
                     )
                 )
             )

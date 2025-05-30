@@ -88,6 +88,8 @@ internal class PrimaryButton @JvmOverloads constructor(
     private var finishedOnBackgroundColor =
         StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(context)
 
+    private var buttonHeight = context.convertDpToPx(StripeThemeDefaults.primaryButtonStyle.shape.buttonHeight.dp)
+
     init {
         // This is only needed if the button is inside a fragment
         viewBinding.label.setViewCompositionStrategy(
@@ -115,6 +117,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         backgroundTintList = tintList
         finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
         finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
+        buttonHeight = context.convertDpToPx(primaryButtonStyle.shape.buttonHeight.dp)
     }
 
     fun setDefaultLabelColor(@ColorInt color: Int) {
@@ -139,7 +142,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         shape.cornerRadius = cornerRadius
         shape.color = tintList
         shape.setStroke(borderStrokeWidth.toInt(), borderStrokeColor)
-
+        layoutParams.height = buttonHeight.toInt()
         background = shape
         setPadding(
             resources.getDimensionPixelSize(

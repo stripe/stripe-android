@@ -53,6 +53,13 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         fontSizeMultiplier = typography.sizeScaleFactor
     )
 
+    StripeTheme.insets = StripeThemeDefaults.insets.copy(
+        top = formInsetValues.topDp,
+        end = formInsetValues.endDp,
+        bottom = formInsetValues.bottomDp,
+        start = formInsetValues.startDp,
+    )
+
     StripeTheme.primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle.copy(
         colorsLight = PrimaryButtonColors(
             background = Color(primaryButton.colorsLight.background ?: colorsLight.primary),
@@ -71,7 +78,8 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         shape = PrimaryButtonShape(
             cornerRadius = primaryButton.shape.cornerRadiusDp ?: shapes.cornerRadiusDp,
             borderStrokeWidth =
-            primaryButton.shape.borderStrokeWidthDp ?: shapes.borderStrokeWidthDp
+            primaryButton.shape.borderStrokeWidthDp ?: shapes.borderStrokeWidthDp,
+            buttonHeight = 100f//primaryButton.shape.heightDp ?: 48f
         ),
         typography = PrimaryButtonTypography(
             fontFamily = primaryButton.typography.fontResId ?: typography.fontResId,

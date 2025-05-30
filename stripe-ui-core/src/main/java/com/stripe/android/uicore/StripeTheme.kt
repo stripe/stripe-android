@@ -94,6 +94,14 @@ data class StripeTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class StripeInsets(
+    val top: Float,
+    val end: Float,
+    val bottom: Float,
+    val start: Float
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonStyle(
     val colorsLight: PrimaryButtonColors,
     val colorsDark: PrimaryButtonColors,
@@ -113,7 +121,8 @@ data class PrimaryButtonColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonShape(
     val cornerRadius: Float,
-    val borderStrokeWidth: Float
+    val borderStrokeWidth: Float,
+    val buttonHeight: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -236,7 +245,8 @@ object StripeThemeDefaults {
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
-            borderStrokeWidth = 0.0f
+            borderStrokeWidth = 0.0f,
+            buttonHeight = 100f
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
@@ -281,6 +291,13 @@ object StripeThemeDefaults {
 
     val floating = EmbeddedFloatingStyle(
         spacing = 12.0f
+    )
+
+    val insets = StripeInsets(
+        top = 0f,
+        end = 0f,
+        bottom = 0f,
+        start = 0f,
     )
 }
 
@@ -521,6 +538,8 @@ object StripeTheme {
     var typographyMutable = StripeThemeDefaults.typography
 
     var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
+
+    var insets = StripeThemeDefaults.insets
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable

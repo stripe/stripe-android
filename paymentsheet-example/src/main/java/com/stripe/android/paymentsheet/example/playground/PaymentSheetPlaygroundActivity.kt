@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -42,6 +43,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -148,6 +150,33 @@ internal class PaymentSheetPlaygroundActivity :
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
+
+//val paddingValues = PaymentSheet.Padding(
+//    topDp = 14f,
+//    bottomDp = 10f,
+//    startDp = 4f,
+//    endDp = 0f
+//)
+//
+//val paddingValues = PaymentSheet.Padding(
+//    horizontalDp = 8f,
+//    verticalDp = 12f
+//)
+//
+//val appearance = PaymentSheet.Appearance(
+//    primaryButton = PaymentSheet.PrimaryButton(
+//        shape = PaymentSheet.PrimaryButtonShape(
+//            context = this,
+//            heightDp = com.stripe.android.paymentsheet.R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+//        )
+//    ),
+//    formPaddingValues = paddingValues
+//)
+//
+//val configuration = EmbeddedPaymentElement.Configuration.Builder("Flex")
+//    .appearance(appearance)
+//    .build()
+
 
             val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
