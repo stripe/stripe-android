@@ -19,7 +19,8 @@ fun AddressElementUI(
     enabled: Boolean,
     controller: AddressController,
     hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?
+    lastTextFieldIdentifier: IdentifierSpec?,
+    modifier: Modifier = Modifier,
 ) {
     val fields by controller.fieldsFlowable.collectAsState()
 
@@ -32,7 +33,8 @@ fun AddressElementUI(
                     enabled,
                     field,
                     hiddenIdentifiers = hiddenIdentifiers,
-                    lastTextFieldIdentifier = lastTextFieldIdentifier
+                    lastTextFieldIdentifier = lastTextFieldIdentifier,
+                    modifier = modifier,
                 )
                 if (index != fieldList.lastIndex) {
                     Divider(

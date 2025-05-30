@@ -118,7 +118,7 @@ class AddressTextFieldController(
         nextFocusDirection: FocusDirection,
         previousFocusDirection: FocusDirection
     ) {
-        AddressTextFieldUI(this)
+        AddressTextFieldUI(this, modifier)
     }
 
     fun launchAutocompleteScreen() {
