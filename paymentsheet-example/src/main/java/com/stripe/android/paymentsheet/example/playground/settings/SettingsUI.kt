@@ -58,8 +58,21 @@ internal fun SettingsUi(
     }
 }
 
+private val WordBoundaryRegex by lazy(LazyThreadSafetyMode.NONE) { "\\s+".toRegex() }
+
+/**
+ * Returns true if the string matches the query.
+ */
 private fun String.matchesQuery(query: String): Boolean {
-    return this.contains(query, ignoreCase = true)
+    if (query.isBlank()) {
+        return true
+    }
+
+    val words = this.trim().split(WordBoundaryRegex)
+    val queryWords = query.trim().split(WordBoundaryRegex)
+    return queryWords.all { queryWord ->
+        words.any { word -> word.startsWith(queryWord, ignoreCase = true) }
+    }
 }
 
 @Preview
