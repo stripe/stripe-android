@@ -130,7 +130,7 @@ internal fun PrimaryButton(
                     .testTag(PRIMARY_BUTTON_TEST_TAG)
                     .fillMaxWidth()
                     .defaultMinSize(
-                        minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
+                        minHeight = shape.height
                     ),
                 enabled = enabled,
                 shape = RoundedCornerShape(shape.cornerRadius),

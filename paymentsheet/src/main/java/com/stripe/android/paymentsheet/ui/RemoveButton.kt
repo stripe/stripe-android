@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalContentAlpha
@@ -46,6 +47,7 @@ internal fun RemoveButton(
     onRemove: () -> Unit,
     testTag: String,
 ) {
+    val shape = PrimaryButtonTheme.shape
     CompositionLocalProvider(
         LocalContentAlpha provides if (removing) ContentAlpha.disabled else ContentAlpha.high,
         LocalRippleConfiguration provides ErrorRippleConfiguration,
@@ -60,12 +62,12 @@ internal fun RemoveButton(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .fillMaxWidth()
-                        .height(height = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)),
+                        .height(height = shape.height),
                     border = BorderStroke(
-                        width = MaterialTheme.getBorderStrokeWidth(isSelected = true),
+                        width = shape.borderStrokeWidth,
                         color = borderColor,
                     ),
-                    shape = MaterialTheme.stripeShapes.roundedCornerShape,
+                    shape = RoundedCornerShape(shape.cornerRadius),
                     enabled = idle && !removing,
                     onClick = onRemove,
                 ) {

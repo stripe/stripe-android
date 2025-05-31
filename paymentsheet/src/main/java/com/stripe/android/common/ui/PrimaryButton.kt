@@ -68,7 +68,7 @@ internal fun PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(
-                        minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
+                        minHeight = StripeTheme.primaryButtonStyle.shape.buttonHeight.dp
                     ),
                 enabled = isEnabled,
                 shape = shape,

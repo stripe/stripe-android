@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -17,6 +19,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import javax.inject.Inject
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FormActivity : AppCompatActivity() {
     private val args: FormContract.Args? by lazy {
         FormContract.Args.fromIntent(intent)
@@ -39,6 +42,9 @@ internal class FormActivity : AppCompatActivity() {
 
     @Inject
     lateinit var confirmationHelper: FormActivityConfirmationHelper
+
+    @Inject
+    lateinit var configuration: EmbeddedPaymentElement.Configuration
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
