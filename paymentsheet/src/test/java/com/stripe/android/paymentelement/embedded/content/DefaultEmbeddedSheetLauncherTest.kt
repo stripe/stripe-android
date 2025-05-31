@@ -152,7 +152,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher invokes rowSelectionCallback on complete result not confirmed`() {
+    fun `formActivityLauncher invokes rowSelectionCallback on complete result when formSheetAction continue`() {
         testScenario(
             shouldRowSelectionBeInvoked = true
         ) {
@@ -169,7 +169,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `formActivityLauncher doesn't invokes rowSelectionCallback on complete result confirmed`() {
+    fun `formActivityLauncher doesn't invokes rowSelectionCallback on complete result when formSheetAction confirm`() {
         testScenario(
             shouldRowSelectionBeInvoked = false
         ) {
