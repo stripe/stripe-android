@@ -21,11 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
@@ -68,7 +66,7 @@ internal fun PrimaryButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(
-                        minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
+                        minHeight = StripeTheme.primaryButtonStyle.shape.height.dp
                     ),
                 enabled = isEnabled,
                 shape = shape,
