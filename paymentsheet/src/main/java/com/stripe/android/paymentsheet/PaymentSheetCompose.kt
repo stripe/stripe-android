@@ -22,6 +22,7 @@ import java.util.UUID
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
  */
 @Composable
+@Deprecated(message = "This will be removed in a future release. Use PaymentSheet.Builder instead.")
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
@@ -47,6 +48,7 @@ fun rememberPaymentSheet(
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
  */
 @Composable
+@Deprecated(message = "This will be removed in a future release. Use PaymentSheet.Builder instead.")
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
@@ -77,6 +79,7 @@ fun rememberPaymentSheet(
  * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
+@Deprecated(message = "This will be removed in a future release. Use PaymentSheet.Builder instead.")
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
