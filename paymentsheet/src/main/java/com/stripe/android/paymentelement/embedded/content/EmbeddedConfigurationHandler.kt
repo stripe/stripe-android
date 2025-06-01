@@ -52,8 +52,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
+        val hasGooglePayOrCustomerConfig = configuration.googlePay != null || configuration.customer != null
         if (internalRowSelectionCallback.get() != null &&
-            (configuration.googlePay != null || configuration.customer != null)
+            configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm &&
+            hasGooglePayOrCustomerConfig
         ) {
             return Result.failure(
                 IllegalArgumentException(
