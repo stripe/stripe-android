@@ -1,9 +1,6 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
-import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,9 +15,11 @@ import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationEffects
 import com.stripe.android.uicore.navigation.NavigationIntent
@@ -28,7 +27,6 @@ import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun FullScreenContent(
     modifier: Modifier,
@@ -48,24 +46,8 @@ internal fun FullScreenContent(
     getLinkAccount: () -> LinkAccount?,
     changeEmail: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-
-    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val navController = rememberNavController()
     val keyboardController = rememberKeyboardController()
-
-    LaunchedEffect(bottomSheetContent) {
-        if (bottomSheetContent != null) {
-            sheetState.show()
-        }
-    }
-
-    LaunchedEffect(sheetState.isVisible) {
-        if (!sheetState.isVisible) {
-            bottomSheetContent = null
-        }
-    }
 
     NavigationEffects(
         navigationChannel = navigationChannel,
@@ -79,41 +61,56 @@ internal fun FullScreenContent(
         },
     )
 
-    ElementsBottomSheetLayout(
-        state = bottomSheetState,
-        onDismissed = dismiss,
-    ) {
-        Box(
-            modifier = modifier
+    val coroutineScope = rememberCoroutineScope()
+    var linkContentBottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+    val linkContentBottomSheetState = rememberStripeBottomSheetState()
+    LaunchedEffect(linkContentBottomSheetContent) {
+        if (linkContentBottomSheetContent != null) {
+            linkContentBottomSheetState.show()
+        }
+    }
+
+    EventReporterProvider(eventReporter) {
+        ElementsBottomSheetLayout(
+            state = bottomSheetState,
+            onDismissed = dismiss,
         ) {
-            EventReporterProvider(
-                eventReporter = eventReporter
-            ) {
-                LinkContent(
-                    initialDestination = initialDestination,
-                    navController = navController,
-                    appBarState = appBarState,
-                    sheetState = sheetState,
-                    bottomSheetContent = bottomSheetContent,
-                    onUpdateSheetContent = { content ->
-                        if (content != null) {
-                            bottomSheetContent = content
-                        } else {
-                            coroutineScope.launch {
-                                sheetState.hide()
-                            }
+            LinkContent(
+                modifier = modifier,
+                initialDestination = initialDestination,
+                navController = navController,
+                appBarState = appBarState,
+                onBackPressed = onBackPressed,
+                moveToWeb = moveToWeb,
+                bottomSheetContent = linkContentBottomSheetContent,
+                onUpdateSheetContent = { content ->
+                    if (content != null) {
+                        linkContentBottomSheetContent = content
+                    } else {
+                        coroutineScope.launch {
+                            linkContentBottomSheetState.hide()
                         }
-                    },
-                    onBackPressed = onBackPressed,
-                    moveToWeb = moveToWeb,
-                    handleViewAction = handleViewAction,
-                    navigate = navigate,
-                    dismissWithResult = dismissWithResult,
-                    getLinkAccount = getLinkAccount,
-                    goBack = goBack,
-                    changeEmail = changeEmail
-                )
-            }
+                    }
+                },
+                handleViewAction = handleViewAction,
+                navigate = navigate,
+                dismissWithResult = dismissWithResult,
+                getLinkAccount = getLinkAccount,
+                goBack = goBack,
+                changeEmail = changeEmail
+            )
+        }
+
+        linkContentBottomSheetContent?.let { content ->
+            ElementsBottomSheetLayout(
+                state = linkContentBottomSheetState,
+                onDismissed = { linkContentBottomSheetContent = null },
+                content = {
+                    DefaultLinkTheme {
+                        Column { content() }
+                    }
+                },
+            )
         }
     }
 }

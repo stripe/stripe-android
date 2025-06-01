@@ -276,6 +276,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        cvc: String?,
     ): Result<SharePaymentDetails> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
@@ -284,6 +285,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 paymentDetailsId = paymentDetailsId,
                 consumerSessionClientSecret = account.clientSecret,
                 expectedPaymentMethodType = expectedPaymentMethodType,
+                cvc = cvc,
             ).getOrThrow()
         }
     }
@@ -465,7 +467,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 ConsumerSignUpConsentAction.Implied
             SignUpConsentAction.ImpliedWithPrefilledEmail ->
                 ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
-            SignUpConsentAction.DefaultOptIn ->
+            SignUpConsentAction.DefaultOptInWithAllPrefilled ->
                 ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledAll
+            SignUpConsentAction.DefaultOptInWithSomePrefilled ->
+                ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledSome
+            SignUpConsentAction.DefaultOptInWithNonePrefilled ->
+                ConsumerSignUpConsentAction.PrecheckedOptInBoxPrefilledNone
         }
 }

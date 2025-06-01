@@ -7,4 +7,5 @@ import kotlinx.parcelize.Parcelize
 internal data class LinkPassthroughConfirmationOption(
     val paymentDetailsId: String,
     val expectedPaymentMethodType: String,
+    val cvc: String?
 ) : ConfirmationHandler.Option

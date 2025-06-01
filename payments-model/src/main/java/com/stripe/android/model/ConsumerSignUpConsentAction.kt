@@ -11,6 +11,8 @@ enum class ConsumerSignUpConsentAction(val value: String) {
     Implied("implied_consent_withspm_mobile_v0"),
     ImpliedWithPrefilledEmail("implied_consent_withspm_mobile_v0_0"),
     PrecheckedOptInBoxPrefilledAll("prechecked_opt_in_box_prefilled_all"),
+    PrecheckedOptInBoxPrefilledSome("prechecked_opt_in_box_prefilled_some"),
+    PrecheckedOptInBoxPrefilledNone("prechecked_opt_in_box_prefilled_none"),
 
     // Financial Connections
     EnteredPhoneNumberClickedSaveToLink("entered_phone_number_clicked_save_to_link"),
