@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -59,7 +60,7 @@ internal fun RemoveButton(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .fillMaxWidth()
-                        .height(height = shape.height),
+                        .defaultMinSize(minHeight = shape.height),
                     border = BorderStroke(
                         width = shape.borderStrokeWidth.coerceAtLeast(2.dp),
                         color = borderColor,
