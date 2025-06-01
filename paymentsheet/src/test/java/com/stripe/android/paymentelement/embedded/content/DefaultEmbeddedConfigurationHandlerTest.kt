@@ -57,20 +57,21 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     @Test
-    fun `configuration fails when rowSelectionCallback not null with Google Pay`() = runScenario(
+    fun `configuration fails rowSelectionCallback not null, action confirm, gPay`() = runScenario(
         rowSelectionCallback = {}
     ) {
         val result = handler.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("")
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
                         environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                         countryCode = "USD",
                     )
                 )
+                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
                 .build(),
         )
 
@@ -82,15 +83,16 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     @Test
-    fun `configuration succeeds when rowSelectionCallback not null without customer or google pay`() = runScenario(
+    fun `configuration fails rowSelectionCallback not null, action confirm, customer`() = runScenario(
         rowSelectionCallback = {}
     ) {
         val result = handler.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("")
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
                 .customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
                 .build(),
         )
 
@@ -102,26 +104,78 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     @Test
-    fun `configuration succeed when rowSelectionCallback not null without customer or google pay `() = runScenario(
-        rowSelectionCallback = {}
+    fun `configuration succeeds rowSelectionCallback null, action confirm, customer & gPay`() = runScenario(
+        rowSelectionCallback = null
     ) {
-        sheetStateHolder.sheetIsOpen = true
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
-            arguments = DefaultEmbeddedConfigurationHandler.Arguments(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-                ),
-                configuration = configuration.asCommonConfiguration(),
-            ),
-            resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
-        )
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
+            .googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "USD",
+                )
+            )
+            .customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            .build()
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+
         val result = handler.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = configuration,
         )
+
+        assertThat(result.getOrThrow())
+            .isInstanceOf<PaymentElementLoader.State>()
+        assertThat(result.isSuccess)
+    }
+
+    @Test
+    fun `configuration succeeds rowSelectionCallback !null, action confirm, no gpay, no customer`() = runScenario(
+        rowSelectionCallback = {}
+    ) {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            .build()
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+
+        val result = handler.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            ),
+            configuration = configuration,
+        )
+
+        assertThat(result.getOrThrow())
+            .isInstanceOf<PaymentElementLoader.State>()
+        assertThat(result.isSuccess)
+    }
+
+    @Test
+    fun `configuration succeeds rowSelectionCallback !null, action continue, gPay & Customer`() = runScenario(
+        rowSelectionCallback = {}
+    ) {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
+            .googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "USD",
+                )
+            )
+            .customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .build()
+
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+
+        val result = handler.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            ),
+            configuration = configuration,
+        )
+
         assertThat(result.getOrThrow())
             .isInstanceOf<PaymentElementLoader.State>()
         assertThat(result.isSuccess)
