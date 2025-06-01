@@ -64,7 +64,7 @@ internal class FormActivity : AppCompatActivity() {
                 )
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onDismissed = ::setCancelAndFinish
+                    onDismissed = ::setCancelAndFinish,
                 ) {
                     FormActivityUI(
                         interactor = formInteractor,

@@ -91,6 +91,7 @@ internal class ManageActivity : AppCompatActivity() {
                 ) {
                     var hasResult by remember { mutableStateOf(false) }
                     if (!hasResult) {
+                        // here
                         Box(modifier = Modifier.padding(bottom = 20.dp)) {
                             ScreenContent(manageNavigator, screen)
                         }
@@ -128,7 +129,7 @@ internal class ManageActivity : AppCompatActivity() {
                 )
             },
             content = {
-                val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+                //val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
                 val headerText by remember(screen) {
                     screen.title()
                 }.collectAsState()
@@ -137,7 +138,7 @@ internal class ManageActivity : AppCompatActivity() {
                         text = text.resolve(),
                         modifier = Modifier
                             .padding(bottom = 16.dp)
-                            .padding(horizontal = horizontalPadding),
+                            //.padding(horizontal = horizontalPadding),
                     )
                 }
 

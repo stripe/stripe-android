@@ -18,15 +18,15 @@ import com.stripe.android.uicore.utils.collectAsState
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
-    val horizontalPadding = dimensionResource(
-        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
+//    val horizontalPadding = dimensionResource(
+//        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+//    )
 
     val state by interactor.state.collectAsState()
 
     Column(
         modifier = Modifier
-            .padding(horizontal = horizontalPadding)
+            //.padding(horizontal = horizontalPadding)
             .testTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

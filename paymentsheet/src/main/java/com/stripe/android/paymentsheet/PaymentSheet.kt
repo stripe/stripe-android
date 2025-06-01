@@ -1024,7 +1024,12 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the Embedded Payment Element
          */
-        internal val embeddedAppearance: Embedded = Embedded.default
+        internal val embeddedAppearance: Embedded = Embedded.default,
+
+        /**
+         * Describes the inset values used for all forms
+         */
+        internal val formInsetValues: Insets = Insets.defaultFormInsetValues
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1704,6 +1709,57 @@ class PaymentSheet internal constructor(
                 context.getRawValueFromDimenResource(it)
             }
         )
+    }
+
+    @Parcelize
+    data class Insets(
+        val startDp: Float,
+        val topDp: Float,
+        val endDp: Float,
+        val bottomDp: Float
+    ) : Parcelable {
+        constructor(
+            context: Context,
+            @DimenRes startRes: Int,
+            @DimenRes topRes: Int,
+            @DimenRes endRes: Int,
+            @DimenRes bottomRes: Int
+        ) : this(
+            startDp = context.getRawValueFromDimenResource(startRes),
+            topDp = context.getRawValueFromDimenResource(topRes),
+            endDp = context.getRawValueFromDimenResource(endRes),
+            bottomDp = context.getRawValueFromDimenResource(bottomRes)
+        )
+
+        constructor(
+            horizontalDp: Float,
+            verticalDp: Float
+        ) : this(
+            startDp = horizontalDp,
+            topDp = verticalDp,
+            endDp = horizontalDp,
+            bottomDp = verticalDp
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes horizontalRes: Int,
+            @DimenRes verticalRes: Int
+        ) : this(
+            startDp = context.getRawValueFromDimenResource(horizontalRes),
+            topDp = context.getRawValueFromDimenResource(verticalRes),
+            endDp = context.getRawValueFromDimenResource(horizontalRes),
+            bottomDp = context.getRawValueFromDimenResource(verticalRes)
+        )
+
+        companion object {
+            internal val defaultFormInsetValues = Insets(
+                startDp = 20f,
+                topDp = 0f,
+                endDp = 20f,
+                bottomDp = 0f,
+            )
+        }
     }
 
     @Parcelize

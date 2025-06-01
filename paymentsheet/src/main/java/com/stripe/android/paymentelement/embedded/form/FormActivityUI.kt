@@ -84,9 +84,9 @@ internal fun USBankAccountMandate(
             mandateText = it.resolve(),
             modifier = Modifier
                 .padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                    ),
+//                    horizontal = dimensionResource(
+//                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+//                    ),
                     vertical = 8.dp
                 )
         )
@@ -102,9 +102,9 @@ internal fun FormActivityError(
             error = it.resolve(),
             modifier = Modifier
                 .padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                    ),
+//                    horizontal = dimensionResource(
+//                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+//                    ),
                     vertical = 8.dp
                 )
         )
@@ -119,9 +119,9 @@ internal fun FormActivityPrimaryButton(
 ) {
     Box(
         modifier = Modifier
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-            )
+//            .padding(
+//                horizontal = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
+//            )
     ) {
         PrimaryButton(
             modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
@@ -143,10 +143,10 @@ internal fun FormActivityTopBar(
     val tintColor = MaterialTheme.stripeColors.appBarIcon
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-            ),
+            .fillMaxWidth(),
+//            .padding(
+//                start = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+//            ),
         contentAlignment = Alignment.CenterStart
     ) {
         if (!isLiveMode) {

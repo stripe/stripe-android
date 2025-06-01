@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 import com.stripe.android.R as PaymentsCoreR
 
+// do something about this
 internal val formBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
@@ -317,7 +318,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            PaymentMethodVerticalLayoutUI(interactor, modifier.padding(horizontal = 20.dp))
+            PaymentMethodVerticalLayoutUI(interactor, modifier)
         }
     }
 

@@ -2,7 +2,9 @@ package com.stripe.android.uicore.elements.bottomsheet
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -11,6 +13,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState.DismissalType
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
@@ -46,6 +49,17 @@ fun StripeBottomSheetLayout(
             onDismissed()
         }
     }
+
+//    val paddingValues = if (useAppearancePaddingValues) {
+//        PaddingValues(
+//            start = StripeTheme.formInsets.start.dp,
+//            top = StripeTheme.formInsets.top.dp,
+//            end = StripeTheme.formInsets.end.dp,
+//            bottom = StripeTheme.formInsets.bottom.dp,
+//        )
+//    } else {
+//        PaddingValues()
+//    }
 
     ModalBottomSheetLayout(
         modifier = modifier
