@@ -573,6 +573,42 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun walletDisplayablePaymentMethodsLink_invokesRowSelectionCallback() {
+        var rowSelectionCallbackInvoked = false
+        runScenario(
+            invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
+            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+            canShowWalletsInline = true,
+            updateSelection = {},
+        ) {
+            walletsState.value = linkAndGooglePayWalletState
+
+            val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
+            displayablePaymentMethods.first { it.code == "link" }.onClick()
+
+            assertThat(rowSelectionCallbackInvoked).isTrue()
+        }
+    }
+
+    @Test
+    fun walletDisplayablePaymentMethodsGooglePay_invokesRowSelectionCallback() {
+        var rowSelectionCallbackInvoked = false
+        runScenario(
+            invokeRowSelectionCallback = { rowSelectionCallbackInvoked = true },
+            paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes,
+            canShowWalletsInline = true,
+            updateSelection = {},
+        ) {
+            walletsState.value = linkAndGooglePayWalletState
+
+            val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
+            displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
+
+            assertThat(rowSelectionCallbackInvoked).isTrue()
+        }
+    }
+
+    @Test
     fun stateDoesNotReturnWalletPaymentMethodsWhenInFlowControllerAndGooglePayIsNotAvailable() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -921,6 +957,22 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
             assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
             assertThat(reportedSelectedPaymentMethodType).isEqualTo("saved")
+        }
+    }
+
+    @Test
+    fun handleViewAction_SelectSavedPaymentMethod_invokesRowSelectionCallback() {
+        val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
+        var rowSelectionCallbackInvoked = false
+        runScenario(
+            onSelectSavedPaymentMethod = { },
+            reportPaymentMethodTypeSelected = { true },
+            invokeRowSelectionCallback = {
+                rowSelectionCallbackInvoked = true
+            }
+        ) {
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            assertThat(rowSelectionCallbackInvoked).isTrue()
         }
     }
 
@@ -1394,6 +1446,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
+    private val linkAndGooglePayWalletState = WalletsState(
+        link = WalletsState.Link("email@email.com"),
+        googlePay = WalletsState.GooglePay(
+            buttonType = GooglePayButtonType.Pay,
+            allowCreditCards = true,
+            billingAddressParameters = null,
+        ),
+        buttonsEnabled = true,
+        dividerTextResource = 0,
+        onGooglePayPressed = {},
+        onLinkPressed = {},
+    )
+
+    private val metadataWithOnlyPaymentMethodTypes = PaymentMethodMetadataFactory.create(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
+        )
+    )
+
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             cbcEligibility = CardBrandChoiceEligibility.create(
@@ -1426,6 +1497,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired
             !requiresFormScreen
         },
+        invokeRowSelectionCallback: (() -> Unit)? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1469,6 +1541,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
             dispatcher = UnconfinedTestDispatcher(),
             mainDispatcher = UnconfinedTestDispatcher(),
+            invokeRowSelectionCallback = invokeRowSelectionCallback,
         )
 
         TestParams(
