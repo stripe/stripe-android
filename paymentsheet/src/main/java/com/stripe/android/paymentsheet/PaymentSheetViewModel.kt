@@ -240,7 +240,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
-            isAwaitingEagerLaunchResult.update {
+            updateIsAwaitingEagerLaunchResult {
                 // If null at this point, then we're not awaiting a result.
                 it ?: false
             }
@@ -314,7 +314,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
             val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
             if (shouldLaunchEagerly) {
-                isAwaitingEagerLaunchResult.update { true }
+                updateIsAwaitingEagerLaunchResult { true }
                 checkoutWithLinkExpress()
             }
         }
@@ -332,7 +332,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                     is ConfirmationHandler.State.Complete -> {
                         processConfirmationResult(state.result)
-                        isAwaitingEagerLaunchResult.update { false }
+                        updateIsAwaitingEagerLaunchResult { false }
                     }
                 }
             }
@@ -677,6 +677,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             null
         } else {
             viewState
+        }
+    }
+
+    private suspend inline fun updateIsAwaitingEagerLaunchResult(crossinline update: (Boolean?) -> Boolean) {
+        withContext(viewModelScope.coroutineContext) {
+            isAwaitingEagerLaunchResult.update(update)
         }
     }
 
