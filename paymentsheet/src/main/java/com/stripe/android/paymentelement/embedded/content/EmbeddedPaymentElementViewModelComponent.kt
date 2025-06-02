@@ -115,6 +115,9 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedConfigurationHandler
 
     @Binds
+    fun bindsLinkHelper(helper: DefaultEmbeddedLinkHelper): EmbeddedLinkHelper
+
+    @Binds
     fun bindsWalletsHelper(helper: DefaultEmbeddedWalletsHelper): EmbeddedWalletsHelper
 
     @Binds
