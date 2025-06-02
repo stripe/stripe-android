@@ -1577,13 +1577,13 @@ class PaymentSheet internal constructor(
         @ExtendedAppearancePreview
         constructor(
             context: Context,
-            @DimenRes cornerRadiusDimen: Int,
-            @DimenRes borderStrokeWidthDimen: Int,
-            @DimenRes bottomSheetCornerRadiusDimen: Int,
+            @DimenRes cornerRadiusRes: Int,
+            @DimenRes borderStrokeWidthRes: Int,
+            @DimenRes bottomSheetCornerRadiusRes: Int,
         ) : this(
-            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDimen),
-            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDimen),
-            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusDimen),
+            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes),
+            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes),
+            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes),
         )
 
         companion object {
