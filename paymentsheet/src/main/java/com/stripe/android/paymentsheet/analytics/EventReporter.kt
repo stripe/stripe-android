@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import androidx.annotation.Keep
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -119,6 +120,8 @@ internal interface EventReporter {
     )
 
     fun onDisallowedCardBrandEntered(brand: CardBrand)
+
+    fun onAnalyticsEvent(event: AnalyticsEvent)
 
     /**
      * The customer has pressed the confirm button.

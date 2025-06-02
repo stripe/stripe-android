@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.analytics
 
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.model.CardBrand
@@ -128,6 +129,8 @@ internal interface CustomerSheetEventReporter {
     fun onCardNumberCompleted()
 
     fun onDisallowedCardBrandEntered(brand: CardBrand)
+
+    fun onAnalyticsEvent(event: AnalyticsEvent)
 
     enum class Screen(val value: String) {
         AddPaymentMethod("add_payment_method"),

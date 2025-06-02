@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
@@ -13,6 +14,7 @@ internal sealed class CustomerSheetViewAction {
     object OnBackPressed : CustomerSheetViewAction()
     object OnEditPressed : CustomerSheetViewAction()
     object OnCardNumberInputCompleted : CustomerSheetViewAction()
+    class OnAnalyticsEvent(val event: AnalyticsEvent) : CustomerSheetViewAction()
     object OnAddCardPressed : CustomerSheetViewAction()
     object OnPrimaryButtonPressed : CustomerSheetViewAction()
     object OnCancelClose : CustomerSheetViewAction()

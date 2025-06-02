@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
@@ -541,6 +542,17 @@ internal class DefaultEventReporter @Inject internal constructor(
             )
         }
         fireEvent(analyticsEvent)
+    }
+
+    override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        CoroutineScope(workContext).launch {
+            analyticsRequestExecutor.executeAsync(
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = emptyMap(),
+                )
+            )
+        }
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
