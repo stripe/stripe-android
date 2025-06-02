@@ -113,7 +113,8 @@ data class PrimaryButtonColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonShape(
     val cornerRadius: Float,
-    val borderStrokeWidth: Float
+    val borderStrokeWidth: Float,
+    val height: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -236,7 +237,8 @@ object StripeThemeDefaults {
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
-            borderStrokeWidth = 0.0f
+            borderStrokeWidth = 0.0f,
+            height = 48f,
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
