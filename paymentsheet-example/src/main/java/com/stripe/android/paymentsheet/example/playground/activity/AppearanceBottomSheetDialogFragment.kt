@@ -439,6 +439,16 @@ private fun Shapes(
             )
         )
     }
+    Divider()
+    IncrementDecrementItem("inputFieldVerticalInsetsDp", currentAppearance.shapes.inputFieldVerticalInsetsDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                shapes = currentAppearance.shapes.copy(
+                    inputFieldVerticalInsetsDp = it
+                )
+            )
+        )
+    }
 }
 
 @Composable

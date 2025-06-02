@@ -20,6 +20,7 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
             ),
             shapes = PaymentSheet.Shapes.default.copy(
                 cornerRadiusDp = 8f,
+                inputFieldVerticalInsetsDp = 6f,
             ),
             typography = PaymentSheet.Typography(
                 fontResId = R.font.cursive,

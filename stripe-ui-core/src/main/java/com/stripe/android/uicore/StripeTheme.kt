@@ -63,6 +63,7 @@ data class StripeShapes(
     val cornerRadius: Float,
     val bottomSheetCornerRadius: Float,
     val borderStrokeWidth: Float,
+    val inputFieldVerticalInsets: Float,
 ) {
 
     val roundedCornerShape: Shape
@@ -206,6 +207,7 @@ object StripeThemeDefaults {
         cornerRadius = 6.0f,
         bottomSheetCornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
+        inputFieldVerticalInsets = 0f,
     )
 
     val typography = StripeTypography(
