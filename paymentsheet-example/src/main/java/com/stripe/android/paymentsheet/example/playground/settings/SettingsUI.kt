@@ -125,6 +125,10 @@ private fun IntegrationTypeConfigurableSetting(
                 name = "Customer Sheet",
                 value = PlaygroundConfigurationData.IntegrationType.CustomerSheet
             ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Wallets Button",
+                value = PlaygroundConfigurationData.IntegrationType.WalletsButton
+            ),
         ),
         value = configurationData.integrationType
     ) { integrationType ->

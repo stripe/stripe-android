@@ -1,12 +1,14 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 
 @Composable
-internal fun StripeThemeForConnections(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeThemeForConnections(
     content: @Composable () -> Unit
 ) {
     // Financial Connections does not currently support dark mode.

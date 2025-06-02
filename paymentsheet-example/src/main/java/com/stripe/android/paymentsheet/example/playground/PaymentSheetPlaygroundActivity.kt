@@ -366,6 +366,24 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
+                    PlaygroundConfigurationData.IntegrationType.WalletsButton -> {
+                        Button(
+                            onClick = {
+                                startActivity(
+                                    com.stripe.android.paymentsheet.example.playground.wallets.WalletsButtonPlaygroundActivity.create(
+                                        this,
+                                        playgroundState
+                                    )
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag(CHECKOUT_TEST_TAG),
+                        ) {
+                            Text("Open Wallets Button Demo")
+                        }
+                    }
+
                     else -> Unit
                 }
             }
