@@ -425,6 +425,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
+        .padding(StripeTheme.getHorizontalPaddingValues())
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button

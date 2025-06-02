@@ -300,6 +300,7 @@ internal fun AddPaymentMethod(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
+                .padding(horizontalPadding)
         )
     }
 }

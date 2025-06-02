@@ -115,11 +115,7 @@ internal class PrimaryButton @JvmOverloads constructor(
         backgroundTintList = tintList
         finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
         finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
-        (layoutParams as? MarginLayoutParams)?.apply {
-            height = context.convertDpToPx(primaryButtonStyle.shape.height.dp).toInt()
-            marginEnd = context.convertDpToPx(StripeTheme.formInsets.end.dp).toInt()
-            marginStart = context.convertDpToPx(StripeTheme.formInsets.start.dp).toInt()
-        }
+        layoutParams?.height = context.convertDpToPx(primaryButtonStyle.shape.height.dp).toInt()
     }
 
     fun setDefaultLabelColor(@ColorInt color: Int) {
