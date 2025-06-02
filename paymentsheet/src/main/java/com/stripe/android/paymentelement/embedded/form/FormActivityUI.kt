@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
@@ -143,7 +144,7 @@ internal fun FormActivityTopBar(
         IconButton(
             enabled = true,
             onClick = onDismissed,
-            modifier = Modifier.align(Alignment.CenterEnd)
+            modifier = Modifier.align(Alignment.CenterEnd).offset(16.dp)
         ) {
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
