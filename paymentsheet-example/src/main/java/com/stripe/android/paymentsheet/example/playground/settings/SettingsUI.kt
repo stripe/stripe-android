@@ -217,7 +217,9 @@ private fun <T> RadioButtonSetting(
             )
         }
 
-        val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
+        val selectedOption = remember(options, value) {
+            options.firstOrNull { it.value == value }
+        }
 
         Row {
             options.forEach { option ->
@@ -262,7 +264,9 @@ internal fun <T> DropdownSetting(
     onOptionChanged: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
+    val selectedOption = remember(options, value) {
+        options.firstOrNull { it.value == value }
+    }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
