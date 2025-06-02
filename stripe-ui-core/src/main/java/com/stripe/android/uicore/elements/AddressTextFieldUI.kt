@@ -10,6 +10,7 @@ import androidx.compose.ui.text.input.ImeAction
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AddressTextFieldUI(
     controller: AddressTextFieldController,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {
         controller.launchAutocompleteScreen()
     }
@@ -18,7 +19,7 @@ fun AddressTextFieldUI(
         textFieldController = controller,
         imeAction = ImeAction.Next,
         enabled = false,
-        modifier = Modifier.clickable {
+        modifier = modifier.clickable {
             onClick()
         }
     )

@@ -135,7 +135,8 @@ internal class CardDetailsController(
             enabled,
             this,
             hiddenIdentifiers,
-            lastTextFieldIdentifier
+            lastTextFieldIdentifier,
+            modifier = modifier,
         )
     }
 }

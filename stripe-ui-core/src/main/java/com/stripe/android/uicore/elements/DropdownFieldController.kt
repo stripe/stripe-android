@@ -79,7 +79,8 @@ class DropdownFieldController(
     ) {
         DropDown(
             this,
-            enabled
+            enabled,
+            modifier = modifier,
         )
     }
 }

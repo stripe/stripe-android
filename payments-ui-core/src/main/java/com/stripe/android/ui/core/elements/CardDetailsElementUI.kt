@@ -17,7 +17,8 @@ internal fun CardDetailsElementUI(
     enabled: Boolean,
     controller: CardDetailsController,
     hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?
+    lastTextFieldIdentifier: IdentifierSpec?,
+    modifier: Modifier = Modifier,
 ) {
     controller.fields.forEachIndexed { index, field ->
         // We need to adjust the focus direction, because some devices (Samsung, OnePlus) will
@@ -33,6 +34,7 @@ internal fun CardDetailsElementUI(
         SectionFieldElementUI(
             enabled,
             field,
+            modifier = modifier,
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             nextFocusDirection = nextFocusDirection
