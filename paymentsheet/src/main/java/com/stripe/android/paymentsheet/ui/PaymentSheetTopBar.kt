@@ -37,6 +37,8 @@ import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
+private const val NAV_ICON_OFFSET = -20.25
+private const val EDIT_BUTTON_OFFSET = 10.25
 
 @Composable
 internal fun PaymentSheetTopBar(
@@ -77,7 +79,7 @@ internal fun PaymentSheetTopBar(
         navigationIcon = {
             Box(
                 Modifier
-                    .offset((-20.25).dp)
+                    .offset(NAV_ICON_OFFSET.dp)
                     .padding(start = StripeTheme.formInsets.start.dp)
             ) {
                 IconButton(
@@ -148,7 +150,7 @@ private fun EditButton(
 
     Box(
         modifier = Modifier
-            .offset(10.25.dp)
+            .offset(EDIT_BUTTON_OFFSET.dp)
             .padding(end = StripeTheme.formInsets.end.dp)
     ) {
         IconButton(
