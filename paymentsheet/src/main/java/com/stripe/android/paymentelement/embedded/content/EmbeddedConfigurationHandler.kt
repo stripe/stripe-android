@@ -52,8 +52,9 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
+        val isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
         val hasGooglePayOrCustomerConfig = configuration.googlePay != null || configuration.customer != null
-        if (internalRowSelectionCallback.get() != null &&
+        if (isRowSelectionImmediateAction &&
             configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm &&
             hasGooglePayOrCustomerConfig
         ) {
@@ -72,7 +73,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             appearance = configuration.appearance,
             isDeferred = true,
             primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(configuration),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = configuration,
+                isRowSelectionImmediateAction = isRowSelectionImmediateAction
+            ),
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
