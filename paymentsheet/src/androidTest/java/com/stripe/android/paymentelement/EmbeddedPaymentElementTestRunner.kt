@@ -60,6 +60,8 @@ internal fun runEmbeddedPaymentElementTest(
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     showWalletButtons: Boolean = false,
+    rowSelectionBehavior: EmbeddedPaymentElement.RowSelectionBehavior =
+        EmbeddedPaymentElement.RowSelectionBehavior.Default(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -72,7 +74,8 @@ internal fun runEmbeddedPaymentElementTest(
                 resultCallback.onResult(result)
                 countDownLatch.countDown()
             },
-        ).apply {
+        ).rowSelectionBehavior(rowSelectionBehavior)
+            .apply {
             builder()
         }
         it.setContent {

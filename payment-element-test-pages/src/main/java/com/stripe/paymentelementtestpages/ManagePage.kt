@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_CHEVR
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 
+@Suppress("TooManyFunctions")
 class ManagePage(
     private val composeTestRule: ComposeTestRule,
 ) {
@@ -30,6 +31,15 @@ class ManagePage(
         composeTestRule
             .onNode(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
             .assertDoesNotExist()
+    }
+
+    fun waitUntilNotVisible() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
     }
 
     fun selectPaymentMethod(paymentMethodId: String) {

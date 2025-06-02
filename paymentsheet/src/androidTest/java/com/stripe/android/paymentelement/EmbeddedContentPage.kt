@@ -65,6 +65,14 @@ internal class EmbeddedContentPage(
         }
     }
 
+    fun clickOnSavedPM(paymentMethodId: String) {
+        waitUntilVisible()
+
+        composeTestRule.onNode(hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"))
+            .performScrollTo()
+            .performClick()
+    }
+
     fun clickViewMore() {
         waitUntilVisible()
 
