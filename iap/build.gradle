@@ -1,0 +1,44 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'dev.drewhamilton.poko'
+
+dependencies {
+    implementation libs.androidx.browser
+    api libs.kotlin.coroutines
+    implementation libs.kotlin.serialization
+    api libs.androidx.activity
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.appCompat
+
+    implementation "com.android.billingclient:billing-ktx:7.1.1"
+
+    ksp libs.daggerCompiler
+
+    testImplementation testLibs.junit
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+}
+
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+        // Make sure animations are off when we run espresso tests
+        animationsDisabled = true
+    }
+}
+
+ext {
+    artifactId = "iap"
+    artifactName = "iap"
+    artifactDescrption = "Stripe In App Purchase Android SDK"
+}
+
+//apply from: "${rootDir}/deploy/deploy.gradle"

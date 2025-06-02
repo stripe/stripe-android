@@ -186,6 +186,7 @@ ext.libs = [
         material                            : "com.google.android.material:material:${versions.material}",
         moshiKotlinCodegen                  : "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
         nimbusJwt                           : "com.nimbusds:nimbus-jose-jwt:${versions.nimbusJwt}",
+        okhttp                              : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
         okio                                : "com.squareup.okio:okio:${versions.okio}",
         payButtonCompose                    : "com.google.pay.button:compose-pay-button:${versions.payButtonCompose}",
         places                              : "com.google.android.libraries.places:places:${versions.places}",
