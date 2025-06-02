@@ -34,16 +34,15 @@ internal fun SettingsUi(
 ) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
     val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
-    val trimmedSearchQuery = searchQuery.trim()
-    val filteredDefinitions = remember(displayableDefinitions, trimmedSearchQuery) {
-        displayableDefinitions.filter { it.displayName.matchesQuery(trimmedSearchQuery) }
+    val filteredDefinitions = remember(displayableDefinitions, searchQuery) {
+        displayableDefinitions.filter { it.displayName.matchesQuery(searchQuery) }
     }
 
     Column(
         modifier = Modifier.padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (IntegrationTypeSettingName.matchesQuery(trimmedSearchQuery)) {
+        if (IntegrationTypeSettingName.matchesQuery(searchQuery)) {
             Row {
                 IntegrationTypeConfigurableSetting(
                     configurationData,
