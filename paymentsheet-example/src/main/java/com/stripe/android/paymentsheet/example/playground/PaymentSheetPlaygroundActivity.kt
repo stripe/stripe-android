@@ -16,11 +16,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
@@ -286,9 +287,10 @@ internal class PaymentSheetPlaygroundActivity :
                     }
 
                     Spacer(
-                        Modifier.padding(
-                            WindowInsets.ime.exclude(WindowInsets.navigationBars)
+                        Modifier.height(
+                            WindowInsets.ime.exclude(WindowInsets.systemBars)
                                 .asPaddingValues()
+                                .calculateBottomPadding()
                         )
                     )
                 },
