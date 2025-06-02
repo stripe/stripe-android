@@ -17,11 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.FormHeaderInformation
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -38,10 +36,6 @@ internal fun VerticalModeFormUI(
     showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = dimensionResource(
-        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
-
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
 
@@ -58,7 +52,6 @@ internal fun VerticalModeFormUI(
             formElements = state.formElements,
             formArguments = state.formArguments,
             usBankAccountFormArguments = state.usBankAccountFormArguments,
-            horizontalPadding = horizontalPadding,
             onFormFieldValuesChanged = { formValues ->
                 interactor.handleViewAction(
                     VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged(formValues)
@@ -90,7 +83,7 @@ internal fun VerticalModeFormHeaderUI(
     }
 
     Row(
-        modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 12.dp),
+        modifier = Modifier.padding(bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {

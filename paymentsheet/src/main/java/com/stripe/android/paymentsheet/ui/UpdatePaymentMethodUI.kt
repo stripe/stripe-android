@@ -16,7 +16,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,16 +43,12 @@ import com.stripe.android.paymentsheet.R as PaymentSheetR
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
     val context = LocalContext.current
-    val horizontalPadding = dimensionResource(
-        id = PaymentSheetR.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
     val state by interactor.state.collectAsState()
     val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
         interactor.displayableSavedPaymentMethod.canChangeCbc()
 
     Column(
         modifier = modifier
-            .padding(horizontal = horizontalPadding)
             .testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {

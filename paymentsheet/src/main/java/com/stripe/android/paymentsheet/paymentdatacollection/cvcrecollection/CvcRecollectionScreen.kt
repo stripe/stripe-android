@@ -67,7 +67,6 @@ internal fun CvcRecollectionScreen(
         Column(
             Modifier
                 .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(horizontal = 20.dp)
         ) {
             CvcRecollectionTopBar(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
@@ -96,9 +95,7 @@ internal fun CvcRecollectionPaymentSheetScreen(
 
     StripeTheme {
         Column(
-            Modifier
-                .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(horizontal = 20.dp)
+            Modifier.background(MaterialTheme.stripeColors.materialColors.surface)
         ) {
             CvcRecollectionTitle()
             CvcRecollectionField(
@@ -220,7 +217,6 @@ private fun CvcRecollectionTopBar(
 ) {
     Row(
         modifier = Modifier
-            .padding(0.dp, 16.dp, 0.dp, 0.dp)
             .height(32.dp)
     ) {
         if (isTestMode) {

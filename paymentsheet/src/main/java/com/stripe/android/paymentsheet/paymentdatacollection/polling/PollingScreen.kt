@@ -111,7 +111,6 @@ private fun ActivePolling(
             .fillMaxSize()
             .padding(
                 vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
-                horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
             ),
     ) {
         LoadingIndicator(
@@ -175,7 +174,6 @@ private fun FailedPolling(
                     .fillMaxWidth()
                     .padding(
                         vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
-                        horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
                     ),
             ) {
                 Image(

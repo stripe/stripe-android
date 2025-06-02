@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import com.stripe.android.uicore.StripeTheme
 
 @Composable
 internal fun BottomSheetScaffold(
@@ -53,6 +55,12 @@ internal fun BottomSheetScaffold(
         Column(
             modifier = Modifier
                 .imePadding()
+                .padding(
+                    start = StripeTheme.formInsets.start.dp,
+                    top = StripeTheme.formInsets.top.dp,
+                    end = StripeTheme.formInsets.end.dp,
+                    bottom = StripeTheme.formInsets.bottom.dp
+                )
                 .verticalScroll(scrollState)
         ) {
             content()

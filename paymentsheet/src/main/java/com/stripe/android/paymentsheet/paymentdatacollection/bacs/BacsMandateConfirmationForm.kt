@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -59,12 +58,9 @@ internal fun BacsMandateConfirmationFormView(
     viewActionHandler: (action: BacsMandateConfirmationViewAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
     return Column(
         modifier = modifier
-            .background(MaterialTheme.colors.surface)
-            .padding(horizontal = padding),
+            .background(MaterialTheme.colors.surface),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         H4Text(
