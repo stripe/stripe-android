@@ -720,7 +720,7 @@ private fun SearchSettingsField(
             null
         } else {
             @Composable {
-                Text(text = "Search")
+                Text(text = "Search settings")
             }
         },
         singleLine = true,
