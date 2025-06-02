@@ -15,12 +15,14 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
@@ -58,8 +60,38 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
+    fun `dataLoaded emits walletButtonsContent event`() = testScenario {
+        embeddedContentHelper.walletButtonsContent.test {
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.default,
+                embeddedViewDisplaysMandateText = true,
+            )
+            assertThat(awaitItem()).isNotNull()
+        }
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `embeddedContent emits null when clearEmbeddedContent is called`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.default,
+                embeddedViewDisplaysMandateText = true,
+            )
+            assertThat(awaitItem()).isNotNull()
+            embeddedContentHelper.clearEmbeddedContent()
+            assertThat(awaitItem()).isNull()
+        }
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `walletButtonsContent emits null when clearEmbeddedContent is called`() = testScenario {
+        embeddedContentHelper.walletButtonsContent.test {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
@@ -112,6 +144,7 @@ internal class DefaultEmbeddedContentHelperTest {
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
+        val errorReporter = FakeErrorReporter()
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             savedStateHandle = savedStateHandle,
@@ -120,6 +153,9 @@ internal class DefaultEmbeddedContentHelperTest {
             uiContext = Dispatchers.Unconfined,
             customerRepository = FakeCustomerRepository(),
             selectionHolder = selectionHolder,
+            embeddedLinkHelper = object : EmbeddedLinkHelper {
+                override val linkEmail: StateFlow<String?> = stateFlowOf(null)
+            },
             embeddedWalletsHelper = { stateFlowOf(null) },
             customerStateHolder = CustomerStateHolder(
                 savedStateHandle = savedStateHandle,
@@ -135,6 +171,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 selectionHolder = selectionHolder,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),
+            errorReporter = errorReporter,
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

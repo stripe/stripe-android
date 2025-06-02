@@ -737,6 +737,7 @@ public final class com/stripe/android/paymentelement/CustomPaymentMethodResultHa
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
 	public static final field $stable I
 	public final fun Content (Landroidx/compose/runtime/Composer;I)V
+	public final fun WalletButtons (Landroidx/compose/runtime/Composer;I)V
 	public final fun clearPaymentOption ()V
 	public final fun configure (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun confirm ()V
