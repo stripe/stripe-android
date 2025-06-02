@@ -113,6 +113,8 @@
   <string name="stripe_paymentsheet_manage_card">Quản lý thẻ</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Quản lý thẻ</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Quản lý tài khoản ngân hàng</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Quản lý các phương thức thanh toán</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->

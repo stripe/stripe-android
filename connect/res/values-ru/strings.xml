@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Скачивание завершено</string>
+  <string name="stripe_downloading_file">Скачивается файл</string>
+  <string name="stripe_failed_to_open_url">Не удалось открыть URL-адрес:%s</string>
+  <string name="stripe_not_yet_built">Пока не разработано...</string>
+  <string name="stripe_unable_to_download_file">Не удалось скачать файл</string>
+</resources>

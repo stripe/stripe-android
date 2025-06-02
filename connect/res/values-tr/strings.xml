@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">İndirme tamamlandı</string>
+  <string name="stripe_downloading_file">Dosya indiriliyor</string>
+  <string name="stripe_failed_to_open_url">URL açılamadı: %s</string>
+  <string name="stripe_not_yet_built">Henüz oluşturulmadı...</string>
+  <string name="stripe_unable_to_download_file">Dosya indirilemiyor</string>
+</resources>

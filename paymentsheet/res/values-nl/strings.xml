@@ -113,6 +113,8 @@
   <string name="stripe_paymentsheet_manage_card">Betaalkaart beheren</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Betaalkaarten beheren</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Bankrekening beheren</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Betaalmethoden beheren</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
