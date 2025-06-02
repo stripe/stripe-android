@@ -429,6 +429,16 @@ private fun Shapes(
             )
         )
     }
+    Divider()
+    IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                shapes = currentAppearance.shapes.copy(
+                    bottomSheetCornerRadiusDp = it
+                )
+            )
+        )
+    }
 }
 
 @Composable
