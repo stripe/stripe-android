@@ -188,6 +188,7 @@ class PhoneNumberController private constructor(
         PhoneNumberElementUI(
             enabled,
             this,
+            modifier = modifier,
             imeAction = if (lastTextFieldIdentifier != field.identifier) {
                 ImeAction.Next
             } else {
