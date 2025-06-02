@@ -35,7 +35,7 @@ import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getBorderStroke
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -45,7 +45,7 @@ import com.stripe.android.paymentsheet.R as PaymentSheetR
 @Composable
 internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier) {
     val context = LocalContext.current
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
     val state by interactor.state.collectAsState()
     val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
         interactor.displayableSavedPaymentMethod.canChangeCbc()

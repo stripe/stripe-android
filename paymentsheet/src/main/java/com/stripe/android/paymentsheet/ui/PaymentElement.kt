@@ -31,7 +31,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import java.util.UUID
 
@@ -54,7 +54,7 @@ internal fun PaymentElement(
         StripeImageLoader(context.applicationContext)
     }
 
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     val selectedIndex = remember(selectedItemCode, supportedPaymentMethods) {
         supportedPaymentMethods.map { it.code }.indexOf(selectedItemCode)

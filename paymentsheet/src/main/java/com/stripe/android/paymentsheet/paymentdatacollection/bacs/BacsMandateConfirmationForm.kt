@@ -32,7 +32,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -59,7 +59,7 @@ internal fun BacsMandateConfirmationFormView(
     viewActionHandler: (action: BacsMandateConfirmationViewAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     return Column(
         modifier = modifier

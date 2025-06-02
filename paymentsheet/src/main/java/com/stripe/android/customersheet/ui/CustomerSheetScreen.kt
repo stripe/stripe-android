@@ -39,7 +39,7 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
@@ -122,7 +122,7 @@ internal fun SelectPaymentMethod(
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     Column(
         modifier = modifier
@@ -198,7 +198,7 @@ internal fun AddPaymentMethod(
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     displayForm: Boolean,
 ) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
@@ -310,7 +310,7 @@ private fun UpdatePaymentMethod(
     viewState: CustomerSheetViewState.UpdatePaymentMethod,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     Column(modifier) {
         viewState.updatePaymentMethodInteractor.screenTitle?.let {

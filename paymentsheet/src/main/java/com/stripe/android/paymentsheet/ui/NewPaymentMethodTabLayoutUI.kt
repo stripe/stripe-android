@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -67,7 +67,7 @@ internal fun NewPaymentMethodTabLayoutUI(
 
         LazyRow(
             state = state,
-            contentPadding = StripeTheme.getHorizontalPaddingValues(),
+            contentPadding = StripeTheme.getOuterFormInsets(),
             horizontalArrangement = Arrangement.spacedBy(PaymentMethodsUISpacing.carouselInnerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)

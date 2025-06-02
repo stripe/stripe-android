@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -38,7 +38,7 @@ internal fun VerticalModeFormUI(
     showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
@@ -90,7 +90,7 @@ internal fun VerticalModeFormHeaderUI(
     Row(
         modifier = Modifier
             .padding(bottom = 12.dp)
-            .padding(StripeTheme.getHorizontalPaddingValues()),
+            .padding(StripeTheme.getOuterFormInsets()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {

@@ -24,7 +24,7 @@ import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import javax.inject.Provider
 
@@ -58,7 +58,7 @@ internal fun InputAddressScreen(
             modifier = Modifier.padding(it)
         ) {
             Column(
-                Modifier.padding(StripeTheme.getHorizontalPaddingValues())
+                Modifier.padding(StripeTheme.getOuterFormInsets())
             ) {
                 Text(
                     title,

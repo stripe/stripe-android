@@ -52,7 +52,7 @@ import com.stripe.android.uicore.elements.Placeholder
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TrailingIcon
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -68,7 +68,7 @@ internal fun CvcRecollectionScreen(
         Column(
             Modifier
                 .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(StripeTheme.getHorizontalPaddingValues())
+                .padding(StripeTheme.getOuterFormInsets())
         ) {
             CvcRecollectionTopBar(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
@@ -99,7 +99,7 @@ internal fun CvcRecollectionPaymentSheetScreen(
         Column(
             Modifier
                 .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(StripeTheme.getHorizontalPaddingValues())
+                .padding(StripeTheme.getOuterFormInsets())
         ) {
             CvcRecollectionTitle()
             CvcRecollectionField(

@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
@@ -127,7 +127,7 @@ internal class ManageActivity : AppCompatActivity() {
                 )
             },
             content = {
-                val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+                val horizontalPadding = StripeTheme.getOuterFormInsets()
                 val headerText by remember(screen) {
                     screen.title()
                 }.collectAsState()

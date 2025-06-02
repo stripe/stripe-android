@@ -29,7 +29,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInter
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -85,7 +85,7 @@ internal fun USBankAccountMandate(
             mandateText = it.resolve(),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .padding(StripeTheme.getHorizontalPaddingValues())
+                .padding(StripeTheme.getOuterFormInsets())
         )
     }
 }
@@ -99,7 +99,7 @@ internal fun FormActivityError(
             error = it.resolve(),
             modifier = Modifier
                 .padding(vertical = 8.dp)
-                .padding(StripeTheme.getHorizontalPaddingValues())
+                .padding(StripeTheme.getOuterFormInsets())
         )
     }
 }
@@ -111,7 +111,7 @@ internal fun FormActivityPrimaryButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier.padding(StripeTheme.getHorizontalPaddingValues())
+        modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
     ) {
         PrimaryButton(
             modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),

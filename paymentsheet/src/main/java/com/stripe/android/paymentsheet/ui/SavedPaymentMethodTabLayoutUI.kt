@@ -62,7 +62,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionError
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -486,7 +486,7 @@ internal fun CvcRecollectionField(
         }
     ) {
         Column(
-            Modifier.padding(top = 20.dp).padding(StripeTheme.getHorizontalPaddingValues())
+            Modifier.padding(top = 20.dp).padding(StripeTheme.getOuterFormInsets())
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),

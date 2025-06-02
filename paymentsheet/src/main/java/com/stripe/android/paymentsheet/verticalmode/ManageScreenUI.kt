@@ -12,13 +12,13 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     val state by interactor.state.collectAsState()
 

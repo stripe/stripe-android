@@ -691,7 +691,7 @@ fun Color.darken(amount: Float): Color {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun StripeTheme.getHorizontalPaddingValues(): PaddingValues = PaddingValues(
+fun StripeTheme.getOuterFormInsets(): PaddingValues = PaddingValues(
     start = formInsets.start.dp,
     end = formInsets.end.dp
 )

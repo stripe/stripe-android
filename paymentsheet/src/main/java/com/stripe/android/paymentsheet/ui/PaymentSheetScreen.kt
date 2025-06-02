@@ -72,7 +72,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
-import com.stripe.android.uicore.getHorizontalPaddingValues
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -298,7 +298,7 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
     modifier: Modifier
 ) {
-    val horizontalPadding = StripeTheme.getHorizontalPaddingValues()
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
@@ -376,7 +376,7 @@ internal fun Wallet(
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter
 ) {
-    val padding = StripeTheme.getHorizontalPaddingValues()
+    val padding = StripeTheme.getOuterFormInsets()
 
     Column(modifier = modifier.padding(padding)) {
         state.googlePay?.let { googlePay ->
@@ -425,7 +425,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
-        .padding(StripeTheme.getHorizontalPaddingValues())
+        .padding(StripeTheme.getOuterFormInsets())
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
