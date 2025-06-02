@@ -297,14 +297,12 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
     modifier: Modifier
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .padding(horizontal = horizontalPadding),
             )
         }
 
@@ -333,7 +331,6 @@ private fun PaymentSheetContent(
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
                     .padding(bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
@@ -343,7 +340,6 @@ private fun PaymentSheetContent(
             ErrorMessage(
                 error = it.resolve(),
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
                     .padding(top = 2.dp, bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
@@ -358,7 +354,6 @@ private fun PaymentSheetContent(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding)
                     .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
@@ -375,9 +370,7 @@ internal fun Wallet(
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter
 ) {
-    val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-
-    Column(modifier = modifier.padding(horizontal = padding)) {
+    Column(modifier = modifier) {
         state.googlePay?.let { googlePay ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,

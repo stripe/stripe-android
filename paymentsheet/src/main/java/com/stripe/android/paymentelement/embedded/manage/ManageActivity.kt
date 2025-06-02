@@ -19,13 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
@@ -128,7 +126,6 @@ internal class ManageActivity : AppCompatActivity() {
                 )
             },
             content = {
-                val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
                 val headerText by remember(screen) {
                     screen.title()
                 }.collectAsState()
@@ -137,7 +134,6 @@ internal class ManageActivity : AppCompatActivity() {
                         text = text.resolve(),
                         modifier = Modifier
                             .padding(bottom = 16.dp)
-                            .padding(horizontal = horizontalPadding),
                     )
                 }
 

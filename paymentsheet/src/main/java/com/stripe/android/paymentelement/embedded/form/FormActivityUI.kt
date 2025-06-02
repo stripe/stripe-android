@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -84,9 +83,6 @@ internal fun USBankAccountMandate(
             mandateText = it.resolve(),
             modifier = Modifier
                 .padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                    ),
                     vertical = 8.dp
                 )
         )
@@ -102,9 +98,6 @@ internal fun FormActivityError(
             error = it.resolve(),
             modifier = Modifier
                 .padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                    ),
                     vertical = 8.dp
                 )
         )
@@ -119,9 +112,6 @@ internal fun FormActivityPrimaryButton(
 ) {
     Box(
         modifier = Modifier
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-            )
     ) {
         PrimaryButton(
             modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
@@ -143,10 +133,7 @@ internal fun FormActivityTopBar(
     val tintColor = MaterialTheme.stripeColors.appBarIcon
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                start = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-            ),
+            .fillMaxWidth(),
         contentAlignment = Alignment.CenterStart
     ) {
         if (!isLiveMode) {
