@@ -7,7 +7,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,11 +21,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getHorizontalPaddingValues
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
 private object PaymentMethodsUISpacing {
-    val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
 }
 
@@ -67,7 +67,7 @@ internal fun NewPaymentMethodTabLayoutUI(
 
         LazyRow(
             state = state,
-            contentPadding = PaddingValues(horizontal = PaymentMethodsUISpacing.carouselOuterPadding),
+            contentPadding = StripeTheme.getHorizontalPaddingValues(),
             horizontalArrangement = Arrangement.spacedBy(PaymentMethodsUISpacing.carouselInnerPadding),
             userScrollEnabled = isEnabled,
             modifier = Modifier.testTag(TEST_TAG_LIST)
@@ -112,7 +112,7 @@ internal fun calculateViewWidth(
     maxWidth: Dp,
     numberOfPaymentMethods: Int
 ): Dp {
-    val targetWidth = maxWidth - (PaymentMethodsUISpacing.carouselOuterPadding * 2)
+    val targetWidth = maxWidth - (StripeTheme.formInsets.end + StripeTheme.formInsets.start).dp
     val minItemWidth = 90.dp
 
     val minimumCardsWidth = minItemWidth * numberOfPaymentMethods
