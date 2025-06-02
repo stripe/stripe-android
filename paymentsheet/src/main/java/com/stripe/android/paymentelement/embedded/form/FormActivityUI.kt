@@ -135,7 +135,7 @@ internal fun FormActivityTopBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(StripeTheme.getHorizontalPaddingValues()),
+            .padding(start = StripeTheme.formInsets.start.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         if (!isLiveMode) {
@@ -144,7 +144,7 @@ internal fun FormActivityTopBar(
         IconButton(
             enabled = true,
             onClick = onDismissed,
-            modifier = Modifier.align(Alignment.CenterEnd).offset(16.dp)
+            modifier = Modifier.align(Alignment.CenterEnd)
         ) {
             Icon(
                 painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
