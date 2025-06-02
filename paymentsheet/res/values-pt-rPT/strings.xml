@@ -113,6 +113,8 @@
   <string name="stripe_paymentsheet_manage_card">Gerir cartão</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Gerir cartões</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Gerir conta bancária</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Gerir métodos de pagamento</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->

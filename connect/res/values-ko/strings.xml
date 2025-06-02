@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">다운로드 완료</string>
+  <string name="stripe_downloading_file">파일 다운로드 중</string>
+  <string name="stripe_failed_to_open_url">%s URL을 열 수 없음</string>
+  <string name="stripe_not_yet_built">아직 구축되지 않음...</string>
+  <string name="stripe_unable_to_download_file">파일을 다운로드할 수 없음</string>
+</resources>

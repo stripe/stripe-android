@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Stahování dokončeno</string>
+  <string name="stripe_downloading_file">Stahování souboru</string>
+  <string name="stripe_failed_to_open_url">Nepodařilo se otevřít adresu URL: %s</string>
+  <string name="stripe_not_yet_built">Zatím nesestaveno…</string>
+  <string name="stripe_unable_to_download_file">Nelze stáhnout soubor</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Download abgeschlossen</string>
+  <string name="stripe_downloading_file">Datei wird heruntergeladen</string>
+  <string name="stripe_failed_to_open_url">URL konnte nicht geöffnet werden: %s</string>
+  <string name="stripe_not_yet_built">Noch nicht fertiggestellt …</string>
+  <string name="stripe_unable_to_download_file">Datei konnte nicht heruntergeladen werden</string>
+</resources>
