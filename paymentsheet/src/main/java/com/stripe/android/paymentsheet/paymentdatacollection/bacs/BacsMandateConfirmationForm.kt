@@ -59,12 +59,12 @@ internal fun BacsMandateConfirmationFormView(
     viewActionHandler: (action: BacsMandateConfirmationViewAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    //val padding = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     return Column(
         modifier = modifier
-            .background(MaterialTheme.colors.surface)
-            .padding(horizontal = padding),
+            .background(MaterialTheme.colors.surface),
+            //.padding(horizontal = padding),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         H4Text(

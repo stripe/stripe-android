@@ -38,9 +38,9 @@ internal fun VerticalModeFormUI(
     showsWalletHeader: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val horizontalPadding = dimensionResource(
-        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
+//    val horizontalPadding = dimensionResource(
+//        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+//    )
 
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
     val state by interactor.state.collectAsState()
@@ -58,7 +58,7 @@ internal fun VerticalModeFormUI(
             formElements = state.formElements,
             formArguments = state.formArguments,
             usBankAccountFormArguments = state.usBankAccountFormArguments,
-            horizontalPadding = horizontalPadding,
+            //horizontalPadding = horizontalPadding,
             onFormFieldValuesChanged = { formValues ->
                 interactor.handleViewAction(
                     VerticalModeFormInteractor.ViewAction.FormFieldValuesChanged(formValues)
@@ -90,7 +90,7 @@ internal fun VerticalModeFormHeaderUI(
     }
 
     Row(
-        modifier = Modifier.padding(horizontal = 20.dp).padding(bottom = 12.dp),
+        modifier = Modifier.padding(bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (formHeaderInformation.shouldShowIcon) {

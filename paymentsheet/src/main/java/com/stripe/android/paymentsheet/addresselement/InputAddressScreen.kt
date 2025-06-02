@@ -56,7 +56,7 @@ internal fun InputAddressScreen(
             modifier = Modifier.padding(it)
         ) {
             Column(
-                Modifier.padding(horizontal = 20.dp)
+                //Modifier.padding(horizontal = 20.dp)
             ) {
                 Text(
                     title,

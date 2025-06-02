@@ -67,7 +67,7 @@ internal fun CvcRecollectionScreen(
         Column(
             Modifier
                 .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(horizontal = 20.dp)
+                //.padding(horizontal = 20.dp)
         ) {
             CvcRecollectionTopBar(isTestMode) {
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
@@ -98,7 +98,7 @@ internal fun CvcRecollectionPaymentSheetScreen(
         Column(
             Modifier
                 .background(MaterialTheme.stripeColors.materialColors.surface)
-                .padding(horizontal = 20.dp)
+                //.padding(horizontal = 20.dp)
         ) {
             CvcRecollectionTitle()
             CvcRecollectionField(
@@ -220,7 +220,7 @@ private fun CvcRecollectionTopBar(
 ) {
     Row(
         modifier = Modifier
-            .padding(0.dp, 16.dp, 0.dp, 0.dp)
+            //.padding(0.dp, 16.dp, 0.dp, 0.dp)
             .height(32.dp)
     ) {
         if (isTestMode) {
@@ -229,7 +229,7 @@ private fun CvcRecollectionTopBar(
         Spacer(modifier = Modifier.weight(1f))
         IconButton(
             onClick = { onClosePressed.invoke() },
-            Modifier.offset(16.dp, -8.dp)
+            //Modifier.offset(16.dp, -8.dp)
         ) {
             Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
         }
@@ -254,7 +254,7 @@ private fun CvcRecollectionButton(
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(0.dp, 32.dp, 0.dp, 20.dp)
+            .padding(0.dp, 32.dp, 0.dp, 0.dp)
             .testTag(CVC_RECOLLECTION_SCREEN_CONFIRM),
         contentAlignment = Alignment.Center
     ) {

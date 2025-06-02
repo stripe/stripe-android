@@ -121,7 +121,7 @@ internal fun SelectPaymentMethod(
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    //val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column(
         modifier = modifier
@@ -132,7 +132,7 @@ internal fun SelectPaymentMethod(
             ),
             modifier = Modifier
                 .padding(bottom = 20.dp)
-                .padding(horizontal = horizontalPadding)
+                //.padding(horizontal = horizontalPadding)
         )
 
         val paymentOptionsState = PaymentOptionsStateFactory.create(
@@ -161,7 +161,7 @@ internal fun SelectPaymentMethod(
                 error = error,
                 modifier = Modifier
                     .padding(vertical = 2.dp)
-                    .padding(horizontal = horizontalPadding),
+                    //.padding(horizontal = horizontalPadding),
             )
         }
 
@@ -176,7 +176,7 @@ internal fun SelectPaymentMethod(
                 modifier = Modifier
                     .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
                     .padding(top = 20.dp)
-                    .padding(horizontal = horizontalPadding),
+                    //.padding(horizontal = horizontalPadding),
             )
         }
 
@@ -185,7 +185,7 @@ internal fun SelectPaymentMethod(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
-                .padding(horizontal = horizontalPadding),
+                //.padding(horizontal = horizontalPadding),
         )
     }
 }
@@ -197,7 +197,7 @@ internal fun AddPaymentMethod(
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     displayForm: Boolean,
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    //val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     if (viewState.displayDismissConfirmationModal) {
         SimpleDialogElementUI(
@@ -220,7 +220,7 @@ internal fun AddPaymentMethod(
         text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
         modifier = Modifier
             .padding(bottom = 4.dp)
-            .padding(horizontal = horizontalPadding)
+            //.padding(horizontal = horizontalPadding)
     )
 
     val eventReporter = remember(viewActionHandler) {
@@ -261,7 +261,7 @@ internal fun AddPaymentMethod(
     viewState.errorMessage?.let { error ->
         ErrorMessage(
             error = error.resolve(),
-            modifier = Modifier.padding(horizontal = horizontalPadding)
+            //modifier = Modifier.padding(horizontal = horizontalPadding)
         )
     }
 
@@ -275,7 +275,7 @@ internal fun AddPaymentMethod(
                         8.dp
                     } ?: 0.dp
                 )
-                .padding(horizontal = horizontalPadding),
+                //.padding(horizontal = horizontalPadding),
         )
     }
 
@@ -290,7 +290,7 @@ internal fun AddPaymentMethod(
         modifier = Modifier
             .testTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
             .padding(top = 10.dp)
-            .padding(horizontal = horizontalPadding),
+            //.padding(horizontal = horizontalPadding),
     )
 
     if (!viewState.showMandateAbovePrimaryButton) {
@@ -299,7 +299,7 @@ internal fun AddPaymentMethod(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp)
-                .padding(horizontal = horizontalPadding),
+                //.padding(horizontal = horizontalPadding),
         )
     }
 }
@@ -309,7 +309,7 @@ private fun UpdatePaymentMethod(
     viewState: CustomerSheetViewState.UpdatePaymentMethod,
     modifier: Modifier = Modifier,
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    //val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column(modifier) {
         viewState.updatePaymentMethodInteractor.screenTitle?.let {
@@ -317,7 +317,7 @@ private fun UpdatePaymentMethod(
                 text = it.resolve(),
                 modifier = Modifier
                     .padding(bottom = 20.dp)
-                    .padding(horizontal = horizontalPadding)
+                    //.padding(horizontal = horizontalPadding)
             )
         }
 

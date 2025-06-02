@@ -484,7 +484,7 @@ internal fun CvcRecollectionField(
         }
     ) {
         Column(
-            Modifier.padding(20.dp, 20.dp, 20.dp, 0.dp)
+            Modifier.padding(0.dp, 20.dp, 0.dp, 0.dp)
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
