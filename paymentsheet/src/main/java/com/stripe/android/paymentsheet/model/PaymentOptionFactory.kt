@@ -34,6 +34,7 @@ internal val PaymentSelection.shippingDetails: AddressDetails?
         is PaymentSelection.New.GenericPaymentMethod,
         is PaymentSelection.New.LinkInline,
         is PaymentSelection.New.USBankAccount,
+        is PaymentSelection.ShopPay,
         is PaymentSelection.Saved -> {
             null
         }
