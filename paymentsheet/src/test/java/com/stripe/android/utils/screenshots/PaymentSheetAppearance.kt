@@ -60,6 +60,11 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 cornerRadiusDp = 0.0f,
                 borderStrokeWidthDp = 4.0f
             ),
+            primaryButton = PaymentSheet.PrimaryButton(
+                shape = PaymentSheet.PrimaryButtonShape(
+                    heightDp = 96f
+                )
+            )
         ),
     );
 
