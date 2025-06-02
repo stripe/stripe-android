@@ -4,6 +4,9 @@ import android.graphics.Typeface
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +15,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -33,7 +35,6 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.getHorizontalPaddingValues
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -77,7 +78,11 @@ internal fun PaymentSheetTopBar(
             }
         },
         navigationIcon = {
-            Box(Modifier.offset((-20).dp).padding(start = StripeTheme.formInsets.start.dp)) {
+            Box(
+                Modifier
+                    .offset((-20.25).dp)
+                    .padding(start = StripeTheme.formInsets.start.dp)
+            ) {
                 IconButton(
                     enabled = isEnabled,
                     onClick = {
@@ -144,7 +149,11 @@ private fun EditButton(
         }
     }
 
-    Box(modifier = Modifier.offset(14.dp).padding(end = StripeTheme.formInsets.end.dp)) {
+    Box(
+        modifier = Modifier
+            .offset(10.25.dp)
+            .padding(end = StripeTheme.formInsets.end.dp)
+    ) {
         IconButton(
             modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
             enabled = isEnabled,
@@ -192,7 +201,7 @@ internal fun PaymentSheetTopBar_Preview() {
 
         PaymentSheetTopBar(
             state = state,
-            canNavigateBack = true,
+            canNavigateBack = false,
             isEnabled = true,
             elevation = 0.dp,
             onNavigationIconPressed = {},
