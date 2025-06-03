@@ -16,4 +16,4 @@ internal data class VerificationViewState(
     val redactedPhoneNumber: String,
     val email: String,
     val isDialog: Boolean
-): Parcelable
+) : Parcelable

@@ -14,7 +14,7 @@ internal data class LinkEmbeddedState(
      * Current verification state. Null when verification is not needed or completed.
      */
     val verificationState: VerificationViewState? = null,
-    
+
     /**
      * Preserved Link payment method selection for re-selection after switching payment methods
      */

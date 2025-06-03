@@ -2,17 +2,23 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.stripe.android.link.ui.LinkSpinner
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -54,22 +60,37 @@ internal fun LinkVerificationSection(
                     .padding(bottom = 12.dp)
             )
 
-            // OTP input connected to domain layer
-            StripeThemeForLink {
-                OTPElementUI(
-                    enabled = !verificationState.isProcessing,
-                    element = otpElement,
-                    otpInputPlaceholder = " ",
-                    middleSpacing = 8.dp,
-                    modifier = Modifier
-                        .testTag(VERIFICATION_OTP_TAG)
-                        .padding(vertical = 10.dp),
-                    colors = OTPElementColors(
-                        selectedBorder = LinkTheme.colors.borderSelected,
-                        placeholder = LinkTheme.colors.textPrimary,
-                        background = LinkTheme.colors.surfaceSecondary
-                    ),
-                )
+            // OTP input connected to domain layer with loading overlay
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.padding(vertical = 10.dp)
+            ) {
+                StripeThemeForLink {
+                    OTPElementUI(
+                        enabled = !verificationState.isProcessing,
+                        element = otpElement,
+                        otpInputPlaceholder = " ",
+                        middleSpacing = 8.dp,
+                        modifier = Modifier
+                            .testTag(VERIFICATION_OTP_TAG)
+                            .alpha(if (verificationState.isProcessing) 0.5f else 1f),
+                        colors = OTPElementColors(
+                            selectedBorder = LinkTheme.colors.borderSelected,
+                            placeholder = LinkTheme.colors.textPrimary,
+                            background = LinkTheme.colors.surfaceSecondary
+                        ),
+                    )
+                }
+                
+                // Loading indicator centered on top of OTP
+                if (verificationState.isProcessing) {
+                    LinkSpinner(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .zIndex(1f),
+                        strokeWidth = 3.dp
+                    )
+                }
             }
 
             // Error message if any
@@ -78,18 +99,6 @@ internal fun LinkVerificationSection(
                     text = error.resolve(LocalContext.current),
                     style = LinkTheme.typography.body,
                     color = LinkTheme.colors.textCritical,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
-            }
-
-            // Processing indicator
-            if (verificationState.isProcessing) {
-                Text(
-                    text = "Verifying...",
-                    style = LinkTheme.typography.body,
-                    color = LinkTheme.colors.textSecondary,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)

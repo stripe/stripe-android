@@ -20,7 +20,7 @@ data class PlaygroundConfigurationData(
 
         @SerialName("Embedded")
         Embedded,
-        
+
         @SerialName("walletsButton")
         WalletsButton,
 
