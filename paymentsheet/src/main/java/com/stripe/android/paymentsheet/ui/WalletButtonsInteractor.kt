@@ -150,8 +150,7 @@ internal class DefaultWalletButtonsInteractor(
 
                         // Case 2: Show Link button only when completed
                         is VerificationState.Resolved -> WalletButton.Link(
-                            email = linkEmail,
-                            preservedPaymentMethod = linkEmbeddedState.preservedPaymentMethod,
+                            email = linkEmail
                         )
 
                         // Case 3: When loading, don't show the button at all
