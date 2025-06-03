@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewModel
@@ -35,8 +36,10 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
@@ -231,11 +234,15 @@ internal fun AddPaymentMethod(
         DefaultCardBrandDisallowedReporter(viewActionHandler)
     }
 
+    val analyticsEventReporter = remember(viewActionHandler) {
+        DefaultAnalyticsEventReporter(viewActionHandler)
+    }
+
     if (displayForm) {
         CompositionLocalProvider(
             LocalCardNumberCompletedEventReporter provides eventReporter,
-            LocalCardBrandDisallowedReporter provides disallowedReporter
-
+            LocalCardBrandDisallowedReporter provides disallowedReporter,
+            LocalAnalyticsEventReporter provides analyticsEventReporter,
         ) {
             PaymentElement(
                 enabled = viewState.enabled,
@@ -333,6 +340,14 @@ const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
+
+private class DefaultAnalyticsEventReporter(
+    private val viewActionHandler: (event: CustomerSheetViewAction) -> Unit
+) : AnalyticsEventReporter {
+    override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        viewActionHandler.invoke(CustomerSheetViewAction.OnAnalyticsEvent(event))
+    }
+}
 
 private class DefaultCardNumberCompletedEventReporter(
     private val viewActionHandler: (CustomerSheetViewAction) -> Unit

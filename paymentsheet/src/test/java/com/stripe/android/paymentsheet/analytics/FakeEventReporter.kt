@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -260,6 +261,9 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+    }
+
+    override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
     data class PaymentFailureCall(
