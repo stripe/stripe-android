@@ -33,35 +33,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
 
-    /**
-     * Form Rows
-     * - Continue
-     *  - Select, fill out details, primary button
-     *      - assert callback selected with correct label
-     *  - Reselect, fill out details, primary button,
-     *      - assert callback selected with correct label
-     * - Confirm
-     *  - Select, fill out details, primary button
-     *      - assert no callback
-     *
-     * non form row, cashapp
-     * - continue
-     *  - assert callback selected with correct label
-     * - confirm
-     *  - assert callback selected with correct label
-     *
-     * saved, row
-     * - Continue
-     *  - assert callback selected with correct label
-     *
-     * saved, manage
-     * - Continue
-     *  - assert callback selected with correct label
-     *
-     * remove
-     * - assert no callback
-     */
-
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionContinue() {
         val rowSelectionLabels: MutableList<String?> = mutableListOf()
