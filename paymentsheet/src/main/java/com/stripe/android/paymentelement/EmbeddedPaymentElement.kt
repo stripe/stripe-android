@@ -81,7 +81,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * A composable function that displays a vertical list of wallet payment methods that can be used for express
      * checkout.
      */
-    @WalletsButtonPreview
+    @WalletButtonPreview
     @Composable
     fun WalletButtons() {
         val walletButtonsContent by contentHelper.walletButtonsContent.collectAsState()

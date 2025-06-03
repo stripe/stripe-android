@@ -31,7 +31,7 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.ExtendedAppearancePreview
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentelement.WalletsButtonPreview
+import com.stripe.android.paymentelement.WalletButtonPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -2354,7 +2354,7 @@ class PaymentSheet internal constructor(
          * Displays a list of wallet buttons that can be used to checkout instantly
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @WalletsButtonPreview
+        @WalletButtonPreview
         @Composable
         fun WalletButtons()
 
