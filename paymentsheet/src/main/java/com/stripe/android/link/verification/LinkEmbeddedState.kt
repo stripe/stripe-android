@@ -11,12 +11,35 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class LinkEmbeddedState(
     /**
-     * Current verification state. Null when verification is not needed or completed.
+     * Current verification state representing the different stages in the verification process.
      */
-    val verificationState: VerificationViewState? = null,
+    val verificationState: VerificationState = VerificationState.Loading,
 
     /**
      * Preserved Link payment method selection for re-selection after switching payment methods
      */
     val preservedPaymentMethod: LinkPaymentMethod? = null,
 ) : Parcelable
+
+/**
+ * Represents the different states of the verification process
+ */
+internal sealed class VerificationState : Parcelable {
+    /**
+     * Initial state while waiting for account information
+     */
+    @Parcelize
+    object Loading : VerificationState()
+    
+    /**
+     * Verification is required and the UI should show the verification form
+     */
+    @Parcelize
+    data class Verifying(val viewState: VerificationViewState) : VerificationState()
+    
+    /**
+     * Verification is completed or not needed, showing the normal Link button
+     */
+    @Parcelize
+    object Resolved : VerificationState()
+}

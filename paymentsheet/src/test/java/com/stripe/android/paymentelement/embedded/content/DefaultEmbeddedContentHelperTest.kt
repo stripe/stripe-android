@@ -171,6 +171,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 selectionHolder = selectionHolder,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),
+            linkEmbeddedManagerFactory = { TODO() },
             errorReporter = errorReporter,
         )
         Scenario(

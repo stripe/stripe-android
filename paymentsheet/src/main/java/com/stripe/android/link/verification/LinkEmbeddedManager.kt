@@ -1,20 +1,20 @@
 package com.stripe.android.link.verification
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentMethod
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.AccountStatus.NeedsVerification
 import com.stripe.android.link.model.AccountStatus.VerificationStarted
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.link.verification.VerificationState.Verifying
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.elements.OTPSpec
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -28,10 +28,10 @@ import kotlinx.coroutines.launch
  * Manages Link verification state and domain logic using unified LinkEmbeddedState
  */
 internal class LinkEmbeddedManager @AssistedInject constructor(
-    private val linkAccountHolder: LinkAccountHolder,
     @Assisted private val coroutineScope: CoroutineScope,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
+    private val logger: Logger
 ) {
 
     internal val otpElement = OTPSpec.transform()
@@ -51,30 +51,22 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         onVerificationSucceeded: (defaultPaymentMethod: LinkPaymentMethod?) -> Unit
     ) {
-        val linkAccountManager = linkAccountManager(paymentMethodMetadata) ?: return
+        // Do not initialize if Link is not available
+        if (paymentMethodMetadata.availableWallets.contains(WalletType.Link).not()) return
+        val linkAccountManager = paymentMethodMetadata.linkAccountManager() ?: return
 
-        // Setup verification flow with Link account state monitoring
-        coroutineScope.launch {
-            linkAccountHolder.linkAccountInfo.map { it.account }.collect { account ->
-                when (account?.accountStatus) {
-                    AccountStatus.Verified -> {
-                        Log.d("STATUS", "Verified")
-                        markVerificationCompleted()
-                    }
-                    NeedsVerification -> {
-                        Log.d("STATUS", "NeedsVerification")
-                        linkAccountManager.startVerification()
-                    }
-                    VerificationStarted -> {
-                        Log.d("STATUS", "VerificationStarted")
-                        updateVerificationState(initialState(account))
-                    }
-                    null,
-                    AccountStatus.SignedOut,
-                    AccountStatus.Error -> {
-                        Log.d("STATUS", "No verification needed or error")
-                    }
-                }
+        // Initialize state to loading before determining the actual state
+        updateState {
+            it.copy(verificationState = VerificationState.Loading)
+        }
+        
+        if (paymentMethodMetadata.existingLinkCustomer()) {
+            setupLinkVerification(linkAccountManager)
+        } else {
+            // If no existing Link customer, we can immediately mark verification as completed
+            // and show the Link button without loading state
+            updateState {
+                it.copy(verificationState = VerificationState.Resolved)
             }
         }
 
@@ -91,21 +83,51 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         }
     }
 
-    private fun initialState(linkAccount: LinkAccount) = VerificationViewState(
-        isProcessing = false,
-        requestFocus = true,
-        errorMessage = null,
-        isSendingNewCode = false,
-        didSendNewCode = false,
-        redactedPhoneNumber = linkAccount.redactedPhoneNumber,
-        email = linkAccount.email,
-        isDialog = false
-    )
-
-    private fun linkAccountManager(paymentMethodMetadata: PaymentMethodMetadata): LinkAccountManager? {
-        val configuration = paymentMethodMetadata.linkState?.configuration ?: return null
-        val linkComponent = linkConfigurationCoordinator.getComponent(configuration)
-        return linkComponent.linkAccountManager
+    private fun setupLinkVerification(linkAccountManager: LinkAccountManager) {
+        coroutineScope.launch {
+            linkAccountManager.linkAccountInfo.map { it.account }.collect { account ->
+                when (account?.accountStatus) {
+                    AccountStatus.Verified -> {
+                        logger.debug("Verified")
+                        updateState {
+                            it.copy(verificationState = VerificationState.Resolved)
+                        }
+                    }
+                    NeedsVerification -> {
+                        logger.debug("NeedsVerification")
+                        linkAccountManager.startVerification()
+                    }
+                    VerificationStarted -> {
+                        logger.debug("VerificationStarted")
+                        // We already checked that account is not null above, so we can use it directly
+                        updateState {
+                            it.copy(
+                                verificationState = Verifying(
+                                    VerificationViewState(
+                                        isProcessing = false,
+                                        requestFocus = true,
+                                        errorMessage = null,
+                                        isSendingNewCode = false,
+                                        didSendNewCode = false,
+                                        redactedPhoneNumber = account.redactedPhoneNumber,
+                                        email = account.email,
+                                        isDialog = false
+                                    )
+                                )
+                            )
+                        }
+                    }
+                    null,
+                    AccountStatus.SignedOut,
+                    AccountStatus.Error -> {
+                        logger.debug("No verification needed or error")
+                        updateState {
+                            it.copy(verificationState = VerificationState.Resolved)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun onOtpCompleted(
@@ -115,46 +137,67 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         onVerificationSucceeded: (defaultPaymentMethod: LinkPaymentMethod?) -> Unit
     ) {
         val verificationState = linkEmbeddedState.value.verificationState
-
-        if (verificationState != null && !verificationState.isProcessing) {
+        if (verificationState is Verifying && verificationState.viewState.isProcessing.not()) {
             // Update to processing state
-            updateVerificationState(
-                verificationState.copy(
-                    isProcessing = true,
-                    errorMessage = null
+            updateState {
+                it.copy(
+                    verificationState = Verifying(
+                        verificationState.viewState.copy(
+                            isProcessing = true,
+                            errorMessage = null
+                        )
+                    )
+                )
+            }
+
+            linkAccountManager.confirmVerification(code)
+                .fold(
+                    onSuccess = { updatedLinkAccount ->
+                        onVerificationSuccess(
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            linkAccountManager = linkAccountManager,
+                            onVerificationSucceeded = onVerificationSucceeded
+                        )
+                    },
+                    onFailure = { error ->
+                        onVerificationError(
+                            verificationState = verificationState,
+                            error = error
+                        )
+                    }
+                )
+        }
+    }
+
+    private fun onVerificationError(
+        verificationState: Verifying,
+        error: Throwable
+    ) {
+        otpElement.controller.reset()
+        updateState {
+            it.copy(
+                verificationState = Verifying(
+                    verificationState.viewState.copy(
+                        isProcessing = false,
+                        errorMessage = error.errorMessage
+                    )
                 )
             )
-
-            val result = linkAccountManager.confirmVerification(code)
-            result.fold(
-                onSuccess = { updatedLinkAccount ->
-                    // Mark verification as completed
-                    markVerificationCompleted()
-
-                    linkAccountHolder.set(
-                        LinkAccountUpdate.Value(
-                            account = updatedLinkAccount,
-                            lastUpdateReason = null
-                        )
-                    )
-                    // Fetch payment details and find default payment method
-                    val payment = fetchDefaultPaymentMethod(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                        linkAccountManager = linkAccountManager
-                    )
-                    onVerificationSucceeded(payment)
-                },
-                onFailure = { error ->
-                    otpElement.controller.reset()
-                    updateVerificationState(
-                        verificationState.copy(
-                            isProcessing = false,
-                            errorMessage = error.errorMessage
-                        )
-                    )
-                }
-            )
         }
+    }
+
+    private suspend fun onVerificationSuccess(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        linkAccountManager: LinkAccountManager,
+        onVerificationSucceeded: (LinkPaymentMethod?) -> Unit
+    ) {
+        // Fetch payment details and find default payment method
+        val payment = fetchDefaultPaymentMethod(
+            paymentMethodMetadata = paymentMethodMetadata,
+            linkAccountManager = linkAccountManager
+        )
+        updateState { it.copy(preservedPaymentMethod = payment) }
+        onVerificationSucceeded(payment)
     }
 
     private suspend fun fetchDefaultPaymentMethod(
@@ -168,21 +211,13 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         return result.fold(
             onSuccess = { consumerPaymentDetails ->
                 // Find the default payment method
-                val defaultPaymentDetails = consumerPaymentDetails.paymentDetails
-                    .firstOrNull { it.isDefault }
-
-                val defaultPaymentMethod = defaultPaymentDetails?.let { paymentDetails ->
+                val defaultPaymentDetails = consumerPaymentDetails.paymentDetails.firstOrNull { it.isDefault }
+                return defaultPaymentDetails?.let { paymentDetails ->
                     LinkPaymentMethod.ConsumerPaymentDetails(
                         details = paymentDetails,
                         collectedCvc = null
                     )
                 }
-
-                // Save the default payment method for preservation
-                if (defaultPaymentMethod != null) {
-                    preservePaymentMethod(defaultPaymentMethod)
-                }
-                defaultPaymentMethod
             },
             onFailure = {
                 null
@@ -190,35 +225,32 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         )
     }
 
+
     /**
      * Creates a Link PaymentSelection with the preserved selectedPaymentMethod
      * This should be called when user re-selects Link after switching to other payment methods
      */
     fun createLinkSelection(): PaymentSelection.Link {
-        return PaymentSelection.Link(
-            selectedPayment = linkEmbeddedState.value.preservedPaymentMethod
-        )
+        return PaymentSelection.Link()
     }
 
-    private fun updateVerificationState(verificationState: VerificationViewState?) {
+    private fun updateState(block: (LinkEmbeddedState) -> LinkEmbeddedState) {
         val currentState = linkEmbeddedState.value
-        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = currentState.copy(
-            verificationState = verificationState
-        )
+        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = block(currentState)
     }
 
-    private fun markVerificationCompleted() {
-        val currentState = linkEmbeddedState.value
-        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = currentState.copy(
-            verificationState = null,
-        )
+    private fun PaymentMethodMetadata.linkAccountManager(): LinkAccountManager? {
+        val configuration = linkState?.configuration ?: return null
+        val linkComponent = linkConfigurationCoordinator.getComponent(configuration)
+        return linkComponent.linkAccountManager
     }
 
-    private fun preservePaymentMethod(linkPaymentMethod: LinkPaymentMethod?) {
-        val currentState = linkEmbeddedState.value
-        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = currentState.copy(
-            preservedPaymentMethod = linkPaymentMethod
-        )
+    private fun PaymentMethodMetadata.existingLinkCustomer(): Boolean {
+        return when (linkState?.loginState) {
+            // No account or logged out
+            null, LinkState.LoginState.LoggedOut -> false
+            LinkState.LoginState.LoggedIn, LinkState.LoginState.NeedsVerification -> true
+        }
     }
 
     companion object {
@@ -229,7 +261,9 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
      * Factory for creating instances of [LinkEmbeddedManager] with assisted injection
      */
     @AssistedFactory
-    interface Factory {
+    fun interface Factory {
         fun create(coroutineScope: CoroutineScope): LinkEmbeddedManager
     }
 }
+
+
