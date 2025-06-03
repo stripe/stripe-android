@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.stripe.android.link.ui.LinkSpinner
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +21,7 @@ import androidx.compose.ui.zIndex
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.uicore.elements.OTPElement
@@ -81,7 +81,7 @@ internal fun LinkVerificationSection(
                         ),
                     )
                 }
-                
+
                 // Loading indicator centered on top of OTP
                 if (verificationState.isProcessing) {
                     LinkSpinner(

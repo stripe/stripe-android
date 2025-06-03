@@ -30,13 +30,13 @@ internal sealed class VerificationState : Parcelable {
      */
     @Parcelize
     object Loading : VerificationState()
-    
+
     /**
      * Verification is required and the UI should show the verification form
      */
     @Parcelize
     data class Verifying(val viewState: VerificationViewState) : VerificationState()
-    
+
     /**
      * Verification is completed or not needed, showing the normal Link button
      */

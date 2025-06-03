@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.AccountStatus.NeedsVerification
 import com.stripe.android.link.model.AccountStatus.VerificationStarted
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Verifying
@@ -55,21 +56,27 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         if (paymentMethodMetadata.availableWallets.contains(WalletType.Link).not()) return
         val linkAccountManager = paymentMethodMetadata.linkAccountManager() ?: return
 
-        // Initialize state to loading before determining the actual state
         updateState {
             it.copy(verificationState = VerificationState.Loading)
         }
-        
-        if (paymentMethodMetadata.existingLinkCustomer()) {
-            setupLinkVerification(linkAccountManager)
-        } else {
-            // If no existing Link customer, we can immediately mark verification as completed
-            // and show the Link button without loading state
-            updateState {
-                it.copy(verificationState = VerificationState.Resolved)
-            }
-        }
 
+        if (paymentMethodMetadata.existingLinkCustomer()) {
+            setupLinkVerification(
+                linkAccountManager = linkAccountManager,
+                paymentMethodMetadata = paymentMethodMetadata,
+                onVerificationSucceeded = onVerificationSucceeded
+            )
+        } else {
+            // If no existing Link customer, no verification needed.
+            updateState { it.copy(verificationState = VerificationState.Resolved) }
+        }
+    }
+
+    private fun setupLinkVerification(
+        linkAccountManager: LinkAccountManager,
+        paymentMethodMetadata: PaymentMethodMetadata,
+        onVerificationSucceeded: (LinkPaymentMethod?) -> Unit
+    ) {
         // Setup OTP completion handling using shared OTP element
         coroutineScope.launch {
             otpElement.otpCompleteFlow.collect { code ->
@@ -81,17 +88,12 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
                 )
             }
         }
-    }
-
-    private fun setupLinkVerification(linkAccountManager: LinkAccountManager) {
         coroutineScope.launch {
             linkAccountManager.linkAccountInfo.map { it.account }.collect { account ->
                 when (account?.accountStatus) {
                     AccountStatus.Verified -> {
                         logger.debug("Verified")
-                        updateState {
-                            it.copy(verificationState = VerificationState.Resolved)
-                        }
+                        updateState { it.copy(verificationState = VerificationState.Resolved) }
                     }
                     NeedsVerification -> {
                         logger.debug("NeedsVerification")
@@ -99,36 +101,29 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
                     }
                     VerificationStarted -> {
                         logger.debug("VerificationStarted")
-                        // We already checked that account is not null above, so we can use it directly
-                        updateState {
-                            it.copy(
-                                verificationState = Verifying(
-                                    VerificationViewState(
-                                        isProcessing = false,
-                                        requestFocus = true,
-                                        errorMessage = null,
-                                        isSendingNewCode = false,
-                                        didSendNewCode = false,
-                                        redactedPhoneNumber = account.redactedPhoneNumber,
-                                        email = account.email,
-                                        isDialog = false
-                                    )
-                                )
-                            )
-                        }
+                        updateState { it.copy(verificationState = Verifying(initialVerificationState(account))) }
                     }
                     null,
                     AccountStatus.SignedOut,
                     AccountStatus.Error -> {
                         logger.debug("No verification needed or error")
-                        updateState {
-                            it.copy(verificationState = VerificationState.Resolved)
-                        }
+                        updateState { it.copy(verificationState = VerificationState.Resolved) }
                     }
                 }
             }
         }
     }
+
+    private fun initialVerificationState(account: LinkAccount): VerificationViewState = VerificationViewState(
+        isProcessing = false,
+        requestFocus = true,
+        errorMessage = null,
+        isSendingNewCode = false,
+        didSendNewCode = false,
+        redactedPhoneNumber = account.redactedPhoneNumber,
+        email = account.email,
+        isDialog = false
+    )
 
     private suspend fun onOtpCompleted(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -225,7 +220,6 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         )
     }
 
-
     /**
      * Creates a Link PaymentSelection with the preserved selectedPaymentMethod
      * This should be called when user re-selects Link after switching to other payment methods
@@ -265,5 +259,3 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
         fun create(coroutineScope: CoroutineScope): LinkEmbeddedManager
     }
 }
-
-
