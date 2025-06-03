@@ -16,20 +16,20 @@ import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.elements.OTPSpec
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Manages Link verification state and domain logic using unified LinkEmbeddedState
  */
-@Singleton
-internal class LinkEmbeddedManager @Inject constructor(
+internal class LinkEmbeddedManager @AssistedInject constructor(
     private val linkAccountHolder: LinkAccountHolder,
-    private val coroutineScope: CoroutineScope,
+    @Assisted private val coroutineScope: CoroutineScope,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
 ) {
@@ -130,7 +130,7 @@ internal class LinkEmbeddedManager @Inject constructor(
                 onSuccess = { updatedLinkAccount ->
                     // Mark verification as completed
                     markVerificationCompleted()
-                    
+
                     linkAccountHolder.set(
                         LinkAccountUpdate.Value(
                             account = updatedLinkAccount,
@@ -164,20 +164,20 @@ internal class LinkEmbeddedManager @Inject constructor(
         // Fetch payment details for common payment method types
         val paymentMethodTypes = paymentMethodMetadata.stripeIntent.paymentMethodTypes
         val result = linkAccountManager.listPaymentDetails(paymentMethodTypes.toSet())
-        
+
         return result.fold(
             onSuccess = { consumerPaymentDetails ->
                 // Find the default payment method
                 val defaultPaymentDetails = consumerPaymentDetails.paymentDetails
                     .firstOrNull { it.isDefault }
-                
+
                 val defaultPaymentMethod = defaultPaymentDetails?.let { paymentDetails ->
                     LinkPaymentMethod.ConsumerPaymentDetails(
                         details = paymentDetails,
                         collectedCvc = null
                     )
                 }
-                
+
                 // Save the default payment method for preservation
                 if (defaultPaymentMethod != null) {
                     preservePaymentMethod(defaultPaymentMethod)
@@ -199,21 +199,21 @@ internal class LinkEmbeddedManager @Inject constructor(
             selectedPayment = linkEmbeddedState.value.preservedPaymentMethod
         )
     }
-    
+
     private fun updateVerificationState(verificationState: VerificationViewState?) {
         val currentState = linkEmbeddedState.value
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = currentState.copy(
             verificationState = verificationState
         )
     }
-    
+
     private fun markVerificationCompleted() {
         val currentState = linkEmbeddedState.value
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = currentState.copy(
             verificationState = null,
         )
     }
-    
+
     private fun preservePaymentMethod(linkPaymentMethod: LinkPaymentMethod?) {
         val currentState = linkEmbeddedState.value
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = currentState.copy(
@@ -223,5 +223,13 @@ internal class LinkEmbeddedManager @Inject constructor(
 
     companion object {
         private const val LINK_EMBEDDED_STATE_KEY = "LINK_EMBEDDED_STATE_KEY"
+    }
+
+    /**
+     * Factory for creating instances of [LinkEmbeddedManager] with assisted injection
+     */
+    @AssistedFactory
+    interface Factory {
+        fun create(coroutineScope: CoroutineScope): LinkEmbeddedManager
     }
 }

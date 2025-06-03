@@ -242,16 +242,17 @@ internal class DefaultWalletButtonsInteractor(
 
     companion object {
         fun create(
-            flowControllerViewModel: FlowControllerViewModel
+            viewModel: FlowControllerViewModel
         ): WalletButtonsInteractor {
-            val linkHandler = flowControllerViewModel.flowControllerStateComponent.linkHandler
-            val linkEmbeddedManager = flowControllerViewModel.flowControllerStateComponent.linkEmbeddedManager
+            val coroutineScope = viewModel.viewModelScope
+            val component = viewModel.flowControllerStateComponent
+            val linkEmbeddedManager = component.linkEmbeddedManagerFactory.create(coroutineScope)
             return DefaultWalletButtonsInteractor(
-                errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
+                errorReporter = component.errorReporter,
                 arguments = combineAsStateFlow(
-                    linkHandler.linkConfigurationCoordinator.emailFlow,
-                    flowControllerViewModel.stateFlow,
-                    flowControllerViewModel.configureRequest,
+                    component.linkHandler.linkConfigurationCoordinator.emailFlow,
+                    viewModel.stateFlow,
+                    viewModel.configureRequest,
                 ) { linkEmail, flowControllerState, configureRequest ->
                     if (flowControllerState != null && configureRequest != null) {
                         Arguments(
@@ -265,14 +266,15 @@ internal class DefaultWalletButtonsInteractor(
                         null
                     }
                 },
-                confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
-                coroutineScope = flowControllerViewModel.viewModelScope,
+                confirmationHandler = component.confirmationHandler,
+                coroutineScope = coroutineScope,
                 linkEmbeddedManager = linkEmbeddedManager,
             )
         }
 
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun create(
+            linkEmbeddedManager: LinkEmbeddedManager,
             embeddedLinkHelper: EmbeddedLinkHelper,
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
             confirmationHandler: ConfirmationHandler,
@@ -297,35 +299,7 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = confirmationHandler,
                 coroutineScope = coroutineScope,
-            )
-        }
-
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-        fun create(
-            embeddedLinkHelper: EmbeddedLinkHelper,
-            confirmationStateHolder: EmbeddedConfirmationStateHolder,
-            confirmationHandler: ConfirmationHandler,
-            coroutineScope: CoroutineScope,
-            errorReporter: ErrorReporter,
-        ): WalletButtonsInteractor {
-            return DefaultWalletButtonsInteractor(
-                errorReporter = errorReporter,
-                arguments = combineAsStateFlow(
-                    embeddedLinkHelper.linkEmail,
-                    confirmationStateHolder.stateFlow,
-                ) { linkEmail, confirmationState ->
-                    confirmationState?.let { state ->
-                        Arguments(
-                            linkEmail = linkEmail,
-                            configuration = state.configuration.asCommonConfiguration(),
-                            paymentMethodMetadata = state.paymentMethodMetadata,
-                            appearance = state.configuration.appearance,
-                            initializationMode = state.initializationMode,
-                        )
-                    }
-                },
-                confirmationHandler = confirmationHandler,
-                coroutineScope = coroutineScope,
+                linkEmbeddedManager = linkEmbeddedManager
             )
         }
     }

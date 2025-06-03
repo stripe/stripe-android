@@ -48,7 +48,7 @@ internal interface FlowControllerStateComponent {
     val linkHandler: LinkHandler
     val errorReporter: ErrorReporter
     val walletButtonsContent: WalletButtonsContent
-    val linkEmbeddedManager: LinkEmbeddedManager
+    val linkEmbeddedManagerFactory: LinkEmbeddedManager.Factory
 
     fun inject(paymentOptionsViewModel: PaymentOptionsViewModel.Factory)
 

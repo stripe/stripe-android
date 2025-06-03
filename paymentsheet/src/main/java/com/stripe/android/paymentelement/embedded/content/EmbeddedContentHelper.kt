@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.verification.LinkEmbeddedManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -70,6 +71,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedLinkHelper: EmbeddedLinkHelper,
+    private val linkEmbeddedManagerFactory: LinkEmbeddedManager.Factory,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -158,6 +160,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             confirmationHandler = confirmationHandler,
             coroutineScope = coroutineScope,
             errorReporter = errorReporter,
+            linkEmbeddedManager = linkEmbeddedManagerFactory.create(coroutineScope)
         )
     }
 
