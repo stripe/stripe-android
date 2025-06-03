@@ -4,7 +4,7 @@ package com.stripe.android.paymentelement
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
@@ -52,12 +52,14 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     }
 }
 
+@OptIn(WalletButtonPreview::class)
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
+    showWalletButtons: Boolean = false,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -76,7 +78,11 @@ internal fun runEmbeddedPaymentElementTest(
         it.setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
             val scrollState = rememberScrollState()
-            Box(modifier = Modifier.verticalScroll(scrollState)) {
+            Column(modifier = Modifier.verticalScroll(scrollState)) {
+                if (showWalletButtons) {
+                    embeddedPaymentElement.WalletButtons()
+                }
+
                 embeddedPaymentElement.Content()
             }
         }
