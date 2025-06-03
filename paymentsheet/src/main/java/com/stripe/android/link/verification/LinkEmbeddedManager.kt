@@ -82,6 +82,7 @@ internal class LinkEmbeddedManager @Inject constructor(
         coroutineScope.launch {
             otpElement.otpCompleteFlow.collect { code ->
                 onOtpCompleted(
+                    paymentMethodMetadata = paymentMethodMetadata,
                     linkAccountManager = linkAccountManager,
                     code = code,
                     onVerificationSucceeded = onVerificationSucceeded
@@ -108,13 +109,13 @@ internal class LinkEmbeddedManager @Inject constructor(
     }
 
     private suspend fun onOtpCompleted(
+        paymentMethodMetadata: PaymentMethodMetadata,
         linkAccountManager: LinkAccountManager,
         code: String,
         onVerificationSucceeded: (defaultPaymentMethod: LinkPaymentMethod?) -> Unit
     ) {
-        val currentState = linkEmbeddedState.value
-        val verificationState = currentState.verificationState
-        
+        val verificationState = linkEmbeddedState.value.verificationState
+
         if (verificationState != null && !verificationState.isProcessing) {
             // Update to processing state
             updateVerificationState(
@@ -137,7 +138,10 @@ internal class LinkEmbeddedManager @Inject constructor(
                         )
                     )
                     // Fetch payment details and find default payment method
-                    val payment = fetchDefaultPaymentMethod(linkAccountManager)
+                    val payment = fetchDefaultPaymentMethod(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        linkAccountManager = linkAccountManager
+                    )
                     onVerificationSucceeded(payment)
                 },
                 onFailure = { error ->
@@ -154,11 +158,12 @@ internal class LinkEmbeddedManager @Inject constructor(
     }
 
     private suspend fun fetchDefaultPaymentMethod(
+        paymentMethodMetadata: PaymentMethodMetadata,
         linkAccountManager: LinkAccountManager,
     ): LinkPaymentMethod? {
         // Fetch payment details for common payment method types
-        val paymentMethodTypes = setOf("card", "bank_account")
-        val result = linkAccountManager.listPaymentDetails(paymentMethodTypes)
+        val paymentMethodTypes = paymentMethodMetadata.stripeIntent.paymentMethodTypes
+        val result = linkAccountManager.listPaymentDetails(paymentMethodTypes.toSet())
         
         return result.fold(
             onSuccess = { consumerPaymentDetails ->
