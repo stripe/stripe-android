@@ -29,6 +29,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -1888,6 +1889,24 @@ class CustomerSheetViewModelTest {
             )
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `on analytics event, should call event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnAnalyticsEvent(PaymentAnalyticsEvent.FileCreate)
+        )
+
+        verify(eventReporter).onAnalyticsEvent(PaymentAnalyticsEvent.FileCreate)
     }
 
     @Test

@@ -24,8 +24,10 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -365,9 +368,13 @@ internal class DefaultCardNumberController(
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
         val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
+        val analyticsEventReporter = LocalAnalyticsEventReporter.current
 
         // Remember the last state indicating whether it was a disallowed card brand error
         var lastLoggedCardBrand by rememberSaveable { mutableStateOf<CardBrand?>(null) }
+        var hasReportedIncompleteCardNumberRequiringMoreThan16Digits by rememberSaveable {
+            mutableStateOf(false)
+        }
 
         LaunchedEffect(Unit) {
             // Drop the set empty value & initial value
@@ -392,6 +399,27 @@ internal class DefaultCardNumberController(
             }
         }
 
+        LaunchedEffect(Unit) {
+            combine(
+                fieldState.drop(1),
+                fieldValue,
+                _hasFocus,
+            ) { state, fieldValue, hasFocus ->
+                state is TextFieldStateConstants.Error.Incomplete &&
+                    !hasFocus &&
+                    !hasReportedIncompleteCardNumberRequiringMoreThan16Digits &&
+                    fieldValue.length == CARD_NUMBER_16_DIGITS
+            }.collectLatest {
+                if (it) {
+                    analyticsEventReporter.onAnalyticsEvent(
+                        PaymentAnalyticsEvent.CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields
+                    )
+
+                    hasReportedIncompleteCardNumberRequiringMoreThan16Digits = true
+                }
+            }
+        }
+
         super.ComposeUI(
             enabled,
             field,
@@ -403,5 +431,6 @@ internal class DefaultCardNumberController(
 
     private companion object {
         const val STATIC_ICON_COUNT = 3
+        const val CARD_NUMBER_16_DIGITS = 16
     }
 }

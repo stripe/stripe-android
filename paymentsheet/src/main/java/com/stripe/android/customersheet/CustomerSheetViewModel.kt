@@ -16,6 +16,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -271,6 +272,7 @@ internal class CustomerSheetViewModel(
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
             is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnDisallowedCardBrandEntered -> onDisallowedCardBrandEntered(viewAction.brand)
+            is CustomerSheetViewAction.OnAnalyticsEvent -> onAnalyticsEvent(viewAction.event)
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnModifyItem -> onModifyItem(viewAction.paymentMethod)
@@ -915,6 +917,10 @@ internal class CustomerSheetViewModel(
 
     private fun onCardNumberInputCompleted() {
         eventReporter.onCardNumberCompleted()
+    }
+
+    private fun onAnalyticsEvent(event: AnalyticsEvent) {
+        eventReporter.onAnalyticsEvent(event)
     }
 
     private fun onDisallowedCardBrandEntered(brand: CardBrand) {
