@@ -299,5 +299,34 @@ internal class DefaultWalletButtonsInteractor(
                 coroutineScope = coroutineScope,
             )
         }
+
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        fun create(
+            embeddedLinkHelper: EmbeddedLinkHelper,
+            confirmationStateHolder: EmbeddedConfirmationStateHolder,
+            confirmationHandler: ConfirmationHandler,
+            coroutineScope: CoroutineScope,
+            errorReporter: ErrorReporter,
+        ): WalletButtonsInteractor {
+            return DefaultWalletButtonsInteractor(
+                errorReporter = errorReporter,
+                arguments = combineAsStateFlow(
+                    embeddedLinkHelper.linkEmail,
+                    confirmationStateHolder.stateFlow,
+                ) { linkEmail, confirmationState ->
+                    confirmationState?.let { state ->
+                        Arguments(
+                            linkEmail = linkEmail,
+                            configuration = state.configuration.asCommonConfiguration(),
+                            paymentMethodMetadata = state.paymentMethodMetadata,
+                            appearance = state.configuration.appearance,
+                            initializationMode = state.initializationMode,
+                        )
+                    }
+                },
+                confirmationHandler = confirmationHandler,
+                coroutineScope = coroutineScope,
+            )
+        }
     }
 }

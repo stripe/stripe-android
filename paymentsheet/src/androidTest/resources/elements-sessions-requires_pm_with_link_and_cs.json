@@ -7,7 +7,9 @@
   "meta_pay_signed_container_context": null,
   "order": null,
   "ordered_payment_method_types_and_wallets": [
-    "card"
+    "card",
+    "link",
+    "google_pay"
   ],
   "link_consumer_info": null,
   "link_settings": {

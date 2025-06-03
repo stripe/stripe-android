@@ -6,14 +6,12 @@
     <dimen name="stripe_paymentsheet_paymentmethod_icon_height">64dp</dimen>
     <dimen name="stripe_paymentsheet_paymentmethod_icon_width">100dp</dimen>
     <dimen name="stripe_paymentsheet_outer_spacing_top">10dp</dimen>
-    <dimen name="stripe_paymentsheet_outer_spacing_horizontal">20dp</dimen>
     <dimen name="stripe_paymentsheet_button_container_spacing">10dp</dimen>
     <dimen name="stripe_paymentsheet_button_container_spacing_bottom">40dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_padding">4dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_icon_size">20dp</dimen>
     <dimen name="stripe_paymentsheet_primary_button_icon_padding">8dp</dimen>
     <dimen name="stripe_paymentsheet_max_primary_button_height">54dp</dimen>
-    <dimen name="stripe_paymentsheet_primary_button_height">48dp</dimen>
     <dimen name="stripe_paymentsheet_googlepay_button_height">48dp</dimen>
     <dimen name="stripe_paymentsheet_googlepay_button_margin">16dp</dimen>
     <dimen name="stripe_paymentsheet_card_elevation">2dp</dimen>

@@ -2,8 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.16.0 - 2025-06-02
+
 ### PaymentSheet
 * [ADDED][10885](https://github.com/stripe/stripe-android/pull/10885) Add `heightDp` to `PrimaryButtonShape`.
+* [CHANGED][10896](https://github.com/stripe/stripe-android/pull/10896) Update manage payment methods screen remove button to use `PrimaryButtonShape` Appearance API values.
 
 ### Connect
 * [CHANGED][10871](https://github.com/stripe/stripe-android/pull/10871) Removed `PrivateBetaConnectSDK` annotation and all usages. Connect SDK is now GA.
