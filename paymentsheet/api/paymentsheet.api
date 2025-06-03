@@ -858,16 +858,12 @@ public abstract interface class com/stripe/android/paymentelement/EmbeddedPaymen
 
 public abstract class com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior {
 	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior$Companion;
 }
 
-public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior$Default : com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior {
-	public static final field $stable I
-	public fun <init> ()V
-}
-
-public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior$ImmediateAction : com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior {
-	public static final field $stable I
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior$Companion {
+	public final fun default ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior;
+	public final fun immediateAction (Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior;
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$State : android/os/Parcelable {
