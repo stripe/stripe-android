@@ -300,7 +300,7 @@ object StripeThemeDefaults {
         start = 20f,
         top = 0f,
         end = 20f,
-        bottom = 0f
+        bottom = 40f
     )
 }
 
