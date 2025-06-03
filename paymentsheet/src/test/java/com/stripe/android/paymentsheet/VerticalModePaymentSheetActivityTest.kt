@@ -19,6 +19,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.UsBankPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
@@ -41,6 +42,7 @@ internal class VerticalModePaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
     private val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
+    private val composeCleanupRule = createComposeCleanupRule()
     private val networkRule = NetworkRule()
 
     private val verticalModePage = VerticalModePage(composeTestRule)
@@ -55,7 +57,8 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(composeTestRule)
+        .outerRule(composeCleanupRule)
+        .around(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(RetryRule(3))
