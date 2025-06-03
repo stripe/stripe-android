@@ -93,6 +93,7 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        cvc: String?,
     ): Result<SharePaymentDetails>
 
     suspend fun logOut(

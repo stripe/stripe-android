@@ -76,6 +76,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
 private val SECTION_LABEL_COLOR = Color(159, 159, 169)
+private const val DEFAULT_PRIMARY_BUTTON_HEIGHT = 48f
 
 internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
@@ -428,6 +429,16 @@ private fun Shapes(
             )
         )
     }
+    Divider()
+    IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                shapes = currentAppearance.shapes.copy(
+                    bottomSheetCornerRadiusDp = it
+                )
+            )
+        )
+    }
 }
 
 @Composable
@@ -592,6 +603,21 @@ private fun PrimaryButton(
                 primaryButton = currentButton.copy(
                     shape = currentButton.shape.copy(
                         borderStrokeWidthDp = it
+                    )
+                )
+            )
+        )
+    }
+
+    Divider()
+
+    val currentButtonHeight = currentButton.shape.heightDp ?: DEFAULT_PRIMARY_BUTTON_HEIGHT
+    IncrementDecrementItem("buttonHeightDp", currentButtonHeight) {
+        updateAppearance(
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    shape = currentButton.shape.copy(
+                        heightDp = it
                     )
                 )
             )

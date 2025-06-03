@@ -126,16 +126,16 @@ internal class ExpiryDateStateTest {
 
     @Test
     fun `expiryMonth should extract month correctly from valid text`() {
-        val state = ExpiryDateState(text = "0525", enabled = true)
+        val state = ExpiryDateState(text = "0550", enabled = true)
 
         assertThat(state.expiryMonth).isEqualTo(5)
     }
 
     @Test
     fun `expiryYear should extract year correctly from valid text`() {
-        val state = ExpiryDateState(text = "0525", enabled = true)
+        val state = ExpiryDateState(text = "0550", enabled = true)
 
-        assertThat(state.expiryYear).isEqualTo(2025)
+        assertThat(state.expiryYear).isEqualTo(2050)
     }
 
     private fun createCard(expiryMonth: Int?, expiryYear: Int?): EditCardPayload {

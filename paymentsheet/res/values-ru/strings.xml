@@ -113,6 +113,8 @@
   <string name="stripe_paymentsheet_manage_card">Управление картой</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Управление картами</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Управление банковским счетом</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Управление способами оплаты</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->

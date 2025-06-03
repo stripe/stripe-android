@@ -31,7 +31,8 @@ class RowController(
             enabled,
             this,
             hiddenIdentifiers,
-            lastTextFieldIdentifier
+            lastTextFieldIdentifier,
+            modifier = modifier,
         )
     }
 }

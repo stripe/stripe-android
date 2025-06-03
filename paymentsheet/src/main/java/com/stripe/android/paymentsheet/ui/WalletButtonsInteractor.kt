@@ -6,11 +6,15 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
@@ -187,6 +191,35 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
+            )
+        }
+
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        fun create(
+            embeddedLinkHelper: EmbeddedLinkHelper,
+            confirmationStateHolder: EmbeddedConfirmationStateHolder,
+            confirmationHandler: ConfirmationHandler,
+            coroutineScope: CoroutineScope,
+            errorReporter: ErrorReporter,
+        ): WalletButtonsInteractor {
+            return DefaultWalletButtonsInteractor(
+                errorReporter = errorReporter,
+                arguments = combineAsStateFlow(
+                    embeddedLinkHelper.linkEmail,
+                    confirmationStateHolder.stateFlow,
+                ) { linkEmail, confirmationState ->
+                    confirmationState?.let { state ->
+                        Arguments(
+                            linkEmail = linkEmail,
+                            configuration = state.configuration.asCommonConfiguration(),
+                            paymentMethodMetadata = state.paymentMethodMetadata,
+                            appearance = state.configuration.appearance,
+                            initializationMode = state.initializationMode,
+                        )
+                    }
+                },
+                confirmationHandler = confirmationHandler,
+                coroutineScope = coroutineScope,
             )
         }
     }

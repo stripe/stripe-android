@@ -72,6 +72,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -297,14 +298,14 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
     modifier: Modifier
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontalPadding),
             )
         }
 
@@ -333,7 +334,7 @@ private fun PaymentSheetContent(
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
                     .padding(bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
@@ -343,7 +344,7 @@ private fun PaymentSheetContent(
             ErrorMessage(
                 error = it.resolve(),
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
                     .padding(top = 2.dp, bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
@@ -358,7 +359,7 @@ private fun PaymentSheetContent(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
                     .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
@@ -375,9 +376,9 @@ internal fun Wallet(
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter
 ) {
-    val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val padding = StripeTheme.getOuterFormInsets()
 
-    Column(modifier = modifier.padding(horizontal = padding)) {
+    Column(modifier = modifier.padding(padding)) {
         state.googlePay?.let { googlePay ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
@@ -424,6 +425,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
+        .padding(StripeTheme.getOuterFormInsets())
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button

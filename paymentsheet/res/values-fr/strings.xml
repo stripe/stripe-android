@@ -113,6 +113,8 @@
   <string name="stripe_paymentsheet_manage_card">Gérer la carte</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Gérer les cartes bancaires</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Gérer le compte bancaire</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Gérer vos moyens de paiement</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->

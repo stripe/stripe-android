@@ -98,9 +98,9 @@
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">確認您的 RevolutPay 付款即表示您允許 %s 按照其條款從您的 RevolutPay 帳戶扣取未來款項。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">保存以用於未來的%s付款</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">儲存以用於未來的%s付款</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">將支付資訊保存到 %s 以備將來購物使用</string>
+  <string name="stripe_save_payment_details_to_merchant_name">將支付資訊儲存到 %s 以備將來購物使用</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">掃描卡</string>
   <!-- SEPA mandate text -->

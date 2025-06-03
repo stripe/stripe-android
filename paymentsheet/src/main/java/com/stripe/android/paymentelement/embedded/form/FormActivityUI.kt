@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,6 +28,8 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -83,12 +84,8 @@ internal fun USBankAccountMandate(
         Mandate(
             mandateText = it.resolve(),
             modifier = Modifier
-                .padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                    ),
-                    vertical = 8.dp
-                )
+                .padding(vertical = 8.dp)
+                .padding(StripeTheme.getOuterFormInsets())
         )
     }
 }
@@ -101,12 +98,8 @@ internal fun FormActivityError(
         ErrorMessage(
             error = it.resolve(),
             modifier = Modifier
-                .padding(
-                    horizontal = dimensionResource(
-                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-                    ),
-                    vertical = 8.dp
-                )
+                .padding(vertical = 8.dp)
+                .padding(StripeTheme.getOuterFormInsets())
         )
     }
 }
@@ -118,10 +111,7 @@ internal fun FormActivityPrimaryButton(
     onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .padding(
-                horizontal = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-            )
+        modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
     ) {
         PrimaryButton(
             modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
@@ -144,9 +134,7 @@ internal fun FormActivityTopBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = dimensionResource(id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-            ),
+            .padding(start = StripeTheme.formInsets.start.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         if (!isLiveMode) {

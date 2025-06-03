@@ -29,8 +29,9 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.ExtendedAppearancePreview
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentelement.WalletsButtonPreview
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -1528,7 +1529,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Shapes(
+    data class Shapes @ExtendedAppearancePreview constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
@@ -1537,11 +1538,52 @@ class PaymentSheet internal constructor(
         /**
          * The border used for inputs, tabs, and other components in PaymentSheet.
          */
-        val borderStrokeWidthDp: Float
+        val borderStrokeWidthDp: Float,
+
+        /**
+         * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
+         * set to the same value as [cornerRadiusDp].
+         */
+        val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
-        constructor(context: Context, cornerRadiusDp: Int, borderStrokeWidthDp: Int) : this(
+        @OptIn(ExtendedAppearancePreview::class)
+        constructor(
+            /**
+             * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
+             */
+            cornerRadiusDp: Float,
+
+            /**
+             * The border used for inputs, tabs, and other components in PaymentSheet.
+             */
+            borderStrokeWidthDp: Float,
+        ) : this(
+            cornerRadiusDp = cornerRadiusDp,
+            borderStrokeWidthDp = borderStrokeWidthDp,
+            bottomSheetCornerRadiusDp = cornerRadiusDp,
+        )
+
+        @OptIn(ExtendedAppearancePreview::class)
+        constructor(
+            context: Context,
+            cornerRadiusDp: Int,
+            borderStrokeWidthDp: Int,
+        ) : this(
             cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
-            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp)
+            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp),
+            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
+        )
+
+        @ExtendedAppearancePreview
+        constructor(
+            context: Context,
+            @DimenRes cornerRadiusRes: Int,
+            @DimenRes borderStrokeWidthRes: Int,
+            @DimenRes bottomSheetCornerRadiusRes: Int,
+        ) : this(
+            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes),
+            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes),
+            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes),
         )
 
         companion object {
@@ -1690,8 +1732,14 @@ class PaymentSheet internal constructor(
          * The border width of the primary button.
          * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
          */
-        val borderStrokeWidthDp: Float? = null
+        val borderStrokeWidthDp: Float? = null,
+        /**
+         * The height of the primary button.
+         * Note: If 'null', the default height is 48dp.
+         */
+        val heightDp: Float? = null
     ) : Parcelable {
+        @Deprecated("Use @DimenRes constructor")
         constructor(
             context: Context,
             cornerRadiusDp: Int? = null,
@@ -1701,6 +1749,23 @@ class PaymentSheet internal constructor(
                 context.getRawValueFromDimenResource(it)
             },
             borderStrokeWidthDp = borderStrokeWidthDp?.let {
+                context.getRawValueFromDimenResource(it)
+            }
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes cornerRadiusRes: Int? = null,
+            @DimenRes borderStrokeWidthRes: Int? = null,
+            @DimenRes heightRes: Int? = null
+        ) : this(
+            cornerRadiusDp = cornerRadiusRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            borderStrokeWidthDp = borderStrokeWidthRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            heightDp = heightRes?.let {
                 context.getRawValueFromDimenResource(it)
             }
         )
@@ -2289,7 +2354,7 @@ class PaymentSheet internal constructor(
          * Displays a list of wallet buttons that can be used to checkout instantly
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @WalletsButtonPreview
+        @WalletButtonsPreview
         @Composable
         fun WalletButtons()
 

@@ -21,11 +21,11 @@
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">用 Clearpay 先買後付</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
-  <string name="stripe_confirm_close_form_body">不會保存您的付款資訊。</string>
+  <string name="stripe_confirm_close_form_body">不會儲存您的付款資訊。</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
-  <string name="stripe_confirm_close_form_title">您確定要保存此表單嗎？</string>
+  <string name="stripe_confirm_close_form_title">您確定要儲存此表單嗎？</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">保存您的資訊，用 Link 安全地一鍵結帳</string>
+  <string name="stripe_inline_sign_up_header">儲存您的資訊，用 Link 安全地一鍵結帳</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -41,7 +41,7 @@
   <!-- Title for the Link signup screen -->
   <string name="stripe_link_sign_up_header">快速安全地一鍵結帳</string>
   <!-- Label describing the benefit of signing up for Link. -->
-  <string name="stripe_link_sign_up_message">用 Link 保存您的支付資訊，並在支援 Link 的網站上一鍵安全結帳。</string>
+  <string name="stripe_link_sign_up_message">用 Link 儲存您的支付資訊，並在支援 Link 的網站上一鍵安全結帳。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[繼續即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -51,7 +51,7 @@
   <!-- Title for the update card screen in Link native -->
   <string name="stripe_link_update_card_title">更新卡</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_link_verification_message">輸入發送到 %s 的驗證碼來使用您保存的資訊。</string>
+  <string name="stripe_link_verification_message">輸入發送到 %s 的驗證碼來使用您儲存的資訊。</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">更新卡</string>
   <!-- Title of the logout action. -->
@@ -63,7 +63,7 @@
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[繼續操作即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
-  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[保存您的 %s 銀行帳戶即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[儲存您的 %s 銀行帳戶即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
   <!-- Error message when an error case happens when linking your account -->
   <string name="stripe_paymentsheet_ach_something_went_wrong">關聯您的帳戶時發生了錯誤。\n請稍後重試。</string>
   <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
@@ -71,7 +71,7 @@
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_add_payment_method_title">添加您的支付資訊</string>
   <!-- Title for a button that when pressed saves the provided address. -->
-  <string name="stripe_paymentsheet_address_element_primary_button">保存地址</string>
+  <string name="stripe_paymentsheet_address_element_primary_button">儲存地址</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">收貨地址</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
@@ -113,6 +113,8 @@
   <string name="stripe_paymentsheet_manage_card">管理金融卡</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">管理金融卡</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">管理銀行帳戶</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">管理支付方式</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -158,17 +160,17 @@
   <!-- Title shown above a view containing a customer's payment method that they can delete -->
   <string name="stripe_paymentsheet_remove_pm_title">移除支付方式</string>
   <!-- A button used for saving a new payment method -->
-  <string name="stripe_paymentsheet_save">保存</string>
+  <string name="stripe_paymentsheet_save">儲存</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
-  <string name="stripe_paymentsheet_save_a_new_payment_method">保存新的支付方式</string>
+  <string name="stripe_paymentsheet_save_a_new_payment_method">儲存新的支付方式</string>
   <!-- US Bank Account copy title for Mobile payment element form -->
-  <string name="stripe_paymentsheet_save_bank_title">幾步保存您的銀行帳戶。</string>
+  <string name="stripe_paymentsheet_save_bank_title">幾步儲存您的銀行帳戶。</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
-  <string name="stripe_paymentsheet_save_for_future_payments">保存以用於未來的付款</string>
+  <string name="stripe_paymentsheet_save_for_future_payments">儲存以用於未來的付款</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來在 %s 付款。</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">儲存該卡，用於未來在 %s 付款。</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
-  <string name="stripe_paymentsheet_saved">已保存</string>
+  <string name="stripe_paymentsheet_saved">已儲存</string>
   <!-- Title shown above a view containing the customer's cards -->
   <string name="stripe_paymentsheet_select_card">選擇卡</string>
   <!-- Title shown above a view containing the customer's payment methods -->
@@ -198,9 +200,9 @@
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[加入 Link 即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative"><![CDATA[提供您的電郵地址，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 帳戶並將您的支付資訊保存到 Link。]]></string>
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[提供您的電郵地址，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 帳戶並將您的支付資訊儲存到 Link。]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[提供您的手機號碼，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 帳戶並將您的支付資訊保存到 Link。]]></string>
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[提供您的手機號碼，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 帳戶並將您的支付資訊儲存到 Link。]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">您的帳戶已被禁用</string>
   <!-- Generic failure message -->
@@ -228,7 +230,7 @@
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_inline">登入您的 Link 帳戶</string>
   <!-- Two factor authentication screen heading -->
-  <string name="stripe_verification_header_prefilled">用您保存的資訊，更快結帳</string>
+  <string name="stripe_verification_header_prefilled">用您儲存的資訊，更快結帳</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_verification_message">輸入發送到 %s 的驗證碼，以預設用 Link 支付。</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->

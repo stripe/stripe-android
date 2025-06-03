@@ -1,5 +1,5 @@
 package com.stripe.android.stripe3ds2
 
 internal object SdkVersion {
-    internal const val VERSION_NAME = "21.15.1"
+    internal const val VERSION_NAME = "21.16.0"
 }

@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.time.Duration
@@ -109,10 +110,8 @@ private fun ActivePolling(
         verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxSize()
-            .padding(
-                vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
-                horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-            ),
+            .padding(vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top))
+            .padding(StripeTheme.getOuterFormInsets())
     ) {
         LoadingIndicator(
             modifier = Modifier.padding(bottom = Spacing.extended),
@@ -173,10 +172,8 @@ private fun FailedPolling(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(
-                        vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top),
-                        horizontal = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal),
-                    ),
+                    .padding(vertical = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_top))
+                    .padding(StripeTheme.getOuterFormInsets())
             ) {
                 Image(
                     painter = painterResource(R.drawable.stripe_ic_paymentsheet_polling_failure),

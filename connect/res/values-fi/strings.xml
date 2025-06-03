@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_download_complete">Lataus valmis</string>
+  <string name="stripe_downloading_file">Ladataan tiedostoa</string>
+  <string name="stripe_failed_to_open_url">URL-osoitteen avaaminen epäonnistui: %s</string>
+  <string name="stripe_not_yet_built">Ei vielä rakennettu...</string>
+  <string name="stripe_unable_to_download_file">Tiedoston lataaminen epäonnistui</string>
+</resources>

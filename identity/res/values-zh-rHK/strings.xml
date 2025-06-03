@@ -192,7 +192,7 @@
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">拍攝了一張自拍照</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
-  <string name="stripe_selfie_not_saved_warning">尚未保存您的自拍照。想要離開嗎？</string>
+  <string name="stripe_selfie_not_saved_warning">尚未儲存您的自拍照。想要離開嗎？</string>
   <!-- Body for selfie warmup page -->
   <string name="stripe_selfie_warmup_body">下一步將自動拍攝一些照片來驗證是否是您本人</string>
   <!-- Title for selfie warmup page -->

@@ -26,7 +26,8 @@ fun RowElementUI(
     enabled: Boolean,
     controller: RowController,
     hiddenIdentifiers: Set<IdentifierSpec>,
-    lastTextFieldIdentifier: IdentifierSpec?
+    lastTextFieldIdentifier: IdentifierSpec?,
+    modifier: Modifier = Modifier,
 ) {
     val visibleFields = controller.fields.filter { !hiddenIdentifiers.contains(it.identifier) }
     val dividerHeight = remember { mutableStateOf(0.dp) }
@@ -57,7 +58,7 @@ fun RowElementUI(
                     field,
                     hiddenIdentifiers = hiddenIdentifiers,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    modifier = Modifier
+                    modifier = modifier
                         .weight(1.0f / visibleFields.size.toFloat())
                         .onSizeChanged {
                             dividerHeight.value =
