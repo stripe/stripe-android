@@ -3,13 +3,11 @@ package com.stripe.android.paymentelement.embedded.form
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal fun confirmationStateConfirming(selection: PaymentSelection): ConfirmationHandler.State.Confirming {
     val confirmationOption = selection.toConfirmationOption(
         configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration.asCommonConfiguration(),

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -14,7 +13,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class NewPaymentMethodRowButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

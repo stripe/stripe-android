@@ -1,11 +1,9 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 
 package com.stripe.android.paymentelement.embedded.content
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 
 internal class FakeEmbeddedStateHelper : EmbeddedStateHelper {
     private val _stateTurbine = Turbine<EmbeddedPaymentElement.State?>()
