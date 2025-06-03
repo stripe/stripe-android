@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentelement
 
+import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -16,6 +17,8 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,39 +38,23 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("card")
+            Espresso.onIdle()
+            formPage.waitUntilVisible()
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             formPage.waitUntilMissing()
 
             val expectedVisaLabel = getCardLabel("4242")
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(expectedVisaLabel)
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(expectedVisaLabel)
             )
 
             enqueueDeferredIntentConfirmationRequests()
@@ -78,50 +65,30 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSuccessfulCardPayment_withFormEdit_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("card")
+            Espresso.onIdle()
+            formPage.waitUntilVisible()
             formPage.fillOutCardDetails("5555555555554444")
             formPage.clickPrimaryButton()
             formPage.waitUntilMissing()
 
-            val expectedMastercardLabel = getCardLabel("4444")
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(expectedMastercardLabel)
-            )
-
             embeddedContentPage.assertHasSelectedLpm("card")
             embeddedContentPage.clickOnLpm("card")
+            Espresso.onIdle()
+            formPage.waitUntilVisible()
             formPage.fillOutCardDetails("4242424242424242")
             formPage.clickPrimaryButton() // Ensures the form has the previous values.
             formPage.waitUntilMissing()
 
-            val expectedVisaLabel = getCardLabel("4242")
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(expectedMastercardLabel, expectedVisaLabel)
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(getCardLabel("4444"), getCardLabel("4242"))
             )
 
             enqueueDeferredIntentConfirmationRequests()
@@ -131,32 +98,15 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSuccessfulCardPayment_withReselection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("card")
+            Espresso.onIdle()
+            formPage.waitUntilVisible()
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             formPage.waitUntilMissing()
@@ -164,11 +114,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             embeddedContentPage.assertHasSelectedLpm("card")
             embeddedContentPage.clickOnLpm("card")
+            Espresso.onIdle()
+            formPage.waitUntilVisible()
             formPage.clickPrimaryButton() // Ensures the form has the previous values.
             formPage.waitUntilMissing()
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(expectedVisaLabel, expectedVisaLabel)
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(expectedVisaLabel, expectedVisaLabel)
             )
 
             enqueueDeferredIntentConfirmationRequests()
@@ -178,32 +131,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSuccessfulCardPayment_withFormSheetActionConfirm() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             }
-
+        ) { _, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("card")
+            Espresso.onIdle()
             formPage.fillOutCardDetails()
 
             enqueueDeferredIntentConfirmationRequests()
@@ -212,43 +147,26 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.waitUntilMissing()
 
             // row selection should not be invoked
-            assertThat(rowSelectionLabels).isEqualTo(
-                emptyList<String>()
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = emptyList()
             )
         }
     }
 
     @Test
     fun testSuccessfulNonFormRowPayment_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("cashapp")
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf("Cash App Pay")
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf("Cash App Pay")
             )
 
             enqueueDeferredIntentConfirmationRequests()
@@ -259,36 +177,19 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSuccessfulNonFormRowPayment_withReselection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("cashapp")
+            Espresso.onIdle()
             embeddedContentPage.clickOnLpm("cashapp")
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf("Cash App Pay", "Cash App Pay")
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf("Cash App Pay", "Cash App Pay")
             )
 
             enqueueDeferredIntentConfirmationRequests()
@@ -299,35 +200,17 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSuccessfulNonFormRowPayment_withFormSheetActionConfirm() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-            resultCallback = ::assertCompleted,
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-requires_payment_method.json",
+            configureBlock = {
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnLpm("cashapp")
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf("Cash App Pay")
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf("Cash App Pay")
             )
 
             enqueueDeferredIntentConfirmationRequests()
@@ -337,42 +220,23 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSavedCardSelection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            resultCallback = ::assertCompleted,
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
+            shouldSetupV1PaymentMethodsResponse = true,
+            configureBlock = {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickViewMore()
-
+            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(getCardLabel("4242"))
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(getCardLabel("4242"))
             )
 
             testContext.markTestSucceeded()
@@ -381,47 +245,29 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSavedCardChangeSelection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            resultCallback = ::assertCompleted,
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
+            shouldSetupV1PaymentMethodsResponse = true,
+            configureBlock = {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickViewMore()
-
+            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
 
             embeddedContentPage.clickViewMore()
+            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card2.id)
             managePage.waitUntilNotVisible()
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(getCardLabel("4242"), getCardLabel("5544"))
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(getCardLabel("4242"), getCardLabel("5544"))
             )
 
             testContext.markTestSucceeded()
@@ -430,86 +276,48 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSavedCardReselection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            resultCallback = ::assertCompleted,
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
+            shouldSetupV1PaymentMethodsResponse = true,
+            configureBlock = {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickViewMore()
-
+            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
 
             embeddedContentPage.clickViewMore()
+            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
 
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(getCardLabel("4242"), getCardLabel("4242"))
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(getCardLabel("4242"), getCardLabel("4242"))
             )
-
             testContext.markTestSucceeded()
         }
     }
 
     @Test
     fun testSavedCardRowSelection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            resultCallback = ::assertCompleted,
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
+            shouldSetupV1PaymentMethodsResponse = true,
+            configureBlock = {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnSavedPM(card1.id)
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(getCardLabel("4242"))
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(getCardLabel("4242"))
             )
 
             testContext.markTestSucceeded()
@@ -518,38 +326,20 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testSavedCardRowReselection_withFormSheetActionContinue() {
-        val rowSelectionLabels: MutableList<String?> = mutableListOf()
-
-        runEmbeddedPaymentElementTest(
-            networkRule = networkRule,
-            createIntentCallback = { _, shouldSavePaymentMethod ->
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
-            },
-            resultCallback = ::assertCompleted,
-            rowSelectionBehavior = EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction { embeddedPaymentElement ->
-                val paymentOption = embeddedPaymentElement.paymentOption.value
-                rowSelectionLabels.add(paymentOption?.label.toString())
-            },
-        ) { testContext ->
-            networkRule.enqueue(
-                host("api.stripe.com"),
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
-            testContext.configure {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
+            shouldSetupV1PaymentMethodsResponse = true,
+            configureBlock = {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
-
+        ) { testContext, rowSelectionLabels ->
             embeddedContentPage.clickOnSavedPM(card1.id)
+            Espresso.onIdle()
             embeddedContentPage.clickOnSavedPM(card1.id)
-            assertThat(rowSelectionLabels).isEqualTo(
-                listOf(getCardLabel("4242"), getCardLabel("4242"))
+            assertRowSelectionLabel(
+                actualList = rowSelectionLabels,
+                expectedList = listOf(getCardLabel("4242"), getCardLabel("4242"))
             )
 
             testContext.markTestSucceeded()
@@ -558,6 +348,47 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
     @Test
     fun testRemoveCard_doesNotInvokeCallback() {
+        runEmbeddedPaymentElementRowSelectionTest(
+            responseTestBodyFileName = "elements-sessions-deferred_payment_intent_no_link.json",
+            shouldSetupV1PaymentMethodsResponse = true,
+            configureBlock = {
+                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            }
+        ) { testContext, rowSelectionLabels ->
+            embeddedContentPage.clickViewMore()
+            Espresso.onIdle()
+            managePage.waitUntilVisible()
+            managePage.clickEdit()
+            managePage.clickEdit(card1.id)
+            editPage.waitUntilVisible()
+
+            networkRule.setupPaymentMethodDetachResponse(card1.id)
+
+            editPage.clickRemove()
+            Espresso.onIdle()
+            managePage.waitUntilVisible()
+            managePage.waitUntilGone(card1.id)
+            managePage.clickDone()
+
+            assertRowSelectionLabel(rowSelectionLabels, emptyList<String>())
+
+            testContext.markTestSucceeded()
+        }
+    }
+
+    private suspend fun assertRowSelectionLabel(actualList: List<String?>, expectedList: List<String?>) {
+        withContext(Dispatchers.Main) {
+            Espresso.onIdle()
+            assertThat(actualList).isEqualTo(expectedList)
+        }
+    }
+
+    private fun runEmbeddedPaymentElementRowSelectionTest(
+        responseTestBodyFileName: String,
+        shouldSetupV1PaymentMethodsResponse: Boolean = false,
+        configureBlock: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
+        testBlock: suspend (EmbeddedPaymentElementTestRunnerContext, MutableList<String?>) -> Unit,
+    ) {
         val rowSelectionLabels: MutableList<String?> = mutableListOf()
 
         runEmbeddedPaymentElementTest(
@@ -577,33 +408,15 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 method("GET"),
                 path("/v1/elements/sessions"),
             ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+                response.testBodyFromFile(responseTestBodyFileName)
             }
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
+            if (shouldSetupV1PaymentMethodsResponse) {
+                networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            }
             testContext.configure {
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                configureBlock()
             }
-
-            embeddedContentPage.clickViewMore()
-
-            managePage.waitUntilVisible()
-            managePage.clickEdit()
-            managePage.clickEdit(card1.id)
-            editPage.waitUntilVisible()
-
-            networkRule.setupPaymentMethodDetachResponse(card1.id)
-
-            editPage.clickRemove()
-            managePage.waitUntilVisible()
-            managePage.waitUntilGone(card1.id)
-            managePage.clickDone()
-
-            assertThat(rowSelectionLabels).isEqualTo(
-                emptyList<String>()
-            )
-
-            testContext.markTestSucceeded()
+            testBlock(testContext, rowSelectionLabels)
         }
     }
 
