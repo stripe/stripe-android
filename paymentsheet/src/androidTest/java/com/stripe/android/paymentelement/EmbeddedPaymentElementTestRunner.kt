@@ -52,7 +52,7 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     }
 }
 
-@OptIn(WalletButtonPreview::class)
+@OptIn(WalletButtonsPreview::class)
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,

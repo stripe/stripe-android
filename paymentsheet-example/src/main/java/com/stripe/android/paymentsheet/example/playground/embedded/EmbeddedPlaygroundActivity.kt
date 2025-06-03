@@ -36,7 +36,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.WalletButtonPreview
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -61,7 +61,7 @@ import kotlinx.coroutines.launch
     ExperimentalEmbeddedPaymentElementApi::class,
     ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
-    WalletButtonPreview::class,
+    WalletButtonsPreview::class,
 )
 internal class EmbeddedPlaygroundActivity :
     AppCompatActivity(),
@@ -345,7 +345,7 @@ internal class EmbeddedPlaygroundActivity :
             }
         },
         Complete {
-            @OptIn(WalletButtonPreview::class)
+            @OptIn(WalletButtonsPreview::class)
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
