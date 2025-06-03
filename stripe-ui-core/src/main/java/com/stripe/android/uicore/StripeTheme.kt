@@ -16,6 +16,7 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.LocalTextStyle
@@ -159,6 +160,14 @@ data class EmbeddedFloatingStyle(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class FormInsets(
+    val start: Float,
+    val top: Float,
+    val end: Float,
+    val bottom: Float
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
 private val EMBEDDED_SEPARATOR_COLOR_DARK = Color(0x40FFFFFF)
 
@@ -285,6 +294,13 @@ object StripeThemeDefaults {
 
     val floating = EmbeddedFloatingStyle(
         spacing = 12.0f
+    )
+
+    val formInsets = FormInsets(
+        start = 20f,
+        top = 0f,
+        end = 20f,
+        bottom = 0f
     )
 }
 
@@ -526,6 +542,8 @@ object StripeTheme {
 
     var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
 
+    var formInsets = StripeThemeDefaults.formInsets
+
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
     }
@@ -671,6 +689,12 @@ fun Color.darken(amount: Float): Color {
         max(it - amount, 0f)
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeTheme.getOuterFormInsets(): PaddingValues = PaddingValues(
+    start = formInsets.start.dp,
+    end = formInsets.end.dp
+)
 
 private fun TextStyle.toCompat(): TextStyle {
     return copy(

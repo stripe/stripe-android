@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutU
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -317,7 +319,10 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            PaymentMethodVerticalLayoutUI(interactor, modifier.padding(horizontal = 20.dp))
+            PaymentMethodVerticalLayoutUI(
+                interactor,
+                modifier.padding(StripeTheme.getOuterFormInsets())
+            )
         }
     }
 
