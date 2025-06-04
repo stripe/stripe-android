@@ -41,8 +41,10 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
@@ -130,10 +132,11 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(vertical = 8.dp)
                 ) {
                     TextFieldSection(
                         textFieldController = viewModel.textFieldController,
+                        modifier = Modifier.padding(StripeTheme.getOuterFormInsets())
                     ) {
                         TextField(
                             modifier = Modifier
@@ -156,7 +159,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                             Column(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth().padding(StripeTheme.getOuterFormInsets())
                             ) {
                                 it.forEach { prediction ->
                                     val primaryText = prediction.primaryText
@@ -168,8 +171,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                                 viewModel.selectPrediction(prediction)
                                             }
                                             .padding(
-                                                vertical = 8.dp,
-                                                horizontal = 16.dp
+                                                vertical = 8.dp
                                             )
                                     ) {
                                         val regex = query
@@ -194,9 +196,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                             style = MaterialTheme.typography.body1
                                         )
                                     }
-                                    Divider(
-                                        modifier = Modifier.padding(horizontal = 16.dp)
-                                    )
+                                    Divider()
                                 }
                             }
                         }
@@ -208,10 +208,8 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                 ),
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .padding(
-                                        vertical = 16.dp,
-                                        horizontal = 16.dp
-                                    )
+                                    .padding(vertical = 16.dp)
+                                    .padding(StripeTheme.getOuterFormInsets())
                                     .testTag(TEST_TAG_ATTRIBUTION_DRAWABLE)
                             )
                         }
