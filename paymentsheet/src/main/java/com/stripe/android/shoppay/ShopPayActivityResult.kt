@@ -7,6 +7,7 @@ internal sealed interface ShopPayActivityResult : Parcelable {
     @Parcelize
     data class Completed(
         val shopPaymentMethodId: String,
+        val addressLine1: String? = null
     ) : ShopPayActivityResult
 
     @Parcelize

@@ -1,5 +1,6 @@
 package com.stripe.android.shoppay
 
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
@@ -43,7 +44,9 @@ internal class ShopPayLauncher @Inject internal constructor(
     ) {
         when (shopPayActivityResult) {
             ShopPayActivityResult.Canceled -> Unit
-            is ShopPayActivityResult.Completed -> Unit
+            is ShopPayActivityResult.Completed -> {
+                Log.d("ShopPayLauncher", "$shopPayActivityResult")
+            }
             is ShopPayActivityResult.Failed -> Unit
         }
         nextStep(shopPayActivityResult)
