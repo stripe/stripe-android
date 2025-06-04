@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.verification.LinkEmbeddedInteractor
 import com.stripe.android.link.verification.VerificationState
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -292,6 +293,35 @@ internal class DefaultWalletButtonsInteractor(
                 confirmationHandler = confirmationHandler,
                 coroutineScope = coroutineScope,
                 linkEmbeddedInteractor = linkEmbeddedInteractor
+            )
+        }
+
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        fun create(
+            embeddedLinkHelper: EmbeddedLinkHelper,
+            confirmationStateHolder: EmbeddedConfirmationStateHolder,
+            confirmationHandler: ConfirmationHandler,
+            coroutineScope: CoroutineScope,
+            errorReporter: ErrorReporter,
+        ): WalletButtonsInteractor {
+            return DefaultWalletButtonsInteractor(
+                errorReporter = errorReporter,
+                arguments = combineAsStateFlow(
+                    embeddedLinkHelper.linkEmail,
+                    confirmationStateHolder.stateFlow,
+                ) { linkEmail, confirmationState ->
+                    confirmationState?.let { state ->
+                        Arguments(
+                            linkEmail = linkEmail,
+                            configuration = state.configuration.asCommonConfiguration(),
+                            paymentMethodMetadata = state.paymentMethodMetadata,
+                            appearance = state.configuration.appearance,
+                            initializationMode = state.initializationMode,
+                        )
+                    }
+                },
+                confirmationHandler = confirmationHandler,
+                coroutineScope = coroutineScope,
             )
         }
     }
