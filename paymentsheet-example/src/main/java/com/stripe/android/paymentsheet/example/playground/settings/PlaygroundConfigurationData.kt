@@ -21,11 +21,14 @@ data class PlaygroundConfigurationData(
         @SerialName("Embedded")
         Embedded,
 
+        @SerialName("walletsButton")
+        WalletsButton,
+
         @SerialName("CustomerSheet")
         CustomerSheet;
 
         fun isPaymentFlow(): Boolean {
-            return this in setOf(PaymentSheet, FlowController, Embedded)
+            return this in setOf(PaymentSheet, FlowController, Embedded, WalletsButton)
         }
 
         fun isCustomerFlow(): Boolean {

@@ -366,6 +366,14 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
+                    PlaygroundConfigurationData.IntegrationType.WalletsButton -> {
+                        // Using flow controller to demonstrate wallet buttons
+                        FlowControllerUi(
+                            flowController = flowController,
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     else -> Unit
                 }
             }

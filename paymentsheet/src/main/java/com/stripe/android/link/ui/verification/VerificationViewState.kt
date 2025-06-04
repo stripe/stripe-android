@@ -1,9 +1,12 @@
 package com.stripe.android.link.ui.verification
 
+import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
+import kotlinx.parcelize.Parcelize
 
 @Immutable
+@Parcelize
 internal data class VerificationViewState(
     val isProcessing: Boolean,
     val requestFocus: Boolean,
@@ -13,4 +16,4 @@ internal data class VerificationViewState(
     val redactedPhoneNumber: String,
     val email: String,
     val isDialog: Boolean
-)
+) : Parcelable
