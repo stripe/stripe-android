@@ -229,8 +229,8 @@ class LinkEmbeddedManagerTest {
         assertThat(selection).isInstanceOf(PaymentSelection.Link::class.java)
     }
 
-    private fun createManager(): LinkEmbeddedManager {
-        return LinkEmbeddedManager(
+    private fun createManager(): LinkEmbeddedInteractor {
+        return LinkEmbeddedInteractor(
             coroutineScope = testScope,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle,

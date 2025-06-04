@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 /**
  * Manages Link verification state and domain logic using unified LinkEmbeddedState
  */
-internal class LinkEmbeddedManager @AssistedInject constructor(
+internal class LinkEmbeddedInteractor @AssistedInject constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle,
@@ -40,9 +40,6 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
     private val linkEmbeddedState: StateFlow<LinkEmbeddedState> =
         savedStateHandle.getStateFlow(LINK_EMBEDDED_STATE_KEY, LinkEmbeddedState())
 
-    /**
-     * Exposes the unified Link embedded state with the shared OTP element
-     */
     val state: StateFlow<LinkEmbeddedState> = linkEmbeddedState
 
     /**
@@ -252,10 +249,10 @@ internal class LinkEmbeddedManager @AssistedInject constructor(
     }
 
     /**
-     * Factory for creating instances of [LinkEmbeddedManager] with assisted injection
+     * Factory for creating instances of [LinkEmbeddedInteractor] with assisted injection
      */
     @AssistedFactory
     fun interface Factory {
-        fun create(coroutineScope: CoroutineScope): LinkEmbeddedManager
+        fun create(coroutineScope: CoroutineScope): LinkEmbeddedInteractor
     }
 }

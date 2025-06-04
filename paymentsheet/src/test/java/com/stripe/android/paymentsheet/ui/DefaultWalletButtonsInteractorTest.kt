@@ -447,7 +447,7 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             errorReporter = errorReporter,
-            linkEmbeddedManager = mock()
+            linkEmbeddedInteractor = mock()
         )
     }
 

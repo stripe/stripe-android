@@ -9,7 +9,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.verification.VerificationViewState
-import com.stripe.android.link.verification.LinkEmbeddedManager
+import com.stripe.android.link.verification.LinkEmbeddedInteractor
 import com.stripe.android.link.verification.VerificationState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -113,7 +113,7 @@ internal class DefaultWalletButtonsInteractor(
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
     private val errorReporter: ErrorReporter,
-    private val linkEmbeddedManager: LinkEmbeddedManager,
+    private val linkEmbeddedInteractor: LinkEmbeddedInteractor,
 ) : WalletButtonsInteractor {
 
     init {
@@ -126,7 +126,7 @@ internal class DefaultWalletButtonsInteractor(
     override val state: StateFlow<WalletButtonsInteractor.State> = combineAsStateFlow(
         arguments,
         confirmationHandler.state,
-        linkEmbeddedManager.state,
+        linkEmbeddedInteractor.state,
     ) { arguments, confirmationState, linkEmbeddedState ->
         val walletButtons = arguments?.run {
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
@@ -144,7 +144,7 @@ internal class DefaultWalletButtonsInteractor(
                         // Case 1: Show verification if needed
                         is VerificationState.Verifying -> WalletButton.Link2FA(
                             verificationViewState = verificationState.viewState,
-                            otpElement = linkEmbeddedManager.otpElement,
+                            otpElement = linkEmbeddedInteractor.otpElement,
                             linkEmail = linkEmail
                         )
 
@@ -172,11 +172,11 @@ internal class DefaultWalletButtonsInteractor(
     }
 
     private fun setupLink(args: Arguments) {
-        linkEmbeddedManager.setup(
+        linkEmbeddedInteractor.setup(
             paymentMethodMetadata = args.paymentMethodMetadata,
             onVerificationSucceeded = { defaultPaymentMethod ->
                 // When verification is successful, create a Link selection with the default payment method
-                val selection = linkEmbeddedManager.createLinkSelection()
+                val selection = linkEmbeddedInteractor.createLinkSelection()
                 confirmationArgs(selection, args)?.let {
                     coroutineScope.launch { confirmationHandler.start(it) }
                 }
@@ -238,7 +238,7 @@ internal class DefaultWalletButtonsInteractor(
         ): WalletButtonsInteractor {
             val coroutineScope = viewModel.viewModelScope
             val component = viewModel.flowControllerStateComponent
-            val linkEmbeddedManager = component.linkEmbeddedManagerFactory.create(coroutineScope)
+            val linkEmbeddedManager = component.linkEmbeddedInteractorFactory.create(coroutineScope)
             return DefaultWalletButtonsInteractor(
                 errorReporter = component.errorReporter,
                 arguments = combineAsStateFlow(
@@ -260,13 +260,13 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = component.confirmationHandler,
                 coroutineScope = coroutineScope,
-                linkEmbeddedManager = linkEmbeddedManager,
+                linkEmbeddedInteractor = linkEmbeddedManager,
             )
         }
 
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun create(
-            linkEmbeddedManager: LinkEmbeddedManager,
+            linkEmbeddedInteractor: LinkEmbeddedInteractor,
             embeddedLinkHelper: EmbeddedLinkHelper,
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
             confirmationHandler: ConfirmationHandler,
@@ -291,7 +291,7 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = confirmationHandler,
                 coroutineScope = coroutineScope,
-                linkEmbeddedManager = linkEmbeddedManager
+                linkEmbeddedInteractor = linkEmbeddedInteractor
             )
         }
     }
