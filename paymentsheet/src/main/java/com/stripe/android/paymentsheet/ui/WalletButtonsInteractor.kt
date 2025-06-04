@@ -145,6 +145,7 @@ internal class DefaultWalletButtonsInteractor(
         val confirmationOption = selection.toConfirmationOption(
             configuration = arguments.configuration,
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
+            collectsShippingAddress = true,
         ) ?: return null
 
         return ConfirmationHandler.Args(

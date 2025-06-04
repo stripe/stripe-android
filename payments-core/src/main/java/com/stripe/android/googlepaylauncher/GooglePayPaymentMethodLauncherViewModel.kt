@@ -18,6 +18,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,8 +66,24 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 merchantName = args.config.merchantName
             ),
             billingAddressParameters = args.config.billingAddressConfig.convert(),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = args.collectsShippingAddress,
+            ),
             isEmailRequired = args.config.isEmailRequired,
-            allowCreditCards = args.config.allowCreditCards
+            allowCreditCards = args.config.allowCreditCards,
+            shippingOptionParameters = if (args.collectsShippingAddress) {
+                GooglePayJsonFactory.ShippingOptionParameters(
+                    shippingOptions = listOf(
+                        GooglePayJsonFactory.ShippingOptionParameters.SelectionOption(
+                            id = "shipping-001",
+                            label = "Free",
+                            description = ""
+                        )
+                    )
+                )
+            } else {
+                null
+            }
         )
     }
 
@@ -123,11 +140,16 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     ): GooglePayPaymentMethodLauncher.Result {
         val paymentDataJson = JSONObject(paymentData.toJson())
 
-        val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
+        val googlePayResult = GooglePayResult.fromJson(paymentDataJson)
+
+        val params = PaymentMethodCreateParams.createFromGooglePay(googlePayResult)
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {
-                GooglePayPaymentMethodLauncher.Result.Completed(it)
+                GooglePayPaymentMethodLauncher.Result.Completed(
+                    paymentMethod = it,
+                    shippingAddress = googlePayResult.shippingInformation,
+                )
             },
             onFailure = {
                 GooglePayPaymentMethodLauncher.Result.Failed(

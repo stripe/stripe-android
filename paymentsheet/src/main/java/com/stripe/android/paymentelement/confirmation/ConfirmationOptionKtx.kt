@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
+    collectsShippingAddress: Boolean = false,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption()
@@ -24,7 +25,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.New -> toConfirmationOption()
-        is PaymentSelection.GooglePay -> toConfirmationOption(configuration)
+        is PaymentSelection.GooglePay -> toConfirmationOption(configuration, collectsShippingAddress)
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
     }
 }
@@ -101,6 +102,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
+    collectsShippingAddress: Boolean,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -112,7 +114,8 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 customAmount = googlePay.amount,
                 customLabel = googlePay.label,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                collectsShippingAddress = collectsShippingAddress,
             )
         )
     }

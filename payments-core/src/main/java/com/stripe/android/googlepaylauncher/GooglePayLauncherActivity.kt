@@ -14,6 +14,7 @@ import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
 import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
+import com.stripe.android.model.GooglePayResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -95,7 +96,8 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 val result = taskResult.result
                 if (result != null) {
                     val paymentDataJson = JSONObject(result.toJson())
-                    val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
+                    val googlePayResult = GooglePayResult.fromJson(paymentDataJson)
+                    val params = PaymentMethodCreateParams.createFromGooglePay(googlePayResult)
                     val host = AuthActivityStarterHost.create(this)
                     viewModel.confirmStripeIntent(host, params)
                 } else {

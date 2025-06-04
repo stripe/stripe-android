@@ -49,7 +49,8 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val amount: Long,
         internal val label: String? = null,
         internal val transactionId: String? = null,
-        internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+        internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        internal val collectsShippingAddress: Boolean = false,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

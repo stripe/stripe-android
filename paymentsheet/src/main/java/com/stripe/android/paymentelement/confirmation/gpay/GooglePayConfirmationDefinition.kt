@@ -98,6 +98,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             },
             transactionId = intent.id,
             label = config.customLabel,
+            collectsShippingAddress = confirmationOption.config.collectsShippingAddress,
         )
     }
 

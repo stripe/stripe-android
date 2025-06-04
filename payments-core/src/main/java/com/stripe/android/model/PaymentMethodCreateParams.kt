@@ -1013,9 +1013,8 @@ constructor(
          */
         @Throws(JSONException::class)
         @JvmStatic
-        fun createFromGooglePay(googlePayPaymentData: JSONObject): PaymentMethodCreateParams {
-            val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
-            val token = googlePayResult.token
+        fun createFromGooglePay(result: GooglePayResult): PaymentMethodCreateParams {
+            val token = result.token
             val tokenId = token?.id.orEmpty()
 
             return create(
@@ -1024,10 +1023,10 @@ constructor(
                     attribution = setOfNotNull(token?.card?.tokenizationMethod?.toString())
                 ),
                 PaymentMethod.BillingDetails(
-                    address = googlePayResult.address,
-                    name = googlePayResult.name,
-                    email = googlePayResult.email,
-                    phone = googlePayResult.phoneNumber
+                    address = result.address,
+                    name = result.name,
+                    email = result.email,
+                    phone = result.phoneNumber
                 )
             )
         }
