@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -63,8 +62,6 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection,
     ) {
         TextField(
             textFieldController = this,
@@ -75,8 +72,6 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
                 ImeAction.Next
             },
             modifier = modifier,
-            nextFocusDirection = nextFocusDirection,
-            previousFocusDirection = previousFocusDirection
         )
     }
 }
@@ -229,8 +224,6 @@ class SimpleTextFieldController(
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection,
     ) {
         TextField(
             textFieldController = this,
@@ -241,8 +234,6 @@ class SimpleTextFieldController(
                 ImeAction.Next
             },
             modifier = modifier,
-            nextFocusDirection = nextFocusDirection,
-            previousFocusDirection = previousFocusDirection,
             shouldAnnounceLabel = textFieldConfig.shouldAnnounceLabel,
             shouldAnnounceFieldValue = textFieldConfig.shouldAnnounceFieldValue
         )

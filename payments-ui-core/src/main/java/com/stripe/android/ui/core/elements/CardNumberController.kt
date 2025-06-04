@@ -10,7 +10,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -362,9 +361,7 @@ internal class DefaultCardNumberController(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         val reporter = LocalCardNumberCompletedEventReporter.current
         val disallowedBrandReporter = LocalCardBrandDisallowedReporter.current
@@ -400,9 +397,7 @@ internal class DefaultCardNumberController(
             field,
             modifier,
             hiddenIdentifiers,
-            lastTextFieldIdentifier,
-            nextFocusDirection,
-            previousFocusDirection
+            lastTextFieldIdentifier
         )
     }
 

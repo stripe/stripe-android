@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
@@ -505,9 +504,7 @@ internal fun CvcRecollectionField(
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
                     hiddenIdentifiers = setOf(),
-                    lastTextFieldIdentifier = null,
-                    nextFocusDirection = FocusDirection.Exit,
-                    previousFocusDirection = FocusDirection.Previous
+                    lastTextFieldIdentifier = null
                 )
             }
             error?.errorMessage?.let {
