@@ -20,6 +20,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
@@ -261,17 +262,12 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLinkInsteadOfPaymentOptions =
-                // The current payment selection is Link
-                paymentSelection?.isLink == true &&
-                    // The current user has a Link account (not necessarily logged in)
-                    linkAccountInfo.account != null &&
-                    // Link is enabled and available
-                    linkConfiguration != null &&
-                    // feature flag and other conditions are met
-                    linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
-
-            if (shouldPresentLinkInsteadOfPaymentOptions) {
+            if (linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
+                    paymentSelection = paymentSelection,
+                    linkAccountInfo = linkAccountInfo,
+                    linkConfiguration = linkConfiguration
+                )
+            ) {
                 linkPaymentLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
@@ -284,6 +280,21 @@ internal class DefaultFlowController @Inject internal constructor(
                 showPaymentOptionList(state, paymentSelection)
             }
         }
+    }
+
+    private fun shouldPresentLinkInsteadOfPaymentOptions(
+        paymentSelection: PaymentSelection?,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        linkConfiguration: LinkConfiguration
+    ): Boolean {
+        // If the user has declined to use Link in the past, do not show it again.
+        return viewModel.state?.declinedLink2FA != true &&
+            // The current payment selection is Link
+            paymentSelection?.isLink == true &&
+            // The current user has a Link account (not necessarily logged in)
+            linkAccountInfo.account != null &&
+            // feature flag and other conditions are met
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
     }
 
     private fun showPaymentOptionList(
@@ -320,8 +331,14 @@ internal class DefaultFlowController @Inject internal constructor(
             is LinkActivityResult.Failed -> Unit
             is LinkActivityResult.Canceled -> when (result.reason) {
                 Reason.BackPressed -> withCurrentState {
+                    val accountStatus = linkAccountHolder.linkAccountInfo.value.account?.accountStatus
+                    // The user dismissed the Link 2FA -> prevent from showing it again
+                    if (accountStatus == AccountStatus.VerificationStarted) {
+                        viewModel.updateState { it?.copy(declinedLink2FA = true) }
+                    }
                     // just show the payment option list if
                     // the user didn't have any preselected Link payment details
+                    // (preselected Link payment means the user is attempting to change their Link payment method)
                     if (viewModel.paymentSelection?.readyToPayWithLink() == false) {
                         showPaymentOptionList(it, viewModel.paymentSelection)
                     }
@@ -686,6 +703,7 @@ internal class DefaultFlowController @Inject internal constructor(
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
         val config: PaymentSheet.Configuration,
+        val declinedLink2FA: Boolean = false
     ) : Parcelable {
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,

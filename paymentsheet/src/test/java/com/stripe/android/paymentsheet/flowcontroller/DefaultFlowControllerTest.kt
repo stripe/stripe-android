@@ -23,11 +23,16 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.TestFactory.CONSUMER_SESSION
+import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -118,6 +123,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -559,6 +565,69 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
+    }
+
+    @Test
+    fun `presentPaymentOptions should not launch Link 2FA after dismissing it once`() = runTest {
+        // Setup the feature flag to enable early verification
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+
+        // Create a verificationStartedAccount with VerificationStarted status
+        val session = CONSUMER_SESSION.copy(
+            verificationSessions = listOf(VERIFICATION_STARTED_SESSION)
+        )
+        val verificationStartedAccount = LinkAccount(consumerSession = session)
+
+        // Create flow controller with Link payment method
+        val flowController = createFlowController(
+            paymentSelection = PaymentSelection.Link(
+                selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = null
+                )
+            )
+        )
+
+        // Set the account holder with VerificationStarted status
+        linkAccountHolder.set(LinkAccountUpdate.Value(verificationStartedAccount))
+
+        flowController.configureExpectingSuccess()
+
+        // First call to present payment options
+        flowController.presentPaymentOptions()
+
+        // Verify Link launcher was called for the first time
+        verify(linkPaymentLauncher).present(
+            configuration = any(),
+            linkAccountInfo = anyOrNull(),
+            launchMode = any(),
+            useLinkExpress = any()
+        )
+
+        // Simulate user dismissing 2FA with back press
+        flowController.onLinkPaymentMethodSelected(
+            LinkActivityResult.Canceled(
+                reason = Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.Value(verificationStartedAccount)
+            )
+        )
+
+        // Reset the mock to clear previous invocations
+        reset(linkPaymentLauncher)
+
+        // Try to present payment options again
+        flowController.presentPaymentOptions()
+
+        // Verify Link launcher was NOT called the second time
+        verify(linkPaymentLauncher, never()).present(
+            configuration = any(),
+            linkAccountInfo = anyOrNull(),
+            useLinkExpress = any(),
+            launchMode = any()
+        )
+
+        // Verify payment option launcher was called instead
+        verify(paymentOptionActivityLauncher).launch(any(), anyOrNull())
     }
 
     @Test
