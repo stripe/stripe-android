@@ -36,6 +36,7 @@ internal class TestLink : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore("Re-enable when Link card brand issues in test mode are resolved")
     fun testLinkPaymentWithBankAccountInPassthroughMode() {
         val testParameters = makeLinkTestParameters(passthroughMode = true)
         testDriver.confirmWithBankAccountInLink(testParameters)
