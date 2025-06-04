@@ -38,39 +38,39 @@ internal fun LinkVerificationSection(
         Column(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(8.dp))
                 .border(
                     width = 1.dp,
                     color = LinkTheme.colors.borderDefault,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(8.dp)
                 )
                 .background(
                     color = LinkTheme.colors.surfacePrimary,
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(8.dp)
                 )
-                .padding(16.dp)
+                .padding(10.dp)
         ) {
-            // Show verification message
+            // Compact verification message
             Text(
-                text = "Please verify your phone number: ${verificationState.redactedPhoneNumber}",
+                text = "Verify: ${verificationState.redactedPhoneNumber}",
                 style = LinkTheme.typography.caption,
                 color = LinkTheme.colors.textPrimary,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 6.dp)
             )
 
-            // OTP input connected to domain layer with loading overlay
+            // OTP input with minimal padding
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.padding(vertical = 10.dp)
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
                 StripeThemeForLink {
                     OTPElementUI(
                         enabled = !verificationState.isProcessing,
                         element = otpElement,
                         otpInputPlaceholder = " ",
-                        middleSpacing = 8.dp,
+                        middleSpacing = 6.dp,  // Reduced spacing between digits
                         modifier = Modifier
                             .testTag(VERIFICATION_OTP_TAG)
                             .alpha(if (verificationState.isProcessing) 0.5f else 1f),
@@ -82,26 +82,26 @@ internal fun LinkVerificationSection(
                     )
                 }
 
-                // Loading indicator centered on top of OTP
+                // Smaller loading indicator
                 if (verificationState.isProcessing) {
                     LinkSpinner(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(28.dp)
                             .zIndex(1f),
-                        strokeWidth = 3.dp
+                        strokeWidth = 2.dp
                     )
                 }
             }
 
-            // Error message if any
+            // Compact error message
             verificationState.errorMessage?.let { error ->
                 Text(
                     text = error.resolve(LocalContext.current),
-                    style = LinkTheme.typography.body,
+                    style = LinkTheme.typography.caption,
                     color = LinkTheme.colors.textCritical,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 8.dp)
+                        .padding(top = 4.dp)
                 )
             }
         }
