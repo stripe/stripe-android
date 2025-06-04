@@ -2,7 +2,9 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
@@ -63,7 +65,7 @@ internal fun FormActivityUI(
                 )
                 USBankAccountMandate(state)
                 FormActivityError(state)
-                PaymentSheetContentPadding()
+                Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
                     state = state,
                     onClick = onClick,
