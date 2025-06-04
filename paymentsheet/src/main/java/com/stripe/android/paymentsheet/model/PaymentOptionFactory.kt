@@ -13,7 +13,7 @@ internal class PaymentOptionFactory @Inject constructor(
         return PaymentOption(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
-            _shippingDetails = selection.shippingAddress,
+            _shippingDetails = selection.shippingDetails,
             imageLoader = {
                 iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,
@@ -25,7 +25,7 @@ internal class PaymentOptionFactory @Inject constructor(
     }
 }
 
-private val PaymentSelection.shippingAddress: AddressDetails?
+internal val PaymentSelection.shippingDetails: AddressDetails?
     get() = when (this) {
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,

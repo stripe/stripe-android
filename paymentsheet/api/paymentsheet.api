@@ -827,6 +827,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Paym
 	public final fun getLabel ()Ljava/lang/String;
 	public final fun getMandateText ()Landroidx/compose/ui/text/AnnotatedString;
 	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public final fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
