@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.customersheet.CustomerSheet
@@ -213,6 +214,17 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
                 cardBrand = brand,
             )
         )
+    }
+
+    override fun onAnalyticsEvent(event: AnalyticsEvent) {
+        CoroutineScope(workContext).launch {
+            analyticsRequestExecutor.executeAsync(
+                analyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = emptyMap(),
+                )
+            )
+        }
     }
 
     private fun fireEvent(event: CustomerSheetEvent) {

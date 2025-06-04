@@ -1,9 +1,11 @@
 package com.stripe.android.networking
 
 import androidx.annotation.Keep
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.AnalyticsEvent
 
-internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     // Token
     TokenCreate("token_creation"),
 
@@ -104,7 +106,10 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
 
     CardMetadataLoadedTooSlow("card_metadata_loaded_too_slow"),
     CardMetadataLoadFailure("card_metadata_load_failure"),
-    CardMetadataMissingRange("card_metadata_missing_range");
+    CardMetadataMissingRange("card_metadata_missing_range"),
+    CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields(
+        "card_metadata.expected_extra_digits_but_user_entered_16_then_switched_fields"
+    );
 
     @Keep
     override fun toString(): String {
