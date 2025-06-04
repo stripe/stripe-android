@@ -746,6 +746,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                disableLinkRuxInFlowController = false
             )
         )
 
@@ -782,6 +783,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                disableLinkRuxInFlowController = false
             )
         )
 
@@ -866,6 +868,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                disableLinkRuxInFlowController = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -896,6 +899,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                disableLinkRuxInFlowController = false
             )
         )
 
@@ -3075,6 +3079,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkConsumerIncentive = null,
             useAttestationEndpoints = false,
             suppress2faModal = false,
+            disableLinkRuxInFlowController = false
         )
     }
 

@@ -25,7 +25,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
-import com.stripe.android.link.domain.LinkProminenceFeatureProvider
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -88,7 +88,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
-    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
+    private val linkGateFactory: LinkGate.Factory,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
     @Named(LINK_LAUNCHER_KEY) private val linkPaymentLauncher: LinkPaymentLauncher,
@@ -269,7 +269,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     // Link is enabled and available
                     linkConfiguration != null &&
                     // feature flag and other conditions are met
-                    linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
+                    linkGateFactory.create(linkConfiguration).showRuxInFlowController
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
                 linkPaymentLauncher.present(

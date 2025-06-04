@@ -37,6 +37,11 @@ internal class DefaultLinkGate @Inject constructor(
             return useNativeLink.not() || configuration.suppress2faModal
         }
 
+    override val showRuxInFlowController: Boolean
+        get() {
+            return useNativeLink && configuration.disableRuxInFlowController == false
+        }
+
     class Factory @Inject constructor() : LinkGate.Factory {
         override fun create(configuration: LinkConfiguration): LinkGate {
             return DefaultLinkGate(configuration)
