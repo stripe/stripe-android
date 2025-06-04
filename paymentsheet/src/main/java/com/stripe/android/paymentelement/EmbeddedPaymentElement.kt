@@ -516,10 +516,18 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * the customer near your "Buy" button to comply with regulations.
          */
         val mandateText: AnnotatedString?,
+        private val _shippingDetails: AddressDetails?,
     ) {
         private val iconDrawable: Drawable by lazy {
             DelegateDrawable(imageLoader)
         }
+
+        /**
+         * A shipping address that the user provided during checkout.
+         */
+        @ShippingDetailsInPaymentOptionPreview
+        val shippingDetails: AddressDetails?
+            get() = _shippingDetails
 
         /**
          * An image representing a payment method; e.g. the Google Pay logo or a VISA logo.
