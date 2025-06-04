@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.utils.combineAsStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -23,9 +22,7 @@ class RowController(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         RowElementUI(
             enabled,

@@ -9,7 +9,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
@@ -24,8 +23,6 @@ fun SectionElementUI(
     hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier,
-    nextFocusDirection: FocusDirection = FocusDirection.Down,
-    previousFocusDirection: FocusDirection = FocusDirection.Up
 ) {
     if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
@@ -51,8 +48,6 @@ fun SectionElementUI(
                     field,
                     hiddenIdentifiers = hiddenIdentifiers,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
-                    nextFocusDirection = nextFocusDirection,
-                    previousFocusDirection = previousFocusDirection
                 )
                 if (index != element.fields.lastIndex) {
                     Divider(
