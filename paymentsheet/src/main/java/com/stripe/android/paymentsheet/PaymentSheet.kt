@@ -1545,6 +1545,11 @@ class PaymentSheet internal constructor(
          * set to the same value as [cornerRadiusDp].
          */
         val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
+
+        /**
+         * The vertical insets applied to the input fields within Payment Element.
+         */
+        val inputFieldVerticalInsetsDp: Float = StripeThemeDefaults.shapes.inputFieldVerticalInsets,
     ) : Parcelable {
         @OptIn(ExtendedAppearancePreview::class)
         constructor(
@@ -1580,10 +1585,12 @@ class PaymentSheet internal constructor(
             @DimenRes cornerRadiusRes: Int,
             @DimenRes borderStrokeWidthRes: Int,
             @DimenRes bottomSheetCornerRadiusRes: Int,
+            @DimenRes inputFieldVerticalInsetsRes: Int,
         ) : this(
             cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes),
             borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes),
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes),
+            inputFieldVerticalInsetsDp = context.getRawValueFromDimenResource(inputFieldVerticalInsetsRes),
         )
 
         companion object {

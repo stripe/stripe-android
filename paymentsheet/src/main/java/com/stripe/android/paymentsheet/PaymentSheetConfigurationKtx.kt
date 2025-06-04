@@ -46,7 +46,8 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     StripeTheme.shapesMutable = StripeThemeDefaults.shapes.copy(
         cornerRadius = shapes.cornerRadiusDp,
         bottomSheetCornerRadius = shapes.bottomSheetCornerRadiusDp,
-        borderStrokeWidth = shapes.borderStrokeWidthDp
+        borderStrokeWidth = shapes.borderStrokeWidthDp,
+        inputFieldVerticalInsets = shapes.inputFieldVerticalInsetsDp,
     )
 
     StripeTheme.typographyMutable = StripeThemeDefaults.typography.copy(

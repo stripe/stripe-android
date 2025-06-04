@@ -71,6 +71,7 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -286,7 +287,9 @@ internal fun TextFieldUi(
         CompatTextField(
             value = value,
             onValueChange = onValueChange,
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth().padding(
+                vertical = MaterialTheme.stripeShapes.inputFieldVerticalInsets.dp,
+            ),
             enabled = enabled,
             label = label?.let {
                 {

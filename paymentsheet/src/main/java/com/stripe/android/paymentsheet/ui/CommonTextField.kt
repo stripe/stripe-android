@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,8 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeShapes
 
 @Composable
 internal fun CommonTextField(
@@ -37,7 +40,11 @@ internal fun CommonTextField(
     ),
 ) {
     TextField(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                vertical = MaterialTheme.stripeShapes.inputFieldVerticalInsets.dp
+            ),
         value = value,
         enabled = enabled,
         label = {
