@@ -1802,6 +1802,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
+    @Poko
     class Insets(
         val startDp: Float,
         val topDp: Float,
