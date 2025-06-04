@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.link
 
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
@@ -68,6 +69,11 @@ internal class LinkConfirmationDefinition @Inject constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: LinkActivityResult
     ): ConfirmationDefinition.Result {
+        return ConfirmationDefinition.Result.Failed(
+            cause = Throwable("Link is not supported yet"),
+            message = "Link is not supported yet".resolvableString,
+            type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+        )
         if (
             result !is LinkActivityResult.Canceled ||
             result.reason != LinkActivityResult.Canceled.Reason.BackPressed
