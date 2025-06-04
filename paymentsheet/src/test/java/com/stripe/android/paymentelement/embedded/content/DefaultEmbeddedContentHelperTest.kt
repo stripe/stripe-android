@@ -178,8 +178,8 @@ internal class DefaultEmbeddedContentHelperTest {
                 selectionHolder = selectionHolder,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),
-            errorReporter = errorReporter,
             rowSelectionImmediateActionHandler = immediateActionHandler,
+            errorReporter = errorReporter,
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
