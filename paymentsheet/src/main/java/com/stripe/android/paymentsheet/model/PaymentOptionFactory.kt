@@ -43,17 +43,19 @@ internal val PaymentSelection.shippingDetails: AddressDetails?
     }
 
 private fun PaymentSelection.Link.makeAddressDetails(): AddressDetails? {
-    return AddressDetails(
-        name = shippingAddress?.address?.name,
-        phoneNumber = shippingAddress?.unredactedPhoneNumber,
-        address = PaymentSheet.Address(
-            line1 = shippingAddress?.address?.line1,
-            line2 = shippingAddress?.address?.line2,
-            city = shippingAddress?.address?.locality,
-            state = shippingAddress?.address?.administrativeArea,
-            postalCode = shippingAddress?.address?.postalCode,
-            country = shippingAddress?.address?.countryCode?.value,
-        ),
-        isCheckboxSelected = null,
-    )
+    return shippingAddress?.let { address ->
+        AddressDetails(
+            name = address.address.name,
+            phoneNumber = address.unredactedPhoneNumber,
+            address = PaymentSheet.Address(
+                line1 = address.address.line1,
+                line2 = address.address.line2,
+                city = address.address.locality,
+                state = address.address.administrativeArea,
+                postalCode = address.address.postalCode,
+                country = address.address.countryCode?.value,
+            ),
+            isCheckboxSelected = null,
+        )
+    }
 }
