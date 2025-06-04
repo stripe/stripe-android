@@ -81,8 +81,8 @@ internal fun PaymentDetailsListItem(
     // without knowing the dimensions of the radio button on the first layout pass.
     Layout(
         modifier = modifier
-            .padding(top = 8.dp, bottom = 8.dp, start = 20.dp)
-            .clickable(enabled = isClickable, onClick = onClick),
+            .clickable(enabled = isClickable, onClick = onClick)
+            .padding(top = 8.dp, bottom = 8.dp, start = 20.dp),
         content = {
             RadioButton(
                 selected = isSelected,
