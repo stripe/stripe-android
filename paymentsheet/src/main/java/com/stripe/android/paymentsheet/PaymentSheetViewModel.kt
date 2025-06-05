@@ -216,6 +216,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 true
             is ConfirmationHandler.State.Confirming -> {
                 when (state.option) {
+                    // Hide the payment sheet for these confirmation flows that render UI
+                    // on top of the payment sheet to avoid weird visual overlap.
                     is GooglePayConfirmationOption,
                     is LinkConfirmationOption ->
                         false
