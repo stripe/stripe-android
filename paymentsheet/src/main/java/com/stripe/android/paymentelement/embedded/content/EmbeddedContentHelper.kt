@@ -177,9 +177,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             eventReporter = eventReporter,
             selectionUpdater = {
                 setSelection(it)
-                if (it !is PaymentSelection.New.LinkInline) {
-                    invokeRowSelectionCallback()
-                }
+                invokeRowSelectionCallback()
             },
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
