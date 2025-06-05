@@ -8,6 +8,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.ui.core.elements.OTPSpec
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -23,6 +24,8 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle
 ) : LinkEmbeddedInteractor {
+
+    override val otpElement = OTPSpec.transform()
 
     private val _state: StateFlow<LinkEmbeddedState> =
         savedStateHandle.getStateFlow(
@@ -52,8 +55,8 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
         }
 
         val linkAccount = linkAccountManager.linkAccountInfo.value.account
-        if (linkAccount == null || linkAccount.existingLinkCustomer().not()) {
-            // If there is no Link account, we don't need to handle verification.
+        if (linkAccount == null || linkAccount.accountStatus != AccountStatus.NeedsVerification) {
+            // If there is no Link account or verification is not needed, don't start verification.
             updateState { it.copy(verificationState = VerificationState.Resolved) }
             return
         }
@@ -64,7 +67,7 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
         }
     }
 
-    fun LinkAccount.initialVerificationState() = VerificationState.Verifying(
+    private fun LinkAccount.initialVerificationState() = VerificationState.Verifying(
         VerificationViewState(
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
@@ -82,17 +85,6 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = block(currentState)
     }
 
-    private fun LinkAccount.existingLinkCustomer(): Boolean {
-        return when (accountStatus) {
-            // No account or logged out
-            AccountStatus.Error -> false
-            AccountStatus.SignedOut -> false
-            AccountStatus.Verified -> true
-            AccountStatus.NeedsVerification -> true
-            AccountStatus.VerificationStarted -> true
-        }
-    }
-
     private fun PaymentMethodMetadata.linkAccountManager(): LinkAccountManager? {
         val configuration = linkState?.configuration ?: return null
         val linkComponent = linkConfigurationCoordinator.getComponent(configuration)
@@ -105,6 +97,8 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
 
     @AssistedFactory
     fun interface Factory {
-        fun create(coroutineScope: CoroutineScope): DefaultLinkEmbeddedInteractor
+        fun create(
+            coroutineScope: CoroutineScope
+        ): DefaultLinkEmbeddedInteractor
     }
 }

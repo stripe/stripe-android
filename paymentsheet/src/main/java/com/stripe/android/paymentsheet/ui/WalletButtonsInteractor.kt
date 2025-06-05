@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.WalletButton
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
+import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -37,10 +38,15 @@ internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
     class State(
-        val verificationState: VerificationViewState?,
+        val linkOtpState: LinkOtpState?,
         val walletButtons: List<WalletButton>,
         val buttonsEnabled: Boolean,
-    )
+    ) {
+        data class LinkOtpState(
+            val viewState: VerificationViewState,
+            val otpElement: OTPElement
+        )
+    }
 
     fun handleViewAction(action: ViewAction)
 
@@ -133,8 +139,16 @@ internal class DefaultWalletButtonsInteractor(
             }
         } ?: emptyList()
 
+        val verifyingState = (linkEmbeddedState.verificationState as? Verifying)?.viewState
+        val linkOTPState = verifyingState?.let {
+            WalletButtonsInteractor.State.LinkOtpState(
+                viewState = it,
+                otpElement = linkEmbeddedInteractor.otpElement
+            )
+        }
+
         WalletButtonsInteractor.State(
-            verificationState = (linkEmbeddedState.verificationState as? Verifying)?.viewState,
+            linkOtpState = linkOTPState,
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
         )
