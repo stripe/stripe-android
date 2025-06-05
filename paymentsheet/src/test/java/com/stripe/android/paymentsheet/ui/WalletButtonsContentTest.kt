@@ -39,14 +39,14 @@ class WalletButtonsContentTest {
         composeTestRule.waitForIdle()
 
         assertThat(viewActionCalls.awaitItem()).isEqualTo(
-            WalletButtonsInteractor.ViewAction.OnRendered
+            WalletButtonsInteractor.ViewAction.OnShown
         )
 
         shouldRender.value = false
         composeTestRule.waitForIdle()
 
         assertThat(viewActionCalls.awaitItem()).isEqualTo(
-            WalletButtonsInteractor.ViewAction.OnUnRendered
+            WalletButtonsInteractor.ViewAction.OnHidden
         )
     }
 

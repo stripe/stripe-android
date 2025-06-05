@@ -20,10 +20,10 @@ internal class WalletButtonsContent(
         val state by interactor.state.collectAsState()
 
         DisposableEffect(Unit) {
-            interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnRendered)
+            interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnShown)
 
             onDispose {
-                interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnUnRendered)
+                interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnHidden)
             }
         }
 

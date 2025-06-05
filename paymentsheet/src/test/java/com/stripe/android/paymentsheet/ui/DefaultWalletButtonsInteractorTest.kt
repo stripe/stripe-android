@@ -391,7 +391,7 @@ class DefaultWalletButtonsInteractorTest {
             completable.complete(isRendered)
         }
 
-        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnRendered)
+        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnShown)
 
         assertThat(completable.await()).isTrue()
     }
@@ -404,7 +404,7 @@ class DefaultWalletButtonsInteractorTest {
             completable.complete(isRendered)
         }
 
-        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnUnRendered)
+        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnHidden)
 
         assertThat(completable.await()).isFalse()
     }

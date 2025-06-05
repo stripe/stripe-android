@@ -78,8 +78,8 @@ internal interface WalletButtonsInteractor {
 
     sealed interface ViewAction {
         data class OnButtonPressed(val button: WalletButton) : ViewAction
-        data object OnRendered : ViewAction
-        data object OnUnRendered : ViewAction
+        data object OnShown : ViewAction
+        data object OnHidden : ViewAction
     }
 }
 
@@ -138,8 +138,8 @@ internal class DefaultWalletButtonsInteractor(
                     )
                 }
             }
-            is WalletButtonsInteractor.ViewAction.OnRendered -> onWalletButtonsRenderStateChanged(true)
-            is WalletButtonsInteractor.ViewAction.OnUnRendered -> onWalletButtonsRenderStateChanged(false)
+            is WalletButtonsInteractor.ViewAction.OnShown -> onWalletButtonsRenderStateChanged(true)
+            is WalletButtonsInteractor.ViewAction.OnHidden -> onWalletButtonsRenderStateChanged(false)
         }
     }
 
