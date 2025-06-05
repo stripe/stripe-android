@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -22,7 +23,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -432,7 +432,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 skipItems(1)
 
                 assertThat(awaitItem().displayablePaymentMethods.first().displayName)
-                    .isEqualTo(R.string.stripe_paymentsheet_payment_method_card.resolvableString)
+                    .isEqualTo(StripeUiCoreR.string.stripe_paymentsheet_payment_method_card.resolvableString)
             }
         }
     }
@@ -1392,6 +1392,57 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
+    @Test
+    fun linkRowButtonShowsEmailSubtitleorReturningConsumer() {
+        val walletsState = WalletsState.create(
+            isLinkAvailable = true,
+            linkEmail = "foo@bar.com",
+            isGooglePayReady = true,
+            googlePayButtonType = GooglePayButtonType.Pay,
+            buttonsEnabled = true,
+            paymentMethodTypes = listOf("card"),
+            isSetupIntent = false,
+            googlePayLauncherConfig = null,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        runScenario(
+            initialWalletsState = walletsState,
+            canShowWalletsInline = true,
+        ) {
+            interactor.state.test {
+                val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
+                assertThat(linkPaymentMethod?.subtitle).isEqualTo("foo@bar.com".resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun linkRowButtonShowsGenericSubtitleForUnknownConsumer() {
+        val walletsState = WalletsState.create(
+            isLinkAvailable = true,
+            linkEmail = null,
+            isGooglePayReady = true,
+            googlePayButtonType = GooglePayButtonType.Pay,
+            buttonsEnabled = true,
+            paymentMethodTypes = listOf("card"),
+            isSetupIntent = false,
+            googlePayLauncherConfig = null,
+            onGooglePayPressed = {},
+            onLinkPressed = {},
+        )
+        runScenario(
+            initialWalletsState = walletsState,
+            canShowWalletsInline = true,
+        ) {
+            interactor.state.test {
+                val linkPaymentMethod = awaitItem().displayablePaymentMethods.firstOrNull { it.code == "link" }
+                assertThat(linkPaymentMethod?.subtitle)
+                    .isEqualTo(R.string.stripe_link_simple_secure_payments.resolvableString)
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -1426,6 +1477,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired
             !requiresFormScreen
         },
+        initialWalletsState: WalletsState? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1434,7 +1486,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val paymentMethods: MutableStateFlow<List<PaymentMethod>> = MutableStateFlow(initialPaymentMethods)
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
             MutableStateFlow(initialMostRecentlySelectedSavedPaymentMethod)
-        val walletsState = MutableStateFlow<WalletsState?>(null)
+        val walletsState = MutableStateFlow<WalletsState?>(initialWalletsState)
         val canRemove = MutableStateFlow(true)
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
