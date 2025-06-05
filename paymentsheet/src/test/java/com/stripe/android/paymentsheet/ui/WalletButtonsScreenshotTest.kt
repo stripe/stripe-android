@@ -50,6 +50,7 @@ class WalletButtonsScreenshotTest {
             state = WalletButtonsInteractor.State(
                 walletButtons = walletButtons,
                 buttonsEnabled = buttonsEnabled,
+                linkOtpState = null
             )
         )
     )

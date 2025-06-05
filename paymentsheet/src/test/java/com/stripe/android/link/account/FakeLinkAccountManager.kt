@@ -70,6 +70,7 @@ internal open class FakeLinkAccountManager(
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
+    private val startVerificationTurbine = Turbine<Unit>()
 
     private val logoutCall = Turbine<Unit>()
 
@@ -189,6 +190,7 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {
+        startVerificationTurbine.add(Unit)
         return startVerificationResult
     }
 
@@ -232,6 +234,10 @@ internal open class FakeLinkAccountManager(
 
     suspend fun awaitLookupCall(): LookupCall {
         return lookupTurbine.awaitItem()
+    }
+
+    suspend fun awaitStartVerificationCall() {
+        return startVerificationTurbine.awaitItem()
     }
 
     suspend fun awaitLogoutCall() {

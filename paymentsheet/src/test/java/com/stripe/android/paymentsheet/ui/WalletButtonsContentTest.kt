@@ -69,6 +69,7 @@ class WalletButtonsContentTest {
                 state: StateFlow<WalletButtonsInteractor.State> = stateFlowOf(
                     WalletButtonsInteractor.State(
                         walletButtons = emptyList(),
+                        linkOtpState = null,
                         buttonsEnabled = false
                     )
                 ),
