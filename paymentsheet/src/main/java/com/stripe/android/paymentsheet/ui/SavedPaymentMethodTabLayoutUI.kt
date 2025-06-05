@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -146,7 +147,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
         LazyRow(
             state = scrollState,
             userScrollEnabled = !isProcessing,
-            contentPadding = PaddingValues(horizontal = 17.dp),
+            contentPadding = getSavedPaymentMethodTabLayoutPaddingValues()
         ) {
             items(
                 items = paymentOptionsItems,
@@ -516,6 +517,11 @@ internal fun CvcRecollectionField(
     }
 }
 
+private fun getSavedPaymentMethodTabLayoutPaddingValues() = PaddingValues(
+    start = (StripeTheme.formInsets.start - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp),
+    end = (StripeTheme.formInsets.end - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp)
+)
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
 
@@ -523,3 +529,4 @@ const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOp
 const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
 private const val ANIMATION_DELAY = 400
 private const val ANIMATION_DURATION = 500
+private const val TAB_LAYOUT_EXTRA_PADDING = 3
