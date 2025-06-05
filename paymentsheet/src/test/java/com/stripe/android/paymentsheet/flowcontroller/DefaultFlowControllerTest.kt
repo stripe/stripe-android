@@ -495,7 +495,8 @@ internal class DefaultFlowControllerTest {
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+            walletButtonsAlreadyShown = false,
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -1346,6 +1347,24 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentOptionActivityLauncher).launch(
             argWhere { it.state.paymentSelection == previousPaymentSelection },
+            anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `On wallet buttons rendered and options launched, 'walletButtonsAlreadyShown' should be true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = true
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess()
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere { it.walletButtonsAlreadyShown },
             anyOrNull(),
         )
     }
@@ -2477,7 +2496,7 @@ internal class DefaultFlowControllerTest {
                 uiContext = testDispatcher,
                 eventReporter = eventReporter,
                 viewModel = viewModel,
-                paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
+                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,

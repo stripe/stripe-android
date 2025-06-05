@@ -31,6 +31,7 @@ internal class PaymentOptionContract :
         val configuration: PaymentSheet.Configuration,
         val linkAccountInfo: LinkAccountUpdate.Value,
         val enableLogging: Boolean,
+        val walletButtonsAlreadyShown: Boolean,
         val productUsage: Set<String>,
         val paymentElementCallbackIdentifier: String,
     ) : ActivityStarter.Args {

@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -382,6 +383,32 @@ class DefaultWalletButtonsInteractorTest {
         }
     }
 
+    @Test
+    fun `On wallet buttons rendered, should call provided callback with true`() = runTest {
+        val completable = CompletableDeferred<Boolean>()
+
+        val interactor = createInteractor { isRendered ->
+            completable.complete(isRendered)
+        }
+
+        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnRendered)
+
+        assertThat(completable.await()).isTrue()
+    }
+
+    @Test
+    fun `On wallet buttons un-rendered, should call provided callback with false`() = runTest {
+        val completable = CompletableDeferred<Boolean>()
+
+        val interactor = createInteractor { isRendered ->
+            completable.complete(isRendered)
+        }
+
+        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnUnRendered)
+
+        assertThat(completable.await()).isFalse()
+    }
+
     private fun googlePayButtonRenderTest(
         arguments: DefaultWalletButtonsInteractor.Arguments,
         expectedGooglePayButtonType: GooglePayButtonType,
@@ -441,12 +468,16 @@ class DefaultWalletButtonsInteractorTest {
         arguments: DefaultWalletButtonsInteractor.Arguments? = null,
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
+            error("Should not be called!")
+        },
     ): DefaultWalletButtonsInteractor {
         return DefaultWalletButtonsInteractor(
             arguments = stateFlowOf(arguments),
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             errorReporter = errorReporter,
+            onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
         )
     }
 

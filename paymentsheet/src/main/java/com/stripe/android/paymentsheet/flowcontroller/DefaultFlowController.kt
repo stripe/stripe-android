@@ -296,6 +296,7 @@ internal class DefaultFlowController @Inject internal constructor(
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 
