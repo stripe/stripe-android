@@ -2,7 +2,6 @@
 
 package com.stripe.android.paymentelement
 
-import androidx.test.espresso.Espresso
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
@@ -48,7 +47,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
-            Espresso.onIdle()
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
@@ -70,7 +68,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
-            Espresso.onIdle()
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails("5555555555554444")
             formPage.clickPrimaryButton()
@@ -79,7 +76,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             embeddedContentPage.assertHasSelectedLpm("card")
             embeddedContentPage.clickOnLpm("card")
-            Espresso.onIdle()
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails("4242424242424242")
             formPage.clickPrimaryButton() // Ensures the form has the previous values.
@@ -100,7 +96,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
-            Espresso.onIdle()
             formPage.waitUntilVisible()
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
@@ -109,7 +104,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
 
             embeddedContentPage.assertHasSelectedLpm("card")
             embeddedContentPage.clickOnLpm("card")
-            Espresso.onIdle()
             formPage.waitUntilVisible()
             formPage.clickPrimaryButton() // Ensures the form has the previous values.
             formPage.waitUntilMissing()
@@ -129,7 +123,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("card")
-            Espresso.onIdle()
             formPage.fillOutCardDetails()
 
             enqueueDeferredIntentConfirmationRequests()
@@ -172,7 +165,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             embeddedContentPage.clickOnLpm("cashapp")
             assertNextItemLabel("Cash App Pay")
 
-            Espresso.onIdle()
             embeddedContentPage.clickOnLpm("cashapp")
             assertNextItemLabel("Cash App Pay")
 
@@ -209,7 +201,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickViewMore()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
@@ -230,14 +221,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickViewMore()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
             assertNextItemCardLabel("4242")
 
             embeddedContentPage.clickViewMore()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card2.id)
             managePage.waitUntilNotVisible()
@@ -258,14 +247,12 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickViewMore()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
             assertNextItemCardLabel("4242")
 
             embeddedContentPage.clickViewMore()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
@@ -305,7 +292,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             embeddedContentPage.clickOnSavedPM(card1.id)
             assertNextItemCardLabel("4242")
 
-            Espresso.onIdle()
             embeddedContentPage.clickOnSavedPM(card1.id)
             assertNextItemCardLabel("4242")
 
@@ -323,7 +309,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickViewMore()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.clickEdit()
             managePage.clickEdit(card1.id)
@@ -332,7 +317,6 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             networkRule.setupPaymentMethodDetachResponse(card1.id)
 
             editPage.clickRemove()
-            Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.waitUntilGone(card1.id)
             managePage.clickDone()

@@ -22,7 +22,7 @@ class ManagePage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
