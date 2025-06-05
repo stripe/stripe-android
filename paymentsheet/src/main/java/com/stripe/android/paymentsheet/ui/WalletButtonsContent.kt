@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
@@ -33,6 +34,10 @@ internal class WalletButtonsContent(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    if (state.verificationState != null) {
+                        Text("Link inline OTP")
+                    }
+
                     state.walletButtons.forEach { button ->
                         when (button) {
                             is WalletButtonsInteractor.WalletButton.GooglePay -> GooglePayButton(
@@ -49,15 +54,6 @@ internal class WalletButtonsContent(
                                 },
                             )
                             is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
-                                email = button.email,
-                                enabled = state.buttonsEnabled,
-                                onClick = {
-                                    interactor.handleViewAction(
-                                        OnButtonPressed(button)
-                                    )
-                                },
-                            )
-                            is WalletButtonsInteractor.WalletButton.Link2FA -> LinkButton(
                                 email = button.email,
                                 enabled = state.buttonsEnabled,
                                 onClick = {

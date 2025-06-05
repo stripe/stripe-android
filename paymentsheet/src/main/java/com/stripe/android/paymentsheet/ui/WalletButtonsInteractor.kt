@@ -10,6 +10,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.verification.LinkEmbeddedInteractor
 import com.stripe.android.link.verification.VerificationState
+import com.stripe.android.link.verification.VerificationState.Verifying
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -36,6 +37,7 @@ internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
     class State(
+        val verificationState: VerificationViewState?,
         val walletButtons: List<WalletButton>,
         val buttonsEnabled: Boolean,
     )
@@ -51,18 +53,6 @@ internal interface WalletButtonsInteractor {
             val email: String?,
         ) : WalletButton {
             override fun createSelection(): PaymentSelection {
-                return PaymentSelection.Link(useLinkExpress = false)
-            }
-        }
-
-        @Immutable
-        @Stable
-        data class Link2FA(
-            val verificationViewState: VerificationViewState,
-            val email: String?,
-        ) : WalletButton {
-            override fun createSelection(): PaymentSelection {
-                // 2FA button doesn't directly create a selection
                 return PaymentSelection.Link(useLinkExpress = false)
             }
         }
@@ -133,26 +123,18 @@ internal class DefaultWalletButtonsInteractor(
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
                     )
-                    WalletType.Link -> when (val verificationState = linkEmbeddedState.verificationState) {
-                        // Case 1: Show Link 2FA when verification is in progress
-                        is VerificationState.Verifying -> WalletButton.Link2FA(
-                            verificationViewState = verificationState.viewState,
-                            email = linkEmail
-                        )
-
-                        // Case 2: Show Link button if verification is resolved
-                        is VerificationState.Resolved -> WalletButton.Link(
-                            email = linkEmail
-                        )
-
-                        // Case 3: When loading, don't show the button at all
-                        is VerificationState.Loading -> null
+                    WalletType.Link -> WalletButton.Link(
+                        email = linkEmail
+                    ).takeIf {
+                        // Only show Link button if the Link verification state is resolved.
+                        linkEmbeddedState.verificationState is VerificationState.Resolved
                     }
                 }
             }
         } ?: emptyList()
 
         WalletButtonsInteractor.State(
+            verificationState = (linkEmbeddedState.verificationState as? Verifying)?.viewState,
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
         )
