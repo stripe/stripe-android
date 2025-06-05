@@ -74,8 +74,8 @@ internal fun runEmbeddedPaymentElementTest(
                 resultCallback.onResult(result)
                 countDownLatch.countDown()
             },
-        ).rowSelectionBehavior(rowSelectionBehavior)
-            .apply {
+        ).apply {
+            rowSelectionBehavior(rowSelectionBehavior)
             builder()
         }
         it.setContent {
