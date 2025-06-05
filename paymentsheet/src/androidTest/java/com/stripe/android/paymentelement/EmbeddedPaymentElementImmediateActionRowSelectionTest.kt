@@ -53,7 +53,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             formPage.waitUntilMissing()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             enqueueDeferredIntentConfirmationRequests()
 
@@ -75,7 +75,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails("5555555555554444")
             formPage.clickPrimaryButton()
             formPage.waitUntilMissing()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4444"))
+            assertNextItemCardLabel("4444")
 
             embeddedContentPage.assertHasSelectedLpm("card")
             embeddedContentPage.clickOnLpm("card")
@@ -84,7 +84,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails("4242424242424242")
             formPage.clickPrimaryButton() // Ensures the form has the previous values.
             formPage.waitUntilMissing()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             enqueueDeferredIntentConfirmationRequests()
             testContext.confirm()
@@ -105,7 +105,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             formPage.waitUntilMissing()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             embeddedContentPage.assertHasSelectedLpm("card")
             embeddedContentPage.clickOnLpm("card")
@@ -113,7 +113,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.waitUntilVisible()
             formPage.clickPrimaryButton() // Ensures the form has the previous values.
             formPage.waitUntilMissing()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             enqueueDeferredIntentConfirmationRequests()
             testContext.confirm()
@@ -153,7 +153,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("cashapp")
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo("Cash App Pay")
+            assertNextItemLabel("Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests()
 
@@ -170,11 +170,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("cashapp")
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo("Cash App Pay")
+            assertNextItemLabel("Cash App Pay")
 
             Espresso.onIdle()
             embeddedContentPage.clickOnLpm("cashapp")
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo("Cash App Pay")
+            assertNextItemLabel("Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests()
 
@@ -191,7 +191,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnLpm("cashapp")
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo("Cash App Pay")
+            assertNextItemLabel("Cash App Pay")
 
             enqueueDeferredIntentConfirmationRequests()
             testContext.confirm()
@@ -213,7 +213,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             testContext.markTestSucceeded()
         }
@@ -234,14 +234,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             embeddedContentPage.clickViewMore()
             Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card2.id)
             managePage.waitUntilNotVisible()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("5544"))
+            assertNextItemCardLabel("5544")
 
             testContext.markTestSucceeded()
         }
@@ -262,14 +262,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             embeddedContentPage.clickViewMore()
             Espresso.onIdle()
             managePage.waitUntilVisible()
             managePage.selectPaymentMethod(card1.id)
             managePage.waitUntilNotVisible()
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             testContext.markTestSucceeded()
         }
@@ -286,7 +286,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnSavedPM(card1.id)
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             testContext.markTestSucceeded()
         }
@@ -303,11 +303,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
         ) { testContext ->
             embeddedContentPage.clickOnSavedPM(card1.id)
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             Espresso.onIdle()
             embeddedContentPage.clickOnSavedPM(card1.id)
-            assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel("4242"))
+            assertNextItemCardLabel("4242")
 
             testContext.markTestSucceeded()
         }
@@ -380,6 +380,14 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
             testBlock(testContext)
         }
+    }
+
+    private suspend fun assertNextItemLabel(label: String) {
+        assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(label)
+    }
+
+    private suspend fun assertNextItemCardLabel(last4: String) {
+        assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel(last4))
     }
 
     private fun getCardLabel(last4: String): String {
