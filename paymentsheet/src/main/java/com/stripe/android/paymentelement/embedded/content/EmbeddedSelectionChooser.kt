@@ -25,6 +25,7 @@ internal fun interface EmbeddedSelectionChooser {
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
+        defaultPaymentMethodId: String?,
     ): PaymentSelection?
 }
 
@@ -48,8 +49,23 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
+        defaultPaymentMethodId: String?,
     ): PaymentSelection? {
-        val result = previousSelection?.takeIf { selection ->
+        // Get the default payment method, and check if it is valid
+        val defaultPaymentMethodSelection = defaultPaymentMethodId?.let {
+            paymentMethods?.find {
+                it.id == defaultPaymentMethodId
+            }?.let { defaultPaymentMethod ->
+                PaymentSelection.Saved(defaultPaymentMethod)
+            }?.takeIf { defaultPaymentMethodSelection ->
+                canUseSelection(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    paymentMethods = paymentMethods,
+                    previousSelection = defaultPaymentMethodSelection,
+                ) && paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+            }
+        }
+        val result = defaultPaymentMethodSelection ?: previousSelection?.takeIf { selection ->
             canUseSelection(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethods = paymentMethods,

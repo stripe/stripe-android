@@ -45,6 +45,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = null,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
     }
@@ -65,6 +66,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -80,6 +82,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -94,6 +97,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isNull()
     }
@@ -112,6 +116,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isNull()
     }
@@ -130,6 +135,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -147,6 +153,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isNull()
     }
@@ -165,6 +172,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = PaymentSelection.GooglePay,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -182,6 +190,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isNull()
     }
@@ -199,6 +208,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -220,6 +230,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(newSelection)
     }
@@ -242,6 +253,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isNull()
     }
@@ -261,6 +273,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -280,6 +293,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -299,6 +313,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -320,6 +335,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
@@ -341,8 +357,105 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = null,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `Selects defaultPaymentMethod as selection`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val newSelection = PaymentSelection.Saved(newSelectionPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = true
+            ),
+            paymentMethods = listOf(
+                newSelectionPaymentMethod,
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = "pm_123456789",
+        )
+        assertThat(selection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
+    }
+
+    @Test
+    fun `Selects defaultPaymentMethod as selection when no newSelection`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelection = null
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = true
+            ),
+            paymentMethods = listOf(
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = "pm_123456789",
+        )
+        assertThat(selection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
+    }
+
+    @Test
+    fun `Does not select defaultPaymentMethod as when setAsDefault disabled`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val newSelection = PaymentSelection.Saved(newSelectionPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = false
+            ),
+            paymentMethods = listOf(
+                newSelectionPaymentMethod,
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = "pm_123456789",
+        )
+        assertThat(selection).isEqualTo(previousSelection)
+    }
+
+    @Test
+    fun `Does not select defaultPaymentMethod as when defaultPaymentMethod not in paymentMethods`() = runScenario {
+        val newSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val newSelection = PaymentSelection.Saved(newSelectionPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = false
+            ),
+            paymentMethods = listOf(
+                newSelectionPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = "pm_123456789",
+        )
+        assertThat(selection).isEqualTo(previousSelection)
     }
 
     @Test
@@ -359,6 +472,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = null,
         )
         assertThat(selection).isEqualTo(previousSelection)
         assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY))

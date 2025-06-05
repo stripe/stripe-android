@@ -219,7 +219,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             confirmationStateHolder = confirmationStateHolder,
             configurationHandler = configurationHandler,
             selectionHolder = selectionHolder,
-            selectionChooser = { _, _, _, newSelection, _ ->
+            selectionChooser = { _, _, _, newSelection, _, _ ->
                 selectionChooser(newSelection)
             },
             stateHelper = stateHelper,
