@@ -1,6 +1,7 @@
 package com.stripe.android.link.verification
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
@@ -25,7 +26,8 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
 
     private val _state: StateFlow<LinkEmbeddedState> =
         savedStateHandle.getStateFlow(
-            LINK_EMBEDDED_STATE_KEY, LinkEmbeddedState(
+            key = LINK_EMBEDDED_STATE_KEY,
+            initialValue = LinkEmbeddedState(
                 verificationState = VerificationState.Loading
             )
         )
@@ -36,33 +38,43 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
      * Sets up Link verification domain logic (should be called once when initializing)
      */
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
+        if (FeatureFlags.showInlineSignupInWalletButtons.isEnabled.not()) {
+            // If the feature flag is disabled, do not start Link verification.
+            updateState { it.copy(verificationState = VerificationState.Resolved) }
+            return
+        }
+
+        val linkAccountManager = paymentMethodMetadata.linkAccountManager()
+        if (linkAccountManager == null) {
+            // If there is no Link account manager, we don't need to handle verification.
+            updateState { it.copy(verificationState = VerificationState.Resolved) }
+            return
+        }
+
+        val linkAccount = linkAccountManager.linkAccountInfo.value.account
+        if (linkAccount == null || linkAccount.existingLinkCustomer().not()) {
+            // If there is no Link account, we don't need to handle verification.
+            updateState { it.copy(verificationState = VerificationState.Resolved) }
+            return
+        }
+
         coroutineScope.launch {
-            val linkAccountManager = paymentMethodMetadata.linkAccountManager()
-            val linkAccount = linkAccountManager?.linkAccountInfo?.value?.account
-            if (linkAccountManager != null && linkAccount != null && linkAccount.existingLinkCustomer()) {
-                // If the user is logged in and needs verification, start the verification process.
-                updateState {
-                    it.copy(
-                        verificationState = VerificationState.Verifying(
-                            viewState = linkAccount.initial()
-                        )
-                    )
-                }
-            } else {
-                updateState { it.copy(verificationState = VerificationState.Resolved) }
-            }
+            linkAccountManager.startVerification()
+            updateState { it.copy(verificationState = linkAccount.initialVerificationState()) }
         }
     }
 
-    fun LinkAccount.initial() = VerificationViewState(
-        email = email,
-        redactedPhoneNumber = redactedPhoneNumber,
-        isProcessing = true,
-        isSendingNewCode = false,
-        didSendNewCode = false,
-        isDialog = true,
-        requestFocus = false,
-        errorMessage = null
+    fun LinkAccount.initialVerificationState() = VerificationState.Verifying(
+        VerificationViewState(
+            email = email,
+            redactedPhoneNumber = redactedPhoneNumber,
+            isProcessing = false,
+            isSendingNewCode = false,
+            didSendNewCode = false,
+            isDialog = true,
+            requestFocus = false,
+            errorMessage = null
+        )
     )
 
     private fun updateState(block: (LinkEmbeddedState) -> LinkEmbeddedState) {
@@ -80,7 +92,6 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
             AccountStatus.VerificationStarted -> true
         }
     }
-
 
     private fun PaymentMethodMetadata.linkAccountManager(): LinkAccountManager? {
         val configuration = linkState?.configuration ?: return null

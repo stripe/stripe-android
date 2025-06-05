@@ -12,4 +12,3 @@ internal interface LinkEmbeddedInteractor {
      */
     fun setup(paymentMethodMetadata: PaymentMethodMetadata)
 }
-

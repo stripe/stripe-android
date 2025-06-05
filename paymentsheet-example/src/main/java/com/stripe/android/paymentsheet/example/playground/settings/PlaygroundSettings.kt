@@ -459,6 +459,7 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
             WalletButtonsSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.linkProminenceInFlowController),
+            FeatureFlagSettingsDefinition(FeatureFlags.showInlineSignupInWalletButtons),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
