@@ -8,6 +8,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.*
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -43,7 +44,7 @@ internal class WalletButtonsContent(
                                 cardBrandFilter = button.cardBrandFilter,
                                 onPressed = {
                                     interactor.handleViewAction(
-                                        WalletButtonsInteractor.ViewAction.OnButtonPressed(button)
+                                        OnButtonPressed(button)
                                     )
                                 },
                             )
@@ -52,7 +53,16 @@ internal class WalletButtonsContent(
                                 enabled = state.buttonsEnabled,
                                 onClick = {
                                     interactor.handleViewAction(
-                                        WalletButtonsInteractor.ViewAction.OnButtonPressed(button)
+                                        OnButtonPressed(button)
+                                    )
+                                },
+                            )
+                            is WalletButtonsInteractor.WalletButton.Link2FA -> LinkButton(
+                                email = button.email,
+                                enabled = state.buttonsEnabled,
+                                onClick = {
+                                    interactor.handleViewAction(
+                                        OnButtonPressed(button)
                                     )
                                 },
                             )
