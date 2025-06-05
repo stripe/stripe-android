@@ -51,19 +51,20 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         newConfiguration: CommonConfiguration,
         defaultPaymentMethodId: String?,
     ): PaymentSelection? {
-        // Get the default payment method, and check if it is valid
-        val defaultPaymentMethodSelection = defaultPaymentMethodId?.let {
-            paymentMethods?.find {
-                it.id == defaultPaymentMethodId
-            }?.let { defaultPaymentMethod ->
-                PaymentSelection.Saved(defaultPaymentMethod)
-            }?.takeIf { defaultPaymentMethodSelection ->
+        /**
+         * In the case that there is a defaultPaymentMethod and setAsDefault is enabled, newSelection.paymentMethod
+         * will be the defaultPaymentMethod. See [DefaultPaymentElementLoader.retrieveInitialPaymentSelection]
+         */
+        val defaultPaymentMethodSelection = newSelection?.takeIf {
+            paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+                defaultPaymentMethodId != null &&
+                it is PaymentSelection.Saved &&
+                it.paymentMethod.id == defaultPaymentMethodId &&
                 canUseSelection(
                     paymentMethodMetadata = paymentMethodMetadata,
                     paymentMethods = paymentMethods,
-                    previousSelection = defaultPaymentMethodSelection,
-                ) && paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
-            }
+                    previousSelection = it,
+                )
         }
         val result = defaultPaymentMethodSelection ?: previousSelection?.takeIf { selection ->
             canUseSelection(

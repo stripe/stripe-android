@@ -365,8 +365,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
     @Test
     fun `Selects defaultPaymentMethod as selection`() = runScenario {
         val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val newSelectionPaymentMethod = PaymentMethodFixtures.createCard()
-        val newSelection = PaymentSelection.Saved(newSelectionPaymentMethod)
+        val newSelection = PaymentSelection.Saved(defaultPaymentMethod)
         val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
         val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
 
@@ -375,7 +374,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
                 isPaymentMethodSetAsDefaultEnabled = true
             ),
             paymentMethods = listOf(
-                newSelectionPaymentMethod,
+                PaymentMethodFixtures.createCard(),
                 defaultPaymentMethod,
                 previousSelectionPaymentMethod
             ),
@@ -384,37 +383,13 @@ internal class DefaultEmbeddedSelectionChooserTest {
             newConfiguration = defaultConfiguration,
             defaultPaymentMethodId = "pm_123456789",
         )
-        assertThat(selection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
+        assertThat(selection).isEqualTo(newSelection)
     }
 
     @Test
-    fun `Selects defaultPaymentMethod as selection when no newSelection`() = runScenario {
+    fun `Does not select defaultPaymentMethod when setAsDefault disabled`() = runScenario {
         val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val newSelection = null
-        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
-        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
-
-        val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                isPaymentMethodSetAsDefaultEnabled = true
-            ),
-            paymentMethods = listOf(
-                defaultPaymentMethod,
-                previousSelectionPaymentMethod
-            ),
-            previousSelection = previousSelection,
-            newSelection = newSelection,
-            newConfiguration = defaultConfiguration,
-            defaultPaymentMethodId = "pm_123456789",
-        )
-        assertThat(selection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
-    }
-
-    @Test
-    fun `Does not select defaultPaymentMethod as when setAsDefault disabled`() = runScenario {
-        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val newSelectionPaymentMethod = PaymentMethodFixtures.createCard()
-        val newSelection = PaymentSelection.Saved(newSelectionPaymentMethod)
+        val newSelection = PaymentSelection.Saved(defaultPaymentMethod)
         val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
         val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
 
@@ -423,31 +398,8 @@ internal class DefaultEmbeddedSelectionChooserTest {
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
             paymentMethods = listOf(
-                newSelectionPaymentMethod,
+                PaymentMethodFixtures.createCard(),
                 defaultPaymentMethod,
-                previousSelectionPaymentMethod
-            ),
-            previousSelection = previousSelection,
-            newSelection = newSelection,
-            newConfiguration = defaultConfiguration,
-            defaultPaymentMethodId = "pm_123456789",
-        )
-        assertThat(selection).isEqualTo(previousSelection)
-    }
-
-    @Test
-    fun `Does not select defaultPaymentMethod as when defaultPaymentMethod not in paymentMethods`() = runScenario {
-        val newSelectionPaymentMethod = PaymentMethodFixtures.createCard()
-        val newSelection = PaymentSelection.Saved(newSelectionPaymentMethod)
-        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
-        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
-
-        val selection = chooser.choose(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                isPaymentMethodSetAsDefaultEnabled = false
-            ),
-            paymentMethods = listOf(
-                newSelectionPaymentMethod,
                 previousSelectionPaymentMethod
             ),
             previousSelection = previousSelection,
