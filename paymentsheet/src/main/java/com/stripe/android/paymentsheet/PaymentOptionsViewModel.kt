@@ -94,30 +94,34 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
-    override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
-        linkHandler.isLinkEnabled,
-        linkHandler.linkConfigurationCoordinator.emailFlow,
-        buttonsEnabled,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
-        val paymentMethodMetadata = args.state.paymentMethodMetadata
-        WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
-            linkEmail = linkEmail,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
-            buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
-            googlePayLauncherConfig = null,
-            googlePayButtonType = GooglePayButtonType.Pay,
-            onGooglePayPressed = {
-                updateSelection(PaymentSelection.GooglePay)
-                onUserSelection()
-            },
-            onLinkPressed = {
-                updateSelection(PaymentSelection.Link())
-                onUserSelection()
-            },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
-        )
+    override val walletsState: StateFlow<WalletsState?> = if (args.walletButtonsAlreadyShown) {
+        stateFlowOf(null)
+    } else {
+        combineAsStateFlow(
+            linkHandler.isLinkEnabled,
+            linkHandler.linkConfigurationCoordinator.emailFlow,
+            buttonsEnabled,
+        ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+            val paymentMethodMetadata = args.state.paymentMethodMetadata
+            WalletsState.create(
+                isLinkAvailable = isLinkAvailable,
+                linkEmail = linkEmail,
+                isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
+                buttonsEnabled = buttonsEnabled,
+                paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
+                googlePayLauncherConfig = null,
+                googlePayButtonType = GooglePayButtonType.Pay,
+                onGooglePayPressed = {
+                    updateSelection(PaymentSelection.GooglePay)
+                    onUserSelection()
+                },
+                onLinkPressed = {
+                    updateSelection(PaymentSelection.Link())
+                    onUserSelection()
+                },
+                isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+            )
+        }
     }
 
     // Only used to determine if we should skip the list and go to the add card view and how to populate that view.

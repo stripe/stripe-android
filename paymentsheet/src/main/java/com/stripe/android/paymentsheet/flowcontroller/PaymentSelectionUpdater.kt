@@ -14,6 +14,7 @@ internal fun interface PaymentSelectionUpdater {
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
+        walletButtonsAlreadyShown: Boolean,
     ): PaymentSelection?
 }
 
@@ -24,20 +25,29 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
+        walletButtonsAlreadyShown: Boolean,
     ): PaymentSelection? {
-        return currentSelection?.takeIf { selection ->
-            canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
-                !previousConfig.asCommonConfiguration().containsVolatileDifferences(newConfig.asCommonConfiguration())
-            } != false
-        } ?: newState.paymentSelection
+        val availableSelection = currentSelection ?: newState.paymentSelection
+
+        return availableSelection?.takeIf { selection ->
+            canUseSelection(selection, newState, newConfig, walletButtonsAlreadyShown) &&
+                previousConfig?.let { previousConfig ->
+                    !previousConfig.asCommonConfiguration()
+                        .containsVolatileDifferences(newConfig.asCommonConfiguration())
+                } != false
+        }
     }
 
     private fun canUseSelection(
         selection: PaymentSelection,
         state: PaymentSheetState.Full,
+        configuration: PaymentSheet.Configuration,
+        walletButtonsAlreadyShown: Boolean,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
         val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
+
+        val shouldNotInitiallySelectWallets = configuration.willShowWalletButtons || walletButtonsAlreadyShown
 
         return when (selection) {
             is PaymentSelection.New -> {
@@ -54,10 +64,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
-                state.paymentMethodMetadata.isGooglePayReady
+                state.paymentMethodMetadata.isGooglePayReady && !shouldNotInitiallySelectWallets
             }
             is PaymentSelection.Link -> {
-                state.paymentMethodMetadata.linkState != null
+                state.paymentMethodMetadata.linkState != null && !shouldNotInitiallySelectWallets
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)

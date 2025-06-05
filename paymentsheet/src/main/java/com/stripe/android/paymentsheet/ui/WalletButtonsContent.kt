@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
@@ -17,6 +18,14 @@ internal class WalletButtonsContent(
     @Composable
     fun Content() {
         val state by interactor.state.collectAsState()
+
+        DisposableEffect(Unit) {
+            interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnShown)
+
+            onDispose {
+                interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnHidden)
+            }
+        }
 
         if (state.walletButtons.isNotEmpty()) {
             StripeTheme {

@@ -658,6 +658,8 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.customPaymentMethods,
 
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
+
+        internal val willShowWalletButtons: Boolean = false,
     ) : Parcelable {
 
         @JvmOverloads
@@ -810,6 +812,7 @@ class PaymentSheet internal constructor(
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+            private var willShowWalletButtons: Boolean = false
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -942,6 +945,11 @@ class PaymentSheet internal constructor(
                 this.link = link
             }
 
+            @WalletButtonsPreview
+            fun willShowWalletButtons(willShowWalletButtons: Boolean) = apply {
+                this.willShowWalletButtons = willShowWalletButtons
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -962,6 +970,7 @@ class PaymentSheet internal constructor(
                 cardBrandAcceptance = cardBrandAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
+                willShowWalletButtons = willShowWalletButtons,
             )
         }
 

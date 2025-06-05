@@ -78,6 +78,8 @@ internal interface WalletButtonsInteractor {
 
     sealed interface ViewAction {
         data class OnButtonPressed(val button: WalletButton) : ViewAction
+        data object OnShown : ViewAction
+        data object OnHidden : ViewAction
     }
 }
 
@@ -86,6 +88,7 @@ internal class DefaultWalletButtonsInteractor(
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
     private val errorReporter: ErrorReporter,
+    private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
     override val state: StateFlow<WalletButtonsInteractor.State> = combineAsStateFlow(
         arguments,
@@ -135,6 +138,8 @@ internal class DefaultWalletButtonsInteractor(
                     )
                 }
             }
+            is WalletButtonsInteractor.ViewAction.OnShown -> onWalletButtonsRenderStateChanged(true)
+            is WalletButtonsInteractor.ViewAction.OnHidden -> onWalletButtonsRenderStateChanged(false)
         }
     }
 
@@ -191,6 +196,9 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
+                onWalletButtonsRenderStateChanged = { isRendered ->
+                    flowControllerViewModel.walletButtonsRendered = isRendered
+                }
             )
         }
 
@@ -220,6 +228,9 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = confirmationHandler,
                 coroutineScope = coroutineScope,
+                onWalletButtonsRenderStateChanged = {
+                    // No-op, not supported for Embedded
+                },
             )
         }
     }
