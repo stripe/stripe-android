@@ -32,7 +32,7 @@ internal object FormInsetsAppearanceSettingDefinition :
                 startDp = value.start,
                 topDp = value.top,
                 endDp = value.end,
-                bottomDp = value.top,
+                bottomDp = value.bottom,
             )
         )
     }
