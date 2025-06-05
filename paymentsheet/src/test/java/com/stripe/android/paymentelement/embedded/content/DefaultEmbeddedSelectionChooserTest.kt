@@ -411,6 +411,30 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
+    fun `Selects previous selection when defaultPaymentMethodId does not match`() = runScenario {
+        val newPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelection = PaymentSelection.Saved(newPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = true
+            ),
+            paymentMethods = listOf(
+                PaymentMethodFixtures.createCard(),
+                newPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            defaultPaymentMethodId = "pm_0000000000000000",
+        )
+        assertThat(selection).isEqualTo(previousSelection)
+    }
+
+    @Test
     fun `previousConfig is set when calling choose`() = runScenario {
         val previousSelection = PaymentSelection.GooglePay
         val paymentMethod = PaymentMethodFixtures.createCard()
