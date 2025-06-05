@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -36,6 +37,8 @@ import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
+private const val NAV_ICON_OFFSET = -20.25
+private const val EDIT_BUTTON_OFFSET = 10.25
 
 @Composable
 internal fun PaymentSheetTopBar(
@@ -66,38 +69,47 @@ internal fun PaymentSheetTopBar(
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val tintColor = MaterialTheme.stripeColors.appBarIcon
-
     TopAppBar(
         title = {
             if (state.showTestModeLabel) {
-                TestModeBadge()
+                Box(
+                    Modifier
+                        .offset(NAV_ICON_OFFSET.dp)
+                        .padding(start = StripeTheme.formInsets.start.dp)
+                ) {
+                    TestModeBadge()
+                }
             }
         },
         navigationIcon = {
-            IconButton(
-                enabled = isEnabled,
-                onClick = {
-                    keyboardController?.hide()
-                    onNavigationIconPressed()
-                },
-                modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
+            Box(
+                Modifier.offset(NAV_ICON_OFFSET.dp).padding(start = StripeTheme.formInsets.start.dp)
             ) {
-                val icon = if (canNavigateBack) {
-                    R.drawable.stripe_ic_paymentsheet_back
-                } else {
-                    R.drawable.stripe_ic_paymentsheet_close
-                }
+                IconButton(
+                    enabled = isEnabled,
+                    onClick = {
+                        keyboardController?.hide()
+                        onNavigationIconPressed()
+                    },
+                    modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
+                ) {
+                    val icon = if (canNavigateBack) {
+                        R.drawable.stripe_ic_paymentsheet_back
+                    } else {
+                        R.drawable.stripe_ic_paymentsheet_close
+                    }
 
-                val contentDescription = if (canNavigateBack) {
-                    StripeUiCoreR.string.stripe_back
-                } else {
-                    R.string.stripe_paymentsheet_close
+                    val contentDescription = if (canNavigateBack) {
+                        StripeUiCoreR.string.stripe_back
+                    } else {
+                        R.string.stripe_paymentsheet_close
+                    }
+                    Icon(
+                        painter = painterResource(icon),
+                        contentDescription = stringResource(contentDescription),
+                        tint = tintColor,
+                    )
                 }
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = stringResource(contentDescription),
-                    tint = tintColor,
-                )
             }
         },
         backgroundColor = MaterialTheme.colors.surface,
@@ -138,19 +150,24 @@ private fun EditButton(
             (sizeInPx.dp * typography.fontSizeMultiplier).toSp()
         }
     }
-
-    IconButton(
-        modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).padding(end = 10.dp),
-        enabled = isEnabled,
-        onClick = onClick,
+    Box(
+        modifier = Modifier
+            .offset(EDIT_BUTTON_OFFSET.dp)
+            .padding(end = StripeTheme.formInsets.end.dp)
     ) {
-        val text = stringResource(labelResourceId)
-        Text(
-            text = text.uppercase(),
-            color = tintColor,
-            fontSize = editButtonFontSize,
-            fontFamily = FontFamily(editButtonTypeface),
-        )
+        IconButton(
+            modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG),
+            enabled = isEnabled,
+            onClick = onClick,
+        ) {
+            val text = stringResource(labelResourceId)
+            Text(
+                text = text.uppercase(),
+                color = tintColor,
+                fontSize = editButtonFontSize,
+                fontFamily = FontFamily(editButtonTypeface),
+            )
+        }
     }
 }
 
