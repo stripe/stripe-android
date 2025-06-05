@@ -168,7 +168,8 @@ internal object PaymentSheetFixtures {
         enableLogging = false,
         productUsage = mock(),
         paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-        linkAccountInfo = LinkAccountUpdate.Value(null)
+        linkAccountInfo = LinkAccountUpdate.Value(null),
+        walletButtonsAlreadyShown = false,
     )
 
     internal fun PaymentOptionContract.Args.updateState(

@@ -6,6 +6,11 @@ internal object WalletButtonsSettingsDefinition : BooleanSettingsDefinition(
     defaultValue = false
 ) {
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
-        return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.Embedded
+        return when (configurationData.integrationType) {
+            PlaygroundConfigurationData.IntegrationType.Embedded,
+            PlaygroundConfigurationData.IntegrationType.FlowController -> true
+            PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+            PlaygroundConfigurationData.IntegrationType.CustomerSheet -> false
+        }
     }
 }
