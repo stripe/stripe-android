@@ -1974,10 +1974,13 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Insets : android
 	public fun <init> (Landroid/content/Context;II)V
 	public fun <init> (Landroid/content/Context;IIII)V
 	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBottomDp ()F
 	public final fun getEndDp ()F
 	public final fun getStartDp ()F
 	public final fun getTopDp ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
