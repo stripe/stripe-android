@@ -283,7 +283,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     }
 
     private fun invokeRowSelectionCallback() {
-        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback()
+        rowSelectionImmediateActionHandler.invoke()
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {

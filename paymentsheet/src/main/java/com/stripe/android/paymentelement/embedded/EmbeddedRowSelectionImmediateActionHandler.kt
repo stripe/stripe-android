@@ -8,8 +8,8 @@ import javax.inject.Provider
 
 internal typealias InternalRowSelectionCallback = () -> Unit
 
-internal interface EmbeddedRowSelectionImmediateActionHandler {
-    fun handleImmediateRowSelectionCallback()
+internal fun interface EmbeddedRowSelectionImmediateActionHandler {
+    fun invoke()
 }
 
 internal class DefaultEmbeddedRowSelectionImmediateActionHandler @Inject constructor(
@@ -21,7 +21,7 @@ internal class DefaultEmbeddedRowSelectionImmediateActionHandler @Inject constru
      * This callback will always be invoked after [DefaultPaymentOptionDisplayDataHolder.paymentOption] updates.
      * The update paymentOption coroutine is always enqueued first because it is always older, it is launched on init.
      */
-    override fun handleImmediateRowSelectionCallback() {
+    override fun invoke() {
         internalRowSelectionCallback.get()?.let { callback -> coroutineScope.launch { callback.invoke() } }
     }
 }

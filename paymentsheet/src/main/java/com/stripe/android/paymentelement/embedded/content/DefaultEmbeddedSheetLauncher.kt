@@ -77,7 +77,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                         EmbeddedPaymentElement.Result.Completed()
                     )
                 } else {
-                    result.selection?.let { rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback() }
+                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
             }
         }
@@ -91,7 +91,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     customerStateHolder.setCustomerState(result.customerState)
                     selectionHolder.set(result.selection)
                     if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                        rowSelectionImmediateActionHandler.handleImmediateRowSelectionCallback()
+                        rowSelectionImmediateActionHandler.invoke()
                     }
                 }
             }
