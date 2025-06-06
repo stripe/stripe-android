@@ -12,7 +12,7 @@ internal object FormInsetsAppearanceSettingDefinition :
     PlaygroundSettingDefinition<FormInsetsAppearance>,
     PlaygroundSettingDefinition.Saveable<FormInsetsAppearance> {
     override val key: String
-        get() = "embeddedAppearance"
+        get() = "formInsetsAppearance"
 
     override val defaultValue: FormInsetsAppearance
         get() = FormInsetsAppearance()
