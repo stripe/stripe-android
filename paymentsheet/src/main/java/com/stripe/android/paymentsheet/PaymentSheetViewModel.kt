@@ -136,6 +136,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle[IN_PROGRESS_SELECTION] = value
         }
 
+    private val isConfirmingWithLinkExpress: Boolean
+        get() = (inProgressSelection as? PaymentSelection.Link)?.useLinkExpress == true
+
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     @VisibleForTesting
@@ -193,7 +196,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentSheetViewState.Reset -> WalletsProcessingState.Idle(
                 error = viewState.errorMessage?.message
             )
-            is PaymentSheetViewState.StartProcessing -> WalletsProcessingState.Processing
+            is PaymentSheetViewState.StartProcessing -> {
+                if (isConfirmingWithLinkExpress) {
+                    // Keep showing the standard loading view to avoid too many UI changes
+                    WalletsProcessingState.Idle(error = null)
+                } else {
+                    WalletsProcessingState.Processing
+                }
+            }
             is PaymentSheetViewState.FinishProcessing -> WalletsProcessingState.Completed(viewState.onComplete)
         }
     }
@@ -204,28 +214,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal val contentVisible: StateFlow<Boolean> = combineAsStateFlow(
         isAwaitingEagerLaunchResult,
-        confirmationHandler.state.mapAsStateFlow { contentVisibleFromConfirmationState(it) }
+        confirmationHandler.state.mapAsStateFlow { it.contentVisible }
     ) { isAwaitingEagerLaunchResult, contentVisibleFromConfirmationState ->
-        isAwaitingEagerLaunchResult == false && contentVisibleFromConfirmationState
+        isAwaitingEagerLaunchResult != true && contentVisibleFromConfirmationState
     }
-
-    private fun contentVisibleFromConfirmationState(state: ConfirmationHandler.State) =
-        when (state) {
-            ConfirmationHandler.State.Idle,
-            is ConfirmationHandler.State.Complete ->
-                true
-            is ConfirmationHandler.State.Confirming -> {
-                when (state.option) {
-                    // Hide the payment sheet for these confirmation flows that render UI
-                    // on top of the payment sheet to avoid weird visual overlap.
-                    is GooglePayConfirmationOption,
-                    is LinkConfirmationOption ->
-                        false
-                    else ->
-                        true
-                }
-            }
-        }
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -242,10 +234,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
-            updateIsAwaitingEagerLaunchResult {
-                // If null at this point, then we're not awaiting a result.
-                it ?: false
-            }
         }
     }
 
@@ -292,6 +280,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
         withContext(Dispatchers.Main.immediate) {
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
+            if (shouldLaunchEagerly) {
+                checkoutWithLinkExpress()
+            }
+
             customerStateHolder.setCustomerState(state.customer)
 
             when (state.paymentSelection) {
@@ -306,18 +299,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 as? ConfirmationHandler.Result.Failed
             val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
-            resetViewState(errorMessage)
-            navigationHandler.resetTo(
-                determineInitialBackStack(
-                    paymentMethodMetadata = state.paymentMethodMetadata,
-                    customerStateHolder = customerStateHolder,
+            if (!shouldLaunchEagerly) {
+                initializeNavigationStateIfNeeded(
+                    metadata = state.paymentMethodMetadata,
+                    errorMessage = errorMessage,
                 )
-            )
-
-            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
-            if (shouldLaunchEagerly) {
-                updateIsAwaitingEagerLaunchResult { true }
-                checkoutWithLinkExpress()
             }
         }
 
@@ -333,6 +319,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         }
                     }
                     is ConfirmationHandler.State.Complete -> {
+                        paymentMethodMetadata.value?.let {
+                            initializeNavigationStateIfNeeded(metadata = it)
+                        }
                         processConfirmationResult(state.result)
                         updateIsAwaitingEagerLaunchResult { false }
                     }
@@ -345,6 +334,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
+    }
+
+    private fun initializeNavigationStateIfNeeded(
+        metadata: PaymentMethodMetadata,
+        errorMessage: ResolvableString? = null
+    ) {
+        val currentScreen = navigationHandler.currentScreen.value
+        if (currentScreen != PaymentSheetScreen.Loading) {
+            // We already initialized the navigation state, so nothing else to do.
+            return
+        }
+
+        resetViewState(errorMessage)
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = metadata,
+                customerStateHolder = customerStateHolder,
+            )
+        )
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
@@ -733,5 +741,22 @@ private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
         is PaymentElementLoader.InitializationMode.SetupIntent -> false
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+        }
+    }
+
+private val ConfirmationHandler.State.contentVisible: Boolean
+    get() = when (this) {
+        is ConfirmationHandler.State.Idle,
+        is ConfirmationHandler.State.Complete -> {
+            true
+        }
+        is ConfirmationHandler.State.Confirming -> {
+            when (option) {
+                // Hide the payment sheet for these confirmation flows that render UI
+                // on top of the payment sheet to avoid weird visual overlap.
+                is GooglePayConfirmationOption -> false
+                is LinkConfirmationOption -> option.useLinkExpress
+                else -> true
+            }
         }
     }
