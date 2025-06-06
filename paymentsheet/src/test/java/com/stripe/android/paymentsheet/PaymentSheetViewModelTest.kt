@@ -149,6 +149,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -175,6 +176,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
@@ -1587,6 +1589,52 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isFalse()
             googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `Content should be hidden during initialization`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(delay = 1.seconds)
+
+        viewModel.contentVisible.test {
+            assertThat(awaitItem()).isFalse()
+            advanceTimeBy(2.seconds)
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `Content should be hidden when Link is visible`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        )
+
+        viewModel.contentVisible.test {
+            assertThat(awaitItem()).isTrue()
+            viewModel.checkoutWithLink()
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `Content starts hidden and remains hidden on checkout with Link Express`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            ),
+            delay = 1.seconds,
+        )
+
+        viewModel.contentVisible.test {
+            assertThat(awaitItem()).isFalse()
+            advanceTimeBy(2.seconds)
+            ensureAllEventsConsumed()
         }
     }
 

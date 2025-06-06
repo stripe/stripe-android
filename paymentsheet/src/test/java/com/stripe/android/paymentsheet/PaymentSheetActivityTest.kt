@@ -88,6 +88,7 @@ import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -134,6 +135,9 @@ internal class PaymentSheetActivityTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -1111,11 +1115,8 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            testDispatcher.scheduler.advanceTimeBy(50)
-            Espresso.onIdle()
-            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }

@@ -116,7 +116,7 @@ private fun Screens(
         composable(LinkScreen.SignUp.route) {
             // Keep height fixed to reduce animations caused by IME toggling on both
             // this screen and Verification screen.
-            MinScreenHeightBox {
+            MinScreenHeightBox(screenHeightPercentage = 1f) {
                 SignUpRoute(
                     navigateAndClearStack = navigateAndClearStack,
                     moveToWeb = moveToWeb
@@ -137,7 +137,7 @@ private fun Screens(
         composable(LinkScreen.Verification.route) {
             // Keep height fixed to reduce animations caused by IME toggling on both
             // this screen and SignUp screen.
-            MinScreenHeightBox {
+            MinScreenHeightBox(screenHeightPercentage = if (initialDestination == LinkScreen.SignUp) 1f else 0f) {
                 val linkAccount = getLinkAccount()
                     ?: return@MinScreenHeightBox dismissWithResult(noLinkAccountResult())
                 VerificationRoute(
