@@ -400,6 +400,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
         )
         assertThat(selection).isEqualTo(newSelection)
     }
@@ -423,6 +424,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             previousSelection = previousSelection,
             newSelection = newSelection,
             newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
         )
         assertThat(selection).isEqualTo(previousSelection)
     }
