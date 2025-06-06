@@ -136,7 +136,7 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
-    fun `when otp is complete and confirmation successful, should keep status as Render2FA and launch Link`() = runTest {
+    fun `when otp complete and confirmation succeeds, keeps status as Render2FA and launches Link`() = runTest {
         // Setup
         val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
