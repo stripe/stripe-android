@@ -123,7 +123,7 @@ internal class DefaultWalletButtonsInteractor(
         val walletButtons = arguments?.run {
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
-                    WalletType.GooglePay -> WalletButtonsInteractor.WalletButton.GooglePay(
+                    WalletType.GooglePay -> WalletButton.GooglePay(
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(
@@ -240,8 +240,7 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
-                linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent
-                    .linkEmbeddedInteractorFactory.create(flowControllerViewModel.viewModelScope),
+                linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }

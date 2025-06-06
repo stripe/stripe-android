@@ -93,6 +93,7 @@
     <ID>TooManyFunctions:EmbeddedCommonModule.kt$EmbeddedCommonModule$Companion</ID>
     <ID>TooManyFunctions:EmbeddedPaymentElementViewModelComponent.kt$EmbeddedPaymentElementViewModelModule</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
+    <ID>TooManyFunctions:FlowControllerModule.kt$FlowControllerModule</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
     <ID>TooManyFunctions:NativeLinkComponent.kt$NativeLinkComponent$Builder</ID>
     <ID>TooManyFunctions:NativeLinkModule.kt$NativeLinkModule</ID>

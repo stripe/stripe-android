@@ -160,7 +160,8 @@ internal class DefaultFlowControllerTest {
     private val sepaMandateActivityLauncher =
         mock<ActivityResultLauncher<SepaMandateContract.Args>>()
 
-    private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+    private val flowControllerLinkPaymentLauncher = mock<LinkPaymentLauncher>()
+    private val walletsButtonLinkPaymentLauncher = mock<LinkPaymentLauncher>()
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -552,7 +553,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.presentPaymentOptions()
 
-        verify(linkPaymentLauncher).present(
+        verify(flowControllerLinkPaymentLauncher).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
@@ -911,7 +912,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
+        verify(flowControllerLinkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1279,7 +1280,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
+        verify(flowControllerLinkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -2503,7 +2504,8 @@ internal class DefaultFlowControllerTest {
             linkHandler = mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
-            linkPaymentLauncher = linkPaymentLauncher,
+            flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
+            walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkProminenceFeatureProvider = linkProminenceFeatureProvider,
             confirmationHandler = createTestConfirmationHandlerFactory(
@@ -2517,7 +2519,7 @@ internal class DefaultFlowControllerTest {
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
                     accountStatus = AccountStatus.Verified,
                 ),
-                linkLauncher = linkPaymentLauncher,
+                linkLauncher = flowControllerLinkPaymentLauncher,
                 errorReporter = errorReporter,
                 savedStateHandle = viewModel.handle,
                 statusBarColor = STATUS_BAR_COLOR,

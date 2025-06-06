@@ -91,7 +91,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
-    @Named(LINK_LAUNCHER_KEY) private val linkPaymentLauncher: LinkPaymentLauncher,
+    @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
+    @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val walletsButtonLinkLauncher: LinkPaymentLauncher,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
@@ -137,22 +138,25 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
-        linkPaymentLauncher.register(
-            key = LINK_LAUNCHER_KEY,
+        flowControllerLinkLauncher.register(
+            key = FLOW_CONTROLLER_LINK_LAUNCHER,
             activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
-            callback = ::onLinkPaymentMethodSelected
+            callback = ::onLinkResultFromFlowController
         )
 
-        val activityResultLaunchers = setOf(
-            paymentOptionActivityLauncher,
-            sepaMandateActivityLauncher,
+        walletsButtonLinkLauncher.register(
+            key = WALLETS_BUTTON_LINK_LAUNCHER,
+            activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
+            callback = ::onLinkResultFromWalletsButton
         )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    activityResultLaunchers.forEach { it.unregister() }
-                    linkPaymentLauncher.unregister()
+                    paymentOptionActivityLauncher.unregister()
+                    sepaMandateActivityLauncher.unregister()
+                    walletsButtonLinkLauncher.unregister()
+                    flowControllerLinkLauncher.unregister()
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                 }
             }
@@ -272,7 +276,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
 
             if (shouldPresentLinkInsteadOfPaymentOptions) {
-                linkPaymentLauncher.present(
+                flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
                     useLinkExpress = true,
@@ -314,7 +318,7 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    fun onLinkPaymentMethodSelected(result: LinkActivityResult) {
+    fun onLinkResultFromFlowController(result: LinkActivityResult) {
         result.linkAccountUpdate?.updateLinkAccount()
         when (result) {
             is LinkActivityResult.PaymentMethodObtained,
@@ -338,6 +342,17 @@ internal class DefaultFlowController @Inject internal constructor(
 
             is LinkActivityResult.Completed -> {
                 updateLinkPaymentSelection(result.selectedPayment)
+            }
+        }
+    }
+
+    fun onLinkResultFromWalletsButton(result: LinkActivityResult) {
+        result.linkAccountUpdate?.updateLinkAccount()
+        viewModel.flowControllerStateComponent.linkInlineInteractor.onLinkResult()
+        if (result is LinkActivityResult.Completed) {
+            with(Link(selectedPayment = result.selectedPayment)) {
+                viewModel.paymentSelection = this
+                paymentOptionCallback.onPaymentOption(paymentOptionFactory.create(this))
             }
         }
     }
@@ -705,7 +720,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     companion object {
-        internal const val LINK_LAUNCHER_KEY = "LinkPaymentLauncher_DefaultFlowController"
+        internal const val FLOW_CONTROLLER_LINK_LAUNCHER = "LinkPaymentLauncher_DefaultFlowController"
+        internal const val WALLETS_BUTTON_LINK_LAUNCHER = "LinkPaymentLauncher_WalletsButton"
 
         fun getInstance(
             viewModelStoreOwner: ViewModelStoreOwner,

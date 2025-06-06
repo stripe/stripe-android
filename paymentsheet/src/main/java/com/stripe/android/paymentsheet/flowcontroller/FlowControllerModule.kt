@@ -13,7 +13,8 @@ import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.LINK_LAUNCHER_KEY
+import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
+import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
@@ -40,8 +41,23 @@ internal object FlowControllerModule {
 
     @Provides
     @Singleton
-    @Named(LINK_LAUNCHER_KEY)
+    @Named(FLOW_CONTROLLER_LINK_LAUNCHER)
     fun provideFlowControllerLinkLauncher(
+        linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
+        linkActivityContract: LinkActivityContract,
+        @PaymentElementCallbackIdentifier identifier: String,
+        linkStore: LinkStore,
+    ) = LinkPaymentLauncher(
+        linkAnalyticsComponentBuilder,
+        identifier,
+        linkActivityContract,
+        linkStore,
+    )
+
+    @Provides
+    @Singleton
+    @Named(WALLETS_BUTTON_LINK_LAUNCHER)
+    fun provideWalletsButtonLinkLauncher(
         linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
