@@ -222,7 +222,7 @@ class DefaultLinkInlineInteractorTest {
         // Setup
         val manager = createManager()
         val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
-        
+
         val initialViewState = VerificationViewState(
             isProcessing = true,
             errorMessage = null,
@@ -233,26 +233,26 @@ class DefaultLinkInlineInteractorTest {
             isSendingNewCode = false,
             didSendNewCode = false
         )
-        
+
         val render2FA = VerificationState.Render2FA(initialViewState)
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
             verificationState = render2FA
         )
-        
+
         // Execute
         manager.onConfirmationResult(render2FA, Result.success(mockAccount))
         testScope.advanceUntilIdle()
-        
+
         // Verify
         assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
     }
-    
+
     @Test
     fun `onConfirmationResult should set error state on failure`() = runTest {
         // Setup
         val manager = createManager()
         val testError = RuntimeException("Invalid OTP code")
-        
+
         val initialViewState = VerificationViewState(
             isProcessing = true,
             errorMessage = null,
@@ -263,16 +263,16 @@ class DefaultLinkInlineInteractorTest {
             isSendingNewCode = false,
             didSendNewCode = false
         )
-        
+
         val render2FA = VerificationState.Render2FA(initialViewState)
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
             verificationState = render2FA
         )
-        
+
         // Execute
         manager.onConfirmationResult(render2FA, Result.failure(testError))
         testScope.advanceUntilIdle()
-        
+
         // Verify
         val verificationState = manager.state.value.verificationState as VerificationState.Render2FA
         assertThat(verificationState.viewState.isProcessing).isFalse()
