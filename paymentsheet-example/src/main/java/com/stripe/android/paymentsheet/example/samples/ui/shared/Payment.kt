@@ -84,12 +84,13 @@ fun PaymentMethodSelector(
 
 @Composable
 fun BuyButton(
+    modifier: Modifier = Modifier,
     buyButtonEnabled: Boolean,
     onClick: () -> Unit,
 ) {
     TextButton(
         enabled = buyButtonEnabled,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(top = 4.dp)
             .testTag(CHECKOUT_TEST_TAG),

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -158,6 +159,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             confirmationHandler = confirmationHandler,
             coroutineScope = coroutineScope,
             errorReporter = errorReporter,
+            linkInlineInteractor = NoOpLinkInlineInteractor()
         )
     }
 

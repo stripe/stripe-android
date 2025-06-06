@@ -177,6 +177,7 @@ private fun OTPView(
                 .testTag(VERIFICATION_OTP_TAG)
                 .padding(vertical = 10.dp),
             colors = OTPElementColors(
+                unselectedBorder = LinkTheme.colors.surfaceSecondary,
                 selectedBorder = LinkTheme.colors.borderSelected,
                 placeholder = LinkTheme.colors.textPrimary,
                 background = LinkTheme.colors.surfaceSecondary
