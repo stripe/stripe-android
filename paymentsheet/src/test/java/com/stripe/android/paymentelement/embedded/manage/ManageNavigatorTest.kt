@@ -40,7 +40,7 @@ internal class ManageNavigatorTest {
     fun `navigating back with one screen emits result`() = testScenario {
         navigator.performAction(ManageNavigator.Action.Back)
         navigator.result.test {
-            assertThat(awaitItem()).isNotNull()
+            assertThat(awaitItem()).isNull()
         }
     }
 
@@ -66,9 +66,37 @@ internal class ManageNavigatorTest {
 
     @Test
     fun `performing close action emits result`() = testScenario {
-        navigator.performAction(ManageNavigator.Action.Close)
+        navigator.performAction(ManageNavigator.Action.Close())
         navigator.result.test {
             assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `performing close action with shouldInvokeRowSelection true emits true`() = testScenario {
+        navigator.performAction(
+            ManageNavigator.Action.Close(
+                shouldInvokeRowSelectionCallback = true
+            )
+        )
+        navigator.result.test {
+            val item = awaitItem()
+            assertThat(item).isNotNull()
+            assertThat(item).isTrue()
+        }
+    }
+
+    @Test
+    fun `performing close action with shouldInvokeRowSelection false emits false`() = testScenario {
+        navigator.performAction(
+            ManageNavigator.Action.Close(
+                shouldInvokeRowSelectionCallback = false
+            )
+        )
+        navigator.result.test {
+            val item = awaitItem()
+            assertThat(item).isNotNull()
+            assertThat(item).isFalse()
         }
     }
 

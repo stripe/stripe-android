@@ -18,12 +18,15 @@ import kotlin.time.Duration.Companion.seconds
 internal class EmbeddedFormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    val cardNumber: SemanticsNodeInteraction = nodeWithLabel("Card number")
+    val cardNumberText: SemanticsNodeInteraction = nodeWithLabel("Card number")
 
-    fun fillOutCardDetails(fillOutCardNumber: Boolean = true) {
+    fun fillOutCardDetails(
+        newCardNumber: String = "4242424242424242",
+        fillOutCardNumber: Boolean = true
+    ) {
         waitUntilVisible()
         if (fillOutCardNumber) {
-            replaceText(cardNumber, "4242424242424242")
+            replaceText(cardNumberText, newCardNumber)
         }
         fillExpirationDate("12/34")
         replaceText("CVC", "123")
@@ -52,7 +55,7 @@ internal class EmbeddedFormPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

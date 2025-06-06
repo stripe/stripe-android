@@ -23,7 +23,7 @@ internal class EmbeddedContentPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }
@@ -63,6 +63,14 @@ internal class EmbeddedContentPage(
                 useUnmergedTree = true,
             ).assertExists()
         }
+    }
+
+    fun clickOnSavedPM(paymentMethodId: String) {
+        waitUntilVisible()
+
+        composeTestRule.onNode(hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"))
+            .performScrollTo()
+            .performClick()
     }
 
     fun clickViewMore() {

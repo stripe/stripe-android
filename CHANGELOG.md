@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+* [ADDED][10831](https://github.com/stripe/stripe-android/pull/10831) Added `RowSelectionBehavior` API to Embedded Payment Element
 
 ## 21.16.0 - 2025-06-02
 

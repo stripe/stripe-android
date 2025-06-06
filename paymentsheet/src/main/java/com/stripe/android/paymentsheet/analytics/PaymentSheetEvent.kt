@@ -44,6 +44,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         data class Embedded(
+            private val isRowSelectionImmediateAction: Boolean,
             private val configuration: EmbeddedPaymentElement.Configuration,
         ) : ConfigurationSpecificPayload {
             override val payload: Map<String, Any?>
@@ -54,6 +55,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                             EmbeddedPaymentElement.FormSheetAction.Continue -> "continue"
                             EmbeddedPaymentElement.FormSheetAction.Confirm -> "confirm"
                         }
+                    )
+                    put(
+                        FIELD_ROW_SELECTION_BEHAVIOR,
+                        if (isRowSelectionImmediateAction) "immediate_action" else "default"
                     )
                     put("embedded_view_displays_mandate_text", configuration.embeddedViewDisplaysMandateText)
                 }
@@ -718,6 +723,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_DISPLAY = "link_display"
         const val FIELD_PAYMENT_METHOD_OPTIONS_SETUP_FUTURE_USAGE = "payment_method_options_setup_future_usage"
         const val FIELD_SETUP_FUTURE_USAGE = "setup_future_usage"
+        const val FIELD_ROW_SELECTION_BEHAVIOR = "row_selection_behavior"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

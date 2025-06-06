@@ -792,6 +792,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Buil
 	public final fun analyticEventCallback (Lcom/stripe/android/paymentelement/AnalyticEventCallback;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
+	public final fun rowSelectionBehavior (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration : android/os/Parcelable {
@@ -893,6 +894,16 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Resu
 
 public abstract interface class com/stripe/android/paymentelement/EmbeddedPaymentElement$ResultCallback {
 	public abstract fun onResult (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Result;)V
+}
+
+public abstract class com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior$Companion;
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior$Companion {
+	public final fun default ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior;
+	public final fun immediateAction (Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior;
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$State : android/os/Parcelable {

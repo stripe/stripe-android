@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -71,6 +72,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedLinkHelper: EmbeddedLinkHelper,
+    private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -175,7 +177,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = ::setSelection,
+            selectionUpdater = {
+                setSelection(it)
+                invokeRowSelectionCallback()
+            },
             // Not important for determining formType so set to default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
@@ -222,9 +227,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
-            onSelectSavedPaymentMethod = {
-                setSelection(PaymentSelection.Saved(it))
-            },
+            onSelectSavedPaymentMethod = ::setSelection,
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,
@@ -245,7 +248,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 } else {
                     true
                 }
-            }
+            },
+            invokeRowSelectionCallback = ::invokeRowSelectionCallback
         )
     }
 
@@ -276,6 +280,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
         )
+    }
+
+    private fun invokeRowSelectionCallback() {
+        rowSelectionImmediateActionHandler.invoke()
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {

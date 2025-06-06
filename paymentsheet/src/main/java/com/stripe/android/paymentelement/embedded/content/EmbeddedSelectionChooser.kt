@@ -8,8 +8,10 @@ import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -17,6 +19,7 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal fun interface EmbeddedSelectionChooser {
     fun choose(
@@ -25,6 +28,7 @@ internal fun interface EmbeddedSelectionChooser {
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
+        formSheetAction: EmbeddedPaymentElement.FormSheetAction,
     ): PaymentSelection?
 }
 
@@ -33,6 +37,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
     private val formHelperFactory: EmbeddedFormHelperFactory,
     private val eventReporter: EventReporter,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) : EmbeddedSelectionChooser {
     private var previousConfiguration: CommonConfiguration?
         get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
@@ -48,6 +53,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
+        formSheetAction: EmbeddedPaymentElement.FormSheetAction,
     ): PaymentSelection? {
         val result = newSelection?.takeIf {
             shouldUseNewSelectionAsDefaultPaymentMethod(
@@ -63,6 +69,13 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
                 newConfiguration = newConfiguration
             )
         } ?: newSelection
+
+        if (
+            internalRowSelectionCallback.get() != null &&
+            formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
+        ) {
+            return null
+        }
 
         previousConfiguration = newConfiguration
         previousPaymentMethodMetadata = paymentMethodMetadata
