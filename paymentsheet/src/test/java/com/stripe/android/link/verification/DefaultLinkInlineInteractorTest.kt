@@ -240,7 +240,7 @@ class DefaultLinkInlineInteractorTest {
         )
 
         // Execute
-        manager.onConfirmationResult(render2FA, Result.success(mockAccount))
+        manager.onConfirmationResult(Result.success(mockAccount))
         testScope.advanceUntilIdle()
 
         // Verify
@@ -270,7 +270,7 @@ class DefaultLinkInlineInteractorTest {
         )
 
         // Execute
-        manager.onConfirmationResult(render2FA, Result.failure(testError))
+        manager.onConfirmationResult(Result.failure(testError))
         testScope.advanceUntilIdle()
 
         // Verify
