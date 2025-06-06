@@ -73,24 +73,24 @@ class DefaultLinkEmbeddedInteractorTest {
         val metadata = createPaymentMethodMetadata(linkState = null)
         val manager = createManager()
 
+        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Loading)
+
         manager.setup(
             paymentMethodMetadata = metadata
         )
 
         testScope.advanceUntilIdle()
 
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Loading)
+        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Resolved)
     }
 
     @Test
     fun `when account status is LoggedIn, should mark as Resolved`() = runTest {
-        val metadata = createPaymentMethodMetadata(
-            linkState = LinkState(
-                loginState = LoginState.LoggedIn,
-                configuration = createLinkConfiguration(),
-                signupMode = null
-            )
+        // Setup
+        linkAccountManager.setLinkAccount(
+            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.Verified))
         )
+        val metadata = createPaymentMethodMetadata()
         val manager = createManager()
 
         manager.setup(
@@ -108,13 +108,7 @@ class DefaultLinkEmbeddedInteractorTest {
         linkAccountManager.setLinkAccount(
             LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification))
         )
-        val metadata = createPaymentMethodMetadata(
-            linkState = LinkState(
-                loginState = LoginState.NeedsVerification,
-                configuration = createLinkConfiguration(),
-                signupMode = null
-            )
-        )
+        val metadata = createPaymentMethodMetadata()
 
         // Execute
         val manager = createManager()
@@ -128,6 +122,8 @@ class DefaultLinkEmbeddedInteractorTest {
         // Verify
         linkAccountManager.startVerificationResult
         linkAccountManager.awaitStartVerificationCall()
+
+        assertThat(manager.state.value.verificationState).isInstanceOf(VerificationState.Verifying::class.java)
     }
 
     private fun createManager(): LinkEmbeddedInteractor {
