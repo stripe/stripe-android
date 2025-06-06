@@ -5,6 +5,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -31,13 +34,16 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DefaultLinkInlineInteractorTest {
     private val savedStateHandle = SavedStateHandle()
     private val linkAccountManager = FakeLinkAccountManager()
+    private val linkLauncher = mock<LinkPaymentLauncher>()
     private val mockComponent = mock<LinkComponent> {
         on { linkAccountManager } doReturn linkAccountManager
     }
@@ -130,7 +136,7 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
-    fun `when otp is complete and confirmation successful, should update to RenderButton state`() = runTest {
+    fun `when otp is complete and confirmation successful, should keep status as Render2FA and launch Link`() = runTest {
         // Setup
         val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
@@ -149,8 +155,13 @@ class DefaultLinkInlineInteractorTest {
         }
         testScope.advanceUntilIdle()
 
-        // Verify
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
+        assertThat(manager.state.value.verificationState).isInstanceOf(VerificationState.Render2FA::class.java)
+        verify(linkLauncher).present(
+            configuration = any(),
+            linkAccountInfo = any(),
+            launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
+            useLinkExpress = any()
+        )
     }
 
     @Test
@@ -202,8 +213,13 @@ class DefaultLinkInlineInteractorTest {
         // Make sure the confirm verification doesn't get called
         linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
 
+        val verificationState = VerificationState.Render2FA(
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            viewState = initialViewState
+        )
+
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = VerificationState.Render2FA(initialViewState)
+            verificationState = verificationState
         )
 
         // Submit OTP
@@ -215,36 +231,6 @@ class DefaultLinkInlineInteractorTest {
 
         // Verify that confirmation wasn't called
         linkAccountManager.confirmVerificationTurbine.expectNoEvents()
-    }
-
-    @Test
-    fun `onConfirmationResult should set state to RenderButton on success`() = runTest {
-        // Setup
-        val manager = createManager()
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
-
-        val initialViewState = VerificationViewState(
-            isProcessing = true,
-            errorMessage = null,
-            email = "test@example.com",
-            redactedPhoneNumber = "****1234",
-            requestFocus = false,
-            isDialog = true,
-            isSendingNewCode = false,
-            didSendNewCode = false
-        )
-
-        val render2FA = VerificationState.Render2FA(initialViewState)
-        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = render2FA
-        )
-
-        // Execute
-        manager.onConfirmationResult(Result.success(mockAccount))
-        testScope.advanceUntilIdle()
-
-        // Verify
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
     }
 
     @Test
@@ -264,25 +250,33 @@ class DefaultLinkInlineInteractorTest {
             didSendNewCode = false
         )
 
-        val render2FA = VerificationState.Render2FA(initialViewState)
+        val verificationState = VerificationState.Render2FA(
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            viewState = initialViewState
+        )
+
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
-            verificationState = render2FA
+            verificationState = verificationState
         )
 
         // Execute
-        manager.onConfirmationResult(Result.failure(testError))
+        manager.onConfirmationResult(
+            verificationState = verificationState,
+            result = Result.failure(testError)
+        )
         testScope.advanceUntilIdle()
 
         // Verify
-        val verificationState = manager.state.value.verificationState as VerificationState.Render2FA
-        assertThat(verificationState.viewState.isProcessing).isFalse()
-        assertThat(verificationState.viewState.errorMessage).isNotNull()
+        val resultState = manager.state.value.verificationState as VerificationState.Render2FA
+        assertThat(resultState.viewState.isProcessing).isFalse()
+        assertThat(resultState.viewState.errorMessage).isNotNull()
     }
 
     private fun createManager(): DefaultLinkInlineInteractor {
         return DefaultLinkInlineInteractor(
             coroutineScope = testScope,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkLauncher = linkLauncher,
             savedStateHandle = savedStateHandle
         )
     }
