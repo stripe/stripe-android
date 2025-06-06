@@ -111,7 +111,7 @@ internal class DefaultLinkInlineInteractor @AssistedInject constructor(
         }
     }
 
-    private fun LinkAccount.initial2FAState() = Render2FA(
+    private fun LinkAccount.initial2FAState() = VerificationState.Render2FA(
         VerificationViewState(
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,

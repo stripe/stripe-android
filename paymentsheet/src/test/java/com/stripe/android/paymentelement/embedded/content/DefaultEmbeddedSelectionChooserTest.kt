@@ -346,6 +346,52 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
+    fun `Selects newSelection when setAsDefault enabled`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelection = PaymentSelection.Saved(defaultPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = true
+            ),
+            paymentMethods = listOf(
+                PaymentMethodFixtures.createCard(),
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `Does not select newSelection when setAsDefault disabled`() = runScenario {
+        val defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val newSelection = PaymentSelection.Saved(defaultPaymentMethod)
+        val previousSelectionPaymentMethod = PaymentMethodFixtures.createCard()
+        val previousSelection = PaymentSelection.Saved(previousSelectionPaymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = false
+            ),
+            paymentMethods = listOf(
+                PaymentMethodFixtures.createCard(),
+                defaultPaymentMethod,
+                previousSelectionPaymentMethod
+            ),
+            previousSelection = previousSelection,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isEqualTo(previousSelection)
+    }
+
+    @Test
     fun `previousConfig is set when calling choose`() = runScenario {
         val previousSelection = PaymentSelection.GooglePay
         val paymentMethod = PaymentMethodFixtures.createCard()

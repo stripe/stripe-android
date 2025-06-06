@@ -15,9 +15,14 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 internal fun MinScreenHeightBox(
-    @FloatRange(0.0, 1.0) screenHeightPercentage: Float = 1f,
+    @FloatRange(0.0, 1.0) screenHeightPercentage: Float,
     content: @Composable BoxScope.() -> Unit
 ) {
+    if (screenHeightPercentage == 0f) {
+        Box(content = content)
+        return
+    }
+
     val screenHeight = LocalConfiguration.current.screenHeightDp
     BoxWithConstraints {
         val minScreenHeight = (screenHeight * screenHeightPercentage).dp.coerceAtMost(maxHeight)
