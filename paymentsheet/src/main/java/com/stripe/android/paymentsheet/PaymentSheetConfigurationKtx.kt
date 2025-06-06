@@ -81,4 +81,11 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
                 ?: (StripeThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
         )
     )
+
+    StripeTheme.formInsets = StripeThemeDefaults.formInsets.copy(
+        start = formInsetValues.startDp,
+        top = formInsetValues.topDp,
+        end = formInsetValues.endDp,
+        bottom = formInsetValues.bottomDp
+    )
 }

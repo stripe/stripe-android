@@ -52,11 +52,13 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.activity.getFormInsetsAppearance
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -256,6 +258,7 @@ internal class PaymentSheetPlaygroundActivity :
     private fun AppearanceButton() {
         val settings = viewModel.playgroundSettingsFlow.collectAsState().value
         val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
+        val insetsAppearance = settings?.get(FormInsetsAppearanceSettingDefinition)?.collectAsState()?.value
         supportFragmentManager.setFragmentResultListener(
             AppearanceBottomSheetDialogFragment.REQUEST_KEY,
             this@PaymentSheetPlaygroundActivity
@@ -264,12 +267,17 @@ internal class PaymentSheetPlaygroundActivity :
                 EmbeddedAppearanceSettingsDefinition,
                 bundle.getEmbeddedAppearance()
             )
+            viewModel.updateFormInsetsAppearance(
+                FormInsetsAppearanceSettingDefinition,
+                bundle.getFormInsetsAppearance()
+            )
         }
         Button(
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
                 bottomSheet.arguments = Bundle().apply {
                     putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
+                    putParcelable(AppearanceBottomSheetDialogFragment.INSETS_KEY, insetsAppearance)
                 }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
