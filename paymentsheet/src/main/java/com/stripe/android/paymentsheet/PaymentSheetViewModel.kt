@@ -136,6 +136,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle[IN_PROGRESS_SELECTION] = value
         }
 
+    private val isConfirmingWithLinkExpress: Boolean
+        get() = (inProgressSelection as? PaymentSelection.Link)?.useLinkExpress == true
+
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     @VisibleForTesting
@@ -211,26 +214,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal val contentVisible: StateFlow<Boolean> = combineAsStateFlow(
         isAwaitingEagerLaunchResult,
-        confirmationHandler.state.mapAsStateFlow { contentVisibleFromConfirmationState(it) }
+        confirmationHandler.state.mapAsStateFlow { it.contentVisible }
     ) { isAwaitingEagerLaunchResult, contentVisibleFromConfirmationState ->
         isAwaitingEagerLaunchResult != true && contentVisibleFromConfirmationState
     }
-
-    private fun contentVisibleFromConfirmationState(state: ConfirmationHandler.State) =
-        when (state) {
-            ConfirmationHandler.State.Idle,
-            is ConfirmationHandler.State.Complete ->
-                true
-            is ConfirmationHandler.State.Confirming -> {
-                when (val option = state.option) {
-                    // Hide the payment sheet for these confirmation flows that render UI
-                    // on top of the payment sheet to avoid weird visual overlap.
-                    is GooglePayConfirmationOption -> false
-                    is LinkConfirmationOption -> option.useLinkExpress
-                    else -> true
-                }
-            }
-        }
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -709,9 +696,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private val isConfirmingWithLinkExpress: Boolean
-        get() = (inProgressSelection as? PaymentSelection.Link)?.useLinkExpress == true
-
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
     ) : ViewModelProvider.Factory {
@@ -757,5 +741,22 @@ private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
         is PaymentElementLoader.InitializationMode.SetupIntent -> false
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+        }
+    }
+
+private val ConfirmationHandler.State.contentVisible: Boolean
+    get() = when (this) {
+        is ConfirmationHandler.State.Idle,
+        is ConfirmationHandler.State.Complete -> {
+            true
+        }
+        is ConfirmationHandler.State.Confirming -> {
+            when (option) {
+                // Hide the payment sheet for these confirmation flows that render UI
+                // on top of the payment sheet to avoid weird visual overlap.
+                is GooglePayConfirmationOption -> false
+                is LinkConfirmationOption -> option.useLinkExpress
+                else -> true
+            }
         }
     }
