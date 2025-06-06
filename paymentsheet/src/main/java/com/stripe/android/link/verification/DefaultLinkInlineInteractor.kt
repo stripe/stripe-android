@@ -7,6 +7,8 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.ui.core.elements.OTPSpec
 import dagger.assisted.Assisted
@@ -60,11 +62,56 @@ internal class DefaultLinkInlineInteractor @AssistedInject constructor(
 
         coroutineScope.launch {
             linkAccountManager.startVerification()
+            observeOtp(linkAccountManager)
             updateState { it.copy(verificationState = linkAccount.initial2FAState()) }
         }
     }
 
-    private fun LinkAccount.initial2FAState() = VerificationState.Render2FA(
+    fun observeOtp(linkAccountManager: LinkAccountManager) {
+        // Setup OTP completion handling using shared OTP element
+        coroutineScope.launch {
+            otpElement.otpCompleteFlow.collect { code ->
+                val verificationState = state.value.verificationState
+                if (verificationState is Render2FA && verificationState.viewState.isProcessing.not()) {
+                    // Update to processing state
+                    state.value.copy(
+                        verificationState.copy(
+                            viewState = verificationState.viewState.copy(
+                                isProcessing = true,
+                                errorMessage = null
+                            )
+                        )
+                    )
+                    // confirm verification
+                    val result: Result<LinkAccount> = linkAccountManager.confirmVerification(code)
+                    onConfirmationResult(verificationState, result)
+                }
+            }
+        }
+    }
+
+    fun onConfirmationResult(verificationState: Render2FA, result: Result<LinkAccount>) {
+        result.onSuccess {
+            updateState {
+                it.copy(
+                    verificationState = VerificationState.RenderButton
+                )
+            }
+        }.onFailure { error ->
+            updateState {
+                it.copy(
+                    verificationState = verificationState.copy(
+                        verificationState.viewState.copy(
+                            isProcessing = false,
+                            errorMessage = error.errorMessage
+                        )
+                    )
+                )
+            }
+        }
+    }
+
+    private fun LinkAccount.initial2FAState() = Render2FA(
         VerificationViewState(
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
