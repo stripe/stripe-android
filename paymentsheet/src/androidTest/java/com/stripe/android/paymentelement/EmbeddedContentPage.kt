@@ -23,7 +23,7 @@ internal class EmbeddedContentPage(
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
     }

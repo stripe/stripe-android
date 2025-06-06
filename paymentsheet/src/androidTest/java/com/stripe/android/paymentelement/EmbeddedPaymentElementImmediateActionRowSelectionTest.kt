@@ -127,7 +127,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             formPage.waitUntilMissing()
 
             // row selection should not be invoked
-            testContext.rowSelectionCalls!!.expectNoEvents()
+            testContext.rowSelectionCalls.expectNoEvents()
 
             testContext.markTestSucceeded()
         }
@@ -317,7 +317,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             managePage.waitUntilGone(card1.id)
             managePage.clickDone()
 
-            testContext.rowSelectionCalls!!.expectNoEvents()
+            testContext.rowSelectionCalls.expectNoEvents()
 
             testContext.markTestSucceeded()
         }
@@ -367,11 +367,11 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
     }
 
     private suspend fun EmbeddedPaymentElementTestRunnerContext.assertNextItemLabel(label: String) {
-        assertThat(rowSelectionCalls!!.awaitItem().paymentOptionLabel).isEqualTo(label)
+        assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(label)
     }
 
     private suspend fun EmbeddedPaymentElementTestRunnerContext.assertNextItemCardLabel(last4: String) {
-        assertThat(rowSelectionCalls!!.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel(last4))
+        assertThat(rowSelectionCalls.awaitItem().paymentOptionLabel).isEqualTo(getCardLabel(last4))
     }
 
     private fun getCardLabel(last4: String): String {
@@ -399,8 +399,4 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
     }
-
-    data class RowSelectionCall(
-        val paymentOptionLabel: String?,
-    )
 }
