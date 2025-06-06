@@ -4,9 +4,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.uicore.elements.OTPElement
 import kotlinx.coroutines.flow.StateFlow
 
-internal interface LinkEmbeddedInteractor {
+/**
+ * Interface for handling Link logic when embedded in a Stripe UI component.
+ *
+ * @see [com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.WalletButton]
+ */
+internal interface LinkInlineInteractor {
 
-    val state: StateFlow<LinkEmbeddedState>
+    val state: StateFlow<LinkInlineState>
 
     val otpElement: OTPElement
 

@@ -9,7 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
-import com.stripe.android.link.ui.wallet.LinkEmbeddedOtpSection
+import com.stripe.android.link.ui.wallet.LinkInline2FASection
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.uicore.StripeTheme
@@ -31,14 +31,15 @@ internal class WalletButtonsContent(
             }
         }
 
-        if (state.walletButtons.isNotEmpty() || state.linkOtpState != null) {
+        // Render the wallet buttons and 2FA section if they exist
+        if (state.hasContent) {
             StripeTheme {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    state.linkOtpState?.let {
-                        // Render Link 2FA verification UI
-                        LinkEmbeddedOtpSection(
+                    // Render the Link 2FA section verification is in progress
+                    state.link2FAState?.let {
+                        LinkInline2FASection(
                             verificationState = it.viewState,
                             otpElement = it.otpElement
                         )
@@ -62,6 +63,7 @@ internal class WalletButtonsContent(
                                     )
                                 },
                             )
+                            // Link button is filtered out if the 2FA verification is in progress
                             is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
                                 email = button.email,
                                 enabled = state.buttonsEnabled,

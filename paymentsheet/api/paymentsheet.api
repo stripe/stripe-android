@@ -556,11 +556,11 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Paymen
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/verification/LinkEmbeddedState$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/link/verification/LinkInlineState$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/LinkEmbeddedState;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/LinkInlineState;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/verification/LinkEmbeddedState;
+	public final fun newArray (I)[Lcom/stripe/android/link/verification/LinkInlineState;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -572,19 +572,19 @@ public final class com/stripe/android/link/verification/VerificationState$Loadin
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/verification/VerificationState$Resolved$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/link/verification/VerificationState$Render2FA$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/VerificationState$Resolved;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/VerificationState$Render2FA;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/verification/VerificationState$Resolved;
+	public final fun newArray (I)[Lcom/stripe/android/link/verification/VerificationState$Render2FA;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/verification/VerificationState$Verifying$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/link/verification/VerificationState$RenderButton$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/VerificationState$Verifying;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/VerificationState$RenderButton;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/link/verification/VerificationState$Verifying;
+	public final fun newArray (I)[Lcom/stripe/android/link/verification/VerificationState$RenderButton;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

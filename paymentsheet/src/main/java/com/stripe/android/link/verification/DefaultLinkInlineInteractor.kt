@@ -17,25 +17,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
- * Default implementation of [LinkEmbeddedInteractor] that handles 2FA verification.
+ * Default implementation of [LinkInlineInteractor] that handles 2FA verification.
  */
-internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
+internal class DefaultLinkInlineInteractor @AssistedInject constructor(
     @Assisted private val coroutineScope: CoroutineScope,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val savedStateHandle: SavedStateHandle
-) : LinkEmbeddedInteractor {
+) : LinkInlineInteractor {
 
     override val otpElement = OTPSpec.transform()
 
-    private val _state: StateFlow<LinkEmbeddedState> =
-        savedStateHandle.getStateFlow(
-            key = LINK_EMBEDDED_STATE_KEY,
-            initialValue = LinkEmbeddedState(
-                verificationState = VerificationState.Loading
-            )
+    override val state: StateFlow<LinkInlineState> = savedStateHandle.getStateFlow(
+        key = LINK_EMBEDDED_STATE_KEY,
+        initialValue = LinkInlineState(
+            verificationState = VerificationState.Loading
         )
-
-    override val state: StateFlow<LinkEmbeddedState> = _state
+    )
 
     /**
      * Sets up Link verification domain logic (should be called once when initializing)
@@ -43,31 +40,31 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
         if (FeatureFlags.showInlineSignupInWalletButtons.isEnabled.not()) {
             // If the feature flag is disabled, do not start Link verification.
-            updateState { it.copy(verificationState = VerificationState.Resolved) }
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
 
         val linkAccountManager = paymentMethodMetadata.linkAccountManager()
         if (linkAccountManager == null) {
             // If there is no Link account manager, we don't need to handle verification.
-            updateState { it.copy(verificationState = VerificationState.Resolved) }
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
 
         val linkAccount = linkAccountManager.linkAccountInfo.value.account
         if (linkAccount == null || linkAccount.accountStatus != AccountStatus.NeedsVerification) {
             // If there is no Link account or verification is not needed, don't start verification.
-            updateState { it.copy(verificationState = VerificationState.Resolved) }
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
 
         coroutineScope.launch {
             linkAccountManager.startVerification()
-            updateState { it.copy(verificationState = linkAccount.initialVerificationState()) }
+            updateState { it.copy(verificationState = linkAccount.initial2FAState()) }
         }
     }
 
-    private fun LinkAccount.initialVerificationState() = VerificationState.Verifying(
+    private fun LinkAccount.initial2FAState() = VerificationState.Render2FA(
         VerificationViewState(
             email = email,
             redactedPhoneNumber = redactedPhoneNumber,
@@ -80,8 +77,8 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
         )
     )
 
-    private fun updateState(block: (LinkEmbeddedState) -> LinkEmbeddedState) {
-        val currentState = _state.value
+    private fun updateState(block: (LinkInlineState) -> LinkInlineState) {
+        val currentState = state.value
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = block(currentState)
     }
 
@@ -99,6 +96,6 @@ internal class DefaultLinkEmbeddedInteractor @AssistedInject constructor(
     fun interface Factory {
         fun create(
             coroutineScope: CoroutineScope
-        ): DefaultLinkEmbeddedInteractor
+        ): DefaultLinkInlineInteractor
     }
 }

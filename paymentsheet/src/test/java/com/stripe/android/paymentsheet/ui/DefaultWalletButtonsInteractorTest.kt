@@ -7,7 +7,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.verification.NoOpLinkEmbeddedInteractor
+import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -478,7 +478,7 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             errorReporter = errorReporter,
-            linkEmbeddedInteractor = NoOpLinkEmbeddedInteractor(),
+            linkInlineInteractor = NoOpLinkInlineInteractor(),
             onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
 
         )

@@ -8,7 +8,7 @@ import kotlinx.parcelize.Parcelize
  * Unified state for Link embedded functionality including verification and payment method selection
  */
 @Parcelize
-internal data class LinkEmbeddedState(
+internal data class LinkInlineState(
     /**
      * Current verification state representing the different stages in the verification process.
      */
@@ -29,11 +29,11 @@ internal sealed class VerificationState : Parcelable {
      * Verification is required and the UI should show the verification form
      */
     @Parcelize
-    internal data class Verifying(val viewState: VerificationViewState) : VerificationState()
+    internal data class Render2FA(val viewState: VerificationViewState) : VerificationState()
 
     /**
      * Verification is completed or not needed, showing the normal Link button
      */
     @Parcelize
-    internal object Resolved : VerificationState()
+    internal object RenderButton : VerificationState()
 }

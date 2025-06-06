@@ -81,7 +81,7 @@ class DefaultLinkEmbeddedInteractorTest {
 
         testScope.advanceUntilIdle()
 
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Resolved)
+        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
     }
 
     @Test
@@ -99,7 +99,7 @@ class DefaultLinkEmbeddedInteractorTest {
 
         testScope.advanceUntilIdle()
 
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Resolved)
+        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
     }
 
     @Test
@@ -123,11 +123,11 @@ class DefaultLinkEmbeddedInteractorTest {
         linkAccountManager.startVerificationResult
         linkAccountManager.awaitStartVerificationCall()
 
-        assertThat(manager.state.value.verificationState).isInstanceOf(VerificationState.Verifying::class.java)
+        assertThat(manager.state.value.verificationState).isInstanceOf(VerificationState.Render2FA::class.java)
     }
 
-    private fun createManager(): LinkEmbeddedInteractor {
-        return DefaultLinkEmbeddedInteractor(
+    private fun createManager(): LinkInlineInteractor {
+        return DefaultLinkInlineInteractor(
             coroutineScope = testScope,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle

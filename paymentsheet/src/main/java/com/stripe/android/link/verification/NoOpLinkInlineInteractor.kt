@@ -9,10 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 /**
  * Implementation for surfaces that don't support Link embedded verification.
  */
-internal class NoOpLinkEmbeddedInteractor : LinkEmbeddedInteractor {
+internal class NoOpLinkInlineInteractor : LinkInlineInteractor {
 
-    override val state: StateFlow<LinkEmbeddedState> = MutableStateFlow(
-        LinkEmbeddedState(verificationState = VerificationState.Resolved)
+    override val state: StateFlow<LinkInlineState> = MutableStateFlow(
+        LinkInlineState(verificationState = VerificationState.RenderButton)
     )
     override val otpElement: OTPElement = OTPSpec.transform()
 
