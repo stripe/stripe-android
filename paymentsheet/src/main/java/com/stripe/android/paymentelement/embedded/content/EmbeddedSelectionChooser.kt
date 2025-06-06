@@ -49,18 +49,56 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
     ): PaymentSelection? {
-        val result = previousSelection?.takeIf { selection ->
-            canUseSelection(
+        val result = newSelection?.takeIf {
+            shouldUseNewSelectionAsDefaultPaymentMethod(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethods = paymentMethods,
-                previousSelection = selection,
-            ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
+                newSelection = it,
+            )
+        } ?: previousSelection?.takeIf {
+            shouldUsePreviousSelection(
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethods = paymentMethods,
+                previousSelection = it,
+                newConfiguration = newConfiguration
+            )
         } ?: newSelection
 
         previousConfiguration = newConfiguration
         previousPaymentMethodMetadata = paymentMethodMetadata
 
         return result
+    }
+
+    /**
+     * In the case that there is a defaultPaymentMethod and setAsDefault is enabled, newSelection.paymentMethod
+     * will be the defaultPaymentMethod. See [DefaultPaymentElementLoader.retrieveInitialPaymentSelection]
+     */
+    private fun shouldUseNewSelectionAsDefaultPaymentMethod(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>?,
+        newSelection: PaymentSelection,
+    ): Boolean {
+        return paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+            newSelection is PaymentSelection.Saved &&
+            canUseSelection(
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethods = paymentMethods,
+                previousSelection = newSelection,
+            )
+    }
+
+    private fun shouldUsePreviousSelection(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>?,
+        previousSelection: PaymentSelection,
+        newConfiguration: CommonConfiguration,
+    ): Boolean {
+        return canUseSelection(
+            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethods = paymentMethods,
+            previousSelection = previousSelection,
+        ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
     }
 
     private fun canUseSelection(

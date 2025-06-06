@@ -656,7 +656,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
-                it.id == customer.defaultPaymentMethodId
+                customer.defaultPaymentMethodId != null && it.id == customer.defaultPaymentMethodId
             }?.toPaymentSelection()
         } else {
             when (val selection = savedSelection.await()) {
