@@ -67,7 +67,6 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
             previousSelection = selectionHolder.selection.value,
             newSelection = state.paymentSelection,
             newConfiguration = configuration.asCommonConfiguration(),
-            defaultPaymentMethodId = state.customer?.defaultPaymentMethodId,
         )
         stateHelper.state = EmbeddedPaymentElement.State(
             confirmationState = EmbeddedConfirmationStateHolder.State(

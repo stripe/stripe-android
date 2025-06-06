@@ -25,7 +25,6 @@ internal fun interface EmbeddedSelectionChooser {
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
-        defaultPaymentMethodId: String?,
     ): PaymentSelection?
 }
 
@@ -49,35 +48,57 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection?,
         newSelection: PaymentSelection?,
         newConfiguration: CommonConfiguration,
-        defaultPaymentMethodId: String?,
     ): PaymentSelection? {
-        /**
-         * In the case that there is a defaultPaymentMethod and setAsDefault is enabled, newSelection.paymentMethod
-         * will be the defaultPaymentMethod. See [DefaultPaymentElementLoader.retrieveInitialPaymentSelection]
-         */
-        val defaultPaymentMethodSelection = newSelection?.takeIf {
-            paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                defaultPaymentMethodId != null &&
-                it is PaymentSelection.Saved &&
-                it.paymentMethod.id == defaultPaymentMethodId &&
-                canUseSelection(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    paymentMethods = paymentMethods,
-                    previousSelection = it,
-                )
-        }
-        val result = defaultPaymentMethodSelection ?: previousSelection?.takeIf { selection ->
-            canUseSelection(
+        val result = newSelection?.takeIf {
+            shouldUseNewSelectionAsDefaultPaymentMethod(
                 paymentMethodMetadata = paymentMethodMetadata,
                 paymentMethods = paymentMethods,
-                previousSelection = selection,
-            ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
+                newSelection = it,
+            )
+        } ?: previousSelection?.takeIf {
+            shouldUsePreviousSelection(
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethods = paymentMethods,
+                previousSelection = it,
+                newConfiguration = newConfiguration
+            )
         } ?: newSelection
 
         previousConfiguration = newConfiguration
         previousPaymentMethodMetadata = paymentMethodMetadata
 
         return result
+    }
+
+    /**
+     * In the case that there is a defaultPaymentMethod and setAsDefault is enabled, newSelection.paymentMethod
+     * will be the defaultPaymentMethod. See [DefaultPaymentElementLoader.retrieveInitialPaymentSelection]
+     */
+    private fun shouldUseNewSelectionAsDefaultPaymentMethod(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>?,
+        newSelection: PaymentSelection,
+    ): Boolean {
+        return paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+            newSelection is PaymentSelection.Saved &&
+            canUseSelection(
+                paymentMethodMetadata = paymentMethodMetadata,
+                paymentMethods = paymentMethods,
+                previousSelection = newSelection,
+            )
+    }
+
+    private fun shouldUsePreviousSelection(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>?,
+        previousSelection: PaymentSelection,
+        newConfiguration: CommonConfiguration,
+    ): Boolean {
+        return canUseSelection(
+            paymentMethodMetadata = paymentMethodMetadata,
+            paymentMethods = paymentMethods,
+            previousSelection = previousSelection,
+        ) && previousConfiguration?.containsVolatileDifferences(newConfiguration) != true
     }
 
     private fun canUseSelection(
