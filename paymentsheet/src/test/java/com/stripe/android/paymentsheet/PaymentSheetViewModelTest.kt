@@ -1610,6 +1610,35 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Does not show processing WalletsProcessingState when using Link Express`() = runTest(testDispatcher) {
+        val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            ),
+            linkPaymentLauncher = linkPaymentLauncher,
+            delay = 1.seconds,
+        )
+
+        viewModel.walletsProcessingState.test {
+            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(WalletsProcessingState.Idle(null))
+            advanceTimeBy(2.seconds)
+            expectNoEvents()
+        }
+
+        verify(linkPaymentLauncher).present(
+            configuration = eq(TestFactory.LINK_CONFIGURATION),
+            linkAccountInfo = any(),
+            launchMode = any(),
+            useLinkExpress = eq(true),
+        )
+    }
+
+    @Test
     fun `launched with correct screen when in horizontal mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
