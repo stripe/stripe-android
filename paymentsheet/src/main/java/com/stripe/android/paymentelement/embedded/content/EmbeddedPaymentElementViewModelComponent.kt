@@ -17,10 +17,14 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -45,7 +49,6 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -145,6 +148,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
+    @Binds
+    fun bindsEmbeddedRowSelectionImmediateActionHandler(
+        handler: DefaultEmbeddedRowSelectionImmediateActionHandler
+    ): EmbeddedRowSelectionImmediateActionHandler
+
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
@@ -210,6 +218,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
         ): () -> EmbeddedConfirmationStateHolder.State? {
             return { confirmationStateHolder.state }
+        }
+
+        @Provides
+        fun providesInternalRowSelectionCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): InternalRowSelectionCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
         }
     }
 }
