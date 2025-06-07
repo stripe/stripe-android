@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequ
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetting
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRowSelectionBehaviorSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -118,6 +119,9 @@ internal class EmbeddedPlaygroundActivity :
             .confirmCustomPaymentMethodCallback(this)
             .externalPaymentMethodConfirmHandler(this)
             .analyticEventCallback(this)
+            .rowSelectionBehavior(
+                playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
+            )
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
