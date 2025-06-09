@@ -31,6 +31,9 @@ proguard/
 *.iws
 .idea
 
+# Cursor IDE
+.cursor/
+
 # Output
 payments/target
 payments/gen
