@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Pretende fechar este formulário?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Guardar as suas informações para finalização de compra de 1 clique com Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Guardar as minhas informações para uma finalização de compra mais rápida com Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Crédito %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Ao fornecer o seu email, concorda em criar uma conta Link e guardar as suas informações de pagamento no Link, de acordo com as <terms>condições do Link</terms> e a <privacy>política de privacidade</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Ao fornecer o seu número de telefone, concorda em criar uma conta Link e guardar as suas informações de pagamento no Link, de acordo com as <terms>condições do Link</terms> e a <privacy>política de privacidade</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Ao fornecer o número de telefone e o e-mail, concorda em criar uma conta Link sujeita às <terms>Condições</terms> e à <privacy>Política de Privacidade</privacy> do Link.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">A sua conta foi desativada</string>
   <!-- Generic failure message -->

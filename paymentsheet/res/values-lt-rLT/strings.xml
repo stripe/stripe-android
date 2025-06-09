@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Ar norite uždaryti šią formą?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su \"Link\"</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Išsaugoti mano informaciją greitesniam atsiskaitymui su „Link“</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">„%1$s“ kredito</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Pateikdami savo el. pašto adresą sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Pateikdami savo telefono numerį sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Pateikdami telefono numerį ir el. pašto adresą sutinkate susikurti „Link“ paskyrą pagal „Link“ <terms>sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Jūsų paskyra išjungta</string>
   <!-- Generic failure message -->
