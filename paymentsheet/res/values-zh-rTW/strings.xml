@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">您確定要儲存此表單嗎？</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">儲存您的資訊，用 Link 安全地一鍵結帳</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">保存我的資訊，用 Link 更快結帳</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[提供您的電郵地址，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 帳戶並將您的支付資訊儲存到 Link。]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[提供您的手機號碼，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 帳戶並將您的支付資訊儲存到 Link。]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[提供您的手機號碼和電子郵件地址，即表示您同意按照 Link <terms>條款</terms>和<privacy>隱私政策</privacy>建立 Link 帳戶。]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">您的帳戶已被禁用</string>
   <!-- Generic failure message -->

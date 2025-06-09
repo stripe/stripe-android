@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Gusto mo bang isara ang form na ito?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">I-save ang iyong impormasyon para sa ligtas na 1-click na pag-checkout sa Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">I-save ang aking impormasyon para sa mas mabilis na checkout gamit ang Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Sa pagbibigay ng iyong email, sumasang-ayon ka na gumawa ng Link account at i-save ang impormasyon ng iyong pagbabayad sa Link, alinsunod sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado ng Link</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Sa pagbibigay ng iyong numero ng telepono, sumasang-ayon ka na gumawa ng Link account at i-save ang impormasyon ng iyong pagbabayad sa Link, alinsunod sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado ng Link</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Sa pagbibigay ng numero ng telepono at email, sumasang-ayon ka na gumawa ng isang Link account na napapailalim sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado</privacy> ng Link.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Na-deactivate ang iyong account</string>
   <!-- Generic failure message -->
