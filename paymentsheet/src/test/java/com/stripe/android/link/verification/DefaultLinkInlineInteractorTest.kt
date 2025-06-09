@@ -5,41 +5,28 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.attestation.FakeLinkAttestationCheck
-import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.link.injection.LinkInlineSignupAssistedViewModelFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.verification.VerificationState.Loading
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -57,8 +44,15 @@ class DefaultLinkInlineInteractorTest {
     private val savedStateHandle = SavedStateHandle()
     private val linkLauncher = mock<LinkPaymentLauncher>()
     private val linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager()
-    private val component = FakeLinkComponent(linkAccountManager = linkAccountManager)
-    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component)
+    private val linkGate: FakeLinkGate = FakeLinkGate()
+    private val component = FakeLinkComponent(
+        linkAccountManager = linkAccountManager,
+        linkGate = linkGate
+    )
+    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+        component = component,
+        linkGate = linkGate
+    )
 
     @get:Rule
     val showOTPFlagRule = FeatureFlagTestRule(
@@ -70,6 +64,10 @@ class DefaultLinkInlineInteractorTest {
 
     @get:Rule
     val rule: TestRule = CoroutineTestRule(testDispatcher)
+
+    init {
+        linkGate.setUseInlineOtpInWalletButtons(true)
+    }
 
     @Test
     fun `initial state should be Loading`() = runTest(testDispatcher) {
@@ -302,56 +300,6 @@ class DefaultLinkInlineInteractorTest {
         whenever(mockAccount.redactedPhoneNumber).thenReturn(redactedPhoneNumber)
         whenever(mockAccount.email).thenReturn(email)
         return mockAccount
-    }
-
-    private class FakeLinkComponent(linkAccountManager: FakeLinkAccountManager) : LinkComponent() {
-        override val configuration: LinkConfiguration = createLinkConfiguration()
-        override val linkAccountManager: LinkAccountManager = linkAccountManager
-        override val linkGate: LinkGate = FakeLinkGate()
-        override val linkAttestationCheck = FakeLinkAttestationCheck()
-        override val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory
-            get() = mock()
-    }
-
-    private class FakeLinkConfigurationCoordinator(
-        val component: LinkComponent = FakeLinkComponent(FakeLinkAccountManager())
-    ) : LinkConfigurationCoordinator {
-
-        override val emailFlow: StateFlow<String?> = stateFlowOf(null)
-
-        override fun getComponent(configuration: LinkConfiguration): LinkComponent {
-            return component
-        }
-
-        override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
-            return component.linkAccountManager.accountStatus
-        }
-
-        override fun linkGate(configuration: LinkConfiguration): LinkGate {
-            return component.linkGate
-        }
-
-        override fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck {
-            return component.linkAttestationCheck
-        }
-
-        override suspend fun signInWithUserInput(
-            configuration: LinkConfiguration,
-            userInput: UserInput
-        ): Result<Boolean> {
-            TODO()
-        }
-
-        override suspend fun attachNewCardToAccount(
-            configuration: LinkConfiguration,
-            paymentMethodCreateParams: PaymentMethodCreateParams
-        ): Result<LinkPaymentDetails> {
-            TODO()
-        }
-
-        override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {
-            TODO()
-        }
     }
 
     companion object {
