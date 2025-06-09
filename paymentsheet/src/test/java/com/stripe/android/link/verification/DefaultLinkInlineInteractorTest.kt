@@ -1,39 +1,51 @@
 package com.stripe.android.link.verification
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.injection.LinkInlineSignupAssistedViewModelFactory
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.link.verification.VerificationState.Loading
+import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -42,77 +54,65 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 class DefaultLinkInlineInteractorTest {
     private val savedStateHandle = SavedStateHandle()
-    private val linkAccountManager = FakeLinkAccountManager()
     private val linkLauncher = mock<LinkPaymentLauncher>()
-    private val mockComponent = mock<LinkComponent> {
-        on { linkAccountManager } doReturn linkAccountManager
-    }
-    private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator> {
-        on { getComponent(any()) } doReturn mockComponent
-    }
-
-    private val testDispatcher = StandardTestDispatcher()
-    private val testScope = TestScope(testDispatcher)
+    private val linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager()
+    private val component = FakeLinkComponent(linkAccountManager = linkAccountManager)
+    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component)
 
     @get:Rule
-    val prominenceFeatureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.showInlineSignupInWalletButtons,
+    val showOTPFlagRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.showInlineOtpInWalletButtons,
         isEnabled = true
     )
 
-    @Before
-    fun before() {
-        Dispatchers.setMain(testDispatcher)
-    }
+    private val testDispatcher = UnconfinedTestDispatcher()
 
-    @After
-    fun cleanup() {
-        Dispatchers.resetMain()
+    @get:Rule
+    val rule: TestRule = CoroutineTestRule(testDispatcher)
+
+    @Test
+    fun `initial state should be Loading`() = runTest(testDispatcher) {
+        val interactor = createInteractor()
+
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(Loading)
+        }
     }
 
     @Test
-    fun `initial state should be Loading`() {
-        val manager = createManager()
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Loading)
-    }
-
-    @Test
-    fun `when setup is called with link disabled, should mark as resolved`() = runTest {
+    fun `when setup is called with link disabled, should render button`() = runTest(testDispatcher) {
         val metadata = createPaymentMethodMetadata(linkState = null)
-        val manager = createManager()
+        val interactor = createInteractor()
 
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.Loading)
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(Loading)
 
-        manager.setup(
-            paymentMethodMetadata = metadata
-        )
+            interactor.setup(paymentMethodMetadata = metadata)
 
-        testScope.advanceUntilIdle()
-
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
+            assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
+        }
     }
 
     @Test
-    fun `when account status is LoggedIn, should mark as Resolved`() = runTest {
+    fun `when account status is LoggedIn, should render button`() = runTest(testDispatcher) {
         // Setup
         linkAccountManager.setLinkAccount(
             LinkAccountUpdate.Value(createLinkAccount(AccountStatus.Verified))
         )
         val metadata = createPaymentMethodMetadata()
-        val manager = createManager()
-        manager.otpElement.controller
+        val interactor = createInteractor()
 
-        manager.setup(
-            paymentMethodMetadata = metadata
-        )
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(Loading)
 
-        testScope.advanceUntilIdle()
+            interactor.setup(paymentMethodMetadata = metadata)
 
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
+            assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
+        }
     }
 
     @Test
-    fun `when account status is NeedsVerification, should call startVerification`() = runTest {
+    fun `when account status is NeedsVerification, should call startVerification`() = runTest(testDispatcher) {
         // Setup
         linkAccountManager.setLinkAccount(
             LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification))
@@ -120,80 +120,79 @@ class DefaultLinkInlineInteractorTest {
         val metadata = createPaymentMethodMetadata()
 
         // Execute
-        val manager = createManager()
-
-        manager.setup(
-            paymentMethodMetadata = metadata
-        )
-
-        testScope.advanceUntilIdle()
+        val interactor = createInteractor()
 
         // Verify
-        linkAccountManager.startVerificationResult
-        linkAccountManager.awaitStartVerificationCall()
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(Loading)
 
-        assertThat(manager.state.value.verificationState).isInstanceOf(VerificationState.Render2FA::class.java)
-    }
+            interactor.setup(paymentMethodMetadata = metadata)
 
-    @Test
-    fun `when otp complete and confirmation succeeds, keeps status as Render2FA and launches Link`() = runTest {
-        // Setup
-        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
-        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
-        linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
+            linkAccountManager.awaitStartVerificationCall()
 
-        val manager = createManager()
-
-        manager.setup(createPaymentMethodMetadata())
-
-        testScope.advanceUntilIdle()
-
-        // Submit OTP
-        val otpController = manager.otpElement.controller
-        for (i in 0 until otpController.otpLength) {
-            otpController.onValueChanged(i, "1")
+            assertThat(awaitItem().verificationState).isInstanceOf(Render2FA::class.java)
         }
-        testScope.advanceUntilIdle()
-
-        assertThat(manager.state.value.verificationState).isInstanceOf(VerificationState.Render2FA::class.java)
-        verify(linkLauncher).present(
-            configuration = any(),
-            linkAccountInfo = any(),
-            launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
-            useLinkExpress = any()
-        )
     }
 
     @Test
-    fun `when verification state is not Render2FA, otp complete should be ignored`() = runTest {
+    fun `when otp complete and confirmation succeeds, keeps status as Render2FA and launches Link`() =
+        runTest(testDispatcher) {
+            // Setup
+            val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
+            linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
+
+            val interactor = createInteractor()
+
+            interactor.setup(createPaymentMethodMetadata())
+
+            // Submit OTP
+            val otpController = interactor.otpElement.controller
+            for (i in 0 until otpController.otpLength) {
+                otpController.onValueChanged(i, "1")
+            }
+
+            interactor.state.test {
+                assertThat(awaitItem().verificationState).isInstanceOf(Render2FA::class.java)
+            }
+            verify(linkLauncher).present(
+                configuration = any(),
+                linkAccountInfo = any(),
+                launchMode = eq(LinkLaunchMode.PaymentMethodSelection(null)),
+                useLinkExpress = any()
+            )
+        }
+
+    @Test
+    fun `when verification state is not Render2FA, otp complete should be ignored`() = runTest(testDispatcher) {
         // Setup
         val otpCompleteFlow = MutableSharedFlow<String>()
 
-        val manager = createManager()
+        val interactor = createInteractor()
 
         // Setup state as RenderButton
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
             verificationState = VerificationState.RenderButton
         )
 
-        manager.setup(createPaymentMethodMetadata())
-        testScope.advanceUntilIdle()
+        interactor.setup(createPaymentMethodMetadata())
 
         // Submit OTP
         otpCompleteFlow.emit("123456")
-        testScope.advanceUntilIdle()
 
         // State should remain unchanged
-        assertThat(manager.state.value.verificationState).isEqualTo(VerificationState.RenderButton)
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
+        }
     }
 
     @Test
-    fun `when verification is already processing, otp complete should be ignored`() = runTest {
+    fun `when verification is already processing, otp complete should be ignored`() = runTest(testDispatcher) {
         // Setup
         val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
 
-        val manager = createManager()
+        val interactor = createInteractor()
 
         // Setup initial state with isProcessing=true
         val initialViewState = VerificationViewState(
@@ -207,13 +206,12 @@ class DefaultLinkInlineInteractorTest {
             didSendNewCode = false
         )
 
-        manager.setup(createPaymentMethodMetadata())
-        testScope.advanceUntilIdle()
+        interactor.setup(createPaymentMethodMetadata())
 
         // Make sure the confirm verification doesn't get called
         linkAccountManager.confirmVerificationResult = Result.success(mockAccount)
 
-        val verificationState = VerificationState.Render2FA(
+        val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             viewState = initialViewState
         )
@@ -223,20 +221,19 @@ class DefaultLinkInlineInteractorTest {
         )
 
         // Submit OTP
-        val otpController = manager.otpElement.controller
+        val otpController = interactor.otpElement.controller
         for (i in 0 until otpController.otpLength) {
             otpController.onValueChanged(i, "1")
         }
-        testScope.advanceUntilIdle()
 
         // Verify that confirmation wasn't called
         linkAccountManager.confirmVerificationTurbine.expectNoEvents()
     }
 
     @Test
-    fun `onConfirmationResult should set error state on failure`() = runTest {
+    fun `onConfirmationResult should set error state on failure`() = runTest(testDispatcher) {
         // Setup
-        val manager = createManager()
+        val interactor = createInteractor()
         val testError = RuntimeException("Invalid OTP code")
 
         val initialViewState = VerificationViewState(
@@ -250,7 +247,7 @@ class DefaultLinkInlineInteractorTest {
             didSendNewCode = false
         )
 
-        val verificationState = VerificationState.Render2FA(
+        val verificationState = Render2FA(
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             viewState = initialViewState
         )
@@ -260,26 +257,26 @@ class DefaultLinkInlineInteractorTest {
         )
 
         // Execute
-        manager.onConfirmationResult(
+        interactor.onConfirmationResult(
             verificationState = verificationState,
             result = Result.failure(testError)
         )
-        testScope.advanceUntilIdle()
 
         // Verify
-        val resultState = manager.state.value.verificationState as VerificationState.Render2FA
-        assertThat(resultState.viewState.isProcessing).isFalse()
-        assertThat(resultState.viewState.errorMessage).isNotNull()
+        interactor.state.test {
+            val state = awaitItem()
+            val resultState = state.verificationState as Render2FA
+            assertThat(resultState.viewState.isProcessing).isFalse()
+            assertThat(resultState.viewState.errorMessage).isNotNull()
+        }
     }
 
-    private fun createManager(): DefaultLinkInlineInteractor {
-        return DefaultLinkInlineInteractor(
-            coroutineScope = testScope,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkLauncher = linkLauncher,
-            savedStateHandle = savedStateHandle
-        )
-    }
+    private fun createInteractor() = DefaultLinkInlineInteractor(
+        coroutineScope = TestScope(testDispatcher),
+        linkConfigurationCoordinator = linkConfigurationCoordinator,
+        linkLauncher = linkLauncher,
+        savedStateHandle = savedStateHandle
+    )
 
     private fun createPaymentMethodMetadata(
         linkState: LinkState? = LinkState(
@@ -303,6 +300,56 @@ class DefaultLinkInlineInteractorTest {
         whenever(mockAccount.redactedPhoneNumber).thenReturn(redactedPhoneNumber)
         whenever(mockAccount.email).thenReturn(email)
         return mockAccount
+    }
+
+    private class FakeLinkComponent(linkAccountManager: FakeLinkAccountManager) : LinkComponent() {
+        override val configuration: LinkConfiguration = createLinkConfiguration()
+        override val linkAccountManager: LinkAccountManager = linkAccountManager
+        override val linkGate: LinkGate = FakeLinkGate()
+        override val linkAttestationCheck = FakeLinkAttestationCheck()
+        override val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory
+            get() = mock()
+    }
+
+    private class FakeLinkConfigurationCoordinator(
+        val component: LinkComponent = FakeLinkComponent(FakeLinkAccountManager())
+    ) : LinkConfigurationCoordinator {
+
+        override val emailFlow: StateFlow<String?> = stateFlowOf(null)
+
+        override fun getComponent(configuration: LinkConfiguration): LinkComponent {
+            return component
+        }
+
+        override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
+            return component.linkAccountManager.accountStatus
+        }
+
+        override fun linkGate(configuration: LinkConfiguration): LinkGate {
+            return component.linkGate
+        }
+
+        override fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck {
+            return component.linkAttestationCheck
+        }
+
+        override suspend fun signInWithUserInput(
+            configuration: LinkConfiguration,
+            userInput: UserInput
+        ): Result<Boolean> {
+            TODO()
+        }
+
+        override suspend fun attachNewCardToAccount(
+            configuration: LinkConfiguration,
+            paymentMethodCreateParams: PaymentMethodCreateParams
+        ): Result<LinkPaymentDetails> {
+            TODO()
+        }
+
+        override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {
+            TODO()
+        }
     }
 
     companion object {

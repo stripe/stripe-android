@@ -46,7 +46,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
      * Sets up Link verification domain logic (should be called once when initializing)
      */
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
-        if (FeatureFlags.showInlineSignupInWalletButtons.isEnabled.not()) {
+        if (FeatureFlags.showInlineOtpInWalletButtons.isEnabled.not()) {
             // If the feature flag is disabled, do not start Link verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
