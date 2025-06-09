@@ -1,6 +1,7 @@
 package com.stripe.android.link.verification
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -30,6 +31,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     private val coroutineScope: CoroutineScope,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val linkLauncher: LinkPaymentLauncher,
+    private val logger: Logger,
     private val savedStateHandle: SavedStateHandle
 ) : LinkInlineInteractor {
 
@@ -80,14 +82,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 val verificationState = state.value.verificationState
                 if (verificationState is Render2FA && verificationState.viewState.isProcessing.not()) {
                     // Update to processing state
-                    updateState {
-                        it.copy(
-                            verificationState.copy(
-                                viewState = verificationState.viewState.copy(
-                                    isProcessing = true,
-                                    errorMessage = null
-                                )
-                            )
+                    update2FAState { viewState ->
+                        viewState.copy(
+                            isProcessing = true,
+                            errorMessage = null
                         )
                     }
                     // confirm verification
@@ -112,14 +110,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->
-                updateState {
-                    it.copy(
-                        verificationState = verificationState.copy(
-                            verificationState.viewState.copy(
-                                isProcessing = false,
-                                errorMessage = error.errorMessage
-                            )
-                        )
+                update2FAState { viewState ->
+                    viewState.copy(
+                        isProcessing = false,
+                        errorMessage = error.errorMessage
                     )
                 }
             }
@@ -144,6 +138,21 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = block(currentState)
     }
 
+    private fun update2FAState(
+        block: (VerificationViewState) -> VerificationViewState,
+    ) {
+        val currentState = state.value.verificationState
+        if (currentState is Render2FA) {
+            val newState = currentState.copy(viewState = block(currentState.viewState))
+            updateState { it.copy(verificationState = newState) }
+        } else {
+            logger.error(
+                "Expected Render2FA state but found ${currentState::class.simpleName}. Resetting to RenderButton."
+            )
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
+        }
+    }
+
     private fun Render2FA.linkAccountManager(): LinkAccountManager {
         return linkConfigurationCoordinator.getComponent(linkConfiguration).linkAccountManager
     }
@@ -155,58 +164,32 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
-        withOTPState { render2FAState ->
-            updateState {
-                it.copy(
-                    verificationState = render2FAState.copy(
-                        viewState = render2FAState.viewState.copy(
-                            isSendingNewCode = true,
-                            errorMessage = null
-                        )
-                    )
-                )
-            }
-            startVerification()
+        update2FAState { viewState ->
+            viewState.copy(
+                isSendingNewCode = true,
+                errorMessage = null
+            )
         }
-    }
-
-    fun withOTPState(
-        block: (Render2FA) -> Unit,
-    ) {
-        (state.value.verificationState as? Render2FA)?.let { render2FAState ->
-            block(render2FAState)
-        } ?: run {
-            // If the current state is not Render2FA, we cannot resend the code.
-            // This should not happen in normal flow, but we handle it gracefully.
-            updateState { it.copy(verificationState = VerificationState.RenderButton) }
-        }
+        startVerification()
     }
 
     private fun startVerification() {
-        withOTPState { render2FAState ->
-            updateState {
-                it.copy(
-                    verificationState = render2FAState.copy(
-                        viewState = render2FAState.viewState.copy(
-                            errorMessage = null
-                        )
-                    )
-                )
-            }
-            coroutineScope.launch {
-                val linkAccountManager = render2FAState.linkAccountManager()
+        update2FAState { viewState ->
+            viewState.copy(errorMessage = null)
+        }
+
+        coroutineScope.launch {
+            val currentState = state.value.verificationState
+            if (currentState is Render2FA) {
+                val linkAccountManager = currentState.linkAccountManager()
                 val result = linkAccountManager.startVerification()
                 val error = result.exceptionOrNull()
 
-                updateState {
-                    it.copy(
-                        verificationState = render2FAState.copy(
-                            viewState = render2FAState.viewState.copy(
-                                isSendingNewCode = false,
-                                didSendNewCode = render2FAState.viewState.isSendingNewCode && error == null,
-                                errorMessage = error?.errorMessage,
-                            )
-                        )
+                update2FAState { viewState ->
+                    viewState.copy(
+                        isSendingNewCode = false,
+                        didSendNewCode = viewState.isSendingNewCode && error == null,
+                        errorMessage = error?.errorMessage,
                     )
                 }
             }
