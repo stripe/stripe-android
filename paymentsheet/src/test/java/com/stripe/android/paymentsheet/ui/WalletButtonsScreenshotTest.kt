@@ -65,6 +65,7 @@ class WalletButtonsScreenshotTest {
                 is WalletButtonsInteractor.ViewAction.OnShown,
                 is WalletButtonsInteractor.ViewAction.OnHidden -> Unit
                 is WalletButtonsInteractor.ViewAction.OnButtonPressed -> error("Should not be called!")
+                WalletButtonsInteractor.ViewAction.OnResendCode -> Unit
             }
         }
     }

@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -275,7 +276,8 @@ class DefaultLinkInlineInteractorTest {
         coroutineScope = TestScope(testDispatcher),
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         linkLauncher = linkLauncher,
-        savedStateHandle = savedStateHandle
+        savedStateHandle = savedStateHandle,
+        logger = FakeLogger()
     )
 
     private fun createPaymentMethodMetadata(
