@@ -88,4 +88,11 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         end = formInsetValues.endDp,
         bottom = formInsetValues.bottomDp
     )
+
+    StripeTheme.textFieldInsets = StripeThemeDefaults.textFieldInsets.copy(
+        start = textFieldInsets.startDp,
+        top = textFieldInsets.topDp,
+        end = textFieldInsets.endDp,
+        bottom = textFieldInsets.bottomDp
+    )
 }

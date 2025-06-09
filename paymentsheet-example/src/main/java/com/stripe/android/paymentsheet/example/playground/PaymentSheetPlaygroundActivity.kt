@@ -53,6 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
 import com.stripe.android.paymentsheet.example.playground.activity.getFormInsetsAppearance
+import com.stripe.android.paymentsheet.example.playground.activity.getTextFieldInsetsAppearance
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -63,6 +64,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
+import com.stripe.android.paymentsheet.example.playground.settings.TextFieldInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
@@ -259,6 +261,8 @@ internal class PaymentSheetPlaygroundActivity :
         val settings = viewModel.playgroundSettingsFlow.collectAsState().value
         val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
         val insetsAppearance = settings?.get(FormInsetsAppearanceSettingDefinition)?.collectAsState()?.value
+        val textFieldInsetsAppearance =
+            settings?.get(TextFieldInsetsAppearanceSettingDefinition)?.collectAsState()?.value
         supportFragmentManager.setFragmentResultListener(
             AppearanceBottomSheetDialogFragment.REQUEST_KEY,
             this@PaymentSheetPlaygroundActivity
@@ -271,6 +275,10 @@ internal class PaymentSheetPlaygroundActivity :
                 FormInsetsAppearanceSettingDefinition,
                 bundle.getFormInsetsAppearance()
             )
+            viewModel.updateFormInsetsAppearance(
+                TextFieldInsetsAppearanceSettingDefinition,
+                bundle.getTextFieldInsetsAppearance()
+            )
         }
         Button(
             onClick = {
@@ -278,6 +286,7 @@ internal class PaymentSheetPlaygroundActivity :
                 bottomSheet.arguments = Bundle().apply {
                     putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
                     putParcelable(AppearanceBottomSheetDialogFragment.INSETS_KEY, insetsAppearance)
+                    putParcelable(AppearanceBottomSheetDialogFragment.TEXT_FIELD_INSETS_KEY, textFieldInsetsAppearance)
                 }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },

@@ -302,6 +302,13 @@ object StripeThemeDefaults {
         end = 20f,
         bottom = 40f
     )
+
+    val textFieldInsets = FormInsets(
+        start = 0f,
+        top = 0f,
+        end = 0f,
+        bottom = 0f
+    )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -543,6 +550,8 @@ object StripeTheme {
     var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
 
     var formInsets = StripeThemeDefaults.formInsets
+
+    var textFieldInsets = StripeThemeDefaults.textFieldInsets
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable

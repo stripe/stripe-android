@@ -46,9 +46,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -642,7 +642,7 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun updateFormInsetsAppearance(
-        appearanceSetting: FormInsetsAppearanceSettingDefinition,
+        appearanceSetting: PlaygroundSettingDefinition<FormInsetsAppearance>,
         value: FormInsetsAppearance
     ) {
         playgroundSettingsFlow.value?.let { settings ->

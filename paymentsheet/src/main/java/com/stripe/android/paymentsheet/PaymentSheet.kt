@@ -1005,7 +1005,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance(
+    data class Appearance @ExtendedAppearancePreview constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
@@ -1039,7 +1039,12 @@ class PaymentSheet internal constructor(
         /**
          * Describes the inset values used for all forms
          */
-        internal val formInsetValues: Insets = Insets.defaultFormInsetValues
+        internal val formInsetValues: Insets = Insets.defaultFormInsetValues,
+
+        /**
+         * Describes the inset values used inside text fields
+         */
+        internal val textFieldInsets: Insets = Insets.defaultTextFieldInsets
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1062,6 +1067,26 @@ class PaymentSheet internal constructor(
             typography = typography,
             primaryButton = primaryButton,
             embeddedAppearance = Embedded.default
+        )
+
+        @OptIn(ExtendedAppearancePreview::class)
+        constructor(
+            colorsLight: Colors = Colors.defaultLight,
+            colorsDark: Colors = Colors.defaultDark,
+            shapes: Shapes = Shapes.default,
+            typography: Typography = Typography.default,
+            primaryButton: PrimaryButton = PrimaryButton(),
+            embeddedAppearance: Embedded = Embedded.default,
+            formInsetValues: Insets = Insets.defaultFormInsetValues,
+        ) : this(
+            colorsLight = colorsLight,
+            colorsDark = colorsDark,
+            shapes = shapes,
+            typography = typography,
+            primaryButton = primaryButton,
+            embeddedAppearance = embeddedAppearance,
+            formInsetValues = formInsetValues,
+            textFieldInsets = Insets.defaultTextFieldInsets
         )
 
         fun getColors(isDark: Boolean): Colors {
@@ -1379,6 +1404,7 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
+            private var textFieldInsets = Insets.defaultTextFieldInsets
 
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
@@ -1409,9 +1435,23 @@ class PaymentSheet internal constructor(
                 this.embeddedAppearance = embeddedAppearance
             }
 
-            @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+            @ExtendedAppearancePreview
+            fun textFieldInsets(textFieldInsets: Insets) = apply {
+                this.textFieldInsets = textFieldInsets
+            }
+
+            @OptIn(ExperimentalEmbeddedPaymentElementApi::class, ExtendedAppearancePreview::class)
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, embeddedAppearance)
+                return Appearance(
+                    colorsLight = colorsLight,
+                    colorsDark = colorsDark,
+                    shapes = shapes,
+                    typography = typography,
+                    primaryButton = primaryButton,
+                    embeddedAppearance = embeddedAppearance,
+                    formInsetValues = Insets.defaultFormInsetValues,
+                    textFieldInsets = textFieldInsets,
+                )
             }
         }
     }
@@ -1858,6 +1898,13 @@ class PaymentSheet internal constructor(
                 topDp = 0f,
                 endDp = 20f,
                 bottomDp = 40f,
+            )
+
+            internal val defaultTextFieldInsets = Insets(
+                startDp = 0f,
+                topDp = 0f,
+                endDp = 0f,
+                bottomDp = 0f,
             )
         }
     }

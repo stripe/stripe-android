@@ -1,8 +1,12 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -74,10 +78,19 @@ class DropdownFieldController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
+        val textFieldInsets = StripeTheme.textFieldInsets
+
         DropDown(
             this,
             enabled,
-            modifier = modifier,
+            modifier = modifier.padding(
+                PaddingValues(
+                    start = textFieldInsets.start.dp,
+                    end = textFieldInsets.end.dp,
+                    top = textFieldInsets.top.dp,
+                    bottom = textFieldInsets.bottom.dp,
+                )
+            ),
         )
     }
 }

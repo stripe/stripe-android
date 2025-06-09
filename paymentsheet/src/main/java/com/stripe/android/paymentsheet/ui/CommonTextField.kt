@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -10,11 +12,16 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.stripeColors
 
 @Composable
@@ -36,9 +43,12 @@ internal fun CommonTextField(
         enabled = enabled
     ),
 ) {
-    TextField(
-        modifier = modifier.fillMaxWidth(),
-        value = value,
+    val textFieldInsets = StripeTheme.textFieldInsets
+
+    CompatTextField(
+        modifier = modifier
+            .fillMaxWidth(),
+        value = TextFieldValue(value),
         enabled = enabled,
         label = {
             Label(
@@ -51,7 +61,18 @@ internal fun CommonTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
-        onValueChange = onValueChange,
+        onValueChange = { textFieldValue ->
+            onValueChange(textFieldValue.text)
+        },
+        errorMessage = null,
+        contentPadding = remember(textFieldInsets) {
+            PaddingValues(
+                start = textFieldInsets.start.dp,
+                end = textFieldInsets.end.dp,
+                top = textFieldInsets.top.dp,
+                bottom = textFieldInsets.bottom.dp,
+            )
+        }
     )
 }
 

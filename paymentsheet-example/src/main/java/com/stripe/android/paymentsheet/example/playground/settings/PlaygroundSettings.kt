@@ -467,7 +467,8 @@ internal class PlaygroundSettings private constructor(
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
             EmbeddedAppearanceSettingsDefinition,
-            FormInsetsAppearanceSettingDefinition
+            FormInsetsAppearanceSettingDefinition,
+            TextFieldInsetsAppearanceSettingDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

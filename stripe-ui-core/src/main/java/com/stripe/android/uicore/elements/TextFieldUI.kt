@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -68,6 +69,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
@@ -185,6 +187,7 @@ fun TextField(
     }
 
     val context = LocalContext.current
+    val textFieldInsets = StripeTheme.textFieldInsets
 
     TextFieldUi(
         value = TextFieldValue(
@@ -255,6 +258,14 @@ fun TextField(
                 focusManager.clearFocus(true)
             }
         ),
+        contentPadding = remember(textFieldInsets) {
+            PaddingValues(
+                start = textFieldInsets.start.dp,
+                end = textFieldInsets.end.dp,
+                top = textFieldInsets.top.dp,
+                bottom = textFieldInsets.bottom.dp,
+            )
+        }
     )
 }
 
@@ -270,6 +281,7 @@ internal fun TextFieldUi(
     shouldShowError: Boolean,
     errorMessage: String?,
     shouldAnnounceLabel: Boolean = true,
+    contentPadding: PaddingValues = remember { PaddingValues() },
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     layoutDirection: LayoutDirection? = null,
@@ -319,7 +331,8 @@ internal fun TextFieldUi(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,
-            colors = colors
+            colors = colors,
+            contentPadding = contentPadding,
         )
     }
 }

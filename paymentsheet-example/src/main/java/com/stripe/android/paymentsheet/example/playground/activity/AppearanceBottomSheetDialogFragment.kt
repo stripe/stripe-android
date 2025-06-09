@@ -71,6 +71,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.INSETS_KEY
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.TEXT_FIELD_INSETS_KEY
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
 import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearance
@@ -84,6 +85,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     private var embeddedAppearance by mutableStateOf(EmbeddedAppearance())
     private var formInsetsAppearance by mutableStateOf(FormInsetsAppearance())
+    private var textFieldInsetsAppearance by mutableStateOf(FormInsetsAppearance())
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,6 +94,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
     ): View {
         embeddedAppearance = arguments.getEmbeddedAppearance()
         formInsetsAppearance = arguments.getFormInsetsAppearance()
+        textFieldInsetsAppearance = arguments.getTextFieldInsetsAppearance()
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -101,7 +104,9 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
                     embeddedAppearance = embeddedAppearance,
                     updateEmbedded = { embeddedAppearance = it },
                     formInsetsAppearance = formInsetsAppearance,
+                    textFieldInsetsAppearance = textFieldInsetsAppearance,
                     updateInsets = { formInsetsAppearance = it },
+                    updateTextFieldInsets = { textFieldInsetsAppearance = it },
                     resetAppearance = ::resetAppearance
                 )
             }
@@ -112,6 +117,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
         AppearanceStore.reset()
         embeddedAppearance = EmbeddedAppearance()
         formInsetsAppearance = FormInsetsAppearance()
+        textFieldInsetsAppearance = FormInsetsAppearance(start = 0f, end = 0f, top = 0f, bottom = 0f)
     }
 
     override fun onDestroy() {
@@ -119,6 +125,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
         val result = Bundle().apply {
             putParcelable(EMBEDDED_KEY, embeddedAppearance)
             putParcelable(INSETS_KEY, formInsetsAppearance)
+            putParcelable(TEXT_FIELD_INSETS_KEY, textFieldInsetsAppearance)
         }
         setFragmentResult(REQUEST_KEY, result)
     }
@@ -131,6 +138,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
         const val REQUEST_KEY = "REQUEST_KEY"
         const val EMBEDDED_KEY = "EMBEDDED_APPEARANCE"
         const val INSETS_KEY = "INSETS_APPEARANCE"
+        const val TEXT_FIELD_INSETS_KEY = "TEXT_FIELD_INSETS_APPEARANCE"
     }
 }
 
@@ -141,7 +149,9 @@ private fun AppearancePicker(
     embeddedAppearance: EmbeddedAppearance,
     updateEmbedded: (EmbeddedAppearance) -> Unit,
     formInsetsAppearance: FormInsetsAppearance,
+    textFieldInsetsAppearance: FormInsetsAppearance,
     updateInsets: (FormInsetsAppearance) -> Unit,
+    updateTextFieldInsets: (FormInsetsAppearance) -> Unit,
     resetAppearance: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -178,6 +188,12 @@ private fun AppearancePicker(
                 Insets(
                     insetsAppearance = formInsetsAppearance,
                     updateInsets = updateInsets
+                )
+            }
+            CustomizationCard("Text Field Insets") {
+                Insets(
+                    insetsAppearance = textFieldInsetsAppearance,
+                    updateInsets = updateTextFieldInsets
                 )
             }
             CustomizationCard("Typography") {
@@ -1142,6 +1158,16 @@ internal fun Bundle?.getFormInsetsAppearance(): FormInsetsAppearance {
     } else {
         @Suppress("DEPRECATION")
         this?.getParcelable(INSETS_KEY)
+    }
+    return appearance ?: FormInsetsAppearance()
+}
+
+internal fun Bundle?.getTextFieldInsetsAppearance(): FormInsetsAppearance {
+    val appearance = if (SDK_INT >= 33) {
+        this?.getParcelable(TEXT_FIELD_INSETS_KEY, FormInsetsAppearance::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        this?.getParcelable(TEXT_FIELD_INSETS_KEY)
     }
     return appearance ?: FormInsetsAppearance()
 }

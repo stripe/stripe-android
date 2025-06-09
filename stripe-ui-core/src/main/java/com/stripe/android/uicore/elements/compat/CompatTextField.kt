@@ -32,6 +32,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -60,6 +62,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
@@ -130,7 +133,8 @@ import androidx.compose.ui.R as ComposeUiR
  * this text field in different states. See [TextFieldDefaults.textFieldColors]
  */
 @Composable
-internal fun CompatTextField(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun CompatTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
@@ -151,7 +155,8 @@ internal fun CompatTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = TextFieldDefaults.TextFieldShape,
-    colors: TextFieldColors = TextFieldDefaults.textFieldColors()
+    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
+    contentPadding: PaddingValues = remember { PaddingValues() },
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
@@ -182,6 +187,27 @@ internal fun CompatTextField(
         maxLines = maxLines,
         minLines = minLines,
         decorationBox = @Composable { innerTextField ->
+            val layoutDirection = LocalLayoutDirection.current
+
+            val defaultPadding = remember {
+                if (label == null) {
+                    TextFieldDefaults.textFieldWithoutLabelPadding()
+                } else {
+                    TextFieldDefaults.textFieldWithLabelPadding()
+                }
+            }
+
+            val innerContentPadding = remember {
+                PaddingValues(
+                    start = defaultPadding.calculateStartPadding(layoutDirection) +
+                        contentPadding.calculateStartPadding(layoutDirection),
+                    end = defaultPadding.calculateEndPadding(layoutDirection) +
+                        contentPadding.calculateEndPadding(layoutDirection),
+                    top = defaultPadding.calculateTopPadding() + contentPadding.calculateTopPadding(),
+                    bottom = defaultPadding.calculateBottomPadding() + contentPadding.calculateBottomPadding()
+                )
+            }
+
             // places leading icon, text field with label and placeholder, trailing icon
             CommonDecorationBox(
                 value = value.text,
@@ -197,11 +223,7 @@ internal fun CompatTextField(
                 interactionSource = interactionSource,
                 colors = colors,
                 shape = shape,
-                contentPadding = if (label == null) {
-                    TextFieldDefaults.textFieldWithoutLabelPadding()
-                } else {
-                    TextFieldDefaults.textFieldWithLabelPadding()
-                }
+                contentPadding = innerContentPadding,
             )
         }
     )
