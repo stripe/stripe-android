@@ -280,7 +280,7 @@ private fun ChangeEmailRow(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun ResendCodeButton(
+internal fun ResendCodeButton(
     isProcessing: Boolean,
     isSendingNewCode: Boolean,
     onClick: () -> Unit,

@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.wallet.LinkInline2FASection
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -41,7 +42,8 @@ internal class WalletButtonsContent(
                     state.link2FAState?.let {
                         LinkInline2FASection(
                             verificationState = it.viewState,
-                            otpElement = it.otpElement
+                            otpElement = it.otpElement,
+                            onResend = { interactor.handleViewAction(OnResendCode) }
                         )
                         if (state.walletButtons.size > 1) {
                             WalletsDivider(stringResource(R.string.stripe_paymentsheet_or_use))

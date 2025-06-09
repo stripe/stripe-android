@@ -68,11 +68,9 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             return
         }
 
-        coroutineScope.launch {
-            linkAccountManager.startVerification()
-            observeOtp(linkAccountManager)
-            updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
-        }
+        updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
+        observeOtp(linkAccountManager)
+        startVerification()
     }
 
     fun observeOtp(linkAccountManager: LinkAccountManager) {
@@ -154,6 +152,65 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         // Regardless of the Link result, the user completed verification,
         // so we can reset the verification state to RenderButton.
         updateState { it.copy(verificationState = VerificationState.RenderButton) }
+    }
+
+    override fun resendCode() {
+        withOTPState { render2FAState ->
+            updateState {
+                it.copy(
+                    verificationState = render2FAState.copy(
+                        viewState = render2FAState.viewState.copy(
+                            isSendingNewCode = true,
+                            errorMessage = null
+                        )
+                    )
+                )
+            }
+            startVerification()
+        }
+    }
+
+    fun withOTPState(
+        block: (Render2FA) -> Unit,
+    ) {
+        (state.value.verificationState as? Render2FA)?.let { render2FAState ->
+            block(render2FAState)
+        } ?: run {
+            // If the current state is not Render2FA, we cannot resend the code.
+            // This should not happen in normal flow, but we handle it gracefully.
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
+        }
+    }
+
+    private fun startVerification() {
+        withOTPState { render2FAState ->
+            updateState {
+                it.copy(
+                    verificationState = render2FAState.copy(
+                        viewState = render2FAState.viewState.copy(
+                            errorMessage = null
+                        )
+                    )
+                )
+            }
+            coroutineScope.launch {
+                val linkAccountManager = render2FAState.linkAccountManager()
+                val result = linkAccountManager.startVerification()
+                val error = result.exceptionOrNull()
+
+                updateState {
+                    it.copy(
+                        verificationState = render2FAState.copy(
+                            viewState = render2FAState.viewState.copy(
+                                isSendingNewCode = false,
+                                didSendNewCode = render2FAState.viewState.isSendingNewCode && error == null,
+                                errorMessage = error?.errorMessage,
+                            )
+                        )
+                    )
+                }
+            }
+        }
     }
 
     companion object {

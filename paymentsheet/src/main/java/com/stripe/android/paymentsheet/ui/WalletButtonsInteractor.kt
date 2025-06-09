@@ -96,6 +96,7 @@ internal interface WalletButtonsInteractor {
         data class OnButtonPressed(val button: WalletButton) : ViewAction
         data object OnShown : ViewAction
         data object OnHidden : ViewAction
+        data object OnResendCode : ViewAction
     }
 }
 
@@ -184,6 +185,7 @@ internal class DefaultWalletButtonsInteractor(
             }
             is WalletButtonsInteractor.ViewAction.OnShown -> onWalletButtonsRenderStateChanged(true)
             is WalletButtonsInteractor.ViewAction.OnHidden -> onWalletButtonsRenderStateChanged(false)
+            is WalletButtonsInteractor.ViewAction.OnResendCode -> linkInlineInteractor.resendCode()
         }
     }
 

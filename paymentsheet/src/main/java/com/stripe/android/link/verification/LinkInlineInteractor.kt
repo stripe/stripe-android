@@ -19,4 +19,6 @@ internal interface LinkInlineInteractor {
      * Sets up Link domain logic (should be called once when initializing).
      */
     fun setup(paymentMethodMetadata: PaymentMethodMetadata)
+
+    fun resendCode()
 }
