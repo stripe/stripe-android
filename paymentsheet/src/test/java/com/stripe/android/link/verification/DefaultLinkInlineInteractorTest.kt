@@ -3,6 +3,7 @@ package com.stripe.android.link.verification
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
@@ -268,6 +269,193 @@ class DefaultLinkInlineInteractorTest {
             assertThat(resultState.viewState.isProcessing).isFalse()
             assertThat(resultState.viewState.errorMessage).isNotNull()
         }
+    }
+
+    @Test
+    fun `resendCode should reset OTP controller and start verification`() = runTest(testDispatcher) {
+        // Setup
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
+        linkAccountManager.startVerificationResult = Result.success(createLinkAccount())
+
+        val interactor = createInteractor()
+
+        // Setup initial state with some OTP values and error
+        val initialViewState = VerificationViewState(
+            isProcessing = false,
+            errorMessage = "Previous error".resolvableString,
+            email = "test@example.com",
+            redactedPhoneNumber = "****1234",
+            requestFocus = false,
+            isDialog = true,
+            isSendingNewCode = false,
+            didSendNewCode = false
+        )
+
+        val verificationState = Render2FA(
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            viewState = initialViewState
+        )
+
+        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
+            verificationState = verificationState
+        )
+
+        // Fill OTP with some values
+        val otpController = interactor.otpElement.controller
+        for (i in 0 until otpController.otpLength) {
+            otpController.onValueChanged(i, "1")
+        }
+
+        // Execute
+        interactor.resendCode()
+
+        // Verify
+        linkAccountManager.awaitStartVerificationCall()
+
+        interactor.state.test {
+            val state = awaitItem()
+            val resultState = state.verificationState as Render2FA
+            assertThat(resultState.viewState.isSendingNewCode).isFalse()
+            assertThat(resultState.viewState.didSendNewCode).isTrue()
+            assertThat(resultState.viewState.errorMessage).isNull()
+        }
+
+        // Verify OTP was reset
+        assertThat(otpController.fieldValue.value).isEmpty()
+    }
+
+    @Test
+    fun `resendCode should handle verification failure`() = runTest(testDispatcher) {
+        // Setup
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
+        val testError = RuntimeException("Verification failed")
+        linkAccountManager.startVerificationResult = Result.failure(testError)
+
+        val interactor = createInteractor()
+
+        val initialViewState = VerificationViewState(
+            isProcessing = false,
+            errorMessage = null,
+            email = "test@example.com",
+            redactedPhoneNumber = "****1234",
+            requestFocus = false,
+            isDialog = true,
+            isSendingNewCode = false,
+            didSendNewCode = false
+        )
+
+        val verificationState = Render2FA(
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            viewState = initialViewState
+        )
+
+        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
+            verificationState = verificationState
+        )
+
+        // Execute
+        interactor.resendCode()
+
+        // Verify
+        linkAccountManager.awaitStartVerificationCall()
+
+        interactor.state.test {
+            val state = awaitItem()
+            val resultState = state.verificationState as Render2FA
+            assertThat(resultState.viewState.isSendingNewCode).isFalse()
+            assertThat(resultState.viewState.didSendNewCode).isFalse()
+            assertThat(resultState.viewState.errorMessage).isNotNull()
+        }
+    }
+
+    @Test
+    fun `resendCode should clear error message`() = runTest(testDispatcher) {
+        // Setup
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
+        linkAccountManager.startVerificationResult = Result.success(createLinkAccount())
+
+        val interactor = createInteractor()
+
+        val initialViewState = VerificationViewState(
+            isProcessing = false,
+            errorMessage = "Previous error message".resolvableString,
+            email = "test@example.com",
+            redactedPhoneNumber = "****1234",
+            requestFocus = false,
+            isDialog = true,
+            isSendingNewCode = false,
+            didSendNewCode = false
+        )
+
+        val verificationState = Render2FA(
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            viewState = initialViewState
+        )
+
+        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
+            verificationState = verificationState
+        )
+
+        // Execute
+        interactor.resendCode()
+
+        // Verify
+        linkAccountManager.awaitStartVerificationCall()
+
+        interactor.state.test {
+            val state = awaitItem()
+            val resultState = state.verificationState as Render2FA
+            assertThat(resultState.viewState.errorMessage).isNull()
+        }
+    }
+
+    @Test
+    fun `resendCode should reset OTP controller even when verification fails`() = runTest(testDispatcher) {
+        // Setup
+        val mockAccount = createLinkAccount(AccountStatus.NeedsVerification)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(mockAccount))
+        val testError = RuntimeException("Verification failed")
+        linkAccountManager.startVerificationResult = Result.failure(testError)
+
+        val interactor = createInteractor()
+
+        val initialViewState = VerificationViewState(
+            isProcessing = false,
+            errorMessage = null,
+            email = "test@example.com",
+            redactedPhoneNumber = "****1234",
+            requestFocus = false,
+            isDialog = true,
+            isSendingNewCode = false,
+            didSendNewCode = false
+        )
+
+        val verificationState = Render2FA(
+            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            viewState = initialViewState
+        )
+
+        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
+            verificationState = verificationState
+        )
+
+        // Fill OTP with some values
+        val otpController = interactor.otpElement.controller
+        for (i in 0 until otpController.otpLength) {
+            otpController.onValueChanged(i, "1")
+        }
+
+        // Execute
+        interactor.resendCode()
+
+        // Verify
+        linkAccountManager.awaitStartVerificationCall()
+
+        // Verify OTP was reset even though verification failed
+        assertThat(otpController.fieldValue.value).isEmpty()
     }
 
     private fun createInteractor() = DefaultLinkInlineInteractor(
