@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Bezárja ezt az űrlapot?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Mentse el az adatait a biztonságos egykattintásos fizetéshez a Linkkel</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Adataim mentése a gyorsabb fizetéshez a Linkkel</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$sHitel</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Az e-mail-címe megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a <terms>Link feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[A telefonszáma megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Telefonszáma és e-mail-címe megadásával hozzájárul a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> által szabályozott Link-számla létrehozásához.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">A számláját deaktiváltuk.</string>
   <!-- Generic failure message -->

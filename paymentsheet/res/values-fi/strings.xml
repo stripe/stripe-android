@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Haluatko sulkea tämän lomakkeen?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Tallenna tiedot turvalliselle yhden napsautuksen maksamiselle Link-palvelulla</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Tallenna tietoni nopeammalle maksamiselle Link-palvelulla</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s-luottokortti</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Antamalla sähköpostisi hyväksyt Link-tilin luomisen ja tallennat maksutietosi Link-palveluun <terms>Link-ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Antamalla puhelinnumerosi hyväksyt Link-tilin luomisen ja tallennat maksutietosi Link-palveluun <terms>Link-ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Antamalla puhelinnumeron ja sähköpostin hyväksyt Link-tilin, joka noudattaa Link-palvelun <terms>ehtoja</terms> ja <privacy>tietosuojaselostetta</privacy>, luomisen.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Tilisi on deaktivoitu</string>
   <!-- Generic failure message -->

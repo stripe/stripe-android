@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Chcete zatvoriť tento formulár?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Uložte svoje údaje pre bezpečnú platbu jedným kliknutím pomocou služby Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Uložiť moje údaje pre rýchlejšiu platbu so službou Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kreditná karta %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Poskytnutím svojho e-mailu súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Poskytnutím svojho telefónneho čísla súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Poskytnutím telefónneho čísla a e-mailu súhlasíte s vytvorením účtu Link, ktoré podlieha <terms>podmienkam</terms> a <privacy>zásadám ochrany osobných údajov</privacy> služby Link.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Váš účet bol deaktivovaný</string>
   <!-- Generic failure message -->
