@@ -72,6 +72,8 @@ internal open class FakeLinkAccountManager(
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
     private val startVerificationTurbine = Turbine<Unit>()
 
+    val confirmVerificationTurbine = Turbine<String>()
+
     private val logoutCall = Turbine<Unit>()
 
     override var consumerPublishableKey: String? = null
@@ -195,6 +197,7 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
+        confirmVerificationTurbine.add(code)
         return confirmVerificationResult
     }
 
@@ -238,6 +241,10 @@ internal open class FakeLinkAccountManager(
 
     suspend fun awaitStartVerificationCall() {
         return startVerificationTurbine.awaitItem()
+    }
+
+    suspend fun awaitConfirmVerificationCall(): String {
+        return confirmVerificationTurbine.awaitItem()
     }
 
     suspend fun awaitLogoutCall() {
