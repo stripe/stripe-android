@@ -21,4 +21,6 @@ internal interface LinkInlineInteractor {
     fun setup(paymentMethodMetadata: PaymentMethodMetadata)
 
     fun resendCode()
+
+    fun didShowCodeSentNotification()
 }

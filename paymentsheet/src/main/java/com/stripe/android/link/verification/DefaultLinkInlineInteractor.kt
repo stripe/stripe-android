@@ -173,6 +173,12 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         startVerification()
     }
 
+    override fun didShowCodeSentNotification() {
+        update2FAState { viewState ->
+            viewState.copy(didSendNewCode = false)
+        }
+    }
+
     private fun startVerification() {
         update2FAState { viewState ->
             viewState.copy(errorMessage = null)

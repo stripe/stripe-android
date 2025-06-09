@@ -21,4 +21,6 @@ internal class NoOpLinkInlineInteractor : LinkInlineInteractor {
     }
 
     override fun resendCode() = Unit
+
+    override fun didShowCodeSentNotification() = Unit
 }

@@ -1,16 +1,21 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.wallet.LinkInline2FASection
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
 import com.stripe.android.uicore.StripeTheme
@@ -23,14 +28,17 @@ internal class WalletButtonsContent(
     @Composable
     fun Content() {
         val state by interactor.state.collectAsState()
+        val context = LocalContext.current
 
         DisposableEffect(Unit) {
-            interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnShown)
+            interactor.handleViewAction(ViewAction.OnShown)
 
             onDispose {
-                interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnHidden)
+                interactor.handleViewAction(ViewAction.OnHidden)
             }
         }
+
+        ResendCodeNotificationEffect(state, context)
 
         // Render the wallet buttons and 2FA section if they exist
         if (state.hasContent) {
@@ -78,6 +86,19 @@ internal class WalletButtonsContent(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @Composable
+    private fun ResendCodeNotificationEffect(
+        state: WalletButtonsInteractor.State,
+        context: Context
+    ) {
+        LaunchedEffect(state.link2FAState?.viewState?.didSendNewCode) {
+            if (state.link2FAState?.viewState?.didSendNewCode == true) {
+                Toast.makeText(context, R.string.stripe_verification_code_sent, Toast.LENGTH_SHORT).show()
+                interactor.handleViewAction(ViewAction.OnResendCodeNotificationSent)
             }
         }
     }
