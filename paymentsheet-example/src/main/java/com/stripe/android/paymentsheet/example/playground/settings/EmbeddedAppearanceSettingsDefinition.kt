@@ -44,6 +44,7 @@ internal enum class EmbeddedRow {
     FloatingButton
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Serializable
 @Parcelize

@@ -31,7 +31,6 @@ internal object EmbeddedRowSelectionBehaviorSettingsDefinition :
         option("Immediate Action", RowSelectionBehavior.ImmediateAction),
     )
 
-
     override fun configure(
         value: RowSelectionBehavior,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
@@ -52,8 +51,8 @@ internal object EmbeddedRowSelectionBehaviorSettingsDefinition :
             EmbeddedPaymentElement.RowSelectionBehavior.immediateAction { embeddedPaymentElement ->
                 val paymentOption = embeddedPaymentElement.paymentOption.value
                 Log.d(
-                    "ImmediateAction", "Payment Option " +
-                        "${paymentOption?.paymentMethodType}: ${paymentOption?.label}"
+                    "ImmediateAction",
+                    "Payment Option ${paymentOption?.paymentMethodType}: ${paymentOption?.label}"
                 )
             }
         )
