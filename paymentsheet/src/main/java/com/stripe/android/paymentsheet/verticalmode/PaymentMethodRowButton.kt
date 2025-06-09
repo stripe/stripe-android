@@ -24,7 +24,10 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -147,6 +150,21 @@ private fun RowButtonOuterContent(
         }
         is RowStyle.FlatWithCheckmark -> {
             RowButtonCheckmarkOuterContent(
+                isSelected = isSelected,
+                contentPaddingValues = PaddingValues(
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
+                ),
+                verticalArrangement = Arrangement.Center,
+                trailingContent = trailingContent,
+                style = style,
+                modifier = modifier
+            ) {
+                rowContent(false)
+            }
+        }
+        is RowStyle.FlatWithChevron -> {
+            RowButtonChevronOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
                     horizontal = style.horizontalInsetsDp.dp,
@@ -283,6 +301,47 @@ private fun RowButtonCheckmarkOuterContent(
                     .padding(end = style.checkmarkInsetDp.dp)
                     .offset(3.dp),
                 tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowButtonChevronOuterContent(
+    isSelected: Boolean,
+    contentPaddingValues: PaddingValues,
+    verticalArrangement: Arrangement.Vertical,
+    trailingContent: (@Composable RowScope.() -> Unit)?,
+    modifier: Modifier,
+    style: RowStyle.FlatWithChevron,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier.padding(contentPaddingValues),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            verticalArrangement = verticalArrangement
+        ) {
+            content()
+            Row {
+                if (trailingContent != null) {
+                    Spacer(Modifier.width(iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp))
+                    trailingContent()
+                }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 0.dp)
+                    .offset(3.dp),
+                tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
             )
         }
     }

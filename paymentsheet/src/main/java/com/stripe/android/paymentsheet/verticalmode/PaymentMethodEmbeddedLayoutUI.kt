@@ -178,6 +178,7 @@ private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
         is Embedded.RowStyle.FloatingButton -> false
         is Embedded.RowStyle.FlatWithRadio -> bottomSeparatorEnabled
         is Embedded.RowStyle.FlatWithCheckmark -> bottomSeparatorEnabled
+        is Embedded.RowStyle.FlatWithChevron -> bottomSeparatorEnabled
     }
 }
 
@@ -187,6 +188,7 @@ private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
         is Embedded.RowStyle.FloatingButton -> false
         is Embedded.RowStyle.FlatWithRadio -> topSeparatorEnabled
         is Embedded.RowStyle.FlatWithCheckmark -> topSeparatorEnabled
+        is Embedded.RowStyle.FlatWithChevron -> topSeparatorEnabled
     }
 }
 
@@ -196,6 +198,7 @@ private fun Embedded.RowStyle.separatorThickness(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> separatorThicknessDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> separatorThicknessDp.dp
+        is Embedded.RowStyle.FlatWithChevron -> separatorThicknessDp.dp
     }
 }
 
@@ -205,6 +208,7 @@ private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
         is Embedded.RowStyle.FloatingButton -> 0
         is Embedded.RowStyle.FlatWithRadio -> getColors(isDarkMode).separatorColor
         is Embedded.RowStyle.FlatWithCheckmark -> getColors(isDarkMode).separatorColor
+        is Embedded.RowStyle.FlatWithChevron -> getColors(isDarkMode).separatorColor
     }
 }
 
@@ -214,6 +218,7 @@ private fun Embedded.RowStyle.startSeparatorInset(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> startSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> startSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithChevron -> startSeparatorInsetDp.dp
     }
 }
 
@@ -223,6 +228,7 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithChevron -> endSeparatorInsetDp.dp
     }
 }
 
@@ -317,6 +323,7 @@ private val RowStyle.viewMoreShowsChevron: Boolean
         is RowStyle.FloatingButton -> true
         is RowStyle.FlatWithRadio -> true
         is RowStyle.FlatWithCheckmark -> false
+        is RowStyle.FlatWithChevron -> false
     }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
