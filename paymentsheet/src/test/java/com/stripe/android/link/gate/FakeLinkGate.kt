@@ -13,6 +13,10 @@ internal class FakeLinkGate : LinkGate {
     override val suppress2faModal: Boolean
         get() = _suppress2faModal
 
+    private var _useInlineOtpInWalletButtons: Boolean = false
+    override val useInlineOtpInWalletButtons: Boolean
+        get() = _useInlineOtpInWalletButtons
+
     fun setUseNativeLink(value: Boolean) {
         _useNativeLink = value
     }
@@ -23,5 +27,9 @@ internal class FakeLinkGate : LinkGate {
 
     fun setSuppress2faModal(value: Boolean) {
         _suppress2faModal = value
+    }
+
+    fun setUseInlineOtpInWalletButtons(value: Boolean) {
+        _useInlineOtpInWalletButtons = value
     }
 }

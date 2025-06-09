@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -42,8 +43,15 @@ class DefaultLinkInlineInteractorTest {
     private val savedStateHandle = SavedStateHandle()
     private val linkLauncher = mock<LinkPaymentLauncher>()
     private val linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager()
-    private val component = FakeLinkComponent(linkAccountManager = linkAccountManager)
-    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component = component)
+    private val linkGate: FakeLinkGate = FakeLinkGate()
+    private val component = FakeLinkComponent(
+        linkAccountManager = linkAccountManager,
+        linkGate = linkGate
+    )
+    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+        component = component,
+        linkGate = linkGate
+    )
 
     @get:Rule
     val showOTPFlagRule = FeatureFlagTestRule(
@@ -55,6 +63,10 @@ class DefaultLinkInlineInteractorTest {
 
     @get:Rule
     val rule: TestRule = CoroutineTestRule(testDispatcher)
+
+    init {
+        linkGate.setUseInlineOtpInWalletButtons(true)
+    }
 
     @Test
     fun `initial state should be Loading`() = runTest(testDispatcher) {

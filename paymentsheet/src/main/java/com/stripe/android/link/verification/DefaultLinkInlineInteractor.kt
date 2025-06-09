@@ -1,7 +1,6 @@
 package com.stripe.android.link.verification
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -46,15 +45,15 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
      * Sets up Link verification domain logic (should be called once when initializing)
      */
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
-        if (FeatureFlags.showInlineOtpInWalletButtons.isEnabled.not()) {
-            // If the feature flag is disabled, do not start Link verification.
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        if (linkConfiguration == null) {
+            // If there is no Link account manager, we don't need to handle verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
 
-        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
-        if (linkConfiguration == null) {
-            // If there is no Link account manager, we don't need to handle verification.
+        if (linkConfigurationCoordinator.linkGate(linkConfiguration).useInlineOtpInWalletButtons.not()) {
+            // If the feature flag is disabled, do not start Link verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
