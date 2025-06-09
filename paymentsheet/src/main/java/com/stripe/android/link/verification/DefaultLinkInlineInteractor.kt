@@ -163,6 +163,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
+        otpElement.controller.reset()
         update2FAState { viewState ->
             viewState.copy(
                 isSendingNewCode = true,
