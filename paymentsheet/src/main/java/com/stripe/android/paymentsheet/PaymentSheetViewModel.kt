@@ -210,14 +210,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
-    private val isAwaitingEagerLaunchResult = MutableStateFlow<Boolean?>(null)
-
-    internal val contentVisible: StateFlow<Boolean> = combineAsStateFlow(
-        isAwaitingEagerLaunchResult,
-        confirmationHandler.state.mapAsStateFlow { it.contentVisible }
-    ) { isAwaitingEagerLaunchResult, contentVisibleFromConfirmationState ->
-        isAwaitingEagerLaunchResult != true && contentVisibleFromConfirmationState
-    }
+    internal val contentVisible: StateFlow<Boolean> = confirmationHandler.state.mapAsStateFlow { it.contentVisible }
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -323,7 +316,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             initializeNavigationStateIfNeeded(metadata = it)
                         }
                         processConfirmationResult(state.result)
-                        updateIsAwaitingEagerLaunchResult { false }
                     }
                 }
             }
@@ -687,12 +679,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             null
         } else {
             viewState
-        }
-    }
-
-    private suspend inline fun updateIsAwaitingEagerLaunchResult(crossinline update: (Boolean?) -> Boolean) {
-        withContext(viewModelScope.coroutineContext) {
-            isAwaitingEagerLaunchResult.update(update)
         }
     }
 
