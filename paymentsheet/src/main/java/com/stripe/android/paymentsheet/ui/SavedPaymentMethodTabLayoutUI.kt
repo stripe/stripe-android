@@ -29,7 +29,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
@@ -44,6 +43,7 @@ import androidx.compose.ui.semantics.text
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -58,9 +58,11 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionError
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -145,7 +147,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
         LazyRow(
             state = scrollState,
             userScrollEnabled = !isProcessing,
-            contentPadding = PaddingValues(horizontal = 17.dp),
+            contentPadding = getSavedPaymentMethodTabLayoutPaddingValues()
         ) {
             items(
                 items = paymentOptionsItems,
@@ -404,7 +406,7 @@ private fun SavedPaymentMethodTab(
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel()?.resolve() ?: return
+    val labelText = paymentMethod.paymentMethod.getLabel(canShowSublabel = false)?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {
@@ -484,7 +486,7 @@ internal fun CvcRecollectionField(
         }
     ) {
         Column(
-            Modifier.padding(20.dp, 20.dp, 20.dp, 0.dp)
+            Modifier.padding(top = 20.dp).padding(StripeTheme.getOuterFormInsets())
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
@@ -503,9 +505,7 @@ internal fun CvcRecollectionField(
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
                     hiddenIdentifiers = setOf(),
-                    lastTextFieldIdentifier = null,
-                    nextFocusDirection = FocusDirection.Exit,
-                    previousFocusDirection = FocusDirection.Previous
+                    lastTextFieldIdentifier = null
                 )
             }
             error?.errorMessage?.let {
@@ -517,6 +517,11 @@ internal fun CvcRecollectionField(
     }
 }
 
+private fun getSavedPaymentMethodTabLayoutPaddingValues() = PaddingValues(
+    start = (StripeTheme.formInsets.start - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp),
+    end = (StripeTheme.formInsets.end - TAB_LAYOUT_EXTRA_PADDING).dp.coerceAtLeast(0.dp)
+)
+
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
 
@@ -524,3 +529,4 @@ const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOp
 const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
 private const val ANIMATION_DELAY = 400
 private const val ANIMATION_DURATION = 500
+private const val TAB_LAYOUT_EXTRA_PADDING = 3

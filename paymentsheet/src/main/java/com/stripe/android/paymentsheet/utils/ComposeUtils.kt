@@ -6,15 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
 
 @Composable
 internal fun PaymentSheetContentPadding(subtractingExtraPadding: Dp = 0.dp) {
-    val bottomPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing_bottom)
-    Spacer(modifier = Modifier.requiredHeight(bottomPadding - subtractingExtraPadding))
+    val bottomPadding = StripeTheme.formInsets.bottom.dp - subtractingExtraPadding
+    Spacer(modifier = Modifier.requiredHeight(bottomPadding.coerceAtLeast(0.dp)))
 }
 
 @Composable

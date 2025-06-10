@@ -20,6 +20,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -73,7 +74,7 @@ internal class LinkActivityTest {
     @Test
     fun `verification dialog is displayed when link screen state is VerificationDialog`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         setupActivityController(
@@ -92,7 +93,7 @@ internal class LinkActivityTest {
     @Test
     fun `full screen content is displayed when link screen state is FullScreen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         setupActivityController(
@@ -152,7 +153,9 @@ internal class LinkActivityTest {
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
-                navigationManager = TestNavigationManager()
+                navigationManager = TestNavigationManager(),
+                linkLaunchMode = LinkLaunchMode.Full,
+                linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() }
             )
         }
     }

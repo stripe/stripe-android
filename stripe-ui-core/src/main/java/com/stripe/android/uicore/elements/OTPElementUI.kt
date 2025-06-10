@@ -104,6 +104,7 @@ fun OTPElementUI(
     otpInputPlaceholder: String = "●",
     colors: OTPElementColors = OTPElementColors(
         selectedBorder = MaterialTheme.colors.primary,
+        unselectedBorder = MaterialTheme.stripeColors.componentBorder,
         placeholder = MaterialTheme.stripeColors.placeholderText,
         background = Color.Transparent
     ),
@@ -135,7 +136,7 @@ fun OTPElementUI(
                     color = if (isSelected) {
                         colors.selectedBorder
                     } else {
-                        MaterialTheme.stripeColors.componentBorder
+                        colors.unselectedBorder
                     }
                 )
             ) {
@@ -297,5 +298,6 @@ internal object OTPElementUI {
 data class OTPElementColors(
     val selectedBorder: Color,
     val placeholder: Color,
-    val background: Color
+    val background: Color,
+    val unselectedBorder: Color
 )

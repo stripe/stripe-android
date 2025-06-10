@@ -45,6 +45,7 @@ internal class FakeCustomerSessionElementsSessionManager(
                 linkSettings = null,
                 paymentMethodSpecs = null,
                 stripeIntent = intent,
+                orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
                 merchantCountry = null,
                 isGooglePayEnabled = true,
                 sessionsError = null,

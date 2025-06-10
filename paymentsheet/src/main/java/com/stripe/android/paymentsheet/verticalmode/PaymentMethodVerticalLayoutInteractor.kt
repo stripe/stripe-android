@@ -327,6 +327,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val wallets = mutableListOf<DisplayablePaymentMethod>()
         if (showsWalletsInline(walletsState)) {
             walletsState?.link?.let {
+                val subtitle = it.email?.resolvableString
+                    ?: PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
+
                 wallets += DisplayablePaymentMethod(
                     code = PaymentMethod.Type.Link.code,
                     displayName = PaymentsCoreR.string.stripe_link.resolvableString,
@@ -334,7 +337,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
-                    subtitle = PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString,
+                    subtitle = subtitle,
                     onClick = {
                         updateSelection(PaymentSelection.Link())
                     },

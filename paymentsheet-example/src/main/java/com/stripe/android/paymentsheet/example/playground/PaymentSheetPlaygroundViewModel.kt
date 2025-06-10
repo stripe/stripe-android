@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -44,6 +45,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearance
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -348,10 +351,12 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    @OptIn(ShippingDetailsInPaymentOptionPreview::class)
     fun onPaymentOptionSelected(paymentOption: PaymentOption?) {
         flowControllerState.update { existingState ->
             existingState?.copy(
-                selectedPaymentOption = paymentOption
+                selectedPaymentOption = paymentOption,
+                addressDetails = paymentOption?.shippingDetails,
             )
         }
     }
@@ -622,6 +627,24 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun updateEmbeddedAppearance(appearanceSetting: EmbeddedAppearanceSettingsDefinition, value: EmbeddedAppearance) {
+        playgroundSettingsFlow.value?.let { settings ->
+            settings[appearanceSetting] = value
+            setPlaygroundState(
+                state.value?.let { state ->
+                    val updatedSnapshot = settings.snapshot()
+                    when (state) {
+                        is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    }
+                }
+            )
+        }
+    }
+
+    fun updateFormInsetsAppearance(
+        appearanceSetting: FormInsetsAppearanceSettingDefinition,
+        value: FormInsetsAppearance
+    ) {
         playgroundSettingsFlow.value?.let { settings ->
             settings[appearanceSetting] = value
             setPlaygroundState(

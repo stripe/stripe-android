@@ -39,7 +39,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.ui.inline.LinkLogo
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
@@ -62,7 +61,6 @@ internal fun PaymentMethodRowButton(
     title: String,
     subtitle: String?,
     promoText: String?,
-    showLinkIcon: Boolean,
     onClick: () -> Unit,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
@@ -111,10 +109,6 @@ internal fun PaymentMethodRowButton(
 
             if (promoText != null) {
                 PromoBadge(promoText)
-            }
-
-            if (showLinkIcon) {
-                LinkLogo()
             }
 
             if (trailingContent != null && displayTrailingContent) {
@@ -394,7 +388,6 @@ private fun ButtonPreview() {
                 title = "•••• 4242",
                 subtitle = null,
                 promoText = null,
-                showLinkIcon = false,
                 onClick = {},
                 style = RowStyle.FloatingButton.default,
                 trailingContent = {
@@ -420,7 +413,6 @@ private fun ButtonPreview() {
                 title = "•••• 4242",
                 subtitle = null,
                 promoText = null,
-                showLinkIcon = false,
                 onClick = {},
                 style = RowStyle.FloatingButton.default,
                 trailingContent = {

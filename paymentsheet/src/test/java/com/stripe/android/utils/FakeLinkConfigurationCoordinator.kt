@@ -53,14 +53,15 @@ internal class FakeLinkConfigurationCoordinator(
     private val accountStatus: AccountStatus = AccountStatus.SignedOut,
     private val linkGate: LinkGate = FakeLinkGate(),
     private val linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
-    private val email: String? = null
+    private val email: String? = null,
+    private val component: LinkComponent = mock()
 ) : LinkConfigurationCoordinator {
 
     override val emailFlow: StateFlow<String?>
         get() = stateFlowOf(email)
 
     override fun getComponent(configuration: LinkConfiguration): LinkComponent {
-        return mock()
+        return component
     }
 
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {

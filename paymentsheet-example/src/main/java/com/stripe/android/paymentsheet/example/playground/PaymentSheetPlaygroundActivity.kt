@@ -14,6 +14,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -36,10 +37,12 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
@@ -49,15 +52,18 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.activity.getFormInsetsAppearance
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -67,7 +73,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class, WalletButtonsPreview::class)
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
@@ -112,26 +118,31 @@ internal class PaymentSheetPlaygroundActivity :
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
 
         setContent {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 window.isNavigationBarContrastEnforced = false
             }
-            val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
-                .externalPaymentMethodConfirmHandler(this)
-                .confirmCustomPaymentMethodCallback(this)
-                .createIntentCallback(viewModel::createIntentCallback)
-                .analyticEventCallback(viewModel::analyticCallback)
+            val paymentSheet = remember {
+                PaymentSheet.Builder(viewModel::onPaymentSheetResult)
+                    .externalPaymentMethodConfirmHandler(this)
+                    .confirmCustomPaymentMethodCallback(this)
+                    .createIntentCallback(viewModel::createIntentCallback)
+                    .analyticEventCallback(viewModel::analyticCallback)
+            }
                 .build()
-            val flowController = PaymentSheet.FlowController.Builder(
-                viewModel::onPaymentSheetResult,
-                viewModel::onPaymentOptionSelected
-            )
-                .externalPaymentMethodConfirmHandler(this)
-                .confirmCustomPaymentMethodCallback(this)
-                .createIntentCallback(viewModel::createIntentCallback)
-                .analyticEventCallback(viewModel::analyticCallback)
+            val flowController = remember {
+                PaymentSheet.FlowController.Builder(
+                    viewModel::onPaymentSheetResult,
+                    viewModel::onPaymentOptionSelected
+                )
+                    .externalPaymentMethodConfirmHandler(this)
+                    .confirmCustomPaymentMethodCallback(this)
+                    .createIntentCallback(viewModel::createIntentCallback)
+                    .analyticEventCallback(viewModel::analyticCallback)
+            }
                 .build()
             val embeddedPaymentElementBuilder = remember {
                 EmbeddedPaymentElement.Builder(
@@ -247,6 +258,7 @@ internal class PaymentSheetPlaygroundActivity :
     private fun AppearanceButton() {
         val settings = viewModel.playgroundSettingsFlow.collectAsState().value
         val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
+        val insetsAppearance = settings?.get(FormInsetsAppearanceSettingDefinition)?.collectAsState()?.value
         supportFragmentManager.setFragmentResultListener(
             AppearanceBottomSheetDialogFragment.REQUEST_KEY,
             this@PaymentSheetPlaygroundActivity
@@ -255,12 +267,17 @@ internal class PaymentSheetPlaygroundActivity :
                 EmbeddedAppearanceSettingsDefinition,
                 bundle.getEmbeddedAppearance()
             )
+            viewModel.updateFormInsetsAppearance(
+                FormInsetsAppearanceSettingDefinition,
+                bundle.getFormInsetsAppearance()
+            )
         }
         Button(
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
                 bottomSheet.arguments = Bundle().apply {
                     putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
+                    putParcelable(AppearanceBottomSheetDialogFragment.INSETS_KEY, insetsAppearance)
                 }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
@@ -336,6 +353,7 @@ internal class PaymentSheetPlaygroundActivity :
                     ShippingAddressButton(
                         addressLauncher = addressLauncher,
                         playgroundState = playgroundState,
+                        address = { flowController.shippingDetails },
                     )
                 }
 
@@ -417,6 +435,10 @@ internal class PaymentSheetPlaygroundActivity :
             flowController.shippingDetails = localFlowControllerState?.addressDetails
         }
 
+        if (playgroundState.snapshot[WalletButtonsSettingsDefinition]) {
+            flowController.WalletButtons()
+        }
+
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
             paymentMethodLabel = flowControllerState.paymentMethodLabel(),
@@ -424,6 +446,7 @@ internal class PaymentSheetPlaygroundActivity :
             onClick = flowController::presentPaymentOptions
         )
         BuyButton(
+            modifier = Modifier.imePadding(),
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
         )
@@ -538,11 +561,13 @@ internal class PaymentSheetPlaygroundActivity :
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
         playgroundState: PlaygroundState.Payment,
+        address: () -> AddressDetails?,
     ) {
         val context = LocalContext.current
         Button(
             onClick = {
                 val configuration = AddressLauncher.Configuration.Builder()
+                    .address(address())
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                     .appearance(AppearanceStore.state)
                     .build()

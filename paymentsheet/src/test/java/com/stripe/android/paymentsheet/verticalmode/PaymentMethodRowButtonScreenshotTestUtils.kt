@@ -39,7 +39,6 @@ internal fun testPaymentMethodRowButton(
     subtitle: String?,
     promoText: String?,
     shouldShowDefaultBadge: Boolean,
-    showLinkIcon: Boolean,
     paparazziRule: PaparazziRule,
 ) {
     paparazziRule.snapshot {
@@ -50,7 +49,6 @@ internal fun testPaymentMethodRowButton(
             title = title,
             subtitle = subtitle,
             promoText = promoText,
-            showLinkIcon = showLinkIcon,
             onClick = {},
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,

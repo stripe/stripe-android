@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.link.ui.wallet.label
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -635,6 +636,28 @@ internal object PaymentMethodFixtures {
         return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
     }
 
+    fun displayableLinkPaymentMethod(): DisplayableSavedPaymentMethod {
+        return LINK_PAYMENT_METHOD.copy(
+            linkPaymentDetails = LinkPaymentDetails.Card(
+                nickname = null,
+                expMonth = 12,
+                expYear = 2030,
+                last4 = "4242",
+                brand = CardBrand.Visa,
+                funding = "CREDIT",
+            ),
+        ).toDisplayableSavedPaymentMethod()
+    }
+
+    fun displayableLinkCardBrandPaymentMethod(): DisplayableSavedPaymentMethod {
+        return CARD_PAYMENT_METHOD.copy(
+            linkPaymentDetails = LinkPaymentDetails.BankAccount(
+                last4 = "4242",
+                bankName = "Stripe Bank",
+            ),
+        ).toDisplayableSavedPaymentMethod()
+    }
+
     fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
         return CARD_PAYMENT_METHOD.copy(
             id = "pm_234567890",
@@ -645,10 +668,14 @@ internal object PaymentMethodFixtures {
     fun PaymentMethod.toDisplayableSavedPaymentMethod(
         shouldShowDefaultBadge: Boolean = false
     ): DisplayableSavedPaymentMethod {
+        val displayName = linkPaymentDetails?.label
+            ?: this.card?.last4?.resolvableString
+            ?: this.usBankAccount?.last4?.resolvableString
+            ?: this.sepaDebit?.last4?.resolvableString
+            ?: "".resolvableString
+
         return DisplayableSavedPaymentMethod.create(
-            displayName = (
-                this.card?.last4 ?: this.usBankAccount?.last4 ?: this.sepaDebit?.last4 ?: ""
-                ).resolvableString,
+            displayName = displayName,
             paymentMethod = this,
             isCbcEligible = true,
             shouldShowDefaultBadge = shouldShowDefaultBadge

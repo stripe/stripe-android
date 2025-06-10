@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -9,6 +10,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -17,7 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @SuppressWarnings("TooManyFunctions")
 internal interface LinkAccountManager {
-    val linkAccount: StateFlow<LinkAccount?>
+    val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
     val accountStatus: Flow<AccountStatus>
     var consumerPublishableKey: String?
 
@@ -27,6 +29,11 @@ internal interface LinkAccountManager {
      * [updatePaymentDetails] calls will refresh the edited payment details on the list.
      */
     val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?>
+
+    /**
+     * Cached shipping addresses for the current Link account.
+     */
+    var cachedShippingAddresses: ConsumerShippingAddresses?
 
     /**
      * Retrieves the Link account associated with the email if it exists.
@@ -97,6 +104,7 @@ internal interface LinkAccountManager {
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        cvc: String?,
     ): Result<SharePaymentDetails>
 
     suspend fun setLinkAccountFromLookupResult(
@@ -118,6 +126,11 @@ internal interface LinkAccountManager {
      * Fetch all saved payment methods for the signed in consumer.
      */
     suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails>
+
+    /**
+     * Fetch all shipping addresses for the signed in consumer.
+     */
+    suspend fun listShippingAddresses(): Result<ConsumerShippingAddresses>
 
     /**
      * Delete the payment method from the signed in consumer account.

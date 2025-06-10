@@ -452,20 +452,22 @@ internal class PlaygroundSettings private constructor(
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
             FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
-            FeatureFlagSettingsDefinition(FeatureFlags.linkPMsInSPM),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage),
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
-            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
+            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
+            WalletButtonsSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.linkProminenceInFlowController),
+            FeatureFlagSettingsDefinition(FeatureFlags.showInlineOtpInWalletButtons),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
-            EmbeddedAppearanceSettingsDefinition
+            EmbeddedAppearanceSettingsDefinition,
+            FormInsetsAppearanceSettingDefinition
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

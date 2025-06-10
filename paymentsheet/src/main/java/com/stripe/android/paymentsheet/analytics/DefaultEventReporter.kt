@@ -12,6 +12,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -102,6 +103,8 @@ internal class DefaultEventReporter @Inject internal constructor(
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?,
+        paymentMethodOptionsSetupFutureUsage: Boolean,
+        setupFutureUsage: StripeIntent.Usage?
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
@@ -128,6 +131,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
+                paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
+                setupFutureUsage = setupFutureUsage
             )
         )
     }

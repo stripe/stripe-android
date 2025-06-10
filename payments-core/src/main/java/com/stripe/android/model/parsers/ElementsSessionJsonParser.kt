@@ -41,6 +41,9 @@ internal class ElementsSessionJsonParser(
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
+        val orderedPaymentMethodTypesAndWallets =
+            jsonArrayToList(json.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPESAND_WALLETS))
+
         val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags -> parseSessionFlags(json = flags) } ?: emptyMap()
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
@@ -91,6 +94,7 @@ internal class ElementsSessionJsonParser(
                 customPaymentMethods = customPaymentMethods,
                 flags = flags,
                 experimentsData = experimentsData,
+                orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
@@ -213,7 +217,7 @@ internal class ElementsSessionJsonParser(
             return null
         }
 
-        val paymentMethods = if (enableLinkInSpm && FeatureFlags.linkPMsInSPM.isEnabled) {
+        val paymentMethods = if (enableLinkInSpm) {
             parsePaymentMethodsWithLinkDetails(json)
         } else {
             parsePaymentMethods(json)
@@ -427,6 +431,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
+        private const val FIELD_ORDERED_PAYMENT_METHOD_TYPESAND_WALLETS = "ordered_payment_method_types_and_wallets"
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_FLAGS = "flags"

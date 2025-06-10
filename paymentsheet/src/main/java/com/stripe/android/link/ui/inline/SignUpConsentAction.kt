@@ -5,5 +5,8 @@ internal enum class SignUpConsentAction {
     CheckboxWithPrefilledEmail,
     CheckboxWithPrefilledEmailAndPhone,
     Implied,
-    ImpliedWithPrefilledEmail
+    ImpliedWithPrefilledEmail,
+    DefaultOptInWithAllPrefilled,
+    DefaultOptInWithSomePrefilled,
+    DefaultOptInWithNonePrefilled,
 }

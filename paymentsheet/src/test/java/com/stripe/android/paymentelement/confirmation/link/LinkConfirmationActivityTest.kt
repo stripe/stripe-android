@@ -17,6 +17,8 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -202,8 +204,9 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             publishableKey = PUBLISHABLE_KEY,
                             stripeAccountId = null,
                             startWithVerificationDialog = true,
-                            linkAccount = null,
-                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier"
+                            linkAccountInfo = LinkAccountUpdate.Value(null),
+                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",
+                            launchMode = LinkLaunchMode.Full,
                         )
                     )
                 )
@@ -237,7 +240,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
             configuration = TestFactory.LINK_CONFIGURATION,
-            useLinkExpress = true
+            useLinkExpress = true,
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

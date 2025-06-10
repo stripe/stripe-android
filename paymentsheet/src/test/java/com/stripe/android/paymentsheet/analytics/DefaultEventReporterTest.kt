@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -16,10 +16,12 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -187,6 +189,36 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["set_as_default_enabled"] == true &&
                     req.params["has_default_payment_method"] == null
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with pmo sfu map`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            paymentMethodOptionsSetupFutureUsage = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["payment_method_options_setup_future_usage"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with setup future usage value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setupFutureUsage = StripeIntent.Usage.OffSession
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["setup_future_usage"] == "off_session"
             }
         )
     }
@@ -633,13 +665,14 @@ class DefaultEventReporterTest {
                 simulateSuccessfulSetup()
             }
 
-            val experiment = LoggableExperiment.LinkGlobalHoldback(
+            val experiment = LoggableExperiment.LinkHoldback(
+                experiment = LINK_GLOBAL_HOLD_BACK,
                 arbId = "random_arb_id",
                 isReturningLinkUser = false,
                 group = "holdback",
                 useLinkNative = true,
                 emailRecognitionSource = EmailRecognitionSource.EMAIL,
-                providedDefaultValues = LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues(
+                providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
                     email = true,
                     name = false,
                     phone = true,
@@ -1105,6 +1138,8 @@ class DefaultEventReporterTest {
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        paymentMethodOptionsSetupFutureUsage: Boolean = false,
+        setupFutureUsage: StripeIntent.Usage? = null
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -1121,6 +1156,8 @@ class DefaultEventReporterTest {
             setAsDefaultEnabled = setAsDefaultEnabled,
             financialConnectionsAvailability = financialConnectionsAvailability,
             linkDisplay = linkDisplay,
+            paymentMethodOptionsSetupFutureUsage = paymentMethodOptionsSetupFutureUsage,
+            setupFutureUsage = setupFutureUsage
         )
     }
 

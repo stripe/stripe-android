@@ -32,6 +32,7 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
     override fun createSupportedPaymentMethod(): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = InstantDebitsDefinition.type.code,
+            syntheticCode = "link_instant_debits",
             displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_instant_debits,
             iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank,
             iconRequiresTinting = true,

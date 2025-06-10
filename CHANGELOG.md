@@ -2,6 +2,38 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.17.0 - 2025-06-09
+
+### PaymentSheet
+* [ADDED][10919](https://github.com/stripe/stripe-android/pull/10919) Add `formInsetValues` to `PaymentSheet.Appearance`.
+
+## 21.16.0 - 2025-06-02
+
+### PaymentSheet
+* [ADDED][10885](https://github.com/stripe/stripe-android/pull/10885) Add `heightDp` to `PrimaryButtonShape`.
+* [CHANGED][10896](https://github.com/stripe/stripe-android/pull/10896) Update manage payment methods screen remove button to use `PrimaryButtonShape` Appearance API values.
+
+### Connect
+* [CHANGED][10871](https://github.com/stripe/stripe-android/pull/10871) Removed `PrivateBetaConnectSDK` annotation and all usages. Connect SDK is now GA.
+
+## 21.15.1 - 2025-05-28
+
+### PaymentSheet
+* [FIXED][10870](https://github.com/stripe/stripe-android/pull/10870) Fixed an issue with `EmbeddedPaymentElement` where `View more` and `Edit` buttons would completely fill the parent's height if `height` modifier is used by the parent composable.
+
+## 21.15.0 - 2025-05-27
+
+### PaymentSheet
+* [BREAKING][10854](https://github.com/stripe/stripe-android/pull/10854) Applicable to `ExperimentalEmbeddedPaymentElementApi`, fixed misnaming of `EmbeddedRowStyle` constructor params.
+
+### Payments
+* [FIXED][10843](https://github.com/stripe/stripe-android/pull/10843) Fix 3DS2 Whitelisting Encoding Issue.
+
+## 21.14.0 - 2025-05-19
+
+### PaymentSheet
+* [ADDED][10827](https://github.com/stripe/stripe-android/pull/10827) PaymentMethodOptions SetupFutureUsage is now in public preview.
+
 ## 21.13.0 - 2025-05-06
 
 ### PaymentSheet

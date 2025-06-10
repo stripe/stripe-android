@@ -8,7 +8,6 @@ import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 
-@PrivateBetaConnectSDK
 class EmbeddedComponentManager @JvmOverloads constructor(
     publishableKey: String,
     fetchClientSecret: FetchClientSecret,

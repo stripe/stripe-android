@@ -31,12 +31,6 @@ class ElementsSessionJsonParserTest {
         isEnabled = false,
     )
 
-    @get:Rule
-    val linkInSpmFeatureFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkPMsInSPM,
-        isEnabled = false,
-    )
-
     @Test
     fun parsePaymentIntent_shouldCreateObjectWithOrderedPaymentMethods() {
         val elementsSession = ElementsSessionJsonParser(
@@ -603,6 +597,30 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession has ordered payment method types and wallets when in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = JSONObject(ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS)
+        val session = parser.parse(intent)
+
+        assertThat(session?.orderedPaymentMethodTypesAndWallets).containsExactly(
+            "card",
+            "apple_pay",
+            "google_pay",
+            "afterpay_clearpay",
+            "au_becs_debit",
+        )
+    }
+
+    @Test
     fun `ElementsSession has custom payment methods when they are included in response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -1144,9 +1162,8 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Parses payment_methods_with_link_details if feature is enabled locally and for merchant`() {
+    fun `Parses payment_methods_with_link_details if feature is enabled for merchant`() {
         testPaymentMethodsAndLinkDetails(
-            featureEnabled = true,
             merchantEnabled = true,
             expectedPaymentMethods = 2,
             expectLinkPaymentDetails = true,
@@ -1154,33 +1171,19 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Does not parse payment_methods_with_link_details if feature is enabled locally but disabled for merchant`() {
+    fun `Does not parse payment_methods_with_link_details if feature is disabled for merchant`() {
         testPaymentMethodsAndLinkDetails(
-            featureEnabled = true,
             merchantEnabled = false,
             expectedPaymentMethods = 1,
             expectLinkPaymentDetails = false,
         )
     }
 
-    @Test
-    fun `Does not parse payment_methods_with_link_details if feature is enabled for merchant but disabled locally`() {
-        testPaymentMethodsAndLinkDetails(
-            featureEnabled = false,
-            merchantEnabled = true,
-            expectedPaymentMethods = 1,
-            expectLinkPaymentDetails = false,
-        )
-    }
-
     private fun testPaymentMethodsAndLinkDetails(
-        featureEnabled: Boolean,
         merchantEnabled: Boolean,
         expectedPaymentMethods: Int,
         expectLinkPaymentDetails: Boolean,
     ) {
-        linkInSpmFeatureFlagRule.setEnabled(featureEnabled)
-
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",

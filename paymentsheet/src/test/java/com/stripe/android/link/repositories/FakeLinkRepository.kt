@@ -6,6 +6,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
@@ -26,6 +27,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var listPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
+    var listShippingAddressesResult = Result.success(TestFactory.CONSUMER_SHIPPING_ADDRESSES)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult = Result.success(Unit)
 
@@ -128,7 +130,8 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String
+        expectedPaymentMethodType: String,
+        cvc: String?
     ) = sharePaymentDetails
 
     override suspend fun logOut(
@@ -152,6 +155,11 @@ internal open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = listPaymentDetailsResult
+
+    override suspend fun listShippingAddresses(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerShippingAddresses> = listShippingAddressesResult
 
     override suspend fun deletePaymentDetails(
         paymentDetailsId: String,

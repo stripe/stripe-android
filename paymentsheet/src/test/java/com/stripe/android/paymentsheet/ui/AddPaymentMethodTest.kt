@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -19,11 +18,11 @@ import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromP
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.CheckboxFieldElement
@@ -47,12 +46,6 @@ internal class AddPaymentMethodTest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     val context: Context = getApplicationContext()
     val metadata = PaymentMethodMetadataFactory.create(
@@ -87,7 +80,6 @@ internal class AddPaymentMethodTest {
 
     @Test
     fun `transformToPaymentSelection transforms cards with PMO SFU correctly for RequestNoReuse`() {
-        featureFlagTestRule.setEnabled(true)
         val cardBrand = "visa"
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
@@ -114,7 +106,6 @@ internal class AddPaymentMethodTest {
 
     @Test
     fun `transformToPaymentSelection transforms cards with PMO SFU correctly for RequestReuse`() {
-        featureFlagTestRule.setEnabled(true)
         val cardBrand = "visa"
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
         val formFieldValues = FormFieldValues(
@@ -141,7 +132,6 @@ internal class AddPaymentMethodTest {
 
     @Test
     fun `transformToPaymentSelection transforms cards with PMO SFU correctly for NoRequest`() {
-        featureFlagTestRule.setEnabled(true)
         val cardBrand = "visa"
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         val formFieldValues = FormFieldValues(
@@ -164,6 +154,53 @@ internal class AddPaymentMethodTest {
         val options = cardPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
         assertThat(cardPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
         assertThat(options?.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms generic PM with PMO SFU sets requiresMandate to true`() {
+        val formFieldValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "klarna",
+                    sfuValue = "off_session"
+                )
+            )
+        )
+        val klarna = metadataWithPmoSfu.supportedPaymentMethodForCode("klarna")!!
+        val klarnaSelection = formFieldValues.transformToPaymentSelection(
+            klarna,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.GenericPaymentMethod
+        assertThat(klarnaSelection.paymentMethodCreateParams.requiresMandate()).isTrue()
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms generic PM with PMO SFU override sets requiresMandate to false`() {
+        val formFieldValues = FormFieldValues(
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val metadataWithPmoSfu = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna"),
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "klarna",
+                    sfuValue = "none"
+                )
+            )
+        )
+        val klarna = metadataWithPmoSfu.supportedPaymentMethodForCode("klarna")!!
+        val klarnaSelection = formFieldValues.transformToPaymentSelection(
+            klarna,
+            metadataWithPmoSfu
+        ) as PaymentSelection.New.GenericPaymentMethod
+        assertThat(klarnaSelection.paymentMethodCreateParams.requiresMandate()).isFalse()
     }
 
     @Test
@@ -360,7 +397,6 @@ internal class AddPaymentMethodTest {
 
     @Test
     fun `when customer reuse is not requested with pmo sfu, should have allow_redisplay in params`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -383,7 +419,6 @@ internal class AddPaymentMethodTest {
 
     @Test
     fun `when customer reuse is requested with reuse and pmo sfu, should have allow_redisplay in params`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

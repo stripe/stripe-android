@@ -85,7 +85,7 @@ internal data class EditCardPayload(
             )
         }
 
-        fun create(link: LinkPaymentDetails): EditCardPayload {
+        fun create(link: LinkPaymentDetails.Card): EditCardPayload {
             return EditCardPayload(
                 last4 = link.last4,
                 expiryMonth = link.expMonth,

@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
@@ -28,7 +29,6 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        renderEdgeToEdge()
 
         try {
             viewModel = ViewModelProvider(this, viewModelFactory)[LinkActivityViewModel::class.java]
@@ -39,6 +39,9 @@ internal class LinkActivity : ComponentActivity() {
         }
 
         val vm = viewModel ?: return
+
+        vm.linkLaunchMode.setTheme()
+
         vm.registerActivityForConfirmation(
             activityResultCaller = this,
             lifecycleOwner = this,
@@ -71,6 +74,18 @@ internal class LinkActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Set the theme to transparent if [LinkActivity] launches in confirmation mode.
+     */
+    private fun LinkLaunchMode.setTheme() {
+        when (this) {
+            is LinkLaunchMode.Full,
+            is LinkLaunchMode.PaymentMethodSelection -> setTheme(R.style.StripePaymentSheetDefaultTheme)
+            is LinkLaunchMode.Confirmation -> setTheme(R.style.StripeTransparentTheme)
+        }
+        renderEdgeToEdge()
+    }
+
     private fun observeBackPress() {
         onBackPressedDispatcher.addCallback { viewModel?.handleBackPressed() }
     }
@@ -101,7 +116,11 @@ internal class LinkActivity : ComponentActivity() {
             LinkActivityContract.Args(
                 configuration = configuration,
                 startWithVerificationDialog = false,
-                linkAccount = null
+                linkAccountInfo = LinkAccountUpdate.Value(
+                    account = null,
+                    lastUpdateReason = null
+                ),
+                launchMode = LinkLaunchMode.Full,
             )
         )
     }

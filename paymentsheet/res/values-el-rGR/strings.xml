@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Θέλετε να κλείσετε αυτή τη φόρμα;</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Αποθήκευση των στοιχείων σας για ασφαλή ολοκλήρωση αγοράς με 1 κλικ μέσω Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Αποθήκευση των στοιχείων μου για ταχύτερη ολοκλήρωση αγοράς με το Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Πιστωτική κάρτα %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -34,6 +37,8 @@
   <string name="stripe_link_card_type_prepaid">Προπληρωμένη κάρτα %1$s</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">Κάρτα %1$s</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Σύνδεση ή εγγραφή</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Αποδοχή και συνέχεια</string>
   <!-- Title for the Link signup screen -->
@@ -111,6 +116,8 @@
   <string name="stripe_paymentsheet_manage_card">Διαχείριση κάρτας</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Διαχείριση καρτών</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Διαχείριση τραπεζικού λογαριασμού</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Διαχείριση μεθόδων πληρωμής</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -199,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Αν παράσχετε το email σας, συμφωνείτε να δημιουργηθεί ένας λογαριασμός στο Link και να αποθηκευτούν τα στοιχεία πληρωμής σας στο Link, σύμφωνα με τους <terms>Όρους του Link</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Αν παράσχετε τον αριθμό τηλεφώνου σας, συμφωνείτε να δημιουργηθεί ένας λογαριασμός στο Link και να αποθηκευτούν τα στοιχεία πληρωμής σας στο Link, σύμφωνα με τους <terms>Όρους του Link</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Αν παράσχετε αριθμό τηλεφώνου και email, συμφωνείτε να δημιουργηθεί ένας λογαριασμός Link που υπόκειται στους <terms>Όρους</terms> και την <privacy>Πολιτική απορρήτου</privacy> του Link.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Ο λογαριασμός σας έχει απενεργοποιηθεί</string>
   <!-- Generic failure message -->
@@ -239,6 +248,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Εάν συνεχίσετε, συμφωνείτε να εξουσιοδοτείτε πληρωμές με βάση αυτούς τους <terms>όρους</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Πληρωμή</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Συνέχεια με άλλο τρόπο</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Προεπιλογή</string>
   <string name="stripe_wallet_expand_accessibility">Αλλαγή επιλογής</string>

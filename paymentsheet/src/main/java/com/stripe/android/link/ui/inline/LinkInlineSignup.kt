@@ -8,6 +8,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,16 +28,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -48,6 +52,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.menu.Checkbox
@@ -57,6 +62,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 
@@ -94,8 +100,11 @@ internal fun LinkInlineSignup(
         enabled = enabled,
         expanded = viewState.isExpanded,
         requiresNameCollection = viewModel.requiresNameCollection,
+        allowsDefaultOptIn = viewState.allowsDefaultOptIn,
+        didAskToChangeSignupDetails = viewState.didAskToChangeSignupDetails,
         errorMessage = errorMessage?.resolve(),
         toggleExpanded = viewModel::toggleExpanded,
+        changeSignupDetails = viewModel::changeSignupDetails,
         modifier = modifier
     )
 }
@@ -112,8 +121,11 @@ internal fun LinkInlineSignup(
     enabled: Boolean,
     expanded: Boolean,
     requiresNameCollection: Boolean,
+    allowsDefaultOptIn: Boolean,
+    didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     toggleExpanded: () -> Unit,
+    changeSignupDetails: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -121,23 +133,35 @@ internal fun LinkInlineSignup(
     val bringFullSignUpIntoViewRequester = remember { BringIntoViewRequester() }
 
     LaunchedEffect(expanded) {
-        if (expanded) {
+        if (expanded && !allowsDefaultOptIn) {
             emailFocusRequester.requestFocus()
         }
     }
 
     val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
+    val shape = if (allowsDefaultOptIn) {
+        // We render the content inline for default opt-in. A large corner radius would cut into the content.
+        RectangleShape
+    } else {
+        MaterialTheme.stripeShapes.roundedCornerShape
+    }
 
-    Box(
-        modifier = modifier
+    val boxModifier = if (allowsDefaultOptIn) {
+        modifier
+    } else {
+        modifier
             .border(
                 border = MaterialTheme.getBorderStroke(isSelected = false),
-                shape = MaterialTheme.stripeShapes.roundedCornerShape,
+                shape = shape,
             )
             .background(
                 color = MaterialTheme.stripeColors.component,
-                shape = MaterialTheme.stripeShapes.roundedCornerShape,
+                shape = shape,
             )
+    }
+
+    Box(
+        modifier = boxModifier
             .onFocusEvent { state ->
                 if (state.hasFocus && expanded) {
                     scope.launch {
@@ -150,7 +174,7 @@ internal fun LinkInlineSignup(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(MaterialTheme.stripeShapes.roundedCornerShape)
+                .clip(shape)
                 .alpha(contentAlpha),
         ) {
             LinkCheckbox(
@@ -158,6 +182,7 @@ internal fun LinkInlineSignup(
                 expanded = expanded,
                 enabled = enabled,
                 contentAlpha = contentAlpha,
+                defaultOptIn = allowsDefaultOptIn,
                 toggleExpanded = toggleExpanded
             )
 
@@ -166,12 +191,15 @@ internal fun LinkInlineSignup(
                 enabled = enabled,
                 signUpState = signUpState,
                 requiresNameCollection = requiresNameCollection,
+                allowsDefaultOptIn = allowsDefaultOptIn,
+                didAskToChangeSignupDetails = didAskToChangeSignupDetails,
                 errorMessage = errorMessage,
                 sectionController = sectionController,
                 emailController = emailController,
                 phoneNumberController = phoneNumberController,
                 nameController = nameController,
                 emailFocusRequester = emailFocusRequester,
+                changeSignupDetails = changeSignupDetails,
             )
         }
     }
@@ -183,12 +211,26 @@ private fun LinkCheckbox(
     expanded: Boolean,
     enabled: Boolean,
     contentAlpha: Float,
+    defaultOptIn: Boolean,
     toggleExpanded: () -> Unit,
 ) {
+    val label = if (defaultOptIn) {
+        stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
+    } else {
+        stringResource(id = R.string.stripe_inline_sign_up_header)
+    }
+
+    val sublabel = if (!defaultOptIn) {
+        stringResource(R.string.stripe_sign_up_message, merchantName)
+    } else {
+        null
+    }
+
     Row(
+        verticalAlignment = if (defaultOptIn) Alignment.CenterVertically else Alignment.Top,
         modifier = Modifier
             .clickable(enabled = enabled) { toggleExpanded() }
-            .padding(16.dp)
+            .padding(if (defaultOptIn) 0.dp else 16.dp)
     ) {
         Checkbox(
             checked = expanded,
@@ -198,18 +240,61 @@ private fun LinkCheckbox(
         )
         Column {
             Text(
-                text = stringResource(id = R.string.stripe_inline_sign_up_header),
+                text = label,
                 style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colors.onSurface
-                    .copy(alpha = contentAlpha)
+                color = MaterialTheme.colors.onSurface.copy(alpha = contentAlpha)
             )
+            if (sublabel != null) {
+                Text(
+                    text = sublabel,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 4.dp),
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.stripeColors.subtitle
+                )
+            }
+        }
+    }
+}
+
+@Composable
+internal fun LinkDefaultOptIn(
+    enabled: Boolean,
+    email: String,
+    phoneNumber: String,
+    modifier: Modifier = Modifier,
+    onChange: () -> Unit,
+) {
+    SectionCard(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = email,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colors.onSurface,
+                    maxLines = 1,
+                )
+                Text(
+                    text = phoneNumber,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.stripeColors.subtitle,
+                    maxLines = 1,
+                )
+            }
+
             Text(
-                text = stringResource(R.string.stripe_sign_up_message, merchantName),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.stripeColors.subtitle
+                text = stringResource(id = StripeUiCoreR.string.stripe_change),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.subtitle1,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.clickable(enabled = enabled, onClick = onChange),
             )
         }
     }
@@ -221,43 +306,67 @@ internal fun LinkFields(
     enabled: Boolean,
     signUpState: SignUpState,
     requiresNameCollection: Boolean,
+    allowsDefaultOptIn: Boolean,
+    didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     sectionController: SectionController,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,
     nameController: TextFieldController,
     emailFocusRequester: FocusRequester,
+    changeSignupDetails: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var didShowAllFields by rememberSaveable { mutableStateOf(false) }
 
     val sectionError by sectionController.error.collectAsState()
 
-    AnimatedVisibility(visible = expanded, modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.padding(
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 16.dp,
-            )
-        ) {
-            LinkInlineSignupFields(
-                sectionError = sectionError?.errorMessage,
-                emailController = emailController,
-                phoneNumberController = phoneNumberController,
-                nameController = nameController,
-                signUpState = signUpState,
-                enabled = enabled,
-                isShowingPhoneFirst = false,
-                emailFocusRequester = emailFocusRequester,
-                requiresNameCollection = requiresNameCollection,
-                errorMessage = errorMessage,
-                didShowAllFields = didShowAllFields,
-                onShowingAllFields = { didShowAllFields = true },
-            )
+    val columnModifier = if (allowsDefaultOptIn) {
+        Modifier
+    } else {
+        Modifier.padding(
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 16.dp,
+        )
+    }
 
-            AnimatedVisibility(visible = signUpState == InputtingRemainingFields) {
+    val hasEmail = emailController.initialValue?.isBlank() == false
+    val hasPhoneNumber = phoneNumberController.initialPhoneNumber.isNotBlank()
+    val showDefaultOptIn = allowsDefaultOptIn && hasEmail && hasPhoneNumber && !didAskToChangeSignupDetails
+
+    AnimatedVisibility(visible = expanded, modifier = modifier.fillMaxWidth()) {
+        Column(modifier = columnModifier) {
+            if (showDefaultOptIn) {
+                LinkDefaultOptIn(
+                    enabled = enabled,
+                    email = emailController.initialValue.orEmpty(),
+                    phoneNumber = phoneNumberController.formatLocalNumber(),
+                    onChange = changeSignupDetails,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            } else {
+                LinkInlineSignupFields(
+                    sectionError = sectionError?.errorMessage,
+                    emailController = emailController,
+                    phoneNumberController = phoneNumberController,
+                    nameController = nameController,
+                    signUpState = signUpState,
+                    enabled = enabled,
+                    isShowingPhoneFirst = false,
+                    emailFocusRequester = emailFocusRequester,
+                    requiresNameCollection = requiresNameCollection,
+                    allowsDefaultOptIn = allowsDefaultOptIn,
+                    errorMessage = errorMessage,
+                    didShowAllFields = didShowAllFields,
+                    onShowingAllFields = { didShowAllFields = true },
+                    modifier = Modifier.padding(top = if (allowsDefaultOptIn) 8.dp else 0.dp),
+                )
+            }
+
+            AnimatedVisibility(visible = allowsDefaultOptIn || signUpState == InputtingRemainingFields) {
                 LinkTerms(
-                    type = LinkTermsType.Inline,
+                    type = if (allowsDefaultOptIn) LinkTermsType.InlineWithDefaultOptIn else LinkTermsType.Inline,
                     modifier = Modifier.padding(top = 16.dp),
                     textAlign = TextAlign.Start,
                 )
@@ -281,8 +390,11 @@ private fun Preview() {
                 enabled = true,
                 expanded = true,
                 requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
-                toggleExpanded = {}
+                toggleExpanded = {},
+                changeSignupDetails = {},
             )
         }
     }

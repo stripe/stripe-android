@@ -8,11 +8,16 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.linkAccountUpdate
+import com.stripe.android.link.account.loadDefaultShippingAddress
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -39,6 +44,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val logger: Logger,
     private val formHelper: FormHelper,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val linkLaunchMode: LinkLaunchMode,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val _state = MutableStateFlow(
@@ -46,7 +52,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             formElements = formHelper.formElementsForCode(PaymentMethod.Type.Card.code),
             formArguments = formHelper.createFormArguments(PaymentMethod.Type.Card.code),
             primaryButtonState = PrimaryButtonState.Disabled,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
         )
     )
 
@@ -115,23 +121,39 @@ internal class PaymentMethodViewModel @Inject constructor(
         paymentDetails: LinkPaymentDetails,
         cvc: String?
     ) {
-        val result = linkConfirmationHandler.confirm(
-            paymentDetails = paymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc
-        )
-        when (result) {
-            Result.Canceled -> Unit
-            is Result.Failed -> {
-                _state.update { it.copy(errorMessage = result.message) }
-            }
-            Result.Succeeded -> {
-                dismissWithResult(
-                    LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(null)
-                    )
+        when (linkLaunchMode) {
+            is LinkLaunchMode.Confirmation,
+            is LinkLaunchMode.Full -> {
+                val result = linkConfirmationHandler.confirm(
+                    paymentDetails = paymentDetails,
+                    linkAccount = linkAccount,
+                    cvc = cvc
                 )
+                when (result) {
+                    Result.Canceled -> Unit
+                    is Result.Failed -> {
+                        _state.update { it.copy(errorMessage = result.message) }
+                    }
+                    Result.Succeeded -> {
+                        dismissWithResult(
+                            LinkActivityResult.Completed(
+                                linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                                selectedPayment = null
+                            )
+                        )
+                    }
+                }
             }
+            is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                    selectedPayment = LinkPaymentMethod.LinkPaymentDetails(
+                        linkPaymentDetails = paymentDetails,
+                        collectedCvc = cvc,
+                    ),
+                    shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
+                )
+            )
         }
     }
 
@@ -175,6 +197,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         ),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
                         dismissWithResult = dismissWithResult
                     )
                 }

@@ -28,13 +28,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -52,6 +59,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
 
 @Composable
@@ -73,8 +81,8 @@ internal fun PaymentDetailsListItem(
     // without knowing the dimensions of the radio button on the first layout pass.
     Layout(
         modifier = modifier
-            .padding(top = 8.dp, bottom = 8.dp, start = 20.dp)
-            .clickable(enabled = isClickable, onClick = onClick),
+            .clickable(enabled = isClickable, onClick = onClick)
+            .padding(top = 8.dp, bottom = 8.dp, start = 20.dp),
         content = {
             RadioButton(
                 selected = isSelected,
@@ -122,48 +130,58 @@ internal fun PaymentDetailsListItem(
                     style = ErrorTextStyle.Small
                 )
             }
+        },
+        measurePolicy = object : MeasurePolicy {
+            override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): MeasureResult {
+                val componentConstraints = constraints.copy(minHeight = 0)
+
+                // Measure each component.
+                val radioButton = measurables[0].measure(componentConstraints)
+                val menuAndLoader = measurables[2].measure(componentConstraints)
+                val descriptionWidth = constraints.maxWidth - radioButton.width - menuAndLoader.width
+                val description = measurables[1].measure(
+                    componentConstraints.copy(
+                        minWidth = descriptionWidth,
+                        maxWidth = descriptionWidth,
+                    )
+                )
+
+                @Suppress("MagicNumber")
+                val errorText = measurables.getOrNull(3)?.measure(componentConstraints)
+
+                // Calculate heights.
+                val topRowHeight = maxOf(
+                    radioButton.height,
+                    description.height,
+                    menuAndLoader.height
+                )
+                val fullHeight = maxOf(
+                    constraints.minHeight,
+                    topRowHeight + (errorText?.height ?: 0)
+                )
+
+                return layout(constraints.maxWidth, fullHeight) {
+                    // Place top row.
+                    var x = 0
+                    radioButton.placeRelative(x, (topRowHeight - radioButton.height) / 2)
+                    x += radioButton.width
+                    description.placeRelative(x, (topRowHeight - description.height) / 2)
+                    x += description.width
+                    menuAndLoader.placeRelative(x, (topRowHeight - menuAndLoader.height) / 2)
+
+                    // Place error text start-aligned and below the description.
+                    errorText?.placeRelative(radioButton.width, topRowHeight)
+                }
+            }
+
+            override fun IntrinsicMeasureScope.minIntrinsicHeight(
+                measurables: List<IntrinsicMeasurable>,
+                width: Int
+            ): Int {
+                return measurables.maxOf { it.minIntrinsicHeight(width) }
+            }
         }
-    ) { measurable, constraints ->
-        val componentConstraints = constraints.copy(minHeight = 0)
-
-        // Measure each component.
-        val radioButton = measurable[0].measure(componentConstraints)
-        val menuAndLoader = measurable[2].measure(componentConstraints)
-        val descriptionWidth = constraints.maxWidth - radioButton.width - menuAndLoader.width
-        val description = measurable[1].measure(
-            componentConstraints.copy(
-                minWidth = descriptionWidth,
-                maxWidth = descriptionWidth,
-            )
-        )
-
-        @Suppress("MagicNumber")
-        val errorText = measurable.getOrNull(3)?.measure(componentConstraints)
-
-        // Calculate heights.
-        val topRowHeight = maxOf(
-            radioButton.height,
-            description.height,
-            menuAndLoader.height
-        )
-        val fullHeight = maxOf(
-            constraints.minHeight,
-            topRowHeight + (errorText?.height ?: 0)
-        )
-
-        layout(constraints.maxWidth, fullHeight) {
-            // Place top row.
-            var x = 0
-            radioButton.placeRelative(x, (topRowHeight - radioButton.height) / 2)
-            x += radioButton.width
-            description.placeRelative(x, (topRowHeight - description.height) / 2)
-            x += description.width
-            menuAndLoader.placeRelative(x, (topRowHeight - menuAndLoader.height) / 2)
-
-            // Place error text start-aligned and below the description.
-            errorText?.placeRelative(radioButton.width, topRowHeight)
-        }
-    }
+    )
 }
 
 @Preview(showBackground = true)
@@ -304,7 +322,7 @@ internal fun RowScope.PaymentDetails(
         is Card -> {
             CardInfo(
                 modifier = modifier,
-                title = paymentDetails.displayName,
+                title = paymentDetails.displayName.resolve(),
                 subtitle = "•••• ${paymentDetails.last4}",
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
@@ -315,7 +333,7 @@ internal fun RowScope.PaymentDetails(
         is ConsumerPaymentDetails.Passthrough -> {
             CardInfo(
                 modifier = modifier,
-                title = paymentDetails.displayName,
+                title = paymentDetails.displayName.resolve(),
                 subtitle = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
             )
@@ -352,7 +370,7 @@ private fun RowScope.BankAccountInfo(
 ) {
     PaymentMethodInfo(
         modifier = modifier,
-        title = bankAccount.displayName,
+        title = bankAccount.displayName.resolve(),
         subtitle = "•••• ${bankAccount.last4}",
         icon = {
             BankIcon(bankAccount.bankIconCode)

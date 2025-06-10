@@ -77,6 +77,9 @@ internal fun SignUpBody(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val isSigningUp = signUpScreenState.signUpState == SignUpState.InputtingRemainingFields
+
     var didFocusField by rememberSaveable { mutableStateOf(false) }
     val emailFocusRequester = remember { FocusRequester() }
 
@@ -116,8 +119,7 @@ internal fun SignUpBody(
             )
         }
         AnimatedVisibility(
-            visible = signUpScreenState.signUpState != SignUpState.InputtingRemainingFields &&
-                signUpScreenState.errorMessage != null,
+            visible = !isSigningUp && signUpScreenState.errorMessage != null,
             modifier = Modifier.fillMaxWidth(),
         ) {
             ErrorText(
@@ -127,14 +129,31 @@ internal fun SignUpBody(
                     .testTag(SIGN_UP_ERROR_TAG)
             )
         }
-        AnimatedVisibility(visible = signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
+        AnimatedVisibility(visible = isSigningUp) {
             SecondaryFields(
                 phoneNumberController = phoneNumberController,
                 nameController = nameController,
                 signUpScreenState = signUpScreenState,
-                onSignUpClick = onSignUpClick
             )
         }
+
+        PrimaryButton(
+            modifier = Modifier.padding(vertical = 16.dp),
+            label = if (isSigningUp) {
+                stringResource(R.string.stripe_link_sign_up)
+            } else {
+                stringResource(R.string.stripe_link_log_in_or_sign_up)
+            },
+            state = when {
+                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
+                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
+                else -> PrimaryButtonState.Disabled
+            },
+            onButtonClick = {
+                onSignUpClick()
+                keyboardController?.hide()
+            }
+        )
     }
 }
 
@@ -192,11 +211,9 @@ private fun SecondaryFields(
     phoneNumberController: PhoneNumberController,
     nameController: TextFieldController,
     signUpScreenState: SignUpScreenState,
-    onSignUpClick: () -> Unit
 ) {
     var emailFocused by rememberSaveable { mutableStateOf(false) }
     var nameFocused by rememberSaveable { mutableStateOf(false) }
-    val keyboardController = LocalSoftwareKeyboardController.current
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
@@ -247,19 +264,6 @@ private fun SecondaryFields(
                     .fillMaxWidth()
             )
         }
-        PrimaryButton(
-            modifier = Modifier.padding(vertical = 16.dp),
-            label = stringResource(R.string.stripe_link_sign_up),
-            state = when {
-                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
-                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
-                else -> PrimaryButtonState.Disabled
-            },
-            onButtonClick = {
-                onSignUpClick()
-                keyboardController?.hide()
-            }
-        )
     }
 }
 

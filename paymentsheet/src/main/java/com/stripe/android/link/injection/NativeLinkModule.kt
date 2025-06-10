@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -34,7 +35,6 @@ import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -130,11 +130,9 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         fun providesLinkAccountHolder(
             savedStateHandle: SavedStateHandle,
-            linkAccount: LinkAccount?
-        ): LinkAccountHolder {
-            return LinkAccountHolder(savedStateHandle).apply {
-                set(linkAccount)
-            }
+            linkAccountInfo: LinkAccountUpdate.Value,
+        ): LinkAccountHolder = LinkAccountHolder(savedStateHandle).apply {
+            set(linkAccountInfo)
         }
 
         @Provides

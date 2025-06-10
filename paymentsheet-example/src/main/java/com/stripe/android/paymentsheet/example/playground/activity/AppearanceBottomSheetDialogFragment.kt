@@ -70,16 +70,20 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.INSETS_KEY
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearance
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
 private val SECTION_LABEL_COLOR = Color(159, 159, 169)
+private const val DEFAULT_PRIMARY_BUTTON_HEIGHT = 48f
 
 internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     private var embeddedAppearance by mutableStateOf(EmbeddedAppearance())
+    private var formInsetsAppearance by mutableStateOf(FormInsetsAppearance())
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,6 +91,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
         savedInstanceState: Bundle?
     ): View {
         embeddedAppearance = arguments.getEmbeddedAppearance()
+        formInsetsAppearance = arguments.getFormInsetsAppearance()
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -95,6 +100,8 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
                     updateAppearance = { AppearanceStore.state = it },
                     embeddedAppearance = embeddedAppearance,
                     updateEmbedded = { embeddedAppearance = it },
+                    formInsetsAppearance = formInsetsAppearance,
+                    updateInsets = { formInsetsAppearance = it },
                     resetAppearance = ::resetAppearance
                 )
             }
@@ -104,12 +111,14 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
     private fun resetAppearance() {
         AppearanceStore.reset()
         embeddedAppearance = EmbeddedAppearance()
+        formInsetsAppearance = FormInsetsAppearance()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         val result = Bundle().apply {
             putParcelable(EMBEDDED_KEY, embeddedAppearance)
+            putParcelable(INSETS_KEY, formInsetsAppearance)
         }
         setFragmentResult(REQUEST_KEY, result)
     }
@@ -121,6 +130,7 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
 
         const val REQUEST_KEY = "REQUEST_KEY"
         const val EMBEDDED_KEY = "EMBEDDED_APPEARANCE"
+        const val INSETS_KEY = "INSETS_APPEARANCE"
     }
 }
 
@@ -130,6 +140,8 @@ private fun AppearancePicker(
     updateAppearance: (PaymentSheet.Appearance) -> Unit,
     embeddedAppearance: EmbeddedAppearance,
     updateEmbedded: (EmbeddedAppearance) -> Unit,
+    formInsetsAppearance: FormInsetsAppearance,
+    updateInsets: (FormInsetsAppearance) -> Unit,
     resetAppearance: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -137,18 +149,7 @@ private fun AppearancePicker(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Appearance") },
-                actions = {
-                    TextButton(onClick = {
-                        resetAppearance()
-                    }) {
-                        Text(text = stringResource(R.string.reset))
-                    }
-                },
-                backgroundColor = MaterialTheme.colors.surface,
-                contentColor = MaterialTheme.colors.onSurface,
-            )
+            AppearanceTopAppBar(resetAppearance)
         },
         modifier = Modifier
             .systemBarsPadding()
@@ -173,6 +174,12 @@ private fun AppearancePicker(
                     updateAppearance = updateAppearance,
                 )
             }
+            CustomizationCard("Form Insets") {
+                Insets(
+                    insetsAppearance = formInsetsAppearance,
+                    updateInsets = updateInsets
+                )
+            }
             CustomizationCard("Typography") {
                 Typography(
                     currentAppearance = currentAppearance,
@@ -195,6 +202,22 @@ private fun AppearancePicker(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+@Composable
+private fun AppearanceTopAppBar(resetAppearance: () -> Unit) {
+    TopAppBar(
+        title = { Text("Appearance") },
+        actions = {
+            TextButton(onClick = {
+                resetAppearance()
+            }) {
+                Text(text = stringResource(R.string.reset))
+            }
+        },
+        backgroundColor = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface,
+    )
 }
 
 @Composable
@@ -428,6 +451,54 @@ private fun Shapes(
             )
         )
     }
+    Divider()
+    IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
+        updateAppearance(
+            currentAppearance.copy(
+                shapes = currentAppearance.shapes.copy(
+                    bottomSheetCornerRadiusDp = it
+                )
+            )
+        )
+    }
+}
+
+@Composable
+private fun Insets(
+    insetsAppearance: FormInsetsAppearance,
+    updateInsets: (FormInsetsAppearance) -> Unit
+) {
+    IncrementDecrementItem("start", insetsAppearance.start) {
+        updateInsets(
+            insetsAppearance.copy(
+                start = it
+            )
+        )
+    }
+    Divider()
+    IncrementDecrementItem("top", insetsAppearance.top) {
+        updateInsets(
+            insetsAppearance.copy(
+                top = it
+            )
+        )
+    }
+    Divider()
+    IncrementDecrementItem("end", insetsAppearance.end) {
+        updateInsets(
+            insetsAppearance.copy(
+                end = it
+            )
+        )
+    }
+    Divider()
+    IncrementDecrementItem("bottom", insetsAppearance.bottom) {
+        updateInsets(
+            insetsAppearance.copy(
+                bottom = it
+            )
+        )
+    }
 }
 
 @Composable
@@ -592,6 +663,21 @@ private fun PrimaryButton(
                 primaryButton = currentButton.copy(
                     shape = currentButton.shape.copy(
                         borderStrokeWidthDp = it
+                    )
+                )
+            )
+        )
+    }
+
+    Divider()
+
+    val currentButtonHeight = currentButton.shape.heightDp ?: DEFAULT_PRIMARY_BUTTON_HEIGHT
+    IncrementDecrementItem("buttonHeightDp", currentButtonHeight) {
+        updateAppearance(
+            currentAppearance.copy(
+                primaryButton = currentButton.copy(
+                    shape = currentButton.shape.copy(
+                        heightDp = it
                     )
                 )
             )
@@ -1048,4 +1134,14 @@ internal fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
         this?.getParcelable(EMBEDDED_KEY)
     }
     return appearance ?: EmbeddedAppearance()
+}
+
+internal fun Bundle?.getFormInsetsAppearance(): FormInsetsAppearance {
+    val appearance = if (SDK_INT >= 33) {
+        this?.getParcelable(INSETS_KEY, FormInsetsAppearance::class.java)
+    } else {
+        @Suppress("DEPRECATION")
+        this?.getParcelable(INSETS_KEY)
+    }
+    return appearance ?: FormInsetsAppearance()
 }

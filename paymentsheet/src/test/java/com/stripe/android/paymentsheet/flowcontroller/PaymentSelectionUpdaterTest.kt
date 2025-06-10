@@ -39,6 +39,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
     }
@@ -73,6 +74,7 @@ class PaymentSelectionUpdaterTest {
             ),
             newState = newState,
             newConfig = newConfig,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isEqualTo(existingSelection)
     }
@@ -93,6 +95,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isEqualTo(existingSelection)
     }
@@ -108,6 +111,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isNull()
     }
@@ -125,6 +129,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isNull()
     }
@@ -145,6 +150,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isNull()
     }
@@ -164,6 +170,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isEqualTo(paymentSelection)
     }
@@ -183,6 +190,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isNull()
     }
@@ -202,6 +210,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isEqualTo(paymentSelection)
     }
@@ -221,6 +230,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
         assertThat(result).isNull()
     }
@@ -249,6 +259,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isEqualTo(null)
@@ -280,6 +291,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isEqualTo(existingSelection)
@@ -311,6 +323,7 @@ class PaymentSelectionUpdaterTest {
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isEqualTo(existingSelection)
@@ -355,6 +368,7 @@ class PaymentSelectionUpdaterTest {
             ),
             newState = newState,
             newConfig = newConfig,
+            walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isEqualTo(existingSelection)
@@ -377,10 +391,75 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
-            newConfig = newConfig
+            newConfig = newConfig,
+            walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isEqualTo(null)
+    }
+
+    @Test
+    fun `If wallet buttons are already shown and existing selection is Google Pay, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = PaymentSelection.GooglePay,
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = true,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `If wallet buttons are already shown and existing selection is Link, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = true,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `If using wallet buttons config option and existing selection is Google Pay, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = PaymentSelection.GooglePay,
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.copy(
+                willShowWalletButtons = true,
+            ),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `If using wallet buttons config option and existing selection is Link, should be null`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.copy(
+                willShowWalletButtons = true,
+            ),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(

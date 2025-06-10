@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
+import androidx.annotation.DimenRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -27,7 +29,9 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.ExtendedAppearancePreview
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -429,7 +433,6 @@ class PaymentSheet internal constructor(
                 @Parcelize
                 @Poko
                 @PaymentMethodOptionsSetupFutureUsagePreview
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class PaymentMethodOptions(
                     internal val setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>
                 ) : Parcelable
@@ -476,7 +479,6 @@ class PaymentSheet internal constructor(
              * Use none if you do not intend to reuse this payment method and want to override the top-level
              * setup_future_usage value for this payment method.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             None
         }
 
@@ -656,6 +658,8 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.customPaymentMethods,
 
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
+
+        internal val willShowWalletButtons: Boolean = false,
     ) : Parcelable {
 
         @JvmOverloads
@@ -808,6 +812,7 @@ class PaymentSheet internal constructor(
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+            private var willShowWalletButtons: Boolean = false
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -940,6 +945,11 @@ class PaymentSheet internal constructor(
                 this.link = link
             }
 
+            @WalletButtonsPreview
+            fun willShowWalletButtons(willShowWalletButtons: Boolean) = apply {
+                this.willShowWalletButtons = willShowWalletButtons
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -960,6 +970,7 @@ class PaymentSheet internal constructor(
                 cardBrandAcceptance = cardBrandAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
+                willShowWalletButtons = willShowWalletButtons,
             )
         }
 
@@ -1023,7 +1034,12 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the Embedded Payment Element
          */
-        internal val embeddedAppearance: Embedded = Embedded.default
+        internal val embeddedAppearance: Embedded = Embedded.default,
+
+        /**
+         * Describes the inset values used for all forms
+         */
+        internal val formInsetValues: Insets = Insets.defaultFormInsetValues
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1126,23 +1142,23 @@ class PaymentSheet internal constructor(
                 ) : RowStyle() {
                     constructor(
                         context: Context,
-                        separatorThicknessDp: Int,
-                        startSeparatorInsetDp: Int,
-                        endSeparatorInsetDp: Int,
+                        @DimenRes separatorThicknessRes: Int,
+                        @DimenRes startSeparatorInsetRes: Int,
+                        @DimenRes endSeparatorInsetRes: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int,
+                        @DimenRes additionalVerticalInsetsRes: Int,
+                        @DimenRes horizontalInsetsRes: Int,
                         colorsLight: Colors,
                         colorsDark: Colors
                     ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
+                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
+                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
                         colorsDark = colorsDark
                     )
@@ -1255,25 +1271,25 @@ class PaymentSheet internal constructor(
                 ) : RowStyle() {
                     constructor(
                         context: Context,
-                        separatorThicknessDp: Int,
-                        startSeparatorInsetDp: Int,
-                        endSeparatorInsetDp: Int,
+                        @DimenRes separatorThicknessRes: Int,
+                        @DimenRes startSeparatorInsetRes: Int,
+                        @DimenRes endSeparatorInsetRes: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        checkmarkInsetDp: Int,
-                        additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int,
+                        @DimenRes checkmarkInsetRes: Int,
+                        @DimenRes additionalVerticalInsetsRes: Int,
+                        @DimenRes horizontalInsetsRes: Int,
                         colorsLight: Colors,
                         colorsDark: Colors
                     ) : this(
-                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
-                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
+                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
+                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
-                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetRes),
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
                         colorsDark = colorsDark
                     )
@@ -1337,11 +1353,11 @@ class PaymentSheet internal constructor(
                 ) : RowStyle() {
                     constructor(
                         context: Context,
-                        spacingDp: Int,
-                        additionalInsetsDp: Int
+                        @DimenRes spacingRes: Int,
+                        @DimenRes additionalInsetsRes: Int
                     ) : this(
-                        spacingDp = context.getRawValueFromDimenResource(spacingDp),
-                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                        spacingDp = context.getRawValueFromDimenResource(spacingRes),
+                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsRes)
                     )
 
                     override fun hasSeparators() = false
@@ -1527,7 +1543,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Shapes(
+    data class Shapes @ExtendedAppearancePreview constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
@@ -1536,11 +1552,52 @@ class PaymentSheet internal constructor(
         /**
          * The border used for inputs, tabs, and other components in PaymentSheet.
          */
-        val borderStrokeWidthDp: Float
+        val borderStrokeWidthDp: Float,
+
+        /**
+         * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
+         * set to the same value as [cornerRadiusDp].
+         */
+        val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
-        constructor(context: Context, cornerRadiusDp: Int, borderStrokeWidthDp: Int) : this(
+        @OptIn(ExtendedAppearancePreview::class)
+        constructor(
+            /**
+             * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
+             */
+            cornerRadiusDp: Float,
+
+            /**
+             * The border used for inputs, tabs, and other components in PaymentSheet.
+             */
+            borderStrokeWidthDp: Float,
+        ) : this(
+            cornerRadiusDp = cornerRadiusDp,
+            borderStrokeWidthDp = borderStrokeWidthDp,
+            bottomSheetCornerRadiusDp = cornerRadiusDp,
+        )
+
+        @OptIn(ExtendedAppearancePreview::class)
+        constructor(
+            context: Context,
+            cornerRadiusDp: Int,
+            borderStrokeWidthDp: Int,
+        ) : this(
             cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
-            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp)
+            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp),
+            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
+        )
+
+        @ExtendedAppearancePreview
+        constructor(
+            context: Context,
+            @DimenRes cornerRadiusRes: Int,
+            @DimenRes borderStrokeWidthRes: Int,
+            @DimenRes bottomSheetCornerRadiusRes: Int,
+        ) : this(
+            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes),
+            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes),
+            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes),
         )
 
         companion object {
@@ -1689,8 +1746,14 @@ class PaymentSheet internal constructor(
          * The border width of the primary button.
          * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
          */
-        val borderStrokeWidthDp: Float? = null
+        val borderStrokeWidthDp: Float? = null,
+        /**
+         * The height of the primary button.
+         * Note: If 'null', the default height is 48dp.
+         */
+        val heightDp: Float? = null
     ) : Parcelable {
+        @Deprecated("Use @DimenRes constructor")
         constructor(
             context: Context,
             cornerRadiusDp: Int? = null,
@@ -1700,6 +1763,23 @@ class PaymentSheet internal constructor(
                 context.getRawValueFromDimenResource(it)
             },
             borderStrokeWidthDp = borderStrokeWidthDp?.let {
+                context.getRawValueFromDimenResource(it)
+            }
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes cornerRadiusRes: Int? = null,
+            @DimenRes borderStrokeWidthRes: Int? = null,
+            @DimenRes heightRes: Int? = null
+        ) : this(
+            cornerRadiusDp = cornerRadiusRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            borderStrokeWidthDp = borderStrokeWidthRes?.let {
+                context.getRawValueFromDimenResource(it)
+            },
+            heightDp = heightRes?.let {
                 context.getRawValueFromDimenResource(it)
             }
         )
@@ -1728,6 +1808,58 @@ class PaymentSheet internal constructor(
             fontResId = fontResId,
             fontSizeSp = context.getRawValueFromDimenResource(fontSizeSp)
         )
+    }
+
+    @Parcelize
+    @Poko
+    class Insets(
+        val startDp: Float,
+        val topDp: Float,
+        val endDp: Float,
+        val bottomDp: Float
+    ) : Parcelable {
+        constructor(
+            context: Context,
+            @DimenRes startRes: Int,
+            @DimenRes topRes: Int,
+            @DimenRes endRes: Int,
+            @DimenRes bottomRes: Int
+        ) : this(
+            startDp = context.getRawValueFromDimenResource(startRes),
+            topDp = context.getRawValueFromDimenResource(topRes),
+            endDp = context.getRawValueFromDimenResource(endRes),
+            bottomDp = context.getRawValueFromDimenResource(bottomRes)
+        )
+
+        constructor(
+            horizontalDp: Float,
+            verticalDp: Float
+        ) : this(
+            startDp = horizontalDp,
+            topDp = verticalDp,
+            endDp = horizontalDp,
+            bottomDp = verticalDp
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes horizontalRes: Int,
+            @DimenRes verticalRes: Int
+        ) : this(
+            startDp = context.getRawValueFromDimenResource(horizontalRes),
+            topDp = context.getRawValueFromDimenResource(verticalRes),
+            endDp = context.getRawValueFromDimenResource(horizontalRes),
+            bottomDp = context.getRawValueFromDimenResource(verticalRes)
+        )
+
+        companion object {
+            internal val defaultFormInsetValues = Insets(
+                startDp = 20f,
+                topDp = 0f,
+                endDp = 20f,
+                bottomDp = 40f,
+            )
+        }
     }
 
     @Parcelize
@@ -1882,10 +2014,28 @@ class PaymentSheet internal constructor(
                 email == CollectionMode.Always ||
                 address == AddressCollectionMode.Full
 
-        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
-            val collectAddress = address == AddressCollectionMode.Full
-            val collectPhone = phone == CollectionMode.Always
+        private val collectsFullAddress: Boolean
+            get() = address == AddressCollectionMode.Full
 
+        internal fun toBillingAddressParameters(): GooglePayJsonFactory.BillingAddressParameters {
+            val format = when (address) {
+                AddressCollectionMode.Never,
+                AddressCollectionMode.Automatic -> {
+                    GooglePayJsonFactory.BillingAddressParameters.Format.Min
+                }
+                AddressCollectionMode.Full -> {
+                    GooglePayJsonFactory.BillingAddressParameters.Format.Full
+                }
+            }
+
+            return GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = collectsFullAddress || collectsPhone,
+                format = format,
+                isPhoneNumberRequired = collectsPhone,
+            )
+        }
+
+        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
             val format = when (address) {
                 AddressCollectionMode.Never,
                 AddressCollectionMode.Automatic -> {
@@ -1897,9 +2047,9 @@ class PaymentSheet internal constructor(
             }
 
             return GooglePayPaymentMethodLauncher.BillingAddressConfig(
-                isRequired = collectAddress || collectPhone,
+                isRequired = collectsFullAddress || collectsPhone,
                 format = format,
-                isPhoneNumberRequired = collectPhone,
+                isPhoneNumberRequired = collectsPhone,
             )
         }
 
@@ -2265,6 +2415,14 @@ class PaymentSheet internal constructor(
     interface FlowController {
 
         var shippingDetails: AddressDetails?
+
+        /**
+         * Displays a list of wallet buttons that can be used to checkout instantly
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @WalletButtonsPreview
+        @Composable
+        fun WalletButtons()
 
         /**
          * Configure the FlowController to process a [PaymentIntent].

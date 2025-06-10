@@ -31,7 +31,8 @@ internal data class PrimaryButtonColors(
 
 internal data class PrimaryButtonShape(
     val cornerRadius: Dp = Dp.Unspecified,
-    val borderStrokeWidth: Dp = Dp.Unspecified
+    val borderStrokeWidth: Dp = Dp.Unspecified,
+    val height: Dp = Dp.Unspecified
 )
 
 internal data class PrimaryButtonTypography(
@@ -118,6 +119,9 @@ internal object PrimaryButtonTheme {
                 },
                 borderStrokeWidth = localShape.borderStrokeWidth.takeOrElse {
                     style.shape.borderStrokeWidth.dp
+                },
+                height = localShape.height.takeOrElse {
+                    style.shape.height.dp
                 }
             )
         }

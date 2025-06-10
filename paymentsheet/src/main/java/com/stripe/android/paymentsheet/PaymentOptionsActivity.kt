@@ -48,6 +48,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             viewModel.analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
         }
 
+        viewModel.linkPaymentLauncher.register(
+            activityResultCaller = this,
+            callback = viewModel::onLinkAuthenticationResult
+        )
+
         setContent {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()

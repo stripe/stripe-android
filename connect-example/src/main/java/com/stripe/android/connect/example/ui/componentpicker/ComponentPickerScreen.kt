@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.ModalBottomSheetLayout
@@ -33,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.stripe.android.connect.AccountOnboardingListener
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Success
@@ -57,7 +56,6 @@ import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 @Suppress("LongMethod")
-@OptIn(PrivateBetaConnectSDK::class, ExperimentalMaterialApi::class)
 @Composable
 fun ComponentPickerContent(
     viewModel: EmbeddedComponentLoaderViewModel,
@@ -90,7 +88,10 @@ fun ComponentPickerContent(
             title = stringResource(R.string.connect_sdk_example),
             actions = (embeddedComponentAsync is Success).then {
                 {
-                    IconButton(onClick = openSettings) {
+                    IconButton(
+                        modifier = Modifier.testTag("settings_button"),
+                        onClick = openSettings
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.settings),

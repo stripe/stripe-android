@@ -8,25 +8,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
-    val horizontalPadding = dimensionResource(
-        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-    )
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
 
     val state by interactor.state.collectAsState()
 
     Column(
         modifier = Modifier
-            .padding(horizontal = horizontalPadding)
+            .padding(horizontalPadding)
             .testTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -37,7 +35,6 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 displayableSavedPaymentMethod = it,
                 isEnabled = true,
                 isSelected = isSelected,
-                canShowLinkIcon = true,
                 onClick = {
                     rowOnClick(
                         isEditing = state.isEditing,

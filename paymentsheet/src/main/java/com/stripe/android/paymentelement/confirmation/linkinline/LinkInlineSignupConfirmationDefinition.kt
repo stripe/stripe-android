@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.linkinline
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkStore
@@ -120,9 +121,10 @@ internal class LinkInlineSignupConfirmationDefinition(
         val createParams = linkInlineSignupConfirmationOption.createParams
         val saveOption = linkInlineSignupConfirmationOption.saveOption
         val extraParams = linkInlineSignupConfirmationOption.extraParams
+        val configuration = linkInlineSignupConfirmationOption.linkConfiguration
 
         val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
-            linkInlineSignupConfirmationOption.linkConfiguration,
+            configuration,
             createParams,
         ).getOrNull()
 
@@ -130,7 +132,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.New -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toNewOption(saveOption, extraParams)
+                linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
             }
             is LinkPaymentDetails.Saved -> {
                 linkStore.markLinkAsUsed()
@@ -160,7 +162,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                 .setType(PaymentMethod.Type.Card)
                 .build(),
             optionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
                     saveOption.shouldSave()
                 } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
@@ -170,13 +172,20 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     private fun LinkPaymentDetails.New.toNewOption(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
+        configuration: LinkConfiguration,
         extraParams: PaymentMethodExtraParams?,
     ): PaymentMethodConfirmationOption.New {
+        val passthroughMode = configuration.passthroughModeEnabled
+
+        val optionsParams = if (passthroughMode) {
+            PaymentMethodOptionsParams.Card(setupFutureUsage = saveOption.setupFutureUsage)
+        } else {
+            PaymentMethodOptionsParams.Link(setupFutureUsage = saveOption.setupFutureUsage)
+        }
+
         return PaymentMethodConfirmationOption.New(
             createParams = paymentMethodCreateParams,
-            optionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = saveOption.setupFutureUsage,
-            ),
+            optionsParams = optionsParams,
             extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
         )

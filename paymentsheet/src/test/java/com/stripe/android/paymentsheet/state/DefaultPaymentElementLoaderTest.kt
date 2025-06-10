@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -43,7 +43,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.FakeLogLinkGlobalHoldbackExposure
+import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -127,7 +127,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 config,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
         ).isEqualTo(
             PaymentElementLoader.State(
@@ -149,6 +151,7 @@ internal class DefaultPaymentElementLoaderTest {
                     sharedDataSpecs = emptyList(),
                     isGooglePayReady = true,
                     linkMode = null,
+                    availableWallets = emptyList(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
                     financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
@@ -174,7 +177,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             PaymentSheetFixtures.CONFIG_MINIMUM,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
         assertThat(result.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isFalse()
     }
@@ -197,7 +202,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow().paymentMethodMetadata.isGooglePayReady
         ).isFalse()
     }
@@ -217,7 +224,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(state.paymentSelection).isEqualTo(
@@ -240,7 +249,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
@@ -262,7 +273,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
@@ -284,7 +297,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isNull()
@@ -308,7 +323,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isNull()
@@ -333,7 +350,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isNull()
@@ -364,7 +383,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             verify(customerRepository).getPaymentMethods(
@@ -399,7 +420,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             verify(customerRepository).getPaymentMethods(
@@ -429,7 +452,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             val actualException = loadResult.exceptionOrNull()
@@ -451,7 +476,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(result.customer?.paymentMethods)
@@ -478,7 +505,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(result.customer?.paymentMethods)
@@ -514,7 +543,9 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
                 allowsDelayedPaymentMethods = true,
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.customer?.paymentMethods)
@@ -539,7 +570,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.validationError).isEqualTo(PaymentIntentInTerminalState(Succeeded))
@@ -556,7 +589,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.validationError).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
@@ -576,7 +611,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = "ek_123",
                 )
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val expectedPaymentMethod = requireNotNull(PAYMENT_METHODS.first())
@@ -590,7 +627,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
@@ -603,7 +642,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
@@ -616,7 +657,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
@@ -629,7 +672,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
@@ -650,32 +695,20 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
-        val expectedLinkConfig = LinkConfiguration(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            merchantName = "Merchant",
-            merchantCountryCode = null,
-            customerInfo = LinkConfiguration.CustomerInfo(
+        val configuration = result.paymentMethodMetadata.linkState?.configuration
+        assertThat(configuration?.customerInfo).isEqualTo(
+            LinkConfiguration.CustomerInfo(
                 name = "Till",
                 email = null,
                 phone = null,
                 billingCountryCode = "CA",
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            cardBrandFilter = DefaultCardBrandFilter,
-            flags = emptyMap(),
-            useAttestationEndpointsForLink = false,
-            suppress2faModal = false,
-            initializationMode = initializationMode,
-            elementsSessionId = "session_1234",
-            linkMode = null,
+            )
         )
-
-        assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)
     }
 
     @Test
@@ -693,7 +726,9 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = mockConfiguration(
                 shippingDetails = shippingDetails,
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.shippingDetails).isNotNull()
@@ -718,7 +753,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.passthroughModeEnabled).isTrue()
@@ -752,7 +789,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val expectedFlags = mapOf(
@@ -781,7 +820,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val cardBrandChoice = result.paymentMethodMetadata.linkState?.configuration?.cardBrandChoice
@@ -802,7 +843,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val cardBrandChoice = result.paymentMethodMetadata.linkState?.configuration?.cardBrandChoice
@@ -833,11 +876,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -859,11 +903,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -878,11 +923,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -894,11 +940,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -910,11 +957,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -926,11 +974,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
     @Test
@@ -945,12 +994,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -962,12 +1011,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -988,7 +1037,9 @@ internal class DefaultPaymentElementLoaderTest {
                 shippingDetails = shippingDetails,
                 defaultBillingDetails = billingDetails,
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.phone)
@@ -1016,7 +1067,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = "ek_123",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.email)
@@ -1041,7 +1094,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = "ek_123",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val observedElements = result.customer?.paymentMethods
@@ -1061,7 +1116,9 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).exceptionOrNull()
 
         assertThat(result).isEqualTo(
@@ -1087,7 +1144,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = "ek_123",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(false))
@@ -1105,7 +1164,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -1149,7 +1210,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(true))
@@ -1165,7 +1228,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -1177,7 +1242,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(false))
@@ -1199,7 +1266,9 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(false))
@@ -1224,7 +1293,9 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(false))
@@ -1243,7 +1314,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = intent.clientSecret!!,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(false))
@@ -1264,7 +1337,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.cbcEligibility)
@@ -1282,12 +1357,12 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1307,12 +1382,12 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = "ek_123",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1327,12 +1402,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(InsteadOfSaveForFutureUse)
     }
 
     @Test
@@ -1347,12 +1422,12 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             paymentSheetConfiguration = DEFAULT_PAYMENT_SHEET_CONFIG,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
-            .isEqualTo(AlongsideSaveForFutureUse)
     }
 
     @Test
@@ -1369,11 +1444,12 @@ internal class DefaultPaymentElementLoaderTest {
                     name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState).isNull()
-        assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 
     @Test
@@ -1422,7 +1498,9 @@ internal class DefaultPaymentElementLoaderTest {
                     )
                 )
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         if (expectedEnabled) {
@@ -1539,7 +1617,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = "customer_client_secret",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         assertThat(repository.lastParams?.customer).isEqualTo(
@@ -1594,7 +1674,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(attemptedToRetrievePaymentMethods).isFalse()
@@ -1632,7 +1714,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
@@ -1675,7 +1759,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
@@ -1718,7 +1804,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
@@ -1761,7 +1849,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
@@ -1790,7 +1880,9 @@ internal class DefaultPaymentElementLoaderTest {
                         ephemeralKeySecret = "ek_123",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
@@ -1827,7 +1919,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).exceptionOrNull()
 
             assertThat(exception).isInstanceOf<IllegalStateException>()
@@ -1865,7 +1959,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrNull()
 
             assertThat(state).isNotNull()
@@ -1909,7 +2005,9 @@ internal class DefaultPaymentElementLoaderTest {
                         ephemeralKeySecret = "ek_123",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             assertThat(attemptedToRetrievePaymentMethods).isTrue()
@@ -1951,7 +2049,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = "cuss_1",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val observedElements = result.customer?.paymentMethods
@@ -1989,7 +2089,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                     allowsDelayedPaymentMethods = true,
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             ).getOrThrow()
 
             val expectedPaymentMethods = paymentMethods.filter { paymentMethod ->
@@ -2043,7 +2145,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                     defaultBillingDetails = null
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             verify(customerRepository).retrieveCustomer(
@@ -2083,7 +2187,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "cuss_1",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             assertThat(repository.lastParams?.savedPaymentMethodSelectionId)
@@ -2114,7 +2220,9 @@ internal class DefaultPaymentElementLoaderTest {
                         clientSecret = "cuss_1",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
@@ -2173,30 +2281,32 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() = runTest {
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
-            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
-        )
+    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() =
+        runTest {
+            val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+                lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+                defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+            )
 
-        val observedElements = result.customer?.paymentMethods
-        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
-        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
-    }
+            val observedElements = result.customer?.paymentMethods
+            val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+            assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+        }
 
     @Test
-    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() = runTest {
-        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() =
+        runTest {
+            val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
 
-        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
-            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
-            defaultPaymentMethod = defaultPaymentMethod,
-        )
+            val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+                lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+                defaultPaymentMethod = defaultPaymentMethod,
+            )
 
-        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
-            defaultPaymentMethod
-        )
-    }
+            assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+                defaultPaymentMethod
+            )
+        }
 
     @Test
     fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runTest {
@@ -2303,7 +2413,9 @@ internal class DefaultPaymentElementLoaderTest {
                         ephemeralKeySecret = "ek_123",
                     ),
                 ),
-                initializedViaCompose = false,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
             )
 
             assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
@@ -2320,7 +2432,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadSucceeded(
@@ -2335,7 +2449,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2351,7 +2467,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadSucceeded(
@@ -2366,7 +2484,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2382,7 +2502,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadSucceeded(
@@ -2397,7 +2519,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2411,7 +2535,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadSucceeded(
@@ -2426,7 +2552,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2450,7 +2578,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadSucceeded(
@@ -2465,7 +2595,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2489,7 +2621,9 @@ internal class DefaultPaymentElementLoaderTest {
         loader.load(
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-            initializedViaCompose = true
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
         )
 
         verify(eventReporter).onLoadSucceeded(
@@ -2504,7 +2638,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2542,7 +2678,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = config,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(state.customer?.paymentMethods?.count() ?: 0).isEqualTo(
@@ -2597,7 +2735,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = config,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState).isNotNull()
@@ -2622,7 +2762,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = config,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         verify(eventReporter).onLoadSucceeded(
@@ -2637,7 +2779,9 @@ internal class DefaultPaymentElementLoaderTest {
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull()
+            setAsDefaultEnabled = anyOrNull(),
+            paymentMethodOptionsSetupFutureUsage = anyOrNull(),
+            setupFutureUsage = anyOrNull()
         )
     }
 
@@ -2659,7 +2803,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = config,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState).isNull()
@@ -2684,7 +2830,9 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = config,
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         verify(eventReporter).onLoadSucceeded(
@@ -2699,7 +2847,81 @@ internal class DefaultPaymentElementLoaderTest {
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull()
+            setAsDefaultEnabled = anyOrNull(),
+            paymentMethodOptionsSetupFutureUsage = anyOrNull(),
+            setupFutureUsage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `Emits correct load event for PMO setup future usage`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkEnabled = anyOrNull(),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = anyOrNull(),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+            paymentMethodOptionsSetupFutureUsage = eq(true),
+            setupFutureUsage = anyOrNull()
+        )
+    }
+
+    @Test
+    fun `Emits correct load event for setup future usage'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkEnabled = anyOrNull(),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = anyOrNull(),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+            paymentMethodOptionsSetupFutureUsage = anyOrNull(),
+            setupFutureUsage = eq(StripeIntent.Usage.OffSession)
         )
     }
 
@@ -2738,7 +2960,9 @@ internal class DefaultPaymentElementLoaderTest {
                 customer = customer,
                 allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodFromConfig
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         test(requireNotNull(state.paymentMethodMetadata.customerMetadata).permissions)
@@ -2763,12 +2987,60 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                 .googlePay(ConfigFixtures.GOOGLE_PAY)
                 .externalPaymentMethods(requestedExternalPaymentMethods).build(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         val actualExternalPaymentMethods = result.paymentMethodMetadata.externalPaymentMethodSpecs.map { it.type }
         assertThat(actualExternalPaymentMethods).isEqualTo(expectedExternalPaymentMethods)
         assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
+    }
+
+    @Test
+    fun `Just Link holdback experiment is triggered when loading PaymentSheet and Link unavailable`() = runTest {
+        val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
+
+        val loader = createPaymentElementLoader(
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            )
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        )
+
+        val item = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(item.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        logLinkHoldbackExperiment.calls.expectNoEvents()
+    }
+
+    @Test
+    fun `Both Link holdback experiments are triggered when loading PaymentSheet`() = runTest {
+        val logLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment()
+
+        val loader = createPaymentElementLoader(
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = true,
+            ),
+        )
+
+        val globalHoldback = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(globalHoldback.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK)
+        val abTest = logLinkHoldbackExperiment.calls.awaitItem()
+        assertThat(abTest.experiment).isEqualTo(ElementsSession.ExperimentAssignment.LINK_AB_TEST)
     }
 
     private fun testCustomPaymentMethods(
@@ -2790,7 +3062,9 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                 .googlePay(ConfigFixtures.GOOGLE_PAY)
                 .customPaymentMethods(requestedCustomPaymentMethods).build(),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.displayableCustomPaymentMethods)
@@ -2816,7 +3090,9 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = "ek_123",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         )
 
         verify(eventReporter).onLoadStarted(eq(false))
@@ -2832,7 +3108,9 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            paymentMethodOptionsSetupFutureUsage = false,
+            setupFutureUsage = null
         )
     }
 
@@ -2910,6 +3188,7 @@ internal class DefaultPaymentElementLoaderTest {
         linkStore: LinkStore = mock(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
+        logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
@@ -2943,7 +3222,7 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
-            logLinkGlobalHoldbackExposure = FakeLogLinkGlobalHoldbackExposure(),
+            logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo)
         )
     }
@@ -2986,13 +3265,11 @@ internal class DefaultPaymentElementLoaderTest {
     private suspend fun PaymentElementLoader.load(
         initializationMode: PaymentElementLoader.InitializationMode,
         paymentSheetConfiguration: PaymentSheet.Configuration,
-        isReloadingAfterProcessDeath: Boolean = false,
-        initializedViaCompose: Boolean,
+        metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = load(
         initializationMode = initializationMode,
         configuration = paymentSheetConfiguration.asCommonConfiguration(),
-        isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
-        initializedViaCompose = initializedViaCompose,
+        metadata = metadata,
     )
 
     private val paymentMethodsForTestingOrdering = listOf(
@@ -3044,7 +3321,9 @@ internal class DefaultPaymentElementLoaderTest {
                     clientSecret = "cuss_1",
                 ),
             ),
-            initializedViaCompose = false,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
         ).getOrThrow()
 
         return result

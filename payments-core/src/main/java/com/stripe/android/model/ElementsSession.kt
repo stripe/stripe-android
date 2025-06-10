@@ -15,6 +15,7 @@ data class ElementsSession(
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
+    val orderedPaymentMethodTypesAndWallets: List<String>,
     val flags: Map<Flag, Boolean>,
     val experimentsData: ExperimentsData?,
     val customer: Customer?,
@@ -50,6 +51,9 @@ data class ElementsSession(
 
     val enableLinkInSpm: Boolean
         get() = flags[Flag.ELEMENTS_ENABLE_LINK_SPM] == true
+
+    val allowLinkDefaultOptIn: Boolean
+        get() = linkSettings?.linkFlags?.get("link_mobile_disable_default_opt_in") != true
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -173,6 +177,7 @@ data class ElementsSession(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExperimentAssignment(val experimentValue: String) {
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
+        LINK_AB_TEST("link_ab_test"),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -188,6 +193,7 @@ data class ElementsSession(
                 externalPaymentMethodData = null,
                 flags = emptyMap(),
                 stripeIntent = stripeIntent,
+                orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
                 experimentsData = null,
                 customer = null,
                 customPaymentMethods = listOf(),

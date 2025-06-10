@@ -16,6 +16,7 @@ import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
 import androidx.compose.material.LocalTextStyle
@@ -62,6 +63,7 @@ data class StripeColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeShapes(
     val cornerRadius: Float,
+    val bottomSheetCornerRadius: Float,
     val borderStrokeWidth: Float,
 ) {
 
@@ -114,7 +116,8 @@ data class PrimaryButtonColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class PrimaryButtonShape(
     val cornerRadius: Float,
-    val borderStrokeWidth: Float
+    val borderStrokeWidth: Float,
+    val height: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -155,6 +158,14 @@ data class EmbeddedRadioColors(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFloatingStyle(
     val spacing: Float
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class FormInsets(
+    val start: Float,
+    val top: Float,
+    val end: Float,
+    val bottom: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -203,6 +214,7 @@ object StripeThemeDefaults {
 
     val shapes = StripeShapes(
         cornerRadius = 6.0f,
+        bottomSheetCornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
     )
 
@@ -237,7 +249,8 @@ object StripeThemeDefaults {
         ),
         shape = PrimaryButtonShape(
             cornerRadius = shapes.cornerRadius,
-            borderStrokeWidth = 0.0f
+            borderStrokeWidth = 0.0f,
+            height = 48f,
         ),
         typography = PrimaryButtonTypography(
             fontFamily = typography.fontFamily,
@@ -282,6 +295,13 @@ object StripeThemeDefaults {
 
     val floating = EmbeddedFloatingStyle(
         spacing = 12.0f
+    )
+
+    val formInsets = FormInsets(
+        start = 20f,
+        top = 0f,
+        end = 20f,
+        bottom = 40f
     )
 }
 
@@ -526,6 +546,8 @@ object StripeTheme {
 
     var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
 
+    var formInsets = StripeThemeDefaults.formInsets
+
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
     }
@@ -671,6 +693,12 @@ fun Color.darken(amount: Float): Color {
         max(it - amount, 0f)
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun StripeTheme.getOuterFormInsets(): PaddingValues = PaddingValues(
+    start = formInsets.start.dp,
+    end = formInsets.end.dp
+)
 
 private fun TextStyle.toCompat(): TextStyle {
     return copy(

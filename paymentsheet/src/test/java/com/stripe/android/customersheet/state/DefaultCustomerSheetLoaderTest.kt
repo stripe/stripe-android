@@ -595,6 +595,7 @@ class DefaultCustomerSheetLoaderTest {
             paymentMethodSpecs = null,
             flags = emptyMap(),
             elementsSessionId = "session_1234",
+            orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,
             experimentsData = null
         )
     }

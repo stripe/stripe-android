@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
@@ -186,6 +187,7 @@ internal class LinkApiRepository @Inject constructor(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = consumerSessionClientSecret,
                 extraParams = extraParams,
+                allowRedisplay = paymentMethodCreateParams.allowRedisplay
             )
 
             LinkPaymentDetails.New(
@@ -237,9 +239,13 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        cvc: String?,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
+        val optionsParams = cvc?.let {
+            mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to it)))
+        } ?: emptyMap()
 
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -247,7 +253,7 @@ internal class LinkApiRepository @Inject constructor(
             expectedPaymentMethodType = expectedPaymentMethodType,
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,
-            extraParams = paymentMethodParams + fraudParams,
+            extraParams = paymentMethodParams + fraudParams + optionsParams,
             billingPhone = null,
         )
     }
@@ -318,6 +324,21 @@ internal class LinkApiRepository @Inject constructor(
         return stripeRepository.listPaymentDetails(
             clientSecret = consumerSessionClientSecret,
             paymentMethodTypes = paymentMethodTypes,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                publishableKeyProvider(),
+                stripeAccountIdProvider()
+            )
+        )
+    }
+
+    override suspend fun listShippingAddresses(
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ): Result<ConsumerShippingAddresses> {
+        return stripeRepository.listShippingAddresses(
+            clientSecret = consumerSessionClientSecret,
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(

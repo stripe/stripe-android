@@ -12,13 +12,16 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -67,11 +70,16 @@ internal sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     data class Link(
-        val useLinkExpress: Boolean = false
+        val useLinkExpress: Boolean = false,
+        val selectedPayment: LinkPaymentMethod? = null,
+        val shippingAddress: ConsumerShippingAddress? = null,
     ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
+
+        val label: ResolvableString
+            get() = selectedPayment?.details?.displayName ?: StripeR.string.stripe_link.resolvableString
 
         override fun mandateText(
             merchantName: String,
@@ -334,7 +342,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        is PaymentSelection.Link -> getLinkIcon()
+        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
@@ -343,6 +351,10 @@ internal val PaymentSelection.drawableResourceId: Int
     }
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
+    if (selection.paymentMethod.isLinkCardBrand) {
+        return R.drawable.stripe_ic_paymentsheet_link_arrow
+    }
+
     return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
         R.drawable.stripe_ic_paymentsheet_card_unknown_ref -> {
             when (selection.walletType) {
@@ -386,7 +398,7 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
+        is PaymentSelection.Link -> label
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
@@ -395,7 +407,7 @@ internal val PaymentSelection.label: ResolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel() ?: run {
+    return selection.paymentMethod.getLabel(canShowSublabel = true) ?: run {
         when (selection.walletType) {
             PaymentSelection.Saved.WalletType.Link -> StripeR.string.stripe_link.resolvableString
             PaymentSelection.Saved.WalletType.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
@@ -459,12 +471,11 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
 internal fun PaymentSelection.CustomerRequestedSave.getSetupFutureUseValue(
     hasIntentToSetup: Boolean
 ): ConfirmPaymentIntentParams.SetupFutureUsage? {
-    return if (FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage.isEnabled) {
-        when (setupFutureUsage) {
-            ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> setupFutureUsage
-            else -> setupFutureUsage.takeIf { !hasIntentToSetup }
-        }
-    } else {
-        setupFutureUsage
+    return when (setupFutureUsage) {
+        ConfirmPaymentIntentParams.SetupFutureUsage.OffSession -> setupFutureUsage
+        else -> setupFutureUsage.takeIf { !hasIntentToSetup }
     }
 }
+
+private val PaymentMethod.isLinkCardBrand: Boolean
+    get() = type == PaymentMethod.Type.Card && linkPaymentDetails is LinkPaymentDetails.BankAccount

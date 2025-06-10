@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -127,15 +126,14 @@ internal class CardDetailsController(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         CardDetailsElementUI(
             enabled,
             this,
             hiddenIdentifiers,
-            lastTextFieldIdentifier
+            lastTextFieldIdentifier,
+            modifier = modifier,
         )
     }
 }

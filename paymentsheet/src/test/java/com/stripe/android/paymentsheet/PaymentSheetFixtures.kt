@@ -5,6 +5,7 @@ import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
@@ -167,6 +168,8 @@ internal object PaymentSheetFixtures {
         enableLogging = false,
         productUsage = mock(),
         paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+        linkAccountInfo = LinkAccountUpdate.Value(null),
+        walletButtonsAlreadyShown = false,
     )
 
     internal fun PaymentOptionContract.Args.updateState(

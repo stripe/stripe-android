@@ -1,24 +1,12 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
@@ -31,7 +19,6 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.scrim
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -44,12 +31,11 @@ import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
 
 @SuppressWarnings("LongMethod")
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun LinkContent(
+    modifier: Modifier,
     navController: NavHostController,
     appBarState: LinkAppBarState,
-    sheetState: ModalBottomSheetState,
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     handleViewAction: (LinkAction) -> Unit,
@@ -64,61 +50,43 @@ internal fun LinkContent(
 ) {
     DefaultLinkTheme {
         Surface(
+            modifier = modifier,
             color = LinkTheme.colors.surfacePrimary,
         ) {
-            ModalBottomSheetLayout(
-                sheetContent = bottomSheetContent ?: {
-                    // Must have some content at startup or bottom sheet crashes when
-                    // calculating its initial size
-                    Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
-                },
-                modifier = Modifier.fillMaxHeight(),
-                sheetState = sheetState,
-                sheetShape = LinkTheme.shapes.large.copy(
-                    bottomStart = CornerSize(0.dp),
-                    bottomEnd = CornerSize(0.dp)
-                ),
-                sheetBackgroundColor = LinkTheme.colors.surfacePrimary,
-                scrimColor = LinkTheme.colors.scrim
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    BackHandler {
-                        if (bottomSheetContent != null) {
-                            onUpdateSheetContent(null)
-                        } else if (navController.popBackStack().not()) {
-                            handleViewAction(LinkAction.BackPressed)
-                        }
+            Column(modifier = Modifier.fillMaxWidth()) {
+                BackHandler {
+                    if (bottomSheetContent != null) {
+                        onUpdateSheetContent(null)
+                    } else if (navController.popBackStack().not()) {
+                        handleViewAction(LinkAction.BackPressed)
                     }
-
-                    LinkAppBar(
-                        state = appBarState,
-                        onBackPressed = onBackPressed,
-                        showBottomSheetContent = onUpdateSheetContent,
-                        onLogoutClicked = {
-                            handleViewAction(LinkAction.LogoutClicked)
-                        }
-                    )
-
-                    Screens(
-                        initialDestination = initialDestination,
-                        navController = navController,
-                        goBack = goBack,
-                        moveToWeb = moveToWeb,
-                        navigateAndClearStack = { screen ->
-                            navigate(screen, true)
-                        },
-                        dismissWithResult = dismissWithResult,
-                        getLinkAccount = getLinkAccount,
-                        showBottomSheetContent = onUpdateSheetContent,
-                        changeEmail = changeEmail,
-                        hideBottomSheetContent = {
-                            onUpdateSheetContent(null)
-                        }
-                    )
                 }
+
+                LinkAppBar(
+                    state = appBarState,
+                    onBackPressed = onBackPressed,
+                    showBottomSheetContent = onUpdateSheetContent,
+                    onLogoutClicked = {
+                        handleViewAction(LinkAction.LogoutClicked)
+                    }
+                )
+
+                Screens(
+                    initialDestination = initialDestination,
+                    navController = navController,
+                    goBack = goBack,
+                    moveToWeb = moveToWeb,
+                    navigateAndClearStack = { screen ->
+                        navigate(screen, true)
+                    },
+                    dismissWithResult = dismissWithResult,
+                    getLinkAccount = getLinkAccount,
+                    showBottomSheetContent = onUpdateSheetContent,
+                    changeEmail = changeEmail,
+                    hideBottomSheetContent = {
+                        onUpdateSheetContent(null)
+                    }
+                )
             }
         }
     }
@@ -137,20 +105,23 @@ private fun Screens(
     changeEmail: () -> Unit,
     initialDestination: LinkScreen,
 ) {
-    NavHost(
-        modifier = Modifier.fillMaxSize(),
+    LinkNavHost(
         navController = navController,
         startDestination = initialDestination.route,
     ) {
         composable(LinkScreen.Loading.route) {
-            Loader()
+            LinkLoadingScreen()
         }
 
         composable(LinkScreen.SignUp.route) {
-            SignUpRoute(
-                navigateAndClearStack = navigateAndClearStack,
-                moveToWeb = moveToWeb
-            )
+            // Keep height fixed to reduce animations caused by IME toggling on both
+            // this screen and Verification screen.
+            MinScreenHeightBox(screenHeightPercentage = 1f) {
+                SignUpRoute(
+                    navigateAndClearStack = navigateAndClearStack,
+                    moveToWeb = moveToWeb
+                )
+            }
         }
 
         composable(
@@ -164,14 +135,18 @@ private fun Screens(
         }
 
         composable(LinkScreen.Verification.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
-            VerificationRoute(
-                linkAccount = linkAccount,
-                changeEmail = changeEmail,
-                navigateAndClearStack = navigateAndClearStack,
-                goBack = goBack
-            )
+            // Keep height fixed to reduce animations caused by IME toggling on both
+            // this screen and SignUp screen.
+            MinScreenHeightBox(screenHeightPercentage = if (initialDestination == LinkScreen.SignUp) 1f else 0f) {
+                val linkAccount = getLinkAccount()
+                    ?: return@MinScreenHeightBox dismissWithResult(noLinkAccountResult())
+                VerificationRoute(
+                    linkAccount = linkAccount,
+                    changeEmail = changeEmail,
+                    navigateAndClearStack = navigateAndClearStack,
+                    goBack = goBack
+                )
+            }
         }
 
         composable(LinkScreen.Wallet.route) {
@@ -290,18 +265,6 @@ private fun WalletRoute(
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent
     )
-}
-
-@Composable
-internal fun Loader() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        LinkSpinner(
-            modifier = Modifier.size(48.dp)
-        )
-    }
 }
 
 private fun noLinkAccountResult(): LinkActivityResult {

@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -34,6 +36,8 @@ fun Mandate(
     mandateText: String?,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Left,
+    imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
+    imageLoader: Map<String, EmbeddableImage> = emptyMap(),
 ) {
     mandateText?.let {
         val caption = MaterialTheme.typography.caption
@@ -54,6 +58,8 @@ fun Mandate(
             urlSpanStyle = SpanStyle(
                 color = MaterialTheme.colors.primary
             ),
+            imageAlign = imageAlign,
+            imageLoader = imageLoader,
         )
     }
 }

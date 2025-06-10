@@ -144,6 +144,7 @@ internal fun LinkOptionalInlineSignup(
             enabled = enabled,
             isShowingPhoneFirst = isShowingPhoneFirst,
             requiresNameCollection = requiresNameCollection,
+            allowsDefaultOptIn = false,
             errorMessage = errorMessage,
             emailFocusRequester = emailFocusRequester,
             phoneFocusRequester = phoneFocusRequester,

@@ -7,9 +7,18 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.updateLinkAccount
+import com.stripe.android.link.domain.LinkProminenceFeatureProvider
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -17,6 +26,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -41,6 +51,9 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
+    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
+    private val linkAccountHolder: LinkAccountHolder,
+    val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
     @IOContext workContext: CoroutineContext,
@@ -81,30 +94,34 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
-    override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
-        linkHandler.isLinkEnabled,
-        linkHandler.linkConfigurationCoordinator.emailFlow,
-        buttonsEnabled,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled ->
-        val paymentMethodMetadata = args.state.paymentMethodMetadata
-        WalletsState.create(
-            isLinkAvailable = isLinkAvailable,
-            linkEmail = linkEmail,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
-            buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
-            googlePayLauncherConfig = null,
-            googlePayButtonType = GooglePayButtonType.Pay,
-            onGooglePayPressed = {
-                updateSelection(PaymentSelection.GooglePay)
-                onUserSelection()
-            },
-            onLinkPressed = {
-                updateSelection(PaymentSelection.Link())
-                onUserSelection()
-            },
-            isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
-        )
+    override val walletsState: StateFlow<WalletsState?> = if (args.walletButtonsAlreadyShown) {
+        stateFlowOf(null)
+    } else {
+        combineAsStateFlow(
+            linkHandler.isLinkEnabled,
+            linkHandler.linkConfigurationCoordinator.emailFlow,
+            buttonsEnabled,
+        ) { isLinkAvailable, linkEmail, buttonsEnabled ->
+            val paymentMethodMetadata = args.state.paymentMethodMetadata
+            WalletsState.create(
+                isLinkAvailable = isLinkAvailable,
+                linkEmail = linkEmail,
+                isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
+                buttonsEnabled = buttonsEnabled,
+                paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
+                googlePayLauncherConfig = null,
+                googlePayButtonType = GooglePayButtonType.Pay,
+                onGooglePayPressed = {
+                    updateSelection(PaymentSelection.GooglePay)
+                    onUserSelection()
+                },
+                onLinkPressed = {
+                    updateSelection(PaymentSelection.Link())
+                    onUserSelection()
+                },
+                isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
+            )
+        }
     }
 
     // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
@@ -121,8 +138,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
+        linkAccountHolder.set(args.linkAccountInfo)
         linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
-
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
         // would not be the case.
@@ -141,10 +158,45 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
+    fun onLinkAuthenticationResult(result: LinkActivityResult) {
+        result.linkAccountUpdate?.updateLinkAccount(linkAccountHolder)
+        when (result) {
+            // Link verification dialog dismissed -> user canceled
+            is LinkActivityResult.Canceled -> {
+                Unit
+            }
+            // Link verification dialog failed -> show error
+            is LinkActivityResult.Failed -> {
+                onError(result.error.stripeErrorMessage())
+            }
+            // Link verification dialog completed -> close payment method selection with authenticated state
+            is LinkActivityResult.Completed -> {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                        paymentSelection = Link(
+                            selectedPayment = result.selectedPayment,
+                            shippingAddress = result.shippingAddress,
+                        ),
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
+            // This should not happen, but if it does, we should show an error
+            is LinkActivityResult.PaymentMethodObtained -> {
+                val error = IllegalStateException(
+                    "PaymentMethodObtained is not expected from authentication only Link flows"
+                )
+                onError(error.stripeErrorMessage())
+            }
+        }
+    }
+
     override fun onUserCancel() {
         eventReporter.onDismiss()
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Canceled(
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 mostRecentError = null,
                 paymentSelection = determinePaymentSelectionUponCancel(),
                 paymentMethods = customerStateHolder.paymentMethods.value,
@@ -153,7 +205,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun determinePaymentSelectionUponCancel(): PaymentSelection? {
-        val initialSelection = args.state.paymentSelection
+        val initialSelection = args.state.paymentSelection?.withLinkDetails()
 
         return if (initialSelection is PaymentSelection.Saved) {
             initialSelection.takeIfStillValid()
@@ -178,16 +230,55 @@ internal class PaymentOptionsViewModel @Inject constructor(
         clearErrorMessages()
 
         selection.value?.let { paymentSelection ->
-            // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
-
-            _paymentOptionResult.tryEmit(
-                PaymentOptionResult.Succeeded(
-                    paymentSelection = paymentSelection,
-                    paymentMethods = customerStateHolder.paymentMethods.value
+            val linkState = args.state.paymentMethodMetadata.linkState
+            val shouldShowLinkConfiguration = linkState != null && shouldShowLinkVerification(
+                paymentSelection = paymentSelection,
+                linkConfiguration = linkState.configuration
+            )
+            if (shouldShowLinkConfiguration) {
+                linkPaymentLauncher.present(
+                    configuration = linkState.configuration,
+                    launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
+                    linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                    useLinkExpress = true
                 )
+            } else {
+                _paymentOptionResult.tryEmit(
+                    PaymentOptionResult.Succeeded(
+                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                        paymentSelection = paymentSelection.withLinkDetails(),
+                        paymentMethods = customerStateHolder.paymentMethods.value
+                    )
+                )
+            }
+        }
+    }
+
+    /**
+     * - Updates the [PaymentSelection], if Link, to include the current [LinkAccount] if it exists.
+     * - Preserves the previously selected payment method, if any, in case none is selected in this launch.
+     */
+    private fun PaymentSelection.withLinkDetails(): PaymentSelection = when (this) {
+        is Link -> when (linkAccountHolder.linkAccountInfo.value.account) {
+            // If link account is null, clear account status and selected payment from payment selection
+            null -> copy(
+                selectedPayment = null
+            )
+            // If link account exists, include it in the payment selection and keep the previously selected payment.
+            else -> copy(
+                selectedPayment = (selectedPayment ?: (args.state.paymentSelection as? Link)?.selectedPayment)
             )
         }
+        else -> this
+    }
+
+    private fun shouldShowLinkVerification(
+        paymentSelection: PaymentSelection,
+        linkConfiguration: LinkConfiguration
+    ): Boolean {
+        return paymentSelection is Link &&
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

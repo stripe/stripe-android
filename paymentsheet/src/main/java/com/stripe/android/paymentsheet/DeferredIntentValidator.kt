@@ -52,8 +52,8 @@ internal object DeferredIntentValidator {
 
                 require(
                     validatePaymentMethodOptionsSetupFutureUsage(
-                        paymentMode.paymentMethodOptionsJsonString,
-                        stripeIntent.getPaymentMethodOptions()
+                        paramsPaymentMethodOptionsJsonString = paymentMode.paymentMethodOptionsJsonString,
+                        stripeIntent = stripeIntent
                     )
                 ) {
                     "Your PaymentIntent payment_method_options setup_future_usage values " +
@@ -142,16 +142,17 @@ internal object DeferredIntentValidator {
 
     private fun validatePaymentMethodOptionsSetupFutureUsage(
         paramsPaymentMethodOptionsJsonString: String?,
-        intentPaymentMethodOptions: Map<String, Any?>
+        stripeIntent: StripeIntent,
     ): Boolean {
         val paramsMap = paramsPaymentMethodOptionsJsonString?.let {
             StripeJsonUtils.jsonObjectToMap(JSONObject(it))
         } ?: emptyMap()
 
-        return intentPaymentMethodOptions.entries.all { (key, value) ->
-            val intentSfu = (value as? Map<*, *>?)?.get("setup_future_usage") as? String
-            val paramSfu = (paramsMap[key] as? Map<*, *>?)?.get("setup_future_usage") as? String
-            intentSfu == paramSfu
+        return paramsMap.entries.all { (key, value) ->
+            val paramsSfu = (value as? Map<*, *>?)?.get("setup_future_usage") as? String
+            val intentSfu = (stripeIntent.getPaymentMethodOptions()[key] as? Map<*, *>?)?.get("setup_future_usage")
+            val isPaymentMethodInIntent = stripeIntent.paymentMethodTypes.contains(key)
+            if (isPaymentMethodInIntent) intentSfu == paramsSfu else true
         }
     }
 }

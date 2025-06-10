@@ -18,10 +18,15 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
+import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.signup.SignUpViewModel
@@ -64,7 +69,7 @@ internal class LinkActivityViewModelTest {
     fun `test that cancel result is called on back pressed`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         val navigationManager = TestNavigationManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val vm = createViewModel(
             navigationManager = navigationManager,
@@ -125,8 +130,12 @@ internal class LinkActivityViewModelTest {
             publishableKey = "",
             stripeAccountId = null,
             startWithVerificationDialog = false,
-            linkAccount = null,
+            linkAccountInfo = LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = null
+            ),
             paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
+            launchMode = LinkLaunchMode.Full,
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)
@@ -141,7 +150,7 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
         val vm = createViewModel(linkAccountManager = linkAccountManager)
 
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         assertThat(vm.linkAccount).isEqualTo(TestFactory.LINK_ACCOUNT)
     }
@@ -176,6 +185,93 @@ internal class LinkActivityViewModelTest {
             route = LinkScreen.Wallet.route,
             popUpTo = null,
         )
+    }
+
+    @Test
+    fun `onCreate does not confirm when paymentReadyForConfirmation returns null`() = runTest {
+        val vm = createViewModel(linkLaunchMode = LinkLaunchMode.Full)
+        vm.onCreate(mock())
+        advanceUntilIdle()
+        // Should not emit Completed result, should proceed to attestation check and update screen state
+        assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
+    }
+
+    @Test
+    fun `onCreate does not confirm when linkAccount is null`() = runTest {
+        val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(null))
+
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
+            linkAccountManager = linkAccountManager
+        )
+
+        advanceUntilIdle()
+
+        vm.result.test {
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Failed::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreate confirms preselected Link payment when provided and emits Completed`() = runTest {
+        val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+        val confirmationHandler = FakeLinkConfirmationHandler()
+        confirmationHandler.confirmWithLinkPaymentDetailsResult = Result.Succeeded
+
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = confirmationHandler
+        )
+
+        vm.result.test {
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Completed::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreate does not emit Completed when confirmation is failed`() = runTest {
+        val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null
+        )
+
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
+
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
+            Result.Failed("something went wrong".resolvableString)
+        linkConfirmationHandler.confirmResult = Result.Failed("something went wrong".resolvableString)
+
+        val vm = createViewModel(
+            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler
+        )
+
+        advanceUntilIdle()
+
+        vm.result.test {
+            vm.onCreate(mock())
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Failed::class.java)
+        }
     }
 
     @Test
@@ -316,7 +412,7 @@ internal class LinkActivityViewModelTest {
     fun `onCreate should launch 2fa when eager launch is enabled`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         val linkAttestationCheck = FakeLinkAttestationCheck()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -334,7 +430,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate should dismiss 2fa on when succeeded`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -358,7 +454,7 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `onCreate should dismiss 2fa on when dismissed`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -489,7 +585,7 @@ internal class LinkActivityViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
                 )
             )
         }
@@ -545,15 +641,15 @@ internal class LinkActivityViewModelTest {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val linkAccountManager = FakeLinkAccountManager(
             linkAccountHolder = linkAccountHolder,
-            accountStatusOverride = linkAccountHolder.linkAccount.map {
-                it?.accountStatus ?: AccountStatus.SignedOut
+            accountStatusOverride = linkAccountHolder.linkAccountInfo.map {
+                it.account?.accountStatus ?: AccountStatus.SignedOut
             }
         )
         val linkAttestationCheck = FakeLinkAttestationCheck()
 
         linkAttestationCheck.result = attestationCheckResult
-        linkAccountHolder.set(TestFactory.LINK_ACCOUNT)
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val vm = createViewModel(
             linkAttestationCheck = linkAttestationCheck,
@@ -571,7 +667,7 @@ internal class LinkActivityViewModelTest {
             advanceUntilIdle()
 
             linkAccountManager.awaitLogoutCall()
-            assertThat(linkAccountHolder.linkAccount.value).isNull()
+            assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
             assertThat(launchWebConfig).isNull()
 
             expectNoEvents()
@@ -591,6 +687,8 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+        linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -603,7 +701,9 @@ internal class LinkActivityViewModelTest {
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
-            savedStateHandle = savedStateHandle
+            savedStateHandle = savedStateHandle,
+            linkLaunchMode = linkLaunchMode,
+            linkConfirmationHandlerFactory = { linkConfirmationHandler }
         ).apply {
             this.launchWebFlow = launchWeb
         }

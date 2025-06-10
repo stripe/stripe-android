@@ -29,6 +29,10 @@ internal class LinkHandler @Inject constructor(
         if (state == null) return
 
         _linkConfiguration.value = state.configuration
+
+        // trigger component creation on Link handler setup so that it gets
+        // cached in the coordinator.
+        linkConfigurationCoordinator.getComponent(state.configuration)
     }
 
     suspend fun setupLinkWithEagerLaunch(state: LinkState?): Boolean {

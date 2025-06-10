@@ -4,8 +4,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -60,7 +62,10 @@ class PaymentMethodViewModelTest {
                 formArguments = TestFactory.CARD_FORM_ARGS,
                 formElements = TestFactory.CARD_FORM_ELEMENTS,
                 primaryButtonState = PrimaryButtonState.Disabled,
-                primaryButtonLabel = completePaymentButtonLabel(TestFactory.LINK_CONFIGURATION.stripeIntent)
+                primaryButtonLabel = completePaymentButtonLabel(
+                    TestFactory.LINK_CONFIGURATION.stripeIntent,
+                    LinkLaunchMode.Full
+                )
             )
         )
     }
@@ -99,7 +104,7 @@ class PaymentMethodViewModelTest {
     fun `onPayClicked confirms payment successfully`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val linkAccountManager = FakeLinkAccountManager()
-        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         var result: LinkActivityResult? = null
         val viewModel = createViewModel(
@@ -119,13 +124,14 @@ class PaymentMethodViewModelTest {
 
         assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
         val call = linkConfirmationHandler.confirmWithLinkPaymentDetailsCall.first()
-        assertThat(call.paymentDetails)
-            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+        val paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        assertThat(call.paymentDetails).isEqualTo(paymentDetails)
         assertThat(call.cvc).isEqualTo("111")
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                    selectedPayment = null,
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -236,7 +242,8 @@ class PaymentMethodViewModelTest {
             formHelper = formHelper,
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
-            linkAccountManager = linkAccountManager
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Full
         )
     }
 }

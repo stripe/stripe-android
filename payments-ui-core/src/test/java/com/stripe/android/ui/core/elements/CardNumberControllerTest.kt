@@ -2,7 +2,6 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.LayoutDirection
@@ -420,9 +419,7 @@ internal class CardNumberControllerTest {
                     ),
                     modifier = Modifier.testTag(TEST_TAG),
                     hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = null,
-                    nextFocusDirection = FocusDirection.Next,
-                    previousFocusDirection = FocusDirection.Next
+                    lastTextFieldIdentifier = null
                 )
             }
         }
@@ -456,8 +453,6 @@ internal class CardNumberControllerTest {
                     modifier = Modifier.testTag(TEST_TAG),
                     hiddenIdentifiers = emptySet(),
                     lastTextFieldIdentifier = null,
-                    nextFocusDirection = FocusDirection.Next,
-                    previousFocusDirection = FocusDirection.Next,
                 )
             }
         }
@@ -533,9 +528,7 @@ internal class CardNumberControllerTest {
                     ),
                     modifier = Modifier.testTag(TEST_TAG),
                     hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = null,
-                    nextFocusDirection = FocusDirection.Next,
-                    previousFocusDirection = FocusDirection.Next
+                    lastTextFieldIdentifier = null
                 )
             }
         }

@@ -55,8 +55,11 @@ class LinkInlineSignupScreenshotTest {
                 enabled = true,
                 expanded = false,
                 requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
+                changeSignupDetails = {},
             )
         }
     }
@@ -87,8 +90,11 @@ class LinkInlineSignupScreenshotTest {
                 enabled = true,
                 expanded = true,
                 requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
+                changeSignupDetails = {},
             )
         }
     }
@@ -119,8 +125,116 @@ class LinkInlineSignupScreenshotTest {
                 enabled = true,
                 expanded = true,
                 requiresNameCollection = true,
+                allowsDefaultOptIn = false,
+                didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultOptIn() {
+        val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(initialValue = "5555555555")
+        val nameController = NameConfig.createController(initialValue = null)
+
+        val sectionController = SectionController(
+            label = null,
+            sectionFieldErrorControllers = listOf(
+                emailController,
+                phoneNumberController,
+                nameController,
+            )
+        )
+
+        paparazziRule.snapshot {
+            LinkInlineSignup(
+                merchantName = "Merchant, Inc.",
+                sectionController = sectionController,
+                emailController = emailController,
+                phoneNumberController = phoneNumberController,
+                nameController = nameController,
+                signUpState = SignUpState.InputtingRemainingFields,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = false,
+                allowsDefaultOptIn = true,
+                didAskToChangeSignupDetails = false,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultOptInWithPartialValues() {
+        val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(initialValue = "")
+        val nameController = NameConfig.createController(initialValue = null)
+
+        val sectionController = SectionController(
+            label = null,
+            sectionFieldErrorControllers = listOf(
+                emailController,
+                phoneNumberController,
+                nameController,
+            )
+        )
+
+        paparazziRule.snapshot {
+            LinkInlineSignup(
+                merchantName = "Merchant, Inc.",
+                sectionController = sectionController,
+                emailController = emailController,
+                phoneNumberController = phoneNumberController,
+                nameController = nameController,
+                signUpState = SignUpState.InputtingRemainingFields,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = false,
+                allowsDefaultOptIn = true,
+                didAskToChangeSignupDetails = false,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
+
+    @Test
+    fun testDefaultOptInAfterChangingSignupData() {
+        val emailController = EmailConfig.createController("email@email.com", showOptionalLabel = true)
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(initialValue = "5555555555")
+        val nameController = NameConfig.createController(initialValue = null)
+
+        val sectionController = SectionController(
+            label = null,
+            sectionFieldErrorControllers = listOf(
+                emailController,
+                phoneNumberController,
+                nameController,
+            )
+        )
+
+        paparazziRule.snapshot {
+            LinkInlineSignup(
+                merchantName = "Merchant, Inc.",
+                sectionController = sectionController,
+                emailController = emailController,
+                phoneNumberController = phoneNumberController,
+                nameController = nameController,
+                signUpState = SignUpState.InputtingRemainingFields,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = false,
+                allowsDefaultOptIn = true,
+                didAskToChangeSignupDetails = true,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
             )
         }
     }

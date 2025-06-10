@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.model.label
 import com.stripe.android.paymentsheet.model.lightThemeIconUrl
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.shippingDetails
 import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import javax.inject.Inject
 
@@ -54,7 +55,8 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             },
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             paymentMethodType = selection.paymentMethodType,
-            mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context))
+            mandateText = if (mandate == null) null else AnnotatedString(mandate.resolve(context)),
+            _shippingDetails = selection.shippingDetails,
         )
     }
 }

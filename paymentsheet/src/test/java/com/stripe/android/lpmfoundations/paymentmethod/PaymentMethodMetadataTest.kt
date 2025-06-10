@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -12,7 +11,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
@@ -26,13 +24,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -42,9 +41,9 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFails
 import com.stripe.android.core.R as CoreR
@@ -52,11 +51,6 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enablePaymentMethodOptionsSetupFutureUsage,
-        isEnabled = false
-    )
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -86,7 +80,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `hasIntentToSetup returns true for payment_intent with PMO SFU set to off_session`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -97,7 +90,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `hasIntentToSetup returns false for payment_intent with top level SFU and PMO SFU set to none`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession,
@@ -109,7 +101,6 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `hasIntentToSetup returns top level SFU if PMO SFU is not set`() {
-        featureFlagTestRule.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 setupFutureUsage = StripeIntent.Usage.OffSession
@@ -475,6 +466,47 @@ internal class PaymentMethodMetadataTest {
         val identifiers = addressElement.fields.first().map { it.identifier }
         // Check that the address element contains country.
         assertThat(identifiers).contains(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `formElementsForCode contains mandate for PMO SFU`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "cashapp",
+                    sfuValue = "off_session"
+                )
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "cashapp",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        val mandate = formElement[0] as MandateTextElement
+        assertThat(mandate.mandateText).isNotNull()
+        assertThat(mandate.identifier.v1).isEqualTo("cashapp_mandate")
+    }
+
+    @Test
+    fun `formElementsForCode does not contain mandate for PMO SFU none override`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp"),
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "cashapp",
+                    sfuValue = "none"
+                )
+            )
+        )
+        val formElement = metadata.formElementsForCode(
+            code = "cashapp",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        assertThat(formElement).isEmpty()
     }
 
     @Test
@@ -974,7 +1006,6 @@ internal class PaymentMethodMetadataTest {
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
         val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
-        val linkInlineConfiguration = createLinkInlineConfiguration()
         val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
             listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
         )
@@ -1035,8 +1066,11 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
-            linkInlineConfiguration = linkInlineConfiguration,
-            linkState = null,
+            linkState = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
             customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
@@ -1046,6 +1080,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
+            availableWallets = listOf(WalletType.Link),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(
@@ -1080,9 +1115,12 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
-            linkInlineConfiguration = linkInlineConfiguration,
             linkMode = null,
-            linkState = null,
+            linkState = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
@@ -1136,6 +1174,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
+            availableWallets = emptyList(),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
@@ -1152,7 +1191,6 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
-            linkInlineConfiguration = null,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
             linkState = null,
@@ -1227,7 +1265,6 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
-            linkInlineConfiguration = null,
             linkState = null,
             customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
         )
@@ -1239,6 +1276,7 @@ internal class PaymentMethodMetadataTest {
             eligible = true,
             preferredNetworks = listOf("cartes_bancaires")
         ),
+        orderedPaymentMethodTypesAndWallets: List<String> = intent.paymentMethodTypes,
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
     ): ElementsSession {
@@ -1270,6 +1308,7 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap(),
+            orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
             experimentsData = null
         )
     }
@@ -1308,7 +1347,6 @@ internal class PaymentMethodMetadataTest {
             expectedValue = PaymentMethod.AllowRedisplay.UNSPECIFIED
         )
 
-        featureFlagTestRule.setEnabled(true)
         val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1351,7 +1389,6 @@ internal class PaymentMethodMetadataTest {
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.ALWAYS)
 
-            featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1410,7 +1447,6 @@ internal class PaymentMethodMetadataTest {
                 )
             ).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
 
-            featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1515,7 +1551,6 @@ internal class PaymentMethodMetadataTest {
             expectedValue = PaymentMethod.AllowRedisplay.LIMITED
         )
 
-        featureFlagTestRule.setEnabled(true)
         val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1560,7 +1595,6 @@ internal class PaymentMethodMetadataTest {
                 expectedValue = PaymentMethod.AllowRedisplay.UNSPECIFIED
             )
 
-            featureFlagTestRule.setEnabled(true)
             val metadataForPaymentIntentWithPmoSfu = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
@@ -1661,14 +1695,127 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `requiresMandate respects PMO SFU if set`() {
-        featureFlagTestRule.setEnabled(true)
+    fun `requiresMandate returns true for PMO SFU`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE
             ),
         )
         assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isTrue()
+    }
+
+    @Test
+    fun `requiresMandate returns false for PMO SFU none override`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OffSession,
+                paymentMethodOptionsJsonString = PaymentIntentFixtures.getPaymentMethodOptionsJsonString(
+                    code = "amazon_pay",
+                    sfuValue = "none"
+                )
+            ),
+        )
+        assertThat(metadata.requiresMandate(PaymentMethod.Type.AmazonPay.code)).isFalse()
+    }
+
+    @Test
+    fun `availableWallets contains all wallet types`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "card"),
+        isGooglePayReady = true,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets contains all wallet types in order`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("link", "card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
+    )
+
+    @Test
+    fun `availableWallets contains only Google Pay`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = false,
+        expectedWalletTypes = listOf(WalletType.GooglePay),
+    )
+
+    @Test
+    fun `availableWallets does not contain Google Pay if not ready`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = false,
+        hasLinkState = false,
+        expectedWalletTypes = emptyList(),
+    )
+
+    @Test
+    fun `availableWallets contains only Link`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "link"),
+        isGooglePayReady = false,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets contains Link if state is available but not in types`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = false,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets order respected if Link available but not in types`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = true,
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+    )
+
+    private fun availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets: List<String>,
+        isGooglePayReady: Boolean,
+        hasLinkState: Boolean,
+        expectedWalletTypes: List<WalletType>,
+    ) {
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires")
+            ),
+        )
+
+        val configuration = createPaymentSheetConfiguration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            shippingDetails = AddressDetails(),
+            billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
+            customPaymentMethods = listOf(),
+            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = configuration.asCommonConfiguration(),
+            sharedDataSpecs = emptyList(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = isGooglePayReady,
+            linkState = if (hasLinkState) {
+                LinkState(
+                    configuration = mock(),
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                )
+            } else {
+                null
+            },
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
+        )
+
+        assertThat(metadata.availableWallets).containsExactlyElementsIn(expectedWalletTypes)
     }
 
     fun `Passes CBF along to Link`() {
@@ -1681,33 +1828,31 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
     }
 
-    private fun createLinkInlineConfiguration(): LinkInlineConfiguration {
-        return LinkInlineConfiguration(
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            linkConfiguration = LinkConfiguration(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    email = "john@email.com",
-                    name = "John Doe",
-                    billingCountryCode = "CA",
-                    phone = "1234567890"
-                ),
-                merchantName = "Merchant Inc.",
-                merchantCountryCode = "CA",
-                shippingDetails = null,
-                flags = mapOf(),
-                cardBrandChoice = LinkConfiguration.CardBrandChoice(
-                    eligible = true,
-                    preferredNetworks = listOf("cartes_bancaires")
-                ),
-                cardBrandFilter = DefaultCardBrandFilter,
-                passthroughModeEnabled = false,
-                useAttestationEndpointsForLink = false,
-                suppress2faModal = false,
-                initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementsSessionId = "session_1234",
-                linkMode = LinkMode.LinkPaymentMethod,
+    private fun createLinkConfiguration(): LinkConfiguration {
+        return LinkConfiguration(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = "john@email.com",
+                name = "John Doe",
+                billingCountryCode = "CA",
+                phone = "1234567890"
             ),
+            merchantName = "Merchant Inc.",
+            merchantCountryCode = "CA",
+            shippingDetails = null,
+            flags = mapOf(),
+            cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires")
+            ),
+            cardBrandFilter = DefaultCardBrandFilter,
+            passthroughModeEnabled = false,
+            useAttestationEndpointsForLink = false,
+            suppress2faModal = false,
+            initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
+            elementsSessionId = "session_1234",
+            linkMode = LinkMode.LinkPaymentMethod,
+            allowDefaultOptIn = false,
         )
     }
 

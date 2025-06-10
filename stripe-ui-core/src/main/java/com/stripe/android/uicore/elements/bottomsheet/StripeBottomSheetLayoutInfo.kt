@@ -22,7 +22,7 @@ data class StripeBottomSheetLayoutInfo(
 
 @Composable
 fun rememberStripeBottomSheetLayoutInfo(
-    cornerRadius: Dp = MaterialTheme.stripeShapes.cornerRadius.dp,
+    cornerRadius: Dp = MaterialTheme.stripeShapes.bottomSheetCornerRadius.dp,
     sheetBackgroundColor: Color = MaterialTheme.colors.surface,
     scrimColor: Color = ModalBottomSheetDefaults.scrimColor,
 ): StripeBottomSheetLayoutInfo {

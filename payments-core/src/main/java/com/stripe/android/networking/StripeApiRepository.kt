@@ -55,6 +55,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -82,6 +83,7 @@ import com.stripe.android.model.parsers.CardMetadataJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
+import com.stripe.android.model.parsers.ConsumerShippingAddressesParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
@@ -1512,6 +1514,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun listShippingAddresses(
+        clientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerShippingAddresses> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                listShippingAddresses,
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to clientSecret
+                    ),
+                )
+            ),
+            ConsumerShippingAddressesParser
+        )
+    }
+
     override suspend fun deletePaymentDetails(
         clientSecret: String,
         paymentDetailsId: String,
@@ -1579,6 +1600,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
+            params.legacyCustomerEphemeralKey?.let { this["legacy_customer_ephemeral_key"] = it }
             params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
             params.customPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["custom_payment_methods"] = it }
             params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
@@ -1909,6 +1931,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val listConsumerPaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details/list")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/shipping_addresses/list`
+         */
+        internal val listShippingAddresses: String
+            @JvmSynthetic
+            get() = getApiUrl("consumers/shipping_addresses/list")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/share`

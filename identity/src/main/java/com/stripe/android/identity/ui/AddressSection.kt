@@ -11,7 +11,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -126,8 +125,6 @@ private fun AddressSectionContent(
         element = sectionElement,
         hiddenIdentifiers = emptySet(),
         lastTextFieldIdentifier = textIdentifiers.lastOrNull(),
-        nextFocusDirection = FocusDirection.Next,
-        previousFocusDirection = FocusDirection.Previous
     )
 
     TextButton(

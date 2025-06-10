@@ -30,6 +30,7 @@ def create_version_bump_pr()
     update_gradle_properties()
     update_changelog()
     update_version()
+    update_3ds2_version()
     execute_or_fail("git commit -m \"Bump version to #{@version}\"")
 
     begin

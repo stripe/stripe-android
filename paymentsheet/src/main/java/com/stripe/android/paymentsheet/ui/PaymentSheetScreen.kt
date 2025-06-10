@@ -17,7 +17,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
@@ -72,6 +76,7 @@ import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -82,10 +87,12 @@ internal fun PaymentSheetScreen(
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
     val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
-        AnimatedVisibility(visible = contentVisible, modifier = Modifier.fillMaxWidth()) {
-            PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
-        }
+    PaymentSheetScreen(
+        viewModel = viewModel,
+        scrollState = scrollState,
+        contentVisible = contentVisible
+    ) {
+        PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
     }
 }
 
@@ -114,6 +121,7 @@ internal fun PaymentSheetScreen(
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     scrollState: ScrollState,
+    contentVisible: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val processing by viewModel.processing.collectAsState()
@@ -122,10 +130,18 @@ private fun PaymentSheetScreen(
 
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
+    val minContentHeight =
+        PaymentSheetTopBarHeight + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     DismissKeyboardOnProcessing(processing)
 
     BottomSheetScaffold(
+        modifier = Modifier
+            .onGloballyPositioned {
+                contentHeight = with(density) { it.size.height.toDp() }
+            }
+            // Set a min height to reduce size changes during initialization.
+            .heightIn(min = minContentHeight),
         topBar = {
             val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
@@ -139,16 +155,19 @@ private fun PaymentSheetScreen(
                 handleBackPressed = viewModel::handleBackPressed,
             )
         },
-        content = content,
-        modifier = Modifier.onGloballyPositioned {
-            contentHeight = with(density) { it.size.height.toDp() }
+        content = {
+            AnimatedVisibility(
+                visible = contentVisible,
+                modifier = Modifier.fillMaxWidth(),
+                content = { content() }
+            )
         },
         scrollState = scrollState,
     )
 
     AnimatedVisibility(
-        visible = walletsProcessingState != null &&
-            walletsProcessingState !is WalletsProcessingState.Idle,
+        visible = !contentVisible ||
+            (walletsProcessingState != null && walletsProcessingState !is WalletsProcessingState.Idle),
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
@@ -159,7 +178,10 @@ private fun PaymentSheetScreen(
                 .fillMaxWidth()
                 .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
         ) {
-            ProgressOverlay(walletsProcessingState)
+            ProgressOverlay(
+                contentVisible = contentVisible,
+                walletsProcessingState = walletsProcessingState
+            )
         }
     }
 }
@@ -220,17 +242,22 @@ private fun ResetScroll(scrollState: ScrollState, currentScreen: PaymentSheetScr
 
 @Suppress("UnusedReceiverParameter")
 @Composable
-private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingState?) {
+private fun BoxScope.ProgressOverlay(
+    contentVisible: Boolean,
+    walletsProcessingState: WalletsProcessingState?
+) {
     AnimatedContent(
         targetState = walletsProcessingState,
         label = "AnimatedProcessingState"
     ) { processingState ->
+        if (!contentVisible) {
+            ProgressOverlayProcessing()
+            return@AnimatedContent
+        }
         when (processingState) {
-            is WalletsProcessingState.Processing -> CircularProgressIndicator(
-                color = MaterialTheme.colors.onSurface,
-                strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width),
-                modifier = Modifier.requiredSize(48.dp),
-            )
+            is WalletsProcessingState.Processing -> {
+                ProgressOverlayProcessing()
+            }
             is WalletsProcessingState.Completed -> {
                 LaunchedEffect(processingState) {
                     delay(POST_SUCCESS_ANIMATION_DELAY)
@@ -248,6 +275,15 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
             is WalletsProcessingState.Idle -> Unit
         }
     }
+}
+
+@Composable
+private fun ProgressOverlayProcessing() {
+    CircularProgressIndicator(
+        color = MaterialTheme.colors.onSurface,
+        strokeWidth = dimensionResource(R.dimen.stripe_paymentsheet_loading_indicator_stroke_width),
+        modifier = Modifier.requiredSize(48.dp),
+    )
 }
 
 @Composable
@@ -297,14 +333,14 @@ private fun PaymentSheetContent(
     mandateText: MandateText?,
     modifier: Modifier
 ) {
-    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val horizontalPadding = StripeTheme.getOuterFormInsets()
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
         headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .padding(horizontal = horizontalPadding),
+                    .padding(horizontalPadding),
             )
         }
 
@@ -333,7 +369,7 @@ private fun PaymentSheetContent(
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
                     .padding(bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
@@ -343,7 +379,7 @@ private fun PaymentSheetContent(
             ErrorMessage(
                 error = it.resolve(),
                 modifier = Modifier
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
                     .padding(top = 2.dp, bottom = 8.dp)
                     .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
@@ -358,7 +394,7 @@ private fun PaymentSheetContent(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
                     .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding)
+                    .padding(horizontalPadding)
                     .testTag(PAYMENT_SHEET_MANDATE_TEXT_TEST_TAG),
             )
         }
@@ -375,9 +411,9 @@ internal fun Wallet(
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter
 ) {
-    val padding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val padding = StripeTheme.getOuterFormInsets()
 
-    Column(modifier = modifier.padding(horizontal = padding)) {
+    Column(modifier = modifier.padding(padding)) {
         state.googlePay?.let { googlePay ->
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
@@ -424,6 +460,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
+        .padding(StripeTheme.getOuterFormInsets())
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button

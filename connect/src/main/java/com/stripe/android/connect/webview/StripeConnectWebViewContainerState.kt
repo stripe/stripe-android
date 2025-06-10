@@ -2,12 +2,10 @@ package com.stripe.android.connect.webview
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.getContrastingColor
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 
-@OptIn(PrivateBetaConnectSDK::class)
 internal data class StripeConnectWebViewContainerState(
     /**
      * Non-null if we received the 'pageDidLoad' message,

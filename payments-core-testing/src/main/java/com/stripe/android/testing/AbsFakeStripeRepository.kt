@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.Customer
@@ -446,6 +447,13 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         paymentMethodTypes: Set<String>,
         requestOptions: ApiRequest.Options
     ): Result<ConsumerPaymentDetails> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun listShippingAddresses(
+        clientSecret: String,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerShippingAddresses> {
         TODO("Not yet implemented")
     }
 

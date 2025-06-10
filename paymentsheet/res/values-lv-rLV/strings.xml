@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Vai vēlaties aizvērt šo formu?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Saglabāt jūsu informāciju, lai nodrošinātu norēķināšanos Link ar 1 klikšķi</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Saglabāt manu informāciju, lai varētu norēķināties ar Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredīta</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -34,6 +37,8 @@
   <string name="stripe_link_card_type_prepaid">%1$s Priekšapmaksas</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s Karte</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Pieteikties vai reģistrēties</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Piekrist un turpināt</string>
   <!-- Title for the Link signup screen -->
@@ -111,6 +116,8 @@
   <string name="stripe_paymentsheet_manage_card">Pārvaldīt karti</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Pārvaldīt kartes</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Pārvaldīt bankas kontu</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Pārvaldīt maksājuma veidus</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -199,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Norādot savu e-pastu, es piekrītu izveidot Link kontu un saglabāt savu maksājuma informāciju Link, ievērojot <terms>Link noteikumus</terms> un <privacy>Konfidencialitātes politiku</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Norādot savu tālruņa numuru, es piekrītu izveidot Link kontu un saglabāt savu maksājuma informāciju Link, ievērojot <terms>Link noteikumus</terms> un <privacy>Konfidencialitātes politiku</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Norādot tālruņa numuru un e-pastu, jūs piekrītat izveidot Link kontu atbilstoši Link <terms>noteikumiem</terms> un <privacy>Konfidencialitātes politikai</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Jūsu konts ir deaktivizēts</string>
   <!-- Generic failure message -->
@@ -239,6 +248,8 @@
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Turpinot, jūs piekrītat autorizēt maksājumus saskaņā ar šiem<terms>noteikumiem</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Maksājums</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Turpināt ar citu veidu</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Noklusējuma</string>
   <string name="stripe_wallet_expand_accessibility">Mainīt atlasi</string>

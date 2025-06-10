@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -104,6 +103,12 @@ class PhoneNumberController private constructor(
 
     fun getLocalNumber() = _fieldValue.value.removePrefix(phoneNumberFormatter.value.prefix)
 
+    fun formatLocalNumber(): String {
+        val localNumber = getLocalNumber()
+        val regionFormatter = phoneNumberFormatter.value as? PhoneNumberFormatter.WithRegion
+        return regionFormatter?.formatNumberNational(localNumber) ?: localNumber
+    }
+
     fun onValueChange(displayFormatted: String) {
         _fieldValue.value = phoneNumberFormatter.value.userInputFilter(displayFormatted)
     }
@@ -175,13 +180,12 @@ class PhoneNumberController private constructor(
         field: SectionFieldElement,
         modifier: Modifier,
         hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        lastTextFieldIdentifier: IdentifierSpec?
     ) {
         PhoneNumberElementUI(
             enabled,
             this,
+            modifier = modifier,
             imeAction = if (lastTextFieldIdentifier != field.identifier) {
                 ImeAction.Next
             } else {

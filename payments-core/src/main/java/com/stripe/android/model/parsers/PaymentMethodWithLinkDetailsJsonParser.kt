@@ -22,16 +22,23 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
             ConsumerPaymentDetailsJsonParser.parsePaymentDetails(it)
         }
 
-        val linkDetails = when (consumerPaymentDetails) {
+        val linkPaymentDetails = when (consumerPaymentDetails) {
             is ConsumerPaymentDetails.Card -> {
-                LinkPaymentDetails(
+                LinkPaymentDetails.Card(
+                    nickname = consumerPaymentDetails.nickname,
                     expMonth = consumerPaymentDetails.expiryMonth,
                     expYear = consumerPaymentDetails.expiryYear,
                     last4 = consumerPaymentDetails.last4,
                     brand = consumerPaymentDetails.brand,
+                    funding = consumerPaymentDetails.funding,
                 )
             }
-            is ConsumerPaymentDetails.BankAccount,
+            is ConsumerPaymentDetails.BankAccount -> {
+                LinkPaymentDetails.BankAccount(
+                    bankName = consumerPaymentDetails.bankName,
+                    last4 = consumerPaymentDetails.last4,
+                )
+            }
             is ConsumerPaymentDetails.Passthrough,
             null -> {
                 null
@@ -41,11 +48,12 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
         // TODO(tillh-stripe): This is a short-term solution. We plan to create a new type that
         //  contains payment method and Link information, but we can't easily do that right now.
         return paymentMethod.copy(
-            linkPaymentDetails = linkDetails,
+            linkPaymentDetails = linkPaymentDetails,
         )
     }
 
     private fun isUnsupportedLinkPaymentDetailsType(json: JSONObject?): Boolean {
-        return json != null && optString(json, "type") != "CARD"
+        val supportedTypes = setOf("CARD", "BANK_ACCOUNT")
+        return json != null && optString(json, "type") !in supportedTypes
     }
 }

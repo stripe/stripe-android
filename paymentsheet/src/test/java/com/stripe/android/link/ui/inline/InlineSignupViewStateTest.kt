@@ -78,15 +78,116 @@ class InlineSignupViewStateTest {
         )
     }
 
+    @Test
+    fun `Allows default opt-in for eligible users`() {
+        testDefaultOptInAllowed(
+            countryCode = "US",
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            merchantEligible = true,
+            expectedResult = true
+        )
+    }
+
+    @Test
+    fun `Disables default opt-in if showing the save-future-use checkbox`() {
+        testDefaultOptInAllowed(
+            countryCode = "US",
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            merchantEligible = true,
+            expectedResult = false
+        )
+    }
+
+    @Test
+    fun `Disables default opt-in if outside US`() {
+        testDefaultOptInAllowed(
+            countryCode = "CA",
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            merchantEligible = true,
+            expectedResult = false
+        )
+    }
+
+    @Test
+    fun `Disables default opt-in if merchant is not eligible`() {
+        testDefaultOptInAllowed(
+            countryCode = "US",
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            merchantEligible = false,
+            expectedResult = false
+        )
+    }
+
+    @Test
+    fun `Uses Link if using default opt-in and all fields filled out`() {
+        val linkConfig = createLinkConfig(
+            countryCode = "US",
+            allowsDefaultOptIn = true,
+        )
+
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        ).copy(
+            userInput = UserInput.SignUp(
+                email = "email@email.com",
+                phone = "5555555555",
+                name = null,
+                country = "US",
+                consentAction = SignUpConsentAction.DefaultOptInWithAllPrefilled,
+            )
+        )
+
+        assertThat(viewState.useLink).isTrue()
+    }
+
+    @Test
+    fun `Does not use Link if using default opt-in but not filling out all fields`() {
+        val linkConfig = createLinkConfig(
+            countryCode = "US",
+            allowsDefaultOptIn = true,
+        )
+
+        val viewState = InlineSignupViewState.create(
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            config = linkConfig
+        ).copy(
+            userInput = null,
+        )
+
+        assertThat(viewState.useLink).isFalse()
+    }
+
+    private fun testDefaultOptInAllowed(
+        countryCode: String,
+        signupMode: LinkSignupMode,
+        merchantEligible: Boolean,
+        expectedResult: Boolean,
+    ) {
+        val linkConfig = createLinkConfig(
+            countryCode = countryCode,
+            allowsDefaultOptIn = merchantEligible,
+        )
+
+        val viewState = InlineSignupViewState.create(
+            signupMode = signupMode,
+            config = linkConfig
+        )
+
+        assertThat(viewState.allowsDefaultOptIn).isEqualTo(expectedResult)
+    }
+
     private fun createLinkConfig(
         countryCode: String,
         email: String? = "john@doe.ca",
+        allowsDefaultOptIn: Boolean = false,
     ): LinkConfiguration {
         return TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFactory.create(countryCode = countryCode),
             customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
                 email = email
-            )
+            ),
+            allowDefaultOptIn = allowsDefaultOptIn,
         )
     }
 }

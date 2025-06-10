@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
@@ -26,6 +27,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.FakeLinkProminenceFeatureProvider
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -103,7 +107,7 @@ internal class PaymentOptionsActivityTest {
             assertThat(
                 PaymentOptionResult.fromIntent(it.getResult().resultData)
             ).isEqualTo(
-                PaymentOptionResult.Canceled(null, null, listOf())
+                PaymentOptionResult.Canceled(null, null, listOf(), LinkAccountUpdate.Value(null))
             )
         }
     }
@@ -126,7 +130,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity {
                 // We use US Bank Account because they don't dismiss PaymentSheet upon selection
                 // due to their mandate requirement.
-                val usBankAccountLabel = usBankAccount.getLabel()?.resolve(context)
+                val usBankAccountLabel = usBankAccount.getLabel(canShowSublabel = false)?.resolve(context)
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
@@ -138,7 +142,7 @@ internal class PaymentOptionsActivityTest {
 
             val result = PaymentOptionResult.fromIntent(it.getResult().resultData)
             assertThat(result).isEqualTo(
-                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods)
+                PaymentOptionResult.Canceled(null, initialSelection, paymentMethods, LinkAccountUpdate.Value(null))
             )
         }
     }
@@ -248,6 +252,7 @@ internal class PaymentOptionsActivityTest {
                 PaymentOptionResult.Succeeded(
                     paymentSelection = PaymentSelection.GooglePay,
                     paymentMethods = emptyList(),
+                    linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
             )
         }
@@ -257,7 +262,7 @@ internal class PaymentOptionsActivityTest {
     fun `notes visibility is set correctly`() {
         val usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT
 
-        val label = usBankAccount.getLabel()?.resolve(context)
+        val label = usBankAccount.getLabel(canShowSublabel = false)?.resolve(context)
         val mandateText = "By continuing, you agree to authorize payments pursuant to these terms."
 
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
@@ -455,6 +460,9 @@ internal class PaymentOptionsActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider(),
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                linkPaymentLauncher = mock(),
             )
         }
 

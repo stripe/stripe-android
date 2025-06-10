@@ -91,8 +91,10 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         paymentElementLoader.load(
             initializationMode = initializationMode,
             configuration = configuration.asCommonConfiguration(),
-            isReloadingAfterProcessDeath = false,
-            initializedViaCompose = initializedViaCompose,
+            metadata = PaymentElementLoader.Metadata(
+                isReloadingAfterProcessDeath = false,
+                initializedViaCompose = initializedViaCompose,
+            )
         ).fold(
             onSuccess = { state ->
                 if (state.validationError != null) {
@@ -129,6 +131,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             previousConfig = viewModel.state?.config,
             newState = state,
             newConfig = configuration,
+            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
         )
 
         withContext(uiContext) {

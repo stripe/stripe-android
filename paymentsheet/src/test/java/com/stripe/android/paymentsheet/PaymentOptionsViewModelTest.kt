@@ -2,15 +2,23 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.FakeLinkProminenceFeatureProvider
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -23,6 +31,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -57,6 +66,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -75,8 +85,15 @@ internal class PaymentOptionsViewModelTest {
 
     private val eventReporter = mock<EventReporter>()
     private val customerRepository = mock<CustomerRepository>()
+    private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+
+    private lateinit var linkProminenceFeatureProvider: FakeLinkProminenceFeatureProvider
 
     @Before
+    fun setUp() {
+        linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider()
+    }
+
     @After
     fun resetMainDispatcher() {
         Dispatchers.resetMain()
@@ -92,7 +109,8 @@ internal class PaymentOptionsViewModelTest {
                 assertThat(awaitItem()).isEqualTo(
                     PaymentOptionResult.Succeeded(
                         SELECTION_SAVED_PAYMENT_METHOD,
-                        listOf()
+                        LinkAccountUpdate.Value(null),
+                        listOf(),
                     )
                 )
                 ensureAllEventsConsumed()
@@ -115,6 +133,7 @@ internal class PaymentOptionsViewModelTest {
                     .isEqualTo(
                         PaymentOptionResult.Succeeded(
                             NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                            LinkAccountUpdate.Value(null),
                             listOf()
                         )
                     )
@@ -138,6 +157,7 @@ internal class PaymentOptionsViewModelTest {
                     .isEqualTo(
                         PaymentOptionResult.Succeeded(
                             EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
+                            LinkAccountUpdate.Value(null),
                             listOf()
                         )
                     )
@@ -161,6 +181,7 @@ internal class PaymentOptionsViewModelTest {
                     .isEqualTo(
                         PaymentOptionResult.Succeeded(
                             CUSTOM_PAYMENT_METHOD_SELECTION,
+                            LinkAccountUpdate.Value(null),
                             listOf()
                         )
                     )
@@ -191,6 +212,72 @@ internal class PaymentOptionsViewModelTest {
                 ensureAllEventsConsumed()
             }
         }
+
+    @Test
+    fun `onUserSelection with Link and prominence true launches LinkPaymentLauncher`() = runTest {
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        val unverifiedAccount = LinkAccount(TestFactory.CONSUMER_SESSION.copy(verificationSessions = emptyList()))
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS
+                .copy(linkAccountInfo = LinkAccountUpdate.Value(unverifiedAccount))
+                .updateState(
+                    linkState = LinkState(
+                        configuration = TestFactory.LINK_CONFIGURATION,
+                        loginState = LinkState.LoginState.NeedsVerification,
+                        signupMode = null
+                    )
+                ),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+        )
+
+        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.onUserSelection()
+
+        verify(linkPaymentLauncher).present(
+            configuration = any(),
+            linkAccountInfo = eq(LinkAccountUpdate.Value(unverifiedAccount)),
+            launchMode = eq(LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)),
+            useLinkExpress = eq(true)
+        )
+    }
+
+    @Test
+    fun `onUserSelection with Link and prominence false emits Succeeded result`() = runTest {
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = false
+        val viewModel = createViewModel(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        )
+
+        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.paymentOptionResult.test {
+            viewModel.onUserSelection()
+            val result = awaitItem()
+            assertThat(result).isInstanceOf<PaymentOptionResult.Succeeded>()
+            val succeeded = result as PaymentOptionResult.Succeeded
+            assertThat(succeeded.paymentSelection).isInstanceOf<PaymentSelection.Link>()
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `onUserSelection with non-Link selection does not launch LinkPaymentLauncher`() = runTest {
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        val viewModel = createViewModel(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+        )
+
+        // Select a non-Link payment method (e.g., a saved card)
+        viewModel.updateSelection(CARD_PAYMENT_SELECTION)
+        viewModel.onUserSelection()
+
+        // Ensure LinkPaymentLauncher.present is never called
+        verify(linkPaymentLauncher, never()).present(
+            configuration = any(),
+            linkAccountInfo = any(),
+            launchMode = any(),
+            useLinkExpress = any()
+        )
+    }
 
     @Test
     fun `Opens saved payment methods if no new payment method was previously selected`() = runTest {
@@ -601,6 +688,7 @@ internal class PaymentOptionsViewModelTest {
                     mostRecentError = null,
                     paymentSelection = null,
                     paymentMethods = paymentMethods - selection.paymentMethod,
+                    linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
             )
         }
@@ -641,6 +729,7 @@ internal class PaymentOptionsViewModelTest {
                 PaymentOptionResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = selection,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                     paymentMethods = emptyList(),
                 )
             )
@@ -782,6 +871,81 @@ internal class PaymentOptionsViewModelTest {
             expectedCustomerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
+    @Test
+    fun `onLinkActivityResult with Canceled does nothing`() = runTest {
+        val viewModel = createViewModel()
+        val linkAccountUpdate = LinkAccountUpdate.None
+        viewModel.paymentOptionResult.test {
+            viewModel.onLinkAuthenticationResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult with Failed sets error`() = runTest {
+        val viewModel = createViewModel()
+        val error = Exception("link failed")
+        val linkAccountUpdate = LinkAccountUpdate.None
+        viewModel.error.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.onLinkAuthenticationResult(
+                LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = linkAccountUpdate
+                )
+            )
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult with Completed emits Succeeded result`() = runTest {
+        val linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+        val result = LinkActivityResult.Completed(
+            linkAccountUpdate = linkAccountUpdate,
+            selectedPayment = null
+        )
+        val viewModel = createViewModel()
+        viewModel.paymentOptionResult.test {
+            viewModel.onLinkAuthenticationResult(result)
+            val succeeded = awaitItem() as PaymentOptionResult.Succeeded
+            val paymentSelection = succeeded.paymentSelection
+            assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
+            assertThat(succeeded.linkAccountInfo.account).isEqualTo(linkAccountUpdate.account)
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult with PaymentMethodObtained sets error`() = runTest {
+        val viewModel = createViewModel()
+        val result = LinkActivityResult.PaymentMethodObtained(mock())
+        viewModel.error.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.onLinkAuthenticationResult(result)
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `wallets state should be null even if wallets are available if they have already been rendered`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                linkState = LinkState(
+                    configuration = mock(),
+                    signupMode = null,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                ),
+                isGooglePayReady = true,
+            ).copy(
+                walletButtonsAlreadyShown = true,
+            )
+        )
+
+        viewModel.walletsState.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
     /**
      * Helper function to test user cancellation scenarios
      */
@@ -810,6 +974,7 @@ internal class PaymentOptionsViewModelTest {
                 PaymentOptionResult.Canceled(
                     mostRecentError = null,
                     paymentSelection = expectedSelection,
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
                     paymentMethods = expectedPaymentMethods,
                 )
             )
@@ -894,7 +1059,7 @@ internal class PaymentOptionsViewModelTest {
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.paymentMethodMetadata.linkState,
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        workContext: CoroutineContext = testDispatcher,
+        workContext: CoroutineContext = testDispatcher
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -910,6 +1075,9 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            linkProminenceFeatureProvider = linkProminenceFeatureProvider,
+            linkPaymentLauncher = linkPaymentLauncher,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )
     }
 
@@ -956,6 +1124,11 @@ internal class PaymentOptionsViewModelTest {
             enableLogging = false,
             productUsage = mock(),
             paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
+            linkAccountInfo = LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = null
+            ),
+            walletButtonsAlreadyShown = false,
         )
     }
 

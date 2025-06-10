@@ -13,6 +13,8 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
@@ -150,6 +152,24 @@ internal object TestFactory {
         )
     )
 
+    val CONSUMER_SHIPPING_ADDRESSES: ConsumerShippingAddresses = ConsumerShippingAddresses(
+        addresses = listOf(
+            ConsumerShippingAddress(
+                id = "adr_123",
+                isDefault = true,
+                address = ConsumerPaymentDetails.BillingAddress(
+                    name = "John Doe",
+                    line1 = "123 Main St",
+                    line2 = "Apt 4B",
+                    locality = "San Francisco",
+                    administrativeArea = "CA",
+                    postalCode = "94105",
+                    countryCode = CountryCode.US,
+                ),
+            )
+        )
+    )
+
     val LINK_CUSTOMER_INFO = LinkConfiguration.CustomerInfo(
         name = CUSTOMER_NAME,
         email = CUSTOMER_EMAIL,
@@ -172,6 +192,7 @@ internal object TestFactory {
         initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
         elementsSessionId = "session_1234",
         linkMode = LinkMode.LinkPaymentMethod,
+        allowDefaultOptIn = false,
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
@@ -207,7 +228,8 @@ internal object TestFactory {
         publishableKey = "",
         stripeAccountId = "",
         startWithVerificationDialog = false,
-        linkAccount = LINK_ACCOUNT,
+        linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
+        launchMode = LinkLaunchMode.Full,
     )
 }

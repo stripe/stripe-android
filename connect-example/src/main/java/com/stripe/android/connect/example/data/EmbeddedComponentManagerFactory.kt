@@ -2,7 +2,6 @@ package com.stripe.android.connect.example.data
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +10,6 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@OptIn(PrivateBetaConnectSDK::class)
 @Singleton
 class EmbeddedComponentManagerFactory @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,

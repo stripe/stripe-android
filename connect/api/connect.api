@@ -126,9 +126,6 @@ public abstract interface class com/stripe/android/connect/FetchClientSecretTask
 	public abstract fun onResult (Ljava/lang/String;)V
 }
 
-public abstract interface annotation class com/stripe/android/connect/PrivateBetaConnectSDK : java/lang/annotation/Annotation {
-}
-
 public abstract class com/stripe/android/connect/StripeComponentController {
 	public static final field $stable I
 	public final fun dismiss ()V

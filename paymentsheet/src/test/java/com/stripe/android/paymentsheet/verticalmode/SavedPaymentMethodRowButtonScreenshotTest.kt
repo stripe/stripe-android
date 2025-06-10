@@ -88,4 +88,30 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testSavedLinkPaymentMethod() {
+        val savedDefaultVisa = PaymentMethodFixtures.displayableLinkPaymentMethod()
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedDefaultVisa,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedLinkCardBrandPaymentMethod() {
+        val savedDefaultVisa = PaymentMethodFixtures.displayableLinkCardBrandPaymentMethod()
+
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedDefaultVisa,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
 }
