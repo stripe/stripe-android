@@ -9,7 +9,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.wallet.LinkInline2FASection
@@ -51,9 +50,6 @@ internal class WalletButtonsContent(
                             otpElement = it.otpElement,
                             onResend = { interactor.handleViewAction(OnResendCode) }
                         )
-                        if (state.walletButtons.size > 1) {
-                            WalletsDivider(stringResource(R.string.stripe_paymentsheet_or_use))
-                        }
                     }
 
                     state.walletButtons.forEach { button ->

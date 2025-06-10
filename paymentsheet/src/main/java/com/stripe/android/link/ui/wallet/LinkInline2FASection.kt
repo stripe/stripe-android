@@ -1,10 +1,11 @@
 package com.stripe.android.link.ui.wallet
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,20 +50,32 @@ internal fun LinkInline2FASection(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = spacedBy(16.dp)
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Link logo at the top
             Image(
                 modifier = Modifier
-                    .width(48.dp)
+                    .width(54.dp)
+                    .height(18.dp)
                     .testTag(VERIFICATION_HEADER_IMAGE_TAG),
                 painter = painterResource(R.drawable.stripe_link_logo),
                 contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
             )
 
+            Spacer(
+                modifier = Modifier.height(18.dp)
+            )
+
             // Verification instruction message
-            Title(verificationState)
+            Title(
+                // extra padding to avoid text using all width.
+                modifier = Modifier.padding(horizontal = 24.dp),
+                verificationState
+            )
+
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
 
             // OTP input
             OTPSection(
@@ -72,6 +85,9 @@ internal fun LinkInline2FASection(
 
             // Compact error message
             verificationState.errorMessage?.let { error ->
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
                 Text(
                     text = error.resolve(),
                     style = LinkTheme.typography.caption,
@@ -82,6 +98,10 @@ internal fun LinkInline2FASection(
                         .padding(top = 4.dp)
                 )
             }
+
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
 
             ResendCodeButton(
                 isProcessing = verificationState.isProcessing,
@@ -131,6 +151,7 @@ private fun OTPSection(
 
 @Composable
 private fun Title(
+    modifier: Modifier,
     verificationState: VerificationViewState
 ) {
     Text(
@@ -141,7 +162,7 @@ private fun Title(
         style = LinkTheme.typography.body,
         color = LinkTheme.colors.textPrimary,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     )
 }
 
