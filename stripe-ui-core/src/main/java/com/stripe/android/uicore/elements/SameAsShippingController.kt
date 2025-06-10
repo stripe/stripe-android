@@ -1,6 +1,8 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -13,7 +15,9 @@ import kotlinx.coroutines.flow.asStateFlow
 class SameAsShippingController(
     initialValue: Boolean
 ) : InputController {
-    override val label: StateFlow<Int> = stateFlowOf(R.string.stripe_billing_same_as_shipping)
+    override val label: StateFlow<ResolvableString> = stateFlowOf(
+        resolvableString(R.string.stripe_billing_same_as_shipping)
+    )
     private val _value = MutableStateFlow(initialValue)
     val value: StateFlow<Boolean> = _value.asStateFlow()
     override val fieldValue: StateFlow<String> = value.mapAsStateFlow { it.toString() }

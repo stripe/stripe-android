@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import androidx.annotation.StringRes
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
@@ -373,7 +374,7 @@ internal class FormViewModelTest {
         // Fill all address values except line2
         val addressControllers = AddressControllers.create(formViewModel)
         val populateAddressControllers = addressControllers.controllers
-            .filter { it.label.first() != UiCoreR.string.stripe_address_label_address_line2 }
+            .filter { it.label.first() != resolvableString(UiCoreR.string.stripe_address_label_address_line2) }
         populateAddressControllers
             .forEachIndexed { index, textFieldController ->
                 textFieldController.onValueChange("12345")
@@ -629,7 +630,7 @@ internal class FormViewModelTest {
             .filterIsInstance<SectionSingleFieldElement>()
             .map { it.controller }
             .filterIsInstance<TextFieldController>()
-            .firstOrNull { it.label.first() == label }
+            .firstOrNull { it.label.first() == resolvableString(label) }
 
     private data class AddressControllers(
         val controllers: List<TextFieldController>
@@ -678,14 +679,14 @@ internal class FormViewModelTest {
             return addressElementFields
                 ?.filterIsInstance<SectionSingleFieldElement>()
                 ?.map { (it.controller as? SimpleTextFieldController) }
-                ?.firstOrNull { it?.label?.first() == label }
+                ?.firstOrNull { it?.label?.first() == resolvableString(label) }
                 ?: addressElementFields
                     ?.asSequence()
                     ?.filterIsInstance<RowElement>()
                     ?.map { it.fields }
                     ?.flatten()
                     ?.map { (it.controller as? SimpleTextFieldController) }
-                    ?.firstOrNull { it?.label?.first() == label }
+                    ?.firstOrNull { it?.label?.first() == resolvableString(label) }
         }
     }
 

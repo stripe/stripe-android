@@ -30,6 +30,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
@@ -363,7 +364,7 @@ private fun AddressSection(
     ) {
         Column(modifier) {
             Section(
-                title = PaymentsUiCoreR.string.stripe_billing_details,
+                title = resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
                 error = sectionErrorString,
             ) {
                 AddressElementUI(

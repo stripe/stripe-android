@@ -3,6 +3,7 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -24,7 +25,7 @@ class DropdownFieldController(
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: StateFlow<Int> = _selectedIndex
-    override val label: StateFlow<Int> = MutableStateFlow(config.label)
+    override val label: StateFlow<ResolvableString> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.mapAsStateFlow { displayItems[it] }
     override val rawFieldValue = selectedIndex.mapAsStateFlow { config.rawItems.getOrNull(it) }
     override val error: StateFlow<FieldError?> = stateFlowOf(null)

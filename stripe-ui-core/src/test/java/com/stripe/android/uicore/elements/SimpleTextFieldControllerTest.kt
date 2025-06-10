@@ -6,6 +6,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid.Full
@@ -189,15 +190,9 @@ internal class SimpleTextFieldControllerTest {
     }
 
     @Test
-    fun `Verify null label`() {
-        val controller = createControllerWithState(nullLabel = true)
-        assertThat(controller.label.value).isNull()
-    }
-
-    @Test
-    fun `Verify non-null label`() {
-        val controller = createControllerWithState(nullLabel = false)
-        assertThat(controller.label.value).isEqualTo(CoreR.string.stripe_address_label_full_name)
+    fun `Verify label`() {
+        val controller = createControllerWithState()
+        assertThat(controller.label.value).isEqualTo(resolvableString(CoreR.string.stripe_address_label_full_name))
     }
 
     @Test
@@ -214,7 +209,6 @@ internal class SimpleTextFieldControllerTest {
 
     private fun createControllerWithState(
         showOptionalLabel: Boolean = false,
-        nullLabel: Boolean = false,
         nullPlaceHolder: Boolean = true
     ): SimpleTextFieldController {
         val config: TextFieldConfig = mock {
@@ -237,11 +231,7 @@ internal class SimpleTextFieldControllerTest {
             on { determineState("") } doReturn Blank
             on { filter("") } doReturn ""
 
-            if (nullLabel) {
-                on { label } doReturn null
-            } else {
-                on { label } doReturn CoreR.string.stripe_address_label_full_name
-            }
+            on { label } doReturn resolvableString(CoreR.string.stripe_address_label_full_name)
 
             if (!nullPlaceHolder) {
                 on { placeHolder } doReturn "PlaceHolder"

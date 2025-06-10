@@ -6,6 +6,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -38,7 +39,7 @@ internal class CardDetailsController(
         SimpleTextElement(
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
-                    label = R.string.stripe_name_on_card,
+                    label = resolvableString(R.string.stripe_name_on_card),
                     capitalization = KeyboardCapitalization.Words,
                     keyboard = androidx.compose.ui.text.input.KeyboardType.Text
                 ),

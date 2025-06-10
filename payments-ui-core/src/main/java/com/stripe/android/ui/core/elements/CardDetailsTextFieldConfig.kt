@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.TextFieldState
 
@@ -13,7 +14,7 @@ import com.stripe.android.uicore.elements.TextFieldState
 internal interface CardDetailsTextFieldConfig {
     val capitalization: KeyboardCapitalization
     val debugLabel: String
-    val label: Int
+    val label: ResolvableString
     val keyboard: KeyboardType
     fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation
     fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState
