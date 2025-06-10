@@ -107,7 +107,7 @@ internal fun VerificationBody(
                 .fillMaxWidth(),
             textAlign = TextAlign.Companion.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textSecondary
+            color = LinkTheme.colors.textTertiary
         )
 
         Spacer(modifier = Modifier.size(24.dp))
