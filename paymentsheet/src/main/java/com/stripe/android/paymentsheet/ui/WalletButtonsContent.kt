@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
