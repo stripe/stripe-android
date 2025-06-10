@@ -37,12 +37,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -191,14 +190,15 @@ internal fun EmailCollection(
         )
 
         if (signUpState == SignUpState.VerifyingEmail) {
-            LinkSpinner(
+            CircularProgressIndicator(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(32.dp)
                     .padding(start = 0.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                filledColor = LinkTheme.colors.iconPrimary,
+                color = MaterialTheme.colors.primary,
+                strokeWidth = 2.dp
             )
         }
 
