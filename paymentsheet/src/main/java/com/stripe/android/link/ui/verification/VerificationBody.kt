@@ -127,7 +127,8 @@ internal fun VerificationBody(
                 colors = OTPElementColors(
                     selectedBorder = LinkTheme.colors.borderSelected,
                     placeholder = LinkTheme.colors.textPrimary,
-                    background = LinkTheme.colors.surfaceSecondary
+                    background = LinkTheme.colors.surfaceSecondary,
+                    unselectedBorder = LinkTheme.colors.borderDefault
                 ),
                 focusRequester = focusRequester
             )

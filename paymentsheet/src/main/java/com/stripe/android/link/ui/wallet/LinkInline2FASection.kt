@@ -116,7 +116,7 @@ private fun Title(
 ) {
     Text(
         text = stringResource(
-            R.string.stripe_link_verification_message,
+            R.string.stripe_link_verification_message_short,
             verificationState.redactedPhoneNumber
         ),
         style = LinkTheme.typography.body,
