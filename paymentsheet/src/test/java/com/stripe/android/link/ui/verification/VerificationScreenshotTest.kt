@@ -3,7 +3,6 @@ package com.stripe.android.link.ui.verification
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
@@ -17,35 +16,21 @@ internal class VerificationScreenshotTest(
 ) {
 
     @get:Rule
-    val paparazziRule = PaparazziRule(
-        SystemAppearance.entries
-    )
+    val paparazziRule = PaparazziRule()
 
     @Test
     fun testContent() {
         paparazziRule.snapshot {
             LinkScreenshotSurface {
-                if (testCase.content.state.isDialog) {
-                    VerificationDialogBody(
-                        state = testCase.content.state,
-                        otpElement = testCase.content.otpElement,
-                        onBack = {},
-                        onResendCodeClick = {},
-                        onFocusRequested = {},
-                        onChangeEmailClick = {},
-                        didShowCodeSentNotification = {},
-                    )
-                } else {
-                    VerificationBody(
-                        state = testCase.content.state,
-                        otpElement = testCase.content.otpElement,
-                        onBack = {},
-                        onResendCodeClick = {},
-                        onFocusRequested = {},
-                        onChangeEmailClick = {},
-                        didShowCodeSentNotification = {},
-                    )
-                }
+                VerificationBody(
+                    state = testCase.content.state,
+                    otpElement = testCase.content.otpElement,
+                    onBack = {},
+                    onResendCodeClick = {},
+                    onChangeEmailClick = {},
+                    didShowCodeSentNotification = {},
+                    onFocusRequested = {},
+                )
             }
         }
     }
@@ -55,139 +40,137 @@ internal class VerificationScreenshotTest(
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data(): List<TestCase> {
-            return testCases(isDialog = true) + testCases(isDialog = false)
+            return listOf(
+                TestCase(
+                    name = "VerificationScreenWithOTPNotFilled",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = false
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationScreenWithOTPFilled",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = false
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationScreenWithOTPFilledAndProcessing",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            isProcessing = true,
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = false
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationScreenWithOTPFilledAndSendingNewCode",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            isSendingNewCode = true,
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            didSendNewCode = false,
+                            isDialog = false
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationScreenWithOTPFilledAndErrorMessage",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            isSendingNewCode = false,
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = "Something went wrong".resolvableString,
+                            didSendNewCode = false,
+                            isDialog = false
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogWithOTPNotFilled",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(content = ""),
+                        state = VerificationViewState(
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = true
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogWithOTPFilled",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = null,
+                            isSendingNewCode = false,
+                            didSendNewCode = false,
+                            isDialog = true
+                        )
+                    )
+                ),
+                TestCase(
+                    name = "VerificationDialogWithOTPFilledAndErrorMessage",
+                    content = TestCase.Content(
+                        otpElement = otpSpecWithContent(),
+                        state = VerificationViewState(
+                            isSendingNewCode = false,
+                            requestFocus = false,
+                            redactedPhoneNumber = "(•••) ••• ••91",
+                            email = "test@test.com",
+                            isProcessing = false,
+                            errorMessage = "Something went wrong".resolvableString,
+                            didSendNewCode = false,
+                            isDialog = true
+                        )
+                    )
+                ),
+            )
         }
-
-        private fun testCases(isDialog: Boolean): List<TestCase> = listOf(
-            TestCase(
-                name = "VerificationScreenWithOTPNotFilled",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(content = ""),
-                    state = VerificationViewState(
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = null,
-                        isSendingNewCode = false,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationScreenWithOTPFilled",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(),
-                    state = VerificationViewState(
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = null,
-                        isSendingNewCode = false,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationScreenWithOTPFilledAndProcessing",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(),
-                    state = VerificationViewState(
-                        isProcessing = true,
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        errorMessage = null,
-                        isSendingNewCode = false,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationScreenWithOTPFilledAndSendingNewCode",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(),
-                    state = VerificationViewState(
-                        isSendingNewCode = true,
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = null,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationScreenWithOTPFilledAndErrorMessage",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(),
-                    state = VerificationViewState(
-                        isSendingNewCode = false,
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = "Something went wrong".resolvableString,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationDialogWithOTPNotFilled",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(content = ""),
-                    state = VerificationViewState(
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = null,
-                        isSendingNewCode = false,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationDialogWithOTPFilled",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(),
-                    state = VerificationViewState(
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = null,
-                        isSendingNewCode = false,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-            TestCase(
-                name = "VerificationDialogWithOTPFilledAndErrorMessage",
-                content = TestCase.Content(
-                    otpElement = otpSpecWithContent(),
-                    state = VerificationViewState(
-                        isSendingNewCode = false,
-                        requestFocus = false,
-                        redactedPhoneNumber = "(•••) ••• ••91",
-                        email = "test@test.com",
-                        isProcessing = false,
-                        errorMessage = "Something went wrong".resolvableString,
-                        didSendNewCode = false,
-                        isDialog = isDialog
-                    )
-                )
-            ),
-        )
 
         private fun otpSpecWithContent(content: String = "555555"): OTPElement {
             val spec = OTPSpec.transform()
