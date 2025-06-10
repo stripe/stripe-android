@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.StateFlow
 
@@ -9,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface InputController : SectionFieldErrorController {
-    val label: StateFlow<Int?>
+    val label: StateFlow<ResolvableString>
     val fieldValue: StateFlow<String>
     val rawFieldValue: StateFlow<String?>
     val isComplete: StateFlow<Boolean>

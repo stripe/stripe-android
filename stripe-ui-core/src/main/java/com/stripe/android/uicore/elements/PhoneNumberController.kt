@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -22,7 +23,9 @@ class PhoneNumberController private constructor(
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
-    override val label = stateFlowOf(CoreR.string.stripe_address_label_phone_number)
+    override val label = stateFlowOf(
+        resolvableString(CoreR.string.stripe_address_label_phone_number)
+    )
 
     private val _fieldValue = MutableStateFlow(initialPhoneNumber)
 

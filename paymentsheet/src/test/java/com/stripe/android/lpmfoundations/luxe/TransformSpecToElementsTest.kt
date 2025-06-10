@@ -96,7 +96,7 @@ internal class TransformSpecToElementsTest {
             val idealElement = idealSectionElement.fields[0] as SimpleDropdownElement
 
             // Verify the correct config is setup for the controller
-            assertThat(idealElement.controller.label.first()).isEqualTo(R.string.stripe_ideal_bank)
+            assertThat(idealElement.controller.label.first()).isEqualTo(resolvableString(R.string.stripe_ideal_bank))
 
             assertThat(idealSectionElement.identifier.v1).isEqualTo("ideal[bank]_section")
 
@@ -144,7 +144,9 @@ internal class TransformSpecToElementsTest {
             as SimpleTextElement
 
         // Verify the correct config is setup for the controller
-        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_full_name)
+        )
         assertThat(nameElement.identifier.v1).isEqualTo("simple")
         assertThat(nameElement.controller.showOptionalLabel).isTrue()
     }

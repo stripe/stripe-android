@@ -25,6 +25,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -159,7 +161,7 @@ class TextFieldTest {
     ) : TextFieldConfig {
         override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Characters
         override val debugLabel: String = TEST_TAG
-        override val label: Int? = null
+        override val label: ResolvableString = resolvableString(value = "")
         override val keyboard: KeyboardType = KeyboardType.Text
         override val visualTransformation: VisualTransformation? = null
         override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)

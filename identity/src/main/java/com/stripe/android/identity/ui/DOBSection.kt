@@ -13,6 +13,7 @@ import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.DobParam
@@ -58,7 +59,7 @@ internal fun DOBSection(
                 identifier = IdentifierSpec.Generic(DOB_SPEC),
                 controller = dateController
             ),
-            label = R.string.stripe_dob
+            label = resolvableString(R.string.stripe_dob)
         )
     }
 
@@ -82,7 +83,7 @@ internal fun DOBSection(
 }
 
 internal object DobTextFieldConfig : SimpleTextFieldConfig(
-    label = R.string.stripe_dob_placeholder
+    label = resolvableString(R.string.stripe_dob_placeholder)
 ) {
     /**
      * Check if the string is a valid date and is between 01-01-1990 and now.

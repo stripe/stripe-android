@@ -85,7 +85,7 @@ internal class DefaultCardNumberController(
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val debugLabel = cardTextFieldConfig.debugLabel
 
-    override val label: StateFlow<Int> = stateFlowOf(cardTextFieldConfig.label)
+    override val label: StateFlow<ResolvableString> = stateFlowOf(cardTextFieldConfig.label)
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()

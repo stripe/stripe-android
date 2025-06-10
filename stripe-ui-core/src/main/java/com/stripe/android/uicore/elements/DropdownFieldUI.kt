@@ -42,7 +42,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -193,7 +195,7 @@ fun DropDown(
 
 @Composable
 private fun LargeDropdownLabel(
-    label: Int?,
+    label: ResolvableString,
     selectedItemLabel: String,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
@@ -210,9 +212,7 @@ private fun LargeDropdownLabel(
                 bottom = 8.dp
             )
         ) {
-            label?.let {
-                FormLabel(stringResource(it))
-            }
+            FormLabel(label.resolve())
             Row(
                 modifier = Modifier.fillMaxWidth(.9f),
                 verticalAlignment = Alignment.Bottom

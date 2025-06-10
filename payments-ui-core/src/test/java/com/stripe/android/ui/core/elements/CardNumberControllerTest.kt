@@ -414,7 +414,9 @@ internal class CardNumberControllerTest {
                     field = SimpleTextElement(
                         identifier = IdentifierSpec.Name,
                         controller = SimpleTextFieldController(
-                            textFieldConfig = SimpleTextFieldConfig()
+                            textFieldConfig = SimpleTextFieldConfig(
+                                resolvableString(value = "Card number")
+                            )
                         ),
                     ),
                     modifier = Modifier.testTag(TEST_TAG),
@@ -447,7 +449,9 @@ internal class CardNumberControllerTest {
                     field = SimpleTextElement(
                         identifier = IdentifierSpec.Name,
                         controller = SimpleTextFieldController(
-                            textFieldConfig = SimpleTextFieldConfig()
+                            textFieldConfig = SimpleTextFieldConfig(
+                                resolvableString(value = "Card number")
+                            )
                         ),
                     ),
                     modifier = Modifier.testTag(TEST_TAG),
@@ -523,7 +527,9 @@ internal class CardNumberControllerTest {
                     field = SimpleTextElement(
                         identifier = IdentifierSpec.Name,
                         controller = SimpleTextFieldController(
-                            textFieldConfig = SimpleTextFieldConfig()
+                            textFieldConfig = SimpleTextFieldConfig(
+                                resolvableString(value = "Card number")
+                            )
                         ),
                     ),
                     modifier = Modifier.testTag(TEST_TAG),

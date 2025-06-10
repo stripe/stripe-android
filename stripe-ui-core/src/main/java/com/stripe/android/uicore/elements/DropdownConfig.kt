@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface DropdownConfig {
@@ -8,7 +9,7 @@ interface DropdownConfig {
     val debugLabel: String
 
     /** This is the label to describe the field **/
-    val label: Int
+    val label: ResolvableString
 
     /** The list of raw values to use in the parameter map **/
     val rawItems: List<String?>

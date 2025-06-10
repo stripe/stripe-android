@@ -1,6 +1,8 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.InputController
@@ -17,7 +19,9 @@ class SetAsDefaultPaymentMethodController(
     saveForFutureUseCheckedFlow: StateFlow<Boolean>,
     setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) : InputController {
-    override val label: StateFlow<Int> = MutableStateFlow(R.string.stripe_set_as_default_payment_method)
+    override val label: StateFlow<ResolvableString> = MutableStateFlow(
+        resolvableString(R.string.stripe_set_as_default_payment_method)
+    )
 
     private val _setAsDefaultPaymentMethodChecked = MutableStateFlow(setAsDefaultPaymentMethodInitialValue)
     val setAsDefaultPaymentMethodChecked: StateFlow<Boolean> = _setAsDefaultPaymentMethodChecked

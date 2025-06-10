@@ -5,6 +5,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardUtils
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
@@ -16,7 +18,7 @@ internal class CardNumberConfig(
 ) : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "Card number"
-    override val label: Int = StripeR.string.stripe_acc_label_card_number
+    override val label: ResolvableString = resolvableString(StripeR.string.stripe_acc_label_card_number)
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
 
     // Hardcoded number of card digits + a buffer entered before we hit the card metadata service in CBC

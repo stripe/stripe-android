@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -50,7 +51,7 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple {
             identifier = IdentifierSpec.KonbiniConfirmationNumber,
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
-                    label = R.string.stripe_konbini_confirmation_number_label,
+                    label = resolvableString(R.string.stripe_konbini_confirmation_number_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Phone,
                 ),

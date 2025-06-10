@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressType
@@ -57,7 +58,7 @@ data class AddressSpec(
         initialValues: Map<IdentifierSpec, String?>,
         shippingValues: Map<IdentifierSpec, String?>?,
     ): List<FormElement> {
-        val label = if (showLabel) R.string.stripe_billing_details else null
+        val label = if (showLabel) resolvableString(R.string.stripe_billing_details) else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
             listOfNotNull(
                 createSectionElement(

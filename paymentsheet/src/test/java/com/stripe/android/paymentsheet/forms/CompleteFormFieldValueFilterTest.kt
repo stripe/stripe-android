@@ -45,7 +45,10 @@ class CompleteFormFieldValueFilterTest {
                     IdentifierSpec.Email,
                     controller = emailController
                 ),
-                SectionController(emailController.label.first(), listOf(emailController))
+                SectionController(
+                    emailController.label.first(),
+                    listOf(emailController)
+                )
             )
         }
     }

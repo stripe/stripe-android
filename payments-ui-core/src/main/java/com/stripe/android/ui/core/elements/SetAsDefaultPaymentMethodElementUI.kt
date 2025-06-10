@@ -4,8 +4,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -21,7 +21,6 @@ fun SetAsDefaultPaymentMethodElementUI(
     val controller = element.controller
     val checked by controller.setAsDefaultPaymentMethodChecked.collectAsState()
     val label by controller.label.collectAsState()
-    val resources = LocalContext.current.resources
 
     val shouldShow by element.shouldShowElementFlow.collectAsState()
 
@@ -29,7 +28,7 @@ fun SetAsDefaultPaymentMethodElementUI(
         CheckboxElementUI(
             automationTestTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG,
             isChecked = checked,
-            label = resources.getString(label),
+            label = label.resolve(),
             isEnabled = enabled,
             modifier = modifier,
             onValueChange = {

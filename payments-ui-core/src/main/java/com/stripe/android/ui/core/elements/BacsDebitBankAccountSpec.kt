@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -41,7 +42,7 @@ class BacsDebitBankAccountSpec : FormItemSpec() {
                 )
             )
         ),
-        R.string.stripe_bacs_bank_account_title
+        resolvableString(R.string.stripe_bacs_bank_account_title)
     )
 
     private companion object {

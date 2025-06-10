@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -80,7 +81,7 @@ data class SimpleTextSpec(
             this.apiPath,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
-                    label = this.label,
+                    label = resolvableString(this.label),
                     capitalization = when (this.capitalization) {
                         Capitalization.None -> KeyboardCapitalization.None
                         Capitalization.Characters -> KeyboardCapitalization.Characters

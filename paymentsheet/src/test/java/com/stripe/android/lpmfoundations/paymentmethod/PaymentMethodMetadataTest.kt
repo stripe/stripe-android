@@ -447,17 +447,23 @@ internal class PaymentMethodMetadataTest {
 
         val nameSection = formElement[0] as SectionElement
         val nameElement = nameSection.fields[0] as SimpleTextElement
-        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_full_name)
+        )
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
         val emailSection = formElement[1] as SectionElement
         val emailElement = emailSection.fields[0] as EmailElement
-        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
+        assertThat(emailElement.controller.label.first()).isEqualTo(
+            resolvableString(UiCoreR.string.stripe_email)
+        )
         assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
 
         val phoneSection = formElement[2] as SectionElement
         val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
+        assertThat(phoneElement.controller.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_phone_number)
+        )
         assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
 
         val addressSection = formElement[3] as SectionElement
@@ -531,17 +537,23 @@ internal class PaymentMethodMetadataTest {
 
         val nameSection = formElement[0] as SectionElement
         val nameElement = nameSection.fields[0] as SimpleTextElement
-        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
+        assertThat(nameElement.controller.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_full_name)
+        )
         assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
 
         val phoneSection = formElement[1] as SectionElement
         val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
+        assertThat(phoneElement.controller.label.first()).isEqualTo(
+            resolvableString(CoreR.string.stripe_address_label_phone_number)
+        )
         assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
 
         val emailSection = formElement[2] as SectionElement
         val emailElement = emailSection.fields[0] as EmailElement
-        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
+        assertThat(emailElement.controller.label.first()).isEqualTo(
+            resolvableString(UiCoreR.string.stripe_email)
+        )
         assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
 
         val addressSection = formElement[3] as SectionElement

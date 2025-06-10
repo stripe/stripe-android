@@ -34,13 +34,15 @@ class CvcController constructor(
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
 
     private val _label = cardBrandFlow.mapAsStateFlow { cardBrand ->
-        if (cardBrand == CardBrand.AmericanExpress) {
+        val resource = if (cardBrand == CardBrand.AmericanExpress) {
             StripeR.string.stripe_cvc_amex_hint
         } else {
             StripeR.string.stripe_cvc_number_hint
         }
+
+        resolvableString(resource)
     }
-    override val label: StateFlow<Int> = _label
+    override val label: StateFlow<ResolvableString> = _label
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 

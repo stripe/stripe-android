@@ -3,6 +3,7 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
@@ -42,7 +43,7 @@ open class AddressElement(
         IdentifierSpec.Name,
         SimpleTextFieldController(
             textFieldConfig = SimpleTextFieldConfig(
-                label = CoreR.string.stripe_address_label_full_name
+                label = resolvableString(CoreR.string.stripe_address_label_full_name)
             ),
             initialValue = rawValuesMap[IdentifierSpec.Name]
         )
@@ -50,7 +51,7 @@ open class AddressElement(
 
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
-        config = SimpleTextFieldConfig(label = R.string.stripe_address_label_address),
+        config = SimpleTextFieldConfig(label = resolvableString(R.string.stripe_address_label_address)),
         onNavigation = (addressType as? AddressType.ShippingCondensed)?.onNavigation
     )
 

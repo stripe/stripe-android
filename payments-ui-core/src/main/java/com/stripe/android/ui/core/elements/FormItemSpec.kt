@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
@@ -24,12 +25,12 @@ sealed class FormItemSpec : Parcelable {
 
     internal fun createSectionElement(
         sectionFieldElement: SectionFieldElement,
-        label: Int? = null
+        label: ResolvableString? = null
     ): SectionElement = SectionElement.wrap(sectionFieldElement, label)
 
     internal fun createSectionElement(
         sectionFieldElements: List<SectionFieldElement>,
-        label: Int? = null
+        label: ResolvableString? = null
     ): SectionElement = SectionElement.wrap(sectionFieldElements, label)
 }
 
