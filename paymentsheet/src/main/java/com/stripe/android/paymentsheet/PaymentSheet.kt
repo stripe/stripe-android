@@ -1665,32 +1665,7 @@ class PaymentSheet internal constructor(
              * The letter spacing used for the text. This should represent a sp value.
              */
             val letterSpacingSp: Float? = null,
-        ) : Parcelable {
-            constructor(
-                context: Context,
-                /**
-                 * The font used in text. This should be a resource ID value.
-                 */
-                @FontRes fontFamily: Int?,
-                /**
-                 * The font size resource used for the text. This should represent a sp value.
-                 */
-                @DimenRes fontSizeRes: Int? = null,
-                /**
-                 * The font weight used for the text.
-                 */
-                fontWeight: Int? = null,
-                /**
-                 * The letter spacing resource used for the text. This should represent a sp value.
-                 */
-                @DimenRes letterSpacingRes: Int? = null,
-            ) : this(
-                fontFamily = fontFamily,
-                fontSizeSp = fontSizeRes?.let { context.getRawValueFromDimenResource(it) },
-                fontWeight = fontWeight,
-                letterSpacingSp = letterSpacingRes?.let { context.getRawValueFromDimenResource(it) },
-            )
-        }
+        ) : Parcelable
 
         companion object {
             val default = Typography(
