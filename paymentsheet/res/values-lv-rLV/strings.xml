@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Vai vēlaties aizvērt šo formu?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Saglabāt jūsu informāciju, lai nodrošinātu norēķināšanos Link ar 1 klikšķi</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Saglabāt manu informāciju, lai varētu norēķināties ar Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredīta</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Norādot savu e-pastu, es piekrītu izveidot Link kontu un saglabāt savu maksājuma informāciju Link, ievērojot <terms>Link noteikumus</terms> un <privacy>Konfidencialitātes politiku</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Norādot savu tālruņa numuru, es piekrītu izveidot Link kontu un saglabāt savu maksājuma informāciju Link, ievērojot <terms>Link noteikumus</terms> un <privacy>Konfidencialitātes politiku</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Norādot tālruņa numuru un e-pastu, jūs piekrītat izveidot Link kontu atbilstoši Link <terms>noteikumiem</terms> un <privacy>Konfidencialitātes politikai</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Jūsu konts ir deaktivizēts</string>
   <!-- Generic failure message -->

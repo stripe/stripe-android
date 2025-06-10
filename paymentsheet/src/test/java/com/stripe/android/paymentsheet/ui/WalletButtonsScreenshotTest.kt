@@ -50,6 +50,7 @@ class WalletButtonsScreenshotTest {
             state = WalletButtonsInteractor.State(
                 walletButtons = walletButtons,
                 buttonsEnabled = buttonsEnabled,
+                link2FAState = null
             )
         )
     )
@@ -60,7 +61,11 @@ class WalletButtonsScreenshotTest {
         override val state: StateFlow<WalletButtonsInteractor.State> = stateFlowOf(state)
 
         override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
-            error("Should not be called!")
+            when (action) {
+                is WalletButtonsInteractor.ViewAction.OnShown,
+                is WalletButtonsInteractor.ViewAction.OnHidden -> Unit
+                is WalletButtonsInteractor.ViewAction.OnButtonPressed -> error("Should not be called!")
+            }
         }
     }
 }

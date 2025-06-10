@@ -127,7 +127,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 .padding(paddingValues)
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().padding(top = StripeTheme.formInsets.top.dp)
             ) {
                 Box(
                     modifier = Modifier

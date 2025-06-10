@@ -1,8 +1,8 @@
 package com.stripe.android.common.analytics.experiment
 
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
-import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.ProvidedDefaultValues
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -10,7 +10,6 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
-import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -23,7 +22,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal interface LogLinkGlobalHoldbackExposure {
+internal interface LogLinkHoldbackExperiment {
     /**
      * Logs the exposure of the Link Global Holdback experiment.
      *
@@ -31,12 +30,13 @@ internal interface LogLinkGlobalHoldbackExposure {
      * @param state The current state of the payment element loader.
      */
     operator fun invoke(
+        experimentAssignment: ElementsSession.ExperimentAssignment,
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     )
 }
 
-internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
+internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val eventReporter: EventReporter,
     @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
     @IOContext private val workContext: CoroutineContext,
@@ -44,15 +44,16 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val mode: EventReporter.Mode,
     private val logger: Logger
-) : LogLinkGlobalHoldbackExposure {
+) : LogLinkHoldbackExperiment {
 
     override operator fun invoke(
+        experimentAssignment: ElementsSession.ExperimentAssignment,
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
         CoroutineScope(workContext).launch {
             runCatching {
-                logExposure(elementsSession, state)
+                logExposure(elementsSession, state, experimentAssignment)
             }.onFailure { error ->
                 logger.error("Failed to log Global holdback exposure", error)
             }
@@ -61,17 +62,19 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
     private suspend fun logExposure(
         elementsSession: ElementsSession,
-        state: PaymentElementLoader.State
+        state: PaymentElementLoader.State,
+        experimentAssignment: ElementsSession.ExperimentAssignment
     ) {
         // Don't log if the lookup kill-switch is disabled.
         if (elementsSession.flags[ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP] == true) {
             return
         }
+
         val experimentsData = requireNotNull(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }
         val experimentGroup: String = elementsSession.experimentsData
-            ?.experimentAssignments[LINK_GLOBAL_HOLD_BACK] ?: "control"
+            ?.experimentAssignments[experimentAssignment] ?: "control"
 
         val customerEmail = state.getEmail()
 
@@ -91,22 +94,10 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
         val isSpmEnabled: Boolean = elementsSession.isSpmEnabled(linkEnabled)
 
-        logger.debug(
-            """Link Global Holdback exposure: 
-                |arbId=${experimentsData.arbId},
-                |isReturningLinkConsumer=$isReturningUser,
-                |group=$experimentGroup,
-                |defaultValues=$defaultValues,
-                |useLinkNative=$useLinkNative,
-                |emailRecognitionSource=$emailRecognitionSource,
-                |spmEnabled=$isSpmEnabled,
-                |integrationShape=$integrationShape,
-                |linkDisplayed=$linkEnabled
-            """.trimMargin()
-        )
         eventReporter.onExperimentExposure(
-            experiment = LinkGlobalHoldback(
+            experiment = LinkHoldback(
                 arbId = experimentsData.arbId,
+                experiment = experimentAssignment,
                 isReturningLinkUser = isReturningUser,
                 providedDefaultValues = defaultValues,
                 linkDisplayed = linkEnabled,

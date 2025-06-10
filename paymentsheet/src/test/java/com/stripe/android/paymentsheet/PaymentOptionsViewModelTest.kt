@@ -926,6 +926,26 @@ internal class PaymentOptionsViewModelTest {
         }
     }
 
+    @Test
+    fun `wallets state should be null even if wallets are available if they have already been rendered`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                linkState = LinkState(
+                    configuration = mock(),
+                    signupMode = null,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                ),
+                isGooglePayReady = true,
+            ).copy(
+                walletButtonsAlreadyShown = true,
+            )
+        )
+
+        viewModel.walletsState.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
     /**
      * Helper function to test user cancellation scenarios
      */
@@ -1108,6 +1128,7 @@ internal class PaymentOptionsViewModelTest {
                 account = null,
                 lastUpdateReason = null
             ),
+            walletButtonsAlreadyShown = false,
         )
     }
 

@@ -149,6 +149,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -175,6 +176,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
@@ -1588,6 +1590,52 @@ internal class PaymentSheetViewModelTest {
             googlePayListener.onActivityResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(awaitItem()).isTrue()
         }
+    }
+
+    @Test
+    fun `Content should be hidden when Link is visible`() = runTest {
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+        )
+
+        viewModel.contentVisible.test {
+            assertThat(awaitItem()).isTrue()
+            viewModel.checkoutWithLink()
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun `Does not show processing WalletsProcessingState when using Link Express`() = runTest(testDispatcher) {
+        val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            ),
+            linkPaymentLauncher = linkPaymentLauncher,
+            delay = 1.seconds,
+        )
+
+        viewModel.walletsProcessingState.test {
+            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(WalletsProcessingState.Idle(null))
+            advanceTimeBy(2.seconds)
+            expectNoEvents()
+        }
+
+        verify(linkPaymentLauncher).present(
+            configuration = eq(TestFactory.LINK_CONFIGURATION),
+            linkAccountInfo = any(),
+            launchMode = any(),
+            useLinkExpress = eq(true),
+        )
     }
 
     @Test

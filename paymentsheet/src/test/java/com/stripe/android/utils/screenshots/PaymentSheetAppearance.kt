@@ -64,6 +64,12 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 shape = PaymentSheet.PrimaryButtonShape(
                     heightDp = 96f
                 )
+            ),
+            formInsetValues = PaymentSheet.Insets(
+                startDp = 40f,
+                topDp = 20f,
+                endDp = 40f,
+                bottomDp = 60f
             )
         ),
     );

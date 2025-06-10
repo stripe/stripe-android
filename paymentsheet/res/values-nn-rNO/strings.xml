@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Vil du lukke dette skjemaet?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Lagre informasjonen din for sikker betaling med 1 klikk med Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Lagre min informasjon for raskare betaling med Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s-kreditt</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Ved å oppgi e-postadressa di godtek du å opprette ein Link-konto og lagre betaingsinformasjonen din til Link, i samsvar med <terms>Link sine vilkår</terms> og <privacy>personvernerklæring</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Ved å oppgi telefonnummeret ditt godtek du å opprette ein Link-konto og lagre betaingsinformasjonen din til Link, i samsvar med <terms>Link sine vilkår</terms> og <privacy>personvernerklæring</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Ved å oppgi telefonnummer og e-postadresse godtek du å oppretta ein Link-konto underlagt <terms>vilkåra</terms> til Link og <privacy>personvernerklæringa</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Kontoen din er deaktivert</string>
   <!-- Generic failure message -->

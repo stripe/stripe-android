@@ -34,6 +34,8 @@ internal class FlowControllerViewModel(
             .flowControllerViewModel(this)
             .build()
 
+    var walletButtonsRendered: Boolean = false
+
     @Volatile
     var paymentSelection: PaymentSelection? = null
 

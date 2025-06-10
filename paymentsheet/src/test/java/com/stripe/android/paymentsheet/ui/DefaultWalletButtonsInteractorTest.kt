@@ -7,6 +7,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -382,6 +384,32 @@ class DefaultWalletButtonsInteractorTest {
         }
     }
 
+    @Test
+    fun `On wallet buttons rendered, should call provided callback with true`() = runTest {
+        val completable = CompletableDeferred<Boolean>()
+
+        val interactor = createInteractor { isRendered ->
+            completable.complete(isRendered)
+        }
+
+        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnShown)
+
+        assertThat(completable.await()).isTrue()
+    }
+
+    @Test
+    fun `On wallet buttons un-rendered, should call provided callback with false`() = runTest {
+        val completable = CompletableDeferred<Boolean>()
+
+        val interactor = createInteractor { isRendered ->
+            completable.complete(isRendered)
+        }
+
+        interactor.handleViewAction(WalletButtonsInteractor.ViewAction.OnHidden)
+
+        assertThat(completable.await()).isFalse()
+    }
+
     private fun googlePayButtonRenderTest(
         arguments: DefaultWalletButtonsInteractor.Arguments,
         expectedGooglePayButtonType: GooglePayButtonType,
@@ -441,12 +469,18 @@ class DefaultWalletButtonsInteractorTest {
         arguments: DefaultWalletButtonsInteractor.Arguments? = null,
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
+            error("Should not be called!")
+        },
     ): DefaultWalletButtonsInteractor {
         return DefaultWalletButtonsInteractor(
             arguments = stateFlowOf(arguments),
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             errorReporter = errorReporter,
+            linkInlineInteractor = NoOpLinkInlineInteractor(),
+            onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
+
         )
     }
 

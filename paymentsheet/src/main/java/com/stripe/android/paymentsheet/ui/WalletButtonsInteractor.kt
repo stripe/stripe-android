@@ -7,6 +7,10 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.link.verification.LinkInlineInteractor
+import com.stripe.android.link.verification.VerificationState
+import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -21,19 +25,31 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.WalletButton
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
+import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 internal interface WalletButtonsInteractor {
     val state: StateFlow<State>
 
     class State(
+        val link2FAState: LinkOtpState?,
         val walletButtons: List<WalletButton>,
         val buttonsEnabled: Boolean,
-    )
+    ) {
+        data class LinkOtpState(
+            val viewState: VerificationViewState,
+            val otpElement: OTPElement
+        )
+
+        val hasContent: Boolean
+            get() = walletButtons.isNotEmpty() || link2FAState != null
+    }
 
     fun handleViewAction(action: ViewAction)
 
@@ -78,6 +94,8 @@ internal interface WalletButtonsInteractor {
 
     sealed interface ViewAction {
         data class OnButtonPressed(val button: WalletButton) : ViewAction
+        data object OnShown : ViewAction
+        data object OnHidden : ViewAction
     }
 }
 
@@ -86,15 +104,26 @@ internal class DefaultWalletButtonsInteractor(
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
     private val errorReporter: ErrorReporter,
+    private val linkInlineInteractor: LinkInlineInteractor,
+    private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
+
+    init {
+        coroutineScope.launch {
+            // Perform Link verification setup at initialization time
+            arguments.filterNotNull().collect { setupLink(it) }
+        }
+    }
+
     override val state: StateFlow<WalletButtonsInteractor.State> = combineAsStateFlow(
         arguments,
         confirmationHandler.state,
-    ) { arguments, confirmationState ->
+        linkInlineInteractor.state
+    ) { arguments, confirmationState, linkEmbeddedState ->
         val walletButtons = arguments?.run {
-            arguments.paymentMethodMetadata.availableWallets.map { wallet ->
+            arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
-                    WalletType.GooglePay -> WalletButtonsInteractor.WalletButton.GooglePay(
+                    WalletType.GooglePay -> WalletButton.GooglePay(
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(
@@ -103,16 +132,34 @@ internal class DefaultWalletButtonsInteractor(
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
                     )
-                    WalletType.Link -> WalletButtonsInteractor.WalletButton.Link(
-                        email = linkEmail,
-                    )
+                    WalletType.Link -> WalletButton.Link(
+                        email = linkEmail
+                    ).takeIf {
+                        // Only show Link button if the Link verification state is resolved.
+                        linkEmbeddedState.verificationState is VerificationState.RenderButton
+                    }
                 }
             }
         } ?: emptyList()
 
+        val render2FAState = (linkEmbeddedState.verificationState as? Render2FA)?.viewState
+        val linkOTPState = render2FAState?.let {
+            WalletButtonsInteractor.State.LinkOtpState(
+                viewState = it,
+                otpElement = linkInlineInteractor.otpElement
+            )
+        }
+
         WalletButtonsInteractor.State(
+            link2FAState = linkOTPState,
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
+        )
+    }
+
+    private fun setupLink(args: Arguments) {
+        linkInlineInteractor.setup(
+            paymentMethodMetadata = args.paymentMethodMetadata
         )
     }
 
@@ -135,6 +182,8 @@ internal class DefaultWalletButtonsInteractor(
                     )
                 }
             }
+            is WalletButtonsInteractor.ViewAction.OnShown -> onWalletButtonsRenderStateChanged(true)
+            is WalletButtonsInteractor.ViewAction.OnHidden -> onWalletButtonsRenderStateChanged(false)
         }
     }
 
@@ -191,11 +240,16 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
+                linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
+                onWalletButtonsRenderStateChanged = { isRendered ->
+                    flowControllerViewModel.walletButtonsRendered = isRendered
+                }
             )
         }
 
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun create(
+            linkInlineInteractor: LinkInlineInteractor,
             embeddedLinkHelper: EmbeddedLinkHelper,
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
             confirmationHandler: ConfirmationHandler,
@@ -220,6 +274,10 @@ internal class DefaultWalletButtonsInteractor(
                 },
                 confirmationHandler = confirmationHandler,
                 coroutineScope = coroutineScope,
+                onWalletButtonsRenderStateChanged = {
+                    // No-op, not supported for Embedded
+                },
+                linkInlineInteractor = linkInlineInteractor
             )
         }
     }

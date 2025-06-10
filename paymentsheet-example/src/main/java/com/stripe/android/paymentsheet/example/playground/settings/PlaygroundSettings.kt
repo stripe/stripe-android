@@ -459,13 +459,15 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
             WalletButtonsSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.linkProminenceInFlowController),
+            FeatureFlagSettingsDefinition(FeatureFlags.showInlineOtpInWalletButtons),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
-            EmbeddedAppearanceSettingsDefinition
+            EmbeddedAppearanceSettingsDefinition,
+            FormInsetsAppearanceSettingDefinition
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

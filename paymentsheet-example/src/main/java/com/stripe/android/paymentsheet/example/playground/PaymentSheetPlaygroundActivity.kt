@@ -14,6 +14,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -36,6 +37,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -50,15 +52,18 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.activity.getFormInsetsAppearance
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -68,7 +73,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class, WalletButtonsPreview::class)
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
@@ -113,6 +118,7 @@ internal class PaymentSheetPlaygroundActivity :
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
+
         super.onCreate(savedInstanceState)
 
         setContent {
@@ -252,6 +258,7 @@ internal class PaymentSheetPlaygroundActivity :
     private fun AppearanceButton() {
         val settings = viewModel.playgroundSettingsFlow.collectAsState().value
         val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
+        val insetsAppearance = settings?.get(FormInsetsAppearanceSettingDefinition)?.collectAsState()?.value
         supportFragmentManager.setFragmentResultListener(
             AppearanceBottomSheetDialogFragment.REQUEST_KEY,
             this@PaymentSheetPlaygroundActivity
@@ -260,12 +267,17 @@ internal class PaymentSheetPlaygroundActivity :
                 EmbeddedAppearanceSettingsDefinition,
                 bundle.getEmbeddedAppearance()
             )
+            viewModel.updateFormInsetsAppearance(
+                FormInsetsAppearanceSettingDefinition,
+                bundle.getFormInsetsAppearance()
+            )
         }
         Button(
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
                 bottomSheet.arguments = Bundle().apply {
                     putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
+                    putParcelable(AppearanceBottomSheetDialogFragment.INSETS_KEY, insetsAppearance)
                 }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
@@ -423,6 +435,10 @@ internal class PaymentSheetPlaygroundActivity :
             flowController.shippingDetails = localFlowControllerState?.addressDetails
         }
 
+        if (playgroundState.snapshot[WalletButtonsSettingsDefinition]) {
+            flowController.WalletButtons()
+        }
+
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
             paymentMethodLabel = flowControllerState.paymentMethodLabel(),
@@ -430,6 +446,7 @@ internal class PaymentSheetPlaygroundActivity :
             onClick = flowController::presentPaymentOptions
         )
         BuyButton(
+            modifier = Modifier.imePadding(),
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
         )

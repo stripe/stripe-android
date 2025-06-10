@@ -37,6 +37,9 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
 
+// Same as the default value for `TopAppBar`
+internal val PaymentSheetTopBarHeight = 56.dp
+
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState?,

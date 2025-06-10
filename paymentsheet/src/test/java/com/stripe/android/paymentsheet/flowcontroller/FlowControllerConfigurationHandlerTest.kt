@@ -585,7 +585,7 @@ class FlowControllerConfigurationHandlerTest {
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
+            paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
         )
     }
 }

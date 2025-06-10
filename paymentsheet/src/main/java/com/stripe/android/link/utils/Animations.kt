@@ -28,8 +28,8 @@ internal const val LINK_DEFAULT_ANIMATION_DELAY_MILLIS: Long =
 
 internal val LinkScreenTransition: ContentTransform =
     ContentTransform(
-        targetContentEnter = fadeIn(tween(durationMillis = 700)),
-        initialContentExit = fadeOut(tween(durationMillis = 700)),
+        targetContentEnter = fadeIn(tween(durationMillis = 300)),
+        initialContentExit = fadeOut(tween(durationMillis = 300)),
         sizeTransform = SizeTransform(
             sizeAnimationSpec = { _, _ ->
                 tween(

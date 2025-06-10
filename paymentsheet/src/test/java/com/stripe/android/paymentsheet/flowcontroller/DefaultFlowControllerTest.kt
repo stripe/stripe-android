@@ -166,7 +166,8 @@ internal class DefaultFlowControllerTest {
     private val sepaMandateActivityLauncher =
         mock<ActivityResultLauncher<SepaMandateContract.Args>>()
 
-    private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+    private val flowControllerLinkPaymentLauncher = mock<LinkPaymentLauncher>()
+    private val walletsButtonLinkPaymentLauncher = mock<LinkPaymentLauncher>()
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -501,7 +502,8 @@ internal class DefaultFlowControllerTest {
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+            walletButtonsAlreadyShown = false,
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -557,7 +559,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.presentPaymentOptions()
 
-        verify(linkPaymentLauncher).present(
+        verify(flowControllerLinkPaymentLauncher).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
@@ -979,7 +981,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
+        verify(flowControllerLinkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1347,7 +1349,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
+        verify(flowControllerLinkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1415,6 +1417,24 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentOptionActivityLauncher).launch(
             argWhere { it.state.paymentSelection == previousPaymentSelection },
+            anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `On wallet buttons rendered and options launched, 'walletButtonsAlreadyShown' should be true`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = true
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess()
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere { it.walletButtonsAlreadyShown },
             anyOrNull(),
         )
     }
@@ -2546,14 +2566,15 @@ internal class DefaultFlowControllerTest {
                 uiContext = testDispatcher,
                 eventReporter = eventReporter,
                 viewModel = viewModel,
-                paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
+                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
             ),
             errorReporter = errorReporter,
             initializedViaCompose = false,
             linkHandler = mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
-            linkPaymentLauncher = linkPaymentLauncher,
+            flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
+            walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkProminenceFeatureProvider = linkProminenceFeatureProvider,
             confirmationHandler = createTestConfirmationHandlerFactory(
@@ -2567,7 +2588,7 @@ internal class DefaultFlowControllerTest {
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
                     accountStatus = AccountStatus.Verified,
                 ),
-                linkLauncher = linkPaymentLauncher,
+                linkLauncher = flowControllerLinkPaymentLauncher,
                 errorReporter = errorReporter,
                 savedStateHandle = viewModel.handle,
                 statusBarColor = STATUS_BAR_COLOR,

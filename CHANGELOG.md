@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.17.0 - 2025-06-09
+
+### PaymentSheet
+* [ADDED][10919](https://github.com/stripe/stripe-android/pull/10919) Add `formInsetValues` to `PaymentSheet.Appearance`.
+
 ## 21.16.0 - 2025-06-02
 
 ### PaymentSheet

@@ -58,7 +58,7 @@ internal fun InputAddressScreen(
             modifier = Modifier.padding(it)
         ) {
             Column(
-                Modifier.padding(StripeTheme.getOuterFormInsets())
+                Modifier.padding(StripeTheme.getOuterFormInsets()).padding(top = StripeTheme.formInsets.top.dp)
             ) {
                 Text(
                     title,
