@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -69,6 +70,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
@@ -263,7 +265,7 @@ internal fun TextFieldUi(
     value: TextFieldValue,
     enabled: Boolean,
     loading: Boolean,
-    label: String?,
+    label: String,
     placeholder: String?,
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
@@ -279,6 +281,7 @@ internal fun TextFieldUi(
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
     val colors = TextFieldColors(shouldShowError)
+    val textFieldInsets = StripeTheme.textFieldInsets
 
     val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
 
@@ -288,20 +291,18 @@ internal fun TextFieldUi(
             onValueChange = onValueChange,
             modifier = modifier.fillMaxWidth(),
             enabled = enabled,
-            label = label?.let {
-                {
-                    FormLabel(
-                        text = if (showOptionalLabel) {
-                            stringResource(
-                                R.string.stripe_form_label_optional,
-                                it
-                            )
-                        } else {
-                            it
-                        },
-                        modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
-                    )
-                }
+            label = {
+                FormLabel(
+                    text = if (showOptionalLabel) {
+                        stringResource(
+                            R.string.stripe_form_label_optional,
+                            label,
+                        )
+                    } else {
+                        label
+                    },
+                    modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
+                )
             },
             placeholder = placeholder?.let {
                 {
@@ -319,7 +320,15 @@ internal fun TextFieldUi(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             singleLine = true,
-            colors = colors
+            colors = colors,
+            contentPadding = remember {
+                PaddingValues(
+                    top = textFieldInsets.top.dp,
+                    bottom = textFieldInsets.bottom.dp,
+                    start = textFieldInsets.start.dp,
+                    end = textFieldInsets.end.dp,
+                )
+            }
         )
     }
 }

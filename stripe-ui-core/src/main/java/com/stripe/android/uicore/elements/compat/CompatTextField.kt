@@ -32,7 +32,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -129,6 +128,7 @@ import androidx.compose.ui.R as ComposeUiR
  * (including label, placeholder, leading and trailing icons, indicator line) and background for
  * this text field in different states. See [TextFieldDefaults.textFieldColors]
  */
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun CompatTextField(
     value: TextFieldValue,
@@ -137,7 +137,7 @@ internal fun CompatTextField(
     enabled: Boolean = true,
     readOnly: Boolean = false,
     textStyle: TextStyle = LocalTextStyle.current,
-    label: @Composable (() -> Unit)? = null,
+    label: @Composable (() -> Unit),
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -151,7 +151,8 @@ internal fun CompatTextField(
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     shape: Shape = TextFieldDefaults.TextFieldShape,
-    colors: TextFieldColors = TextFieldDefaults.textFieldColors()
+    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
+    contentPadding: PaddingValues = TextFieldDefaults.textFieldWithLabelPadding(),
 ) {
     // If color is not provided via the text style, use content color as a default
     val textColor = textStyle.color.takeOrElse {
@@ -164,11 +165,7 @@ internal fun CompatTextField(
         value = value,
         modifier = modifier
             .indicatorLine(enabled, isError, interactionSource, colors)
-            .errorSemanticsWithDefault(isError, errorMessage)
-            .defaultMinSize(
-                minWidth = TextFieldDefaults.MinWidth,
-                minHeight = TextFieldDefaults.MinHeight
-            ),
+            .errorSemanticsWithDefault(isError, errorMessage),
         onValueChange = onValueChange,
         enabled = enabled,
         readOnly = readOnly,
@@ -197,11 +194,7 @@ internal fun CompatTextField(
                 interactionSource = interactionSource,
                 colors = colors,
                 shape = shape,
-                contentPadding = if (label == null) {
-                    TextFieldDefaults.textFieldWithoutLabelPadding()
-                } else {
-                    TextFieldDefaults.textFieldWithLabelPadding()
-                }
+                contentPadding = contentPadding,
             )
         }
     )
