@@ -25,6 +25,11 @@ import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnHidden
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCodeNotificationSent
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnShown
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.WalletButton
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.uicore.elements.OTPElement
@@ -96,6 +101,8 @@ internal interface WalletButtonsInteractor {
         data class OnButtonPressed(val button: WalletButton) : ViewAction
         data object OnShown : ViewAction
         data object OnHidden : ViewAction
+        data object OnResendCode : ViewAction
+        data object OnResendCodeNotificationSent : ViewAction
     }
 }
 
@@ -165,7 +172,7 @@ internal class DefaultWalletButtonsInteractor(
 
     override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
         when (action) {
-            is WalletButtonsInteractor.ViewAction.OnButtonPressed -> {
+            is OnButtonPressed -> {
                 arguments.value?.let { arguments ->
                     confirmationArgs(action.button.createSelection(), arguments)?.let {
                         coroutineScope.launch {
@@ -182,8 +189,10 @@ internal class DefaultWalletButtonsInteractor(
                     )
                 }
             }
-            is WalletButtonsInteractor.ViewAction.OnShown -> onWalletButtonsRenderStateChanged(true)
-            is WalletButtonsInteractor.ViewAction.OnHidden -> onWalletButtonsRenderStateChanged(false)
+            is OnShown -> onWalletButtonsRenderStateChanged(true)
+            is OnHidden -> onWalletButtonsRenderStateChanged(false)
+            is OnResendCode -> linkInlineInteractor.resendCode()
+            is OnResendCodeNotificationSent -> linkInlineInteractor.didShowCodeSentNotification()
         }
     }
 

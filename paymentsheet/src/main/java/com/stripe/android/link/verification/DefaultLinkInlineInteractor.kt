@@ -1,7 +1,7 @@
 package com.stripe.android.link.verification
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -30,6 +30,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     private val coroutineScope: CoroutineScope,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val linkLauncher: LinkPaymentLauncher,
+    private val logger: Logger,
     private val savedStateHandle: SavedStateHandle
 ) : LinkInlineInteractor {
 
@@ -46,15 +47,15 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
      * Sets up Link verification domain logic (should be called once when initializing)
      */
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
-        if (FeatureFlags.showInlineOtpInWalletButtons.isEnabled.not()) {
-            // If the feature flag is disabled, do not start Link verification.
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        if (linkConfiguration == null) {
+            // If there is no Link account manager, we don't need to handle verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
 
-        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
-        if (linkConfiguration == null) {
-            // If there is no Link account manager, we don't need to handle verification.
+        if (linkConfigurationCoordinator.linkGate(linkConfiguration).useInlineOtpInWalletButtons.not()) {
+            // If the feature flag is disabled, do not start Link verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
@@ -68,11 +69,9 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             return
         }
 
-        coroutineScope.launch {
-            linkAccountManager.startVerification()
-            observeOtp(linkAccountManager)
-            updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
-        }
+        updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
+        observeOtp(linkAccountManager)
+        startVerification()
     }
 
     fun observeOtp(linkAccountManager: LinkAccountManager) {
@@ -82,14 +81,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 val verificationState = state.value.verificationState
                 if (verificationState is Render2FA && verificationState.viewState.isProcessing.not()) {
                     // Update to processing state
-                    updateState {
-                        it.copy(
-                            verificationState.copy(
-                                viewState = verificationState.viewState.copy(
-                                    isProcessing = true,
-                                    errorMessage = null
-                                )
-                            )
+                    update2FAState { viewState ->
+                        viewState.copy(
+                            isProcessing = true,
+                            errorMessage = null
                         )
                     }
                     // confirm verification
@@ -114,14 +109,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.
             }.onFailure { error ->
-                updateState {
-                    it.copy(
-                        verificationState = verificationState.copy(
-                            verificationState.viewState.copy(
-                                isProcessing = false,
-                                errorMessage = error.errorMessage
-                            )
-                        )
+                update2FAState { viewState ->
+                    viewState.copy(
+                        isProcessing = false,
+                        errorMessage = error.errorMessage
                     )
                 }
             }
@@ -146,6 +137,21 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         savedStateHandle[LINK_EMBEDDED_STATE_KEY] = block(currentState)
     }
 
+    private fun update2FAState(
+        block: (VerificationViewState) -> VerificationViewState,
+    ) {
+        val currentState = state.value.verificationState
+        if (currentState is Render2FA) {
+            val newState = currentState.copy(viewState = block(currentState.viewState))
+            updateState { it.copy(verificationState = newState) }
+        } else {
+            logger.error(
+                "Expected Render2FA state but found ${currentState::class.simpleName}. Resetting to RenderButton."
+            )
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
+        }
+    }
+
     private fun Render2FA.linkAccountManager(): LinkAccountManager {
         return linkConfigurationCoordinator.getComponent(linkConfiguration).linkAccountManager
     }
@@ -154,6 +160,46 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         // Regardless of the Link result, the user completed verification,
         // so we can reset the verification state to RenderButton.
         updateState { it.copy(verificationState = VerificationState.RenderButton) }
+    }
+
+    override fun resendCode() {
+        otpElement.controller.reset()
+        update2FAState { viewState ->
+            viewState.copy(
+                isSendingNewCode = true,
+                errorMessage = null
+            )
+        }
+        startVerification()
+    }
+
+    override fun didShowCodeSentNotification() {
+        update2FAState { viewState ->
+            viewState.copy(didSendNewCode = false)
+        }
+    }
+
+    private fun startVerification() {
+        update2FAState { viewState ->
+            viewState.copy(errorMessage = null)
+        }
+
+        coroutineScope.launch {
+            val currentState = state.value.verificationState
+            if (currentState is Render2FA) {
+                val linkAccountManager = currentState.linkAccountManager()
+                val result = linkAccountManager.startVerification()
+                val error = result.exceptionOrNull()
+
+                update2FAState { viewState ->
+                    viewState.copy(
+                        isSendingNewCode = false,
+                        didSendNewCode = viewState.isSendingNewCode && error == null,
+                        errorMessage = error?.errorMessage,
+                    )
+                }
+            }
+        }
     }
 
     companion object {

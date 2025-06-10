@@ -19,4 +19,8 @@ internal class NoOpLinkInlineInteractor : LinkInlineInteractor {
     override fun setup(paymentMethodMetadata: PaymentMethodMetadata) {
         // No-op implementation
     }
+
+    override fun resendCode() = Unit
+
+    override fun didShowCodeSentNotification() = Unit
 }

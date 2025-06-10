@@ -25,6 +25,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -40,6 +41,7 @@ import com.stripe.android.uicore.strings.resolve
 internal fun LinkInline2FASection(
     verificationState: VerificationViewState,
     otpElement: OTPElement,
+    onResend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     DefaultLinkTheme {
@@ -63,7 +65,10 @@ internal fun LinkInline2FASection(
             Title(verificationState)
 
             // OTP input
-            OTPSection(verificationState, otpElement)
+            OTPSection(
+                verificationState = verificationState,
+                otpElement = otpElement
+            )
 
             // Compact error message
             verificationState.errorMessage?.let { error ->
@@ -77,6 +82,12 @@ internal fun LinkInline2FASection(
                         .padding(top = 4.dp)
                 )
             }
+
+            ResendCodeButton(
+                isProcessing = verificationState.isProcessing,
+                isSendingNewCode = verificationState.isSendingNewCode,
+                onClick = onResend,
+            )
         }
     }
 }
@@ -156,7 +167,8 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
 
     LinkInline2FASection(
         verificationState = verificationState,
-        otpElement = otpElement
+        otpElement = otpElement,
+        onResend = {}
     )
 }
 
@@ -186,7 +198,8 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
     ) {
         LinkInline2FASection(
             verificationState = verificationState,
-            otpElement = otpElement
+            otpElement = otpElement,
+            onResend = {}
         )
     }
 }
@@ -214,6 +227,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
 
     LinkInline2FASection(
         verificationState = verificationState,
-        otpElement = otpElement
+        otpElement = otpElement,
+        onResend = { }
     )
 }
