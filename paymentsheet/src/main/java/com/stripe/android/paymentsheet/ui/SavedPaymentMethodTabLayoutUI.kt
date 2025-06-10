@@ -319,6 +319,15 @@ private fun SavedPaymentMethodTab(
                 modifier = modifier,
             )
         }
+        is PaymentOptionsItem.ShopPay -> {
+            ShopPayTab(
+                width = width,
+                isEnabled = isEnabled,
+                isSelected = isSelected,
+                onItemSelected = onItemSelected,
+                modifier = modifier,
+            )
+        }
     }
 }
 
@@ -390,6 +399,28 @@ private fun LinkTab(
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun ShopPayTab(
+    width: Dp,
+    isEnabled: Boolean,
+    isSelected: Boolean,
+    onItemSelected: (PaymentSelection?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    SavedPaymentMethodTab(
+        viewWidth = width,
+        shouldShowModifyBadge = false,
+        shouldShowDefaultBadge = false,
+        isSelected = isSelected,
+        isEnabled = isEnabled,
+        iconRes = R.drawable.stripe_google_pay_mark,
+        labelText = "Shop Pay",
+        description = stringResource(StripeR.string.stripe_google_pay),
+        onItemSelectedListener = { onItemSelected(PaymentSelection.GooglePay) },
         modifier = modifier,
     )
 }

@@ -90,6 +90,16 @@ internal interface WalletButtonsInteractor {
                 return PaymentSelection.GooglePay
             }
         }
+
+        @Immutable
+        @Stable
+        data class ShopPay(
+            val checkoutUrl: String,
+        ) : WalletButton {
+            override fun createSelection(): PaymentSelection {
+                return PaymentSelection.ShopPay(checkoutUrl)
+            }
+        }
     }
 
     sealed interface ViewAction {
@@ -137,6 +147,11 @@ internal class DefaultWalletButtonsInteractor(
                     ).takeIf {
                         // Only show Link button if the Link verification state is resolved.
                         linkEmbeddedState.verificationState is VerificationState.RenderButton
+                    }
+                    WalletType.ShopPay -> {
+                        WalletButtonsInteractor.WalletButton.ShopPay(
+                            checkoutUrl = "https://example.com",
+                        )
                     }
                 }
             }
