@@ -723,6 +723,9 @@ public abstract interface class com/stripe/android/paymentelement/AnalyticEventC
 	public abstract fun onEvent (Lcom/stripe/android/paymentelement/AnalyticEvent;)V
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/AppearanceAPIAdditionsPreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface class com/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback {
 	public abstract fun onConfirmCustomPaymentMethod (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
 }
@@ -921,9 +924,6 @@ public abstract interface annotation class com/stripe/android/paymentelement/Exp
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalEmbeddedPaymentElementApi : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/ExtendedAppearancePreview : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
@@ -2340,7 +2340,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Shapes : android
 	public fun <init> (FFF)V
 	public synthetic fun <init> (FFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Landroid/content/Context;II)V
-	public fun <init> (Landroid/content/Context;III)V
 	public final fun component1 ()F
 	public final fun component2 ()F
 	public final fun component3 ()F

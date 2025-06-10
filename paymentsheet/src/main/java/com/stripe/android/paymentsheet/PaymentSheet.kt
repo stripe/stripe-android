@@ -25,11 +25,11 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.ExtendedAppearancePreview
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -1543,7 +1543,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Shapes @ExtendedAppearancePreview constructor(
+    data class Shapes @AppearanceAPIAdditionsPreview constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
@@ -1560,7 +1560,7 @@ class PaymentSheet internal constructor(
          */
         val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
-        @OptIn(ExtendedAppearancePreview::class)
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             /**
              * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
@@ -1577,7 +1577,7 @@ class PaymentSheet internal constructor(
             bottomSheetCornerRadiusDp = cornerRadiusDp,
         )
 
-        @OptIn(ExtendedAppearancePreview::class)
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             context: Context,
             cornerRadiusDp: Int,
@@ -1586,18 +1586,6 @@ class PaymentSheet internal constructor(
             cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
             borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp),
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
-        )
-
-        @ExtendedAppearancePreview
-        constructor(
-            context: Context,
-            @DimenRes cornerRadiusRes: Int,
-            @DimenRes borderStrokeWidthRes: Int,
-            @DimenRes bottomSheetCornerRadiusRes: Int,
-        ) : this(
-            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes),
-            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes),
-            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes),
         )
 
         companion object {
