@@ -1,6 +1,7 @@
 package com.stripe.android.utils.screenshots
 
 import android.graphics.Color
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
@@ -28,6 +29,7 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
         ),
     ),
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     CrazyAppearance(
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors(
@@ -70,7 +72,19 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                 topDp = 20f,
                 endDp = 40f,
                 bottomDp = 60f
-            )
+            ),
+            typography = PaymentSheet.Typography(
+                sizeScaleFactor = 1f,
+                fontResId = null,
+                custom = PaymentSheet.Typography.Custom(
+                    h1 = PaymentSheet.Typography.Font(
+                        fontFamily = R.font.cursive,
+                        fontSizeSp = 24f,
+                        fontWeight = 700,
+                        letterSpacingSp = 0.15f,
+                    )
+                )
+            ),
         ),
     );
 

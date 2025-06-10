@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
@@ -13,7 +15,7 @@ import com.stripe.android.R as StripeR
 class CvcConfig : CardDetailsTextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "cvc"
-    override val label: Int = StripeR.string.stripe_cvc_number_hint
+    override val label: ResolvableString = resolvableString(StripeR.string.stripe_cvc_number_hint)
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
 
     override fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation {

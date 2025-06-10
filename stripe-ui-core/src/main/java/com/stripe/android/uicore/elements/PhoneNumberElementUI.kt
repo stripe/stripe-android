@@ -39,8 +39,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.moveFocusSafely
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
@@ -85,7 +87,7 @@ fun PhoneNumberCollectionSection(
 
     Section(
         modifier = Modifier.padding(vertical = 8.dp),
-        title = sectionTitle,
+        title = sectionTitle?.let { resolvableString(it) },
         error = sectionErrorString,
         isSelected = isSelected
     ) {
@@ -168,10 +170,10 @@ fun PhoneNumberElementUI(
                     text = if (controller.showOptionalLabel) {
                         stringResource(
                             R.string.stripe_form_label_optional,
-                            stringResource(label)
+                            label.resolve()
                         )
                     } else {
-                        stringResource(label)
+                        label.resolve()
                     }
                 )
             },

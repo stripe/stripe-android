@@ -67,6 +67,7 @@ import androidx.fragment.app.setFragmentResult
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
@@ -501,6 +502,7 @@ private fun Insets(
     }
 }
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Typography(
     currentAppearance: PaymentSheet.Appearance,

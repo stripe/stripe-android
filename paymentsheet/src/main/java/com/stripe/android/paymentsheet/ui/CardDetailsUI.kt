@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
@@ -82,7 +83,7 @@ private fun CardDetailsEditUI(
     Column {
         Section(
             title = billingDetailsForm?.let {
-                CoreR.string.stripe_paymentsheet_add_payment_method_card_information
+                resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
             },
             error = expiryDateState.sectionError()?.resolve(),
             modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),

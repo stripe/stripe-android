@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -12,11 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 /**
@@ -26,7 +26,7 @@ import com.stripe.android.uicore.stripeColors
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Section(
-    @StringRes title: Int?,
+    title: ResolvableString?,
     error: String?,
     modifier: Modifier = Modifier,
     isSelected: Boolean = false,
@@ -49,10 +49,10 @@ fun Section(
  * This is the layout for the section title
  */
 @Composable
-internal fun SectionTitle(@StringRes titleText: Int?) {
+internal fun SectionTitle(titleText: ResolvableString?) {
     titleText?.let {
         H6Text(
-            text = stringResource(titleText),
+            text = it.resolve(),
             modifier = Modifier
                 .padding(bottom = 4.dp)
                 .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility

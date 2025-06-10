@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
@@ -87,9 +88,9 @@ data class StripeTypography(
     @FontRes
     val fontFamily: Int?,
     // individual front overrides, only valid when fontFamily is null.
+    val h4: TextStyle? = null,
     val body1FontFamily: FontFamily? = null,
     val body2FontFamily: FontFamily? = null,
-    val h4FontFamily: FontFamily? = null,
     val h5FontFamily: FontFamily? = null,
     val h6FontFamily: FontFamily? = null,
     val subtitle1FontFamily: FontFamily? = null,
@@ -334,9 +335,10 @@ fun StripeTypography.toComposeTypography(): Typography {
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = defaultTextStyle.copy(
-        fontFamily = globalFontFamily ?: h4FontFamily ?: FontFamily.Default,
-        fontSize = (xLargeFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightBold)
+        fontFamily = h4?.fontFamily ?: globalFontFamily ?: FontFamily.Default,
+        fontSize = h4?.fontSize.elseIfNullOrUnspecified(unit = xLargeFontSize * fontSizeMultiplier),
+        fontWeight = h4?.fontWeight ?: FontWeight(fontWeightBold),
+        letterSpacing = h4?.letterSpacing.elseIfNullOrUnspecified(defaultTextStyle.letterSpacing)
     )
 
     // h5 is our medium headline label.
@@ -706,6 +708,16 @@ private fun TextStyle.toCompat(): TextStyle {
         platformStyle = PlatformTextStyle(includeFontPadding = true),
     )
 }
+
+private fun TextUnit?.elseIfNullOrUnspecified(
+    unit: TextUnit
+): TextUnit = this?.run {
+    if (isUnspecified) {
+        unit
+    } else {
+        this
+    }
+} ?: unit
 
 private fun Color.modifyBrightness(transform: (Float) -> Float): Color {
     val hsl = FloatArray(3)

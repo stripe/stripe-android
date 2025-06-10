@@ -1,10 +1,10 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.resolvableString
 import java.util.Locale
 import com.stripe.android.core.R as CoreR
 
@@ -32,8 +32,7 @@ class CountryConfig(
 ) : DropdownConfig {
     override val debugLabel = "country"
 
-    @StringRes
-    override val label = CoreR.string.stripe_address_label_country_or_region
+    override val label = resolvableString(CoreR.string.stripe_address_label_country_or_region)
 
     internal val countries = CountryUtils.getOrderedCountries(locale)
         .filter {

@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.identity.R
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.NameParam
@@ -29,12 +30,12 @@ internal fun NameSection(
 ) {
     val firstNameController = remember {
         SimpleTextFieldController(
-            textFieldConfig = SimpleTextFieldConfig(R.string.stripe_first_name)
+            textFieldConfig = SimpleTextFieldConfig(resolvableString(R.string.stripe_first_name))
         )
     }
     val lastNameController = remember {
         SimpleTextFieldController(
-            textFieldConfig = SimpleTextFieldConfig(R.string.stripe_last_name)
+            textFieldConfig = SimpleTextFieldConfig(resolvableString(R.string.stripe_last_name))
         )
     }
     val nameSectionElement = remember {
@@ -49,7 +50,7 @@ internal fun NameSection(
                     controller = lastNameController
                 )
             ),
-            label = CoreR.string.stripe_address_label_name
+            label = resolvableString(CoreR.string.stripe_address_label_name)
         )
     }
 

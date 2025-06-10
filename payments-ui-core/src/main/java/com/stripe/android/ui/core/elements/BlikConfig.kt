@@ -1,10 +1,11 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -22,8 +23,7 @@ class BlikConfig : TextFieldConfig {
         "^[0-9]{6}\$".toRegex()
     }
 
-    @StringRes
-    override val label: Int = R.string.stripe_blik_code
+    override val label: ResolvableString = resolvableString(R.string.stripe_blik_code)
 
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel: String = "blik_code"

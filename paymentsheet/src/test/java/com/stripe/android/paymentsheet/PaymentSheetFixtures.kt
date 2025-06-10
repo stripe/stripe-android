@@ -68,7 +68,7 @@ internal object PaymentSheetFixtures {
                 cornerRadiusDp = 0.0f,
                 borderStrokeWidthDp = 0.0f
             ),
-            typography = PaymentSheet.Typography.default.copy(
+            typography = PaymentSheet.Typography(
                 sizeScaleFactor = 1.1f,
                 fontResId = 0
             ),

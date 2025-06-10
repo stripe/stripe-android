@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth
 import com.stripe.android.core.R
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.PostalCodeConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import org.junit.Test
@@ -131,7 +132,7 @@ class PostalCodeConfigTest {
 
     private fun createConfigForCountry(country: String): PostalCodeConfig {
         return PostalCodeConfig(
-            label = R.string.stripe_address_label_postal_code,
+            label = resolvableString(R.string.stripe_address_label_postal_code),
             country = country
         )
     }

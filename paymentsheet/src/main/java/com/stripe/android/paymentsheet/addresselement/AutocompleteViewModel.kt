@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -49,7 +50,7 @@ internal class AutocompleteViewModel @Inject constructor(
     val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
 
     private val config = SimpleTextFieldConfig(
-        label = UiCoreR.string.stripe_address_label_address,
+        label = resolvableString(UiCoreR.string.stripe_address_label_address),
         trailingIcon = MutableStateFlow(null)
     )
 

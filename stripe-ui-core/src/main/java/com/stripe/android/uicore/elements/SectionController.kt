@@ -1,7 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SectionController(
-    @StringRes val label: Int?,
+    val label: ResolvableString?,
     sectionFieldErrorControllers: List<SectionFieldErrorController>
 ) : Controller {
     val error: StateFlow<FieldError?> = combineAsStateFlow(

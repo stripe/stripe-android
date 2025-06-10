@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.identity.navigation.CountryNotListedDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
@@ -67,7 +68,10 @@ internal fun AddressSection(
         }
     }
     val sectionElement = remember(selectedCountryCode) {
-        SectionElement.wrap(sectionList, UiCoreR.string.stripe_address_label_address)
+        SectionElement.wrap(
+            sectionList,
+            resolvableString(UiCoreR.string.stripe_address_label_address)
+        )
     }
     val formFieldValues by sectionElement.getFormFieldValueFlow()
         .collectAsState()

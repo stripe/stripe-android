@@ -1,10 +1,11 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
@@ -14,7 +15,7 @@ import java.util.regex.Pattern
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmailConfig(
-    @StringRes override val label: Int = R.string.stripe_email
+    override val label: ResolvableString = resolvableString(R.string.stripe_email)
 ) : TextFieldConfig {
 
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None

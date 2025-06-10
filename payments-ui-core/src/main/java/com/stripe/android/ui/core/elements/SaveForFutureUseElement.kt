@@ -21,6 +21,7 @@ data class SaveForFutureUseElement(
     override val mandateText: ResolvableString? = null
 
     override val controller: SaveForFutureUseController = SaveForFutureUseController(
+        merchantName,
         initialValue
     )
 

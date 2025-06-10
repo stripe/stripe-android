@@ -37,7 +37,7 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
     val layoutDirection: LayoutDirection?
-    override val label: StateFlow<Int?>
+    override val label: StateFlow<ResolvableString>
     val visualTransformation: StateFlow<VisualTransformation>
     override val showOptionalLabel: Boolean
     val fieldState: StateFlow<TextFieldState>

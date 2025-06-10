@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -102,6 +103,6 @@ class FormControllerTest {
             .map { it.controller }
             .filterIsInstance<TextFieldController>()
             .firstOrNull {
-                it.label.first() == label
+                it.label.first() == resolvableString(label)
             }
 }

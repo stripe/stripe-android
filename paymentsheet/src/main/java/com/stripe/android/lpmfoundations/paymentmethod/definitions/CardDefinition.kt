@@ -276,7 +276,7 @@ private fun cardBillingElements(
     return listOfNotNull(
         SectionElement.wrap(
             addressElement,
-            PaymentsUiCoreR.string.stripe_billing_details,
+            resolvableString(PaymentsUiCoreR.string.stripe_billing_details),
         ),
         sameAsShippingElement,
     )
@@ -302,7 +302,7 @@ private fun contactInformationElement(
     if (elements.isEmpty()) return null
 
     return SectionElement.wrap(
-        label = PaymentsUiCoreR.string.stripe_contact_information,
+        label = resolvableString(PaymentsUiCoreR.string.stripe_contact_information),
         sectionFieldElements = elements,
     )
 }

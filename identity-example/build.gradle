@@ -59,6 +59,7 @@ android {
 
 dependencies {
     implementation project(':identity')
+    implementation project(':stripe-core')
     implementation project(':stripe-ui-core')
 
     implementation libs.accompanist.materialThemeAdapter
