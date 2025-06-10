@@ -28,7 +28,6 @@ internal class WalletButtonsContent(
     @Composable
     fun Content() {
         val state by interactor.state.collectAsState()
-        val context = LocalContext.current
 
         DisposableEffect(Unit) {
             interactor.handleViewAction(ViewAction.OnShown)
@@ -38,7 +37,7 @@ internal class WalletButtonsContent(
             }
         }
 
-        ResendCodeNotificationEffect(state, context)
+        ResendCodeNotificationEffect(state)
 
         // Render the wallet buttons and 2FA section if they exist
         if (state.hasContent) {
@@ -92,9 +91,9 @@ internal class WalletButtonsContent(
 
     @Composable
     private fun ResendCodeNotificationEffect(
-        state: WalletButtonsInteractor.State,
-        context: Context
+        state: WalletButtonsInteractor.State
     ) {
+        val context = LocalContext.current
         LaunchedEffect(state.link2FAState?.viewState?.didSendNewCode) {
             if (state.link2FAState?.viewState?.didSendNewCode == true) {
                 Toast.makeText(context, R.string.stripe_verification_code_sent, Toast.LENGTH_SHORT).show()
