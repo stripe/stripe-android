@@ -3,13 +3,20 @@ package com.stripe.android.paymentsheet
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal fun PaymentSheet.Appearance.parseAppearance() {
     StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(
         component = Color(colorsLight.component),
@@ -51,7 +58,8 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
 
     StripeTheme.typographyMutable = StripeThemeDefaults.typography.copy(
         fontFamily = typography.fontResId,
-        fontSizeMultiplier = typography.sizeScaleFactor
+        fontSizeMultiplier = typography.sizeScaleFactor,
+        h4 = typography.custom.h1?.toTextStyle(),
     )
 
     StripeTheme.primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle.copy(
@@ -87,5 +95,15 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         top = formInsetValues.topDp,
         end = formInsetValues.endDp,
         bottom = formInsetValues.bottomDp
+    )
+}
+
+@OptIn(AppearanceAPIAdditionsPreview::class)
+private fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
+    return TextStyle(
+        fontSize = fontSizeSp?.sp ?: TextUnit.Unspecified,
+        fontWeight = fontWeight?.let { FontWeight(it) },
+        fontFamily = fontFamily?.let { FontFamily(Font(it)) },
+        letterSpacing = letterSpacingSp?.sp ?: TextUnit.Unspecified,
     )
 }

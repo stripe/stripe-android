@@ -1597,7 +1597,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Typography(
+    data class Typography @AppearanceAPIAdditionsPreview constructor(
         /**
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
          * When this value increases fonts will increase in size and decrease when this value is lowered.
@@ -1608,8 +1608,65 @@ class PaymentSheet internal constructor(
          * The font used in text. This should be a resource ID value.
          */
         @FontRes
-        val fontResId: Int?
+        val fontResId: Int?,
+
+        /**
+         * Custom font configuration for specific text styles
+         * Note: When set, these fonts override the default font calculations for their respective text styles
+         */
+        val custom: Custom,
     ) : Parcelable {
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        constructor(
+            /**
+             * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
+             * When this value increases fonts will increase in size and decrease when this value is lowered.
+             */
+            sizeScaleFactor: Float,
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            @FontRes
+            fontResId: Int?
+        ) : this(
+            sizeScaleFactor = sizeScaleFactor,
+            fontResId = fontResId,
+            custom = Custom(),
+        )
+
+        @AppearanceAPIAdditionsPreview
+        @Parcelize
+        data class Custom(
+            /**
+             * The font used for headlines (e.g., "Add your payment information")
+             *
+             * Note: If `null`, uses the calculated font based on `base` and `sizeScaleFactor`
+             */
+            val h1: Font? = null,
+        ) : Parcelable
+
+        @AppearanceAPIAdditionsPreview
+        @Parcelize
+        data class Font(
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            @FontRes
+            val fontFamily: Int? = null,
+            /**
+             * The font size used for the text. This should represent a sp value.
+             */
+            val fontSizeSp: Float? = null,
+            /**
+             * The font weight used for the text.
+             */
+            val fontWeight: Int? = null,
+            /**
+             * The letter spacing used for the text. This should represent a sp value.
+             */
+            val letterSpacingSp: Float? = null,
+        ) : Parcelable
+
         companion object {
             val default = Typography(
                 sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
