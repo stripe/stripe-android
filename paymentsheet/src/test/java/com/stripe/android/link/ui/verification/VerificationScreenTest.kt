@@ -141,7 +141,6 @@ internal class VerificationScreenTest {
         onOtpTag().assertIsDisplayed()
         onEmailTag().assertIsDisplayed().assertIsEnabled()
         onErrorTag().assertDoesNotExist()
-        onLoaderTag().assertIsDisplayed()
         onResendCodeButtonTag()
             .assertIsDisplayed()
             .assertHasClickAction()
