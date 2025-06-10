@@ -153,6 +153,12 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 isEnabled = false,
                 isSelected = false,
             )
+            SavedPaymentMethodRowButton(
+                rowStyle = Embedded.RowStyle.FlatWithChevron.default,
+                displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                isEnabled = true,
+                isSelected = true,
+            )
         }
     }
 }

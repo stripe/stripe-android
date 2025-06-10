@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -24,10 +25,7 @@ import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +33,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -44,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -106,7 +106,7 @@ internal fun PaymentMethodRowButton(
                 style = style
             )
 
-            if (style !is RowStyle.FlatWithCheckmark) {
+            if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
@@ -121,6 +121,7 @@ internal fun PaymentMethodRowButton(
     }
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonOuterContent(
@@ -165,7 +166,6 @@ private fun RowButtonOuterContent(
         }
         is RowStyle.FlatWithChevron -> {
             RowButtonChevronOuterContent(
-                isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
                     horizontal = style.horizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
@@ -309,7 +309,6 @@ private fun RowButtonCheckmarkOuterContent(
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonChevronOuterContent(
-    isSelected: Boolean,
     contentPaddingValues: PaddingValues,
     verticalArrangement: Arrangement.Vertical,
     trailingContent: (@Composable RowScope.() -> Unit)?,
@@ -333,17 +332,13 @@ private fun RowButtonChevronOuterContent(
             }
         }
         Spacer(Modifier.weight(1f))
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 0.dp)
-                    .offset(3.dp),
-                tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
-            )
-        }
+        Icon(
+            painter = painterResource(R.drawable.stripe_ic_chevron_right),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.CenterVertically),
+            tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
+        )
     }
 }
 
