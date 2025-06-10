@@ -121,7 +121,8 @@ internal fun VerificationBody(
                     background = LinkTheme.colors.surfaceSecondary,
                     unselectedBorder = LinkTheme.colors.surfaceSecondary
                 ),
-                focusRequester = focusRequester
+                focusRequester = focusRequester,
+                selectedStrokeWidth = 1.5.dp,
             )
         }
 

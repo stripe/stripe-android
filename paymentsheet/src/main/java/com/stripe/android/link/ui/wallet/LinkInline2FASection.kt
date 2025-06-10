@@ -116,7 +116,8 @@ private fun OTPSection(
                     selectedBackground = LinkTheme.colors.surfacePrimary,
                     background = LinkTheme.colors.surfacePrimary,
                     unselectedBorder = LinkTheme.colors.borderDefault
-                )
+                ),
+                selectedStrokeWidth = 1.5.dp,
             )
         }
 

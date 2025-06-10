@@ -519,8 +519,7 @@ val MaterialTheme.stripeTypography: StripeTypography
 fun MaterialTheme.getBorderStrokeWidth(
     isSelected: Boolean,
     selectedStrokeWidth: Dp = 2.dp
-) =
-    if (isSelected) maxDp(stripeShapes.borderStrokeWidth.dp, selectedStrokeWidth) else stripeShapes.borderStrokeWidth.dp
+) = if (isSelected) maxDp(stripeShapes.borderStrokeWidth.dp, selectedStrokeWidth) else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable

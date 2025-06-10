@@ -109,6 +109,7 @@ fun OTPElementUI(
         background = Color.Transparent,
         selectedBackground = Color.Transparent
     ),
+    selectedStrokeWidth: Dp = 2.dp,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     val focusManager = LocalFocusManager.current
@@ -135,7 +136,7 @@ fun OTPElementUI(
                 border = BorderStroke(
                     width = MaterialTheme.getBorderStrokeWidth(
                         isSelected = isSelected,
-                        selectedStrokeWidth = 1.5.dp
+                        selectedStrokeWidth = selectedStrokeWidth,
                     ),
                     color = if (isSelected) {
                         colors.selectedBorder
