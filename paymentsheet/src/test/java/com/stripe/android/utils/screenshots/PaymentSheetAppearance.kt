@@ -1,7 +1,7 @@
 package com.stripe.android.utils.screenshots
 
 import android.graphics.Color
-import com.stripe.android.paymentelement.ExtendedAppearancePreview
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
@@ -29,7 +29,7 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
         ),
     ),
 
-    @OptIn(ExtendedAppearancePreview::class)
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     CrazyAppearance(
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors(

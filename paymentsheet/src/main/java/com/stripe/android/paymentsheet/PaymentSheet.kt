@@ -1597,7 +1597,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Typography @ExtendedAppearancePreview constructor(
+    data class Typography @AppearanceAPIAdditionsPreview constructor(
         /**
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
          * When this value increases fonts will increase in size and decrease when this value is lowered.
@@ -1616,7 +1616,7 @@ class PaymentSheet internal constructor(
          */
         val custom: Custom,
     ) : Parcelable {
-        @OptIn(ExtendedAppearancePreview::class)
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             /**
              * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
@@ -1634,7 +1634,7 @@ class PaymentSheet internal constructor(
             custom = Custom(),
         )
 
-        @ExtendedAppearancePreview
+        @AppearanceAPIAdditionsPreview
         @Parcelize
         data class Custom(
             /**
@@ -1645,7 +1645,7 @@ class PaymentSheet internal constructor(
             val h1: Font? = null,
         ) : Parcelable
 
-        @ExtendedAppearancePreview
+        @AppearanceAPIAdditionsPreview
         @Parcelize
         data class Font(
             /**

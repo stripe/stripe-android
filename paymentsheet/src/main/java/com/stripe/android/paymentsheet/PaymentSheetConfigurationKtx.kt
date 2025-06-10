@@ -9,14 +9,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import com.stripe.android.paymentelement.ExtendedAppearancePreview
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 
-@OptIn(ExtendedAppearancePreview::class)
+@OptIn(AppearanceAPIAdditionsPreview::class)
 internal fun PaymentSheet.Appearance.parseAppearance() {
     StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(
         component = Color(colorsLight.component),
@@ -98,7 +98,7 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     )
 }
 
-@OptIn(ExtendedAppearancePreview::class)
+@OptIn(AppearanceAPIAdditionsPreview::class)
 private fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
     return TextStyle(
         fontSize = fontSizeSp?.sp ?: TextUnit.Unspecified,
