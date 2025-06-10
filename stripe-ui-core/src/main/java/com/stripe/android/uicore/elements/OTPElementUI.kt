@@ -133,7 +133,10 @@ fun OTPElementUI(
                 shape = boxShape,
                 backgroundColor = MaterialTheme.stripeColors.component,
                 border = BorderStroke(
-                    width = MaterialTheme.getBorderStrokeWidth(isSelected),
+                    width = MaterialTheme.getBorderStrokeWidth(
+                        isSelected = isSelected,
+                        selectedStrokeWidth = 1.5.dp
+                    ),
                     color = if (isSelected) {
                         colors.selectedBorder
                     } else {

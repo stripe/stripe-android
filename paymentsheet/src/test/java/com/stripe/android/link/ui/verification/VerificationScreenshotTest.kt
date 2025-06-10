@@ -93,7 +93,7 @@ internal class VerificationScreenshotTest(
                 content = TestCase.Content(
                     otpElement = otpSpecWithContent(),
                     state = VerificationViewState(
-                        isProcessing = isDialog,
+                        isProcessing = true,
                         requestFocus = false,
                         redactedPhoneNumber = "(•••) ••• ••91",
                         email = "test@test.com",
@@ -109,7 +109,7 @@ internal class VerificationScreenshotTest(
                 content = TestCase.Content(
                     otpElement = otpSpecWithContent(),
                     state = VerificationViewState(
-                        isSendingNewCode = isDialog,
+                        isSendingNewCode = true,
                         requestFocus = false,
                         redactedPhoneNumber = "(•••) ••• ••91",
                         email = "test@test.com",
