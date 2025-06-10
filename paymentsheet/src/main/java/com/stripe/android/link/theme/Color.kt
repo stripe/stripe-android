@@ -142,10 +142,13 @@ internal object LinkThemeConfig {
         )
 
     /**
-     * Scrim color does not have a match in the Link theme, so we use a default color matching Elements.
+     * Workaround:
+     *
+     * The OTP background color not consistent across light and dark mode.
      */
-    internal val LinkColors.scrim: Color
-        get() = Color.Black.copy(alpha = 0.32f)
+    internal val LinkColors.otpSurface
+        @Composable
+        get() = if (isSystemInDarkTheme()) LinkTheme.colors.surfaceSecondary else LinkTheme.colors.surfacePrimary
 }
 
 @Composable

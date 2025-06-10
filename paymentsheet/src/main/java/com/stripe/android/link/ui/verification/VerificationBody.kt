@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.verification
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -24,10 +25,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.otpSurface
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
@@ -64,28 +68,15 @@ internal fun VerificationBody(
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    LaunchedEffect(state.isProcessing) {
-        if (state.isProcessing) {
-            focusManager.clearFocus(true)
-            keyboardController?.hide()
-        }
-    }
-
-    LaunchedEffect(state.requestFocus) {
-        if (state.requestFocus) {
-            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
-            focusRequester.requestFocus()
-            keyboardController?.show()
-            onFocusRequested()
-        }
-    }
-
-    LaunchedEffect(state.didSendNewCode) {
-        if (state.didSendNewCode) {
-            Toast.makeText(context, R.string.stripe_verification_code_sent, Toast.LENGTH_SHORT).show()
-            didShowCodeSentNotification()
-        }
-    }
+    LaunchedEffects(
+        state = state,
+        focusManager = focusManager,
+        keyboardController = keyboardController,
+        focusRequester = focusRequester,
+        onFocusRequested = onFocusRequested,
+        context = context,
+        didShowCodeSentNotification = didShowCodeSentNotification
+    )
 
     ContentWrapper(
         isDialog = state.isDialog,
@@ -127,7 +118,7 @@ internal fun VerificationBody(
                 colors = OTPElementColors(
                     selectedBorder = LinkTheme.colors.borderSelected,
                     placeholder = LinkTheme.colors.textPrimary,
-                    background = LinkTheme.colors.surfaceSecondary,
+                    background = LinkTheme.colors.otpSurface,
                     unselectedBorder = LinkTheme.colors.borderDefault
                 ),
                 focusRequester = focusRequester
@@ -161,6 +152,40 @@ internal fun VerificationBody(
         }
 
         Spacer(modifier = Modifier.size(12.dp))
+    }
+}
+
+@Composable
+private fun LaunchedEffects(
+    state: VerificationViewState,
+    focusManager: FocusManager,
+    keyboardController: SoftwareKeyboardController?,
+    focusRequester: FocusRequester,
+    onFocusRequested: () -> Unit,
+    context: Context,
+    didShowCodeSentNotification: () -> Unit
+) {
+    LaunchedEffect(state.isProcessing) {
+        if (state.isProcessing) {
+            focusManager.clearFocus(true)
+            keyboardController?.hide()
+        }
+    }
+
+    LaunchedEffect(state.requestFocus) {
+        if (state.requestFocus) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+            focusRequester.requestFocus()
+            keyboardController?.show()
+            onFocusRequested()
+        }
+    }
+
+    LaunchedEffect(state.didSendNewCode) {
+        if (state.didSendNewCode) {
+            Toast.makeText(context, R.string.stripe_verification_code_sent, Toast.LENGTH_SHORT).show()
+            didShowCodeSentNotification()
+        }
     }
 }
 

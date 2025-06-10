@@ -77,7 +77,7 @@ internal fun VerificationDialogBody(
         ) {
             // This is a workaround to set the dim amount to 0f in dark mode
             // because the default dim amount is too dark for the dialog
-            val dim = if (isSystemInDarkTheme()) 0.3f else 0.8f
+            val dim = if (isSystemInDarkTheme()) DIM_DARK_THEME else DIM_LIGHT_THEME
             (LocalView.current.parent as? DialogWindowProvider)?.window?.setDimAmount(dim)
             DefaultLinkTheme {
                 Surface(
@@ -99,6 +99,9 @@ internal fun VerificationDialogBody(
         }
     }
 }
+
+private const val DIM_LIGHT_THEME = 0.8f
+private const val DIM_DARK_THEME = 0.3f
 
 @Preview()
 @Composable
