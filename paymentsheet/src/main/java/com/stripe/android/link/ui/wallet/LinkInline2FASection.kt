@@ -63,36 +63,7 @@ internal fun LinkInline2FASection(
             Title(verificationState)
 
             // OTP input
-            Box(
-                contentAlignment = Alignment.Center
-            ) {
-                StripeThemeForLink {
-                    OTPElementUI(
-                        enabled = !verificationState.isProcessing,
-                        element = otpElement,
-                        otpInputPlaceholder = " ",
-                        middleSpacing = 8.dp,
-                        modifier = Modifier
-                            .testTag(VERIFICATION_OTP_TAG)
-                            .alpha(if (verificationState.isProcessing) ContentAlpha.disabled else ContentAlpha.high),
-                        colors = OTPElementColors(
-                            selectedBorder = LinkTheme.colors.borderSelected,
-                            placeholder = LinkTheme.colors.textPrimary,
-                            background = LinkTheme.colors.surfacePrimary,
-                            unselectedBorder = LinkTheme.colors.borderDefault
-                        ),
-                    )
-                }
-
-                // Smaller loading indicator
-                if (verificationState.isProcessing) {
-                    LinkSpinner(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 4.dp,
-                        filledColor = LinkTheme.colors.buttonPrimary
-                    )
-                }
-            }
+            OTPSection(verificationState, otpElement)
 
             // Compact error message
             verificationState.errorMessage?.let { error ->
@@ -106,6 +77,44 @@ internal fun LinkInline2FASection(
                         .padding(top = 4.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun OTPSection(
+    verificationState: VerificationViewState,
+    otpElement: OTPElement
+) {
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        StripeThemeForLink {
+            OTPElementUI(
+                enabled = !verificationState.isProcessing,
+                element = otpElement,
+                otpInputPlaceholder = " ",
+                middleSpacing = 8.dp,
+                modifier = Modifier
+                    .testTag(VERIFICATION_OTP_TAG)
+                    .alpha(if (verificationState.isProcessing) ContentAlpha.disabled else ContentAlpha.high),
+                colors = OTPElementColors(
+                    selectedBorder = LinkTheme.colors.borderSelected,
+                    placeholder = LinkTheme.colors.textPrimary,
+                    background = LinkTheme.colors.surfaceSecondary,
+                    selectedBackground = LinkTheme.colors.surfacePrimary,
+                    unselectedBorder = LinkTheme.colors.surfaceSecondary
+                ),
+            )
+        }
+
+        // Smaller loading indicator
+        if (verificationState.isProcessing) {
+            LinkSpinner(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 4.dp,
+                filledColor = LinkTheme.colors.buttonPrimary
+            )
         }
     }
 }

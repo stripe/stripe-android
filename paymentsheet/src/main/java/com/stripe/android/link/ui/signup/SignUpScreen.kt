@@ -108,7 +108,7 @@ internal fun SignUpBody(
                 .padding(top = 4.dp, bottom = 30.dp),
             textAlign = TextAlign.Center,
             style = LinkTheme.typography.body,
-            color = LinkTheme.colors.textSecondary
+            color = LinkTheme.colors.textTertiary
         )
         StripeThemeForLink {
             EmailCollectionSection(

@@ -140,15 +140,6 @@ internal object LinkThemeConfig {
             selectedColor = LinkTheme.colors.buttonBrand,
             unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
         )
-
-    /**
-     * Workaround:
-     *
-     * The OTP background color not consistent across light and dark mode.
-     */
-    internal val LinkColors.otpSurface
-        @Composable
-        get() = if (isSystemInDarkTheme()) LinkTheme.colors.surfaceSecondary else LinkTheme.colors.surfacePrimary
 }
 
 @Composable

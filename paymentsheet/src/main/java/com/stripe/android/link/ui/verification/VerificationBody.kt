@@ -38,7 +38,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.otpSurface
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
@@ -118,8 +117,9 @@ internal fun VerificationBody(
                 colors = OTPElementColors(
                     selectedBorder = LinkTheme.colors.borderSelected,
                     placeholder = LinkTheme.colors.textPrimary,
-                    background = LinkTheme.colors.otpSurface,
-                    unselectedBorder = LinkTheme.colors.borderDefault
+                    selectedBackground = LinkTheme.colors.surfacePrimary,
+                    background = LinkTheme.colors.surfaceSecondary,
+                    unselectedBorder = LinkTheme.colors.surfaceSecondary
                 ),
                 focusRequester = focusRequester
             )
