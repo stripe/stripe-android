@@ -599,7 +599,7 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         // Verify Link launcher was called for the first time
-        verify(linkPaymentLauncher).present(
+        verify(flowControllerLinkPaymentLauncher).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
@@ -607,7 +607,7 @@ internal class DefaultFlowControllerTest {
         )
 
         // Simulate user dismissing 2FA with back press
-        flowController.onLinkPaymentMethodSelected(
+        flowController.onLinkResultFromFlowController(
             LinkActivityResult.Canceled(
                 reason = Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.Value(verificationStartedAccount)
@@ -615,13 +615,13 @@ internal class DefaultFlowControllerTest {
         )
 
         // Reset the mock to clear previous invocations
-        reset(linkPaymentLauncher)
+        reset(flowControllerLinkPaymentLauncher)
 
         // Try to present payment options again
         flowController.presentPaymentOptions()
 
         // Verify Link launcher was NOT called the second time
-        verify(linkPaymentLauncher, never()).present(
+        verify(flowControllerLinkPaymentLauncher, never()).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             useLinkExpress = any(),
