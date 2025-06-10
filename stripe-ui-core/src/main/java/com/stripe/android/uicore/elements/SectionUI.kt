@@ -77,7 +77,6 @@ fun SectionCard(
 ) {
     Card(
         border = border,
-        // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = backgroundColor,
         shape = shape,

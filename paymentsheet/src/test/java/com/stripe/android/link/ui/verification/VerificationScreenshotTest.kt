@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.verification
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
@@ -16,7 +17,9 @@ internal class VerificationScreenshotTest(
 ) {
 
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(
+        SystemAppearance.entries
+    )
 
     @Test
     fun testContent() {
