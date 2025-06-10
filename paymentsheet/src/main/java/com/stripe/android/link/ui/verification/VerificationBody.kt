@@ -309,7 +309,7 @@ private fun ChangeEmailRow(
 }
 
 @Composable
-private fun ResendCodeButton(
+internal fun ResendCodeButton(
     isProcessing: Boolean,
     isSendingNewCode: Boolean,
     onClick: () -> Unit,
