@@ -61,6 +61,11 @@ internal object TestFactory {
         state = ConsumerSession.VerificationSession.SessionState.Verified
     )
 
+    val VERIFICATION_STARTED_SESSION = ConsumerSession.VerificationSession(
+        type = ConsumerSession.VerificationSession.SessionType.Sms,
+        state = ConsumerSession.VerificationSession.SessionState.Started
+    )
+
     val CONSUMER_SESSION = ConsumerSession(
         emailAddress = EMAIL,
         clientSecret = CLIENT_SECRET,
