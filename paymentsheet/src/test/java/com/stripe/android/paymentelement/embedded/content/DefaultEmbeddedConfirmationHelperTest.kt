@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
@@ -159,7 +160,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         )
         confirmationStateHolder.state = loadedState
         val stateHelper = FakeEmbeddedStateHelper()
-        stateHelper.state = if (loadedState != null) EmbeddedPaymentElement.State(loadedState, null) else null
+        stateHelper.state = if (loadedState != null) EmbeddedPaymentElement.State(loadedState, null, Bundle()) else null
         val callbackHelper = FakeEmbeddedResultCallbackHelper(
             stateHelper = stateHelper
         )
