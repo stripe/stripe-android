@@ -104,15 +104,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun createLinkAccountSession(
-        linkMode: LinkMode
-    ): Result<FinancialConnectionsSession> {
+    override suspend fun createLinkAccountSession(): Result<FinancialConnectionsSession> {
         return runCatching {
             val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
             linkRepository.createLinkAccountSession(
                 consumerSessionClientSecret = linkAccount.clientSecret,
                 stripeIntent = config.stripeIntent,
-                linkMode = config.linkMode!!,
+                linkMode = config.linkMode,
                 consumerPublishableKey = consumerPublishableKey,
             ).getOrThrow()
         }
