@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
@@ -97,6 +98,15 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         bottom = formInsetValues.bottomDp
     )
 }
+
+internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>
+    get() = if (walletsToShow.isEmpty()) {
+        WalletType.entries
+    } else {
+        WalletType.entries.filter { type ->
+            walletsToShow.contains(type.code)
+        }
+    }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
 private fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {

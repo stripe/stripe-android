@@ -24,6 +24,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -927,7 +928,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `wallets state should be null even if wallets are available if they have already been rendered`() = runTest {
+    fun `Link but not Google Pay should be available if only Link allowed in wallets`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 linkState = LinkState(
@@ -937,12 +938,61 @@ internal class PaymentOptionsViewModelTest {
                 ),
                 isGooglePayReady = true,
             ).copy(
-                walletButtonsAlreadyShown = true,
+                walletsToShow = listOf(WalletType.Link)
             )
         )
 
         viewModel.walletsState.test {
-            assertThat(awaitItem()).isNull()
+            val item = awaitItem()
+
+            assertThat(item?.googlePay).isNull()
+            assertThat(item?.link).isNotNull()
+        }
+    }
+
+    @Test
+    fun `Google Pay but not Link should be available if only Link allowed in wallets`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                linkState = LinkState(
+                    configuration = mock(),
+                    signupMode = null,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                ),
+                isGooglePayReady = true,
+            ).copy(
+                walletsToShow = listOf(WalletType.GooglePay)
+            )
+        )
+
+        viewModel.walletsState.test {
+            val item = awaitItem()
+
+            assertThat(item?.googlePay).isNotNull()
+            assertThat(item?.link).isNull()
+        }
+    }
+
+    @Test
+    fun `All wallets should be available if allowed in wallets`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                linkState = LinkState(
+                    configuration = mock(),
+                    signupMode = null,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                ),
+                isGooglePayReady = true,
+            ).copy(
+                walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+            )
+        )
+
+        viewModel.walletsState.test {
+            val item = awaitItem()
+
+            assertThat(item?.googlePay).isNotNull()
+            assertThat(item?.link).isNotNull()
         }
     }
 
@@ -1128,7 +1178,7 @@ internal class PaymentOptionsViewModelTest {
                 account = null,
                 lastUpdateReason = null
             ),
-            walletButtonsAlreadyShown = false,
+            walletsToShow = WalletType.entries,
         )
     }
 

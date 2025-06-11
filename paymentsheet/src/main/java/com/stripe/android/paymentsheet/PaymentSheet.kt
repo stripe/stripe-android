@@ -659,7 +659,7 @@ class PaymentSheet internal constructor(
 
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
 
-        internal val willShowWalletButtons: Boolean = false,
+        internal val walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons,
     ) : Parcelable {
 
         @JvmOverloads
@@ -812,7 +812,7 @@ class PaymentSheet internal constructor(
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
-            private var willShowWalletButtons: Boolean = false
+            private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -945,9 +945,12 @@ class PaymentSheet internal constructor(
                 this.link = link
             }
 
+            /**
+             * Configuration related to `WalletButtons`
+             */
             @WalletButtonsPreview
-            fun willShowWalletButtons(willShowWalletButtons: Boolean) = apply {
-                this.willShowWalletButtons = willShowWalletButtons
+            fun walletButtons(walletButtons: WalletButtonsConfiguration) = apply {
+                this.walletButtons = walletButtons
             }
 
             fun build() = Configuration(
@@ -970,7 +973,7 @@ class PaymentSheet internal constructor(
                 cardBrandAcceptance = cardBrandAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
-                willShowWalletButtons = willShowWalletButtons,
+                walletButtons = walletButtons,
             )
         }
 
@@ -2453,6 +2456,27 @@ class PaymentSheet internal constructor(
                 }
         }
     }
+
+    /**
+     * Configuration for wallet buttons
+     */
+    @Poko
+    @Parcelize
+    class WalletButtonsConfiguration(
+        /**
+         * Indicates the `WalletButtons` API will be used. This helps
+         * ensure the Payment Element is not initialized with a displayed
+         * wallet option as the default payment option.
+         */
+        val willDisplayExternally: Boolean = false,
+
+        /**
+         * Identifies the list of wallets that can be shown in `WalletButtons`. Wallets
+         * are identified by their wallet identifier (google_pay, link, shop_pay). An
+         * empty list means all wallets will be shown.
+         */
+        val walletsToShow: List<String> = emptyList(),
+    ) : Parcelable
 
     /**
      * A class that presents the individual steps of a payment sheet flow.

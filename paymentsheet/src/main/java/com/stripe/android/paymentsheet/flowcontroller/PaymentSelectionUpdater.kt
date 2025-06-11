@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import javax.inject.Inject
@@ -47,8 +49,6 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         // The types that are allowed for this intent, as returned by the backend
         val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
 
-        val shouldNotInitiallySelectWallets = configuration.willShowWalletButtons || walletButtonsAlreadyShown
-
         return when (selection) {
             is PaymentSelection.New -> {
                 val requiresMandate = shouldAskForMandate(
@@ -64,10 +64,12 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
-                state.paymentMethodMetadata.isGooglePayReady && !shouldNotInitiallySelectWallets
+                state.paymentMethodMetadata.isGooglePayReady &&
+                    walletCanBeUsed(selection, configuration, walletButtonsAlreadyShown)
             }
             is PaymentSelection.Link -> {
-                state.paymentMethodMetadata.linkState != null && !shouldNotInitiallySelectWallets
+                state.paymentMethodMetadata.linkState != null &&
+                    walletCanBeUsed(selection, configuration, walletButtonsAlreadyShown)
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
@@ -76,6 +78,26 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 state.paymentMethodMetadata.isCustomPaymentMethod(selection.id)
             }
         }
+    }
+
+    private fun walletCanBeUsed(
+        selection: PaymentSelection,
+        configuration: PaymentSheet.Configuration,
+        walletButtonsAlreadyShown: Boolean
+    ): Boolean {
+        if (!configuration.walletButtons.willDisplayExternally && !walletButtonsAlreadyShown) {
+            return true
+        }
+
+        val walletTypesDisplayedExternally = configuration.walletButtons.allowedWalletTypes
+
+        val walletType = when (selection) {
+            is PaymentSelection.GooglePay -> WalletType.GooglePay
+            is PaymentSelection.Link -> WalletType.Link
+            else -> null
+        }
+
+        return walletType != null && !walletTypesDisplayedExternally.contains(walletType)
     }
 
     private fun shouldAskForMandate(

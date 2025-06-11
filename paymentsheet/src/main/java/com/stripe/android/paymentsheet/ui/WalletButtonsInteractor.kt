@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -138,23 +139,29 @@ internal class DefaultWalletButtonsInteractor(
                         ),
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
-                    )
+                    ).takeIf {
+                        walletsAllowedByMerchant.contains(WalletType.GooglePay)
+                    }
                     WalletType.Link -> WalletButton.Link(
                         email = linkEmail
                     ).takeIf {
                         // Only show Link button if the Link verification state is resolved.
-                        linkEmbeddedState.verificationState is VerificationState.RenderButton
+                        linkEmbeddedState.verificationState is VerificationState.RenderButton &&
+                            walletsAllowedByMerchant.contains(WalletType.Link)
                     }
                 }
             }
         } ?: emptyList()
 
-        val render2FAState = (linkEmbeddedState.verificationState as? Render2FA)?.viewState
-        val linkOTPState = render2FAState?.let {
-            WalletButtonsInteractor.State.LinkOtpState(
-                viewState = it,
-                otpElement = linkInlineInteractor.otpElement
-            )
+        val linkOTPState = arguments?.run {
+            (linkEmbeddedState.verificationState as? Render2FA)?.viewState?.let {
+                WalletButtonsInteractor.State.LinkOtpState(
+                    viewState = it,
+                    otpElement = linkInlineInteractor.otpElement
+                )
+            }?.takeIf {
+                walletsAllowedByMerchant.contains(WalletType.Link)
+            }
         }
 
         WalletButtonsInteractor.State(
@@ -220,6 +227,7 @@ internal class DefaultWalletButtonsInteractor(
         val configuration: CommonConfiguration,
         val appearance: PaymentSheet.Appearance,
         val initializationMode: PaymentElementLoader.InitializationMode,
+        val walletsAllowedByMerchant: List<WalletType>,
     )
 
     companion object {
@@ -242,6 +250,10 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
                             appearance = configureRequest.configuration.appearance,
                             initializationMode = configureRequest.initializationMode,
+                            walletsAllowedByMerchant = configureRequest
+                                .configuration
+                                .walletButtons
+                                .allowedWalletTypes,
                         )
                     } else {
                         null
@@ -278,6 +290,7 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
                             initializationMode = state.initializationMode,
+                            walletsAllowedByMerchant = WalletType.entries,
                         )
                     }
                 },
