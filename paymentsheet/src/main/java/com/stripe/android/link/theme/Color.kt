@@ -140,12 +140,6 @@ internal object LinkThemeConfig {
             selectedColor = LinkTheme.colors.buttonBrand,
             unselectedColor = if (isSystemInDarkTheme()) Neutral700 else LinkTheme.colors.borderDefault
         )
-
-    /**
-     * Scrim color does not have a match in the Link theme, so we use a default color matching Elements.
-     */
-    internal val LinkColors.scrim: Color
-        get() = Color.Black.copy(alpha = 0.32f)
 }
 
 @Composable

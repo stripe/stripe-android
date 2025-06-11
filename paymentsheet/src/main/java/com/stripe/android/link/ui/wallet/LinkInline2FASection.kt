@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -66,7 +64,7 @@ internal fun LinkInline2FASection(
 
             // OTP input
             OTPSection(
-                verificationState = verificationState,
+                state = verificationState,
                 otpElement = otpElement
             )
 
@@ -94,7 +92,7 @@ internal fun LinkInline2FASection(
 
 @Composable
 private fun OTPSection(
-    verificationState: VerificationViewState,
+    state: VerificationViewState,
     otpElement: OTPElement
 ) {
     Box(
@@ -102,24 +100,29 @@ private fun OTPSection(
     ) {
         StripeThemeForLink {
             OTPElementUI(
-                enabled = !verificationState.isProcessing,
+                enabled = !state.isProcessing,
                 element = otpElement,
-                otpInputPlaceholder = " ",
                 middleSpacing = 8.dp,
+                boxSpacing = 8.dp,
+                otpInputPlaceholder = " ",
+                boxShape = LinkTheme.shapes.large,
                 modifier = Modifier
-                    .testTag(VERIFICATION_OTP_TAG)
-                    .alpha(if (verificationState.isProcessing) ContentAlpha.disabled else ContentAlpha.high),
+                    // 48dp per OTP box plus 8dp per space
+                    .width(328.dp)
+                    .testTag(VERIFICATION_OTP_TAG),
                 colors = OTPElementColors(
                     selectedBorder = LinkTheme.colors.borderSelected,
                     placeholder = LinkTheme.colors.textPrimary,
+                    selectedBackground = LinkTheme.colors.surfacePrimary,
                     background = LinkTheme.colors.surfacePrimary,
                     unselectedBorder = LinkTheme.colors.borderDefault
                 ),
+                selectedStrokeWidth = 1.5.dp,
             )
         }
 
         // Smaller loading indicator
-        if (verificationState.isProcessing) {
+        if (state.isProcessing) {
             LinkSpinner(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 4.dp,
