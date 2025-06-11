@@ -1379,6 +1379,7 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
+            private var formInsetValues: Insets = Insets.defaultFormInsetValues
 
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
@@ -1409,9 +1410,21 @@ class PaymentSheet internal constructor(
                 this.embeddedAppearance = embeddedAppearance
             }
 
+            fun formInsetValues(insets: Insets) = apply {
+                this.formInsetValues = insets
+            }
+
             @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, embeddedAppearance)
+                return Appearance(
+                    colorsLight = colorsLight,
+                    colorsDark = colorsDark,
+                    shapes = shapes,
+                    typography = typography,
+                    primaryButton = primaryButton,
+                    embeddedAppearance = embeddedAppearance,
+                    formInsetValues = formInsetValues
+                )
             }
         }
     }
