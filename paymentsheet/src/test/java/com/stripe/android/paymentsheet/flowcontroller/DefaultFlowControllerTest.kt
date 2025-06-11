@@ -34,6 +34,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -48,6 +49,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
@@ -503,7 +505,7 @@ internal class DefaultFlowControllerTest {
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            walletButtonsAlreadyShown = false,
+            walletsToShow = WalletType.entries,
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -1422,7 +1424,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `On wallet buttons rendered and options launched, 'walletButtonsAlreadyShown' should be true`() = runTest {
+    fun `On wallet buttons rendered and options launched, should show no wallets in options screen`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.walletButtonsRendered = true
@@ -1434,7 +1436,85 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere { it.walletButtonsAlreadyShown },
+            argWhere { it.walletsToShow.isEmpty() },
+            anyOrNull(),
+        )
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `On wallet buttons rendered and options launched, should show only Link in options screen`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = true
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        walletsToShow = listOf("google_pay")
+                    )
+                )
+                .build()
+        )
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere {
+                it.walletsToShow.size == 1 &&
+                    it.walletsToShow.contains(WalletType.Link)
+            },
+            anyOrNull(),
+        )
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `On wallet buttons rendered and options launched, should show only GPay in options screen`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = true
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        walletsToShow = listOf("link")
+                    )
+                )
+                .build()
+        )
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere {
+                it.walletsToShow.size == 1 &&
+                    it.walletsToShow.contains(WalletType.GooglePay)
+            },
             anyOrNull(),
         )
     }

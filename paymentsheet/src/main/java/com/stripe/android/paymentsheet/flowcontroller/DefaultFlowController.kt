@@ -30,6 +30,7 @@ import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -50,6 +51,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -311,7 +313,13 @@ internal class DefaultFlowController @Inject internal constructor(
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
+            walletsToShow = if (viewModel.walletButtonsRendered) {
+                WalletType.entries.filterNot {
+                    state.config.walletButtons.allowedWalletTypes.contains(it)
+                }
+            } else {
+                state.config.walletButtons.allowedWalletTypes
+            },
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 

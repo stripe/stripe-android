@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DropdownSetti
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewDisplaysMandateSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -154,7 +155,9 @@ internal class EmbeddedPlaygroundActivity :
             BottomSheetContent(
                 loadingState = loadingState,
                 configure = ::configure,
-                showWalletButtons = playgroundState.snapshot[WalletButtonsSettingsDefinition],
+                showWalletButtons =
+                playgroundState.snapshot[WalletButtonsSettingsDefinition] !=
+                    WalletButtonsPlaygroundType.Disabled,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         }

@@ -102,6 +102,64 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `on init with GPay & Link enabled but only Link allowed, state should have only Link`() = runTest {
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+                allowedWalletTypes = listOf(WalletType.Link),
+                linkEmail = null,
+            )
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            assertThat(state.walletButtons).hasSize(1)
+            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+
+            assertThat(state.buttonsEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `on init with GPay & Link enabled but only GPay allowed, state should have only GPay`() = runTest {
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+                allowedWalletTypes = listOf(WalletType.GooglePay),
+                linkEmail = null,
+            )
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            assertThat(state.walletButtons).hasSize(1)
+            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
+
+            assertThat(state.buttonsEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun `on init with GPay & Link enabled but none allowed, state should no buttons`() = runTest {
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
+                allowedWalletTypes = emptyList(),
+                linkEmail = null,
+            )
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            assertThat(state.walletButtons).hasSize(0)
+            assertThat(state.buttonsEnabled).isTrue()
+        }
+    }
+
+    @Test
     fun `on init with GPay enabled, Link enabled, & different wallet type order, state should reflect the order`() =
         runTest {
             val interactor = createInteractor(
@@ -439,6 +497,7 @@ class DefaultWalletButtonsInteractorTest {
 
     private fun createArguments(
         availableWallets: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay),
+        allowedWalletTypes: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay),
         linkEmail: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         googlePay: PaymentSheet.GooglePayConfiguration? = null,
@@ -462,6 +521,7 @@ class DefaultWalletButtonsInteractorTest {
             ),
             appearance = appearance,
             initializationMode = initializationMode,
+            walletsAllowedByMerchant = allowedWalletTypes,
         )
     }
 

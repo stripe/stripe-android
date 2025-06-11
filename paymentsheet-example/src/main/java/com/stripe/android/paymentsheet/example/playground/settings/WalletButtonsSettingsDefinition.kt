@@ -1,10 +1,25 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-internal object WalletButtonsSettingsDefinition : BooleanSettingsDefinition(
-    key = "WalletButtons",
-    displayName = "Show Wallet Buttons",
-    defaultValue = false
-) {
+import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+
+internal object WalletButtonsSettingsDefinition :
+    PlaygroundSettingDefinition<WalletButtonsPlaygroundType>,
+    PlaygroundSettingDefinition.Saveable<WalletButtonsPlaygroundType> by EnumSaveable(
+        key = "walletButtons",
+        values = WalletButtonsPlaygroundType.entries.toTypedArray(),
+        defaultValue = WalletButtonsPlaygroundType.Disabled,
+    ),
+    PlaygroundSettingDefinition.Displayable<WalletButtonsPlaygroundType> {
+    override val displayName: String = "Wallet Buttons"
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = WalletButtonsPlaygroundType.entries.map {
+        option(it.displayName, it)
+    }
+
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
@@ -13,4 +28,44 @@ internal object WalletButtonsSettingsDefinition : BooleanSettingsDefinition(
             PlaygroundConfigurationData.IntegrationType.CustomerSheet -> false
         }
     }
+
+    @OptIn(WalletButtonsPreview::class)
+    override fun configure(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        val configuration = when (value) {
+            WalletButtonsPlaygroundType.Disabled -> {
+                PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = false
+                )
+            }
+            WalletButtonsPlaygroundType.Enabled -> {
+                PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = true
+                )
+            }
+            WalletButtonsPlaygroundType.EnabledWithOnlyLink -> {
+                PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = true,
+                    walletsToShow = listOf("link")
+                )
+            }
+        }
+
+        configurationBuilder.walletButtons(configuration)
+    }
+}
+
+enum class WalletButtonsPlaygroundType(
+    val displayName: String
+) : ValueEnum {
+    Disabled("Disabled"),
+    Enabled("Enabled"),
+    EnabledWithOnlyLink("Enabled w/ only Link");
+
+    override val value: String
+        get() = name
 }

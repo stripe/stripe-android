@@ -16,11 +16,13 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -437,7 +439,9 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.copy(
-                willShowWalletButtons = true,
+                walletButtons = PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = true,
+                ),
             ),
             walletButtonsAlreadyShown = false,
         )
@@ -454,12 +458,54 @@ class PaymentSelectionUpdaterTest {
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.copy(
-                willShowWalletButtons = true,
+                walletButtons = PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = true,
+                ),
             ),
             walletButtonsAlreadyShown = false,
         )
 
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun `If using wallet buttons config option with only GPay allowed and selection is Link, should be Link`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = PaymentSelection.Link(useLinkExpress = false),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.copy(
+                walletButtons = PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = true,
+                    walletsToShow = listOf("google_pay"),
+                ),
+            ),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+    }
+
+    @Test
+    fun `If using wallet buttons config option with only Link allowed and selection is GPay, should be GPay`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = PaymentSelection.GooglePay,
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.copy(
+                walletButtons = PaymentSheet.WalletButtonsConfiguration(
+                    willDisplayExternally = true,
+                    walletsToShow = listOf("link"),
+                ),
+            ),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(PaymentSelection.GooglePay)
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(
@@ -487,6 +533,11 @@ class PaymentSelectionUpdaterTest {
                     SharedDataSpec("card"),
                     SharedDataSpec("paypal"),
                     SharedDataSpec("sofort"),
+                ),
+                linkState = LinkState(
+                    configuration = mock(),
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
                 ),
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 displayableCustomPaymentMethods = displayableCustomPaymentMethods,

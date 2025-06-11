@@ -63,6 +63,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Initializatio
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
@@ -435,7 +436,7 @@ internal class PaymentSheetPlaygroundActivity :
             flowController.shippingDetails = localFlowControllerState?.addressDetails
         }
 
-        if (playgroundState.snapshot[WalletButtonsSettingsDefinition]) {
+        if (playgroundState.snapshot[WalletButtonsSettingsDefinition] != WalletButtonsPlaygroundType.Disabled) {
             flowController.WalletButtons()
         }
 
