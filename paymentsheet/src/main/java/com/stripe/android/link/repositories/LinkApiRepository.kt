@@ -407,7 +407,7 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         stripeIntent: StripeIntent,
-        linkMode: LinkMode,
+        linkMode: LinkMode?,
         consumerPublishableKey: String?
     ): Result<FinancialConnectionsSession> {
         return consumersApiService.createLinkAccountSession(
