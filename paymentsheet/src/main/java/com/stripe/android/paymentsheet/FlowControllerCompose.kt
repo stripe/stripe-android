@@ -26,7 +26,7 @@ import java.util.UUID
     replaceWith = ReplaceWith(
         "remember(paymentOptionCallback, paymentResultCallback) { " +
             "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback) " +
-        "}.build()"
+            "}.build()"
     )
 )
 fun rememberPaymentSheetFlowController(
@@ -62,8 +62,8 @@ fun rememberPaymentSheetFlowController(
     replaceWith = ReplaceWith(
         "remember(createIntentCallback, paymentOptionCallback, paymentResultCallback) { " +
             "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
-                ".createIntentCallback(createIntentCallback) " +
-        "}.build()"
+            ".createIntentCallback(createIntentCallback) " +
+            "}.build()"
     )
 )
 fun rememberPaymentSheetFlowController(
@@ -102,11 +102,16 @@ fun rememberPaymentSheetFlowController(
 @Deprecated(
     message = "This will be removed in a future release. Use FlowController.Builder instead.",
     replaceWith = ReplaceWith(
-        "remember(createIntentCallback, externalPaymentMethodConfirmHandler, paymentOptionCallback, paymentResultCallback) { " +
+        "remember(" +
+            "createIntentCallback, " +
+            "externalPaymentMethodConfirmHandler, " +
+            "paymentOptionCallback, " +
+            "paymentResultCallback" +
+            ") { " +
             "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
-                ".createIntentCallback(createIntentCallback)" +
-                ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler) " +
-        "}.build()"
+            ".createIntentCallback(createIntentCallback)" +
+            ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler) " +
+            "}.build()"
     )
 )
 fun rememberPaymentSheetFlowController(

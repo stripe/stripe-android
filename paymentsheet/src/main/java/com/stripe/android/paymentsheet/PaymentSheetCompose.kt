@@ -58,7 +58,7 @@ fun rememberPaymentSheet(
     replaceWith = ReplaceWith(
         "remember(createIntentCallback, paymentResultCallback) { " +
             "PaymentSheet.Builder(paymentResultCallback).createIntentCallback(createIntentCallback) " +
-        "}.build()"
+            "}.build()"
     )
 )
 fun rememberPaymentSheet(
@@ -96,9 +96,9 @@ fun rememberPaymentSheet(
     replaceWith = ReplaceWith(
         "remember(createIntentCallback, externalPaymentMethodConfirmHandler, paymentResultCallback) { " +
             "PaymentSheet.Builder(paymentResultCallback)" +
-                ".createIntentCallback(createIntentCallback)" +
-                ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler) " +
-        "}.build()"
+            ".createIntentCallback(createIntentCallback)" +
+            ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler) " +
+            "}.build()"
     )
 )
 fun rememberPaymentSheet(
