@@ -85,10 +85,6 @@ internal class LinkActivityViewModel @Inject constructor(
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
 
-    init {
-        linkAccountManager.consumerPublishableKey = getArgs(savedStateHandle)?.consumerPublishableKey
-    }
-
     fun handleViewAction(action: LinkAction) {
         when (action) {
             LinkAction.BackPressed -> handleBackPressed()

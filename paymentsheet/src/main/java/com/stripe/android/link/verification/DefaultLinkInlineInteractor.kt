@@ -106,7 +106,6 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                     configuration = verificationState.linkConfiguration,
                     linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
-                    consumerSessionPublishableKey = accountManager.consumerPublishableKey,
                     useLinkExpress = true
                 )
                 // No UI changes - keep the 2FA until we get a result from the Link payment selection flow.

@@ -386,7 +386,9 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onAddNewPaymentMethodClicked() {
+//        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
         viewModelScope.launch {
+            val publishableKey = linkAccountManager.linkAccountInfo.value.account?.consumerPublishableKey!!
             linkAccountManager.createLinkAccountSession().fold(
                 onSuccess = { result ->
                     logger.info(result.clientSecret!!)
@@ -394,7 +396,7 @@ internal class WalletViewModel @Inject constructor(
                         it.copy(
                             financialConnectionsSheetConfiguration = FinancialConnectionsSheetConfiguration(
                                 financialConnectionsSessionClientSecret = result.clientSecret!!,
-                                publishableKey = linkAccountManager.consumerPublishableKey!!,
+                                publishableKey = publishableKey,
                             )
                         )
                     }
@@ -430,7 +432,6 @@ internal class WalletViewModel @Inject constructor(
             }
         }
     }
-
 
     fun onDismissAlert() {
         _uiState.update {

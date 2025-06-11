@@ -279,7 +279,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
                     useLinkExpress = true,
-                    consumerSessionPublishableKey = null,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     )

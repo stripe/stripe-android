@@ -77,14 +77,12 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         configuration: LinkConfiguration,
         linkAccountInfo: LinkAccountUpdate.Value,
         launchMode: LinkLaunchMode,
-        consumerSessionPublishableKey: String?,
         useLinkExpress: Boolean
     ) {
         val args = LinkActivityContract.Args(
             configuration = configuration,
             linkAccountInfo = linkAccountInfo,
             launchMode = launchMode,
-            consumerSessionPublishableKey = consumerSessionPublishableKey,
             startWithVerificationDialog = useLinkExpress
         )
         linkActivityResultLauncher?.launch(args)
