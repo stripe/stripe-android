@@ -115,7 +115,7 @@ interface ConsumersApiService {
     suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         intentToken: String?,
-        linkMode: LinkMode,
+        linkMode: LinkMode?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<FinancialConnectionsSession>
@@ -399,7 +399,7 @@ class ConsumersApiServiceImpl(
     override suspend fun createLinkAccountSession(
         consumerSessionClientSecret: String,
         intentToken: String?,
-        linkMode: LinkMode,
+        linkMode: LinkMode?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<FinancialConnectionsSession> {
@@ -410,11 +410,12 @@ class ConsumersApiServiceImpl(
                 url = createLinkAccountSession,
                 options = requestOptions,
                 params = mapOf(
-                    "request_surface" to requestSurface,
-                    "link_mode" to linkMode.value,
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
+                    "intent_token" to intentToken,
+                    "link_mode" to linkMode?.value,
+                    "request_surface" to requestSurface,
                 ),
             ),
             responseJsonParser = FinancialConnectionsSessionJsonParser(),

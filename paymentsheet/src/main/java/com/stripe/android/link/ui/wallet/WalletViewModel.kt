@@ -387,9 +387,7 @@ internal class WalletViewModel @Inject constructor(
 
     fun onAddNewPaymentMethodClicked() {
         viewModelScope.launch {
-            linkAccountManager.createLinkAccountSession(
-                configuration.linkMode!!
-            ).fold(
+            linkAccountManager.createLinkAccountSession().fold(
                 onSuccess = { result ->
                     logger.info(result.clientSecret!!)
                     _uiState.update {
