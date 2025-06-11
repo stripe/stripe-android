@@ -150,7 +150,9 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.clickPrimaryButton()
             composeTestRule.waitForIdle()
 
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith(paymentMethodType.getLast4())
+            val paymentOption = testContext.configureCallbackTurbine.awaitItem()
+            assertThat(paymentOption?.label).endsWith(paymentMethodType.getLast4())
+            assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType.type.code)
 
             composeTestRule.waitForIdle()
 

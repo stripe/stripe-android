@@ -123,6 +123,8 @@ class CustomerSheetTest {
 
             assertThat(paymentMethodSelection.paymentMethod)
                 .isEqualTo(CARD_PAYMENT_METHOD.copy(id = "pm_1"))
+            assertThat(paymentMethodSelection.paymentOption.paymentMethodType)
+                .isEqualTo("card")
             assertThat(paymentMethodSelection.paymentOption.label)
                 .isEqualTo("···· 4242")
         }

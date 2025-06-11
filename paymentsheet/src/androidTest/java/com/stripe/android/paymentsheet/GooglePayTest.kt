@@ -148,8 +148,9 @@ internal class GooglePayTest {
 
                     if (context is ProductIntegrationTestRunnerContext.WithFlowController) {
                         runTest {
-                            val label = context.context.configureCallbackTurbine.awaitItem()?.label
-                            assertThat(label).isEqualTo("Google Pay")
+                            val paymentOption = context.context.configureCallbackTurbine.awaitItem()
+                            assertThat(paymentOption?.label).isEqualTo("Google Pay")
+                            assertThat(paymentOption?.paymentMethodType).isEqualTo("google_pay")
                         }
 
                         context.confirm()

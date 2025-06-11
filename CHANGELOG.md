@@ -6,6 +6,7 @@
 * [ADDED][10935](https://github.com/stripe/stripe-android/pull/10935) Add `formInsetValues` method to `PaymentSheet.Appearance.Builder`.
 * [ADDED][10831](https://github.com/stripe/stripe-android/pull/10831) Added `RowSelectionBehavior` API to Embedded Payment Element
 * [DEPRECATED][10833](https://github.com/stripe/stripe-android/pull/10833) Deprecated PaymentSheet/FlowController constructors, create methods, and Compose remember functions in favor of new Builder pattern APIs.
+* [ADDED][10940](https://github.com/stripe/stripe-android/pull/10940) Add `paymentMethodType` to `PaymentOption` for use with `PaymentSheet.FlowController`.
 
 ## 21.17.0 - 2025-06-09
 

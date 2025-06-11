@@ -24,6 +24,16 @@ data class PaymentOption internal constructor(
      * For example, "···· 4242" for a Visa ending in 4242.
      */
     val label: String,
+    /**
+     * A string representation of the customer's desired payment method:
+     * - If this is a Stripe payment method, see
+     *      https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for possible values.
+     * - If this is an external payment method, see
+     *      https://stripe.com/docs/payments/external-payment-methods?platform=ios#available-external-payment-methods
+     *      for possible values.
+     * - If this is Google Pay, the value is "google_pay".
+     */
+    val paymentMethodType: String,
     private val _shippingDetails: AddressDetails?,
 
     private val imageLoader: suspend () -> Drawable,
@@ -44,6 +54,7 @@ data class PaymentOption internal constructor(
     ) : this(
         drawableResourceId = drawableResourceId,
         label = label,
+        paymentMethodType = "unsupportedInitializationType",
         _shippingDetails = null,
         imageLoader = errorImageLoader,
     )
