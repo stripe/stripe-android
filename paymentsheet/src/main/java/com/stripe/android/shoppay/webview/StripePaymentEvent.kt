@@ -37,6 +37,32 @@ sealed interface StripeParentEvent {
     val controllerAppFrameId: String?
 }
 
+// --- Checkout State Data Classes ---
+data class CheckoutState(
+    val currency: String?,
+    val amount: Int?,
+    val lineItems: List<LineItem>?,
+    val shippingRates: List<String>?
+) {
+    data class LineItem(
+        val name: String?,
+        val amount: Int?
+    )
+}
+
+// --- Ping Event for handling ping messages with checkout state ---
+data class PingEvent(
+    override val eventType: String = "ping",
+    override val sourceFrameId: String?,
+    override val controllerAppFrameId: String?,
+    val messageType: String?,
+    val origin: String?,
+    val source: String?,
+    val timestamp: Long?,
+    val currentFrame: String?,
+    val checkoutState: CheckoutState?
+) : StripeParentEvent
+
 data class ConfirmEvent(
     override val eventType: String = "confirm",
     override val sourceFrameId: String?,

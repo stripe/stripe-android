@@ -1,6 +1,7 @@
 package com.stripe.android.shoppay.webview
 
 import android.annotation.SuppressLint
+import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -39,7 +40,8 @@ internal fun MainWebView(
                     }
                 ),
             ).apply {
-                loadUrl("https://confirmation-tokens.glitch.me/checkout/")
+                layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+//                loadUrl("https://unexpected-dune-list.glitch.me/checkout/")
                 viewModel.setWebView(this)
             }
         },

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.paymentsheet.WalletConfiguration
 import javax.inject.Inject
 
 internal class ShopPayActivityContract @Inject constructor() :
@@ -20,7 +21,10 @@ internal class ShopPayActivityContract @Inject constructor() :
         return result ?: ShopPayActivityResult.Failed(Throwable("No result"))
     }
 
-    data class Args(val checkoutUrl: String)
+    data class Args(
+        val checkoutUrl: String,
+        val walletHandlers: WalletConfiguration.Handlers
+    )
 
     companion object {
         internal const val EXTRA_RESULT = "com.stripe.android.shoppay.ShopPayActivityContract.extra_result"

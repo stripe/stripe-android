@@ -6,6 +6,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.WalletConfiguration
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
 internal data class PaymentElementCallbacks private constructor(
@@ -13,12 +14,14 @@ internal data class PaymentElementCallbacks private constructor(
     val confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?,
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
+    val walletHandlers: WalletConfiguration.Handlers?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
         private var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
         private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
         private var analyticEventCallback: AnalyticEventCallback? = null
+        private var walletHandlers: WalletConfiguration.Handlers? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -40,12 +43,17 @@ internal data class PaymentElementCallbacks private constructor(
             this.analyticEventCallback = analyticEventCallback
         }
 
+        fun walletHandlers(walletHandlers: WalletConfiguration.Handlers?) = apply {
+            this.walletHandlers = walletHandlers
+        }
+
         fun build(): PaymentElementCallbacks {
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
                 confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 analyticEventCallback = analyticEventCallback,
+                walletHandlers = walletHandlers,
             )
         }
     }

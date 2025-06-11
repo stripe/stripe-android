@@ -5,12 +5,15 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentsheet.WalletConfiguration
 import com.stripe.android.shoppay.ShopPayActivityResult
 import com.stripe.android.shoppay.ShopPayLauncher
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal class ShopPayConfirmationDefinition @Inject constructor(
-    private val shopPayLauncher: ShopPayLauncher
+    private val shopPayLauncher: ShopPayLauncher,
+    private val walletHandlersProvider: Provider<WalletConfiguration.Handlers?>
 ) : ConfirmationDefinition<ShopPayConfirmationOption, ShopPayLauncher, Unit, ShopPayActivityResult> {
     override val key = "ShopPay"
 
@@ -47,7 +50,8 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
         confirmationOption: ShopPayConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ) {
-        launcher.present(confirmationOption.checkoutUrl)
+
+        launcher.present(confirmationOption.checkoutUrl, walletHandlersProvider.get()!!)
     }
 
     override suspend fun action(

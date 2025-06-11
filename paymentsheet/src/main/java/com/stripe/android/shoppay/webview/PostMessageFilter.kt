@@ -3,6 +3,7 @@ package com.stripe.android.shoppay.webview
 import android.util.Log
 import org.json.JSONException
 import org.json.JSONObject
+import java.net.URLDecoder
 
 interface PostMessageFilter {
     fun filter(message: String): StripeParentEvent? // Updated return type
@@ -21,26 +22,32 @@ class DefaultPostMessageFilter : PostMessageFilter {
         }
 
         val type = initialJsonObject.optString("type")
-        // We are only interested in "messageEvent" that encapsulate a "parent" type message
         if (type != "messageEvent") return null
 
+        // Check if this is a ping message (data is direct JSON object)
+        val dataObject = initialJsonObject.optJSONObject("data")
+        if (dataObject != null && dataObject.optString("messageType") == "ping") {
+            return handlePingMessage(initialJsonObject, dataObject)
+        }
+
+        // Handle existing message format (data is string containing JSON)
         val dataString = initialJsonObject.optString("data", null) ?: return null
-        val dataObject: JSONObject
+        val dataJsonObject: JSONObject
         try {
-            dataObject = JSONObject(dataString)
+            dataJsonObject = JSONObject(dataString)
         } catch (e: JSONException) {
             // Log.e("Filter", "data field is not valid JSON string: $dataString", e)
             return null
         }
 
-        val dataType = dataObject.optString("type")
+        val dataType = dataJsonObject.optString("type")
         if (dataType != "parent") return null
 
         // Extract common identifiers
-        val sourceFrameId = dataObject.optString("sourceFrameId", null)
-        val controllerAppFrameId = dataObject.optString("controllerAppFrameId", null)
+        val sourceFrameId = dataJsonObject.optString("sourceFrameId", null)
+        val controllerAppFrameId = dataJsonObject.optString("controllerAppFrameId", null)
 
-        val messageObj = dataObject.optJSONObject("message") ?: return null
+        val messageObj = dataJsonObject.optJSONObject("message") ?: return null
         val action = messageObj.optString("action")
 
         // Most relevant events are under "stripe-frame-event"
@@ -155,6 +162,88 @@ class DefaultPostMessageFilter : PostMessageFilter {
                 controllerAppFrameId = controllerAppFrameId,
                 payloadData = eventSpecificData
             )
+        }
+    }
+
+    private fun handlePingMessage(initialJsonObject: JSONObject, dataObject: JSONObject): PingEvent {
+        val origin = initialJsonObject.optString("origin", null)
+        val source = initialJsonObject.optString("source", null)
+        val timestamp = initialJsonObject.optLong("timestamp", 0L).takeIf { it != 0L }
+        val currentFrame = initialJsonObject.optString("currentFrame", null)
+        val messageType = dataObject.optString("messageType", null)
+        
+        val checkoutState = currentFrame?.let { parseCheckoutStateFromUrl(it) }
+        
+        return PingEvent(
+            eventType = "ping",
+            sourceFrameId = null, // Ping messages don't have frame IDs
+            controllerAppFrameId = null,
+            messageType = messageType,
+            origin = origin,
+            source = source,
+            timestamp = timestamp,
+            currentFrame = currentFrame,
+            checkoutState = checkoutState
+        )
+    }
+    
+    private fun parseCheckoutStateFromUrl(url: String): CheckoutState? {
+        return try {
+            // Extract checkoutState parameter from URL
+            val checkoutStateParam = url.substringAfter("checkoutState=", "")
+                .substringBefore("&")
+                .takeIf { it.isNotEmpty() } ?: return null
+            
+            // URL decode the parameter
+            val decodedParam = URLDecoder.decode(checkoutStateParam, "UTF-8")
+            
+            // Log for debugging
+            Log.d("PostMessageFilter", "Parsing checkout state: $decodedParam")
+            
+            // Parse the JSON
+            val checkoutJson = JSONObject(decodedParam)
+            
+            // Extract currency and amount
+            val currency = checkoutJson.optString("currency", null)
+            val amount = checkoutJson.optInt("amount", -1).takeIf { it != -1 }
+            
+            // Extract line items
+            val lineItemsArray = checkoutJson.optJSONArray("lineItems")
+            val lineItems = mutableListOf<CheckoutState.LineItem>()
+            lineItemsArray?.let { array ->
+                for (i in 0 until array.length()) {
+                    val itemJson = array.optJSONObject(i)
+                    if (itemJson != null) {
+                        val name = itemJson.optString("name", null)
+                        val itemAmount = itemJson.optInt("amount", -1).takeIf { it != -1 }
+                        lineItems.add(CheckoutState.LineItem(name, itemAmount))
+                    }
+                }
+            }
+            
+            // Extract shipping rates (currently empty array in the example)
+            val shippingRatesArray = checkoutJson.optJSONArray("shippingRates")
+            val shippingRates = mutableListOf<String>()
+            shippingRatesArray?.let { array ->
+                for (i in 0 until array.length()) {
+                    array.optString(i)?.let { rate ->
+                        shippingRates.add(rate)
+                    }
+                }
+            }
+            
+            val result = CheckoutState(
+                currency = currency,
+                amount = amount,
+                lineItems = lineItems.ifEmpty { null },
+                shippingRates = shippingRates.ifEmpty { null }
+            )
+            
+            Log.d("PostMessageFilter", "Successfully parsed checkout state: $result")
+            result
+        } catch (e: Exception) {
+            Log.e("PostMessageFilter", "Failed to parse checkout state from URL: $url", e)
+            null
         }
     }
 }

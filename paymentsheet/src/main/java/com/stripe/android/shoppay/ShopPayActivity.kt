@@ -2,30 +2,22 @@ package com.stripe.android.shoppay
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.WalletConfiguration
 import com.stripe.android.shoppay.webview.MainWebView
 import com.stripe.android.shoppay.webview.WebViewModel
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -81,8 +74,6 @@ internal class ShopPayActivity : ComponentActivity() {
             }
         ) {
             BottomSheetScaffold(
-//                modifier = Modifier
-//                    .fillMaxSize(),
                 topBar = {
                     Box(
                         modifier = Modifier
@@ -104,26 +95,6 @@ internal class ShopPayActivity : ComponentActivity() {
                 },
                 content = {
                     ComposeWebView()
-//                    Column(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                    ) {
-//                        Button(
-//                            onClick = {
-//                                dismissWithResult(ShopPayActivityResult.Completed("pm_1234"))
-//                            }
-//                        ) {
-//                            Text("Complete")
-//                        }
-//
-//                        Button(
-//                            onClick = {
-//                                dismissWithResult(ShopPayActivityResult.Failed(Throwable("Failed")))
-//                            }
-//                        ) {
-//                            Text("Fail")
-//                        }
-//                    }
                 }
             )
         }
@@ -131,7 +102,11 @@ internal class ShopPayActivity : ComponentActivity() {
 
     @Composable
     private fun ComposeWebView() {
-        val viewModel: WebViewModel = viewModel()
+        val viewModel: WebViewModel = viewModel(
+            factory = WebViewModel.Factory(
+                walletHandlers = WalletConfiguration.Handlers()
+            )
+        )
         val showPopup by viewModel.showPopup.collectAsState()
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -157,19 +132,25 @@ internal class ShopPayActivity : ComponentActivity() {
                         },
                         enabled = canGoForward.value
                     ) {
-                        Icon(Icons.Default.ArrowForward, contentDescription = "Forward")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Forward"
+                        )
                     }
                     IconButton(
                         onClick = {
                             viewModel.webView.value?.reload()
                         }
                     ) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Refresh"
+                        )
                     }
                 }
             )
 
-            Box(modifier = Modifier.fillMaxSize()) { // Added fillMaxSize to Box to ensure PopupWebViewDialog is constrained
+            Box(modifier = Modifier.fillMaxSize()) {
                 MainWebView(
                     viewModel = viewModel,
                     onNavigationStateChange = { back, forward ->
@@ -191,7 +172,14 @@ internal class ShopPayActivity : ComponentActivity() {
 
         popupWebView?.let { webView ->
             AndroidView(
-                factory = { webView },
+                factory = {
+                    webView.apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxSize()// Use a fraction of the dialog's max size
             )
         }

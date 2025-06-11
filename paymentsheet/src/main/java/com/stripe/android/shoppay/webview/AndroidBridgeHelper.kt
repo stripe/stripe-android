@@ -2,8 +2,10 @@ package com.stripe.android.shoppay.webview
 
 import android.util.Log
 import android.webkit.JavascriptInterface
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -21,12 +23,21 @@ class AndroidBridgeHelper(
 
     @JavascriptInterface
     fun postMessage(message: String) {
-        Log.d("WebViewBridge", "📨 [${timestampProvider()}] Stripe Message Bridge: $message")
+        if (message.contains("ping").not()) {
+            Log.d("WebViewBridge", "📨 [${timestampProvider()}] Stripe Message Bridge: $message")
+        }
         postMessageFilter.filter(message)
             ?.let {
-                Log.d("WebViewBridge", "📨 [${timestampProvider()}] Stripe Parent Event: $it")
-                _eventsFlow.tryEmit(it)
+//                Log.d("WebViewBridge", "📨 [${timestampProvider()}] Stripe Parent Event: $it")
+                GlobalScope.launch {
+                    _eventsFlow.emit(it)
+                }
             }
+    }
+
+    @JavascriptInterface
+    fun calculateShipping(message: String) {
+        Log.d("WebViewBridge", "function => $message")
     }
 
     @JavascriptInterface

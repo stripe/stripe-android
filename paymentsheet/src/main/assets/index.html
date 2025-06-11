@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://js.stripe.com/v3/"></script>
+    <title>Checkout</title>
+
+    <script>
+        if (window.localStorage.getItem("dark-mode") === "true") {
+          document.documentElement.classList.add("dark-mode");
+        }
+    </script>
+</head>
+<body>
+
+<div class="Checkout">
+    <header class="Header">
+        <div class="container">
+            <span class="logo"></span>
+        </div>
+    </header>
+    <div class="Main CheckoutMain">
+        <div class="container relative">
+            <div id="OrderSummary" class="OrderSummary"></div>
+            <div id="ShippingRates" class="OrderSummary"></div>
+            <form id="checkout-form">
+                <section>
+                    <h2 class="Heading">Payment</h2>
+                    <div id="express-checkout-element">
+                        <!-- Express Checkout Element will be inserted here -->
+                    </div>
+                    <div id="error-message">
+                        <!-- Display error message to your customers here -->
+                    </div>
+                </section>
+            </form>
+        </div>
+    </div>
+    <table>
+        <tr>
+            <td class="options-table">
+                <div class="click-options">
+                    <h4>Click Options</h4>
+                    <input type="checkbox" id="billingAddressRequired" />
+                    <label for="billingAddressRequired"
+                    >Billing Address Required</label
+                    ><br />
+                    <input type="checkbox" id="emailRequired" />
+                    <label for="emailRequired">Email Required</label><br />
+                    <input type="checkbox" id="phoneNumberRequired" />
+                    <label for="phoneNumberRequired">Phone Number Required</label
+                    ><br />
+                    <input type="checkbox" id="shippingAddressRequired" />
+                    <label for="shippingAddressRequired"
+                    >Shipping Address Required</label
+                    ><br />
+                    <label for="allowedShippingCountries"
+                    >Allowed Shipping Countries</label
+                    >
+                    <input
+                            type="input"
+                            id="allowedShippingCountries"
+                            placeholder="us,gb,it"
+                    /><br />
+                    <label for="businessName">Business Name</label>
+                    <input type="input" id="businessName" /><br />
+                </div>
+            </td>
+            <td>
+                <div class="Simulation-options">
+                    <h4>Simulation Options</h4>
+                    <input type="checkbox" id="rejectShippingAddressChange" />
+                    <label for="rejectShippingAddressChange"
+                    >Reject Shipping Address Change</label
+                    ><br />
+                    <input type="checkbox" id="rejectShippingRateChange" />
+                    <label for="rejectShippingRateChange"
+                    >Reject Shipping Rate Change</label
+                    ><br />
+                    <input type="checkbox" id="simulatePaymentFailed" />
+                    <label for="simulatePaymentFailed">Simulate Payment Failed</label
+                    ><br />
+                    <input type="checkbox" id="disableOverlay" />
+                    <label for="disableOverlay">Disable ECE Click Overlay</label
+                    ><br />
+                    <input type="checkbox" id="createPaymentMethod" />
+                    <label for="createPaymentMethod">Create payment method</label><br />
+                    <br />
+                    <button type="button" id="testNativeAPI" style="background: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                        Test Native Shipping API
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </table>
+    <table>
+        <th>Update Elements</th>
+        <th>Update ECE</th>
+        <tr>
+            <td>
+                <a href="/checkout/asdf">Link</a>
+                <textarea id="updateElementsText" rows="10" cols="50"></textarea>
+            </td>
+            <td>
+                <textarea id="updateECEText" rows="10" cols="50"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <button class="update-btn" id="updateElementsBtn" type="button" title="Invokes elements.update">
+                    Update
+                </button>
+                <button class="reload-btn" id="reloadElementsBtn" type="button" title="reloads Elements with new options">
+                    Reload
+                </button>
+            </td>
+            <td>
+                <button class="update-btn" id="updateECEBtn" type="button">
+                    Update
+                </button>
+                <button class="reload-btn" id="reloadECEBtn" type="button" title="reloads ECE with new options">
+                    Reload
+                </button>
+            </td>
+        </tr>
+        <tr>
+            <th>Logs <button id="clearConsole" type="button">Clear</button></th>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <textarea id="console" rows="15" cols="105"></textarea>
+            </td>
+        </tr>
+    </table>
+    <table id="testcards">
+        <th>Number</th>
+        <th>Type</th>
+        <tr>
+            <td><div>4242424242424242</div></td>
+            <td>Visa</td>
+        </tr>
+        <tr>
+            <td><div>4000000000000002</div></td>
+            <td>Generic Decline</td>
+        </tr>
+        <tr>
+            <td><div>4000000000003220</div></td>
+            <td>3DS2 Required</td>
+        </tr>
+        <tr>
+            <td><div>4000000000003063</div></td>
+            <td>3DS Required</td>
+        </tr>
+        <tr>
+            <td><div>4000008400001629</div></td>
+            <td>3DS Declined</td>
+        </tr>
+        <tr>
+            <td><div>4000008400001280</div></td>
+            <td>3DS Error</td>
+        </tr>
+    </table>
+</div>
+<div id="snackbar">Card Copied to Clipboard</div>
+<script>
+
+
+    function getStripePublishableKey() {
+      return "pk_test_51RUTiSAs6uch2mqQune4yYMgnaPTI8z7AuCS9CPb5zaDQuUsje3qsRZKwgjDND3DTwvKVz6aSWYFy36FVA7iyn7h00QbaV5A9S";
+
+    }
+
+    async function createPaymentIntent(
+      event,
+      mode,
+      captureMethod,
+      selectedShippingId
+    ) {
+      const response = await fetch("https://unexpected-dune-list.glitch.me/secret", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: mode,
+          captureMethod: captureMethod,
+          selectedShippingId: selectedShippingId,
+        }),
+      });
+      const json = await response.json();
+      logECEEvent(`PaymentIntent Created: ${json.paymentIntentId}`);
+      return {
+        paymentIntentId: json.paymentIntentId,
+        client_secret: json.secret,
+      };
+    }
+
+    async function getAndLogPaymentIntent(paymentIntentId) {
+      const response = await fetch(`https://unexpected-dune-list.glitch.me/intent/${paymentIntentId}`);
+      const result = await response.json();
+      logECEEvent(`PaymentIntent:\n${hashToString(result)}`);
+    }
+
+    function hashToString(hash) {
+      return JSON.stringify(hash, 0, 2);
+    }
+
+    var QUERY_PARAMS = new URLSearchParams(window.location.search);
+    var ELEMENTS_OPTIONS = JSON.parse("{}");
+    var LINE_ITEMS = [];
+    var AMOUNT_TOTAL = 0;
+    var SHIPPING_RATES = [];
+    function getNamespacedQueryParams(ns) {
+      const namespacedParams = {};
+      QUERY_PARAMS.forEach((value, key) => {
+        console.log(key);
+        const indexOfNs = key.indexOf(ns);
+        if (indexOfNs === 0) {
+          const paramKey = key.substring(ns.length + 1); // omit "elements."
+          namespacedParams[paramKey] = value;
+        }
+      });
+      return namespacedParams;
+    }
+    async function getItems() {
+      return fetch("https://unexpected-dune-list.glitch.me/items")
+        .then((x) => x.json())
+        .then((x) => {
+          LINE_ITEMS = x.items.map((item) => {
+            return {
+              name: item.name,
+              amount: item.amount,
+            };
+          });
+          AMOUNT_TOTAL = x.total;
+          ELEMENTS_OPTIONS = {
+            ...ELEMENTS_OPTIONS,
+            mode: "payment",
+            amount: x.total,
+            currency: "usd",
+            payment_method_types: ["card", "link", "shop_pay"],
+            ...getNamespacedQueryParams("elements"),
+          };
+          updateOrderSummary();
+          updateElementsText();
+        });
+    }
+
+    async function getShippingRates() {
+      return fetch(
+        "https://unexpected-dune-list.glitch.me/shipping?" +
+          new URLSearchParams({
+            state: shippingState,
+            country: shippingCountry,
+          })
+      )
+        .then((x) => x.json())
+        .then((x) => {
+          SHIPPING_RATES = x;
+          updateShippingRates();
+          return SHIPPING_RATES;
+        });
+    }
+
+    var ECE_OPTIONS = JSON.parse(`
+      {
+        "layout": {
+          "maxColumns": 1,
+          "maxRows": 0,
+          "overflow": "never"
+        }
+      }
+    `);
+
+    var shippingCountry = "US";
+    var shippingState = "WA";
+
+    const updateOrderSummary = () => {
+      var orderSummary = document.getElementById("OrderSummary");
+      let summary = LINE_ITEMS.map((line) => {
+        return `<div class="Summary-row flex justify-between">
+                  <span>${line["name"]}</span>
+                  <span>${(line["amount"] / 100).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}</span>
+                </div>`;
+      });
+
+      let total = `<div class="Summary-total flex justify-between">
+                  <span>Total</span>
+                  <span>${(AMOUNT_TOTAL / 100).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}</span>
+                </div>`;
+      orderSummary.innerHTML = summary.join("") + orderSummary.innerHTML + total;
+    };
+
+    const updateElementsText = () => {
+      document.getElementById("updateElementsText").value =
+        hashToString(ELEMENTS_OPTIONS);
+    };
+
+    const updateShippingRates = () => {
+      var shippingRates = document.getElementById("ShippingRates");
+      let shipping = SHIPPING_RATES.map((ship) => {
+        return `<div class="Summary-row flex justify-between">
+                  <span>${ship["displayName"]} - ${ship["deliveryEstimate"]}</span>
+                  <span>${(ship["amount"] / 100).toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                  })}</span>
+                </div>`;
+      });
+      shippingRates.innerHTML = shipping.join("");
+    };
+
+    const initApp = async () => {
+      await fetch("https://unexpected-dune-list.glitch.me/items")
+        .then((x) => x.json())
+        .then((x) => x.total);
+    };
+
+    function initializeStripeElements() {
+      const stripe = window.Stripe(getStripePublishableKey(), {
+        betas: ["blocked_card_brands_beta_2"],
+      });
+      // const stripe = window.Stripe(getStripePublishableKey(), {
+      //   stripeAccount: "acct_1O0Vgv2fIFjtUMwA",
+      // });
+      const elements = stripe.elements(ELEMENTS_OPTIONS);
+      const expressCheckoutElement = elements.create(
+        "expressCheckout",
+        ECE_OPTIONS
+      );
+      var mode = ELEMENTS_OPTIONS["mode"];
+      var captureMethod = ELEMENTS_OPTIONS["captureMethod"]
+        ? ELEMENTS_OPTIONS["captureMethod"]
+        : "automatic";
+
+      document.getElementById("updateECEText").value = hashToString(ECE_OPTIONS);
+
+      document.getElementById("updateElementsBtn").onclick = () => {
+        ELEMENTS_OPTIONS = JSON.parse(
+          document.getElementById("updateElementsText").value
+        );
+        console.log(`Update Elements with:\n${hashToString(ELEMENTS_OPTIONS)}`);
+        mode = ELEMENTS_OPTIONS["mode"];
+        captureMethod = ELEMENTS_OPTIONS["captureMethod"]
+          ? ELEMENTS_OPTIONS["captureMethod"]
+          : "automatic";
+        elements.update(ELEMENTS_OPTIONS);
+      };
+
+      document.getElementById("reloadElementsBtn").onclick = () => {
+        ELEMENTS_OPTIONS = JSON.parse(
+          document.getElementById("updateElementsText").value
+        );
+        console.log(`Reloading Elements with:\n${hashToString(ELEMENTS_OPTIONS)}`);
+        initializeStripeElements();
+      };
+
+      document.getElementById("reloadECEBtn").onclick = () => {
+        ECE_OPTIONS = JSON.parse(
+          document.getElementById("updateECEText").value
+        );
+        console.log(`Reloading ECE with:\n${hashToString(ECE_OPTIONS)}`);
+        initializeStripeElements();
+      };
+
+      document.getElementById("updateECEBtn").onclick = () => {
+        ECE_OPTIONS = JSON.parse(document.getElementById("updateECEText").value);
+        console.log(`Update ECE with:\n${hashToString(ECE_OPTIONS)}`);
+        expressCheckoutElement.update(ECE_OPTIONS);
+      };
+
+      expressCheckoutElement.mount("#express-checkout-element");
+
+      //When expressCheckoutElement is mounted, ready event tries to show the available payment methods
+      expressCheckoutElement.on("ready", ({ availablePaymentMethods }) => {
+        console.log("ready event triggered1");
+        const expressCheckoutDiv = document.getElementById(
+          "express-checkout-element"
+        );
+        if (!availablePaymentMethods) {
+          console.log("No Payment Options Available");
+        } else {
+          expressCheckoutDiv.style.visibility = "initial";
+        }
+      });
+
+      expressCheckoutElement.on("click", function (event) {
+        logECEEvent(`Click received with event:\n${hashToString(event)}`);
+        const billingAddressRequired = document.getElementById(
+          "billingAddressRequired"
+        ).checked;
+        const emailRequired = document.getElementById("emailRequired").checked;
+        const phoneNumberRequired = document.getElementById(
+          "phoneNumberRequired"
+        ).checked;
+        const shippingAddressRequired = document.getElementById(
+          "shippingAddressRequired"
+        ).checked;
+        const businessName = document.getElementById("businessName").value;
+        const rawAllowedShippingCountries = document.getElementById(
+          "allowedShippingCountries"
+        ).value;
+        var allowedShippingCountries = [];
+        if (rawAllowedShippingCountries) {
+          allowedShippingCountries = rawAllowedShippingCountries.split(",");
+        }
+
+        var resolvePayload = {
+          lineItems: LINE_ITEMS,
+          billingAddressRequired,
+          emailRequired,
+          phoneNumberRequired,
+          shippingAddressRequired,
+          allowedShippingCountries,
+        };
+        if (shippingAddressRequired) {
+          resolvePayload.shippingRates = SHIPPING_RATES;
+        }
+        if (businessName) {
+          resolvePayload.business = {
+            name: businessName,
+          };
+        }
+        logECEEvent(
+          `Click Resolved with payload:\n${hashToString(resolvePayload)}`
+        );
+        event.resolve(resolvePayload);
+        if (document.getElementById("disableOverlay").checked) {
+          // Remove the overlay applied by ECE
+          document.querySelectorAll('div[style*="z-index: 9999999"]')[0]?.remove();
+          document.body.style.overflow = "auto";
+        }
+      });
+
+      expressCheckoutElement.on("shippingaddresschange", async function (event) {
+        logECEEvent(
+          `ShippingAddressChange: Name: ${event.name}\nAddress:\n${hashToString(
+            event.address
+          )}`
+        );
+        shippingCountry = event.address.country;
+        shippingState = event.address.state;
+
+        // Check if we should reject for testing
+        if (document.getElementById("rejectShippingAddressChange").checked) {
+          event.reject();
+          return;
+        }
+
+        // Transform address to match native API format
+        const shippingAddress = {
+          address1: event.address.addressLine ? event.address.addressLine[0] : "",
+          address2: event.address.addressLine && event.address.addressLine[1] ? event.address.addressLine[1] : "",
+          city: event.address.city || "",
+          companyName: event.address.organization || "",
+          countryCode: event.address.country || "US",
+          email: "", // Not provided by Stripe ECE
+          firstName: event.name ? event.name.split(' ')[0] : "",
+          lastName: event.name ? event.name.split(' ').slice(1).join(' ') : "",
+          phone: event.address.phone || "",
+          postalCode: event.address.postalCode || "",
+          provinceCode: event.address.state || ""
+        };
+
+        try {
+          // Check if native API is available
+          if (window.NativeShipping && window.NativeShipping.calculateShipping) {
+            logECEEvent("Using Native Shipping API...");
+
+            // Call native API
+            const response = await window.NativeShipping.calculateShipping(shippingAddress);
+
+            logECEEvent(`Native API Response:\n${hashToString(response)}`);
+
+            // Check if merchant rejected the address
+            if (response.merchantDecision === "rejected") {
+              logECEEvent(`Shipping rejected: ${response.error || "Address not serviceable"}`);
+              event.reject();
+              return;
+            }
+
+            // Use the response from native API
+            SHIPPING_RATES = response.shippingRates;
+            updateShippingRates();
+
+            // Update line items if provided
+            if (response.lineItems) {
+              LINE_ITEMS = response.lineItems;
+              updateOrderSummary();
+            }
+
+            // Add shipping to line items if needed
+            if (SHIPPING_RATES && SHIPPING_RATES.length > 0) {
+              const defaultShipping = SHIPPING_RATES[0];
+              LINE_ITEMS.push({
+                name: defaultShipping.displayName,
+                amount: defaultShipping.amount
+              });
+            }
+
+            // Update Elements with the new total amount
+            const totalAmount = response.totalAmount || (AMOUNT_TOTAL + (SHIPPING_RATES[0]?.amount || 0));
+            elements.update({ amount: totalAmount });
+
+            event.resolve({
+              shippingRates: SHIPPING_RATES,
+              lineItems: LINE_ITEMS
+            });
+
+          } else {
+            // Resolve with an error
+            logECEEvent("Native Shipping API not available");
+            event.reject();
+          }
+
+        } catch (error) {
+          logECEEvent(`Error calculating shipping: ${error.message}`);
+          console.error("Shipping calculation error:", error);
+
+          // On error, reject the shipping address
+          event.reject();
+        }
+      });
+
+      expressCheckoutElement.on("shippingratechange", async function (event) {
+        logECEEvent(`Selected Shipping Rate:\n${hashToString(event.shippingRate)}`);
+        const shippingRates = await getShippingRates();
+        console.log(shippingRates);
+        const shippingRateExists = shippingRates.some(
+          (rate) => rate.id === event.shippingRate.id
+        );
+        if (
+          !shippingRateExists ||
+          document.getElementById("rejectShippingRateChange").checked
+        ) {
+          event.reject();
+        } else {
+          const updatedAmount = AMOUNT_TOTAL + event.shippingRate.amount;
+          console.log(`updating amount to ${updatedAmount}`);
+          elements.update({ amount: updatedAmount });
+          event.resolve();
+        }
+      });
+
+      expressCheckoutElement.on("cancel", function () {
+        logECEEvent("cancel");
+      });
+
+      //Observes confirm action & responds with return_url, elements & clientSecret for completing transaction
+      expressCheckoutElement.on("confirm", async (event) => {
+        logECEEvent(
+          `Confirm: BillingDetails:\n${hashToString(
+            event.billingDetails
+          )}\nShippingAddress:\n${hashToString(
+            event.shippingAddress
+          )}\nShippingRate:\n${hashToString(event.shippingRate)}}}`
+        );
+        console.log("confirm payment event triggered", event);
+        if (document.getElementById("simulatePaymentFailed").checked) {
+          logECEEvent("Invoked event.paymentFailed.");
+          event.paymentFailed({ reason: "fail" });
+          return;
+        }
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+          console.log("submit error");
+          return;
+        }
+
+        var selectedShippingId = null;
+        if (event.shippingRate && event.shippingRate.id) {
+          selectedShippingId = event.shippingRate.id;
+        }
+
+        const isCreatePaymentMethodEnabled = document.getElementById(
+          "createPaymentMethod"
+        ).checked;
+
+        var paymentMethod;
+        if (isCreatePaymentMethodEnabled) {
+          paymentMethod = await stripe.createPaymentMethod({ elements });
+        }
+
+        console.log("createPaymentIntent triggered");
+        await createPaymentIntent(
+          event,
+          mode,
+          captureMethod,
+          selectedShippingId
+        ).then(async (response) => {
+          console.log(response); // Handle the API response
+          const { client_secret: clientSecret, paymentIntentId: paymentIntentId } =
+            response;
+          if (mode === "payment") {
+            const confirmedPI = await stripe.confirmPayment({
+              elements,
+              clientSecret,
+              confirmParams: {
+                return_url: "https://amazon.com", //return_url is expected for createPaymentIntent as it is a mandatory parameter
+                expand: ["payment_method"],
+              },
+              redirect: "always", //Setting redirect: 'if_required' to stop redirection for SPC checkout
+            });
+            logECEEvent(`confirmPayment result:\n${hashToString(confirmedPI)}`);
+          } else if (mode === "setup") {
+            await stripe.confirmSetup({
+              elements,
+              clientSecret,
+              confirmParams: {
+                return_url: "https://amazon.com", //return_url is expected for createPaymentIntent as it is a mandatory parameter
+                expand: ["payment_method"],
+              },
+              redirect: "if_required",
+            });
+          } else {
+            console.log(`Invalid mode onConfirm ${mode}.`);
+          }
+          getAndLogPaymentIntent(paymentIntentId);
+        });
+      });
+    }
+
+    function logECEEvent(msg) {
+      const textArea = document.getElementById("console");
+      const logs = textArea.value + msg + "\n\n";
+      textArea.value = logs;
+    }
+
+    document.getElementById("clearConsole").addEventListener("click", () => {
+      document.getElementById("console").value = "";
+    });
+
+    const table = document.getElementById("testcards");
+    Array.from(table.rows)
+      .slice(1, table.rows.length)
+      .forEach((row) => {
+        row.cells[0].firstChild.addEventListener("click", (event) => {
+          const card = row.cells[0].firstChild.innerHTML;
+          navigator.clipboard.writeText(card);
+          const snackbar = document.getElementById("snackbar");
+          snackbar.className = "show";
+          setTimeout(function () {
+            snackbar.className = snackbar.className.replace("show", "");
+          }, 2000);
+        });
+      });
+
+    // Check for Native API availability
+    function checkNativeAPI() {
+      if (window.NativeShipping && window.NativeShipping.calculateShipping) {
+        logECEEvent("✅ Native Shipping API is available!");
+        console.log("✅ Native Shipping API detected");
+
+        // Add visual indicator
+        const indicator = document.createElement('div');
+        indicator.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #4CAF50; color: white; padding: 10px; border-radius: 5px; z-index: 10000;';
+        indicator.textContent = '✅ Native API Connected';
+        document.body.appendChild(indicator);
+
+        // Remove indicator after 3 seconds
+        setTimeout(() => indicator.remove(), 3000);
+      } else {
+        logECEEvent("⚠️ Native Shipping API not available - using fallback fetch");
+        console.log("⚠️ Native Shipping API not found");
+      }
+    }
+
+    // Test Native API button handler
+    document.getElementById("testNativeAPI").addEventListener("click", async () => {
+      if (!window.NativeShipping || !window.NativeShipping.calculateShipping) {
+        logECEEvent("❌ Native API not available!");
+        alert("Native Shipping API is not available. Make sure you're running in the iOS app.");
+        return;
+      }
+
+      // Test address (San Francisco)
+      const testAddress = {
+        address1: "101 Polk St",
+        address2: "Unit 1405",
+        city: "San Francisco",
+        companyName: "",
+        countryCode: "US",
+        email: "test@example.com",
+        firstName: "Test",
+        lastName: "User",
+        phone: "+14155551234",
+        postalCode: "94102-4763",
+        provinceCode: "CA"
+      };
+
+      logECEEvent(`Testing Native API with address:\n${hashToString(testAddress)}`);
+
+      try {
+        const response = await window.NativeShipping.calculateShipping(testAddress);
+        logECEEvent(`✅ Native API Response:\n${hashToString(response)}`);
+
+        if (response.merchantDecision === "rejected") {
+          alert(`Shipping rejected: ${response.error || "Address not serviceable"}`);
+        } else {
+          alert(`Success! Got ${response.shippingRates.length} shipping rates:\n\n${
+            response.shippingRates.map(rate =>
+              `${rate.displayName}: $${(rate.amount/100).toFixed(2)}`
+            ).join('\n')
+          }`);
+        }
+      } catch (error) {
+        logECEEvent(`❌ Native API Error: ${error.message}`);
+        alert(`Error: ${error.message}`);
+      }
+    });
+
+    getItems()
+      .then(() => {
+        getShippingRates();
+      })
+      .then(() => {
+        initializeStripeElements();
+        // Check for native API after a short delay
+        setTimeout(checkNativeAPI, 500);
+      });
+
+</script>
+</body>
+</html>

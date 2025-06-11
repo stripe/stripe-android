@@ -264,6 +264,13 @@ class PaymentSheet internal constructor(
         }
 
         /**
+         * @param handlers Handlers for wallet-specific events like shipping method and contact updates.
+         */
+        fun walletHandlers(handlers: WalletConfiguration.Handlers) = apply {
+            callbacksBuilder.walletHandlers(handlers)
+        }
+
+        /**
          * Returns a [PaymentSheet].
          *
          * @param activity The Activity that is presenting [PaymentSheet].
@@ -883,7 +890,7 @@ class PaymentSheet internal constructor(
              * See https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for the list of valid
              *  types.
              * - Example: listOf("card", "klarna")
-             * - Note: If you omit payment methods from this list, they’ll be automatically ordered by Stripe after the
+             * - Note: If you omit payment methods from this list, they'll be automatically ordered by Stripe after the
              *  ones you provide. Invalid payment methods are ignored.
              */
             fun paymentMethodOrder(paymentMethodOrder: List<String>): Builder = apply {
@@ -2524,6 +2531,13 @@ class PaymentSheet internal constructor(
             }
 
             /**
+             * @param handlers Handlers for wallet-specific events like shipping method and contact updates.
+             */
+            fun walletHandlers(handlers: WalletConfiguration.Handlers) = apply {
+                callbacksBuilder.walletHandlers(handlers)
+            }
+
+            /**
              * Returns a [PaymentSheet.FlowController].
              *
              * @param activity The Activity that is presenting [PaymentSheet.FlowController].
@@ -2588,13 +2602,21 @@ class PaymentSheet internal constructor(
              * changes.
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
+             * @param walletHandlers Optional handlers for wallet-specific events.
              */
             @JvmStatic
+            @JvmOverloads
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback
+                paymentResultCallback: PaymentSheetResultCallback,
+                walletHandlers: WalletConfiguration.Handlers? = null
             ): FlowController {
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .walletHandlers(walletHandlers)
+                        .build()
+                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2615,17 +2637,21 @@ class PaymentSheet internal constructor(
              * changes.
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
+             * @param walletHandlers Optional handlers for wallet-specific events.
              */
             @JvmStatic
+            @JvmOverloads
             fun create(
                 activity: ComponentActivity,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback
+                paymentResultCallback: PaymentSheetResultCallback,
+                walletHandlers: WalletConfiguration.Handlers? = null
             ): FlowController {
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                        .walletHandlers(walletHandlers)
                         .build()
                 )
                 return FlowControllerFactory(
@@ -2844,3 +2870,4 @@ class PaymentSheet internal constructor(
         }
     }
 }
+

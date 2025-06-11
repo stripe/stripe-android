@@ -19,14 +19,17 @@ import java.util.UUID
  *
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
+ * @param walletHandlers Optional handlers for wallet-specific events.
  */
 @Composable
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    walletHandlers: WalletConfiguration.Handlers? = null
 ): PaymentSheet.FlowController {
     val callbacks = remember {
         PaymentElementCallbacks.Builder()
+            .walletHandlers(walletHandlers)
             .build()
     }
 
@@ -110,6 +113,7 @@ internal fun internalRememberPaymentSheetFlowController(
 ): PaymentSheet.FlowController {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
+        FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)

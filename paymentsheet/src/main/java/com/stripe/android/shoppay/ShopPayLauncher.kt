@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
+import com.stripe.android.paymentsheet.WalletConfiguration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -59,8 +60,9 @@ internal class ShopPayLauncher @Inject internal constructor(
 
     fun present(
         checkoutUrl: String,
+        walletHandlers: WalletConfiguration.Handlers
     ) {
-        val args = ShopPayActivityContract.Args(checkoutUrl)
+        val args = ShopPayActivityContract.Args(checkoutUrl, walletHandlers)
         shopPayActivityResultLauncher?.launch(args)
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.WalletConfiguration
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
@@ -48,9 +49,14 @@ internal class CustomFlowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+
             val flowController = rememberPaymentSheetFlowController(
                 paymentOptionCallback = viewModel::handlePaymentOptionChanged,
                 paymentResultCallback = viewModel::handlePaymentSheetResult,
+                walletHandlers = WalletConfiguration.Handlers(
+                    shippingMethodUpdateHandler = { _, _ ->},
+                    shippingContactUpdateHandler = { _, _ ->}
+                )
             )
 
             PaymentSheetExampleTheme {
