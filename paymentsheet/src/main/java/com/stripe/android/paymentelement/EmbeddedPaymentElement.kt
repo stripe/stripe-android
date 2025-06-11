@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement
 
 import android.app.Activity
 import android.graphics.drawable.Drawable
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.runtime.Composable
@@ -588,6 +589,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     class State internal constructor(
         internal val confirmationState: EmbeddedConfirmationStateHolder.State,
         internal val customer: CustomerState?,
+        internal val previousNewSelections: Bundle,
     ) : Parcelable
 
     internal companion object {

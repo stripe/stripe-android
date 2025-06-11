@@ -25,6 +25,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                 EmbeddedPaymentElement.State(
                     confirmationState = it,
                     customer = customerStateHolder.customer.value,
+                    previousNewSelections = selectionHolder.previousNewSelections,
                 )
             }
         }
@@ -42,6 +43,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         state.confirmationState.configuration.appearance.parseAppearance()
         confirmationStateHolder.state = state.confirmationState
         customerStateHolder.setCustomerState(state.customer)
+        selectionHolder.setPreviousNewSelections(state.previousNewSelections)
         selectionHolder.set(state.confirmationState.selection)
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,

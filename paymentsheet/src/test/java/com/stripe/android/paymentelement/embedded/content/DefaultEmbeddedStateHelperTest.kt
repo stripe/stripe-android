@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
+import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
@@ -166,6 +167,7 @@ internal class DefaultEmbeddedStateHelperTest {
                     configuration = configuration,
                 ),
                 customer = customer,
+                previousNewSelections = Bundle(),
             )
         }
     }

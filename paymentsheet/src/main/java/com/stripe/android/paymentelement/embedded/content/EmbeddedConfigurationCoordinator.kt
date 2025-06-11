@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
+import android.os.Bundle
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -78,6 +79,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
                 configuration = configuration,
             ),
             customer = state.customer,
+            previousNewSelections = Bundle(),
         )
     }
 }

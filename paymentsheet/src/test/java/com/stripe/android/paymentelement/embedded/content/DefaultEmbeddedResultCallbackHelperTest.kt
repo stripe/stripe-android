@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import android.os.Bundle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
@@ -38,7 +39,8 @@ internal class DefaultEmbeddedResultCallbackHelperTest {
         val stateHelper = FakeEmbeddedStateHelper()
         stateHelper.state = EmbeddedPaymentElement.State(
             confirmationState = EmbeddedConfirmationStateFixtures.defaultState(),
-            customer = null
+            customer = null,
+            previousNewSelections = Bundle(),
         )
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
         val helper = DefaultEmbeddedResultCallbackHelper(
