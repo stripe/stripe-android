@@ -13,7 +13,6 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.FinancialConnectionsSession
-import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface LinkAccountManager {
     val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
     val accountStatus: Flow<AccountStatus>
-    var consumerPublishableKey: String?
 
     /**
      * Cached payment details for the current Link account.
@@ -118,7 +116,7 @@ internal interface LinkAccountManager {
         startSession: Boolean,
     ): LinkAccount?
 
-    suspend fun createLinkAccountSession() : Result<FinancialConnectionsSession>
+    suspend fun createLinkAccountSession(): Result<FinancialConnectionsSession>
 
     /**
      * Triggers sending a verification code to the user.
