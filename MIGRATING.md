@@ -2,7 +2,7 @@
 
 ## Migrating from versions < 21.18.0
 - Changes to `PaymentSheet`:
-  * The constructors have been deprecated and will be removed in a future release. Use `PaymentSheet.Builder` method instead.
+  * The constructors have been deprecated and will be removed in a future release. Use `PaymentSheet.Builder` instead.
 - Changes to `PaymentSheet.FlowController`:
   * `FlowController.create()` has been deprecated and will be removed in a future release. Use `FlowController.Builder` instead.
 - Changes to `rememberPaymentSheet`:
