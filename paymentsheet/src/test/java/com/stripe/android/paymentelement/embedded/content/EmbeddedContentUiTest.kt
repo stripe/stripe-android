@@ -50,27 +50,26 @@ internal class EmbeddedContentUiTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `rowStyle FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
-        internalRowSelectionCallback = {}
-    ) {
-        embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
-                embeddedViewDisplaysMandateText = true,
-            )
-            val content = awaitItem()
-            assertThat(content).isNotNull()
+    fun `rowStyle FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() =
+        runScenario(internalRowSelectionCallback = {}) {
+            embeddedContentHelper.embeddedContent.test {
+                assertThat(awaitItem()).isNull()
+                embeddedContentHelper.dataLoaded(
+                    PaymentMethodMetadataFactory.create(),
+                    Embedded.RowStyle.FlatWithRadio.default,
+                    embeddedViewDisplaysMandateText = true,
+                )
+                val content = awaitItem()
+                assertThat(content).isNotNull()
 
-            composeRule.setContent {
-                content?.Content()
+                composeRule.setContent {
+                    content?.Content()
+                }
+
+                composeRule.waitForIdle()
+                composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertExists()
             }
-
-            composeRule.waitForIdle()
-            composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertExists()
         }
-    }
 
     @Test
     fun `rowStyle not FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
@@ -109,8 +108,9 @@ internal class EmbeddedContentUiTest {
             val content = awaitItem()
             assertThat(content).isNotNull()
             assertFailsWith<IllegalArgumentException>(
-                "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
-                        "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+                message = "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to " +
+                    "ImmediateAction when using FlatWithChevron RowStyle. " +
+                    "Use a different style or enable ImmediateAction rowSelectionBehavior"
             ) {
                 composeRule.setContent {
                     content?.Content()
@@ -126,7 +126,7 @@ internal class EmbeddedContentUiTest {
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
-        ) = runTest {
+    ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
@@ -138,41 +138,43 @@ internal class EmbeddedContentUiTest {
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()
-        val immediateActionHandler = DefaultEmbeddedRowSelectionImmediateActionHandler(
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-            internalRowSelectionCallback = { null }
-        )
+        val immediateActionHandler =
+            DefaultEmbeddedRowSelectionImmediateActionHandler(
+                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                internalRowSelectionCallback = { null }
+            )
 
-        val embeddedContentHelper = DefaultEmbeddedContentHelper(
-            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
-            workContext = Dispatchers.Unconfined,
-            uiContext = Dispatchers.Unconfined,
-            customerRepository = FakeCustomerRepository(),
-            selectionHolder = selectionHolder,
-            embeddedLinkHelper = object : EmbeddedLinkHelper {
-                override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-            },
-            embeddedWalletsHelper = { stateFlowOf(null) },
-            customerStateHolder = CustomerStateHolder(
-                savedStateHandle = savedStateHandle,
-                selection = selectionHolder.selection,
-                customerMetadataPermissions = stateFlowOf(
-                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
-                ),
-            ),
-            embeddedFormHelperFactory = embeddedFormHelperFactory,
-            confirmationHandler = confirmationHandler,
-            confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                savedStateHandle = savedStateHandle,
-                selectionHolder = selectionHolder,
+        val embeddedContentHelper =
+            DefaultEmbeddedContentHelper(
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-            ),
-            rowSelectionImmediateActionHandler = immediateActionHandler,
-            errorReporter = errorReporter,
-            internalRowSelectionCallback = { internalRowSelectionCallback }
-        )
+                savedStateHandle = savedStateHandle,
+                eventReporter = eventReporter,
+                workContext = Dispatchers.Unconfined,
+                uiContext = Dispatchers.Unconfined,
+                customerRepository = FakeCustomerRepository(),
+                selectionHolder = selectionHolder,
+                embeddedLinkHelper = object : EmbeddedLinkHelper {
+                    override val linkEmail: StateFlow<String?> = stateFlowOf(null)
+                },
+                embeddedWalletsHelper = { stateFlowOf(null) },
+                customerStateHolder = CustomerStateHolder(
+                    savedStateHandle = savedStateHandle,
+                    selection = selectionHolder.selection,
+                    customerMetadataPermissions = stateFlowOf(
+                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+                    ),
+                ),
+                embeddedFormHelperFactory = embeddedFormHelperFactory,
+                confirmationHandler = confirmationHandler,
+                confirmationStateHolder = EmbeddedConfirmationStateHolder(
+                    savedStateHandle = savedStateHandle,
+                    selectionHolder = selectionHolder,
+                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                ),
+                rowSelectionImmediateActionHandler = immediateActionHandler,
+                errorReporter = errorReporter,
+                internalRowSelectionCallback = { internalRowSelectionCallback }
+            )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
         ).block()
