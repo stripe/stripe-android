@@ -18,10 +18,18 @@ import com.stripe.android.uicore.StripeTheme
 internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
     private val embeddedViewDisplaysMandateText: Boolean,
-    private val rowStyle: Embedded.RowStyle
+    private val rowStyle: Embedded.RowStyle,
+    private val isImmediateAction: Boolean = false,
 ) {
     @Composable
     fun Content() {
+        if (rowStyle is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
+            throw IllegalArgumentException(
+                "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
+                    "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+            )
+        }
+
         StripeTheme {
             Column(
                 modifier = Modifier

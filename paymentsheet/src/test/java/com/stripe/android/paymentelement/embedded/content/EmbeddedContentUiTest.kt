@@ -1,9 +1,10 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -11,12 +12,14 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -27,116 +30,104 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class DefaultEmbeddedContentHelperTest {
+@RunWith(RobolectricTestRunner::class)
+internal class EmbeddedContentUiTest {
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `dataLoaded updates savedStateHandle with paymentMethodMetadata`() = testScenario {
-        assertThat(savedStateHandle.get<PaymentMethodMetadata?>(STATE_KEY_EMBEDDED_CONTENT))
-            .isNull()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val rowStyle = Embedded.RowStyle.FlatWithRadio.default
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata, rowStyle, embeddedViewDisplaysMandateText = true)
-        val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
-        assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(state?.rowStyle).isEqualTo(rowStyle)
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `dataLoaded emits embeddedContent event`() = testScenario {
-        embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
-                embeddedViewDisplaysMandateText = true,
-            )
-            assertThat(awaitItem()).isNotNull()
-        }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `dataLoaded emits walletButtonsContent event`() = testScenario {
-        embeddedContentHelper.walletButtonsContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
-                embeddedViewDisplaysMandateText = true,
-            )
-            assertThat(awaitItem()).isNotNull()
-        }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `embeddedContent emits null when clearEmbeddedContent is called`() = testScenario {
-        embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
-                embeddedViewDisplaysMandateText = true,
-            )
-            assertThat(awaitItem()).isNotNull()
-            embeddedContentHelper.clearEmbeddedContent()
-            assertThat(awaitItem()).isNull()
-        }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `walletButtonsContent emits null when clearEmbeddedContent is called`() = testScenario {
-        embeddedContentHelper.walletButtonsContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
-                embeddedViewDisplaysMandateText = true,
-            )
-            assertThat(awaitItem()).isNotNull()
-            embeddedContentHelper.clearEmbeddedContent()
-            assertThat(awaitItem()).isNull()
-        }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
-        setup = {
-            set(
-                STATE_KEY_EMBEDDED_CONTENT,
-                DefaultEmbeddedContentHelper.State(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FloatingButton.default,
-                    embeddedViewDisplaysMandateText = true,
-                )
-            )
-        }
+    fun `rowStyle FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
+        internalRowSelectionCallback = {}
     ) {
         embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNotNull()
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.default,
+                embeddedViewDisplaysMandateText = true,
+            )
+            val content = awaitItem()
+            assertThat(content).isNotNull()
+
+            composeRule.setContent {
+                content?.Content()
+            }
+
+            composeRule.waitForIdle()
+            composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertExists()
+        }
+    }
+
+    @Test
+    fun `rowStyle not FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
+        internalRowSelectionCallback = null
+    ) {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.default,
+                embeddedViewDisplaysMandateText = true,
+            )
+            val content = awaitItem()
+            assertThat(content).isNotNull()
+
+            composeRule.setContent {
+                content?.Content()
+            }
+
+            composeRule.waitForIdle()
+            composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertExists()
+        }
+    }
+
+    @Test
+    fun `dataLoaded emits embeddedContent event that fails validation`() = runScenario(
+        internalRowSelectionCallback = null
+    ) {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithChevron.default,
+                embeddedViewDisplaysMandateText = true,
+            )
+            val content = awaitItem()
+            assertThat(content).isNotNull()
+            assertFailsWith<IllegalArgumentException>(
+                "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
+                        "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+            ) {
+                composeRule.setContent {
+                    content?.Content()
+                }
+            }
         }
     }
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
-        val savedStateHandle: SavedStateHandle,
-        val eventReporter: FakeEventReporter,
     )
 
-    private fun testScenario(
-        setup: SavedStateHandle.() -> Unit = {},
+    private fun runScenario(
+        internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
-    ) = runTest {
+        ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        savedStateHandle.setup()
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -180,14 +171,10 @@ internal class DefaultEmbeddedContentHelperTest {
             ),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,
-            internalRowSelectionCallback = { null }
+            internalRowSelectionCallback = { internalRowSelectionCallback }
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
         ).block()
-        confirmationHandler.validate()
-        eventReporter.validate()
     }
 }
