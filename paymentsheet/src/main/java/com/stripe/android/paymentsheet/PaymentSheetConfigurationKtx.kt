@@ -97,6 +97,12 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         end = formInsetValues.endDp,
         bottom = formInsetValues.bottomDp
     )
+
+    StripeTheme.customSectionSpacing = if (sectionSpacing.spacingDp >= 0f) {
+        sectionSpacing.spacingDp
+    } else {
+        null
+    }
 }
 
 internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>

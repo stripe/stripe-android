@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -28,7 +29,7 @@ internal object EmbeddedAppearanceSettingsDefinition :
         return Json.encodeToString(value)
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
     override fun setValue(value: EmbeddedAppearance) {
         super.setValue(value)
         AppearanceStore.state = AppearanceStore.state.copy(

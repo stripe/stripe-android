@@ -1008,7 +1008,10 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance(
+    data class Appearance
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
@@ -1042,7 +1045,14 @@ class PaymentSheet internal constructor(
         /**
          * Describes the inset values used for all forms
          */
-        internal val formInsetValues: Insets = Insets.defaultFormInsetValues
+        internal val formInsetValues: Insets = Insets.defaultFormInsetValues,
+
+        /**
+         * Defines spacing between conceptual sections of a form. This does not control padding
+         * between input fields. Negative values will also be ignored and default spacing will
+         * be applied.
+         */
+        internal val sectionSpacing: Spacing = Spacing.defaultSectionSpacing,
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1065,6 +1075,26 @@ class PaymentSheet internal constructor(
             typography = typography,
             primaryButton = primaryButton,
             embeddedAppearance = Embedded.default
+        )
+
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        constructor(
+            colorsLight: Colors = Colors.defaultLight,
+            colorsDark: Colors = Colors.defaultDark,
+            shapes: Shapes = Shapes.default,
+            typography: Typography = Typography.default,
+            primaryButton: PrimaryButton = PrimaryButton(),
+            embeddedAppearance: Embedded = Embedded.default,
+            formInsetValues: Insets = Insets.defaultFormInsetValues,
+        ) : this(
+            colorsLight = colorsLight,
+            colorsDark = colorsDark,
+            shapes = shapes,
+            typography = typography,
+            primaryButton = primaryButton,
+            embeddedAppearance = embeddedAppearance,
+            formInsetValues = formInsetValues,
+            sectionSpacing = Spacing.defaultSectionSpacing,
         )
 
         fun getColors(isDark: Boolean): Colors {
@@ -1384,6 +1414,9 @@ class PaymentSheet internal constructor(
             private var primaryButton: PrimaryButton = PrimaryButton()
             private var formInsetValues: Insets = Insets.defaultFormInsetValues
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var sectionSpacing: Spacing = Spacing.defaultSectionSpacing
+
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
                 Embedded.default
@@ -1417,7 +1450,12 @@ class PaymentSheet internal constructor(
                 this.formInsetValues = insets
             }
 
-            @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+            @AppearanceAPIAdditionsPreview
+            fun sectionSpacing(sectionSpacing: Spacing) = apply {
+                this.sectionSpacing = sectionSpacing
+            }
+
+            @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
             fun build(): Appearance {
                 return Appearance(
                     colorsLight = colorsLight,
@@ -1426,7 +1464,8 @@ class PaymentSheet internal constructor(
                     typography = typography,
                     primaryButton = primaryButton,
                     embeddedAppearance = embeddedAppearance,
-                    formInsetValues = formInsetValues
+                    formInsetValues = formInsetValues,
+                    sectionSpacing = sectionSpacing,
                 )
             }
         }
@@ -1688,6 +1727,15 @@ class PaymentSheet internal constructor(
                 sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
                 fontResId = StripeThemeDefaults.typography.fontFamily
             )
+        }
+    }
+
+    @AppearanceAPIAdditionsPreview
+    @Poko
+    @Parcelize
+    class Spacing(internal val spacingDp: Float) : Parcelable {
+        internal companion object {
+            val defaultSectionSpacing = Spacing(spacingDp = -1f)
         }
     }
 
