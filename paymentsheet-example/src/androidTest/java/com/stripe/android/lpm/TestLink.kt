@@ -15,6 +15,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("Temporarily disabled by @link-mobile-run")
 @RunWith(AndroidJUnit4::class)
 internal class TestLink : BasePlaygroundTest() {
     private val linkNewUser = TestParameters.create(

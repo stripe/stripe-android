@@ -26,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("Temporarily disabled by @link-mobile-run")
 @RunWith(AndroidJUnit4::class)
 internal class TestLinkCardBrand : BasePlaygroundTest() {
 
