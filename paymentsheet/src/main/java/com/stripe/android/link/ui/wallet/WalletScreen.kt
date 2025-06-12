@@ -84,17 +84,14 @@ internal fun WalletScreen(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
-    val financialConnectionsSheetLauncher = rememberFinancialConnectionsSheet {
-        viewModel.onFinancialConnectionsResult(it)
-    }
+    val financialConnectionsSheetLauncher =
+        rememberFinancialConnectionsSheet(viewModel::onFinancialConnectionsResult)
 
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(state.financialConnectionsSheetConfiguration) {
-        if (state.financialConnectionsSheetConfiguration != null) {
-            financialConnectionsSheetLauncher.present(
-                state.financialConnectionsSheetConfiguration!!
-            )
+        state.financialConnectionsSheetConfiguration?.let {
+            financialConnectionsSheetLauncher.present(it)
         }
     }
 
@@ -727,15 +724,15 @@ private fun AlertMessage(
 }
 
 @Composable
-fun rememberFinancialConnectionsSheet(
+private fun rememberFinancialConnectionsSheet(
     callback: (FinancialConnectionsSheetResult) -> Unit
 ): FinancialConnectionsSheetForDataLauncher {
-    val activityResultLauncher = rememberLauncherForActivityResult(
-        FinancialConnectionsSheetForDataContract(
-            intentBuilder(LocalContext.current)
-        )
-    ) { callback(it) }
-    return remember {
+    val context = LocalContext.current
+    val contract = remember(context) {
+        FinancialConnectionsSheetForDataContract(intentBuilder(context))
+    }
+    val activityResultLauncher = rememberLauncherForActivityResult(contract, callback)
+    return remember(activityResultLauncher) {
         FinancialConnectionsSheetForDataLauncher(
             activityResultLauncher
         )
