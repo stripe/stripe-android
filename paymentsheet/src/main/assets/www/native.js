@@ -63,16 +63,11 @@ function callNative(methodName, payload) {
                 requestId: generateRequestId()
             };
 
-            // iOS implementation
             if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers[methodName]) {
                 window.webkit.messageHandlers[methodName].postMessage(requestPayload)
                     .then(response => resolve(response))
                     .catch(error => reject(new Error(`iOS native error: ${error.message || error}`)));
-                return;
-            }
-
-            // Android implementation
-            if (window.androidBridge && typeof window.androidBridge[methodName] === 'function') {
+            } else if (window.androidBridge && typeof window.androidBridge[methodName] === 'function') {
                 console.log(`Sending to Android bridge (${methodName}):`, JSON.stringify(requestPayload));
                 const nativeResponseString = window.androidBridge[methodName](JSON.stringify(requestPayload));
 
@@ -91,10 +86,9 @@ function callNative(methodName, payload) {
                     reject(new Error(`Failed to parse native response: ${e.message}`));
                 }
                 return;
+            } else {
+                reject(new Error(`Native bridge not available for method: ${methodName}`));
             }
-
-            // Neither Android nor iOS bridge available
-            reject(new Error(`Native bridge not available for method: ${methodName}`));
         } catch (e) {
             console.error(`Error calling native method ${methodName}:`, e);
             reject(new Error(`Failed to communicate with native: ${e.message}`));
@@ -143,14 +137,10 @@ window.NativePayment = {
             nativeShippingAvailable: true
         };
 
-        // For iOS
         if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.ready) {
             window.webkit.messageHandlers.ready.postMessage(readyPayload);
             console.log('iOS bridge ready message sent.');
-        }
-
-        // For Android
-        if (window.androidBridge && typeof window.androidBridge.ready === 'function') {
+        } else if (window.androidBridge && typeof window.androidBridge.ready === 'function') {
             window.androidBridge.ready(JSON.stringify(readyPayload));
             console.log('Android bridge ready message sent.');
         }
