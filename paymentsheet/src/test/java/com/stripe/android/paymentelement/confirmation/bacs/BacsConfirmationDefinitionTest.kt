@@ -232,11 +232,14 @@ class BacsConfirmationDefinitionTest {
 
         val launcher = FakeBacsMandateConfirmationLauncher()
 
-        val appearance = PaymentSheet.Appearance().copy(
-            typography = PaymentSheet.Typography.default.copy(
-                sizeScaleFactor = 2f
+        val appearance = PaymentSheet.Appearance.Builder()
+            .typography(
+                PaymentSheet.Typography(
+                    sizeScaleFactor = 2f,
+                    fontResId = PaymentSheet.Typography.default.fontResId,
+                )
             )
-        )
+            .build()
         val bacsMandateData = BacsMandateData(
             name = "John Doe",
             email = "johndoe@email.com",

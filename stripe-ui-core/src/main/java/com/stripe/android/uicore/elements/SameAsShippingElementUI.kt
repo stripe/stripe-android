@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 
 const val SAME_AS_SHIPPING_CHECKBOX_TEST_TAG = "SAME_AS_SHIPPING_CHECKBOX_TEST_TAG"
@@ -22,7 +22,7 @@ fun SameAsShippingElementUI(
         modifier = modifier,
         automationTestTag = SAME_AS_SHIPPING_CHECKBOX_TEST_TAG,
         isChecked = checked,
-        label = stringResource(label),
+        label = label.resolve(),
         isEnabled = true,
         onValueChange = {
             controller.onValueChange(!checked)

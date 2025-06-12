@@ -44,7 +44,7 @@
     <ID>LongMethod:PaymentDetails.kt$@Preview(showBackground = true) @Composable private fun PaymentDetailsListItemPreview()</ID>
     <ID>LongMethod:PaymentElementLoader.kt$DefaultPaymentElementLoader$private suspend fun createLinkConfiguration( configuration: CommonConfiguration, customer: CustomerInfo?, elementsSession: ElementsSession, initializationMode: PaymentElementLoader.InitializationMode ): LinkConfiguration?</ID>
     <ID>LongMethod:PaymentMethodVerticalLayoutInteractor.kt$DefaultPaymentMethodVerticalLayoutInteractor.Companion$fun create( viewModel: BaseSheetViewModel, paymentMethodMetadata: PaymentMethodMetadata, customerStateHolder: CustomerStateHolder, bankFormInteractor: BankFormInteractor, ): PaymentMethodVerticalLayoutInteractor</ID>
-    <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
+    <ID>LongMethod:PaymentSheetConfigurationKtx.kt$@OptIn(AppearanceAPIAdditionsPreview::class) internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetScreen.kt$@Composable private fun PaymentSheetContent( viewModel: BaseSheetViewModel, headerText: ResolvableString?, walletsState: WalletsState?, walletsProcessingState: WalletsProcessingState?, error: ResolvableString?, currentScreen: PaymentSheetScreen, mandateText: MandateText?, modifier: Modifier )</ID>
     <ID>LongMethod:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`()</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
@@ -52,6 +52,8 @@
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, enabled: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
     <ID>LongMethod:UpdatePaymentMethodUI.kt$@Composable internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier)</ID>
+    <ID>LongMethod:VerificationBody.kt$@Composable internal fun VerificationBody( state: VerificationViewState, otpElement: OTPElement, onBack: () -> Unit, onFocusRequested: () -> Unit, didShowCodeSentNotification: () -> Unit, onChangeEmailClick: () -> Unit, onResendCodeClick: () -> Unit, )</ID>
+    <ID>LongMethod:VerificationScreenshotTest.kt$VerificationScreenshotTest.Companion$private fun testCases(isDialog: Boolean): List&lt;TestCase></ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.5f</ID>
@@ -93,6 +95,7 @@
     <ID>TooManyFunctions:EmbeddedCommonModule.kt$EmbeddedCommonModule$Companion</ID>
     <ID>TooManyFunctions:EmbeddedPaymentElementViewModelComponent.kt$EmbeddedPaymentElementViewModelModule</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
+    <ID>TooManyFunctions:FlowControllerModule.kt$FlowControllerModule</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
     <ID>TooManyFunctions:NativeLinkComponent.kt$NativeLinkComponent$Builder</ID>
     <ID>TooManyFunctions:NativeLinkModule.kt$NativeLinkModule</ID>

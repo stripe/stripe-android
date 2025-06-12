@@ -3,6 +3,14 @@
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED][10831](https://github.com/stripe/stripe-android/pull/10831) Added `RowSelectionBehavior` API to Embedded Payment Element
 
+### PaymentSheet
+* [ADDED][10935](https://github.com/stripe/stripe-android/pull/10935) Add `formInsetValues` method to `PaymentSheet.Appearance.Builder`.
+
+## 21.17.0 - 2025-06-09
+
+### PaymentSheet
+* [ADDED][10919](https://github.com/stripe/stripe-android/pull/10919) Add `formInsetValues` to `PaymentSheet.Appearance`.
+
 ## 21.16.0 - 2025-06-02
 
 ### PaymentSheet

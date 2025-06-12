@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Doriți să închideți acest formular?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Salvați-vă informațiile pentru o finalizare securizată a comenzii cu un singur clic cu Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Salvează informațiile mele pentru finalizarea mai rapidă a comenzii cu Link</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Prin furnizarea adresei de e-mail, sunteți de acord să creați un cont Link și să vă salvați informațiile de plată în Link, în conformitate cu <terms>Termenii Link</terms>i și <privacy>Politica de confidențialitate</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Prin furnizarea numărului dvs. de telefon, sunteți de acord să creați un cont Link și să salvați informațiile dvs. de plată în Link, în conformitate cu <terms>Termenii Link</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Prin furnizarea numărului de telefon și a adresei de e-mail, sunteți de acord să creați un cont Link supus <terms>Termenilor</terms> și <privacy>politicii de confidențialitate</privacy> Link.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Contul dvs. a fost dezactivat</string>
   <!-- Generic failure message -->

@@ -1,6 +1,7 @@
 package com.stripe.android.link.verification
 
 import android.os.Parcelable
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.verification.VerificationViewState
 import kotlinx.parcelize.Parcelize
 
@@ -29,7 +30,10 @@ internal sealed class VerificationState : Parcelable {
      * Verification is required and the UI should show the verification form
      */
     @Parcelize
-    internal data class Render2FA(val viewState: VerificationViewState) : VerificationState()
+    internal data class Render2FA(
+        val viewState: VerificationViewState,
+        val linkConfiguration: LinkConfiguration
+    ) : VerificationState()
 
     /**
      * Verification is completed or not needed, showing the normal Link button

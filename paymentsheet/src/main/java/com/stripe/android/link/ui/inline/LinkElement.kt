@@ -4,12 +4,10 @@ package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -23,6 +21,7 @@ internal fun LinkElement(
     linkSignupMode: LinkSignupMode,
     enabled: Boolean,
     onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val component = remember(linkConfigurationCoordinator, configuration) {
         linkConfigurationCoordinator.getComponent(configuration)
@@ -47,9 +46,7 @@ internal fun LinkElement(
                 viewModel = viewModel,
                 enabled = enabled,
                 onStateChanged = onLinkSignupStateChanged,
-                modifier = Modifier
-                    .padding(vertical = 6.dp)
-                    .fillMaxWidth(),
+                modifier = modifier.fillMaxWidth(),
             )
         }
         LinkSignupMode.AlongsideSaveForFutureUse -> {
@@ -57,9 +54,7 @@ internal fun LinkElement(
                 viewModel = viewModel,
                 enabled = enabled,
                 onStateChanged = onLinkSignupStateChanged,
-                modifier = Modifier
-                    .padding(vertical = 6.dp)
-                    .fillMaxWidth(),
+                modifier = modifier.fillMaxWidth(),
             )
         }
     }

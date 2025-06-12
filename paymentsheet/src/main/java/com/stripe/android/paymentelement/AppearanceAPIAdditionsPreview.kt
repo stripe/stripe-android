@@ -5,4 +5,4 @@ package com.stripe.android.paymentelement
     message = "This API is under construction. It can be changed or removed at any time (use at your own risk)."
 )
 @Retention(AnnotationRetention.BINARY)
-annotation class ExtendedAppearancePreview
+annotation class AppearanceAPIAdditionsPreview

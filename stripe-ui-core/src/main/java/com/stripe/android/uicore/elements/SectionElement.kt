@@ -42,7 +42,7 @@ data class SectionElement(
 
         fun wrap(
             sectionFieldElement: SectionFieldElement,
-            label: Int? = null
+            label: ResolvableString? = null
         ): SectionElement {
             return wrap(
                 sectionFieldElements = listOf(sectionFieldElement),
@@ -52,7 +52,7 @@ data class SectionElement(
 
         fun wrap(
             sectionFieldElements: List<SectionFieldElement>,
-            label: Int? = null
+            label: ResolvableString? = null
         ): SectionElement {
             val errorControllers = sectionFieldElements.map {
                 it.sectionFieldErrorController()

@@ -65,11 +65,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -113,7 +115,7 @@ fun TextFieldSection(
 
     Section(
         modifier = modifier,
-        title = sectionTitle,
+        title = sectionTitle?.let { resolvableString(it) },
         error = sectionErrorString,
         isSelected = isSelected,
         content = content,
@@ -231,9 +233,7 @@ fun TextField(
                 if (!shouldAnnounceFieldValue) this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
-        label = label?.let {
-            stringResource(it)
-        },
+        label = label.resolve(),
         showOptionalLabel = textFieldController.showOptionalLabel,
         shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,

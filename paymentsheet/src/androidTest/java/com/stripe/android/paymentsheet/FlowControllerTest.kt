@@ -11,11 +11,15 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -23,6 +27,8 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.WalletButtonsPage
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -38,6 +44,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,10 +60,16 @@ internal class FlowControllerTest {
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+    private val walletButtonsPage = WalletButtonsPage(testRules.compose)
 
     private val defaultConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
         .build()
+
+    @After
+    fun teardown() {
+        GooglePayRepository.resetFactory()
+    }
 
     @Test
     fun testSuccessfulCardPayment(
@@ -969,6 +982,169 @@ internal class FlowControllerTest {
         // Scroll to check that Affirm is included, we expect it to be last in the list.
         composeTestRule.onNodeWithTag(TEST_TAG_LIST).performScrollToIndex(4)
         composeTestRule.onNodeWithTag(TEST_TAG_LIST + "affirm").assertIsDisplayed()
+
+        testContext.markTestSucceeded()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun testWalletButtonsShown() = runFlowControllerTest(
+        networkRule = networkRule,
+        showWalletButtons = true,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val isConfigured = CountDownLatch(1)
+
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/customers/cus_1"),
+        ) { response ->
+            response.testBodyFromFile("customer-get-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = "pi_123_secret_123",
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .customer(
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "cuss_123",
+                    )
+                )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
+                .build(),
+            callback = { _, _ ->
+                isConfigured.countDown()
+            },
+        )
+
+        isConfigured.await(5, TimeUnit.SECONDS)
+
+        walletButtonsPage.assertLinkIsDisplayed()
+        walletButtonsPage.assertGooglePayIsDisplayed()
+
+        testContext.markTestSucceeded()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class, WalletButtonsPreview::class)
+    @Test
+    fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
+        networkRule = networkRule,
+        showWalletButtons = true,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val isConfigured = CountDownLatch(1)
+
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        return true
+                    }
+                }
+            }
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/customers/cus_1"),
+        ) { response ->
+            response.testBodyFromFile("customer-get-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
+
+        testContext.scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
+            testContext.flowController.configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_123_secret_123",
+                configuration = PaymentSheet.Configuration.Builder(
+                    merchantDisplayName = "Example, Inc."
+                )
+                    .customer(
+                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "cuss_123",
+                        )
+                    )
+                    .googlePay(
+                        PaymentSheet.GooglePayConfiguration(
+                            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                            countryCode = "US",
+                        )
+                    )
+                    .walletButtons(
+                        PaymentSheet.WalletButtonsConfiguration(
+                            willDisplayExternally = true,
+                            walletsToShow = listOf("link"),
+                        )
+                    )
+                    .build(),
+                callback = { _, _ ->
+                    isConfigured.countDown()
+                },
+            )
+        }
+
+        isConfigured.await(5, TimeUnit.SECONDS)
+
+        walletButtonsPage.assertGooglePayIsNotDisplayed()
+        walletButtonsPage.assertLinkIsDisplayed()
+
+        testContext.flowController.presentPaymentOptions()
+        activityLaunchObserver.awaitLaunch()
+
+        composeTestRule.waitForIdle()
+        page.assertGooglePayIsDisplayed()
 
         testContext.markTestSucceeded()
     }

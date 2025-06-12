@@ -72,6 +72,18 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
+    fun `launchForm launches activity with previous form details`() = testScenario {
+        val code = "card"
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val state = EmbeddedConfirmationStateFixtures.defaultState()
+        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
+        assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
     fun `launchForm launches activity with correct current selection if selection is saved card`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
@@ -149,6 +161,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        assertThat(selectionHolder.getPreviousNewSelection("cashapp"))
+            .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
     @Test

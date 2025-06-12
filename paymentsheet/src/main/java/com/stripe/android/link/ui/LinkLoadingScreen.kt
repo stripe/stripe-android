@@ -3,6 +3,7 @@ package com.stripe.android.link.ui
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -26,7 +27,8 @@ internal fun LinkLoadingScreen(
         modifier = modifier
             .then(minHeight?.let { Modifier.heightIn(min = it) } ?: Modifier)
             .fillMaxWidth()
-            .padding(vertical = 64.dp),
+            .padding(vertical = 64.dp)
+            .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         LinkSpinner(modifier = Modifier.size(48.dp))

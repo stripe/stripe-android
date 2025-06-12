@@ -23,12 +23,18 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActivityResult.Canceled.Reason
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.TestFactory.CONSUMER_SESSION
+import com.stripe.android.link.TestFactory.VERIFICATION_STARTED_SESSION
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -43,6 +49,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
@@ -118,6 +125,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.isA
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
@@ -160,7 +168,8 @@ internal class DefaultFlowControllerTest {
     private val sepaMandateActivityLauncher =
         mock<ActivityResultLauncher<SepaMandateContract.Args>>()
 
-    private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+    private val flowControllerLinkPaymentLauncher = mock<LinkPaymentLauncher>()
+    private val walletsButtonLinkPaymentLauncher = mock<LinkPaymentLauncher>()
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -496,7 +505,7 @@ internal class DefaultFlowControllerTest {
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            walletButtonsAlreadyShown = false,
+            walletsToShow = WalletType.entries,
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -552,7 +561,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.presentPaymentOptions()
 
-        verify(linkPaymentLauncher).present(
+        verify(flowControllerLinkPaymentLauncher).present(
             configuration = any(),
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
@@ -560,6 +569,69 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
+    }
+
+    @Test
+    fun `presentPaymentOptions should not launch Link 2FA after dismissing it once`() = runTest {
+        // Setup the feature flag to enable early verification
+        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+
+        // Create a verificationStartedAccount with VerificationStarted status
+        val session = CONSUMER_SESSION.copy(
+            verificationSessions = listOf(VERIFICATION_STARTED_SESSION)
+        )
+        val verificationStartedAccount = LinkAccount(consumerSession = session)
+
+        // Create flow controller with Link payment method
+        val flowController = createFlowController(
+            paymentSelection = PaymentSelection.Link(
+                selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = null
+                )
+            )
+        )
+
+        // Set the account holder with VerificationStarted status
+        linkAccountHolder.set(LinkAccountUpdate.Value(verificationStartedAccount))
+
+        flowController.configureExpectingSuccess()
+
+        // First call to present payment options
+        flowController.presentPaymentOptions()
+
+        // Verify Link launcher was called for the first time
+        verify(flowControllerLinkPaymentLauncher).present(
+            configuration = any(),
+            linkAccountInfo = anyOrNull(),
+            launchMode = any(),
+            useLinkExpress = any()
+        )
+
+        // Simulate user dismissing 2FA with back press
+        flowController.onLinkResultFromFlowController(
+            LinkActivityResult.Canceled(
+                reason = Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.Value(verificationStartedAccount)
+            )
+        )
+
+        // Reset the mock to clear previous invocations
+        reset(flowControllerLinkPaymentLauncher)
+
+        // Try to present payment options again
+        flowController.presentPaymentOptions()
+
+        // Verify Link launcher was NOT called the second time
+        verify(flowControllerLinkPaymentLauncher, never()).present(
+            configuration = any(),
+            linkAccountInfo = anyOrNull(),
+            useLinkExpress = any(),
+            launchMode = any()
+        )
+
+        // Verify payment option launcher was called instead
+        verify(paymentOptionActivityLauncher).launch(any(), anyOrNull())
     }
 
     @Test
@@ -911,7 +983,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
+        verify(flowControllerLinkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1279,7 +1351,7 @@ internal class DefaultFlowControllerTest {
         )
         flowController.confirm()
 
-        verify(linkPaymentLauncher).present(any(), anyOrNull(), any(), any())
+        verify(flowControllerLinkPaymentLauncher).present(any(), anyOrNull(), any(), any())
     }
 
     @Test
@@ -1352,7 +1424,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `On wallet buttons rendered and options launched, 'walletButtonsAlreadyShown' should be true`() = runTest {
+    fun `On wallet buttons rendered and options launched, should show no wallets in options screen`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.walletButtonsRendered = true
@@ -1364,7 +1436,85 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere { it.walletButtonsAlreadyShown },
+            argWhere { it.walletsToShow.isEmpty() },
+            anyOrNull(),
+        )
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `On wallet buttons rendered and options launched, should show only Link in options screen`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = true
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        walletsToShow = listOf("google_pay")
+                    )
+                )
+                .build()
+        )
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere {
+                it.walletsToShow.size == 1 &&
+                    it.walletsToShow.contains(WalletType.Link)
+            },
+            anyOrNull(),
+        )
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `On wallet buttons rendered and options launched, should show only GPay in options screen`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.walletButtonsRendered = true
+
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        walletsToShow = listOf("link")
+                    )
+                )
+                .build()
+        )
+
+        flowController.presentPaymentOptions()
+
+        verify(paymentOptionActivityLauncher).launch(
+            argWhere {
+                it.walletsToShow.size == 1 &&
+                    it.walletsToShow.contains(WalletType.GooglePay)
+            },
             anyOrNull(),
         )
     }
@@ -2503,7 +2653,8 @@ internal class DefaultFlowControllerTest {
             linkHandler = mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             linkAccountHolder = linkAccountHolder,
-            linkPaymentLauncher = linkPaymentLauncher,
+            flowControllerLinkLauncher = flowControllerLinkPaymentLauncher,
+            walletsButtonLinkLauncher = walletsButtonLinkPaymentLauncher,
             activityResultRegistryOwner = mock(),
             linkProminenceFeatureProvider = linkProminenceFeatureProvider,
             confirmationHandler = createTestConfirmationHandlerFactory(
@@ -2517,7 +2668,7 @@ internal class DefaultFlowControllerTest {
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
                     accountStatus = AccountStatus.Verified,
                 ),
-                linkLauncher = linkPaymentLauncher,
+                linkLauncher = flowControllerLinkPaymentLauncher,
                 errorReporter = errorReporter,
                 savedStateHandle = viewModel.handle,
                 statusBarColor = STATUS_BAR_COLOR,

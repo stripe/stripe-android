@@ -52,6 +52,10 @@ internal class FlowControllerViewModel(
             handle[STATE_KEY] = value
         }
 
+    fun updateState(block: (DefaultFlowController.State?) -> DefaultFlowController.State?) {
+        handle[STATE_KEY] = block(state)
+    }
+
     private val _configureRequest = MutableStateFlow<FlowControllerConfigurationHandler.ConfigureRequest?>(null)
     val configureRequest: StateFlow<FlowControllerConfigurationHandler.ConfigureRequest?> =
         _configureRequest.asStateFlow()

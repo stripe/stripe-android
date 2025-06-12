@@ -26,6 +26,9 @@
   <string name="stripe_confirm_close_form_title">Bu formu kapatmak istiyor musunuz?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link ile tek tıklamayla güvenli ödeme yapmak için bilgilerinizi kaydedin</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Link ile daha hızlı ödeme için bilgilerimi kaydet</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredisi</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -203,6 +206,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[E-postanızı vererek <terms>Link Şartları</terms> ve <privacy>Gizlilik Politikası</privacy> uyarınca bir Link hesabı oluşturmayı ve ödeme bilgilerinizi Link\'e kaydetmeyi kabul edersiniz.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Telefon numaranızı vererek <terms>Link Şartları</terms> ve <privacy>Gizlilik Politikası</privacy> uyarınca bir Link hesabı oluşturmayı ve ödeme bilgilerinizi Link\'e kaydetmeyi kabul edersiniz.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Telefon numarası ve e-posta adresi vererek Link <terms>Şartları</terms> ve <privacy>Gizlilik Politikası</privacy>\'na tabi bir Link hesabı oluşturmayı kabul etmiş olursunuz.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Hesabınız devre dışı bırakıldı</string>
   <!-- Generic failure message -->

@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -50,7 +51,7 @@ private object BoletoUiDefinitionFactory : UiDefinitionFactory.Simple {
             taxIdElementIdentifierSpec,
             SimpleTextFieldController(
                 SimpleTextFieldConfig(
-                    label = R.string.stripe_boleto_tax_id_label,
+                    label = resolvableString(R.string.stripe_boleto_tax_id_label),
                     capitalization = KeyboardCapitalization.None,
                     keyboard = KeyboardType.Ascii,
                 ),

@@ -1,13 +1,13 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -30,8 +30,7 @@ class IbanConfig : TextFieldConfig {
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Characters
     override val debugLabel = "iban"
 
-    @StringRes
-    override val label = R.string.stripe_iban
+    override val label = resolvableString(R.string.stripe_iban)
     override val keyboard = KeyboardType.Ascii
 
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(

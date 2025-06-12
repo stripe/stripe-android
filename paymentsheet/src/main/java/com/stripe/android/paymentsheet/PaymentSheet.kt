@@ -25,11 +25,11 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.ExtendedAppearancePreview
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -659,7 +659,7 @@ class PaymentSheet internal constructor(
 
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
 
-        internal val willShowWalletButtons: Boolean = false,
+        internal val walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons,
     ) : Parcelable {
 
         @JvmOverloads
@@ -812,7 +812,7 @@ class PaymentSheet internal constructor(
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
-            private var willShowWalletButtons: Boolean = false
+            private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -945,9 +945,12 @@ class PaymentSheet internal constructor(
                 this.link = link
             }
 
+            /**
+             * Configuration related to `WalletButtons`
+             */
             @WalletButtonsPreview
-            fun willShowWalletButtons(willShowWalletButtons: Boolean) = apply {
-                this.willShowWalletButtons = willShowWalletButtons
+            fun walletButtons(walletButtons: WalletButtonsConfiguration) = apply {
+                this.walletButtons = walletButtons
             }
 
             fun build() = Configuration(
@@ -970,7 +973,7 @@ class PaymentSheet internal constructor(
                 cardBrandAcceptance = cardBrandAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 link = link,
-                willShowWalletButtons = willShowWalletButtons,
+                walletButtons = walletButtons,
             )
         }
 
@@ -1005,7 +1008,10 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance(
+    data class Appearance
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
@@ -1034,7 +1040,19 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the Embedded Payment Element
          */
-        internal val embeddedAppearance: Embedded = Embedded.default
+        internal val embeddedAppearance: Embedded = Embedded.default,
+
+        /**
+         * Describes the inset values used for all forms
+         */
+        internal val formInsetValues: Insets = Insets.defaultFormInsetValues,
+
+        /**
+         * Defines spacing between conceptual sections of a form. This does not control padding
+         * between input fields. Negative values will also be ignored and default spacing will
+         * be applied.
+         */
+        internal val sectionSpacing: Spacing = Spacing.defaultSectionSpacing,
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1057,6 +1075,26 @@ class PaymentSheet internal constructor(
             typography = typography,
             primaryButton = primaryButton,
             embeddedAppearance = Embedded.default
+        )
+
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        constructor(
+            colorsLight: Colors = Colors.defaultLight,
+            colorsDark: Colors = Colors.defaultDark,
+            shapes: Shapes = Shapes.default,
+            typography: Typography = Typography.default,
+            primaryButton: PrimaryButton = PrimaryButton(),
+            embeddedAppearance: Embedded = Embedded.default,
+            formInsetValues: Insets = Insets.defaultFormInsetValues,
+        ) : this(
+            colorsLight = colorsLight,
+            colorsDark = colorsDark,
+            shapes = shapes,
+            typography = typography,
+            primaryButton = primaryButton,
+            embeddedAppearance = embeddedAppearance,
+            formInsetValues = formInsetValues,
+            sectionSpacing = Spacing.defaultSectionSpacing,
         )
 
         fun getColors(isDark: Boolean): Colors {
@@ -1374,6 +1412,10 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
+            private var formInsetValues: Insets = Insets.defaultFormInsetValues
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var sectionSpacing: Spacing = Spacing.defaultSectionSpacing
 
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
@@ -1404,9 +1446,27 @@ class PaymentSheet internal constructor(
                 this.embeddedAppearance = embeddedAppearance
             }
 
-            @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+            fun formInsetValues(insets: Insets) = apply {
+                this.formInsetValues = insets
+            }
+
+            @AppearanceAPIAdditionsPreview
+            fun sectionSpacing(sectionSpacing: Spacing) = apply {
+                this.sectionSpacing = sectionSpacing
+            }
+
+            @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, embeddedAppearance)
+                return Appearance(
+                    colorsLight = colorsLight,
+                    colorsDark = colorsDark,
+                    shapes = shapes,
+                    typography = typography,
+                    primaryButton = primaryButton,
+                    embeddedAppearance = embeddedAppearance,
+                    formInsetValues = formInsetValues,
+                    sectionSpacing = sectionSpacing,
+                )
             }
         }
     }
@@ -1538,7 +1598,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Shapes @ExtendedAppearancePreview constructor(
+    data class Shapes @AppearanceAPIAdditionsPreview constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
@@ -1555,7 +1615,7 @@ class PaymentSheet internal constructor(
          */
         val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
-        @OptIn(ExtendedAppearancePreview::class)
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             /**
              * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
@@ -1572,7 +1632,7 @@ class PaymentSheet internal constructor(
             bottomSheetCornerRadiusDp = cornerRadiusDp,
         )
 
-        @OptIn(ExtendedAppearancePreview::class)
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
             context: Context,
             cornerRadiusDp: Int,
@@ -1581,18 +1641,6 @@ class PaymentSheet internal constructor(
             cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
             borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthDp),
             bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusDp),
-        )
-
-        @ExtendedAppearancePreview
-        constructor(
-            context: Context,
-            @DimenRes cornerRadiusRes: Int,
-            @DimenRes borderStrokeWidthRes: Int,
-            @DimenRes bottomSheetCornerRadiusRes: Int,
-        ) : this(
-            cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes),
-            borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes),
-            bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes),
         )
 
         companion object {
@@ -1604,7 +1652,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Typography(
+    data class Typography @AppearanceAPIAdditionsPreview constructor(
         /**
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
          * When this value increases fonts will increase in size and decrease when this value is lowered.
@@ -1615,13 +1663,79 @@ class PaymentSheet internal constructor(
          * The font used in text. This should be a resource ID value.
          */
         @FontRes
-        val fontResId: Int?
+        val fontResId: Int?,
+
+        /**
+         * Custom font configuration for specific text styles
+         * Note: When set, these fonts override the default font calculations for their respective text styles
+         */
+        val custom: Custom,
     ) : Parcelable {
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        constructor(
+            /**
+             * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
+             * When this value increases fonts will increase in size and decrease when this value is lowered.
+             */
+            sizeScaleFactor: Float,
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            @FontRes
+            fontResId: Int?
+        ) : this(
+            sizeScaleFactor = sizeScaleFactor,
+            fontResId = fontResId,
+            custom = Custom(),
+        )
+
+        @AppearanceAPIAdditionsPreview
+        @Parcelize
+        data class Custom(
+            /**
+             * The font used for headlines (e.g., "Add your payment information")
+             *
+             * Note: If `null`, uses the calculated font based on `base` and `sizeScaleFactor`
+             */
+            val h1: Font? = null,
+        ) : Parcelable
+
+        @AppearanceAPIAdditionsPreview
+        @Parcelize
+        data class Font(
+            /**
+             * The font used in text. This should be a resource ID value.
+             */
+            @FontRes
+            val fontFamily: Int? = null,
+            /**
+             * The font size used for the text. This should represent a sp value.
+             */
+            val fontSizeSp: Float? = null,
+            /**
+             * The font weight used for the text.
+             */
+            val fontWeight: Int? = null,
+            /**
+             * The letter spacing used for the text. This should represent a sp value.
+             */
+            val letterSpacingSp: Float? = null,
+        ) : Parcelable
+
         companion object {
             val default = Typography(
                 sizeScaleFactor = StripeThemeDefaults.typography.fontSizeMultiplier,
                 fontResId = StripeThemeDefaults.typography.fontFamily
             )
+        }
+    }
+
+    @AppearanceAPIAdditionsPreview
+    @Poko
+    @Parcelize
+    class Spacing(internal val spacingDp: Float) : Parcelable {
+        internal companion object {
+            val defaultSectionSpacing = Spacing(spacingDp = -1f)
         }
     }
 
@@ -1803,6 +1917,58 @@ class PaymentSheet internal constructor(
             fontResId = fontResId,
             fontSizeSp = context.getRawValueFromDimenResource(fontSizeSp)
         )
+    }
+
+    @Parcelize
+    @Poko
+    class Insets(
+        val startDp: Float,
+        val topDp: Float,
+        val endDp: Float,
+        val bottomDp: Float
+    ) : Parcelable {
+        constructor(
+            context: Context,
+            @DimenRes startRes: Int,
+            @DimenRes topRes: Int,
+            @DimenRes endRes: Int,
+            @DimenRes bottomRes: Int
+        ) : this(
+            startDp = context.getRawValueFromDimenResource(startRes),
+            topDp = context.getRawValueFromDimenResource(topRes),
+            endDp = context.getRawValueFromDimenResource(endRes),
+            bottomDp = context.getRawValueFromDimenResource(bottomRes)
+        )
+
+        constructor(
+            horizontalDp: Float,
+            verticalDp: Float
+        ) : this(
+            startDp = horizontalDp,
+            topDp = verticalDp,
+            endDp = horizontalDp,
+            bottomDp = verticalDp
+        )
+
+        constructor(
+            context: Context,
+            @DimenRes horizontalRes: Int,
+            @DimenRes verticalRes: Int
+        ) : this(
+            startDp = context.getRawValueFromDimenResource(horizontalRes),
+            topDp = context.getRawValueFromDimenResource(verticalRes),
+            endDp = context.getRawValueFromDimenResource(horizontalRes),
+            bottomDp = context.getRawValueFromDimenResource(verticalRes)
+        )
+
+        companion object {
+            internal val defaultFormInsetValues = Insets(
+                startDp = 20f,
+                topDp = 0f,
+                endDp = 20f,
+                bottomDp = 40f,
+            )
+        }
     }
 
     @Parcelize
@@ -2351,6 +2517,27 @@ class PaymentSheet internal constructor(
                 }
         }
     }
+
+    /**
+     * Configuration for wallet buttons
+     */
+    @Poko
+    @Parcelize
+    class WalletButtonsConfiguration(
+        /**
+         * Indicates the `WalletButtons` API will be used. This helps
+         * ensure the Payment Element is not initialized with a displayed
+         * wallet option as the default payment option.
+         */
+        val willDisplayExternally: Boolean = false,
+
+        /**
+         * Identifies the list of wallets that can be shown in `WalletButtons`. Wallets
+         * are identified by their wallet identifier (google_pay, link, shop_pay). An
+         * empty list means all wallets will be shown.
+         */
+        val walletsToShow: List<String> = emptyList(),
+    ) : Parcelable
 
     /**
      * A class that presents the individual steps of a payment sheet flow.

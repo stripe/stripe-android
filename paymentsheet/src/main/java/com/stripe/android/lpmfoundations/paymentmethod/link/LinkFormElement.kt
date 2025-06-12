@@ -1,6 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod.link
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -8,6 +11,7 @@ import com.stripe.android.link.ui.inline.LinkElement
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.ui.core.elements.RenderableFormElement
+import com.stripe.android.uicore.LocalSectionSpacing
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -29,6 +33,14 @@ internal class LinkFormElement(
 
     @Composable
     override fun ComposeUI(enabled: Boolean) {
+        val modifier = Modifier.run {
+            if (LocalSectionSpacing.current == null) {
+                padding(vertical = 6.dp)
+            } else {
+                this
+            }
+        }
+
         LinkElement(
             initialUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -36,6 +48,7 @@ internal class LinkFormElement(
             configuration = configuration,
             enabled = enabled,
             onLinkSignupStateChanged = onLinkInlineSignupStateChanged,
+            modifier = modifier,
         )
     }
 }

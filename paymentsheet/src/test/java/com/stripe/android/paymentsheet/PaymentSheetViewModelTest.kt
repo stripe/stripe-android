@@ -1593,17 +1593,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Content should be hidden during initialization`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(delay = 1.seconds)
-
-        viewModel.contentVisible.test {
-            assertThat(awaitItem()).isFalse()
-            advanceTimeBy(2.seconds)
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
     fun `Content should be hidden when Link is visible`() = runTest {
         val viewModel = createViewModel(
             linkState = LinkState(
@@ -1621,21 +1610,32 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Content starts hidden and remains hidden on checkout with Link Express`() = runTest(testDispatcher) {
+    fun `Does not show processing WalletsProcessingState when using Link Express`() = runTest(testDispatcher) {
+        val linkPaymentLauncher = mock<LinkPaymentLauncher>()
+
         val viewModel = createViewModel(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedIn,
+                loginState = LinkState.LoginState.NeedsVerification,
                 signupMode = null,
             ),
+            linkPaymentLauncher = linkPaymentLauncher,
             delay = 1.seconds,
         )
 
-        viewModel.contentVisible.test {
-            assertThat(awaitItem()).isFalse()
+        viewModel.walletsProcessingState.test {
+            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(WalletsProcessingState.Idle(null))
             advanceTimeBy(2.seconds)
-            ensureAllEventsConsumed()
+            expectNoEvents()
         }
+
+        verify(linkPaymentLauncher).present(
+            configuration = eq(TestFactory.LINK_CONFIGURATION),
+            linkAccountInfo = any(),
+            launchMode = any(),
+            useLinkExpress = eq(true),
+        )
     }
 
     @Test

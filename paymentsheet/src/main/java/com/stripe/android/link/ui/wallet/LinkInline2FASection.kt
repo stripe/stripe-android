@@ -8,12 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,6 +23,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -40,6 +39,7 @@ import com.stripe.android.uicore.strings.resolve
 internal fun LinkInline2FASection(
     verificationState: VerificationViewState,
     otpElement: OTPElement,
+    onResend: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     DefaultLinkTheme {
@@ -63,36 +63,10 @@ internal fun LinkInline2FASection(
             Title(verificationState)
 
             // OTP input
-            Box(
-                contentAlignment = Alignment.Center
-            ) {
-                StripeThemeForLink {
-                    OTPElementUI(
-                        enabled = !verificationState.isProcessing,
-                        element = otpElement,
-                        otpInputPlaceholder = " ",
-                        middleSpacing = 8.dp,
-                        modifier = Modifier
-                            .testTag(VERIFICATION_OTP_TAG)
-                            .alpha(if (verificationState.isProcessing) ContentAlpha.disabled else ContentAlpha.high),
-                        colors = OTPElementColors(
-                            selectedBorder = LinkTheme.colors.borderSelected,
-                            placeholder = LinkTheme.colors.textPrimary,
-                            background = LinkTheme.colors.surfacePrimary,
-                            unselectedBorder = LinkTheme.colors.borderDefault
-                        ),
-                    )
-                }
-
-                // Smaller loading indicator
-                if (verificationState.isProcessing) {
-                    LinkSpinner(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 4.dp,
-                        filledColor = LinkTheme.colors.buttonPrimary
-                    )
-                }
-            }
+            OTPSection(
+                state = verificationState,
+                otpElement = otpElement
+            )
 
             // Compact error message
             verificationState.errorMessage?.let { error ->
@@ -106,6 +80,54 @@ internal fun LinkInline2FASection(
                         .padding(top = 4.dp)
                 )
             }
+
+            ResendCodeButton(
+                isProcessing = verificationState.isProcessing,
+                isSendingNewCode = verificationState.isSendingNewCode,
+                onClick = onResend,
+            )
+        }
+    }
+}
+
+@Composable
+private fun OTPSection(
+    state: VerificationViewState,
+    otpElement: OTPElement
+) {
+    Box(
+        contentAlignment = Alignment.Center
+    ) {
+        StripeThemeForLink {
+            OTPElementUI(
+                enabled = !state.isProcessing,
+                element = otpElement,
+                middleSpacing = 8.dp,
+                boxSpacing = 8.dp,
+                otpInputPlaceholder = " ",
+                boxShape = LinkTheme.shapes.large,
+                modifier = Modifier
+                    // 48dp per OTP box plus 8dp per space
+                    .width(328.dp)
+                    .testTag(VERIFICATION_OTP_TAG),
+                colors = OTPElementColors(
+                    selectedBorder = LinkTheme.colors.borderSelected,
+                    placeholder = LinkTheme.colors.textPrimary,
+                    selectedBackground = LinkTheme.colors.surfacePrimary,
+                    background = LinkTheme.colors.surfacePrimary,
+                    unselectedBorder = LinkTheme.colors.borderDefault
+                ),
+                selectedStrokeWidth = 1.5.dp,
+            )
+        }
+
+        // Smaller loading indicator
+        if (state.isProcessing) {
+            LinkSpinner(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 4.dp,
+                filledColor = LinkTheme.colors.buttonPrimary
+            )
         }
     }
 }
@@ -147,7 +169,8 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
 
     LinkInline2FASection(
         verificationState = verificationState,
-        otpElement = otpElement
+        otpElement = otpElement,
+        onResend = {}
     )
 }
 
@@ -177,7 +200,8 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
     ) {
         LinkInline2FASection(
             verificationState = verificationState,
-            otpElement = otpElement
+            otpElement = otpElement,
+            onResend = {}
         )
     }
 }
@@ -205,6 +229,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
 
     LinkInline2FASection(
         verificationState = verificationState,
-        otpElement = otpElement
+        otpElement = otpElement,
+        onResend = { }
     )
 }

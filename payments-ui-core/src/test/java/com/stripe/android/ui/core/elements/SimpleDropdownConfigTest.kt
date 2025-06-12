@@ -1,13 +1,14 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.DropdownConfig
 import org.junit.Test
 
 class SimpleDropdownConfigTest {
     private val config: DropdownConfig = SimpleDropdownConfig(
-        R.string.stripe_ideal_bank,
+        resolvableString(R.string.stripe_ideal_bank),
         listOf(
             DropdownItemSpec(displayText = "ABN AMRO", apiValue = "abn_amro"),
             DropdownItemSpec(displayText = "ASN Bank", apiValue = "asn_bank"),

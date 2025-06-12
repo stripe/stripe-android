@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.stripe.android.core.model.Country
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.CountryNotListedDestination
 import com.stripe.android.identity.navigation.navigateTo
@@ -151,7 +152,7 @@ private fun IDNumberContent(
                     }
                 }
             ),
-            label = R.string.stripe_id_number
+            label = resolvableString(R.string.stripe_id_number)
         )
     }
     val textIdentifiers by idNumberSectionElement.getTextFieldIdentifiers()
@@ -194,7 +195,7 @@ private fun IDNumberContent(
 }
 
 private object USIDConfig : SimpleTextFieldConfig(
-    label = R.string.stripe_last_4_of_ssn
+    label = resolvableString(R.string.stripe_last_4_of_ssn)
 ) {
     override val placeHolder = US_ID_PLACEHOLDER
     override val keyboard = KeyboardType.Number
@@ -213,7 +214,7 @@ private object USIDConfig : SimpleTextFieldConfig(
 }
 
 private object BRIDConfig : SimpleTextFieldConfig(
-    label = R.string.stripe_individual_cpf
+    label = resolvableString(R.string.stripe_individual_cpf)
 ) {
     override val placeHolder = BRAZIL_ID_PLACEHOLDER
     override val keyboard = KeyboardType.Number
@@ -232,7 +233,7 @@ private object BRIDConfig : SimpleTextFieldConfig(
 }
 
 private object SGIDConfig : SimpleTextFieldConfig(
-    label = R.string.stripe_nric_or_fin
+    label = resolvableString(R.string.stripe_nric_or_fin)
 ) {
     override val placeHolder = SINGAPORE_ID_PLACEHOLDER
     override fun determineState(input: String): TextFieldState = object : TextFieldState {

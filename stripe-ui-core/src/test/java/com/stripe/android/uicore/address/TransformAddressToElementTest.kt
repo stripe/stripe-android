@@ -3,6 +3,7 @@ package com.stripe.android.uicore.address
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
@@ -86,7 +87,7 @@ class TransformAddressToElementTest {
             AdministrativeAreaConfig.Country.US().administrativeAreas.map { it.second }
         )
         assertThat(stateDropdownController.label.first()).isEqualTo(
-            CoreR.string.stripe_address_label_state
+            resolvableString(CoreR.string.stripe_address_label_state)
         )
     }
 
@@ -127,7 +128,7 @@ class TransformAddressToElementTest {
         assertThat(actualController.capitalization).isEqualTo(simpleTextSpec.keyboardCapitalization)
         assertThat(actualController.keyboardType).isEqualTo(simpleTextSpec.keyboardType)
         assertThat(actualController.label.first()).isEqualTo(
-            simpleTextSpec.label
+            resolvableString(simpleTextSpec.label)
         )
     }
 }

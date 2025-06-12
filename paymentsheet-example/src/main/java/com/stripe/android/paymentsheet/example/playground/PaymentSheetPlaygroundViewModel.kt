@@ -43,10 +43,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
@@ -624,9 +623,12 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun updateEmbeddedAppearance(appearanceSetting: EmbeddedAppearanceSettingsDefinition, value: EmbeddedAppearance) {
+    fun <T> updateSetting(
+        setting: PlaygroundSettingDefinition<T>,
+        value: T
+    ) {
         playgroundSettingsFlow.value?.let { settings ->
-            settings[appearanceSetting] = value
+            settings[setting] = value
             setPlaygroundState(
                 state.value?.let { state ->
                     val updatedSnapshot = settings.snapshot()

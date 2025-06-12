@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -27,7 +28,7 @@ data class DropdownSpec(
             this.apiPath,
             DropdownFieldController(
                 SimpleDropdownConfig(
-                    labelTranslationId.resourceId,
+                    resolvableString(labelTranslationId.resourceId),
                     items
                 ),
                 initialValue = initialValues[apiPath]

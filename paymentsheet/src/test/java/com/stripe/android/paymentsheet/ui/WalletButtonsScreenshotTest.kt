@@ -63,7 +63,9 @@ class WalletButtonsScreenshotTest {
         override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
             when (action) {
                 is WalletButtonsInteractor.ViewAction.OnShown,
-                is WalletButtonsInteractor.ViewAction.OnHidden -> Unit
+                is WalletButtonsInteractor.ViewAction.OnHidden,
+                WalletButtonsInteractor.ViewAction.OnResendCode,
+                WalletButtonsInteractor.ViewAction.OnResendCodeNotificationSent -> Unit
                 is WalletButtonsInteractor.ViewAction.OnButtonPressed -> error("Should not be called!")
             }
         }

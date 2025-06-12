@@ -41,10 +41,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.ColorUtils
 import java.lang.Float.max
+import androidx.compose.ui.unit.max as maxDp
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeColors(
@@ -86,9 +88,9 @@ data class StripeTypography(
     @FontRes
     val fontFamily: Int?,
     // individual front overrides, only valid when fontFamily is null.
+    val h4: TextStyle? = null,
     val body1FontFamily: FontFamily? = null,
     val body2FontFamily: FontFamily? = null,
-    val h4FontFamily: FontFamily? = null,
     val h5FontFamily: FontFamily? = null,
     val h6FontFamily: FontFamily? = null,
     val subtitle1FontFamily: FontFamily? = null,
@@ -302,6 +304,8 @@ object StripeThemeDefaults {
         end = 20f,
         bottom = 40f
     )
+
+    val sectionSpacing: Float? = null
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -333,9 +337,10 @@ fun StripeTypography.toComposeTypography(): Typography {
     // h4 is our largest headline. It is used for the most important labels in our UI
     // ex: "Select your payment method" in Payment Sheet.
     val h4 = defaultTextStyle.copy(
-        fontFamily = globalFontFamily ?: h4FontFamily ?: FontFamily.Default,
-        fontSize = (xLargeFontSize * fontSizeMultiplier),
-        fontWeight = FontWeight(fontWeightBold)
+        fontFamily = h4?.fontFamily ?: globalFontFamily ?: FontFamily.Default,
+        fontSize = h4?.fontSize.elseIfNullOrUnspecified(unit = xLargeFontSize * fontSizeMultiplier),
+        fontWeight = h4?.fontWeight ?: FontWeight(fontWeightBold),
+        letterSpacing = h4?.letterSpacing.elseIfNullOrUnspecified(defaultTextStyle.letterSpacing)
     )
 
     // h5 is our medium headline label.
@@ -414,6 +419,9 @@ val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalSectionSpacing = staticCompositionLocalOf { StripeTheme.customSectionSpacing }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalInstrumentationTest = staticCompositionLocalOf { false }
 
 /**
@@ -427,6 +435,7 @@ fun StripeTheme(
     colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
+    sectionSpacing: Float? = StripeTheme.customSectionSpacing,
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
@@ -449,6 +458,7 @@ fun StripeTheme(
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
+        LocalSectionSpacing provides sectionSpacing,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
     ) {
@@ -515,8 +525,10 @@ val MaterialTheme.stripeTypography: StripeTypography
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) max(stripeShapes.borderStrokeWidth, 2f).dp else stripeShapes.borderStrokeWidth.dp
+fun MaterialTheme.getBorderStrokeWidth(
+    isSelected: Boolean,
+    selectedStrokeWidth: Dp = 2.dp
+) = if (isSelected) maxDp(stripeShapes.borderStrokeWidth.dp, selectedStrokeWidth) else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable
@@ -543,6 +555,8 @@ object StripeTheme {
     var primaryButtonStyle = StripeThemeDefaults.primaryButtonStyle
 
     var formInsets = StripeThemeDefaults.formInsets
+
+    var customSectionSpacing: Float? = StripeThemeDefaults.sectionSpacing
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
@@ -703,6 +717,16 @@ private fun TextStyle.toCompat(): TextStyle {
         platformStyle = PlatformTextStyle(includeFontPadding = true),
     )
 }
+
+private fun TextUnit?.elseIfNullOrUnspecified(
+    unit: TextUnit
+): TextUnit = this?.run {
+    if (isUnspecified) {
+        unit
+    } else {
+        this
+    }
+} ?: unit
 
 private fun Color.modifyBrightness(transform: (Float) -> Float): Color {
     val hsl = FloatArray(3)

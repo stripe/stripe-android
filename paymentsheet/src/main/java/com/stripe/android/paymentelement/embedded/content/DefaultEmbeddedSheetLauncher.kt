@@ -112,7 +112,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary(code)
-        val currentSelection = selectionHolder.selection.value as? PaymentSelection.New?
+        val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
+            .takeIf { it?.paymentMethodType == code }
+            ?: selectionHolder.getPreviousNewSelection(code)
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -121,7 +123,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
-            paymentSelection = currentSelection.takeIf { it?.paymentMethodType == code },
+            paymentSelection = currentSelection,
         )
         formActivityLauncher.launch(args)
     }

@@ -1,16 +1,16 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PostalCodeConfig(
-    @StringRes override val label: Int,
+    override val label: ResolvableString,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     private val country: String
 ) : TextFieldConfig {

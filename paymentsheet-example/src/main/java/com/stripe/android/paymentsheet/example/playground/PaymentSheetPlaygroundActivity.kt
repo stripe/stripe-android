@@ -52,15 +52,20 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.activity.getFormInsetsAppearance
+import com.stripe.android.paymentsheet.example.playground.activity.getSectionSpacing
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.SectionSpacingSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
+import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
@@ -256,13 +261,23 @@ internal class PaymentSheetPlaygroundActivity :
     private fun AppearanceButton() {
         val settings = viewModel.playgroundSettingsFlow.collectAsState().value
         val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
+        val insetsAppearance = settings?.get(FormInsetsAppearanceSettingDefinition)?.collectAsState()?.value
+        val sectionSpacing = settings?.get(SectionSpacingSettingsDefinition)?.collectAsState()?.value
         supportFragmentManager.setFragmentResultListener(
             AppearanceBottomSheetDialogFragment.REQUEST_KEY,
             this@PaymentSheetPlaygroundActivity
         ) { _, bundle ->
-            viewModel.updateEmbeddedAppearance(
+            viewModel.updateSetting(
                 EmbeddedAppearanceSettingsDefinition,
                 bundle.getEmbeddedAppearance()
+            )
+            viewModel.updateSetting(
+                FormInsetsAppearanceSettingDefinition,
+                bundle.getFormInsetsAppearance()
+            )
+            viewModel.updateSetting(
+                SectionSpacingSettingsDefinition,
+                bundle.getSectionSpacing()
             )
         }
         Button(
@@ -270,6 +285,8 @@ internal class PaymentSheetPlaygroundActivity :
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
                 bottomSheet.arguments = Bundle().apply {
                     putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
+                    putParcelable(AppearanceBottomSheetDialogFragment.INSETS_KEY, insetsAppearance)
+                    putParcelable(AppearanceBottomSheetDialogFragment.SECTION_SPACING_KEY, sectionSpacing)
                 }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
@@ -427,7 +444,7 @@ internal class PaymentSheetPlaygroundActivity :
             flowController.shippingDetails = localFlowControllerState?.addressDetails
         }
 
-        if (playgroundState.snapshot[WalletButtonsSettingsDefinition]) {
+        if (playgroundState.snapshot[WalletButtonsSettingsDefinition] != WalletButtonsPlaygroundType.Disabled) {
             flowController.WalletButtons()
         }
 

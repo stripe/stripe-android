@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.verification
 
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -20,6 +22,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -138,7 +141,6 @@ internal class VerificationScreenTest {
         onOtpTag().assertIsDisplayed()
         onEmailTag().assertIsDisplayed().assertIsEnabled()
         onErrorTag().assertDoesNotExist()
-        onLoaderTag().assertIsDisplayed()
         onResendCodeButtonTag()
             .assertIsDisplayed()
             .assertHasClickAction()
@@ -187,8 +189,16 @@ internal class VerificationScreenTest {
         )
         composeTestRule.setContent {
             DefaultLinkTheme {
+                val state by viewModel.viewState.collectAsState()
                 VerificationDialogBody(
-                    viewModel = viewModel
+                    modifier = Modifier,
+                    state = state,
+                    otpElement = viewModel.otpElement,
+                    onBack = viewModel::onBack,
+                    onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
+                    onResendCodeClick = viewModel::resendCode,
+                    onFocusRequested = viewModel::onFocusRequested,
+                    didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
                 )
             }
         }
@@ -220,8 +230,16 @@ internal class VerificationScreenTest {
         )
         composeTestRule.setContent {
             DefaultLinkTheme {
+                val state by viewModel.viewState.collectAsState()
                 VerificationDialogBody(
-                    viewModel = viewModel
+                    modifier = Modifier,
+                    state = state,
+                    otpElement = viewModel.otpElement,
+                    onBack = viewModel::onBack,
+                    onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
+                    onResendCodeClick = viewModel::resendCode,
+                    onFocusRequested = viewModel::onFocusRequested,
+                    didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
                 )
             }
         }

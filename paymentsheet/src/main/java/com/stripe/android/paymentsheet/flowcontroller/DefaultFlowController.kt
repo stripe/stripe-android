@@ -20,6 +20,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
@@ -29,6 +30,7 @@ import com.stripe.android.link.domain.LinkProminenceFeatureProvider
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -49,6 +51,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -91,7 +94,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
-    @Named(LINK_LAUNCHER_KEY) private val linkPaymentLauncher: LinkPaymentLauncher,
+    @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
+    @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val walletsButtonLinkLauncher: LinkPaymentLauncher,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
@@ -137,22 +141,25 @@ internal class DefaultFlowController @Inject internal constructor(
             ::onSepaMandateResult,
         )
 
-        linkPaymentLauncher.register(
-            key = LINK_LAUNCHER_KEY,
+        flowControllerLinkLauncher.register(
+            key = FLOW_CONTROLLER_LINK_LAUNCHER,
             activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
-            callback = ::onLinkPaymentMethodSelected
+            callback = ::onLinkResultFromFlowController
         )
 
-        val activityResultLaunchers = setOf(
-            paymentOptionActivityLauncher,
-            sepaMandateActivityLauncher,
+        walletsButtonLinkLauncher.register(
+            key = WALLETS_BUTTON_LINK_LAUNCHER,
+            activityResultRegistry = activityResultRegistryOwner.activityResultRegistry,
+            callback = ::onLinkResultFromWalletsButton
         )
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    activityResultLaunchers.forEach { it.unregister() }
-                    linkPaymentLauncher.unregister()
+                    paymentOptionActivityLauncher.unregister()
+                    sepaMandateActivityLauncher.unregister()
+                    walletsButtonLinkLauncher.unregister()
+                    flowControllerLinkLauncher.unregister()
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                 }
             }
@@ -261,18 +268,13 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLinkInsteadOfPaymentOptions =
-                // The current payment selection is Link
-                paymentSelection?.isLink == true &&
-                    // The current user has a Link account (not necessarily logged in)
-                    linkAccountInfo.account != null &&
-                    // Link is enabled and available
-                    linkConfiguration != null &&
-                    // feature flag and other conditions are met
-                    linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
-
-            if (shouldPresentLinkInsteadOfPaymentOptions) {
-                linkPaymentLauncher.present(
+            if (linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
+                    paymentSelection = paymentSelection,
+                    linkAccountInfo = linkAccountInfo,
+                    linkConfiguration = linkConfiguration
+                )
+            ) {
+                flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
                     useLinkExpress = true,
@@ -286,6 +288,21 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
+    private fun shouldPresentLinkInsteadOfPaymentOptions(
+        paymentSelection: PaymentSelection?,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        linkConfiguration: LinkConfiguration
+    ): Boolean {
+        // If the user has declined to use Link in the past, do not show it again.
+        return viewModel.state?.declinedLink2FA != true &&
+            // The current payment selection is Link
+            paymentSelection?.isLink == true &&
+            // The current user has a Link account (not necessarily logged in)
+            linkAccountInfo.account != null &&
+            // feature flag and other conditions are met
+            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
+    }
+
     private fun showPaymentOptionList(
         state: State,
         paymentSelection: PaymentSelection?
@@ -296,7 +313,13 @@ internal class DefaultFlowController @Inject internal constructor(
             enableLogging = enableLogging,
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
+            walletsToShow = if (viewModel.walletButtonsRendered) {
+                WalletType.entries.filterNot {
+                    state.config.walletButtons.allowedWalletTypes.contains(it)
+                }
+            } else {
+                state.config.walletButtons.allowedWalletTypes
+            },
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 
@@ -314,15 +337,21 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    fun onLinkPaymentMethodSelected(result: LinkActivityResult) {
+    fun onLinkResultFromFlowController(result: LinkActivityResult) {
         result.linkAccountUpdate?.updateLinkAccount()
         when (result) {
             is LinkActivityResult.PaymentMethodObtained,
             is LinkActivityResult.Failed -> Unit
             is LinkActivityResult.Canceled -> when (result.reason) {
                 Reason.BackPressed -> withCurrentState {
+                    val accountStatus = linkAccountHolder.linkAccountInfo.value.account?.accountStatus
+                    // The user dismissed the Link 2FA -> prevent from showing it again
+                    if (accountStatus == AccountStatus.VerificationStarted) {
+                        viewModel.updateState { it?.copy(declinedLink2FA = true) }
+                    }
                     // just show the payment option list if
                     // the user didn't have any preselected Link payment details
+                    // (preselected Link payment means the user is attempting to change their Link payment method)
                     if (viewModel.paymentSelection?.readyToPayWithLink() == false) {
                         showPaymentOptionList(it, viewModel.paymentSelection)
                     }
@@ -338,6 +367,17 @@ internal class DefaultFlowController @Inject internal constructor(
 
             is LinkActivityResult.Completed -> {
                 updateLinkPaymentSelection(result.selectedPayment)
+            }
+        }
+    }
+
+    fun onLinkResultFromWalletsButton(result: LinkActivityResult) {
+        result.linkAccountUpdate?.updateLinkAccount()
+        viewModel.flowControllerStateComponent.linkInlineInteractor.onLinkResult()
+        if (result is LinkActivityResult.Completed) {
+            with(Link(selectedPayment = result.selectedPayment)) {
+                viewModel.paymentSelection = this
+                paymentOptionCallback.onPaymentOption(paymentOptionFactory.create(this))
             }
         }
     }
@@ -687,6 +727,7 @@ internal class DefaultFlowController @Inject internal constructor(
     data class State(
         val paymentSheetState: PaymentSheetState.Full,
         val config: PaymentSheet.Configuration,
+        val declinedLink2FA: Boolean = false
     ) : Parcelable {
         fun copyPaymentSheetState(
             paymentSelection: PaymentSelection? = paymentSheetState.paymentSelection,
@@ -705,7 +746,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     companion object {
-        internal const val LINK_LAUNCHER_KEY = "LinkPaymentLauncher_DefaultFlowController"
+        internal const val FLOW_CONTROLLER_LINK_LAUNCHER = "LinkPaymentLauncher_DefaultFlowController"
+        internal const val WALLETS_BUTTON_LINK_LAUNCHER = "LinkPaymentLauncher_WalletsButton"
 
         fun getInstance(
             viewModelStoreOwner: ViewModelStoreOwner,

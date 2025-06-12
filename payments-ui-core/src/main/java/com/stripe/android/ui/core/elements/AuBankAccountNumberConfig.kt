@@ -1,10 +1,10 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -25,8 +25,7 @@ class AuBankAccountNumberConfig : TextFieldConfig {
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
 
-    @StringRes
-    override val label = StripeR.string.stripe_becs_widget_account_number
+    override val label = resolvableString(StripeR.string.stripe_becs_widget_account_number)
     override val keyboard = KeyboardType.Number
 
     override fun filter(userTyped: String) =

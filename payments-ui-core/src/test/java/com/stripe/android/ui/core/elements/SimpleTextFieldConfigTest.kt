@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import org.junit.Test
 
@@ -9,7 +10,7 @@ class SimpleTextFieldConfigTest {
     @Test
     fun `test number keyboards only accept numbers`() {
         val textConfig = SimpleTextFieldConfig(
-            label = 1,
+            label = resolvableString("Phone"),
             keyboard = KeyboardType.Number
         )
 
@@ -19,7 +20,7 @@ class SimpleTextFieldConfigTest {
     @Test
     fun `test number password keyboards only accept numbers`() {
         val textConfig = SimpleTextFieldConfig(
-            label = 1,
+            label = resolvableString("Password"),
             keyboard = KeyboardType.NumberPassword
         )
 
