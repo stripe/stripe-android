@@ -11,7 +11,7 @@ import com.stripe.android.link.ui.inline.LinkElement
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.ui.core.elements.RenderableFormElement
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.LocalSectionSpacing
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -34,7 +34,7 @@ internal class LinkFormElement(
     @Composable
     override fun ComposeUI(enabled: Boolean) {
         val modifier = Modifier.run {
-            if (StripeTheme.customSectionSpacing == null) {
+            if (LocalSectionSpacing.current == null) {
                 padding(vertical = 6.dp)
             } else {
                 this

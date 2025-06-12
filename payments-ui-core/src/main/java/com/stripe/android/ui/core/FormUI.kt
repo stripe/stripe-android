@@ -30,7 +30,7 @@ import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextElementUI
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.LocalSectionSpacing
 import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.CheckboxFieldUI
 import com.stripe.android.uicore.elements.FormElement
@@ -76,7 +76,7 @@ fun FormUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier
 ) {
-    val sectionSpacing = StripeTheme.customSectionSpacing
+    val sectionSpacing = LocalSectionSpacing.current
 
     Column(
         modifier = modifier.fillMaxWidth(1f),
