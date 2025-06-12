@@ -19,4 +19,4 @@ data class HandleClickRequest(
 @Parcelize
 data class EventData(
     val expressPaymentType: String
-) : StripeModel 
+) : StripeModel

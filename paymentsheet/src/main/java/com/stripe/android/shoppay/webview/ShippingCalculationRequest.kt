@@ -29,4 +29,4 @@ data class ShippingAddress(
     val phone: String?,
     val postalCode: String?,
     val provinceCode: String?
-) : StripeModel 
+) : StripeModel

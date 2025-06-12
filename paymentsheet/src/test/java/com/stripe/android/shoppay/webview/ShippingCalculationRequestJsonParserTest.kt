@@ -5,9 +5,9 @@ import org.json.JSONObject
 import org.junit.Test
 
 class ShippingCalculationRequestJsonParserTest {
-    
+
     private val parser = ShippingCalculationRequestJsonParser()
-    
+
     @Test
     fun `parse should correctly parse valid shipping calculation request`() {
         val jsonString = """
@@ -29,17 +29,17 @@ class ShippingCalculationRequestJsonParserTest {
                 "timestamp": 1749656439240
             }
         """.trimIndent()
-        
+
         val json = JSONObject(jsonString)
         val result = parser.parse(json)
-        
+
         assertThat(result).isNotNull()
         result!!
-        
+
         // Test top-level fields
         assertThat(result.requestId).isEqualTo("1749656439239_0.4450066427864713")
         assertThat(result.timestamp).isEqualTo(1749656439240L)
-        
+
         // Test shipping address fields
         val address = result.shippingAddress
         assertThat(address.address1).isEqualTo("101 Polk St")
@@ -54,7 +54,7 @@ class ShippingCalculationRequestJsonParserTest {
         assertThat(address.postalCode).isEqualTo("94102-4763")
         assertThat(address.provinceCode).isEqualTo("CA")
     }
-    
+
     @Test
     fun `parse should handle missing optional fields`() {
         val jsonString = """
@@ -68,16 +68,16 @@ class ShippingCalculationRequestJsonParserTest {
                 "timestamp": 1234567890
             }
         """.trimIndent()
-        
+
         val json = JSONObject(jsonString)
         val result = parser.parse(json)
-        
+
         assertThat(result).isNotNull()
         result!!
-        
+
         assertThat(result.requestId).isEqualTo("test_request_123")
         assertThat(result.timestamp).isEqualTo(1234567890L)
-        
+
         val address = result.shippingAddress
         assertThat(address.address1).isEqualTo("123 Main St")
         assertThat(address.city).isEqualTo("New York")
@@ -91,7 +91,7 @@ class ShippingCalculationRequestJsonParserTest {
         assertThat(address.postalCode).isNull()
         assertThat(address.provinceCode).isNull()
     }
-    
+
     @Test
     fun `parse should return null when requestId is missing`() {
         val jsonString = """
@@ -104,13 +104,13 @@ class ShippingCalculationRequestJsonParserTest {
                 "timestamp": 1234567890
             }
         """.trimIndent()
-        
+
         val json = JSONObject(jsonString)
         val result = parser.parse(json)
-        
+
         assertThat(result).isNull()
     }
-    
+
     @Test
     fun `parse should return null when shippingAddress is missing`() {
         val jsonString = """
@@ -119,13 +119,13 @@ class ShippingCalculationRequestJsonParserTest {
                 "timestamp": 1234567890
             }
         """.trimIndent()
-        
+
         val json = JSONObject(jsonString)
         val result = parser.parse(json)
-        
+
         assertThat(result).isNull()
     }
-    
+
     @Test
     fun `parse should handle zero timestamp`() {
         val jsonString = """
@@ -138,12 +138,12 @@ class ShippingCalculationRequestJsonParserTest {
                 }
             }
         """.trimIndent()
-        
+
         val json = JSONObject(jsonString)
         val result = parser.parse(json)
-        
+
         assertThat(result).isNotNull()
         result!!
         assertThat(result.timestamp).isEqualTo(0L)
     }
-} 
+}

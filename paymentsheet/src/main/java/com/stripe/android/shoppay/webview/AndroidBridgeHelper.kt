@@ -98,13 +98,17 @@ class AndroidBridgeHelper {
     @JavascriptInterface
     fun handleECEClick(message: String): String {
         logMessage("⏳", "ECE click request: $message")
-        
+
         return try {
             val jsonObject = JSONObject(message)
             val handleClickRequest = handleClickRequestParser.parse(jsonObject)
                 ?: return createErrorResponse("Failed to parse handle click request")
-            
-            logMessage("✅", "Parsed handle click request: expressPaymentType=${handleClickRequest.eventData.expressPaymentType}")
+
+            logMessage(
+                emoji = "✅",
+                message = "Parsed handle click request: expressPaymentType=" +
+                    handleClickRequest.eventData.expressPaymentType
+            )
 
             return processWalletHandlerUpdate { handlers, continuation ->
                 handlers.paymentRequestPaymentMethodInitParamsHandler.invoke { initParams ->

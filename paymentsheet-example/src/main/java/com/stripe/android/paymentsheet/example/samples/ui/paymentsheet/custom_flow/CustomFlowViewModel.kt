@@ -70,7 +70,7 @@ internal class CustomFlowViewModel(
             country = "US"
         )
     )
-    
+
     private var lineItems: List<FetchedItem> = emptyList()
     private var amountTotal: Int = 0
 
@@ -200,7 +200,6 @@ internal class CustomFlowViewModel(
                     )
                 )
             }
-
         }
     }
 
@@ -264,14 +263,14 @@ internal class CustomFlowViewModel(
 
     private suspend fun fetchItems(): ItemsResponse {
         val url = "https://unexpected-dune-list.glitch.me/items"
-        
+
         println("🛒 Fetching items from: $url")
-        
+
         return try {
             val apiResult = Fuel.get(url)
                 .suspendable()
                 .awaitModel(ItemsResponse.serializer())
-            
+
             when (apiResult) {
                 is com.github.kittinunf.result.Result.Success -> {
                     val jsonString = apiResult.value
@@ -288,7 +287,7 @@ internal class CustomFlowViewModel(
             useDefaultItems()
         }
     }
-    
+
     private fun useDefaultItems(): ItemsResponse {
         // Use default values on error - matching the Swift code
         return ItemsResponse(
@@ -302,14 +301,14 @@ internal class CustomFlowViewModel(
 
     private suspend fun fetchShippingRates(provinceCode: String, countryCode: String): List<ShippingRateResponseItem> {
         val url = "https://unexpected-dune-list.glitch.me/shipping?state=$provinceCode&country=$countryCode"
-        
+
         println("📦 Fetching shipping rates from: $url")
-        
+
         return try {
             val apiResult = Fuel.get(url)
                 .suspendable()
                 .awaitModel(ListSerializer(ShippingRateResponseItem.serializer()))
-            
+
             when (apiResult) {
                 is com.github.kittinunf.result.Result.Success -> {
                     val rates = apiResult.value

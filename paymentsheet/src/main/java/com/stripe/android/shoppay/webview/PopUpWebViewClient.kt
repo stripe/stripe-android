@@ -7,7 +7,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.webkit.WebViewAssetLoader
 
-
 internal class PopUpWebViewClient(
     private val assetLoader: WebViewAssetLoader,
     private val onPageLoaded: (WebView) -> Unit
@@ -35,5 +34,4 @@ internal class PopUpWebViewClient(
         super.onPageStarted(view, url, favicon)
         Log.d("WebViewBridge", "🚀 Navigation started: $url")
     }
-
 }

@@ -23,4 +23,4 @@ data class ShippingRate(
     val displayName: String,
     val amount: Long,
     val deliveryEstimate: String?
-) : StripeModel 
+) : StripeModel

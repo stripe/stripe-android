@@ -2870,4 +2870,3 @@ class PaymentSheet internal constructor(
         }
     }
 }
-

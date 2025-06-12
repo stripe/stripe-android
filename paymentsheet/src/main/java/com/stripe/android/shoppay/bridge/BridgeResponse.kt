@@ -2,7 +2,7 @@ package com.stripe.android.shoppay.bridge
 
 import org.json.JSONObject
 
-sealed interface BridgeResponse<T : JsonSerializer>: JsonSerializer {
+sealed interface BridgeResponse<T : JsonSerializer> : JsonSerializer {
     val type: String
     data class Data<T : JsonSerializer>(val data: T) : BridgeResponse<T> {
         override val type = "data"

@@ -9,21 +9,21 @@ import org.json.JSONObject
  * Follows the same pattern as ElementsSessionJsonParser.
  */
 internal class ShippingCalculationRequestJsonParser : ModelJsonParser<ShippingCalculationRequest> {
-    
+
     override fun parse(json: JSONObject): ShippingCalculationRequest? {
         val requestId = StripeJsonUtils.optString(json, FIELD_REQUEST_ID) ?: return null
         val timestamp = json.optLong(FIELD_TIMESTAMP, 0L)
-        
+
         val shippingAddressJson = json.optJSONObject(FIELD_SHIPPING_ADDRESS) ?: return null
         val shippingAddress = parseShippingAddress(shippingAddressJson)
-        
+
         return ShippingCalculationRequest(
             requestId = requestId,
             shippingAddress = shippingAddress,
             timestamp = timestamp
         )
     }
-    
+
     private fun parseShippingAddress(json: JSONObject): ShippingAddress {
         return ShippingAddress(
             address1 = StripeJsonUtils.optString(json, FIELD_ADDRESS1),
@@ -39,12 +39,12 @@ internal class ShippingCalculationRequestJsonParser : ModelJsonParser<ShippingCa
             provinceCode = StripeJsonUtils.optString(json, FIELD_PROVINCE_CODE)
         )
     }
-    
+
     private companion object {
         private const val FIELD_REQUEST_ID = "requestId"
         private const val FIELD_SHIPPING_ADDRESS = "shippingAddress"
         private const val FIELD_TIMESTAMP = "timestamp"
-        
+
         // Shipping address fields
         private const val FIELD_ADDRESS1 = "address1"
         private const val FIELD_ADDRESS2 = "address2"
@@ -58,4 +58,4 @@ internal class ShippingCalculationRequestJsonParser : ModelJsonParser<ShippingCa
         private const val FIELD_POSTAL_CODE = "postalCode"
         private const val FIELD_PROVINCE_CODE = "provinceCode"
     }
-} 
+}

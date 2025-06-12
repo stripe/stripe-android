@@ -1,13 +1,13 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
-import org.json.JSONObject
+import com.stripe.android.paymentsheet.WalletConfiguration.PaymentMethodInitParams
 import com.stripe.android.paymentsheet.WalletConfiguration.PaymentRequestShippingContactUpdate
 import com.stripe.android.paymentsheet.WalletConfiguration.PaymentRequestShippingRateUpdate
-import com.stripe.android.paymentsheet.WalletConfiguration.PaymentMethodInitParams
 import com.stripe.android.paymentsheet.WalletConfiguration.SelectedPartialAddress
 import com.stripe.android.paymentsheet.WalletConfiguration.SelectedShippingRate
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 fun interface PaymentRequestPaymentMethodInitParamsHandler {
     fun invoke(init: PaymentMethodInitParamsHandler)
@@ -40,7 +40,7 @@ typealias ShippingContactUpdateHandler = (SelectedPartialAddress, PaymentRequest
 /**
  * Configuration related to Wallets. Currently this applies to Google Pay and ShopPay.
  */
-//@Parcelize
+// @Parcelize
 data class WalletConfiguration(
     /**
      * Custom handlers for wallet-specific events.
@@ -116,22 +116,31 @@ data class WalletConfiguration(
         fun toJson(): JSONObject {
             return JSONObject().apply {
                 put("merchantDecision", merchantDecision)
-                put("lineItems", JSONObject().apply {
-                    lineItems?.forEach { lineItem ->
-                        put(lineItem.name, lineItem.toJson())
+                put(
+                    "lineItems",
+                    JSONObject().apply {
+                        lineItems?.forEach { lineItem ->
+                            put(lineItem.name, lineItem.toJson())
+                        }
                     }
-                })
-                put("shippingRates", JSONObject().apply {
-                    shippingRates?.forEach { shippingRate ->
-                        put(shippingRate.id, shippingRate.toJson())
+                )
+                put(
+                    "shippingRates",
+                    JSONObject().apply {
+                        shippingRates?.forEach { shippingRate ->
+                            put(shippingRate.id, shippingRate.toJson())
+                        }
                     }
-                })
+                )
                 put("error", error)
             }
         }
 
         companion object {
-            fun accepted(lineItems: List<LineItem>?, shippingRates: List<ShippingRate>?): PaymentRequestShippingRateUpdate {
+            fun accepted(
+                lineItems: List<LineItem>?,
+                shippingRates: List<ShippingRate>?
+            ): PaymentRequestShippingRateUpdate {
                 return PaymentRequestShippingRateUpdate(
                     merchantDecision = "accepted",
                     lineItems = lineItems,
@@ -161,16 +170,22 @@ data class WalletConfiguration(
     ) : Parcelable {
         fun toJson(): JSONObject {
             return JSONObject().apply {
-                put("lineItems", JSONObject().apply {
-                    lineItems.forEach { lineItem ->
-                        put(lineItem.name, lineItem.toJson())
+                put(
+                    "lineItems",
+                    JSONObject().apply {
+                        lineItems.forEach { lineItem ->
+                            put(lineItem.name, lineItem.toJson())
+                        }
                     }
-                })
-                put("shippingRates", JSONObject().apply {
-                    shippingRates.forEach { shippingRate ->
-                        put(shippingRate.id, shippingRate.toJson())
+                )
+                put(
+                    "shippingRates",
+                    JSONObject().apply {
+                        shippingRates.forEach { shippingRate ->
+                            put(shippingRate.id, shippingRate.toJson())
+                        }
                     }
-                })
+                )
             }
         }
     }
@@ -185,16 +200,22 @@ data class WalletConfiguration(
     ) : Parcelable {
         fun toJson(): JSONObject {
             return JSONObject().apply {
-                put("lineItems", JSONObject().apply {
-                    lineItems.forEach { lineItem ->
-                        put(lineItem.name, lineItem.toJson())
+                put(
+                    "lineItems",
+                    JSONObject().apply {
+                        lineItems.forEach { lineItem ->
+                            put(lineItem.name, lineItem.toJson())
+                        }
                     }
-                })
-                put("shippingRates", JSONObject().apply {
-                    shippingRates.forEach { shippingRate ->
-                        put(shippingRate.id, shippingRate.toJson())
+                )
+                put(
+                    "shippingRates",
+                    JSONObject().apply {
+                        shippingRates.forEach { shippingRate ->
+                            put(shippingRate.id, shippingRate.toJson())
+                        }
                     }
-                })
+                )
             }
         }
     }
@@ -237,7 +258,7 @@ data class WalletConfiguration(
         }
     }
 
-        /**
+    /**
      * Estimated delivery time range. Can be either an object with min/max bounds or a simple string.
      */
     sealed interface DeliveryEstimate : Parcelable {
@@ -251,7 +272,7 @@ data class WalletConfiguration(
             val maximum: DeliveryEstimateUnit,
             val minimum: DeliveryEstimateUnit
         ) : DeliveryEstimate {
-            
+
             override fun toJson(): JSONObject {
                 return JSONObject().apply {
                     put("maximum", maximum.toJson())
@@ -278,7 +299,7 @@ data class WalletConfiguration(
             val unit: TimeUnit,
             val value: Int
         ) : Parcelable {
-            
+
             fun toJson(): JSONObject {
                 return JSONObject().apply {
                     put("unit", unit.name.lowercase())
@@ -298,4 +319,4 @@ data class WalletConfiguration(
             }
         }
     }
-} 
+}

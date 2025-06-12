@@ -171,7 +171,7 @@ internal class ShopPayActivity : ComponentActivity() {
                         )
                     }
                 },
-                modifier = Modifier.fillMaxSize()// Use a fraction of the dialog's max size
+                modifier = Modifier.fillMaxSize() // Use a fraction of the dialog's max size
             )
         }
     }

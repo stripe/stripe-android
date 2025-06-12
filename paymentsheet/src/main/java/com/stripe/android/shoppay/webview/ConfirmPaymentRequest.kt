@@ -71,5 +71,4 @@ data class ConfirmPaymentRequest(
         val displayName: String,
         val amount: Long
     ) : StripeModel
-
 }

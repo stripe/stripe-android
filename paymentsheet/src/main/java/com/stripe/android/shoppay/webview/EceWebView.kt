@@ -12,7 +12,7 @@ internal class EceWebView(
     androidJsBridge: AndroidBridgeHelper,
     webViewClient: WebViewClient,
     webChromeClient: WebChromeClient
-): WebView(context) {
+) : WebView(context) {
     init {
         configureDefaultSettings(androidJsBridge)
         this.webViewClient = webViewClient

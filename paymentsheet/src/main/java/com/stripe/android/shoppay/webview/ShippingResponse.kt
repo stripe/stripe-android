@@ -10,7 +10,7 @@ data class ShippingResponse(
     val lineItems: List<WalletConfiguration.LineItem>?,
     val shippingRates: List<WalletConfiguration.ShippingRate>?,
     val totalAmount: Int?,
-): JsonSerializer {
+) : JsonSerializer {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
             put("merchantDecision", merchantDecision)

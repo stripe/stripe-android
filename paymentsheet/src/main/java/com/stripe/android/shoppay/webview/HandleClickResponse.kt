@@ -14,7 +14,7 @@ data class HandleClickResponse(
     val shippingAddressRequired: Boolean?,
     val allowedShippingCountries: List<String>?,
     val disableOverlay: Boolean?
-): JsonSerializer {
+) : JsonSerializer {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
             putOpt("lineItems", lineItems?.let { JSONArray(it.map { item -> item.toJson() }) })
@@ -27,5 +27,4 @@ data class HandleClickResponse(
             putOpt("disableOverlay", disableOverlay)
         }
     }
-
 }
