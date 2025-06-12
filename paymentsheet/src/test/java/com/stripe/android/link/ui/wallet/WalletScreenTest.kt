@@ -696,7 +696,7 @@ internal class WalletScreenTest {
                 hasCompleted = false,
                 primaryButtonLabel = "Buy".resolvableString,
                 secondaryButtonLabel = "Pay another way".resolvableString,
-                canAddNewCard = true,
+                addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
                 userSetIsExpanded = true,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
