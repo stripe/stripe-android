@@ -9,8 +9,8 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -167,5 +167,5 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         linkMode: LinkMode?,
         consumerPublishableKey: String?
-    ): Result<FinancialConnectionsSession>
+    ): Result<LinkAccountSession>
 }

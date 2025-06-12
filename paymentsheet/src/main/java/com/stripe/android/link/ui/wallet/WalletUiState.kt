@@ -4,7 +4,6 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
@@ -29,8 +28,8 @@ internal data class WalletUiState(
     val errorMessage: ResolvableString? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
+    val addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
     val alertMessage: ResolvableString? = null,
-    val financialConnectionsSheetConfiguration: FinancialConnectionsSheetConfiguration? = null
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -83,12 +82,6 @@ internal data class WalletUiState(
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
         return item !is Card || cardBrandFilter.isAccepted(item.brand)
-    }
-
-    fun setProcessing(): WalletUiState {
-        return copy(
-            isProcessing = true,
-        )
     }
 
     fun updateWithResponse(
