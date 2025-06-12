@@ -442,7 +442,8 @@ class LinkApiRepositoryTest {
 
         assertThat(result.isFailure).isTrue()
         assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE.eventName)
+        assertThat(loggedErrors.first())
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE.eventName)
     }
 
     @Test
