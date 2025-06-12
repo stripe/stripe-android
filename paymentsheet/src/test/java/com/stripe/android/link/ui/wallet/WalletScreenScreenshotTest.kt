@@ -208,7 +208,7 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            canAddNewPaymentMethod = canAddNewPaymentMethod,
+            canAddNewCard = canAddNewPaymentMethod,
             userSetIsExpanded = userSetIsExpanded,
             isSettingUp = false,
             merchantName = "Example Inc.",

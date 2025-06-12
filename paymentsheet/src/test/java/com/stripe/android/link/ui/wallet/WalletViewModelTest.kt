@@ -76,7 +76,7 @@ class WalletViewModelTest {
                 secondaryButtonLabel = TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL,
                 expiryDateInput = FormFieldEntry(""),
                 cvcInput = FormFieldEntry(""),
-                canAddNewPaymentMethod = true,
+                canAddNewCard = true,
                 isSettingUp = false,
                 merchantName = "merchantName",
             )
@@ -137,7 +137,7 @@ class WalletViewModelTest {
         val navigationManager = TestNavigationManager()
         val vm = createViewModel(navigationManager = navigationManager)
 
-        vm.onAddNewPaymentMethodClicked()
+        vm.onAddNewCardCardClick()
 
         navigationManager.assertNavigatedTo(LinkScreen.PaymentMethod.route)
     }
