@@ -454,9 +454,9 @@ internal class WalletViewModel @Inject constructor(
                     val accounts = result.financialConnectionsSession.accounts.data
                     if (accounts.isNotEmpty()) {
                         linkAccountManager.createBankAccountPaymentDetails(accounts.first().id)
-                            .mapCatching {
+                            .mapCatching { paymentDetails ->
                                 loadPaymentDetails(
-                                    selectedItemId = it.paymentDetails.first().id,
+                                    selectedItemId = paymentDetails.id,
                                     collapseOnSuccess = true
                                 )
                             }

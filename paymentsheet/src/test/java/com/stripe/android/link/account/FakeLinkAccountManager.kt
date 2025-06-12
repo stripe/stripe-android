@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
@@ -40,14 +41,20 @@ internal open class FakeLinkAccountManager(
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
-    var startVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
-    var confirmVerificationResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var signUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var mobileSignUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
-    var signInWithUserInputResult: Result<LinkAccount> = Result.success(LinkAccount(ConsumerSession("", "", "", "")))
+    var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
+    )
+    var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
+        value = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+    )
+    var createLinkAccountSessionResult: Result<LinkAccountSession> = Result.success(
+        value = TestFactory.LINK_ACCOUNT_SESSION
     )
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
@@ -75,8 +82,6 @@ internal open class FakeLinkAccountManager(
     val confirmVerificationTurbine = Turbine<String>()
 
     private val logoutCall = Turbine<Unit>()
-
-    override var consumerPublishableKey: String? = null
 
     fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
         _consumerPaymentDetails.value = consumerPaymentDetails
@@ -176,6 +181,12 @@ internal open class FakeLinkAccountManager(
         return createCardPaymentDetailsResult
     }
 
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String
+    ): Result<ConsumerPaymentDetails.PaymentDetails> {
+        return createBankAccountPaymentDetailsResult
+    }
+
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
@@ -189,6 +200,10 @@ internal open class FakeLinkAccountManager(
         startSession: Boolean,
     ): LinkAccount? {
         return linkAccountFromLookupResult
+    }
+
+    override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
+        return createLinkAccountSessionResult
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {

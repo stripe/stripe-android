@@ -555,11 +555,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
                 onPaymentSelection()
             }
+            null,
             is PaymentOptionResult.Canceled -> {
-                viewModel.paymentSelection = result.paymentSelection
+                viewModel.paymentSelection = (result as? PaymentOptionResult.Canceled)?.paymentSelection
                 onPaymentSelection()
             }
-            null,
             is PaymentOptionResult.Failed -> {
                 onPaymentSelection()
             }

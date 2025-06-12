@@ -7,6 +7,6 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class LinkAccountSession(
+    val id: String,
     val clientSecret: String,
-    val id: String
 ) : StripeModel

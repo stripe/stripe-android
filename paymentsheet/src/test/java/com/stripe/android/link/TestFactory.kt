@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -129,6 +130,11 @@ internal object TestFactory {
     val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
         id = "pm_125",
         last4 = "4242",
+    )
+
+    val LINK_ACCOUNT_SESSION = LinkAccountSession(
+        id = "fcsess_123",
+        clientSecret = CLIENT_SECRET,
     )
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(

@@ -122,7 +122,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PLACES_FETCH_PLACE_ERROR(
             eventName = "address_element.fetch_place.error"
         ),
-        LINK_CREATE_CARD_FAILURE(
+        LINK_CREATE_PAYMENT_DETAILS_FAILURE(
             eventName = "link.create_new_card.create_payment_details_failure"
         ),
         LINK_SHARE_CARD_FAILURE(
