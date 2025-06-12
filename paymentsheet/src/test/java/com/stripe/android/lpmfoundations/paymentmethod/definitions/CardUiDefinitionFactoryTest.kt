@@ -245,7 +245,7 @@ class CardUiDefinitionFactoryTest {
     @OptIn(AppearanceAPIAdditionsPreview::class)
     private data object CustomSpacingAppearance : PaparazziConfigOption {
         private val appearance = PaymentSheet.Appearance.Builder()
-            .sectionSpacing(PaymentSheet.Spacing(spacingDp = 20f))
+            .sectionSpacing(PaymentSheet.Spacing(spacingDp = 50f))
             .build()
 
         override fun initialize() {
