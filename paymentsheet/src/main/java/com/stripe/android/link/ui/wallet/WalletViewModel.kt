@@ -85,14 +85,7 @@ internal class WalletViewModel @Inject constructor(
             userSetIsExpanded = linkLaunchMode.selectedItemId != null,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
-            addPaymentMethodOptions = buildList {
-                if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)) {
-                    add(AddPaymentMethodOption.Bank)
-                }
-                if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE)) {
-                    add(AddPaymentMethodOption.Card)
-                }
-            },
+            addPaymentMethodOptions = getAddPaymentMethodOptions(),
         )
     )
 
@@ -116,7 +109,7 @@ internal class WalletViewModel @Inject constructor(
 
     init {
         _uiState.update {
-            it.setProcessing()
+            it.copy(isProcessing = true)
         }
 
         viewModelScope.launch {
@@ -152,13 +145,16 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadPaymentDetails(selectedItemId: String?) {
+    private suspend fun loadPaymentDetails(selectedItemId: String?, collapseOnSuccess: Boolean = false) {
         linkAccountManager.listPaymentDetails(
             paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
         ).fold(
             onSuccess = { response ->
                 _uiState.update {
-                    it.copy(selectedItemId = selectedItemId)
+                    it.copy(
+                        selectedItemId = selectedItemId,
+                        userSetIsExpanded = if (collapseOnSuccess) false else it.userSetIsExpanded,
+                    )
                 }
 
                 if (response.paymentDetails.isEmpty()) {
@@ -396,28 +392,7 @@ internal class WalletViewModel @Inject constructor(
     fun onAddPaymentMethodOptionClick(option: AddPaymentMethodOption) {
         when (option) {
             AddPaymentMethodOption.Bank -> {
-                viewModelScope.launch {
-                    val publishableKey = linkAccountManager.linkAccountInfo.value.account?.consumerPublishableKey!!
-                    linkAccountManager.createLinkAccountSession().fold(
-                        onSuccess = { result ->
-                            logger.info(result.clientSecret!!)
-                            _uiState.update {
-                                it.copy(
-                                    financialConnectionsSheetConfiguration = FinancialConnectionsSheetConfiguration(
-                                        financialConnectionsSessionClientSecret = result.clientSecret!!,
-                                        publishableKey = publishableKey,
-                                    )
-                                )
-                            }
-                        },
-                        onFailure = { error ->
-                            updateErrorMessageAndStopProcessing(
-                                error = error,
-                                loggerMessage = "Failed to create Link account session"
-                            )
-                        }
-                    )
-                }
+                onAddBankAccountClick()
             }
             AddPaymentMethodOption.Card -> {
                 navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
@@ -425,24 +400,95 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
+    private fun onAddBankAccountClick() {
+        _uiState.update {
+            it.copy(
+                isProcessing = true,
+                addBankAccountState = AddBankAccountState.ConfiguringFinancialConnections
+            )
+        }
+        viewModelScope.launch {
+            linkAccountManager.createLinkAccountSession()
+                .mapCatching { session ->
+                    FinancialConnectionsSheetConfiguration(
+                        financialConnectionsSessionClientSecret = session.clientSecret,
+                        publishableKey = linkAccount.consumerPublishableKey!!,
+                    )
+                }
+                .fold(
+                    onSuccess = { config ->
+                        _uiState.update {
+                            it.copy(
+                                addBankAccountState = AddBankAccountState.FinancialConnectionsConfigured(config)
+                            )
+                        }
+                    },
+                    onFailure = { error ->
+                        updateErrorMessageAndStopProcessing(
+                            error = error,
+                            loggerMessage = "Failed to create Link account session"
+                        )
+                    }
+                )
+        }
+    }
+
+    fun onPresentFinancialConnections() {
+        _uiState.update {
+            it.copy(
+                isProcessing = true,
+                addBankAccountState = AddBankAccountState.PresentingFinancialConnections
+            )
+        }
+    }
+
     fun onFinancialConnectionsResult(result: FinancialConnectionsSheetResult) {
         viewModelScope.launch {
-            if (result is FinancialConnectionsSheetResult.Completed) {
-                val accounts = result.financialConnectionsSession.accounts.data
-                if (accounts.isNotEmpty()) {
-                    linkAccountManager.createBankAccountPaymentDetails(
-                        bankAccountId = accounts.first().id,
-                    )
-                    linkAccountManager
-                        .listPaymentDetails(stripeIntent.supportedPaymentMethodTypes(linkAccount))
+            when (result) {
+                is FinancialConnectionsSheetResult.Completed -> {
+                    _uiState.update {
+                        it.copy(
+                            addBankAccountState = AddBankAccountState.ProcessingFinancialConnectionsResult
+                        )
+                    }
+                    val accounts = result.financialConnectionsSession.accounts.data
+                    if (accounts.isNotEmpty()) {
+                        linkAccountManager.createBankAccountPaymentDetails(accounts.first().id)
+                            .mapCatching {
+                                loadPaymentDetails(
+                                    selectedItemId = it.paymentDetails.first().id,
+                                    collapseOnSuccess = true
+                                )
+                            }
+                            .onFailure {
+                                updateErrorMessageAndStopProcessing(
+                                    error = it,
+                                    loggerMessage = "Failed to create/load bank account"
+                                )
+                            }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                isProcessing = false,
+                                addBankAccountState = AddBankAccountState.Idle,
+                            )
+                        }
+                    }
                 }
-            } else {
-//                _uiState.update {
-//                    it.copy(
-//                        alertMessage = "Failed to add bank account",
-//                        isProcessing = false
-//                    )
-//                }
+                FinancialConnectionsSheetResult.Canceled -> {
+                    _uiState.update {
+                        it.copy(
+                            isProcessing = false,
+                            addBankAccountState = AddBankAccountState.Idle,
+                        )
+                    }
+                }
+                is FinancialConnectionsSheetResult.Failed -> {
+                    updateErrorMessageAndStopProcessing(
+                        error = result.error,
+                        loggerMessage = "Failed to get Financial Connections result"
+                    )
+                }
             }
         }
     }
@@ -465,8 +511,23 @@ internal class WalletViewModel @Inject constructor(
             it.copy(
                 alertMessage = error.stripeErrorMessage(),
                 isProcessing = false,
-                cardBeingUpdated = null
+                cardBeingUpdated = null,
+                addBankAccountState = AddBankAccountState.Idle
             )
+        }
+    }
+
+    private fun getAddPaymentMethodOptions(): List<AddPaymentMethodOption> {
+        return buildList {
+            if (
+                linkAccount.consumerPublishableKey != null &&
+                supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)
+            ) {
+                add(AddPaymentMethodOption.Bank)
+            }
+            if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE)) {
+                add(AddPaymentMethodOption.Card)
+            }
         }
     }
 

@@ -12,7 +12,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
@@ -116,7 +116,7 @@ internal interface LinkAccountManager {
         startSession: Boolean,
     ): LinkAccount?
 
-    suspend fun createLinkAccountSession(): Result<FinancialConnectionsSession>
+    suspend fun createLinkAccountSession(): Result<LinkAccountSession>
 
     /**
      * Triggers sending a verification code to the user.

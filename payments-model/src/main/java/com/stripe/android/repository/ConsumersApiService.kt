@@ -17,6 +17,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
@@ -28,6 +29,7 @@ import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
+import com.stripe.android.model.parsers.LinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
 import com.stripe.android.model.parsers.UpdateAvailableIncentivesJsonParser
 import java.util.Locale
@@ -118,7 +120,7 @@ interface ConsumersApiService {
         linkMode: LinkMode?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): Result<FinancialConnectionsSession>
+    ): Result<LinkAccountSession>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -402,7 +404,7 @@ class ConsumersApiServiceImpl(
         linkMode: LinkMode?,
         requestSurface: String,
         requestOptions: ApiRequest.Options
-    ): Result<FinancialConnectionsSession> {
+    ): Result<LinkAccountSession> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -418,7 +420,7 @@ class ConsumersApiServiceImpl(
                     "request_surface" to requestSurface,
                 ),
             ),
-            responseJsonParser = FinancialConnectionsSessionJsonParser(),
+            responseJsonParser = LinkAccountSessionJsonParser(),
         )
     }
 
