@@ -69,6 +69,8 @@ internal class WalletViewModel @Inject constructor(
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
 
+    private val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
@@ -83,8 +85,14 @@ internal class WalletViewModel @Inject constructor(
             userSetIsExpanded = linkLaunchMode.selectedItemId != null,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
-            // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
-            canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
+            addPaymentMethodOptions = buildList {
+                if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)) {
+                    add(AddPaymentMethodOption.Bank)
+                }
+                if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE)) {
+                    add(AddPaymentMethodOption.Card)
+                }
+            },
         )
     )
 
@@ -385,29 +393,35 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun onAddNewPaymentMethodClicked() {
-//        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
-        viewModelScope.launch {
-            val publishableKey = linkAccountManager.linkAccountInfo.value.account?.consumerPublishableKey!!
-            linkAccountManager.createLinkAccountSession().fold(
-                onSuccess = { result ->
-                    logger.info(result.clientSecret!!)
-                    _uiState.update {
-                        it.copy(
-                            financialConnectionsSheetConfiguration = FinancialConnectionsSheetConfiguration(
-                                financialConnectionsSessionClientSecret = result.clientSecret!!,
-                                publishableKey = publishableKey,
+    fun onAddPaymentMethodOptionClick(option: AddPaymentMethodOption) {
+        when (option) {
+            AddPaymentMethodOption.Bank -> {
+                viewModelScope.launch {
+                    val publishableKey = linkAccountManager.linkAccountInfo.value.account?.consumerPublishableKey!!
+                    linkAccountManager.createLinkAccountSession().fold(
+                        onSuccess = { result ->
+                            logger.info(result.clientSecret!!)
+                            _uiState.update {
+                                it.copy(
+                                    financialConnectionsSheetConfiguration = FinancialConnectionsSheetConfiguration(
+                                        financialConnectionsSessionClientSecret = result.clientSecret!!,
+                                        publishableKey = publishableKey,
+                                    )
+                                )
+                            }
+                        },
+                        onFailure = { error ->
+                            updateErrorMessageAndStopProcessing(
+                                error = error,
+                                loggerMessage = "Failed to create Link account session"
                             )
-                        )
-                    }
-                },
-                onFailure = { error ->
-                    updateErrorMessageAndStopProcessing(
-                        error = error,
-                        loggerMessage = "Failed to create Link account session"
+                        }
                     )
                 }
-            )
+            }
+            AddPaymentMethodOption.Card -> {
+                navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+            }
         }
     }
 

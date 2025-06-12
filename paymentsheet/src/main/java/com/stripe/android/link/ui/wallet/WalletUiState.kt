@@ -23,7 +23,7 @@ internal data class WalletUiState(
     val primaryButtonLabel: ResolvableString,
     val secondaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
-    val canAddNewPaymentMethod: Boolean,
+    val addPaymentMethodOptions: List<AddPaymentMethodOption>,
     val userSetIsExpanded: Boolean? = null,
     val cardBeingUpdated: String? = null,
     val errorMessage: ResolvableString? = null,
@@ -77,6 +77,9 @@ internal data class WalletUiState(
                 }
             }
         }
+
+    val canAddNewPaymentMethod: Boolean
+        get() = addPaymentMethodOptions.isNotEmpty()
 
     fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
         return item !is Card || cardBrandFilter.isAccepted(item.brand)

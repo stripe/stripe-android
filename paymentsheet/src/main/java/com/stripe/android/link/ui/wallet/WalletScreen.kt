@@ -97,6 +97,7 @@ internal fun WalletScreen(
             )
         }
     }
+
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -110,7 +111,21 @@ internal fun WalletScreen(
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
-        onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
+        onAddNewPaymentMethodClicked = {
+            if (state.addPaymentMethodOptions.size == 1) {
+                viewModel.onAddPaymentMethodOptionClick(state.addPaymentMethodOptions[0])
+            } else {
+                showBottomSheetContent {
+                    AddPaymentMethodMenu(
+                        options = state.addPaymentMethodOptions,
+                        onOptionClick = { option ->
+                            viewModel.onAddPaymentMethodOptionClick(option)
+                            hideBottomSheetContent()
+                        },
+                    )
+                }
+            }
+        },
         onDismissAlert = viewModel::onDismissAlert
     )
 }
