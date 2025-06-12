@@ -26,7 +26,8 @@ internal fun ScrollableTopLevelColumn(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 20.dp)
                 .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

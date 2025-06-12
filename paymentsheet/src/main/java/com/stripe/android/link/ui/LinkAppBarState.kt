@@ -1,22 +1,23 @@
 package com.stripe.android.link.ui
 
-import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.paymentsheet.R
 
 internal data class LinkAppBarState(
-    @DrawableRes val navigationIcon: Int,
     val showHeader: Boolean,
     val showOverflowMenu: Boolean,
+    val canNavigateBack: Boolean,
 ) {
+
+    val canShowCloseIcon: Boolean
+        get() = !canNavigateBack
 
     internal companion object {
 
         fun initial(): LinkAppBarState {
             return LinkAppBarState(
-                navigationIcon = R.drawable.stripe_link_close,
                 showHeader = true,
                 showOverflowMenu = false,
+                canNavigateBack = false,
             )
         }
 
@@ -40,11 +41,7 @@ internal data class LinkAppBarState(
             return LinkAppBarState(
                 showHeader = route in showHeaderRoutes,
                 showOverflowMenu = route == LinkScreen.Wallet.route,
-                navigationIcon = if (previousEntryRoute != null) {
-                    R.drawable.stripe_link_back
-                } else {
-                    R.drawable.stripe_link_close
-                },
+                canNavigateBack = previousEntryRoute != null,
             )
         }
     }
