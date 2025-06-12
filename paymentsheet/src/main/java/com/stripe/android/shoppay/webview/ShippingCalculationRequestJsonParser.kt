@@ -15,7 +15,7 @@ internal class ShippingCalculationRequestJsonParser : ModelJsonParser<ShippingCa
         val timestamp = json.optLong(FIELD_TIMESTAMP, 0L)
         
         val shippingAddressJson = json.optJSONObject(FIELD_SHIPPING_ADDRESS) ?: return null
-        val shippingAddress = parseShippingAddress(shippingAddressJson) ?: return null
+        val shippingAddress = parseShippingAddress(shippingAddressJson)
         
         return ShippingCalculationRequest(
             requestId = requestId,
@@ -24,7 +24,7 @@ internal class ShippingCalculationRequestJsonParser : ModelJsonParser<ShippingCa
         )
     }
     
-    private fun parseShippingAddress(json: JSONObject): ShippingAddress? {
+    private fun parseShippingAddress(json: JSONObject): ShippingAddress {
         return ShippingAddress(
             address1 = StripeJsonUtils.optString(json, FIELD_ADDRESS1),
             address2 = StripeJsonUtils.optString(json, FIELD_ADDRESS2),

@@ -24,7 +24,6 @@ internal interface ShopPayConfirmationModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): WalletConfiguration.Handlers? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.walletHandlers
-                ?: WalletConfiguration.Handlers()
         }
     }
 }

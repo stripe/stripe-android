@@ -34,7 +34,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.WalletConfiguration
 import com.stripe.android.shoppay.webview.MainWebView
 import com.stripe.android.shoppay.webview.WebViewModel
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -102,11 +101,7 @@ internal class ShopPayActivity : ComponentActivity() {
 
     @Composable
     private fun ComposeWebView() {
-        val viewModel: WebViewModel = viewModel(
-            factory = WebViewModel.Factory(
-                walletHandlers = WalletConfiguration.Handlers()
-            )
-        )
+        val viewModel: WebViewModel = viewModel()
         val showPopup by viewModel.showPopup.collectAsState()
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -153,10 +148,6 @@ internal class ShopPayActivity : ComponentActivity() {
             Box(modifier = Modifier.fillMaxSize()) {
                 MainWebView(
                     viewModel = viewModel,
-                    onNavigationStateChange = { back, forward ->
-                        canGoBack.value = back
-                        canGoForward.value = forward
-                    }
                 )
 
                 if (showPopup) {

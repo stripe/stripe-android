@@ -6,6 +6,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
+@SuppressLint("ViewConstructor")
 internal class EceWebView(
     context: Context,
     androidJsBridge: AndroidBridgeHelper,
@@ -23,8 +24,6 @@ internal class EceWebView(
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
         settings.javaScriptCanOpenWindowsAutomatically = true
-        settings.allowFileAccessFromFileURLs = true
-        settings.allowUniversalAccessFromFileURLs = true
         settings.allowFileAccess = true
         settings.allowContentAccess = true
         settings.databaseEnabled = true

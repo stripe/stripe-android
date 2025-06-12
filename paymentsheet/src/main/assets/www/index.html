@@ -416,32 +416,45 @@
         }
       });
 
-      expressCheckoutElement.on("click", function (event) {
+      expressCheckoutElement.on("click", async function (event) {
         logECEEvent(`Click received with event:\n${hashToString(event)}`);
-        const billingAddressRequired = document.getElementById("billingAddressRequired").checked;
-        const emailRequired = document.getElementById("emailRequired").checked;
-        const phoneNumberRequired = document.getElementById("phoneNumberRequired").checked;
-        const shippingAddressRequired = document.getElementById("shippingAddressRequired").checked;
-        const businessName = document.getElementById("businessName").value;
-        const rawAllowedShippingCountries = document.getElementById("allowedShippingCountries").value;
-        var allowedShippingCountries = rawAllowedShippingCountries ? rawAllowedShippingCountries.split(",") : [];
 
-        var resolvePayload = {
-          lineItems: LINE_ITEMS,
-          billingAddressRequired, emailRequired, phoneNumberRequired,
-          shippingAddressRequired, allowedShippingCountries,
-        };
-        if (shippingAddressRequired) {
-          resolvePayload.shippingRates = SHIPPING_RATES;
-        }
-        if (businessName) {
-          resolvePayload.business = { name: businessName };
-        }
-        logECEEvent(`Click Resolved with payload:\n${hashToString(resolvePayload)}`);
-        event.resolve(resolvePayload);
-        if (document.getElementById("disableOverlay").checked) {
-          document.querySelectorAll('div[style*="z-index: 9999999"]')[0]?.remove();
-          document.body.style.overflow = "auto";
+        try {
+          logECEEvent("Using Native ECE Click Handler...");
+
+          // Extract only serializable data from the event
+          // The event object contains functions (resolve, complete) that can't be cloned
+          // for message passing, so we only send the data we need
+          const eventData = {
+            walletType: event.walletType,
+            expressPaymentType: event.expressPaymentType
+          };
+
+          // Call native API to handle the click
+          // The native handler will provide all configuration like:
+          // - billingAddressRequired, emailRequired, phoneNumberRequired
+          // - shippingAddressRequired, allowedShippingCountries
+          // - business name, line items, etc.
+          const resolvePayload = await window.NativeECE.handleClick(eventData);
+
+          logECEEvent(`Native ECE Response:\n${hashToString(resolvePayload)}`);
+
+          // Resolve the event with the payload from native
+          event.resolve(resolvePayload);
+
+          // Handle overlay removal if requested by native
+          if (resolvePayload.disableOverlay) {
+            // Remove the overlay applied by ECE
+            document.querySelectorAll('div[style*="z-index: 9999999"]')[0]?.remove();
+            document.body.style.overflow = "auto";
+          }
+
+        } catch (error) {
+          logECEEvent(`Error handling ECE click: ${error.message}`);
+          console.error("ECE click error:", error);
+
+          // On error, throw to let Stripe handle it
+          throw error;
         }
       });
 

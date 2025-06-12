@@ -22,7 +22,7 @@ internal class PopUpWebChromeClient(
             "WebConsole",
             "${getEmojiForLogLevel(consoleMessage.messageLevel().toString())} " +
                 "[${consoleMessage.sourceId()}:${consoleMessage.lineNumber()}] " +
-                "${consoleMessage.message()}"
+                consoleMessage.message()
         )
         return true
     }

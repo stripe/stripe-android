@@ -3,9 +3,7 @@ function generateRequestId() {
     return 'req_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
 }
 
-// Create native shipping API for index.html to use
-window.NativeShipping = (function() {
-    // Helper function to make native bridge calls
+// Helper function to make native bridge calls
     function callNativeBridge(methodName, payload) {
         try {
             if (window.androidBridge && typeof window.androidBridge[methodName] === 'function') {
@@ -34,6 +32,8 @@ window.NativeShipping = (function() {
         }
     }
 
+// Create native shipping API for index.html to use
+window.NativeShipping = (function() {
     // API implementation
     return {
         calculateShipping: function(shippingAddress) {
@@ -47,6 +47,24 @@ window.NativeShipping = (function() {
             });
         }
     };
+})();
+
+window.NativeECE = (function() {
+   // API implementation
+   return {
+       handleClick: function(eventData) {
+           return callNativeBridge('handleECEClick', { eventData });
+       }
+   };
+})();
+
+window.NativePayment = (function() {
+   // API implementation
+   return {
+       confirmPayment: function(paymentDetails) {
+           return callNativeBridge('confirmPayment', { paymentDetails });
+       }
+   };
 })();
 
 function promiseWrapper(block) {

@@ -6,10 +6,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.WalletConfiguration
 import com.stripe.android.shoppay.bridge.BridgeResponse
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import java.text.SimpleDateFormat
@@ -18,11 +14,7 @@ import java.util.Locale
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class AndroidBridgeHelper(
-    private val postMessageFilter: PostMessageFilter
-) {
-    private val _eventsFlow = MutableSharedFlow<StripeParentEvent>()
-    val eventsFlow: Flow<StripeParentEvent> = _eventsFlow
+class AndroidBridgeHelper {
 
     // Initialize SimpleDateFormat once per instance for efficiency
     private val timestampProvider: () -> String = {
@@ -31,20 +23,15 @@ class AndroidBridgeHelper(
 
     private val shippingCalculationRequestParser = ShippingCalculationRequestJsonParser()
     private val shippingRateChangeRequestParser = ShippingRateChangeRequestJsonParser()
+    private val handleClickRequestParser = HandleClickRequestJsonParser()
+    private val confirmPaymentRequestParser = ConfirmPaymentRequestJsonParser()
 
     private val walletHandlers: WalletConfiguration.Handlers?
         get() = PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]?.walletHandlers
 
     @JavascriptInterface
     fun postMessage(message: String) {
-        if (!message.contains("ping")) {
-            logMessage("📨", "Stripe Message Bridge: $message")
-        }
-        postMessageFilter.filter(message)?.let {
-            GlobalScope.launch {
-                _eventsFlow.emit(it)
-            }
-        }
+        logMessage("📨", "Stripe Message Bridge: $message")
     }
 
     @JavascriptInterface
@@ -105,6 +92,48 @@ class AndroidBridgeHelper(
                     continuation.resume(wrapInBridgeResponse(response))
                 } ?: continuation.resume(createErrorResponse("Failed to parse shipping rate change request"))
             }
+        }
+    }
+
+    @JavascriptInterface
+    fun handleECEClick(message: String): String {
+        logMessage("⏳", "ECE click request: $message")
+        
+        return try {
+            val jsonObject = JSONObject(message)
+            val handleClickRequest = handleClickRequestParser.parse(jsonObject)
+                ?: return createErrorResponse("Failed to parse handle click request")
+            
+            logMessage("✅", "Parsed handle click request: expressPaymentType=${handleClickRequest.eventData.expressPaymentType}")
+
+            return processWalletHandlerUpdate { handlers, continuation ->
+                handlers.paymentRequestPaymentMethodInitParamsHandler.invoke { initParams ->
+                    val response = HandleClickResponse(
+                        lineItems = initParams.lineItems,
+                        shippingRates = initParams.shippingRates,
+                        billingAddressRequired = true,
+                        emailRequired = true,
+                        phoneNumberRequired = false,
+                        shippingAddressRequired = true,
+                        allowedShippingCountries = listOf("US", "CA"),
+                        disableOverlay = null
+                    )
+                    continuation.resume(wrapInBridgeResponse(response))
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("WebViewBridge", "❌ Error parsing handle click request: ${e.message}", e)
+            createErrorResponse("❌ Error parsing handle click request: ${e.message}")
+        }
+    }
+
+    @JavascriptInterface
+    fun confirmPayment(message: String): String {
+        logMessage("⏳", "ECE confirmPayment request: $message")
+        return handleShippingRequest(message) { jsonObject ->
+            val request = confirmPaymentRequestParser.parse(jsonObject)
+                ?: return@handleShippingRequest createErrorResponse("Failed to parse confirm payment request")
+            createErrorResponse("Not implemented")
         }
     }
 
@@ -197,6 +226,13 @@ class AndroidBridgeHelper(
      * Wraps a response in a BridgeResponse.Data and converts to JSON string
      */
     private fun wrapInBridgeResponse(response: ShippingResponse): String {
+        return BridgeResponse.Data(data = response).toJson().toString()
+    }
+
+    /**
+     * Wraps a handle click response in a BridgeResponse.Data and converts to JSON string
+     */
+    private fun wrapInBridgeResponse(response: HandleClickResponse): String {
         return BridgeResponse.Data(data = response).toJson().toString()
     }
 }

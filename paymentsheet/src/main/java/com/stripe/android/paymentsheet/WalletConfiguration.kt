@@ -4,9 +4,14 @@ import android.os.Parcelable
 import org.json.JSONObject
 import com.stripe.android.paymentsheet.WalletConfiguration.PaymentRequestShippingContactUpdate
 import com.stripe.android.paymentsheet.WalletConfiguration.PaymentRequestShippingRateUpdate
+import com.stripe.android.paymentsheet.WalletConfiguration.PaymentMethodInitParams
 import com.stripe.android.paymentsheet.WalletConfiguration.SelectedPartialAddress
 import com.stripe.android.paymentsheet.WalletConfiguration.SelectedShippingRate
 import kotlinx.parcelize.Parcelize
+
+fun interface PaymentRequestPaymentMethodInitParamsHandler {
+    fun invoke(init: PaymentMethodInitParamsHandler)
+}
 
 fun interface PaymentRequestShippingRateUpdateHandler {
     fun onUpdate(update: PaymentRequestShippingRateUpdate)
@@ -15,6 +20,8 @@ fun interface PaymentRequestShippingRateUpdateHandler {
 fun interface PaymentRequestShippingContactUpdateHandler {
     fun onUpdate(update: PaymentRequestShippingContactUpdate)
 }
+
+typealias PaymentMethodInitParamsHandler = (PaymentMethodInitParams) -> Unit
 
 /**
  * Callback type for shipping method updates.
@@ -33,18 +40,17 @@ typealias ShippingContactUpdateHandler = (SelectedPartialAddress, PaymentRequest
 /**
  * Configuration related to Wallets. Currently this applies to Google Pay and ShopPay.
  */
-@Parcelize
+//@Parcelize
 data class WalletConfiguration(
     /**
      * Custom handlers for wallet-specific events.
      */
     val customHandlers: Handlers? = null
-) : Parcelable {
+) {
 
     /**
      * Handlers for wallet-specific events.
      */
-    @Parcelize
     data class Handlers(
         /**
          * Called when the shipping method is updated in the wallet UI.
@@ -56,8 +62,10 @@ data class WalletConfiguration(
          * Called when the shipping address is updated in the wallet UI.
          * The callback should update the line items and available shipping rates based on the selected address.
          */
-        val shippingContactUpdateHandler: ShippingContactUpdateHandler? = null
-    ) : Parcelable
+        val shippingContactUpdateHandler: ShippingContactUpdateHandler? = null,
+
+        val paymentRequestPaymentMethodInitParamsHandler: PaymentRequestPaymentMethodInitParamsHandler
+    )
 
     /**
      * Selected shipping rate in the wallet UI.
@@ -99,7 +107,55 @@ data class WalletConfiguration(
      * Update to be sent to the wallet UI when shipping rates change.
      */
     @Parcelize
-    data class PaymentRequestShippingRateUpdate(
+    data class PaymentRequestShippingRateUpdate private constructor(
+        internal val merchantDecision: String?,
+        val lineItems: List<LineItem>?,
+        val shippingRates: List<ShippingRate>?,
+        val error: String?
+    ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("merchantDecision", merchantDecision)
+                put("lineItems", JSONObject().apply {
+                    lineItems?.forEach { lineItem ->
+                        put(lineItem.name, lineItem.toJson())
+                    }
+                })
+                put("shippingRates", JSONObject().apply {
+                    shippingRates?.forEach { shippingRate ->
+                        put(shippingRate.id, shippingRate.toJson())
+                    }
+                })
+                put("error", error)
+            }
+        }
+
+        companion object {
+            fun accepted(lineItems: List<LineItem>?, shippingRates: List<ShippingRate>?): PaymentRequestShippingRateUpdate {
+                return PaymentRequestShippingRateUpdate(
+                    merchantDecision = "accepted",
+                    lineItems = lineItems,
+                    shippingRates = shippingRates,
+                    error = null
+                )
+            }
+
+            fun rejected(error: String): PaymentRequestShippingRateUpdate {
+                return PaymentRequestShippingRateUpdate(
+                    merchantDecision = "rejected",
+                    lineItems = null,
+                    shippingRates = null,
+                    error = error
+                )
+            }
+        }
+    }
+
+    /**
+     * Update to be sent to the wallet UI when shipping contact changes.
+     */
+    @Parcelize
+    data class PaymentRequestShippingContactUpdate(
         val lineItems: List<LineItem>,
         val shippingRates: List<ShippingRate>
     ) : Parcelable {
@@ -123,7 +179,7 @@ data class WalletConfiguration(
      * Update to be sent to the wallet UI when shipping contact changes.
      */
     @Parcelize
-    data class PaymentRequestShippingContactUpdate(
+    data class PaymentMethodInitParams(
         val lineItems: List<LineItem>,
         val shippingRates: List<ShippingRate>
     ) : Parcelable {
@@ -167,7 +223,7 @@ data class WalletConfiguration(
         val id: String,
         val amount: Int,
         val displayName: String,
-        val deliveryEstimate: DeliveryEstimate? = null
+        val deliveryEstimate: DeliveryEstimate?
     ) : Parcelable {
         fun toJson(): JSONObject {
             return JSONObject().apply {
@@ -175,10 +231,7 @@ data class WalletConfiguration(
                 put("amount", amount)
                 put("displayName", displayName)
                 deliveryEstimate?.let { estimate ->
-                    when (val json = estimate.toJson()) {
-                        is JSONObject -> put("deliveryEstimate", json)
-                        is String -> put("deliveryEstimate", json)
-                    }
+                    put("deliveryEstimate", estimate.toJson())
                 }
             }
         }
@@ -214,7 +267,6 @@ data class WalletConfiguration(
         data class Text(
             val value: String
         ) : DeliveryEstimate {
-            
             override fun toJson(): String = value
         }
 
