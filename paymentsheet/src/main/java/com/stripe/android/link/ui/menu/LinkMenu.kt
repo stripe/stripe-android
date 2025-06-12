@@ -26,10 +26,10 @@ import com.stripe.android.link.theme.MinimumTouchTargetSize
  * @param onItemPress Called when an item in the list is pressed
  */
 @Composable
-internal fun LinkMenu(
+internal fun <T : LinkMenuItem> LinkMenu(
     modifier: Modifier = Modifier,
-    items: List<LinkMenuItem>,
-    onItemPress: (LinkMenuItem) -> Unit
+    items: List<T>,
+    onItemPress: (T) -> Unit
 ) {
     Column(
         modifier = modifier

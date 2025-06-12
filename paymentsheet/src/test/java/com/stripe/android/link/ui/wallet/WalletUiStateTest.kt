@@ -259,7 +259,7 @@ class WalletUiStateTest {
             secondaryButtonLabel = secondaryButtonLabel,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
-            canAddNewPaymentMethod = canAddNewPaymentMethod,
+            canAddNewCard = canAddNewPaymentMethod,
             cardBeingUpdated = cardBeingUpdated,
             isSettingUp = isSettingUp,
             merchantName = merchantName,
