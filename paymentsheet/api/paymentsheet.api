@@ -577,10 +577,6 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Paymen
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/ui/wallet/WalletScreenKt {
-	public static final fun rememberFinancialConnectionsSheet (Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetForDataLauncher;
-}
-
 public final class com/stripe/android/link/verification/LinkInlineState$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/LinkInlineState;
