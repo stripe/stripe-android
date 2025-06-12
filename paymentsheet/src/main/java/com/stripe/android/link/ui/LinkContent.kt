@@ -168,7 +168,6 @@ private fun Screens(
             PaymentMethodRoute(
                 linkAccount = linkAccount,
                 dismissWithResult = dismissWithResult,
-                goBack = goBack
             )
         }
     }
@@ -230,7 +229,6 @@ private fun UpdateCardRoute(paymentDetailsId: String) {
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
     dismissWithResult: (LinkActivityResult) -> Unit,
-    goBack: () -> Unit
 ) {
     val viewModel: PaymentMethodViewModel = linkViewModel { parentComponent ->
         PaymentMethodViewModel.factory(
@@ -241,7 +239,6 @@ private fun PaymentMethodRoute(
     }
     PaymentMethodScreen(
         viewModel = viewModel,
-        onCancelClicked = goBack,
     )
 }
 

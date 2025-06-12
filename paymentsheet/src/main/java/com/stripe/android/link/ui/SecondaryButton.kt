@@ -8,6 +8,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
@@ -28,13 +29,13 @@ internal fun SecondaryButton(
         enabled = enabled,
         shape = LinkTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = LinkTheme.colors.buttonSecondary,
-            disabledBackgroundColor = LinkTheme.colors.buttonSecondary
+            backgroundColor = Color.Transparent,
+            disabledBackgroundColor = Color.Transparent,
         )
     ) {
         Text(
             text = label,
-            color = LinkTheme.colors.textPrimary
+            color = LinkTheme.colors.textBrand
                 .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled),
             style = LinkTheme.typography.bodyEmphasized,
         )

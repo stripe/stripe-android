@@ -102,10 +102,6 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         billingDetails = billingDetails
     )
 
-    fun onCancelClicked() {
-        navigationManager.tryNavigateBack()
-    }
-
     private fun initializeInteractor(
         cardPaymentDetails: ConsumerPaymentDetails.Card
     ): EditCardDetailsInteractor = DefaultEditCardDetailsInteractor.Factory().create(

@@ -17,7 +17,6 @@ import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
-import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
@@ -29,7 +28,6 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 @Composable
 internal fun PaymentMethodScreen(
     viewModel: PaymentMethodViewModel,
-    onCancelClicked: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -37,7 +35,6 @@ internal fun PaymentMethodScreen(
         state = state,
         onFormFieldValuesChanged = viewModel::formValuesChanged,
         onPayClicked = viewModel::onPayClicked,
-        onCancelClicked = onCancelClicked
     )
 }
 
@@ -46,7 +43,6 @@ internal fun PaymentMethodBody(
     state: PaymentMethodState,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
     onPayClicked: () -> Unit,
-    onCancelClicked: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
@@ -84,7 +80,7 @@ internal fun PaymentMethodBody(
         }
 
         PrimaryButton(
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = {
@@ -92,13 +88,6 @@ internal fun PaymentMethodBody(
                 onPayClicked()
             },
             iconEnd = PaymentsUiCoreR.drawable.stripe_ic_lock
-        )
-
-        SecondaryButton(
-            modifier = Modifier.padding(bottom = 16.dp),
-            label = stringResource(com.stripe.android.R.string.stripe_cancel),
-            enabled = true,
-            onClick = onCancelClicked
         )
     }
 }
