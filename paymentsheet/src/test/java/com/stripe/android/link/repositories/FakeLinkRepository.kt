@@ -10,6 +10,8 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
@@ -21,6 +23,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+    var createBankAccountPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
     var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
     var sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)
@@ -119,6 +122,13 @@ internal open class FakeLinkRepository : LinkRepository {
         active: Boolean
     ) = createCardPaymentDetailsResult
 
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String,
+        userEmail: String,
+        consumerSessionClientSecret: String,
+        consumerPublishableKey: String?
+    ) = createBankAccountPaymentDetailsResult
+
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
@@ -172,6 +182,15 @@ internal open class FakeLinkRepository : LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?
     ): Result<ConsumerPaymentDetails> = updatePaymentDetailsResult
+
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent,
+        linkMode: LinkMode?,
+        consumerPublishableKey: String?
+    ): Result<LinkAccountSession> {
+        TODO("Not yet implemented")
+    }
 
     suspend fun awaitMobileLookup(): MobileLookupCall {
         return mobileLookupCalls.awaitItem()

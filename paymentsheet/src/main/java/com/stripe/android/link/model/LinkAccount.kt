@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal class LinkAccount(
     private val consumerSession: ConsumerSession,
-    val consumerPublishableKey: String?,
+    val consumerPublishableKey: String? = null,
 ) : Parcelable {
 
     @IgnoredOnParcel

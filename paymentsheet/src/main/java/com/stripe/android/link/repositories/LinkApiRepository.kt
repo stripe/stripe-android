@@ -198,27 +198,35 @@ internal class LinkApiRepository @Inject constructor(
                 originalParams = paymentMethodCreateParams,
             )
         }.onFailure {
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE, StripeException.create(it))
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
+                StripeException.create(it)
+            )
         }
     }
 
     override suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
+        userEmail: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
-        userEmail: String
-    ): Result<ConsumerPaymentDetails> = withContext(workContext) {
+    ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
                 bankAccountId = bankAccountId,
-                billingEmailAddress = null,
+                billingEmailAddress = userEmail,
                 billingAddress = null
             ),
             requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(consumerPublishableKey),
-        ).onFailure {
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE, StripeException.create(it))
+        ).mapCatching {
+            it.paymentDetails.first()
+        }.onFailure {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
+                StripeException.create(it)
+            )
         }
     }
 

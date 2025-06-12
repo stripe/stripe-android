@@ -280,7 +280,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun createBankAccountPaymentDetails(
         bankAccountId: String
-    ): Result<ConsumerPaymentDetails> {
+    ): Result<ConsumerPaymentDetails.PaymentDetails> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccount != null) {
             linkRepository.createBankAccountPaymentDetails(

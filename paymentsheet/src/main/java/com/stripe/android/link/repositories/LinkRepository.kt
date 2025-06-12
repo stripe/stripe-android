@@ -85,10 +85,10 @@ internal interface LinkRepository {
 
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
+        userEmail: String,
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
-        userEmail: String
-    ): Result<ConsumerPaymentDetails>
+    ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,

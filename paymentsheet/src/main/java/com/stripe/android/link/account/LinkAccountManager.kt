@@ -103,7 +103,7 @@ internal interface LinkAccountManager {
 
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
-    ): Result<ConsumerPaymentDetails>
+    ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
@@ -148,3 +148,6 @@ internal interface LinkAccountManager {
      */
     suspend fun updatePaymentDetails(updateParams: ConsumerPaymentDetailsUpdateParams): Result<ConsumerPaymentDetails>
 }
+
+internal val LinkAccountManager.consumerPublishableKey: String?
+    get() = linkAccountInfo.value.account?.consumerPublishableKey
