@@ -304,6 +304,8 @@ object StripeThemeDefaults {
         end = 20f,
         bottom = 40f
     )
+
+    val sectionSpacing: Float? = null
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -417,6 +419,9 @@ val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalSectionSpacing = staticCompositionLocalOf { StripeTheme.customSectionSpacing }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalInstrumentationTest = staticCompositionLocalOf { false }
 
 /**
@@ -430,6 +435,7 @@ fun StripeTheme(
     colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
+    sectionSpacing: Float? = StripeTheme.customSectionSpacing,
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
@@ -452,6 +458,7 @@ fun StripeTheme(
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
+        LocalSectionSpacing provides sectionSpacing,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
     ) {
@@ -549,7 +556,7 @@ object StripeTheme {
 
     var formInsets = StripeThemeDefaults.formInsets
 
-    var customSectionSpacing: Float? = null
+    var customSectionSpacing: Float? = StripeThemeDefaults.sectionSpacing
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
