@@ -20,7 +20,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.FinancialConnectionsSession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -96,7 +96,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun createLinkAccountSession(): Result<FinancialConnectionsSession> {
+    override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
         return runCatching {
             val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
             linkRepository.createLinkAccountSession(

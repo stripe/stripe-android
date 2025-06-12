@@ -96,9 +96,11 @@ internal fun WalletScreen(
 
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(state.financialConnectionsSheetConfiguration) {
-        state.financialConnectionsSheetConfiguration?.let {
-            financialConnectionsSheetLauncher.present(it)
+    val addBankAccountState = state.addBankAccountState
+    LaunchedEffect(addBankAccountState) {
+        if (addBankAccountState is AddBankAccountState.FinancialConnectionsConfigured) {
+            financialConnectionsSheetLauncher.present(addBankAccountState.config)
+            viewModel.onPresentFinancialConnections()
         }
     }
 
