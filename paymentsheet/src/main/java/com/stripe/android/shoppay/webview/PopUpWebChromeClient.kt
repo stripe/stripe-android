@@ -7,10 +7,12 @@ import android.webkit.ConsoleMessage
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.webkit.WebViewAssetLoader
 
 internal class PopUpWebChromeClient(
     private val context: Context,
     private val androidJsBridge: AndroidBridgeHelper,
+    private val assetLoader: WebViewAssetLoader,
     private val setPopUpView: (WebView) -> Unit,
     private val closeWebView: (WebView?) -> Unit,
     private val onPageLoaded: (WebView) -> Unit
@@ -48,11 +50,13 @@ internal class PopUpWebChromeClient(
                 context = context,
                 androidJsBridge = androidJsBridge,
                 webViewClient = PopUpWebViewClient(
+                    assetLoader = assetLoader,
                     onPageLoaded = onPageLoaded
                 ),
                 webChromeClient = PopUpWebChromeClient(
                     context = context,
                     androidJsBridge = androidJsBridge,
+                    assetLoader = assetLoader,
                     setPopUpView = setPopUpView,
                     closeWebView = closeWebView,
                     onPageLoaded = onPageLoaded

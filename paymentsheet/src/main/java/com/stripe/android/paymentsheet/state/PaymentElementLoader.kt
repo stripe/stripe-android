@@ -666,6 +666,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
                 }
                 is SavedSelection.None -> null
+                SavedSelection.ShopPay -> PaymentSelection.ShopPay("")
             }
         }
 

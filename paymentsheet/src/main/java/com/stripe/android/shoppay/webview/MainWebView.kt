@@ -22,12 +22,14 @@ internal fun MainWebView(
                 context = ctx,
                 androidJsBridge = viewModel.androidJsBridge,
                 webViewClient = PopUpWebViewClient(
+                    assetLoader = viewModel.assetLoader(ctx),
                     onPageLoaded = {
                         viewModel.injectJavaScriptBridge(it)
                     }
                 ),
                 webChromeClient = PopUpWebChromeClient(
                     context = ctx,
+                    assetLoader = viewModel.assetLoader(ctx),
                     androidJsBridge = viewModel.androidJsBridge,
                     setPopUpView = {
                         viewModel.setPopupWebView(it)

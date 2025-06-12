@@ -40,6 +40,7 @@ internal class FakePrefsRepository(
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
             null -> SavedSelection.None
+            is PaymentSelection.ShopPay -> SavedSelection.ShopPay
         }.let {
             savedSelection = it
         }

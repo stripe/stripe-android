@@ -202,6 +202,7 @@ internal class DefaultCustomerSheetLoader(
                     }
                 }
                 is SavedSelection.None -> null
+                SavedSelection.ShopPay -> PaymentSelection.ShopPay("")
             }
         }
     }

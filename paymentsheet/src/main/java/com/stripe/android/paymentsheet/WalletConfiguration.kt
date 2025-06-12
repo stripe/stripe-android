@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
-import com.stripe.android.model.Address
+import org.json.JSONObject
 import com.stripe.android.paymentsheet.WalletConfiguration.PaymentRequestShippingContactUpdate
 import com.stripe.android.paymentsheet.WalletConfiguration.PaymentRequestShippingRateUpdate
 import com.stripe.android.paymentsheet.WalletConfiguration.SelectedPartialAddress
@@ -66,7 +66,14 @@ data class WalletConfiguration(
     data class SelectedShippingRate(
         val name: String,
         val rate: String
-    ) : Parcelable
+    ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("name", name)
+                put("rate", rate)
+            }
+        }
+    }
 
     /**
      * Selected partial address in the wallet UI.
@@ -77,7 +84,16 @@ data class WalletConfiguration(
         val state: String,
         val postalCode: String,
         val country: String
-    ) : Parcelable
+    ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("city", city)
+                put("state", state)
+                put("postalCode", postalCode)
+                put("country", country)
+            }
+        }
+    }
 
     /**
      * Update to be sent to the wallet UI when shipping rates change.
@@ -86,7 +102,22 @@ data class WalletConfiguration(
     data class PaymentRequestShippingRateUpdate(
         val lineItems: List<LineItem>,
         val shippingRates: List<ShippingRate>
-    ) : Parcelable
+    ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("lineItems", JSONObject().apply {
+                    lineItems.forEach { lineItem ->
+                        put(lineItem.name, lineItem.toJson())
+                    }
+                })
+                put("shippingRates", JSONObject().apply {
+                    shippingRates.forEach { shippingRate ->
+                        put(shippingRate.id, shippingRate.toJson())
+                    }
+                })
+            }
+        }
+    }
 
     /**
      * Update to be sent to the wallet UI when shipping contact changes.
@@ -95,7 +126,22 @@ data class WalletConfiguration(
     data class PaymentRequestShippingContactUpdate(
         val lineItems: List<LineItem>,
         val shippingRates: List<ShippingRate>
-    ) : Parcelable
+    ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("lineItems", JSONObject().apply {
+                    lineItems.forEach { lineItem ->
+                        put(lineItem.name, lineItem.toJson())
+                    }
+                })
+                put("shippingRates", JSONObject().apply {
+                    shippingRates.forEach { shippingRate ->
+                        put(shippingRate.id, shippingRate.toJson())
+                    }
+                })
+            }
+        }
+    }
 
     /**
      * A line item in the order summary.
@@ -104,7 +150,14 @@ data class WalletConfiguration(
     data class LineItem(
         val name: String,
         val amount: Int
-    ) : Parcelable
+    ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("name", name)
+                put("amount", amount)
+            }
+        }
+    }
 
     /**
      * A shipping rate option.
@@ -115,16 +168,55 @@ data class WalletConfiguration(
         val amount: Int,
         val displayName: String,
         val deliveryEstimate: DeliveryEstimate? = null
-    ) : Parcelable
-
-    /**
-     * Estimated delivery time range.
-     */
-    @Parcelize
-    data class DeliveryEstimate(
-        val maximum: DeliveryEstimateUnit,
-        val minimum: DeliveryEstimateUnit
     ) : Parcelable {
+        fun toJson(): JSONObject {
+            return JSONObject().apply {
+                put("id", id)
+                put("amount", amount)
+                put("displayName", displayName)
+                deliveryEstimate?.let { estimate ->
+                    when (val json = estimate.toJson()) {
+                        is JSONObject -> put("deliveryEstimate", json)
+                        is String -> put("deliveryEstimate", json)
+                    }
+                }
+            }
+        }
+    }
+
+        /**
+     * Estimated delivery time range. Can be either an object with min/max bounds or a simple string.
+     */
+    sealed interface DeliveryEstimate : Parcelable {
+        fun toJson(): Any
+
+        /**
+         * Object format with minimum and maximum delivery estimates.
+         */
+        @Parcelize
+        data class Range(
+            val maximum: DeliveryEstimateUnit,
+            val minimum: DeliveryEstimateUnit
+        ) : DeliveryEstimate {
+            
+            override fun toJson(): JSONObject {
+                return JSONObject().apply {
+                    put("maximum", maximum.toJson())
+                    put("minimum", minimum.toJson())
+                }
+            }
+        }
+
+        /**
+         * Simple string format for delivery estimate.
+         */
+        @Parcelize
+        data class Text(
+            val value: String
+        ) : DeliveryEstimate {
+            
+            override fun toJson(): String = value
+        }
 
         /**
          * A unit of time for delivery estimates.
@@ -134,6 +226,13 @@ data class WalletConfiguration(
             val unit: TimeUnit,
             val value: Int
         ) : Parcelable {
+            
+            fun toJson(): JSONObject {
+                return JSONObject().apply {
+                    put("unit", unit.name.lowercase())
+                    put("value", value)
+                }
+            }
 
             /**
              * Time unit for delivery estimates.

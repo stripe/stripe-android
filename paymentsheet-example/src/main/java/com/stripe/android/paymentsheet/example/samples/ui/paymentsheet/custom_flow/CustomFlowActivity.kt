@@ -54,8 +54,22 @@ internal class CustomFlowActivity : AppCompatActivity() {
                 paymentOptionCallback = viewModel::handlePaymentOptionChanged,
                 paymentResultCallback = viewModel::handlePaymentSheetResult,
                 walletHandlers = WalletConfiguration.Handlers(
-                    shippingMethodUpdateHandler = { _, _ ->},
-                    shippingContactUpdateHandler = { _, _ ->}
+                    shippingMethodUpdateHandler = { _, handler ->
+                        handler.onUpdate(
+                            update = WalletConfiguration.PaymentRequestShippingRateUpdate(
+                                lineItems = emptyList(),
+                                shippingRates = emptyList()
+                            )
+                        )
+                    },
+                    shippingContactUpdateHandler = { _, handler ->
+                        handler.onUpdate(
+                            update = WalletConfiguration.PaymentRequestShippingContactUpdate(
+                                lineItems = emptyList(),
+                                shippingRates = emptyList()
+                            )
+                        )
+                    }
                 )
             )
 

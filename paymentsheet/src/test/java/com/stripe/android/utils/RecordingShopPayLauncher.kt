@@ -36,7 +36,7 @@ internal object RecordingShopPayLauncher {
                 unregisterCalls.add(Unit)
             }
 
-            on { present(any()) } doAnswer { invocation ->
+            on { present(any(), any()) } doAnswer { invocation ->
                 presentCalls.add(
                     PresentCall(
                         confirmationUrl = invocation.arguments[0] as String

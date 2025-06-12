@@ -140,6 +140,8 @@ interface CustomerAdapter {
 
         internal object Link : PaymentOption("link")
 
+        internal object ShopPay : PaymentOption("shop_pay")
+
         internal data class StripeId(override val id: String) : PaymentOption(id)
 
         internal fun toPaymentSelection(
@@ -159,6 +161,7 @@ interface CustomerAdapter {
                         PaymentSelection.Saved(it)
                     }
                 }
+                ShopPay -> PaymentSelection.ShopPay("")
             }
         }
 
@@ -167,6 +170,7 @@ interface CustomerAdapter {
                 is GooglePay -> SavedSelection.GooglePay
                 is Link -> SavedSelection.Link
                 is StripeId -> SavedSelection.PaymentMethod(id)
+                ShopPay -> SavedSelection.ShopPay
             }
         }
 
@@ -187,6 +191,7 @@ interface CustomerAdapter {
                     is SavedSelection.Link -> Link
                     is SavedSelection.None -> null
                     is SavedSelection.PaymentMethod -> StripeId(id)
+                    SavedSelection.ShopPay -> TODO()
                 }
             }
 

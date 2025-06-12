@@ -140,7 +140,7 @@ internal class ShopPayConfirmationDefinitionTest {
     private fun createShopPayConfirmationDefinition(
         shopPayLauncher: ShopPayLauncher = mock()
     ): ShopPayConfirmationDefinition {
-        return ShopPayConfirmationDefinition(shopPayLauncher, null)
+        return ShopPayConfirmationDefinition(shopPayLauncher, mock())
     }
 
     private fun test(test: suspend Scenario.() -> Unit) = runTest(

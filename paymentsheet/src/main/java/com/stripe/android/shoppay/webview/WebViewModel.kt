@@ -1,18 +1,18 @@
 package com.stripe.android.shoppay.webview
 
+import android.content.Context
 import android.util.Log
 import android.webkit.WebView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.paymentsheet.PaymentRequestShippingContactUpdateHandler
 import com.stripe.android.paymentsheet.WalletConfiguration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flatMapLatest
@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class WebViewModel(
@@ -144,10 +143,11 @@ internal class WebViewModel(
 //    }
 
     fun setWebView(webView: WebView) {
-        val htmlContent = webView.context.assets.open("index.html")
-            .bufferedReader()
-            .use(BufferedReader::readText)
-        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+//        val htmlContent = webView.context.assets.open("index.html")
+//            .bufferedReader()
+//            .use(BufferedReader::readText)
+//        webView.loadDataWithBaseURL(null, htmlContent, "text/html", "UTF-8", null)
+        webView.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
         _webView.value = webView
     }
 
@@ -161,9 +161,15 @@ internal class WebViewModel(
         _showPopup.value = false
     }
 
+    fun assetLoader(context: Context): WebViewAssetLoader {
+        return WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(context))
+            .build()
+    }
+
     fun injectJavaScriptBridge(webView: WebView?) {
         webView ?: return
-        val jsBridge = webView.context.assets.open("native.js")
+        val jsBridge = webView.context.assets.open("www/native.js")
             .bufferedReader()
             .use(BufferedReader::readText)
 //        val bridgeScript = """

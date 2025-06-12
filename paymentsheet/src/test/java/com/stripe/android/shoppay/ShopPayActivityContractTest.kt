@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -18,7 +19,7 @@ internal class ShopPayActivityContractTest {
 
         val intent = contract.createIntent(
             context = ApplicationProvider.getApplicationContext(),
-            input = ShopPayActivityContract.Args("https://example.com")
+            input = ShopPayActivityContract.Args("https://example.com", mock())
         )
 
         assertThat(intent.component?.className).isEqualTo(ShopPayActivity::class.java.name)

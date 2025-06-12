@@ -2,15 +2,25 @@ package com.stripe.android.shoppay.webview
 
 import android.util.Log
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.webkit.WebViewAssetLoader
+
 
 internal class PopUpWebViewClient(
+    private val assetLoader: WebViewAssetLoader,
     private val onPageLoaded: (WebView) -> Unit
 ) : WebViewClient() {
+
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         Log.d("WebViewBridge", "url => ${request.url}")
         return super.shouldOverrideUrlLoading(view, request)
+    }
+
+    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+        request ?: return null
+        return assetLoader.shouldInterceptRequest(request.url)
     }
 
     override fun onPageFinished(view: WebView, url: String) {
