@@ -294,12 +294,12 @@ object StripeThemeDefaults {
 
     val chevronColorsLight = EmbeddedChevronColors(
         separatorColor = colorsLight.componentBorder,
-        chevronColor = colorsLight.materialColors.primary
+        chevronColor = Color.DarkGray
     )
 
     val chevronColorsDark = EmbeddedChevronColors(
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
-        chevronColor = colorsDark.materialColors.primary
+        chevronColor = Color.LightGray
     )
 
     val embeddedCommon = EmbeddedInsets(

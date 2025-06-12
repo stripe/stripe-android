@@ -1452,10 +1452,9 @@ class PaymentSheet internal constructor(
 
                         /**
                          * The color of the chevron.
-                         * If not set, the color of the chevron will match the separatorColor
                          */
                         @ColorInt
-                        internal val chevronColor: Int = separatorColor,
+                        internal val chevronColor: Int,
                     ) : Parcelable
 
                     override fun hasSeparators() = true

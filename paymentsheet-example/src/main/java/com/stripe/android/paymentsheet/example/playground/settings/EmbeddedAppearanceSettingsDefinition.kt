@@ -63,7 +63,7 @@ internal data class EmbeddedAppearance(
     val selectedColor: Int = Color(0xFF007AFF).toArgb(),
     val unselectedColor: Int = Color(0x33787880).toArgb(),
     val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
-    val chevronColor: Int = Color(0xFF007AFF).toArgb()
+    val chevronColor: Int = Color.DarkGray.toArgb()
 ) : Parcelable {
     fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
         return when (embeddedRowStyle) {
@@ -118,7 +118,7 @@ internal data class EmbeddedAppearance(
                 ),
                 colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
                     separatorColor = Color(0x40FFFFFF).toArgb(),
-                    chevronColor = Color(0xFF0074D4).toArgb()
+                    chevronColor = Color.LightGray.toArgb()
                 )
             )
             EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
