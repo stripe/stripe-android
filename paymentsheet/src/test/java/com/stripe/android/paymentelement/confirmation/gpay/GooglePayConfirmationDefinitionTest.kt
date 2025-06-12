@@ -626,9 +626,9 @@ class GooglePayConfirmationDefinitionTest {
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
 
-        private val APPEARANCE = PaymentSheet.Appearance().copy(
-            colorsDark = PaymentSheet.Colors.defaultLight,
-        )
+        private val APPEARANCE = PaymentSheet.Appearance.Builder()
+            .colorsDark(PaymentSheet.Colors.defaultLight)
+            .build()
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             intent = PAYMENT_INTENT,

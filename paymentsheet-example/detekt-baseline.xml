@@ -5,10 +5,10 @@
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_Editable()</ID>
     <ID>FunctionNaming:Receipt.kt$@Preview @Composable fun Receipt_NotEditable()</ID>
-    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun AppearancePicker( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, embeddedAppearance: EmbeddedAppearance, updateEmbedded: (EmbeddedAppearance) -> Unit, resetAppearance: () -> Unit, )</ID>
-    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun AppearancePicker( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, embeddedAppearance: EmbeddedAppearance, updateEmbedded: (EmbeddedAppearance) -> Unit, formInsetsAppearance: FormInsetsAppearance, updateInsets: (FormInsetsAppearance) -> Unit, sectionSpacing: SectionSpacing, updateSectionSpacing: (SectionSpacing) -> Unit, resetAppearance: () -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun EmbeddedPicker( embeddedAppearance: EmbeddedAppearance, updateEmbedded: (EmbeddedAppearance) -> Unit )</ID>
-    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@OptIn(AppearanceAPIAdditionsPreview::class) @Composable private fun Colors( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@OptIn(AppearanceAPIAdditionsPreview::class) @Composable private fun PrimaryButton( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$33</ID>
     <ID>MagicNumber:CartProduct.kt$100</ID>

@@ -7,13 +7,17 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
+import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import org.junit.Rule
 import org.junit.Test
 
@@ -24,6 +28,11 @@ class CardUiDefinitionFactoryTest {
     @get:Rule
     val rightToLeftPaparazziRule = PaparazziRule(
         listOf(LayoutDirection.RightToLeft)
+    )
+
+    @get:Rule
+    val customSpacingPaparazziRule = PaparazziRule(
+        listOf(CustomSpacingAppearance)
     )
 
     private val metadata = PaymentMethodMetadataFactory.create(
@@ -175,6 +184,23 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCardWithCustomSpacing() {
+        customSpacingPaparazziRule.snapshot {
+            val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            )
+
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    stripeIntent = setupIntent,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    customerMetadata = getDefaultCustomerMetadata(),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun testCardRightToLeft() {
         rightToLeftPaparazziRule.snapshot {
             CardDefinition.CreateFormUi(
@@ -213,6 +239,21 @@ class CardUiDefinitionFactoryTest {
                     ),
                 ),
             )
+        }
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    private data object CustomSpacingAppearance : PaparazziConfigOption {
+        private val appearance = PaymentSheet.Appearance.Builder()
+            .sectionSpacing(PaymentSheet.Spacing(spacingDp = 20f))
+            .build()
+
+        override fun initialize() {
+            appearance.parseAppearance()
+        }
+
+        override fun reset() {
+            DefaultAppearance.appearance.parseAppearance()
         }
     }
 }

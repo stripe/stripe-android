@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextElementUI
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.CheckboxFieldUI
 import com.stripe.android.uicore.elements.FormElement
@@ -74,8 +76,13 @@ fun FormUI(
     lastTextFieldIdentifier: IdentifierSpec?,
     modifier: Modifier = Modifier
 ) {
+    val sectionSpacing = StripeTheme.customSectionSpacing
+
     Column(
-        modifier = modifier.fillMaxWidth(1f)
+        modifier = modifier.fillMaxWidth(1f),
+        verticalArrangement = sectionSpacing?.let {
+            Arrangement.spacedBy(it.dp)
+        } ?: Arrangement.Top,
     ) {
         val visibleElements = elements.filter { element ->
             !hiddenIdentifiers.contains(element.identifier) && element !is EmptyFormElement
@@ -88,6 +95,7 @@ fun FormUI(
                 index = index,
                 maxIndex = visibleElements.size - 1,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
+                hasVerticalCustomSpacing = sectionSpacing != null,
                 hiddenIdentifiers = hiddenIdentifiers,
             )
         }
@@ -101,12 +109,14 @@ private fun FormUIElement(
     index: Int,
     maxIndex: Int,
     enabled: Boolean,
+    hasVerticalCustomSpacing: Boolean,
     hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?,
 ) {
     when (element) {
         is SectionElement -> SectionElementUI(
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
@@ -118,6 +128,7 @@ private fun FormUIElement(
         )
         is CheckboxFieldElement -> CheckboxFieldUI(
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
@@ -128,6 +139,7 @@ private fun FormUIElement(
         is StaticTextElement -> StaticTextElementUI(
             element = element,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
@@ -135,6 +147,7 @@ private fun FormUIElement(
         )
         is SaveForFutureUseElement -> SaveForFutureUseElementUI(
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
@@ -144,6 +157,7 @@ private fun FormUIElement(
         )
         is SetAsDefaultPaymentMethodElement -> SetAsDefaultPaymentMethodElementUI(
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
@@ -154,6 +168,7 @@ private fun FormUIElement(
         is SameAsShippingElement -> SameAsShippingElementUI(
             controller = element.controller,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 4.dp,
@@ -163,6 +178,7 @@ private fun FormUIElement(
             enabled = enabled,
             element = element,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 start = 4.dp,
@@ -174,6 +190,7 @@ private fun FormUIElement(
         is AuBecsDebitMandateTextElement -> AuBecsDebitMandateElementUI(
             element = element,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
@@ -181,6 +198,7 @@ private fun FormUIElement(
         )
         is AffirmHeaderElement -> AffirmElementUI(
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
@@ -189,6 +207,7 @@ private fun FormUIElement(
         is MandateTextElement -> MandateTextUI(
             element = element,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 top = element.topPadding,
@@ -201,6 +220,7 @@ private fun FormUIElement(
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
@@ -211,6 +231,7 @@ private fun FormUIElement(
             element = element,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             modifier = Modifier.formVerticalPadding(
+                hasVerticalCustomSpacing = hasVerticalCustomSpacing,
                 maxIndex = maxIndex,
                 index = index,
                 vertical = 8.dp,
@@ -222,10 +243,12 @@ private fun FormUIElement(
 }
 
 private fun Modifier.formVerticalPadding(
+    hasVerticalCustomSpacing: Boolean,
     index: Int,
     maxIndex: Int,
     vertical: Dp,
 ) = formVerticalPadding(
+    hasVerticalCustomSpacing = hasVerticalCustomSpacing,
     index = index,
     maxIndex = maxIndex,
     top = vertical,
@@ -233,6 +256,7 @@ private fun Modifier.formVerticalPadding(
 )
 
 private fun Modifier.formVerticalPadding(
+    hasVerticalCustomSpacing: Boolean,
     index: Int,
     maxIndex: Int,
     top: Dp,
@@ -240,7 +264,7 @@ private fun Modifier.formVerticalPadding(
     start: Dp = 0.dp,
     end: Dp = 0.dp,
 ) = when {
-    maxIndex == 0 -> this.padding(top = 0.dp, bottom = 0.dp, start = start, end = end)
+    hasVerticalCustomSpacing || maxIndex == 0 -> this.padding(top = 0.dp, bottom = 0.dp, start = start, end = end)
     index == 0 -> this.padding(top = 0.dp, bottom = bottom, start = start, end = end)
     index == maxIndex -> this.padding(top = top, bottom = 0.dp, start = start, end = end)
     else -> this.padding(top = top, bottom = bottom, start = start, end = end)

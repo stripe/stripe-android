@@ -549,6 +549,8 @@ object StripeTheme {
 
     var formInsets = StripeThemeDefaults.formInsets
 
+    var customSectionSpacing: Float? = null
+
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
     }

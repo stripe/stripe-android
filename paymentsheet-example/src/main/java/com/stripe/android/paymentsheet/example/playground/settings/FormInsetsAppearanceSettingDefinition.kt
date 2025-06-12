@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import android.os.Parcelable
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import kotlinx.parcelize.Parcelize
@@ -25,6 +26,7 @@ internal object FormInsetsAppearanceSettingDefinition :
         return Json.encodeToString(value)
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     override fun setValue(value: FormInsetsAppearance) {
         super.setValue(value)
         AppearanceStore.state = AppearanceStore.state.copy(
