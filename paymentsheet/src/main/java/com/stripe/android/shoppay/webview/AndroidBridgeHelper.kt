@@ -36,7 +36,6 @@ class AndroidBridgeHelper {
 
     @JavascriptInterface
     fun ready(message: String) {
-        // No-op method for compatibility
     }
 
     @JavascriptInterface
