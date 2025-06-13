@@ -143,7 +143,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
 
-        internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.Default()
+        internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
         /**
          * Called when a user confirms payment for an external payment method.
@@ -597,7 +597,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
      */
     @ExperimentalEmbeddedPaymentElementApi
     abstract class RowSelectionBehavior internal constructor() {
-        internal class Default : RowSelectionBehavior()
+        private object Default : RowSelectionBehavior()
 
         internal class ImmediateAction(
             internal val didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit
@@ -609,7 +609,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * This is the default recommended integration.
              */
             fun default(): RowSelectionBehavior {
-                return Default()
+                return Default
             }
 
             /**
