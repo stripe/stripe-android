@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>ConstructorParameterNaming:BankFormScreenState.kt$BankFormScreenState$private val _isProcessing: Boolean = false</ID>
     <ID>ConstructorParameterNaming:EmbeddedPaymentElement.kt$EmbeddedPaymentElement.PaymentOptionDisplayData$private val _shippingDetails: AddressDetails?</ID>
+    <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _labels: Labels</ID>
     <ID>ConstructorParameterNaming:PaymentOption.kt$PaymentOption$private val _shippingDetails: AddressDetails?</ID>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
@@ -53,7 +54,6 @@
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
     <ID>LongMethod:UpdatePaymentMethodUI.kt$@Composable internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier)</ID>
     <ID>LongMethod:VerificationBody.kt$@Composable internal fun VerificationBody( state: VerificationViewState, otpElement: OTPElement, onBack: () -> Unit, onFocusRequested: () -> Unit, didShowCodeSentNotification: () -> Unit, onChangeEmailClick: () -> Unit, onResendCodeClick: () -> Unit, )</ID>
-    <ID>LongMethod:VerificationScreenshotTest.kt$VerificationScreenshotTest.Companion$private fun testCases(isDialog: Boolean): List&lt;TestCase></ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.5f</ID>
