@@ -2491,8 +2491,6 @@ class PaymentSheet internal constructor(
                 }
             }
         }
-
-
     }
 
     /**
