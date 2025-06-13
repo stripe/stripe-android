@@ -34,6 +34,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("google_pay")
     }
 
     @Test
@@ -43,6 +44,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -56,6 +58,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -68,6 +71,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -80,6 +84,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -92,6 +97,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_ref)
         assertThat(paymentOption.label).isEqualTo("Link")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -104,6 +110,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -116,6 +123,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -136,6 +144,7 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
+        assertThat(paymentOption.paymentMethodType).isEqualTo("card")
     }
 
     private fun card(

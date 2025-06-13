@@ -441,6 +441,7 @@ internal class DefaultFlowControllerTest {
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption?.label).isEqualTo("···· $last4")
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
     }
 
     @Test
@@ -463,6 +464,7 @@ internal class DefaultFlowControllerTest {
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption?.label).isEqualTo("···· $last4")
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
         // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
         // customer, who doesn't have any saved payment methods
@@ -659,6 +661,7 @@ internal class DefaultFlowControllerTest {
             val paymentOption = flowController.getPaymentOption()
             assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
             assertThat(paymentOption?.label).isEqualTo("···· 4242")
+            assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
         }
 
     @Test
@@ -688,6 +691,7 @@ internal class DefaultFlowControllerTest {
             val paymentOption = flowController.getPaymentOption()
             assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
             assertThat(paymentOption?.label).isEqualTo("Google Pay")
+            assertThat(paymentOption?.paymentMethodType).isEqualTo("google_pay")
         }
 
     @Test
@@ -782,6 +786,7 @@ internal class DefaultFlowControllerTest {
         val paymentOption = flowController.getPaymentOption()
         assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption?.label).isEqualTo("Google Pay")
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("google_pay")
     }
 
     @Test

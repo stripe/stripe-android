@@ -187,7 +187,9 @@ internal class FlowControllerTest {
             page.fillOutCardDetails()
 
             page.clickPrimaryButton()
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+            val paymentOption = testContext.configureCallbackTurbine.awaitItem()
+            assertThat(paymentOption?.label).endsWith("4242")
+            assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
             composeTestRule.waitForIdle()
 
             testContext.flowController.presentPaymentOptions()
@@ -233,14 +235,18 @@ internal class FlowControllerTest {
             page.assertLpmSelected("cashapp")
 
             page.clickPrimaryButton()
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("Cash App Pay")
+            val paymentOption1 = testContext.configureCallbackTurbine.awaitItem()
+            assertThat(paymentOption1?.label).endsWith("Cash App Pay")
+            assertThat(paymentOption1?.paymentMethodType).isEqualTo("cashapp")
             composeTestRule.waitForIdle()
 
             testContext.flowController.presentPaymentOptions()
 
             page.assertLpmSelected("cashapp")
             page.clickPrimaryButton()
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("Cash App Pay")
+            val paymentOption2 = testContext.configureCallbackTurbine.awaitItem()
+            assertThat(paymentOption2?.label).endsWith("Cash App Pay")
+            assertThat(paymentOption2?.paymentMethodType).isEqualTo("cashapp")
 
             testContext.markTestSucceeded()
         }
@@ -831,7 +837,9 @@ internal class FlowControllerTest {
                 .and(hasText("4242", substring = true))
         ).performClick()
 
-        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        val paymentOption = testContext.configureCallbackTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith("4242")
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
         page.fillCvcRecollection("123")
 
@@ -911,7 +919,9 @@ internal class FlowControllerTest {
 
         testContext.configureCallbackTurbine.expectNoEvents()
         page.clickPrimaryButton()
-        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        val paymentOption = testContext.configureCallbackTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith("4242")
+        assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
         testContext.markTestSucceeded()
     }
 
