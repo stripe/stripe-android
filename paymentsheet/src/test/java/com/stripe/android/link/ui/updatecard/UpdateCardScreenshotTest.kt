@@ -49,7 +49,6 @@ internal class UpdateCardScreenshotTest(
                     ),
                     state = testCase.state,
                     onUpdateClicked = {},
-                    onCancelClicked = {},
                 )
             }
         }

@@ -132,7 +132,6 @@ internal class PaymentMethodScreenTest {
                 DefaultLinkTheme {
                     PaymentMethodScreen(
                         viewModel = viewModel,
-                        onCancelClicked = {}
                     )
                 }
             }

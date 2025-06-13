@@ -21,7 +21,6 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
-import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -33,7 +32,6 @@ import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.R as StripeR
 
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
@@ -44,7 +42,6 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
             interactor = interactor,
             state = state,
             onUpdateClicked = viewModel::onUpdateClicked,
-            onCancelClicked = viewModel::onCancelClicked,
         )
     }
 }
@@ -54,7 +51,6 @@ internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
     state: UpdateCardScreenState,
     onUpdateClicked: () -> Unit,
-    onCancelClicked: () -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -92,19 +88,13 @@ internal fun UpdateCardScreenBody(
         }
 
         PrimaryButton(
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+            modifier = Modifier.padding(vertical = 16.dp),
             label = stringResource(R.string.stripe_link_update_card_confirm_cta),
             state = state.primaryButtonState,
             onButtonClick = {
                 focusManager.clearFocus()
                 onUpdateClicked()
             }
-        )
-
-        SecondaryButton(
-            label = stringResource(StripeR.string.stripe_cancel),
-            enabled = state.processing.not(),
-            onClick = onCancelClicked
         )
     }
 }
@@ -159,7 +149,6 @@ internal fun UpdateCardScreenBodyPreview() {
                     processing = false,
                 ),
                 onUpdateClicked = {},
-                onCancelClicked = {},
             )
         }
     }
