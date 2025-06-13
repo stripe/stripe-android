@@ -599,8 +599,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
     abstract class RowSelectionBehavior internal constructor() {
         private object Default : RowSelectionBehavior()
 
-        internal class ImmediateAction(
-            internal val didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit
+        private class ImmediateAction(
+            val didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit
         ) : RowSelectionBehavior()
 
         companion object {
@@ -622,6 +622,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
              */
             fun immediateAction(didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit): RowSelectionBehavior {
                 return ImmediateAction(didSelectPaymentOption)
+            }
+
+            internal fun getInternalRowSelectionCallback(
+                rowSelectionBehavior: RowSelectionBehavior,
+                embeddedPaymentElement: EmbeddedPaymentElement
+            ): (() -> Unit)? {
+                return if (rowSelectionBehavior is ImmediateAction) {
+                    { rowSelectionBehavior.didSelectPaymentOption(embeddedPaymentElement) }
+                } else {
+                    null
+                }
             }
         }
     }

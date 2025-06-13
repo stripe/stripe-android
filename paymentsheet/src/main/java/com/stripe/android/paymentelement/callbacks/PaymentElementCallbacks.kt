@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.callbacks
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -50,11 +51,10 @@ internal data class PaymentElementCallbacks private constructor(
             rowSelectionBehavior: EmbeddedPaymentElement.RowSelectionBehavior,
             element: EmbeddedPaymentElement,
         ) = apply {
-            if (rowSelectionBehavior is EmbeddedPaymentElement.RowSelectionBehavior.ImmediateAction) {
-                this.rowSelectionCallback = {
-                    rowSelectionBehavior.didSelectPaymentOption(element)
-                }
-            }
+            this.rowSelectionCallback = getInternalRowSelectionCallback(
+                rowSelectionBehavior = rowSelectionBehavior,
+                embeddedPaymentElement = element
+            )
         }
 
         fun build(): PaymentElementCallbacks {
