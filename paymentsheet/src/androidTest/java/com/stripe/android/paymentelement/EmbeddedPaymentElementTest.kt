@@ -239,7 +239,7 @@ internal class EmbeddedPaymentElementTest {
                 withContext(Dispatchers.Main) {
                     testContext.embeddedPaymentElement.state = state
                 }
-                assertThat(awaitItem()?.paymentMethodType).isEqualTo("Card")
+                assertThat(awaitItem()?.paymentMethodType).isEqualTo("card")
             }
 
             embeddedContentPage.clickViewMore()
