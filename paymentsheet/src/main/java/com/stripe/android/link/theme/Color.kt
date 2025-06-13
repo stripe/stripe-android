@@ -4,6 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 
@@ -165,6 +166,8 @@ internal fun StripeThemeForLink(
         ),
         typography = StripeThemeDefaults.typography,
         sectionSpacing = StripeThemeDefaults.sectionSpacing,
+        sectionStyle = SectionStyle.Borderless,
+        textFieldInsets = StripeThemeDefaults.textFieldInsets,
     ) {
         content()
     }

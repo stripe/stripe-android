@@ -17,7 +17,9 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import com.google.accompanist.themeadapter.material.createMdcTheme
 import com.stripe.android.uicore.LocalColors
+import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.LocalShapes
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.LocalTypography
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.StripeTypography
@@ -97,6 +99,8 @@ internal fun AdoptForStripeTheme(
         LocalShapes provides StripeThemeDefaults.shapes,
         LocalTypography provides stripeTypography,
         LocalInspectionMode provides inspectionMode,
+        LocalSectionStyle provides StripeThemeDefaults.sectionStyle,
+        LocalTextFieldInsets provides StripeThemeDefaults.textFieldInsets,
     ) {
         MaterialTheme(
             colors = hostingAppColors,
