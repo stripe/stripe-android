@@ -136,11 +136,13 @@ internal object AppearanceStore {
             val separatorColor: Int = Color(0x33787880).toArgb(),
             val selectedColor: Int = Color(0xFF007AFF).toArgb(),
             val unselectedColor: Int = Color(0x33787880).toArgb(),
-            val checkmarkColor: Int = Color(0xFF007AFF).toArgb()
+            val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
+            val chevronColor: Int = Color.DarkGray.toArgb()
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
                 FlatWithCheckmark,
+                FlatWithChevron,
                 FloatingButton
             }
 
@@ -181,6 +183,23 @@ internal object AppearanceStore {
                         colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
                             separatorColor = Color(0x40FFFFFF).toArgb(),
                             checkmarkColor = Color(0xFF0074D4).toArgb()
+                        )
+                    )
+                    Row.FlatWithChevron -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron(
+                        separatorThicknessDp = separatorThicknessDp,
+                        startSeparatorInsetDp = startSeparatorInset,
+                        endSeparatorInsetDp = endSeparatorInset,
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                        horizontalInsetsDp = horizontalInsetsDp,
+                        colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                            separatorColor = separatorColor,
+                            chevronColor = chevronColor
+                        ),
+                        colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                            separatorColor = Color(0x40FFFFFF).toArgb(),
+                            chevronColor = Color.LightGray.toArgb()
                         )
                     )
                     Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
