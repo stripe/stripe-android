@@ -142,5 +142,6 @@ private fun runEmbeddedPaymentElementTestInternal(
 }
 
 data class RowSelectionCall(
+    val paymentMethodType: String?,
     val paymentOptionLabel: String?,
 )
