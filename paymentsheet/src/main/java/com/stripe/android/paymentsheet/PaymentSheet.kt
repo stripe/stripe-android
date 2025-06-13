@@ -35,6 +35,9 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.WalletConfiguration.DeliveryEstimate
+import com.stripe.android.paymentsheet.WalletConfiguration.LineItem
+import com.stripe.android.paymentsheet.WalletConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -45,6 +48,7 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
@@ -2416,6 +2420,81 @@ class PaymentSheet internal constructor(
         }
     }
 
+    @Parcelize
+    data class ShopPayConfiguration(
+        val shopId: String,
+        val billingAddressRequired: Boolean,
+        val emailRequired: Boolean,
+        val shippingAddressRequired: Boolean,
+        val lineItems: List<LineItem>,
+        val shippingRates: List<ShippingRate>
+    ): Parcelable {
+        /**
+         * A line item in the order summary.
+         */
+        @Parcelize
+        data class LineItem(
+            val name: String,
+            val amount: Int
+        ) : Parcelable
+
+        /**
+         * A shipping rate option.
+         */
+        @Parcelize
+        data class ShippingRate(
+            val id: String,
+            val amount: Int,
+            val displayName: String,
+            val deliveryEstimate: DeliveryEstimate?
+        ) : Parcelable
+
+        /**
+         * Estimated delivery time range. Can be either an object with min/max bounds or a simple string.
+         */
+        sealed interface DeliveryEstimate : Parcelable {
+            /**
+             * Object format with minimum and maximum delivery estimates.
+             */
+            @Parcelize
+            data class Range(
+                val maximum: DeliveryEstimateUnit,
+                val minimum: DeliveryEstimateUnit
+            ) : DeliveryEstimate
+
+            /**
+             * Simple string format for delivery estimate.
+             */
+            @Parcelize
+            data class Text(
+                val value: String
+            ) : DeliveryEstimate
+
+            /**
+             * A unit of time for delivery estimates.
+             */
+            @Parcelize
+            data class DeliveryEstimateUnit(
+                val unit: TimeUnit,
+                val value: Int
+            ) : Parcelable {
+
+                /**
+                 * Time unit for delivery estimates.
+                 */
+                enum class TimeUnit {
+                    HOUR,
+                    DAY,
+                    BUSINESS_DAY,
+                    WEEK,
+                    MONTH
+                }
+            }
+        }
+
+
+    }
+
     /**
      * A class that presents the individual steps of a payment sheet flow.
      */
@@ -2531,10 +2610,10 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * @param handlers Handlers for wallet-specific events like shipping method and contact updates.
+             * @param handlers Handlers for shop-pay specific events like shipping method and contact updates.
              */
-            fun walletHandlers(handlers: WalletConfiguration.Handlers) = apply {
-                callbacksBuilder.walletHandlers(handlers)
+            fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
+                callbacksBuilder.shopPayHandlers(handlers)
             }
 
             /**
@@ -2609,14 +2688,8 @@ class PaymentSheet internal constructor(
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
-                walletHandlers: WalletConfiguration.Handlers? = null
+                paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                setFlowControllerCallbacks(
-                    PaymentElementCallbacks.Builder()
-                        .walletHandlers(walletHandlers)
-                        .build()
-                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2637,7 +2710,6 @@ class PaymentSheet internal constructor(
              * changes.
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
-             * @param walletHandlers Optional handlers for wallet-specific events.
              */
             @JvmStatic
             @JvmOverloads
@@ -2645,13 +2717,11 @@ class PaymentSheet internal constructor(
                 activity: ComponentActivity,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
-                walletHandlers: WalletConfiguration.Handlers? = null
+                paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
                 setFlowControllerCallbacks(
                     PaymentElementCallbacks.Builder()
                         .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
-                        .walletHandlers(walletHandlers)
                         .build()
                 )
                 return FlowControllerFactory(

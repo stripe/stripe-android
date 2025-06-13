@@ -6,6 +6,8 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.paymentsheet.WalletConfiguration
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
@@ -14,7 +16,7 @@ internal data class PaymentElementCallbacks private constructor(
     val confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?,
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
-    val walletHandlers: WalletConfiguration.Handlers?,
+    val shopPayHandlers: ShopPayHandlers?
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -22,6 +24,7 @@ internal data class PaymentElementCallbacks private constructor(
         private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
         private var analyticEventCallback: AnalyticEventCallback? = null
         private var walletHandlers: WalletConfiguration.Handlers? = null
+        private var shopPayHandlers: ShopPayHandlers? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -47,13 +50,17 @@ internal data class PaymentElementCallbacks private constructor(
             this.walletHandlers = walletHandlers
         }
 
+        fun shopPayHandlers(shopPayHandlers: ShopPayHandlers) = apply {
+            this.shopPayHandlers = shopPayHandlers
+        }
+
         fun build(): PaymentElementCallbacks {
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
                 confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 analyticEventCallback = analyticEventCallback,
-                walletHandlers = walletHandlers,
+                shopPayHandlers = shopPayHandlers
             )
         }
     }
