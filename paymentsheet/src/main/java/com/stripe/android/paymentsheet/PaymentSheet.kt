@@ -1471,6 +1471,122 @@ class PaymentSheet internal constructor(
                         )
                     }
                 }
+
+                @ExperimentalEmbeddedPaymentElementApi
+                @Parcelize
+                @Poko
+                class FlatWithChevron(
+                    /**
+                     * The thickness of the separator line between rows.
+                     */
+                    internal val separatorThicknessDp: Float,
+
+                    /**
+                     * The start inset of the separator line between rows.
+                     */
+                    internal val startSeparatorInsetDp: Float,
+
+                    /**
+                     * The end inset of the separator line between rows.
+                     */
+                    internal val endSeparatorInsetDp: Float,
+
+                    /**
+                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                     */
+                    internal val topSeparatorEnabled: Boolean,
+
+                    /**
+                     * Additional vertical insets applied to a payment method row.
+                     * - Note: Increasing this value increases the height of each row.
+                     */
+                    internal val additionalVerticalInsetsDp: Float,
+
+                    /**
+                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
+                     * Element.
+                     */
+                    internal val bottomSeparatorEnabled: Boolean,
+
+                    /**
+                     * Horizontal insets applied to a payment method row.
+                     */
+                    internal val horizontalInsetsDp: Float,
+
+                    /**
+                     * Describes the colors used while the system is in light mode.
+                     */
+                    internal val colorsLight: Colors,
+
+                    /**
+                     * Describes the colors used while the system is in dark mode.
+                     */
+                    internal val colorsDark: Colors
+                ) : RowStyle() {
+                    constructor(
+                        context: Context,
+                        @DimenRes separatorThicknessRes: Int,
+                        @DimenRes startSeparatorInsetRes: Int,
+                        @DimenRes endSeparatorInsetRes: Int,
+                        topSeparatorEnabled: Boolean,
+                        bottomSeparatorEnabled: Boolean,
+                        @DimenRes additionalVerticalInsetsRes: Int,
+                        @DimenRes horizontalInsetsRes: Int,
+                        colorsLight: Colors,
+                        colorsDark: Colors
+                    ) : this(
+                        separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessRes),
+                        startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetRes),
+                        endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetRes),
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
+                        colorsLight = colorsLight,
+                        colorsDark = colorsDark
+                    )
+
+                    @ExperimentalEmbeddedPaymentElementApi
+                    @Parcelize
+                    @Poko
+                    class Colors(
+                        /**
+                         * The color of the separator line between rows.
+                         */
+                        @ColorInt
+                        internal val separatorColor: Int,
+
+                        /**
+                         * The color of the chevron.
+                         */
+                        @ColorInt
+                        internal val chevronColor: Int,
+                    ) : Parcelable
+
+                    override fun hasSeparators() = true
+                    override fun startSeparatorHasDefaultInset() = false
+                    internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
+
+                    internal companion object {
+                        val default = FlatWithChevron(
+                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
+                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
+                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
+                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
+                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
+                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
+                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
+                            colorsLight = Colors(
+                                separatorColor = StripeThemeDefaults.chevronColorsLight.separatorColor.toArgb(),
+                                chevronColor = StripeThemeDefaults.chevronColorsLight.chevronColor.toArgb()
+                            ),
+                            colorsDark = Colors(
+                                separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
+                                chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
+                            )
+                        )
+                    }
+                }
             }
         }
 

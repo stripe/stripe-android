@@ -162,6 +162,12 @@ data class EmbeddedFloatingStyle(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedChevronColors(
+    val separatorColor: Color,
+    val chevronColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class FormInsets(
     val start: Float,
     val top: Float,
@@ -301,6 +307,16 @@ object StripeThemeDefaults {
         selectedColor = colorsDark.materialColors.primary,
         unselectedColor = EMBEDDED_SEPARATOR_COLOR_DARK,
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK
+    )
+
+    val chevronColorsLight = EmbeddedChevronColors(
+        separatorColor = colorsLight.componentBorder,
+        chevronColor = Color.DarkGray
+    )
+
+    val chevronColorsDark = EmbeddedChevronColors(
+        separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
+        chevronColor = Color.LightGray
     )
 
     val embeddedCommon = EmbeddedInsets(

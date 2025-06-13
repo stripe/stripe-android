@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -103,7 +105,7 @@ internal fun PaymentMethodRowButton(
                 style = style
             )
 
-            if (style !is RowStyle.FlatWithCheckmark) {
+            if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
@@ -118,6 +120,7 @@ internal fun PaymentMethodRowButton(
     }
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonOuterContent(
@@ -148,6 +151,20 @@ private fun RowButtonOuterContent(
         is RowStyle.FlatWithCheckmark -> {
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
+                contentPaddingValues = PaddingValues(
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
+                ),
+                verticalArrangement = Arrangement.Center,
+                trailingContent = trailingContent,
+                style = style,
+                modifier = modifier
+            ) {
+                rowContent(false)
+            }
+        }
+        is RowStyle.FlatWithChevron -> {
+            RowButtonChevronOuterContent(
                 contentPaddingValues = PaddingValues(
                     horizontal = style.horizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
@@ -285,6 +302,42 @@ private fun RowButtonCheckmarkOuterContent(
                 tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
             )
         }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowButtonChevronOuterContent(
+    contentPaddingValues: PaddingValues,
+    verticalArrangement: Arrangement.Vertical,
+    trailingContent: (@Composable RowScope.() -> Unit)?,
+    modifier: Modifier,
+    style: RowStyle.FlatWithChevron,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Row(
+        modifier = modifier.padding(contentPaddingValues),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            verticalArrangement = verticalArrangement
+        ) {
+            content()
+            Row {
+                if (trailingContent != null) {
+                    Spacer(Modifier.width(iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp))
+                    trailingContent()
+                }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        Icon(
+            painter = painterResource(R.drawable.stripe_ic_chevron_right),
+            contentDescription = null,
+            modifier = Modifier
+                .align(Alignment.CenterVertically),
+            tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
+        )
     }
 }
 
