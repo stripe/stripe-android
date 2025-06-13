@@ -71,7 +71,6 @@ internal class PaymentMethodScreenScreenshotTest {
                         state = state,
                         onFormFieldValuesChanged = {},
                         onPayClicked = {},
-                        onCancelClicked = {}
                     )
                 }
             }
