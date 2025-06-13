@@ -237,7 +237,7 @@ internal class FlowControllerTest {
             page.clickPrimaryButton()
             val paymentOption1 = testContext.configureCallbackTurbine.awaitItem()
             assertThat(paymentOption1?.label).endsWith("Cash App Pay")
-            assertThat(paymentOption1?.paymentMethodType).endsWith("cashapp")
+            assertThat(paymentOption1?.paymentMethodType).isEqualTo("cashapp")
             composeTestRule.waitForIdle()
 
             testContext.flowController.presentPaymentOptions()
@@ -246,7 +246,7 @@ internal class FlowControllerTest {
             page.clickPrimaryButton()
             val paymentOption2 = testContext.configureCallbackTurbine.awaitItem()
             assertThat(paymentOption2?.label).endsWith("Cash App Pay")
-            assertThat(paymentOption2?.paymentMethodType).endsWith("cashapp")
+            assertThat(paymentOption2?.paymentMethodType).isEqualTo("cashapp")
 
             testContext.markTestSucceeded()
         }
