@@ -4,7 +4,6 @@ import com.stripe.android.link.LinkScreen
 
 internal data class LinkAppBarState(
     val showHeader: Boolean,
-    val showOverflowMenu: Boolean,
     val canNavigateBack: Boolean,
 ) {
 
@@ -16,7 +15,6 @@ internal data class LinkAppBarState(
         fun initial(): LinkAppBarState {
             return LinkAppBarState(
                 showHeader = true,
-                showOverflowMenu = false,
                 canNavigateBack = false,
             )
         }
@@ -40,7 +38,6 @@ internal data class LinkAppBarState(
 
             return LinkAppBarState(
                 showHeader = route in showHeaderRoutes,
-                showOverflowMenu = route == LinkScreen.Wallet.route,
                 canNavigateBack = previousEntryRoute != null,
             )
         }

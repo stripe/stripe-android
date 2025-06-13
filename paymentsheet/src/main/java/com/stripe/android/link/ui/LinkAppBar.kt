@@ -119,7 +119,6 @@ private fun LinkAppBarPreview() {
             LinkAppBar(
                 state = LinkAppBarState(
                     showHeader = true,
-                    showOverflowMenu = true,
                     canNavigateBack = false,
                 ),
                 onBackPressed = {},
@@ -136,7 +135,6 @@ private fun LinkAppBarChildScreen() {
             LinkAppBar(
                 state = LinkAppBarState(
                     showHeader = false,
-                    showOverflowMenu = false,
                     canNavigateBack = true,
                 ),
                 onBackPressed = {},

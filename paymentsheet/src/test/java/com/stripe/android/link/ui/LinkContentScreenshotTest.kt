@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -48,9 +47,8 @@ internal class LinkContentScreenshotTest {
                         modifier = Modifier,
                         navController = navController,
                         appBarState = LinkAppBarState(
-                            navigationIcon = R.drawable.stripe_link_close,
+                            canNavigateBack = false,
                             showHeader = false,
-                            showOverflowMenu = false,
                         ),
                         bottomSheetContent = null,
                         initialDestination = LinkScreen.Loading,
