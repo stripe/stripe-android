@@ -60,7 +60,7 @@ class PaymentSheet internal constructor(
      */
     @Deprecated(
         message = "This will be removed in a future release.",
-        replaceWith = ReplaceWith("Builder(callback).build(activity)")
+        replaceWith = ReplaceWith("PaymentSheet.Builder(callback).build(activity)")
     )
     constructor(
         activity: ComponentActivity,
@@ -80,7 +80,7 @@ class PaymentSheet internal constructor(
     @Deprecated(
         message = "This will be removed in a future release.",
         replaceWith = ReplaceWith(
-            "Builder(callback)" +
+            "PaymentSheet.Builder(callback)" +
                 ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
                 ".build(activity)"
         )
@@ -111,7 +111,7 @@ class PaymentSheet internal constructor(
     @Deprecated(
         message = "This will be removed in a future release.",
         replaceWith = ReplaceWith(
-            "Builder(paymentResultCallback)" +
+            "PaymentSheet.Builder(paymentResultCallback)" +
                 ".createIntentCallback(createIntentCallback)" +
                 ".build(activity)"
         )
@@ -144,7 +144,7 @@ class PaymentSheet internal constructor(
     @Deprecated(
         message = "This will be removed in a future release.",
         replaceWith = ReplaceWith(
-            "Builder(paymentResultCallback)" +
+            "PaymentSheet.Builder(paymentResultCallback)" +
                 ".createIntentCallback(createIntentCallback)" +
                 ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
                 ".build(activity)"
@@ -174,7 +174,7 @@ class PaymentSheet internal constructor(
      */
     @Deprecated(
         message = "This will be removed in a future release.",
-        replaceWith = ReplaceWith("Builder(callback).build(fragment)")
+        replaceWith = ReplaceWith("PaymentSheet.Builder(callback).build(fragment)")
     )
     constructor(
         fragment: Fragment,
@@ -194,7 +194,7 @@ class PaymentSheet internal constructor(
     @Deprecated(
         message = "This will be removed in a future release.",
         replaceWith = ReplaceWith(
-            "Builder(callback)" +
+            "PaymentSheet.Builder(callback)" +
                 ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
                 ".build(fragment)"
         )
@@ -225,7 +225,7 @@ class PaymentSheet internal constructor(
     @Deprecated(
         message = "This will be removed in a future release.",
         replaceWith = ReplaceWith(
-            "Builder(paymentResultCallback)" +
+            "PaymentSheet.Builder(paymentResultCallback)" +
                 ".createIntentCallback(createIntentCallback)" +
                 ".build(fragment)"
         )
@@ -258,7 +258,7 @@ class PaymentSheet internal constructor(
     @Deprecated(
         message = "This will be removed in a future release.",
         replaceWith = ReplaceWith(
-            "Builder(paymentResultCallback)" +
+            "PaymentSheet.Builder(paymentResultCallback)" +
                 ".createIntentCallback(createIntentCallback)" +
                 ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)" +
                 ".build(fragment)"
