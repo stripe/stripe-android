@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
@@ -131,6 +132,7 @@ fun PhoneNumberElementUI(
     val visualTransformation by controller.visualTransformation.collectAsState()
     val colors = TextFieldColors(shouldShowError != null)
     var hasFocus by rememberSaveable { mutableStateOf(false) }
+    val textFieldInsets = LocalTextFieldInsets.current
 
     if (moveToNextFieldOnceComplete) {
         LaunchedEffect(isComplete) {
@@ -198,6 +200,7 @@ fun PhoneNumberElementUI(
             singleLine = true,
             colors = colors,
             errorMessage = null,
+            contentPadding = textFieldInsets.asPaddingValues(),
         )
     }
 
@@ -213,12 +216,12 @@ fun PhoneNumberElementUI(
 @Composable
 private fun CountryDropdown(
     phoneNumberController: PhoneNumberController,
-    enabled: Boolean
+    enabled: Boolean,
 ) {
     DropDown(
         controller = phoneNumberController.countryDropdownController,
         enabled = enabled,
         modifier = Modifier
-            .padding(start = 16.dp, end = 8.dp)
+            .padding(start = 11.7.dp, end = 8.dp)
     )
 }

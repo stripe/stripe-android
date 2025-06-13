@@ -1111,6 +1111,11 @@ class PaymentSheet internal constructor(
          * be applied.
          */
         internal val sectionSpacing: Spacing = Spacing.defaultSectionSpacing,
+
+        /**
+         * Defines spacing inside the input fields of a form.
+         */
+        internal val textFieldInsets: Insets = Insets.defaultTextFieldInsets
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1475,6 +1480,8 @@ class PaymentSheet internal constructor(
             @OptIn(AppearanceAPIAdditionsPreview::class)
             private var sectionSpacing: Spacing = Spacing.defaultSectionSpacing
 
+            private var textFieldInsets: Insets = Insets.defaultTextFieldInsets
+
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
                 Embedded.default
@@ -1513,6 +1520,11 @@ class PaymentSheet internal constructor(
                 this.sectionSpacing = sectionSpacing
             }
 
+            @AppearanceAPIAdditionsPreview
+            fun textFieldInsets(textFieldInsets: Insets) = apply {
+                this.textFieldInsets = textFieldInsets
+            }
+
             @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
             fun build(): Appearance {
                 return Appearance(
@@ -1524,6 +1536,7 @@ class PaymentSheet internal constructor(
                     embeddedAppearance = embeddedAppearance,
                     formInsetValues = formInsetValues,
                     sectionSpacing = sectionSpacing,
+                    textFieldInsets = textFieldInsets,
                 )
             }
         }
@@ -2025,6 +2038,13 @@ class PaymentSheet internal constructor(
                 topDp = 0f,
                 endDp = 20f,
                 bottomDp = 40f,
+            )
+
+            internal val defaultTextFieldInsets = Insets(
+                startDp = StripeThemeDefaults.textFieldInsets.start,
+                topDp = StripeThemeDefaults.textFieldInsets.top,
+                endDp = StripeThemeDefaults.textFieldInsets.end,
+                bottomDp = StripeThemeDefaults.textFieldInsets.bottom,
             )
         }
     }

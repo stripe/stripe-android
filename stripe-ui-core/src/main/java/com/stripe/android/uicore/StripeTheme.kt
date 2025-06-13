@@ -325,7 +325,7 @@ object StripeThemeDefaults {
     val textFieldInsets = FormInsets(
         start = 16f,
         top = 20f,
-        end = 16f,
+        end = 12f,
         bottom = 10f
     )
 
