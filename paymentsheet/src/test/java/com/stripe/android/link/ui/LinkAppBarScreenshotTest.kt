@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -34,8 +33,6 @@ internal class LinkAppBarScreenshotTest(
                 LinkAppBar(
                     state = testCase.state,
                     onBackPressed = {},
-                    showBottomSheetContent = {},
-                    onLogoutClicked = {}
                 )
             }
         }
@@ -47,27 +44,17 @@ internal class LinkAppBarScreenshotTest(
         fun data(): List<TestCase> {
             return listOf(
                 TestCase(
-                    name = "LinkAppBarWithHeaderWithOverflowMenuWithEmail",
+                    name = "LinkAppBarWithLogoAndCloseButton",
                     state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
+                        canNavigateBack = false,
                         showHeader = true,
-                        showOverflowMenu = true,
                     )
                 ),
                 TestCase(
-                    name = "LinkAppBarWithHeaderNoOverflowMenuWithEmail",
+                    name = "LinkAppBarWithoutLogoAndWithBackButton",
                     state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
-                        showHeader = true,
-                        showOverflowMenu = false,
-                    )
-                ),
-                TestCase(
-                    name = "LinkAppBarNoHeaderWithOverflowMenuWithEmail",
-                    state = LinkAppBarState(
-                        navigationIcon = R.drawable.stripe_link_close,
+                        canNavigateBack = true,
                         showHeader = false,
-                        showOverflowMenu = true,
                     )
                 ),
             )

@@ -23,6 +23,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -50,6 +52,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
+import com.stripe.android.link.ui.LinkAppBarMenu
 import com.stripe.android.link.ui.LinkDivider
 import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
@@ -77,7 +80,8 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 internal fun WalletScreen(
     viewModel: WalletViewModel,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: () -> Unit,
+    onLogoutClicked: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
     WalletBody(
@@ -90,6 +94,7 @@ internal fun WalletScreen(
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
         onUpdateClicked = viewModel::onUpdateClicked,
+        onLogoutClicked = onLogoutClicked,
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
@@ -112,6 +117,7 @@ internal fun WalletBody(
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -149,6 +155,7 @@ internal fun WalletBody(
                     showBottomSheetContent = showBottomSheetContent,
                     onRemoveClicked = onRemoveClicked,
                     onUpdateClicked = onUpdateClicked,
+                    onLogoutClicked = onLogoutClicked,
                     onSetDefaultClicked = onSetDefaultClicked,
                     onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
                     hideBottomSheetContent = hideBottomSheetContent
@@ -179,6 +186,7 @@ private fun PaymentDetailsSection(
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -195,7 +203,8 @@ private fun PaymentDetailsSection(
             onSetDefaultClicked = onSetDefaultClicked,
             onUpdateClicked = onUpdateClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
-            hideBottomSheetContent = hideBottomSheetContent
+            hideBottomSheetContent = hideBottomSheetContent,
+            onLogoutClicked = onLogoutClicked,
         )
 
         AnimatedVisibility(visible = state.mandate != null) {
@@ -276,6 +285,7 @@ private fun PaymentMethodSection(
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -290,6 +300,11 @@ private fun PaymentMethodSection(
         selectedItem = state.selectedItem,
         emailLabel = emailLabel,
         labelMaxWidth = labelMaxWidthDp,
+        onAccountMenuClicked = {
+            showBottomSheetContent {
+                LinkAppBarMenu(onLogoutClicked)
+            }
+        },
         expandedContent = {
             ExpandedPaymentDetails(
                 uiState = state,
@@ -361,6 +376,7 @@ private fun PaymentMethodPicker(
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     modifier: Modifier = Modifier,
+    onAccountMenuClicked: () -> Unit,
     collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
     expandedContent: @Composable (() -> Unit),
 ) {
@@ -376,7 +392,8 @@ private fun PaymentMethodPicker(
         EmailDetails(
             email = email,
             label = emailLabel,
-            labelMaxWidth = labelMaxWidth
+            labelMaxWidth = labelMaxWidth,
+            onMenuClicked = onAccountMenuClicked,
         )
 
         LinkDivider()
@@ -452,7 +469,8 @@ private fun CollapsedPaymentDetails(
 private fun EmailDetails(
     email: String,
     label: String,
-    labelMaxWidth: Dp
+    labelMaxWidth: Dp,
+    onMenuClicked: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -478,6 +496,15 @@ private fun EmailDetails(
             maxLines = 1,
             style = LinkTheme.typography.bodyEmphasized,
             modifier = Modifier.weight(1f),
+        )
+
+        Icon(
+            imageVector = Icons.Default.MoreVert,
+            contentDescription = stringResource(R.string.stripe_show_menu),
+            tint = LinkTheme.colors.iconSecondary,
+            modifier = Modifier
+                .clickable(onClick = onMenuClicked)
+                .padding(4.dp),
         )
     }
 }

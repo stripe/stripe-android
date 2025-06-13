@@ -231,6 +231,7 @@ internal class WalletScreenScreenshotTest {
                     hideBottomSheetContent = {},
                     onAddNewPaymentMethodClicked = {},
                     onDismissAlert = {},
+                    onLogoutClicked = {},
                     expiryDateController = SimpleTextFieldController(DateConfig()),
                     cvcController = CvcController(
                         cardBrandFlow = stateFlowOf(CardBrand.Unknown)

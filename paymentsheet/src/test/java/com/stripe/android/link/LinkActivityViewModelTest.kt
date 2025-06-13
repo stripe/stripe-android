@@ -33,7 +33,6 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -489,8 +488,7 @@ internal class LinkActivityViewModelTest {
 
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.showHeader).isTrue()
-        assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+        assertThat(appBarState.canNavigateBack).isFalse()
     }
 
     private fun navBackStackEntry(screen: LinkScreen): NavBackStackEntry {
@@ -516,8 +514,7 @@ internal class LinkActivityViewModelTest {
 
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.showHeader).isTrue()
-        assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+        assertThat(appBarState.canNavigateBack).isFalse()
     }
 
     @Test
@@ -533,8 +530,7 @@ internal class LinkActivityViewModelTest {
 
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.showHeader).isTrue()
-        assertThat(appBarState.showOverflowMenu).isTrue()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+        assertThat(appBarState.canNavigateBack).isFalse()
     }
 
     @Test
@@ -550,8 +546,7 @@ internal class LinkActivityViewModelTest {
 
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.showHeader).isFalse()
-        assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+        assertThat(appBarState.canNavigateBack).isFalse()
     }
 
     @Test
@@ -567,8 +562,7 @@ internal class LinkActivityViewModelTest {
 
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.showHeader).isTrue()
-        assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
+        assertThat(appBarState.canNavigateBack).isFalse()
     }
 
     @Test
