@@ -2965,10 +2965,20 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public final fun getDrawableResourceId ()I
 	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
 	public final fun getLabel ()Ljava/lang/String;
+	public final fun getLabels ()Lcom/stripe/android/paymentsheet/model/PaymentOption$Labels;
 	public final fun getPaymentMethodType ()Ljava/lang/String;
 	public final fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public fun hashCode ()I
 	public final fun icon ()Landroid/graphics/drawable/Drawable;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/model/PaymentOption$Labels {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getSublabel ()Ljava/lang/String;
+	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
 
