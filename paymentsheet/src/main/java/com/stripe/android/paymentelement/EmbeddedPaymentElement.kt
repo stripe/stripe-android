@@ -518,7 +518,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * - If this is a Stripe payment method, see
          *      https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for possible values.
          * - If this is an external payment method, see
-         *      https://stripe.com/docs/payments/external-payment-methods?platform=android#available-external-payment-methods
+         *      https://docs.stripe.com/payments/mobile/external-payment-methods?platform=android
          *      for possible values.
          * - If this is Google Pay, the value is "google_pay".
          */
