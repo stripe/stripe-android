@@ -351,6 +351,7 @@ internal class FlowControllerTest {
             scenario.onActivity {
                 PaymentConfiguration.init(it, "pk_test_123")
 
+                @Suppress("Deprecation")
                 val unsynchronizedController = PaymentSheet.FlowController.create(
                     activity = it,
                     paymentOptionCallback = { paymentOption ->
@@ -417,6 +418,7 @@ internal class FlowControllerTest {
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")
+            @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
                 paymentOptionCallback = {

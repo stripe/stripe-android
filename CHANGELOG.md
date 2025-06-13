@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [ADDED][10935](https://github.com/stripe/stripe-android/pull/10935) Add `formInsetValues` method to `PaymentSheet.Appearance.Builder`.
+* [DEPRECATED][10833](https://github.com/stripe/stripe-android/pull/10833) Deprecated PaymentSheet/FlowController constructors, create methods, and Compose remember functions in favor of new Builder pattern APIs.
 
 ## 21.17.0 - 2025-06-09
 

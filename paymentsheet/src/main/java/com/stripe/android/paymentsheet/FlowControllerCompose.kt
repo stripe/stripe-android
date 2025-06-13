@@ -21,6 +21,14 @@ import java.util.UUID
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(
+    message = "This will be removed in a future release. Use FlowController.Builder instead.",
+    replaceWith = ReplaceWith(
+        "remember(paymentOptionCallback, paymentResultCallback) { " +
+            "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback) " +
+            "}.build()"
+    )
+)
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
@@ -49,6 +57,15 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(
+    message = "This will be removed in a future release. Use FlowController.Builder instead.",
+    replaceWith = ReplaceWith(
+        "remember(createIntentCallback, paymentOptionCallback, paymentResultCallback) { " +
+            "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+            ".createIntentCallback(createIntentCallback) " +
+            "}.build()"
+    )
+)
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback,
     paymentOptionCallback: PaymentOptionCallback,
@@ -82,6 +99,21 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@Deprecated(
+    message = "This will be removed in a future release. Use FlowController.Builder instead.",
+    replaceWith = ReplaceWith(
+        "remember(" +
+            "createIntentCallback, " +
+            "externalPaymentMethodConfirmHandler, " +
+            "paymentOptionCallback, " +
+            "paymentResultCallback" +
+            ") { " +
+            "PaymentSheet.FlowController.Builder(paymentResultCallback, paymentOptionCallback)" +
+            ".createIntentCallback(createIntentCallback)" +
+            ".externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler) " +
+            "}.build()"
+    )
+)
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
