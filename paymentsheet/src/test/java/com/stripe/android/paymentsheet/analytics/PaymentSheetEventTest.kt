@@ -300,7 +300,10 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = config,
+                isRowSelectionImmediateAction = false
+            ),
             isDeferred = true,
             linkEnabled = false,
             googlePaySupported = false,
@@ -326,6 +329,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = null,
         ) {
             put("form_sheet_action", "confirm")
+            put("row_selection_behavior", "default")
             put("embedded_view_displays_mandate_text", true)
         }
 
@@ -356,7 +360,10 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = config,
+                isRowSelectionImmediateAction = false
+            ),
             isDeferred = true,
             linkEnabled = false,
             googlePaySupported = false,
@@ -382,6 +389,7 @@ class PaymentSheetEventTest {
             primaryButtonColor = null,
         ) {
             put("form_sheet_action", "continue")
+            put("row_selection_behavior", "default")
             put("embedded_view_displays_mandate_text", false)
         }
 
@@ -389,6 +397,63 @@ class PaymentSheetEventTest {
             containsEntry("link_enabled", false)
             containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", true)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @Test
+    fun `Init event with embedded immediateRowSelectionBehavior should return expected params`() {
+        val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                    )
+                )
+            )
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .embeddedViewDisplaysMandateText(false)
+            .build()
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Embedded,
+            configuration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = null,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
+                configuration = config,
+                isRowSelectionImmediateAction = true
+            ),
+            isDeferred = true,
+            linkEnabled = false,
+            googlePaySupported = false,
+            isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_embedded_init"
+        )
+
+        val expectedConfig = buildInitMpeConfig(
+            appearanceMap = buildAppearanceMap(
+                usedParams = false,
+                embeddedConfig = mapOf(
+                    "style" to true,
+                    "row_style" to "flat_with_checkmark"
+                )
+            ),
+            paymentMethodLayout = null,
+            primaryButtonColor = null,
+        ) {
+            put("form_sheet_action", "continue")
+            put("row_selection_behavior", "immediate_action")
+            put("embedded_view_displays_mandate_text", false)
+        }
+
+        assertThat(event.params).run {
             containsEntry("mpe_config", expectedConfig)
         }
     }

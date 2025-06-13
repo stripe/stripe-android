@@ -10,6 +10,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
@@ -23,6 +25,7 @@ import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
     val embeddedPaymentElement: EmbeddedPaymentElement,
+    val rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
@@ -60,6 +63,7 @@ internal fun runEmbeddedPaymentElementTest(
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     showWalletButtons: Boolean = false,
+    rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -94,6 +98,7 @@ internal fun runEmbeddedPaymentElementTest(
         countDownLatch = countDownLatch,
         countDownLatchTimeoutSeconds = successTimeoutSeconds,
         makeEmbeddedPaymentElement = factory,
+        rowSelectionCalls = rowSelectionCalls,
         block = block,
     )
 }
@@ -103,6 +108,7 @@ private fun runEmbeddedPaymentElementTestInternal(
     countDownLatch: CountDownLatch,
     countDownLatchTimeoutSeconds: Long,
     makeEmbeddedPaymentElement: (ComponentActivity) -> EmbeddedPaymentElement,
+    rowSelectionCalls: ReceiveTurbine<RowSelectionCall>,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -121,14 +127,21 @@ private fun runEmbeddedPaymentElementTestInternal(
 
         val testContext = EmbeddedPaymentElementTestRunnerContext(
             embeddedPaymentElement = embeddedPaymentElement,
+            rowSelectionCalls = rowSelectionCalls,
             countDownLatch = countDownLatch,
         )
         runTest {
             block(testContext)
         }
 
+        testContext.rowSelectionCalls.ensureAllEventsConsumed()
         val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
     }
 }
+
+data class RowSelectionCall(
+    val paymentMethodType: String?,
+    val paymentOptionLabel: String?,
+)

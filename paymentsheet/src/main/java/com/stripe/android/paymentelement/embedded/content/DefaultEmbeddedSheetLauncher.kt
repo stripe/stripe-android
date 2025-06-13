@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
+import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
@@ -44,6 +45,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
@@ -74,6 +76,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
                     )
+                } else {
+                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
             }
         }
@@ -86,6 +90,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 is ManageResult.Complete -> {
                     customerStateHolder.setCustomerState(result.customerState)
                     selectionHolder.set(result.selection)
+                    if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
+                        rowSelectionImmediateActionHandler.invoke()
+                    }
                 }
             }
         }

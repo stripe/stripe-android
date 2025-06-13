@@ -32,18 +32,6 @@ fun rememberEmbeddedPaymentElement(
         UUID.randomUUID().toString()
     }
 
-    val callbacks = remember(builder) {
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
-        PaymentElementCallbacks.Builder()
-            .createIntentCallback(builder.createIntentCallback)
-            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
-            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
-            .analyticEventCallback(builder.analyticEventCallback)
-            .build()
-    }
-
-    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
-
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
         "EmbeddedPaymentElement must have an ActivityResultRegistryOwner."
@@ -55,7 +43,7 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must be created in the context of an Activity."
     }
 
-    return remember {
+    val embeddedPaymentElement = remember {
         EmbeddedPaymentElement.create(
             activity = activity,
             activityResultCaller = PaymentElementActivityResultCaller(
@@ -68,4 +56,19 @@ fun rememberEmbeddedPaymentElement(
             resultCallback = onResult,
         )
     }
+
+    val callbacks = remember(builder) {
+        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(builder.createIntentCallback)
+            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
+            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
+            .analyticEventCallback(builder.analyticEventCallback)
+            .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
+            .build()
+    }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+
+    return embeddedPaymentElement
 }

@@ -44,8 +44,9 @@ internal class ManageNavigator private constructor(
     val canGoBack: Boolean
         get() = navigationHandler.canGoBack
 
-    private val _result = MutableSharedFlow<Unit>(replay = 1)
-    val result: SharedFlow<Unit> = _result.asSharedFlow()
+    // result value is shouldInvokeRowSelectionCallback
+    private val _result = MutableSharedFlow<Boolean?>(replay = 1)
+    val result: SharedFlow<Boolean?> = _result.asSharedFlow()
 
     init {
         onScreenShown(screen.value)
@@ -58,12 +59,12 @@ internal class ManageNavigator private constructor(
                 if (navigationHandler.canGoBack) {
                     navigationHandler.pop()
                 } else {
-                    _result.tryEmit(Unit)
+                    _result.tryEmit(null)
                 }
             }
             is Action.Close -> {
                 onScreenHidden(screen.value)
-                _result.tryEmit(Unit)
+                _result.tryEmit(action.shouldInvokeRowSelectionCallback)
             }
             is Action.GoToScreen -> {
                 navigationHandler.transitionToWithDelay(action.screen)
@@ -154,7 +155,7 @@ internal class ManageNavigator private constructor(
     sealed class Action {
         object Back : Action()
 
-        object Close : Action()
+        data class Close(val shouldInvokeRowSelectionCallback: Boolean = false) : Action()
 
         data class GoToScreen(val screen: Screen) : Action()
     }

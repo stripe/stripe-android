@@ -94,7 +94,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
-    private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
+    private val onSelectSavedPaymentMethod: (PaymentSelection.Saved) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
     private val canShowWalletButtons: Boolean,
@@ -105,6 +105,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
+    private val invokeRowSelectionCallback: (() -> Unit)? = null,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -152,9 +153,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 canRemove = viewModel.customerStateHolder.canRemove,
-                onSelectSavedPaymentMethod = {
-                    viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
-                },
+                onSelectSavedPaymentMethod = { viewModel.handlePaymentMethodSelected(it) },
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
                 walletsState = viewModel.walletsState,
                 canShowWalletsInline = !viewModel.isCompleteFlow,
@@ -340,6 +339,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     subtitle = subtitle,
                     onClick = {
                         updateSelection(PaymentSelection.Link())
+                        invokeRowSelectionCallback?.invoke()
                     },
                 )
             }
@@ -355,6 +355,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     subtitle = null,
                     onClick = {
                         updateSelection(PaymentSelection.GooglePay)
+                        invokeRowSelectionCallback?.invoke()
                     },
                 )
             }
@@ -431,7 +432,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.SavedPaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected("saved")
-                onSelectSavedPaymentMethod(viewAction.savedPaymentMethod)
+                val selection = PaymentSelection.Saved(viewAction.savedPaymentMethod)
+                onSelectSavedPaymentMethod(selection)
+                invokeRowSelectionCallback?.invoke()
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()

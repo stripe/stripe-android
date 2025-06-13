@@ -143,6 +143,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
 
+        internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -164,6 +166,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
+        }
+
+        /**
+         * Set the rowSelectionBehavior.
+         * Default: payment method rows are selectable.
+         * ImmediateAction: payment method rows are treated as buttons. Provide the custom logic you want to see when
+         * rows are clicked
+         */
+        fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
+            this.rowSelectionBehavior = rowSelectionBehavior
         }
     }
 
@@ -578,6 +590,51 @@ class EmbeddedPaymentElement @Inject internal constructor(
     @ExperimentalEmbeddedPaymentElementApi
     fun interface ResultCallback {
         fun onResult(result: Result)
+    }
+
+    /**
+     * Describes how you handle row selections in EmbeddedPaymentElement
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    abstract class RowSelectionBehavior internal constructor() {
+        private object Default : RowSelectionBehavior()
+
+        private class ImmediateAction(
+            val didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit
+        ) : RowSelectionBehavior()
+
+        companion object {
+            /**
+             * When a payment option is selected, the customer taps a button to continue or confirm payment.
+             * This is the default recommended integration.
+             */
+            fun default(): RowSelectionBehavior {
+                return Default
+            }
+
+            /**
+             * When a payment option is selected, [didSelectPaymentOption] is triggered.
+             * You can implement this method to immediately perform an action e.g. go back to the checkout screen
+             * or confirm the payment.
+             *
+             * Note that certain payment options like Apple Pay and saved payment methods are disabled in this mode if
+             * you set [EmbeddedPaymentElement.Configuration.formSheetAction] to [FormSheetAction.Confirm].
+             */
+            fun immediateAction(didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit): RowSelectionBehavior {
+                return ImmediateAction(didSelectPaymentOption)
+            }
+
+            internal fun getInternalRowSelectionCallback(
+                rowSelectionBehavior: RowSelectionBehavior,
+                embeddedPaymentElement: EmbeddedPaymentElement
+            ): (() -> Unit)? {
+                return if (rowSelectionBehavior is ImmediateAction) {
+                    { rowSelectionBehavior.didSelectPaymentOption(embeddedPaymentElement) }
+                } else {
+                    null
+                }
+            }
+        }
     }
 
     /**

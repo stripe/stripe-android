@@ -423,7 +423,7 @@ internal val PaymentSelection.paymentMethodType: String
         PaymentSelection.GooglePay -> "google_pay"
         is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
+        is PaymentSelection.Saved -> paymentMethod.type?.code ?: "card"
     }
 
 internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
