@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.FakeLinkProminenceFeatureProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -17,6 +16,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -61,7 +61,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -88,12 +87,7 @@ internal class PaymentOptionsViewModelTest {
     private val customerRepository = mock<CustomerRepository>()
     private val linkPaymentLauncher = mock<LinkPaymentLauncher>()
 
-    private lateinit var linkProminenceFeatureProvider: FakeLinkProminenceFeatureProvider
-
-    @Before
-    fun setUp() {
-        linkProminenceFeatureProvider = FakeLinkProminenceFeatureProvider()
-    }
+    private val linkGate = FakeLinkGate()
 
     @After
     fun resetMainDispatcher() {
@@ -216,7 +210,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection with Link and prominence true launches LinkPaymentLauncher`() = runTest {
-        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        linkGate.setShowRuxInFlowController(true)
         val unverifiedAccount = LinkAccount(TestFactory.CONSUMER_SESSION.copy(verificationSessions = emptyList()))
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS
@@ -244,7 +238,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection with Link and prominence false emits Succeeded result`() = runTest {
-        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = false
+        linkGate.setShowRuxInFlowController(false)
         val viewModel = createViewModel(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
@@ -262,7 +256,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `onUserSelection with non-Link selection does not launch LinkPaymentLauncher`() = runTest {
-        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        linkGate.setShowRuxInFlowController(true)
         val viewModel = createViewModel(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
         )
@@ -1125,7 +1119,7 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            linkProminenceFeatureProvider = linkProminenceFeatureProvider,
+            linkGateFactory = { linkGate },
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )

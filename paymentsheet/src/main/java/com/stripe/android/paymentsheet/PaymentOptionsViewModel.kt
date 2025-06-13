@@ -17,7 +17,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
-import com.stripe.android.link.domain.LinkProminenceFeatureProvider
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -52,8 +52,8 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
-    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
     private val linkAccountHolder: LinkAccountHolder,
+    private val linkGateFactory: LinkGate.Factory,
     val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     customerRepository: CustomerRepository,
@@ -277,7 +277,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkConfiguration: LinkConfiguration
     ): Boolean {
         return paymentSelection is Link &&
-            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
+            linkGateFactory.create(linkConfiguration).showRuxInFlowController
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

@@ -588,6 +588,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             flags = elementsSession.linkFlags,
             useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
             suppress2faModal = elementsSession.suppressLink2faModal,
+            disableRuxInFlowController = elementsSession.disableRuxInFlowController,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,

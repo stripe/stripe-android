@@ -49,6 +49,9 @@ data class ElementsSession(
     val suppressLink2faModal: Boolean
         get() = linkSettings?.suppress2faModal ?: false
 
+    val disableRuxInFlowController: Boolean
+        get() = linkSettings?.disableLinkRuxInFlowController ?: false
+
     val enableLinkInSpm: Boolean
         get() = flags[Flag.ELEMENTS_ENABLE_LINK_SPM] == true
 
@@ -65,7 +68,8 @@ data class ElementsSession(
         val disableLinkSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
         val useAttestationEndpoints: Boolean,
-        val suppress2faModal: Boolean
+        val suppress2faModal: Boolean,
+        val disableLinkRuxInFlowController: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
