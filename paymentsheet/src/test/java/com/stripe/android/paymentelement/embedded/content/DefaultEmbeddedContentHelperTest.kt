@@ -180,6 +180,7 @@ internal class DefaultEmbeddedContentHelperTest {
             ),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,
+            internalRowSelectionCallback = { null }
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
