@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,9 +30,6 @@ internal fun CardDetailsElementUI(
             Divider(
                 color = MaterialTheme.stripeColors.componentDivider,
                 thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                modifier = Modifier.padding(
-                    horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                )
             )
         }
     }

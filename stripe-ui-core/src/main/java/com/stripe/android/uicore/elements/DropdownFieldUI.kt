@@ -40,10 +40,13 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -149,7 +152,7 @@ fun DropDown(
                     selectedItemLabel = selectedItemLabel,
                     currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
-                    showChevron = showChevron
+                    showChevron = showChevron,
                 )
             }
         }
@@ -199,32 +202,20 @@ private fun LargeDropdownLabel(
     selectedItemLabel: String,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
-    showChevron: Boolean
+    showChevron: Boolean,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(
-                start = 16.dp,
-                top = 4.dp,
-                bottom = 8.dp
-            )
-        ) {
+    val textFieldInsets = LocalTextFieldInsets.current
+
+    CompatTextField(
+        value = TextFieldValue(selectedItemLabel),
+        enabled = false,
+        onValueChange = {},
+        errorMessage = null,
+        label = {
             FormLabel(label.resolve())
-            Row(
-                modifier = Modifier.fillMaxWidth(.9f),
-                verticalAlignment = Alignment.Bottom
-            ) {
-                Text(
-                    selectedItemLabel,
-                    color = currentTextColor
-                )
-            }
-        }
-        if (!shouldDisableDropdownWithSingleItem && showChevron) {
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+        },
+        trailingIcon = if (!shouldDisableDropdownWithSingleItem && showChevron) {
+            {
                 Icon(
                     painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
                     contentDescription = null,
@@ -232,8 +223,16 @@ private fun LargeDropdownLabel(
                     tint = currentTextColor
                 )
             }
-        }
-    }
+        } else {
+            null
+        },
+        contentPadding = textFieldInsets.asPaddingValues(),
+        colors = TextFieldColors(
+            textColor = currentTextColor,
+            disabledTextColor = currentTextColor,
+        ),
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable

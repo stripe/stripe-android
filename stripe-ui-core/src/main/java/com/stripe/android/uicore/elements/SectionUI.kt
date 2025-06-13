@@ -9,12 +9,15 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.LocalSectionStyle
+import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -75,15 +78,28 @@ fun SectionCard(
     border: BorderStroke = MaterialTheme.getBorderStroke(isSelected),
     content: @Composable () -> Unit
 ) {
+    val sectionStyle = LocalSectionStyle.current
+
     Card(
-        border = border,
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
+        border = when (sectionStyle) {
+            SectionStyle.Borderless -> null
+            SectionStyle.Bordered -> border
+        },
         backgroundColor = backgroundColor,
-        shape = shape,
-        modifier = modifier
+        modifier = modifier,
+        shape = shape
     ) {
-        Column {
+        Column(
+            modifier = when (sectionStyle) {
+                SectionStyle.Borderless -> Modifier
+                SectionStyle.Bordered ->
+                    Modifier
+                        .padding(border.width)
+                        .clip(shape)
+            }
+        ) {
             content()
         }
     }
