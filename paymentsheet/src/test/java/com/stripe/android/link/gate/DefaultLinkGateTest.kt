@@ -269,7 +269,7 @@ internal class DefaultLinkGateTest {
     }
 
     @Test
-    fun `showRuxInFlowController - returns false when useNativeLink is true but backend flag is true`() {
+    fun `showRuxInFlowController - returns false when useNativeLink is true but disableRuxInFlowController is true`() {
         nativeLinkFeatureFlagTestRule.setEnabled(true)
         val gate = gate(
             isLiveMode = false,
@@ -280,7 +280,7 @@ internal class DefaultLinkGateTest {
     }
 
     @Test
-    fun `showRuxInFlowController -  false when useNativeLink is false regardless of backend flag`() {
+    fun `showRuxInFlowController - false when useNativeLink is false regardless of disableRuxInFlowController`() {
         nativeLinkFeatureFlagTestRule.setEnabled(false)
 
         val gateWithRuxEnabled = gate(
@@ -296,28 +296,6 @@ internal class DefaultLinkGateTest {
         assertThat(gateWithRuxDisabled.showRuxInFlowController).isFalse()
     }
 
-    @Test
-    fun `showRuxInFlowController - true when useNativeLink is true and backend flag is false`() {
-        val gate = gate(
-            isLiveMode = true,
-            useAttestationEndpoints = true,
-            disableRuxInFlowController = false
-        )
-
-        assertThat(gate.showRuxInFlowController).isTrue()
-    }
-
-    @Test
-    fun `showRuxInFlowController - false when livemode and useNativeLink and but backend flag is true`() {
-        val gate = gate(
-            isLiveMode = true,
-            useAttestationEndpoints = true,
-            disableRuxInFlowController = true
-        )
-
-        assertThat(gate.showRuxInFlowController).isFalse()
-    }
-
     private fun gate(
         isLiveMode: Boolean = true,
         useAttestationEndpoints: Boolean = true,
@@ -331,7 +309,6 @@ internal class DefaultLinkGateTest {
             is SetupIntent -> {
                 intent.copy(isLiveMode = isLiveMode)
             }
-            else -> intent
         }
         return DefaultLinkGate(
             configuration = TestFactory.LINK_CONFIGURATION.copy(
