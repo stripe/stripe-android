@@ -565,8 +565,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `presentPaymentOptions should not launch Link 2FA after dismissing it once`() = runTest {
-        // Setup the feature flag to enable early verification
-        linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController = true
+        linkGate.setShowRuxInFlowController(true)
 
         // Create a verificationStartedAccount with VerificationStarted status
         val session = CONSUMER_SESSION.copy(

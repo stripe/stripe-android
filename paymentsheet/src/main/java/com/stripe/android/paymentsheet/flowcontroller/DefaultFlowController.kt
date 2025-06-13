@@ -293,21 +293,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    private fun shouldPresentLinkInsteadOfPaymentOptions(
-        paymentSelection: PaymentSelection?,
-        linkAccountInfo: LinkAccountUpdate.Value,
-        linkConfiguration: LinkConfiguration
-    ): Boolean {
-        // If the user has declined to use Link in the past, do not show it again.
-        return viewModel.state?.declinedLink2FA != true &&
-            // The current payment selection is Link
-            paymentSelection?.isLink == true &&
-            // The current user has a Link account (not necessarily logged in)
-            linkAccountInfo.account != null &&
-            // feature flag and other conditions are met
-            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
-    }
-
     private fun showPaymentOptionList(
         state: State,
         paymentSelection: PaymentSelection?
