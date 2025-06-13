@@ -132,9 +132,6 @@ internal fun LinkInlineSignupFields(
                 Divider(
                     color = MaterialTheme.stripeColors.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                    modifier = Modifier.padding(
-                        horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                    )
                 )
 
                 if (isShowingPhoneFirst) {
@@ -168,9 +165,6 @@ internal fun LinkInlineSignupFields(
                 Divider(
                     color = MaterialTheme.stripeColors.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                    modifier = Modifier.padding(
-                        horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                    )
                 )
 
                 if (requiresNameCollection) {

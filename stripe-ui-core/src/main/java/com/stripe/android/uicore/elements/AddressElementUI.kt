@@ -2,7 +2,6 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -40,9 +39,6 @@ fun AddressElementUI(
                     Divider(
                         color = MaterialTheme.stripeColors.componentDivider,
                         thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                        modifier = Modifier.padding(
-                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                        )
                     )
                 }
             }

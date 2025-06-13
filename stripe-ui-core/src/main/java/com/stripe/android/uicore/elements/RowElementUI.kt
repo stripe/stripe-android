@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -31,7 +32,7 @@ fun RowElementUI(
     // Only draw the row if there are items in the row that are not hidden, otherwise the entire
     // section will fail to draw
     if (visibleFields.isNotEmpty()) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().wrapContentSize()) {
             visibleFields.forEachIndexed { index, field ->
                 SectionFieldElementUI(
                     enabled,

@@ -166,8 +166,23 @@ data class FormInsets(
     val start: Float,
     val top: Float,
     val end: Float,
-    val bottom: Float
-)
+    val bottom: Float,
+) {
+    fun asPaddingValues(): PaddingValues {
+        return PaddingValues(
+            start = start.dp,
+            end = end.dp,
+            top = top.dp,
+            bottom = bottom.dp,
+        )
+    }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class SectionStyle {
+    Bordered,
+    Borderless
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
@@ -306,6 +321,15 @@ object StripeThemeDefaults {
     )
 
     val sectionSpacing: Float? = null
+
+    val textFieldInsets = FormInsets(
+        start = 16f,
+        top = 20f,
+        end = 16f,
+        bottom = 10f
+    )
+
+    val sectionStyle = SectionStyle.Bordered
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -424,6 +448,12 @@ val LocalSectionSpacing = staticCompositionLocalOf { StripeTheme.customSectionSp
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalInstrumentationTest = staticCompositionLocalOf { false }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalSectionStyle = staticCompositionLocalOf { StripeTheme.sectionStyle }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInsets }
+
 /**
  * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
@@ -436,6 +466,8 @@ fun StripeTheme(
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
     sectionSpacing: Float? = StripeTheme.customSectionSpacing,
+    sectionStyle: SectionStyle = StripeTheme.sectionStyle,
+    textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
@@ -459,6 +491,8 @@ fun StripeTheme(
         LocalShapes provides shapes,
         LocalTypography provides typography,
         LocalSectionSpacing provides sectionSpacing,
+        LocalSectionStyle provides sectionStyle,
+        LocalTextFieldInsets provides textFieldInsets,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
     ) {
@@ -557,6 +591,10 @@ object StripeTheme {
     var formInsets = StripeThemeDefaults.formInsets
 
     var customSectionSpacing: Float? = StripeThemeDefaults.sectionSpacing
+
+    var textFieldInsets = StripeThemeDefaults.textFieldInsets
+
+    var sectionStyle = StripeThemeDefaults.sectionStyle
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable

@@ -28,6 +28,8 @@ internal fun StripeThemeForConnections(
         ),
         typography = StripeThemeDefaults.typography,
         sectionSpacing = StripeThemeDefaults.sectionSpacing,
+        sectionStyle = StripeThemeDefaults.sectionStyle,
+        textFieldInsets = StripeThemeDefaults.textFieldInsets,
     ) {
         content()
     }

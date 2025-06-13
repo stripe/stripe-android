@@ -12,7 +12,6 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +40,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.autofill
@@ -141,7 +141,7 @@ fun PhoneNumberElementUI(
     }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-        TextField(
+        CompatTextField(
             value = value,
             onValueChange = controller::onValueChange,
             modifier = modifier
@@ -196,7 +196,8 @@ fun PhoneNumberElementUI(
                 }
             ),
             singleLine = true,
-            colors = colors
+            colors = colors,
+            errorMessage = null,
         )
     }
 
