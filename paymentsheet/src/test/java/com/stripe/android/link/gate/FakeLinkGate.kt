@@ -33,7 +33,6 @@ internal class FakeLinkGate : LinkGate {
         _suppress2faModal = value
     }
 
-
     fun setUseInlineOtpInWalletButtons(value: Boolean) {
         _useInlineOtpInWalletButtons = value
     }

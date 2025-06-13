@@ -268,17 +268,13 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            val shouldPresentLinkInsteadOfPaymentOptions =
-                // The current payment selection is Link
-                paymentSelection?.isLink == true &&
-                    // The current user has a Link account (not necessarily logged in)
-                    linkAccountInfo.account != null &&
-                    // Link is enabled and available
-                    linkConfiguration != null &&
-                    // feature flag and other conditions are met
-                    linkGateFactory.create(linkConfiguration).showRuxInFlowController
+            val shouldPresentLink = linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
+                paymentSelection = paymentSelection,
+                linkAccountInfo = linkAccountInfo,
+                linkConfiguration = linkConfiguration
+            )
 
-            if (shouldPresentLinkInsteadOfPaymentOptions) {
+            if (shouldPresentLink) {
                 flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
@@ -291,6 +287,21 @@ internal class DefaultFlowController @Inject internal constructor(
                 showPaymentOptionList(state, paymentSelection)
             }
         }
+    }
+
+    private fun shouldPresentLinkInsteadOfPaymentOptions(
+        paymentSelection: PaymentSelection?,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        linkConfiguration: LinkConfiguration
+    ): Boolean {
+        // If the user has declined to use Link in the past, do not show it again.
+        return viewModel.state?.declinedLink2FA != true &&
+            // The current payment selection is Link
+            paymentSelection?.isLink == true &&
+            // The current user has a Link account (not necessarily logged in)
+            linkAccountInfo.account != null &&
+            // feature flag and other conditions are met
+            linkGateFactory.create(linkConfiguration).showRuxInFlowController
     }
 
     private fun showPaymentOptionList(
