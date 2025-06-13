@@ -1,13 +1,11 @@
 package com.stripe.android.model.parsers
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.FinancialConnectionsSession
 import org.json.JSONObject
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FinancialConnectionsSessionJsonParser :
+internal class FinancialConnectionsSessionJsonParser :
     ModelJsonParser<FinancialConnectionsSession> {
     override fun parse(json: JSONObject): FinancialConnectionsSession {
         return FinancialConnectionsSession(
