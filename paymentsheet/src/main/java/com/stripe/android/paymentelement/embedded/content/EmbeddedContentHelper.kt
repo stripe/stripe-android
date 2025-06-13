@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -73,6 +75,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedLinkHelper: EmbeddedLinkHelper,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
+    private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -107,6 +110,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         ),
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         rowStyle = state.rowStyle,
+                        isImmediateAction = internalRowSelectionCallback.get() != null
                     )
                 }
             }
