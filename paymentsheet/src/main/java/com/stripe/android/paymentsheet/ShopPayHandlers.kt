@@ -18,8 +18,8 @@ data class ShopPayHandlers(
  */
 @Parcelize
 data class ShippingRateUpdate(
-    val lineItems: List<LineItem>?,
-    val shippingRates: List<ShippingRate>?,
+    val lineItems: List<LineItem>,
+    val shippingRates: List<ShippingRate>,
 ) : Parcelable
 
 /**
