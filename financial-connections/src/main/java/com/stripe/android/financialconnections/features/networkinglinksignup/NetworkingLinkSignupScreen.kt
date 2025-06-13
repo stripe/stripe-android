@@ -268,7 +268,7 @@ private fun PhoneNumberSection(
                         enabled = true,
                         showChevron = false,
                         modifier = Modifier
-                            .padding(horizontal = 6.dp)
+                            .padding(start = 2.dp, end = 6.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(colors.backgroundSecondary)
                             .padding(vertical = 12.dp, horizontal = 8.dp)

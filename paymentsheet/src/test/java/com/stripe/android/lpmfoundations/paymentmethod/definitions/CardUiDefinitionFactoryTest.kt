@@ -35,6 +35,11 @@ class CardUiDefinitionFactoryTest {
         listOf(CustomSpacingAppearance)
     )
 
+    @get:Rule
+    val customTextFieldsPaparazziRule = PaparazziRule(
+        listOf(CustomTextInsetsAppearance)
+    )
+
     private val metadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card"),
@@ -201,6 +206,23 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCardWithCustomTextFieldInsets() {
+        customTextFieldsPaparazziRule.snapshot {
+            val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "link"),
+            )
+
+            CardDefinition.CreateFormUi(
+                metadata = metadata.copy(
+                    stripeIntent = setupIntent,
+                    paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
+                    customerMetadata = getDefaultCustomerMetadata(),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun testCardRightToLeft() {
         rightToLeftPaparazziRule.snapshot {
             CardDefinition.CreateFormUi(
@@ -246,6 +268,28 @@ class CardUiDefinitionFactoryTest {
     private data object CustomSpacingAppearance : PaparazziConfigOption {
         private val appearance = PaymentSheet.Appearance.Builder()
             .sectionSpacing(PaymentSheet.Spacing(spacingDp = 50f))
+            .build()
+
+        override fun initialize() {
+            appearance.parseAppearance()
+        }
+
+        override fun reset() {
+            DefaultAppearance.appearance.parseAppearance()
+        }
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    private data object CustomTextInsetsAppearance : PaparazziConfigOption {
+        private val appearance = PaymentSheet.Appearance.Builder()
+            .textFieldInsets(
+                PaymentSheet.Insets(
+                    startDp = 24f,
+                    endDp = 20f,
+                    topDp = 28f,
+                    bottomDp = 20f,
+                )
+            )
             .build()
 
         override fun initialize() {

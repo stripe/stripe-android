@@ -32,6 +32,10 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -59,6 +63,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.takeOrElse
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
@@ -69,6 +74,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.lerp
+import androidx.compose.ui.unit.coerceAtLeast
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.R as ComposeUiR
 
 /**
@@ -181,8 +188,7 @@ fun CompatTextField(
         maxLines = maxLines,
         minLines = minLines,
         decorationBox = @Composable { innerTextField ->
-            // places leading icon, text field with label and placeholder, trailing icon
-            CommonDecorationBox(
+            InsetDecorationBox(
                 value = value,
                 visualTransformation = visualTransformation,
                 innerTextField = innerTextField,
@@ -312,8 +318,7 @@ fun CompatTextField(
         maxLines = maxLines,
         minLines = minLines,
         decorationBox = @Composable { innerTextField ->
-            // places leading icon, text field with label and placeholder, trailing icon
-            CommonDecorationBox(
+            InsetDecorationBox(
                 value = value.text,
                 visualTransformation = visualTransformation,
                 innerTextField = innerTextField,
@@ -331,6 +336,76 @@ fun CompatTextField(
             )
         }
     )
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun InsetDecorationBox(
+    value: String,
+    innerTextField: @Composable () -> Unit,
+    enabled: Boolean = true,
+    label: @Composable (() -> Unit)? = null,
+    placeholder: @Composable (() -> Unit)? = null,
+    leadingIcon: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    isError: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    singleLine: Boolean = false,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
+    shape: Shape = TextFieldDefaults.TextFieldShape,
+    colors: TextFieldColors = TextFieldDefaults.textFieldColors(),
+    contentPadding: PaddingValues = if (label != null) {
+        TextFieldDefaults.textFieldWithLabelPadding()
+    } else {
+        TextFieldDefaults.textFieldWithoutLabelPadding()
+    },
+) {
+    val layoutDirection = LocalLayoutDirection.current
+
+    val startPadding = contentPadding.calculateStartPadding(layoutDirection)
+    val endPadding = contentPadding.calculateEndPadding(layoutDirection)
+
+    Box(
+        modifier = Modifier.padding(
+            start = leadingIcon?.let {
+                (startPadding - HorizontalIconPadding).coerceAtLeast(0.dp)
+            } ?: 0.dp,
+            end = trailingIcon?.let {
+                (endPadding - HorizontalIconPadding).coerceAtLeast(0.dp)
+            } ?: 0.dp,
+        )
+    ) {
+        // places leading icon, text field with label and placeholder, trailing icon
+        CommonDecorationBox(
+            value = value,
+            visualTransformation = visualTransformation,
+            innerTextField = {
+                Box(Modifier.fillMaxWidth(), propagateMinConstraints = true) {
+                    innerTextField()
+                }
+            },
+            placeholder = placeholder,
+            label = label,
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
+            singleLine = singleLine,
+            enabled = enabled,
+            isError = isError,
+            interactionSource = interactionSource,
+            colors = colors,
+            shape = shape,
+            contentPadding = PaddingValues(
+                top = contentPadding.calculateTopPadding(),
+                bottom = contentPadding.calculateBottomPadding(),
+                start = leadingIcon?.let {
+                    TextFieldPadding
+                } ?: startPadding,
+                end = trailingIcon?.let {
+                    TextFieldPadding
+                } ?: endPadding,
+            ),
+        )
+    }
 }
 
 /**
