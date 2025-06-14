@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -1027,6 +1028,22 @@ class DefaultEventReporterTest {
             analyticEventCallbackRule.assertMatchesExpectedEvent(
                 AnalyticEvent.RemovedSavedPaymentMethod("card")
             )
+        }
+
+    @Test
+    fun `Sends general analytics event on call`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+            }
+
+            completeEventReporter.onAnalyticsEvent(PaymentAnalyticsEvent.FileCreate)
+
+            val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+            verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+            val event = argumentCaptor.firstValue.params["event"]
+            assertThat(event).isEqualTo(PaymentAnalyticsEvent.FileCreate.eventName)
         }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)

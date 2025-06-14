@@ -36,6 +36,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.networking.PaymentAnalyticsEvent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
@@ -375,6 +376,17 @@ class CustomerSheetEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "cs_disallowed_card_brand" &&
                     req.params["brand"] == "amex"
+            }
+        )
+    }
+
+    @Test
+    fun `onAnalyticsEvent() should fire analytics request with expected event value`() {
+        eventReporter.onAnalyticsEvent(PaymentAnalyticsEvent.FileCreate)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == PaymentAnalyticsEvent.FileCreate.eventName
             }
         )
     }
