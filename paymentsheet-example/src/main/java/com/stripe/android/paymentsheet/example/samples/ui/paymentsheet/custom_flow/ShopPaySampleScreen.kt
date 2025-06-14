@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.Deliver
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
-import com.stripe.android.paymentsheet.SelectedPartialAddress
+import com.stripe.android.paymentsheet.SelectedAddress
 import com.stripe.android.paymentsheet.SelectedShippingRate
 import com.stripe.android.paymentsheet.ShippingContactUpdate
 import com.stripe.android.paymentsheet.ShippingRateUpdate
@@ -148,7 +148,7 @@ private fun onShippingMethodUpdate(
 }
 
 private fun onShippingContactUpdate(
-    address: SelectedPartialAddress,
+    address: SelectedAddress,
     updateCallback: (ShippingContactUpdate?) -> Unit
 ) {
     val canShipToLocation = isValidShippingLocation(address)
@@ -172,12 +172,12 @@ private fun onShippingContactUpdate(
     }
 }
 
-private fun isValidShippingLocation(address: SelectedPartialAddress): Boolean {
+private fun isValidShippingLocation(address: SelectedAddress): Boolean {
     return address.country == "US"
 }
 
 private fun getShippingRatesForLocation(
-    address: SelectedPartialAddress
+    address: SelectedAddress
 ): List<ShippingRate> {
     // Return different rates based on the address.
     return if (address.state == "CA") {

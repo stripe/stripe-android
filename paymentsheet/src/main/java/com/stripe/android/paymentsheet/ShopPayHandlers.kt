@@ -3,30 +3,33 @@ package com.stripe.android.paymentsheet
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Handler blocks for Shop Pay.
  */
-data class ShopPayHandlers(
+class ShopPayHandlers(
     val shippingMethodUpdateHandler: ShippingMethodHandler,
     val shippingContactHandler: ShippingContactHandler
 )
 
 /**
- * Type used to describe convey changes in the Shop Pay wallet UI when a shipping rate update occurs.
+ * Describes shipping rate updates Shop Pay should within its UI
  */
+@Poko
 @Parcelize
-data class ShippingRateUpdate(
+class ShippingRateUpdate(
     val lineItems: List<LineItem>,
     val shippingRates: List<ShippingRate>,
 ) : Parcelable
 
 /**
- * Type used to describe convey changes in the Shop Pay wallet UI when a shipping contact update occurs.
+ * Describes shipping contact updates Shop Pay should make within its UI
  */
+@Poko
 @Parcelize
-data class ShippingContactUpdate(
+class ShippingContactUpdate(
     val lineItems: List<LineItem>,
     val shippingRates: List<ShippingRate>
 ) : Parcelable
@@ -34,8 +37,9 @@ data class ShippingContactUpdate(
 /**
  * Describes the address selected by the customer.
  */
+@Poko
 @Parcelize
-data class SelectedPartialAddress(
+class SelectedAddress(
     val city: String,
     val state: String,
     val postalCode: String,
@@ -45,8 +49,9 @@ data class SelectedPartialAddress(
 /**
  * The shipping rate selected by the customer.
  */
+@Poko
 @Parcelize
-data class SelectedShippingRate(
+class SelectedShippingRate(
     val shippingRate: ShippingRate
 ) : Parcelable
 
@@ -81,7 +86,7 @@ fun interface ShippingMethodHandler {
  */
 fun interface ShippingContactHandler {
     /**
-     * @param address The [SelectedPartialAddress] that was selected by the user.
+     * @param address The [SelectedAddress] that was selected by the user.
      * @param updateCallback A completion handler. You must call this handler with a
      * [ShippingContactUpdate] with your updates. To reject this selection,
      * pass `null` into this handler.
@@ -89,7 +94,7 @@ fun interface ShippingContactHandler {
      * **Note**: If you do not call the completion handler, the app will hang.
      */
     fun onAddressSelected(
-        address: SelectedPartialAddress,
+        address: SelectedAddress,
         updateCallback: (ShippingContactUpdate?) -> Unit
     )
 }

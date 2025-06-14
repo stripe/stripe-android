@@ -2617,8 +2617,9 @@ class PaymentSheet internal constructor(
      * @param shippingRates A list of [ShippingRate] objects. The first shipping rate listed
      * appears in the payment interface as the default option.
      */
+    @Poko
     @Parcelize
-    data class ShopPayConfiguration(
+    class ShopPayConfiguration(
         val shopId: String,
         val billingAddressRequired: Boolean = true,
         val emailRequired: Boolean = true,
@@ -2629,8 +2630,9 @@ class PaymentSheet internal constructor(
         /**
          * A type used to describe a single item for in the Shop Pay wallet UI.
          */
+        @Poko
         @Parcelize
-        data class LineItem(
+        class LineItem(
             val name: String,
             val amount: Int
         ) : Parcelable
@@ -2638,8 +2640,9 @@ class PaymentSheet internal constructor(
         /**
          * A shipping rate option.
          */
+        @Poko
         @Parcelize
-        data class ShippingRate(
+        class ShippingRate(
             val id: String,
             val amount: Int,
             val displayName: String,
@@ -2651,19 +2654,22 @@ class PaymentSheet internal constructor(
          * See https://docs.stripe.com/js/elements_object/create_express_checkout_element#express_checkout_element_create-options-shippingRates-deliveryEstimate
          */
         sealed interface DeliveryEstimate : Parcelable {
+            @Poko
             @Parcelize
-            data class Range(
+            class Range(
                 val maximum: DeliveryEstimateUnit,
                 val minimum: DeliveryEstimateUnit
             ) : DeliveryEstimate
 
+            @Poko
             @Parcelize
-            data class Text(
+            class Text(
                 val value: String
             ) : DeliveryEstimate
 
+            @Poko
             @Parcelize
-            data class DeliveryEstimateUnit(
+            class DeliveryEstimateUnit(
                 val unit: TimeUnit,
                 val value: Int
             ) : Parcelable {
