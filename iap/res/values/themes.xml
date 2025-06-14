@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
+    <style name="StripeIapTransparentTheme" parent="@style/Theme.AppCompat.NoActionBar">
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+</resources>
