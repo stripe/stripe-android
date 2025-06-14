@@ -14,6 +14,7 @@ internal class PaymentOptionFactory @Inject constructor(
             drawableResourceId = selection.drawableResourceId,
             label = selection.label.resolve(context),
             paymentMethodType = selection.paymentMethodType,
+            _labels = PaymentOptionLabelsFactory.create(context, selection),
             _shippingDetails = selection.shippingDetails,
             imageLoader = {
                 iconLoader.load(
