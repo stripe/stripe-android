@@ -28,6 +28,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -138,6 +139,7 @@ class LinkFormElementTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             cardBrandFilter = DefaultCardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

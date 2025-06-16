@@ -1936,6 +1936,7 @@ internal class PaymentMethodMetadataTest {
                 preferredNetworks = listOf("cartes_bancaires")
             ),
             cardBrandFilter = DefaultCardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             passthroughModeEnabled = false,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

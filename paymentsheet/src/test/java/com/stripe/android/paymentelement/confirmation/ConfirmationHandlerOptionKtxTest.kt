@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -600,6 +601,7 @@ class ConfirmationHandlerOptionKtxTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             cardBrandFilter = DefaultCardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
