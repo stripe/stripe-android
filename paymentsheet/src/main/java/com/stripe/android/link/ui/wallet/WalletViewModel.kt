@@ -145,7 +145,10 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadPaymentDetails(selectedItemId: String?, collapseOnSuccess: Boolean = false) {
+    private suspend fun loadPaymentDetails(
+        selectedItemId: String?,
+        isAfterAdding: Boolean = false
+    ) {
         linkAccountManager.listPaymentDetails(
             paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
         ).fold(
@@ -153,7 +156,8 @@ internal class WalletViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         selectedItemId = selectedItemId,
-                        userSetIsExpanded = if (collapseOnSuccess) false else it.userSetIsExpanded,
+                        userSetIsExpanded = if (isAfterAdding) false else it.userSetIsExpanded,
+                        errorMessage = if (isAfterAdding) null else it.errorMessage,
                     )
                 }
 
@@ -457,7 +461,7 @@ internal class WalletViewModel @Inject constructor(
                             .mapCatching { paymentDetails ->
                                 loadPaymentDetails(
                                     selectedItemId = paymentDetails.id,
-                                    collapseOnSuccess = true
+                                    isAfterAdding = true
                                 )
                             }
                             .onFailure {
