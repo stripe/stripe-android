@@ -8,6 +8,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class FinancialConnectionsSheetNativeActivityArgs(
+    val flowType: FinancialConnectionsSheetFlowType,
     val configuration: FinancialConnectionsSheetConfiguration,
     val initialSyncResponse: SynchronizeSessionResponse,
     val elementsSessionContext: ElementsSessionContext? = null,

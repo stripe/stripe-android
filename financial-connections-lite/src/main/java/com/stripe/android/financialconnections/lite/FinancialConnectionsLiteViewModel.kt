@@ -11,13 +11,12 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
+import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
@@ -76,17 +75,17 @@ internal class FinancialConnectionsLiteViewModel(
     fun handleUrl(uri: String) = withState { state ->
         when {
             uri.contains(state.successUrl) -> {
-                when (args) {
-                    is ForData -> onSuccessFromDataFlow(userCancelled = false)
-                    is ForToken -> onSuccessFromTokenFlow(userCancelled = false)
-                    is ForInstantDebits -> onSuccessFromInstantDebits(uri)
+                when (args.flowType) {
+                    FinancialConnectionsSheetFlowType.ForData -> onSuccessFromDataFlow(userCancelled = false)
+                    FinancialConnectionsSheetFlowType.ForToken -> onSuccessFromTokenFlow(userCancelled = false)
+                    FinancialConnectionsSheetFlowType.ForInstantDebits -> onSuccessFromInstantDebits(uri)
                 }
             }
             uri.contains(state.cancelUrl) -> {
-                when (args) {
-                    is ForData -> onSuccessFromDataFlow(userCancelled = true)
-                    is ForToken -> onSuccessFromTokenFlow(userCancelled = true)
-                    is ForInstantDebits -> onAuthFlowCanceled()
+                when (args.flowType) {
+                    FinancialConnectionsSheetFlowType.ForData -> onSuccessFromDataFlow(userCancelled = true)
+                    FinancialConnectionsSheetFlowType.ForToken -> onSuccessFromTokenFlow(userCancelled = true)
+                    FinancialConnectionsSheetFlowType.ForInstantDebits -> onAuthFlowCanceled()
                 }
             }
             else -> {

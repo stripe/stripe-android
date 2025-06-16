@@ -61,3 +61,14 @@ sealed class FinancialConnectionsSheetActivityArgs(
         const val EXTRA_ARGS = "FinancialConnectionsSheetActivityArgs"
     }
 }
+
+@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val FinancialConnectionsSheetActivityArgs.flowType: FinancialConnectionsSheetFlowType
+    get() = when (this) {
+        is FinancialConnectionsSheetActivityArgs.ForData ->
+            FinancialConnectionsSheetFlowType.ForData
+        is FinancialConnectionsSheetActivityArgs.ForInstantDebits ->
+            FinancialConnectionsSheetFlowType.ForInstantDebits
+        is FinancialConnectionsSheetActivityArgs.ForToken ->
+            FinancialConnectionsSheetFlowType.ForToken
+    }

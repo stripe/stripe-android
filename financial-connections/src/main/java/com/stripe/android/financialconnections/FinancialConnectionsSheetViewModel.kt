@@ -44,13 +44,12 @@ import com.stripe.android.financialconnections.exception.CustomManualEntryRequir
 import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
+import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -193,6 +192,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                         manifest = manifest,
                         webAuthFlowStatus = AuthFlowStatus.NONE,
                         viewEffect = OpenNativeAuthFlow(
+                            flowType = initialArgs.flowType,
                             configuration = initialArgs.configuration,
                             initialSyncResponse = sync,
                             elementsSessionContext = initialArgs.elementsSessionContext,
@@ -466,10 +466,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             )
         } else {
             setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
-            when (state.initialArgs) {
-                is ForData -> fetchFinancialConnectionsSession(state)
-                is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                is ForInstantDebits -> onSuccessFromInstantDebits(receivedUrl)
+            when (state.initialArgs.flowType) {
+                FinancialConnectionsSheetFlowType.ForData -> fetchFinancialConnectionsSession(state)
+                FinancialConnectionsSheetFlowType.ForToken -> fetchFinancialConnectionsSessionForToken(state)
+                FinancialConnectionsSheetFlowType.ForInstantDebits -> onSuccessFromInstantDebits(receivedUrl)
             }
         }
     }
