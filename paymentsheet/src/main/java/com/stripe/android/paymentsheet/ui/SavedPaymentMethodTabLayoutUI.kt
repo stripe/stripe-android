@@ -58,7 +58,6 @@ import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.DefaultStripeTheme
-import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
@@ -406,7 +405,7 @@ private fun SavedPaymentMethodTab(
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val labelIcon = paymentMethod.paymentMethod.getLabelIcon(LocalIconStyle.current)
+    val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel(canShowSublabel = false)?.resolve() ?: return
 
     Box(
