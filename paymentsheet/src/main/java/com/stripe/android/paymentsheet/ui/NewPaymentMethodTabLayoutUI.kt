@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -83,7 +85,11 @@ internal fun NewPaymentMethodTabLayoutUI(
                         TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
-                    iconRes = item.iconResource,
+                    iconRes = if (LocalIconStyle.current == IconStyle.Filled) {
+                        item.iconResource
+                    } else {
+                        item.outlinedIconResource ?: item.iconResource
+                    },
                     iconUrl = iconUrl,
                     imageLoader = imageLoader,
                     title = item.displayName.resolve(),
