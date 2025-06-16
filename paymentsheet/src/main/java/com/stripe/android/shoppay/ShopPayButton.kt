@@ -2,6 +2,7 @@ package com.stripe.android.shoppay
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,9 +17,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
 
-private val ShopPayButtonHeight = 48.dp
 private val ShopPayBackgroundColor = Color(0xFF5433EB)
 private val ShopPayButtonVerticalPadding = 10.dp
 private val ShopPayButtonHorizontalPadding = 25.dp
@@ -33,7 +34,7 @@ internal fun ShopPayButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(ShopPayButtonHeight)
+            .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
             .semantics {
                 contentDescription = buttonDescription
             },
@@ -51,6 +52,8 @@ internal fun ShopPayButton(
         )
     ) {
         Image(
+            modifier = Modifier
+                .height(PrimaryButtonTheme.shape.height - ShopPayButtonVerticalPadding * 2),
             painter = painterResource(R.drawable.stripe_shop_pay_logo_white),
             contentDescription = null
         )
