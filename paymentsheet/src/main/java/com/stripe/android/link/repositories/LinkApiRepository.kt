@@ -315,8 +315,8 @@ internal class LinkApiRepository @Inject constructor(
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
+                        apiKey = publishableKeyProvider(),
+                        stripeAccount = stripeAccountIdProvider()
                     )
                 )
             )
@@ -338,8 +338,8 @@ internal class LinkApiRepository @Inject constructor(
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
+                        apiKey = publishableKeyProvider(),
+                        stripeAccount = stripeAccountIdProvider()
                     )
                 )
             )
@@ -357,8 +357,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -372,8 +372,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -389,8 +389,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -406,8 +406,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -426,8 +426,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
