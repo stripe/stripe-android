@@ -15,7 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 
-private val backgroundColor = Color(0xFF5433EB)
+private val ShopPayButtonHeight = 48.dp
+private val ShopPayBackgroundColor = Color(0xFF5433EB)
+private val ShopPayButtonVerticalPadding = 10.dp
+private val ShopPayButtonHorizontalPadding = 25.dp
 
 @Composable
 internal fun ShopPayButton(
@@ -26,20 +29,18 @@ internal fun ShopPayButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp),
+            .height(ShopPayButtonHeight),
         enabled = true,
         shape = RoundedCornerShape(
             StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
         ),
         elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = backgroundColor,
+            backgroundColor = ShopPayBackgroundColor,
         ),
         contentPadding = PaddingValues(
-            start = 25.dp,
-            top = 10.dp,
-            end = 25.dp,
-            bottom = 10.dp
+            horizontal = ShopPayButtonHorizontalPadding,
+            vertical = ShopPayButtonVerticalPadding
         )
     ) {
         Image(
