@@ -109,7 +109,6 @@ internal fun VerificationBody(
                 // The OTP element uses sections internally to style the OTP boxes.
                 LocalSectionStyle provides SectionStyle.Bordered,
             ) {
-
                 OTPElementUI(
                     enabled = !state.isProcessing,
                     element = otpElement,
