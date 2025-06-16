@@ -290,7 +290,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerPublishableKey = linkAccount.consumerPublishableKey.takeIf { config.passthroughModeEnabled },
             )
         } else {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
