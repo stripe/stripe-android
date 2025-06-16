@@ -459,7 +459,6 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
             WalletButtonsSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.linkProminenceInFlowController),
             FeatureFlagSettingsDefinition(FeatureFlags.showInlineOtpInWalletButtons),
         )
 

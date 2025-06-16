@@ -26,7 +26,7 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
-import com.stripe.android.link.domain.LinkProminenceFeatureProvider
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -91,7 +91,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
-    private val linkProminenceFeatureProvider: LinkProminenceFeatureProvider,
+    private val linkGateFactory: LinkGate.Factory,
     private val linkHandler: LinkHandler,
     private val linkAccountHolder: LinkAccountHolder,
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
@@ -268,12 +268,13 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentSelection = viewModel.paymentSelection
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
 
-            if (linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
-                    paymentSelection = paymentSelection,
-                    linkAccountInfo = linkAccountInfo,
-                    linkConfiguration = linkConfiguration
-                )
-            ) {
+            val shouldPresentLink = linkConfiguration != null && shouldPresentLinkInsteadOfPaymentOptions(
+                paymentSelection = paymentSelection,
+                linkAccountInfo = linkAccountInfo,
+                linkConfiguration = linkConfiguration
+            )
+
+            if (shouldPresentLink) {
                 flowControllerLinkLauncher.present(
                     configuration = linkConfiguration,
                     linkAccountInfo = linkAccountInfo,
@@ -300,7 +301,7 @@ internal class DefaultFlowController @Inject internal constructor(
             // The current user has a Link account (not necessarily logged in)
             linkAccountInfo.account != null &&
             // feature flag and other conditions are met
-            linkProminenceFeatureProvider.shouldShowEarlyVerificationInFlowController(linkConfiguration)
+            linkGateFactory.create(linkConfiguration).showRuxInFlowController
     }
 
     private fun showPaymentOptionList(
