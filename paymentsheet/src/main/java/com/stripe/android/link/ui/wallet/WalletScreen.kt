@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
@@ -503,6 +504,7 @@ private fun EmailDetails(
             contentDescription = stringResource(R.string.stripe_show_menu),
             tint = LinkTheme.colors.iconSecondary,
             modifier = Modifier
+                .clip(CircleShape)
                 .clickable(onClick = onMenuClicked)
                 .padding(4.dp),
         )
