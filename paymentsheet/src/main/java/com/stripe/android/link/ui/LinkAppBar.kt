@@ -2,20 +2,22 @@ package com.stripe.android.link.ui
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Surface
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,54 +32,67 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal fun LinkAppBar(
     state: LinkAppBarState,
     onBackPressed: () -> Unit,
-    showBottomSheetContent: (BottomSheetContent) -> Unit,
-    onLogoutClicked: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = AppBarHeight),
+            .defaultMinSize(minHeight = AppBarHeight)
+            .padding(horizontal = 20.dp),
     ) {
-        BackIcon(
-            icon = state.navigationIcon,
-            onBackPressed = onBackPressed,
-            modifier = Modifier.align(Alignment.CenterStart),
-        )
+        if (state.canNavigateBack) {
+            AppBarIcon(
+                icon = R.drawable.stripe_link_back,
+                contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
+                onPressed = onBackPressed,
+                modifier = Modifier.align(Alignment.CenterStart),
+            )
+        } else {
+            LinkAppBarLogo(
+                showHeader = state.showHeader,
+                modifier = Modifier.align(Alignment.CenterStart),
+            )
+        }
 
-        LinkAppBarTitle(
-            showHeader = state.showHeader,
-            modifier = Modifier.align(Alignment.Center),
-        )
-
-        LinkAppBarAction(
-            showOverflowMenu = state.showOverflowMenu,
-            showBottomSheetContent = showBottomSheetContent,
-            onLogoutClicked = onLogoutClicked,
-            modifier = Modifier.align(Alignment.CenterEnd),
-        )
+        if (state.canShowCloseIcon) {
+            AppBarIcon(
+                icon = R.drawable.stripe_link_close,
+                contentDescription = stringResource(id = com.stripe.android.R.string.stripe_close),
+                onPressed = onBackPressed,
+                modifier = Modifier.align(Alignment.CenterEnd),
+            )
+        }
     }
 }
 
 @Composable
-private fun BackIcon(
+internal fun AppBarIcon(
     icon: Int,
+    contentDescription: String,
     modifier: Modifier = Modifier,
-    onBackPressed: () -> Unit,
+    onPressed: () -> Unit,
 ) {
-    IconButton(
-        onClick = onBackPressed,
-        modifier = modifier.padding(4.dp),
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(30.dp)
+            .background(
+                color = LinkTheme.colors.surfaceSecondary,
+                shape = CircleShape,
+            )
+            .clip(CircleShape)
+            .clickable(onClick = onPressed),
     ) {
         Icon(
             painter = painterResource(icon),
-            contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
-            tint = LinkTheme.colors.iconSecondary
+            contentDescription = contentDescription,
+            tint = LinkTheme.colors.iconSecondary,
+            modifier = Modifier.size(12.dp),
         )
     }
 }
 
 @Composable
-private fun LinkAppBarTitle(
+private fun LinkAppBarLogo(
     showHeader: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -96,37 +111,6 @@ private fun LinkAppBarTitle(
     }
 }
 
-@Composable
-private fun LinkAppBarAction(
-    showOverflowMenu: Boolean,
-    modifier: Modifier = Modifier,
-    showBottomSheetContent: (BottomSheetContent) -> Unit,
-    onLogoutClicked: () -> Unit,
-) {
-    val overflowIconAlpha by animateFloatAsState(
-        targetValue = if (showOverflowMenu) 1f else 0f,
-        label = "overflowAlpha"
-    )
-
-    IconButton(
-        onClick = {
-            showBottomSheetContent {
-                LinkAppBarMenu(onLogoutClicked)
-            }
-        },
-        enabled = showOverflowMenu,
-        modifier = modifier
-            .alpha(overflowIconAlpha)
-            .padding(4.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.MoreVert,
-            contentDescription = stringResource(R.string.stripe_show_menu),
-            tint = LinkTheme.colors.iconSecondary
-        )
-    }
-}
-
 @Preview
 @Composable
 private fun LinkAppBarPreview() {
@@ -134,13 +118,10 @@ private fun LinkAppBarPreview() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.stripe_link_close,
                     showHeader = true,
-                    showOverflowMenu = true,
+                    canNavigateBack = false,
                 ),
                 onBackPressed = {},
-                showBottomSheetContent = {},
-                onLogoutClicked = {}
             )
         }
     }
@@ -153,13 +134,10 @@ private fun LinkAppBarChildScreen() {
         Surface {
             LinkAppBar(
                 state = LinkAppBarState(
-                    navigationIcon = R.drawable.stripe_link_back,
                     showHeader = false,
-                    showOverflowMenu = false,
+                    canNavigateBack = true,
                 ),
                 onBackPressed = {},
-                showBottomSheetContent = {},
-                onLogoutClicked = {}
             )
         }
     }

@@ -3,28 +3,34 @@ package com.stripe.android.common.ui
 import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetLayoutInfo
+import com.stripe.android.uicore.stripeShapes
 
 @Composable
 internal fun ElementsBottomSheetLayout(
     state: StripeBottomSheetState,
     modifier: Modifier = Modifier,
+    cornerRadius: Dp = MaterialTheme.stripeShapes.bottomSheetCornerRadius.dp,
     onDismissed: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     @Suppress("DEPRECATION")
     val systemUiController = rememberSystemUiController()
     val layoutInfo = rememberStripeBottomSheetLayoutInfo(
+        cornerRadius = cornerRadius,
         scrimColor = Color.Black.copy(alpha = 0.32f),
     )
 

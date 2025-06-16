@@ -84,7 +84,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -117,7 +118,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -158,7 +160,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -205,7 +208,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -236,7 +240,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -260,7 +265,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -287,7 +293,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -312,7 +319,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -344,7 +352,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -391,7 +400,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -429,7 +439,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -469,7 +480,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -502,7 +514,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -533,7 +546,8 @@ internal class WalletScreenTest {
                         },
                         hideBottomSheetContent = {
                             sheetContent = null
-                        }
+                        },
+                        onLogoutClicked = {},
                     )
 
                     sheetContent?.let {
@@ -578,7 +592,8 @@ internal class WalletScreenTest {
                 WalletScreen(
                     viewModel = viewModel,
                     showBottomSheetContent = {},
-                    hideBottomSheetContent = {}
+                    hideBottomSheetContent = {},
+                    onLogoutClicked = {},
                 )
             }
         }
@@ -712,6 +727,7 @@ internal class WalletScreenTest {
             onAddNewPaymentMethodClicked = {},
             onDismissAlert = {},
             onUpdateClicked = {},
+            onLogoutClicked = {},
             expiryDateController = SimpleTextFieldController(DateConfig()),
             cvcController = CvcController(cardBrandFlow = stateFlowOf(CardBrand.Visa))
         )

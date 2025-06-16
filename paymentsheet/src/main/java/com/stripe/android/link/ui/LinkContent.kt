@@ -65,10 +65,6 @@ internal fun LinkContent(
                 LinkAppBar(
                     state = appBarState,
                     onBackPressed = onBackPressed,
-                    showBottomSheetContent = onUpdateSheetContent,
-                    onLogoutClicked = {
-                        handleViewAction(LinkAction.LogoutClicked)
-                    }
                 )
 
                 Screens(
@@ -85,7 +81,10 @@ internal fun LinkContent(
                     changeEmail = changeEmail,
                     hideBottomSheetContent = {
                         onUpdateSheetContent(null)
-                    }
+                    },
+                    onLogoutClicked = {
+                        handleViewAction(LinkAction.LogoutClicked)
+                    },
                 )
             }
         }
@@ -104,6 +103,7 @@ private fun Screens(
     moveToWeb: () -> Unit,
     changeEmail: () -> Unit,
     initialDestination: LinkScreen,
+    onLogoutClicked: () -> Unit,
 ) {
     LinkNavHost(
         navController = navController,
@@ -157,7 +157,8 @@ private fun Screens(
                 navigateAndClearStack = navigateAndClearStack,
                 showBottomSheetContent = showBottomSheetContent,
                 hideBottomSheetContent = hideBottomSheetContent,
-                dismissWithResult = dismissWithResult
+                dismissWithResult = dismissWithResult,
+                onLogoutClicked = onLogoutClicked,
             )
         }
 
@@ -251,6 +252,7 @@ private fun WalletRoute(
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
     hideBottomSheetContent: () -> Unit,
+    onLogoutClicked: () -> Unit,
 ) {
     val viewModel: WalletViewModel = linkViewModel { parentComponent ->
         WalletViewModel.factory(
@@ -263,7 +265,8 @@ private fun WalletRoute(
     WalletScreen(
         viewModel = viewModel,
         showBottomSheetContent = showBottomSheetContent,
-        hideBottomSheetContent = hideBottomSheetContent
+        hideBottomSheetContent = hideBottomSheetContent,
+        onLogoutClicked = onLogoutClicked,
     )
 }
 

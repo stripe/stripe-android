@@ -9,6 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAction
@@ -73,6 +74,7 @@ internal fun FullScreenContent(
     EventReporterProvider(eventReporter) {
         ElementsBottomSheetLayout(
             state = bottomSheetState,
+            cornerRadius = 24.dp,
             onDismissed = dismiss,
         ) {
             LinkContent(
@@ -104,6 +106,7 @@ internal fun FullScreenContent(
         linkContentBottomSheetContent?.let { content ->
             ElementsBottomSheetLayout(
                 state = linkContentBottomSheetState,
+                cornerRadius = 24.dp,
                 onDismissed = { linkContentBottomSheetContent = null },
                 content = {
                     DefaultLinkTheme {

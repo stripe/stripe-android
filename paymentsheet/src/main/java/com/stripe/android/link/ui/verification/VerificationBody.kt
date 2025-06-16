@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.AppBarIcon
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
@@ -204,25 +203,20 @@ private fun ContentWrapper(
 ) {
     if (isDialog) {
         Box {
-            IconButton(
+            AppBarIcon(
+                icon = R.drawable.stripe_link_close,
+                contentDescription = stringResource(id = com.stripe.android.R.string.stripe_close),
+                onPressed = onBackClicked,
                 modifier = Modifier
-                    // - IconButton ensures a 48.dp touch target for accessibility targets.
-                    // - The dialog padding is 24.dp.
-                    // - The icon is 16.dp
-                    .padding(12.dp)
                     .align(Alignment.TopEnd)
+                    .padding(top = 29.dp, end = 24.dp)
                     .testTag(VERIFICATION_HEADER_BUTTON_TAG),
-                onClick = onBackClicked
-            ) {
-                Icon(
-                    modifier = Modifier.size(16.dp),
-                    painter = painterResource(R.drawable.stripe_link_close),
-                    contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel),
-                    tint = LinkTheme.colors.iconSecondary
-                )
-            }
+            )
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier
+                    .padding(top = 32.dp)
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 24.dp),
                 horizontalAlignment = Alignment.Companion.CenterHorizontally,
                 content = content
             )
