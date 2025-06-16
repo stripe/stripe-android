@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 
 internal sealed interface AddBankAccountState {
     data object Idle : AddBankAccountState
@@ -8,7 +8,7 @@ internal sealed interface AddBankAccountState {
     data object ConfiguringFinancialConnections : AddBankAccountState
 
     data class FinancialConnectionsConfigured(
-        val config: FinancialConnectionsSheetConfiguration
+        val config: FinancialConnectionsSheet.Configuration
     ) : AddBankAccountState
 
     data object PresentingFinancialConnections : AddBankAccountState
