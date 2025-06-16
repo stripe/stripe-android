@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -76,6 +77,9 @@ internal data class WalletUiState(
                 }
             }
         }
+
+    val addBankAccountOption: AddPaymentMethodOption.Bank?
+        get() = addPaymentMethodOptions.firstNotNullOfOrNull { it as? AddPaymentMethodOption.Bank }
 
     val canAddNewPaymentMethod: Boolean
         get() = addPaymentMethodOptions.isNotEmpty()

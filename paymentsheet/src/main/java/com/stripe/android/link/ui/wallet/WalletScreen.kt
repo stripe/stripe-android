@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.link.theme.HorizontalPadding
@@ -67,6 +66,8 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.getIntentBuilder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
@@ -91,15 +92,18 @@ internal fun WalletScreen(
     hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
 ) {
-    val financialConnectionsSheetLauncher =
-        rememberFinancialConnectionsSheet(viewModel::onFinancialConnectionsResult)
-
     val state by viewModel.uiState.collectAsState()
+
+    val financialConnectionsSheetLauncher =
+        rememberFinancialConnectionsSheet(
+            state.addBankAccountOption?.financialConnectionsAvailability,
+            viewModel::onFinancialConnectionsResult
+        )
 
     val addBankAccountState = state.addBankAccountState
     LaunchedEffect(addBankAccountState) {
         if (addBankAccountState is AddBankAccountState.FinancialConnectionsConfigured) {
-            financialConnectionsSheetLauncher.present(addBankAccountState.config)
+            financialConnectionsSheetLauncher?.present(addBankAccountState.config)
             viewModel.onPresentFinancialConnections()
         }
     }
@@ -765,11 +769,16 @@ private fun AlertMessage(
 
 @Composable
 private fun rememberFinancialConnectionsSheet(
+    financialConnectionsAvailability: FinancialConnectionsAvailability?,
     callback: (FinancialConnectionsSheetResult) -> Unit
-): FinancialConnectionsSheetForDataLauncher {
+): FinancialConnectionsSheetForDataLauncher? {
+    financialConnectionsAvailability ?: return null
+
     val context = LocalContext.current
-    val contract = remember(context) {
-        FinancialConnectionsSheetForDataContract(intentBuilder(context))
+    val contract = remember(context, financialConnectionsAvailability) {
+        FinancialConnectionsSheetForDataContract(
+            intentBuilder = financialConnectionsAvailability.getIntentBuilder(context)
+        )
     }
     val activityResultLauncher = rememberLauncherForActivityResult(contract, callback)
     return remember(activityResultLauncher) {
