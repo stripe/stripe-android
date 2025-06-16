@@ -210,6 +210,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
         ),
+        LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT(
+            partialEventName = "link.create_new_bank_account.missing_link_account"
+        ),
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
         ),
