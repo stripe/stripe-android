@@ -37,6 +37,7 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -699,6 +700,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 flags = mapOf(),
                 cardBrandChoice = null,
                 cardBrandFilter = DefaultCardBrandFilter,
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(

@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -197,6 +198,7 @@ internal object TestFactory {
         flags = emptyMap(),
         cardBrandChoice = null,
         cardBrandFilter = DefaultCardBrandFilter,
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,

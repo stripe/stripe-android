@@ -22,6 +22,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var mobileLookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
+    var createLinkAccountSessionResult = Result.success(TestFactory.LINK_ACCOUNT_SESSION)
     var createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
     var createBankAccountPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
     var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
@@ -188,9 +189,7 @@ internal open class FakeLinkRepository : LinkRepository {
         stripeIntent: StripeIntent,
         linkMode: LinkMode?,
         consumerPublishableKey: String?
-    ): Result<LinkAccountSession> {
-        TODO("Not yet implemented")
-    }
+    ): Result<LinkAccountSession> = createLinkAccountSessionResult
 
     suspend fun awaitMobileLookup(): MobileLookupCall {
         return mobileLookupCalls.awaitItem()
