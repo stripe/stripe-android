@@ -395,7 +395,7 @@ internal class WalletViewModel @Inject constructor(
 
     fun onAddPaymentMethodOptionClick(option: AddPaymentMethodOption) {
         when (option) {
-            AddPaymentMethodOption.Bank -> {
+            is AddPaymentMethodOption.Bank -> {
                 onAddBankAccountClick()
             }
             AddPaymentMethodOption.Card -> {
@@ -525,9 +525,10 @@ internal class WalletViewModel @Inject constructor(
         return buildList {
             if (
                 linkAccount.consumerPublishableKey != null &&
+                configuration.financialConnectionsAvailability != null &&
                 supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)
             ) {
-                add(AddPaymentMethodOption.Bank)
+                add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))
             }
             if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE)) {
                 add(AddPaymentMethodOption.Card)
