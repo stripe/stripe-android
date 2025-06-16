@@ -33,6 +33,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -636,7 +637,10 @@ internal class PaymentMethodMetadataTest {
         assertThat(headerInformation.displayName)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_bancontact.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
-        assertThat(headerInformation.iconResource).isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
+        assertThat(headerInformation.icon(IconStyle.Filled))
+            .isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
+        assertThat(headerInformation.icon(IconStyle.Outlined))
+            .isEqualTo(R.drawable.stripe_ic_paymentsheet_pm_bancontact)
     }
 
     @Test
@@ -649,7 +653,8 @@ internal class PaymentMethodMetadataTest {
         )!!
         assertThat(headerInformation.displayName).isEqualTo(paypalSpec.label.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
-        assertThat(headerInformation.iconResource).isEqualTo(0)
+        assertThat(headerInformation.icon(IconStyle.Filled)).isEqualTo(0)
+        assertThat(headerInformation.icon(IconStyle.Outlined)).isEqualTo(0)
         assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
         assertThat(headerInformation.darkThemeIconUrl).isEqualTo(paypalSpec.darkImageUrl)
         assertThat(headerInformation.iconRequiresTinting).isFalse()
@@ -832,7 +837,8 @@ internal class PaymentMethodMetadataTest {
         )!!
         assertThat(headerInformation.displayName).isEqualTo(paypalCpm.displayName.resolvableString)
         assertThat(headerInformation.shouldShowIcon).isTrue()
-        assertThat(headerInformation.iconResource).isEqualTo(0)
+        assertThat(headerInformation.icon(IconStyle.Filled)).isEqualTo(0)
+        assertThat(headerInformation.icon(IconStyle.Outlined)).isEqualTo(0)
         assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
         assertThat(headerInformation.darkThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
         assertThat(headerInformation.iconRequiresTinting).isFalse()

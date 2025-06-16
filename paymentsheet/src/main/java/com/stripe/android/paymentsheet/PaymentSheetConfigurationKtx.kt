@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.FormInsets
+import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
@@ -111,6 +112,11 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         top = textFieldInsets.topDp,
         bottom = textFieldInsets.bottomDp,
     )
+
+    StripeTheme.iconStyle = when (iconStyle) {
+        PaymentSheet.IconStyle.Filled -> IconStyle.Filled
+        PaymentSheet.IconStyle.Outlined -> IconStyle.Outlined
+    }
 }
 
 internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>

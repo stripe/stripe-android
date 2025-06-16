@@ -168,6 +168,7 @@ internal fun StripeThemeForLink(
         sectionSpacing = StripeThemeDefaults.sectionSpacing,
         sectionStyle = SectionStyle.Borderless,
         textFieldInsets = StripeThemeDefaults.textFieldInsets,
+        iconStyle = StripeThemeDefaults.iconStyle,
     ) {
         content()
     }

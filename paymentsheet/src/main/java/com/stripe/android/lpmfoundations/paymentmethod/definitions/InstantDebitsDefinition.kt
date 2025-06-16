@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
@@ -35,6 +36,7 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
             syntheticCode = "link_instant_debits",
             displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_instant_debits,
             iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank,
+            outlinedIconResource = R.drawable.stripe_ic_paymentsheet_pm_bank_outlined,
             iconRequiresTinting = true,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,

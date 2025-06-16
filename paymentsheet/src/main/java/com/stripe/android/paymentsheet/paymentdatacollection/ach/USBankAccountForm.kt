@@ -44,6 +44,8 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.H6Text
@@ -452,7 +454,17 @@ private fun BankAccountDetails(
     promoBadgeState: PromoBadgeState?,
     onIconButtonClick: () -> Unit,
 ) {
-    val bankIcon = remember(bankName) { TransformToBankIcon(bankName) }
+    val iconStyle = LocalIconStyle.current
+    val bankIcon = remember(bankName, iconStyle) {
+        TransformToBankIcon(
+            bankName = bankName,
+            fallbackIcon = if (iconStyle == IconStyle.Outlined) {
+                PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank_outlined
+            } else {
+                PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank
+            }
+        )
+    }
 
     SectionCard(modifier = Modifier.fillMaxWidth()) {
         Row(

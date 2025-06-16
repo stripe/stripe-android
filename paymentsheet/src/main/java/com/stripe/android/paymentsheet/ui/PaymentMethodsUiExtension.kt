@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.label
@@ -11,6 +12,9 @@ import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.LocalIconStyle
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(
@@ -232,21 +236,31 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
     else -> null
 }
 
-internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
-    PaymentMethod.Type.Card -> {
-        when (linkPaymentDetails) {
-            is LinkPaymentDetails.BankAccount -> R.drawable.stripe_ic_paymentsheet_bank
-            is LinkPaymentDetails.Card, null -> null
-        }
+@Composable
+internal fun PaymentMethod.getLabelIcon(): Int? {
+    val iconStyle = LocalIconStyle.current
+
+    val bankIcon = when (iconStyle) {
+        IconStyle.Filled -> R.drawable.stripe_ic_paymentsheet_bank
+        IconStyle.Outlined -> PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank_outlined
     }
-    PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_paymentsheet_bank
-    PaymentMethod.Type.Link -> {
-        when (linkPaymentDetails) {
-            is LinkPaymentDetails.BankAccount -> R.drawable.stripe_ic_paymentsheet_bank
-            is LinkPaymentDetails.Card, null -> null
+
+    return when (type) {
+        PaymentMethod.Type.Card -> {
+            when (linkPaymentDetails) {
+                is LinkPaymentDetails.BankAccount -> bankIcon
+                is LinkPaymentDetails.Card, null -> null
+            }
         }
+        PaymentMethod.Type.USBankAccount -> bankIcon
+        PaymentMethod.Type.Link -> {
+            when (linkPaymentDetails) {
+                is LinkPaymentDetails.BankAccount -> bankIcon
+                is LinkPaymentDetails.Card, null -> null
+            }
+        }
+        else -> null
     }
-    else -> null
 }
 
 internal val PaymentMethod.shouldTintLabelIcon: Boolean

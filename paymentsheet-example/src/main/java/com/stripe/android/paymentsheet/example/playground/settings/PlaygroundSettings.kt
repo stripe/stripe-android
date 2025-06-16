@@ -469,6 +469,7 @@ internal class PlaygroundSettings private constructor(
             EmbeddedAppearanceSettingsDefinition,
             FormInsetsAppearanceSettingDefinition,
             SectionSpacingSettingsDefinition,
+            IconStyleAppearanceSettingsDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

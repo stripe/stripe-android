@@ -41,6 +41,7 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+        outlinedIconResource = R.drawable.stripe_ic_paymentsheet_pm_bank_outlined,
         iconRequiresTinting = true,
     )
 

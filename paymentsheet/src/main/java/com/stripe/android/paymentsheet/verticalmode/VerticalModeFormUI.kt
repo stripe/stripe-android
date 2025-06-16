@@ -23,6 +23,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
+import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -95,7 +96,7 @@ internal fun VerticalModeFormHeaderUI(
     ) {
         if (formHeaderInformation.shouldShowIcon) {
             PaymentMethodIcon(
-                iconRes = formHeaderInformation.iconResource,
+                iconRes = formHeaderInformation.icon(LocalIconStyle.current),
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = formHeaderInformation.iconRequiresTinting,

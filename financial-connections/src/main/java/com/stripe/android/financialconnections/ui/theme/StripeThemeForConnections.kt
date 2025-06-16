@@ -30,6 +30,7 @@ internal fun StripeThemeForConnections(
         sectionSpacing = StripeThemeDefaults.sectionSpacing,
         sectionStyle = StripeThemeDefaults.sectionStyle,
         textFieldInsets = StripeThemeDefaults.textFieldInsets,
+        iconStyle = StripeThemeDefaults.iconStyle,
     ) {
         content()
     }
