@@ -1044,6 +1044,7 @@ class PaymentSheet internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
+                shopPayConfiguration = shopPayConfiguration
             )
         }
 

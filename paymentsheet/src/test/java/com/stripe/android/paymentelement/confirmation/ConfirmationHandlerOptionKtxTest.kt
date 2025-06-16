@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -25,6 +26,7 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -433,6 +435,32 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
             .isEqualTo(customPaymentMethod)
         assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
+    }
+
+    @Test
+    fun `On ShopPay selection with config with null shopPay config, should return null`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @Test
+    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
+                    shopPayConfiguration = SHOP_PAY_CONFIGURATION
+                ),
+                linkConfiguration = null,
+            )
+        ).isEqualTo(
+            ShopPayConfirmationOption(
+                shopPayConfiguration = SHOP_PAY_CONFIGURATION
+            )
+        )
     }
 
     private fun testLinkInlineSignupConfirmationOption(
