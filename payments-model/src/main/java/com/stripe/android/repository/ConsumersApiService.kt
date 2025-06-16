@@ -418,7 +418,7 @@ class ConsumersApiServiceImpl(
                     "request_surface" to requestSurface,
                 ),
             ),
-            responseJsonParser = LinkAccountSessionJsonParser(),
+            responseJsonParser = LinkAccountSessionJsonParser,
         )
     }
 
