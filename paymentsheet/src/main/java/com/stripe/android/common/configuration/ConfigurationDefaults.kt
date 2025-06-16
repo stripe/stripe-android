@@ -29,6 +29,7 @@ internal object ConfigurationDefaults {
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
     val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }
