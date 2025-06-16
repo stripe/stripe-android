@@ -51,7 +51,7 @@ internal fun ShopPayButton(
         )
     ) {
         Image(
-            painter = painterResource(R.drawable.shop_pay_logo_white),
+            painter = painterResource(R.drawable.stripe_shop_pay_logo_white),
             contentDescription = null
         )
     }
