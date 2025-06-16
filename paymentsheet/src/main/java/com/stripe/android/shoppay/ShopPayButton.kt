@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
@@ -25,11 +28,15 @@ internal fun ShopPayButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val buttonDescription = stringResource(R.string.stripe_shop_pay_button_description)
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(ShopPayButtonHeight),
+            .height(ShopPayButtonHeight)
+            .semantics {
+                contentDescription = buttonDescription
+            },
         enabled = true,
         shape = RoundedCornerShape(
             StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
@@ -45,7 +52,7 @@ internal fun ShopPayButton(
     ) {
         Image(
             painter = painterResource(R.drawable.shop_pay_logo_white),
-            contentDescription = "Shop Pay Logo"
+            contentDescription = null
         )
     }
 }
