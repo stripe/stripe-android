@@ -10,10 +10,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.Deliver
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
-import com.stripe.android.paymentsheet.SelectedAddress
-import com.stripe.android.paymentsheet.SelectedShippingRate
-import com.stripe.android.paymentsheet.ShippingContactUpdate
-import com.stripe.android.paymentsheet.ShippingRateUpdate
 import com.stripe.android.paymentsheet.ShopPayHandlers
 
 private val singleBusinessDay = DeliveryEstimateUnit(
@@ -99,9 +95,9 @@ private fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
 }
 
 private suspend fun onShippingMethodUpdate(
-    selectedRate: SelectedShippingRate,
-): ShippingRateUpdate {
-    return ShippingRateUpdate(
+    selectedRate: ShopPayHandlers.SelectedShippingRate,
+): ShopPayHandlers.ShippingRateUpdate {
+    return ShopPayHandlers.ShippingRateUpdate(
         lineItems = listOf(
             LineItem(name = "Subtotal", amount = 200),
             LineItem(name = "Tax", amount = 200),
@@ -146,13 +142,13 @@ private suspend fun onShippingMethodUpdate(
 }
 
 private suspend fun onShippingContactUpdate(
-    address: SelectedAddress,
-): ShippingContactUpdate? {
+    address: ShopPayHandlers.SelectedAddress,
+): ShopPayHandlers.ShippingContactUpdate? {
     val canShipToLocation = isValidShippingLocation(address)
 
     return if (canShipToLocation) {
         val shippingRates = getShippingRatesForLocation(address)
-        val update = ShippingContactUpdate(
+        val update = ShopPayHandlers.ShippingContactUpdate(
             lineItems = listOf(
                 LineItem(name = "Subtotal", amount = 200),
                 LineItem(name = "Tax", amount = 200),
@@ -169,12 +165,12 @@ private suspend fun onShippingContactUpdate(
     }
 }
 
-private fun isValidShippingLocation(address: SelectedAddress): Boolean {
+private fun isValidShippingLocation(address: ShopPayHandlers.SelectedAddress): Boolean {
     return address.country == "US"
 }
 
 private fun getShippingRatesForLocation(
-    address: SelectedAddress
+    address: ShopPayHandlers.SelectedAddress
 ): List<ShippingRate> {
     // Return different rates based on the address.
     return if (address.state == "CA") {
