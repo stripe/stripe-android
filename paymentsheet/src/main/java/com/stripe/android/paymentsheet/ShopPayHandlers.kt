@@ -65,16 +65,13 @@ class SelectedShippingRate(
 fun interface ShippingMethodHandler {
     /**
      * @param selectedRate The [SelectedShippingRate] that was selected by the user.
-     * @param updateCallback A completion handler. You must call this handler with a
-     * [ShippingRateUpdate] with your updates. To reject this selection, pass `null`
-     * into this handler.
+     * @return A [ShippingRateUpdate] with your updates. To reject this selection, return `null`.
      *
-     * **Note**: If you do not call the completion handler, the app will hang.
+     * **Note**: If this function does not complete, the app will hang.
      */
-    fun onRateSelected(
+    suspend fun onRateSelected(
         selectedRate: SelectedShippingRate,
-        updateCallback: (ShippingRateUpdate?) -> Unit
-    )
+    ): ShippingRateUpdate?
 }
 
 /**
@@ -87,14 +84,12 @@ fun interface ShippingMethodHandler {
 fun interface ShippingContactHandler {
     /**
      * @param address The [SelectedAddress] that was selected by the user.
-     * @param updateCallback A completion handler. You must call this handler with a
-     * [ShippingContactUpdate] with your updates. To reject this selection,
-     * pass `null` into this handler.
+     * @return A [ShippingContactUpdate] with your updates. To reject this selection,
+     * return `null`.
      *
-     * **Note**: If you do not call the completion handler, the app will hang.
+     * **Note**: If this function does not complete, the app will hang.
      */
-    fun onAddressSelected(
+    suspend fun onAddressSelected(
         address: SelectedAddress,
-        updateCallback: (ShippingContactUpdate?) -> Unit
-    )
+    ): ShippingContactUpdate?
 }

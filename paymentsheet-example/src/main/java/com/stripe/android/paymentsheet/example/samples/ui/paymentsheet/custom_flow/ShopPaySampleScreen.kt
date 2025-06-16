@@ -98,11 +98,10 @@ private fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
     )
 }
 
-private fun onShippingMethodUpdate(
+private suspend fun onShippingMethodUpdate(
     selectedRate: SelectedShippingRate,
-    updateCallback: (ShippingRateUpdate) -> Unit
-) {
-    val update = ShippingRateUpdate(
+): ShippingRateUpdate {
+    return ShippingRateUpdate(
         lineItems = listOf(
             LineItem(name = "Subtotal", amount = 200),
             LineItem(name = "Tax", amount = 200),
@@ -144,16 +143,14 @@ private fun onShippingMethodUpdate(
             ),
         )
     )
-    updateCallback(update)
 }
 
-private fun onShippingContactUpdate(
+private suspend fun onShippingContactUpdate(
     address: SelectedAddress,
-    updateCallback: (ShippingContactUpdate?) -> Unit
-) {
+): ShippingContactUpdate? {
     val canShipToLocation = isValidShippingLocation(address)
 
-    if (canShipToLocation) {
+    return if (canShipToLocation) {
         val shippingRates = getShippingRatesForLocation(address)
         val update = ShippingContactUpdate(
             lineItems = listOf(
@@ -166,9 +163,9 @@ private fun onShippingContactUpdate(
             ),
             shippingRates = shippingRates
         )
-        updateCallback(update)
+        update
     } else {
-        updateCallback(null)
+        null
     }
 }
 
