@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
+import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -39,7 +40,7 @@ internal fun NewPaymentMethodRowButton(
     NewPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        iconRes = displayablePaymentMethod.iconResource,
+        iconRes = displayablePaymentMethod.icon(LocalIconStyle.current),
         iconUrl = iconUrl,
         imageLoader = imageLoader,
         title = displayablePaymentMethod.displayName.resolve(),

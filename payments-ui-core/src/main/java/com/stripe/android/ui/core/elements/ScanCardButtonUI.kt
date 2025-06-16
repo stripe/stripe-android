@@ -22,6 +22,8 @@ import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanContract
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.LocalIconStyle
 
 @Composable
 internal fun ScanCardButtonUI(
@@ -50,8 +52,15 @@ internal fun ScanCardButtonUI(
             }
         )
     ) {
+        val iconStyle = LocalIconStyle.current
+
+        val icon = when (iconStyle) {
+            IconStyle.Filled -> R.drawable.stripe_ic_photo_camera
+            IconStyle.Outlined -> R.drawable.stripe_ic_photo_camera_outlined
+        }
+
         Image(
-            painter = painterResource(R.drawable.stripe_ic_photo_camera),
+            painter = painterResource(icon),
             contentDescription = stringResource(
                 R.string.stripe_scan_card
             ),

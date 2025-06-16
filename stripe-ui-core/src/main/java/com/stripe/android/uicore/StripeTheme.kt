@@ -330,6 +330,14 @@ object StripeThemeDefaults {
     )
 
     val sectionStyle = SectionStyle.Bordered
+
+    val iconStyle: IconStyle = IconStyle.Filled
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class IconStyle {
+    Filled,
+    Outlined
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -446,6 +454,9 @@ val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 val LocalSectionSpacing = staticCompositionLocalOf { StripeTheme.customSectionSpacing }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalIconStyle = staticCompositionLocalOf { StripeTheme.iconStyle }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalInstrumentationTest = staticCompositionLocalOf { false }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -468,6 +479,7 @@ fun StripeTheme(
     sectionSpacing: Float? = StripeTheme.customSectionSpacing,
     sectionStyle: SectionStyle = StripeTheme.sectionStyle,
     textFieldInsets: FormInsets = StripeTheme.textFieldInsets,
+    iconStyle: IconStyle = StripeTheme.iconStyle,
     content: @Composable () -> Unit
 ) {
     val isRobolectricTest = runCatching {
@@ -493,6 +505,7 @@ fun StripeTheme(
         LocalSectionSpacing provides sectionSpacing,
         LocalSectionStyle provides sectionStyle,
         LocalTextFieldInsets provides textFieldInsets,
+        LocalIconStyle provides iconStyle,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
     ) {
@@ -595,6 +608,8 @@ object StripeTheme {
     var textFieldInsets = StripeThemeDefaults.textFieldInsets
 
     var sectionStyle = StripeThemeDefaults.sectionStyle
+
+    var iconStyle: IconStyle = StripeThemeDefaults.iconStyle
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable

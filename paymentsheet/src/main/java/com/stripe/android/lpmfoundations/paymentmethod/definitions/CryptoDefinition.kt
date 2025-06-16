@@ -34,5 +34,7 @@ private object CryptoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_crypto,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto,
+        outlinedIconResource = R.drawable.stripe_ic_paymentsheet_pm_crypto_outlined,
+        iconRequiresTinting = true,
     )
 }

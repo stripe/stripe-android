@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -23,6 +24,13 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     val paparazziRule = PaparazziRule(
         boxModifier = Modifier
             .padding(16.dp)
+    )
+
+    @get:Rule
+    val outlinedPaparazziRule = PaparazziRule(
+        listOf(OutlinedIconsAppearance),
+        boxModifier = Modifier
+            .padding(16.dp),
     )
 
     @get:Rule
@@ -95,6 +103,21 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
         )
 
         paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysSelectSavedPaymentMethodsWithOutlinedIcons() {
+        val viewModel = getTestViewModel(
+            includeDefaultPaymentMethod = true,
+            isEditing = true,
+            isProcessing = false,
+            canEdit = true,
+            canRemove = true,
+        )
+
+        outlinedPaparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
         }
     }

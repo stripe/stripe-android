@@ -39,6 +39,9 @@ internal data class SupportedPaymentMethod(
 
     /** The subtitle, or marketing copy for an LPM. */
     val subtitle: ResolvableString? = null,
+
+    /** This describes the outlined version in the LPM selector. */
+    @DrawableRes val outlinedIconResource: Int? = null,
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
@@ -47,6 +50,7 @@ internal data class SupportedPaymentMethod(
         @DrawableRes iconResource: Int,
         iconRequiresTinting: Boolean = false,
         subtitle: ResolvableString? = null,
+        @DrawableRes outlinedIconResource: Int? = null,
     ) : this(
         code = paymentMethodDefinition.type.code,
         displayName = displayNameResource.resolvableString,
@@ -55,6 +59,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
+        outlinedIconResource = outlinedIconResource,
     )
 
     constructor(
@@ -66,6 +71,7 @@ internal data class SupportedPaymentMethod(
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
         subtitle: ResolvableString? = null,
+        @DrawableRes outlinedIconResource: Int? = null,
     ) : this(
         code = code,
         syntheticCode = syntheticCode,
@@ -75,6 +81,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = darkThemeIconUrl,
         iconRequiresTinting = iconRequiresTinting,
         subtitle = subtitle,
+        outlinedIconResource = outlinedIconResource,
     )
 
     fun asFormHeaderInformation(
@@ -84,6 +91,7 @@ internal data class SupportedPaymentMethod(
             displayName = displayName,
             shouldShowIcon = true,
             iconResource = iconResource,
+            outlinedIconResource = outlinedIconResource,
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,
@@ -111,6 +119,7 @@ internal data class SupportedPaymentMethod(
             syntheticCode = syntheticCode,
             displayName = displayName,
             iconResource = iconResource,
+            outlinedIconResource = outlinedIconResource,
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,

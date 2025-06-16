@@ -52,6 +52,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = CardDefinition,
         displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_card,
         iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card,
+        outlinedIconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_card_outlined,
         iconRequiresTinting = true,
     )
 

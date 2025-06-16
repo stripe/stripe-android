@@ -42,6 +42,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.IconStyle
+import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
@@ -215,8 +217,13 @@ private fun ModifyBadge(
         editIconColorDark
     }
 
+    val icon = when (LocalIconStyle.current) {
+        IconStyle.Filled -> R.drawable.stripe_ic_edit_symbol
+        IconStyle.Outlined -> R.drawable.stripe_ic_edit_outlined_symbol
+    }
+
     Image(
-        painter = painterResource(R.drawable.stripe_ic_edit_symbol),
+        painter = painterResource(icon),
         contentDescription = onModifyAccessibilityDescription,
         colorFilter = ColorFilter.tint(iconColor),
         contentScale = FixedScale(EDIT_ICON_SCALE),

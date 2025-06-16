@@ -6,16 +6,19 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalMode
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
+import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.PaymentIntentFactory
 import kotlinx.coroutines.flow.update
 import org.junit.Rule
 import org.junit.Test
@@ -26,6 +29,13 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     val paparazziRule = PaparazziRule(
         boxModifier = Modifier
             .padding(16.dp)
+    )
+
+    @get:Rule
+    val outlinedPaparazziRule = PaparazziRule(
+        listOf(OutlinedIconsAppearance),
+        boxModifier = Modifier
+            .padding(16.dp),
     )
 
     @get:Rule
@@ -124,6 +134,30 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         )
 
         paparazziRule.snapshot {
+            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
+        }
+    }
+
+    @Test
+    fun displaysVerticalModeWithOutlinedIcons() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(
+                paymentMethodTypes = listOf("card", "crypto", "us_bank_account"),
+                paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}""",
+            ),
+            allowsDelayedPaymentMethods = true,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Lite,
+        )
+
+        val initialScreen = VerticalMode(
+            FakePaymentMethodVerticalLayoutInteractor.create(
+                paymentMethodMetadata = metadata,
+            )
+        )
+
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
+
+        outlinedPaparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
         }
     }

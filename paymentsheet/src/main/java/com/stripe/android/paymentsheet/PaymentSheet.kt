@@ -1115,7 +1115,12 @@ class PaymentSheet internal constructor(
         /**
          * Defines spacing inside the input fields of a form.
          */
-        internal val textFieldInsets: Insets = Insets.defaultTextFieldInsets
+        internal val textFieldInsets: Insets = Insets.defaultTextFieldInsets,
+
+        /**
+         * Defines the visual style of icons in Payment Element
+         */
+        internal val iconStyle: IconStyle = IconStyle.default,
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1482,6 +1487,9 @@ class PaymentSheet internal constructor(
 
             private var textFieldInsets: Insets = Insets.defaultTextFieldInsets
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var iconStyle: IconStyle = IconStyle.default
+
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
                 Embedded.default
@@ -1525,6 +1533,11 @@ class PaymentSheet internal constructor(
                 this.textFieldInsets = textFieldInsets
             }
 
+            @AppearanceAPIAdditionsPreview
+            fun iconStyle(iconStyle: IconStyle) = apply {
+                this.iconStyle = iconStyle
+            }
+
             @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
             fun build(): Appearance {
                 return Appearance(
@@ -1537,6 +1550,7 @@ class PaymentSheet internal constructor(
                     formInsetValues = formInsetValues,
                     sectionSpacing = sectionSpacing,
                     textFieldInsets = textFieldInsets,
+                    iconStyle = iconStyle,
                 )
             }
         }
@@ -1807,6 +1821,26 @@ class PaymentSheet internal constructor(
     class Spacing(internal val spacingDp: Float) : Parcelable {
         internal companion object {
             val defaultSectionSpacing = Spacing(spacingDp = -1f)
+        }
+    }
+
+    /**
+     * Defines the visual style of icons in Payment Element
+     */
+    @AppearanceAPIAdditionsPreview
+    enum class IconStyle {
+        /**
+         * Display icons with a filled appearance
+         */
+        Filled,
+
+        /**
+         * Display icons with an outlined appearance
+         */
+        Outlined;
+
+        internal companion object {
+            val default = Filled
         }
     }
 
