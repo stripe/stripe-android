@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +44,6 @@ import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -113,17 +111,13 @@ internal fun SignUpBody(
             style = LinkTheme.typography.body,
             color = LinkTheme.colors.textTertiary
         )
-        StripeThemeForLink {
-            CompositionLocalProvider(
-                LocalSectionStyle provides SectionStyle.Bordered,
-            ) {
-                EmailCollectionSection(
-                    enabled = signUpScreenState.canEditForm,
-                    emailController = emailController,
-                    signUpScreenState = signUpScreenState,
-                    focusRequester = emailFocusRequester,
-                )
-            }
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
+            EmailCollectionSection(
+                enabled = signUpScreenState.canEditForm,
+                emailController = emailController,
+                signUpScreenState = signUpScreenState,
+                focusRequester = emailFocusRequester,
+            )
         }
         AnimatedVisibility(
             visible = !isSigningUp && signUpScreenState.errorMessage != null,
@@ -222,50 +216,46 @@ private fun SecondaryFields(
     var emailFocused by rememberSaveable { mutableStateOf(false) }
     var nameFocused by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
-        StripeThemeForLink {
-            CompositionLocalProvider(
-                LocalSectionStyle provides SectionStyle.Bordered,
-            ) {
-                PhoneNumberCollectionSection(
-                    modifier = Modifier
-                        .padding(vertical = 4.dp)
-                        .onFocusChanged { emailFocused = it.isFocused },
-                    enabled = signUpScreenState.canEditForm,
-                    isSelected = emailFocused,
-                    phoneNumberController = phoneNumberController,
-                    requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
-                    imeAction = if (signUpScreenState.requiresNameCollection) {
-                        ImeAction.Next
-                    } else {
-                        ImeAction.Done
-                    }
-                )
-
-                if (signUpScreenState.requiresNameCollection) {
-                    TextFieldSection(
-                        modifier = Modifier
-                            .onFocusChanged { nameFocused = it.isFocused }
-                            .padding(vertical = 8.dp),
-                        isSelected = nameFocused,
-                        textFieldController = nameController,
-                    ) {
-                        TextField(
-                            modifier = Modifier.padding(vertical = 4.dp),
-                            textFieldController = nameController,
-                            imeAction = ImeAction.Done,
-                            enabled = signUpScreenState.canEditForm,
-                        )
-                    }
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
+            PhoneNumberCollectionSection(
+                modifier = Modifier
+                    .padding(vertical = 4.dp)
+                    .onFocusChanged { emailFocused = it.isFocused },
+                enabled = signUpScreenState.canEditForm,
+                isSelected = emailFocused,
+                phoneNumberController = phoneNumberController,
+                requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                imeAction = if (signUpScreenState.requiresNameCollection) {
+                    ImeAction.Next
+                } else {
+                    ImeAction.Done
                 }
+            )
 
-                LinkTerms(
+            if (signUpScreenState.requiresNameCollection) {
+                TextFieldSection(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp, bottom = 16.dp),
-                    textAlign = TextAlign.Center,
-                    type = LinkTermsType.Full,
-                )
+                        .onFocusChanged { nameFocused = it.isFocused }
+                        .padding(vertical = 8.dp),
+                    isSelected = nameFocused,
+                    textFieldController = nameController,
+                ) {
+                    TextField(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        textFieldController = nameController,
+                        imeAction = ImeAction.Done,
+                        enabled = signUpScreenState.canEditForm,
+                    )
+                }
             }
+
+            LinkTerms(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 16.dp),
+                textAlign = TextAlign.Center,
+                type = LinkTermsType.Full,
+            )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
             ErrorText(

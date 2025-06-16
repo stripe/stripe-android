@@ -28,6 +28,7 @@ import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -98,7 +99,7 @@ private fun OTPSection(
     Box(
         contentAlignment = Alignment.Center
     ) {
-        StripeThemeForLink {
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             OTPElementUI(
                 enabled = !state.isProcessing,
                 element = otpElement,

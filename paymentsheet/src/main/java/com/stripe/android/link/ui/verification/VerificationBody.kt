@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,7 +43,6 @@ import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.LocalSectionStyle
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
@@ -104,33 +102,28 @@ internal fun VerificationBody(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        StripeThemeForLink {
-            CompositionLocalProvider(
-                // The OTP element uses sections internally to style the OTP boxes.
-                LocalSectionStyle provides SectionStyle.Bordered,
-            ) {
-                OTPElementUI(
-                    enabled = !state.isProcessing,
-                    element = otpElement,
-                    middleSpacing = 8.dp,
-                    boxSpacing = 8.dp,
-                    otpInputPlaceholder = " ",
-                    boxShape = LinkTheme.shapes.large,
-                    modifier = Modifier
-                        // 48dp per OTP box plus 8dp per space
-                        .width(328.dp)
-                        .testTag(VERIFICATION_OTP_TAG),
-                    colors = OTPElementColors(
-                        selectedBorder = LinkTheme.colors.borderSelected,
-                        placeholder = LinkTheme.colors.textPrimary,
-                        selectedBackground = LinkTheme.colors.surfacePrimary,
-                        background = LinkTheme.colors.surfaceSecondary,
-                        unselectedBorder = LinkTheme.colors.surfaceSecondary
-                    ),
-                    focusRequester = focusRequester,
-                    selectedStrokeWidth = 1.5.dp,
-                )
-            }
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
+            OTPElementUI(
+                enabled = !state.isProcessing,
+                element = otpElement,
+                middleSpacing = 8.dp,
+                boxSpacing = 8.dp,
+                otpInputPlaceholder = " ",
+                boxShape = LinkTheme.shapes.large,
+                modifier = Modifier
+                    // 48dp per OTP box plus 8dp per space
+                    .width(328.dp)
+                    .testTag(VERIFICATION_OTP_TAG),
+                colors = OTPElementColors(
+                    selectedBorder = LinkTheme.colors.borderSelected,
+                    placeholder = LinkTheme.colors.textPrimary,
+                    selectedBackground = LinkTheme.colors.surfacePrimary,
+                    background = LinkTheme.colors.surfaceSecondary,
+                    unselectedBorder = LinkTheme.colors.surfaceSecondary
+                ),
+                focusRequester = focusRequester,
+                selectedStrokeWidth = 1.5.dp,
+            )
         }
 
         AnimatedVisibility(visible = state.errorMessage != null) {

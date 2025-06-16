@@ -145,6 +145,7 @@ internal object LinkThemeConfig {
 
 @Composable
 internal fun StripeThemeForLink(
+    sectionStyle: SectionStyle = SectionStyle.Borderless,
     content: @Composable () -> Unit
 ) {
     val stripeDefaultColors = StripeThemeDefaults.colors(isSystemInDarkTheme())
@@ -166,7 +167,7 @@ internal fun StripeThemeForLink(
         ),
         typography = StripeThemeDefaults.typography,
         sectionSpacing = StripeThemeDefaults.sectionSpacing,
-        sectionStyle = SectionStyle.Borderless,
+        sectionStyle = sectionStyle,
         textFieldInsets = StripeThemeDefaults.textFieldInsets,
         iconStyle = StripeThemeDefaults.iconStyle,
     ) {
