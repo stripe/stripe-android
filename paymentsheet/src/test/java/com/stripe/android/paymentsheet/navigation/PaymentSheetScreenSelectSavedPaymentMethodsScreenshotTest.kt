@@ -40,6 +40,10 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
     )
 
+    private val savedUsBankAccount = PaymentOptionsItem.SavedPaymentMethod(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableUsBankAccount(),
+    )
+
     private val defaultSavedPaymentOptionItem = PaymentOptionsItem.SavedPaymentMethod(
         displayableSavedPaymentMethod = PaymentMethodFixtures.defaultDisplayableCard(),
     )
@@ -115,6 +119,7 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
             isProcessing = false,
             canEdit = true,
             canRemove = true,
+            useUsBankAccount = true,
         )
 
         outlinedPaparazziRule.snapshot {
@@ -128,20 +133,26 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
         isProcessing: Boolean,
         canEdit: Boolean,
         canRemove: Boolean,
+        useUsBankAccount: Boolean = false,
     ): FakeBaseSheetViewModel {
         val metadata = PaymentMethodMetadataFactory.create()
+        val option = if (useUsBankAccount) {
+            savedUsBankAccount
+        } else {
+            savedPaymentOptionItem
+        }
         val interactor = FakeSelectSavedPaymentMethodsInteractor(
             initialState = SelectSavedPaymentMethodsInteractor.State(
                 paymentOptionsItems = if (includeDefaultPaymentMethod) {
                     listOf(
                         PaymentOptionsItem.AddCard,
                         defaultSavedPaymentOptionItem,
-                        savedPaymentOptionItem,
+                        option,
                     )
                 } else {
                     listOf(
                         PaymentOptionsItem.AddCard,
-                        savedPaymentOptionItem,
+                        option,
                     )
                 },
                 selectedPaymentOptionsItem = savedPaymentOptionItem,

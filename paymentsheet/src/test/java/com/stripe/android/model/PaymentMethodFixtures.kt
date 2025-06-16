@@ -636,6 +636,10 @@ internal object PaymentMethodFixtures {
         return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
     }
 
+    fun displayableUsBankAccount(): DisplayableSavedPaymentMethod {
+        return US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
+    }
+
     fun displayableLinkPaymentMethod(): DisplayableSavedPaymentMethod {
         return LINK_PAYMENT_METHOD.copy(
             linkPaymentDetails = LinkPaymentDetails.Card(
