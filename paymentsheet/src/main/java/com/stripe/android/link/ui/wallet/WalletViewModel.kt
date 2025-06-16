@@ -9,7 +9,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
@@ -414,7 +414,7 @@ internal class WalletViewModel @Inject constructor(
         viewModelScope.launch {
             linkAccountManager.createLinkAccountSession()
                 .mapCatching { session ->
-                    FinancialConnectionsSheet.Configuration(
+                    FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
                         publishableKey = linkAccount.consumerPublishableKey!!,
                     )

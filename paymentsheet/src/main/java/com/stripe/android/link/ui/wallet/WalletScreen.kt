@@ -54,7 +54,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
-import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -762,6 +761,22 @@ private fun AlertMessage(
             }
         }
     )
+}
+
+@Composable
+private fun rememberFinancialConnectionsSheet(
+    callback: (FinancialConnectionsSheetResult) -> Unit
+): FinancialConnectionsSheetForDataLauncher {
+    val context = LocalContext.current
+    val contract = remember(context) {
+        FinancialConnectionsSheetForDataContract(intentBuilder(context))
+    }
+    val activityResultLauncher = rememberLauncherForActivityResult(contract, callback)
+    return remember(activityResultLauncher) {
+        FinancialConnectionsSheetForDataLauncher(
+            activityResultLauncher
+        )
+    }
 }
 
 private fun String.replaceHyperlinks() = this.replace(
