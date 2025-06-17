@@ -267,6 +267,55 @@ class WalletViewModelTest {
     }
 
     @Test
+    fun `viewmodel should init with correct Add Payment Method options`() = runTest(dispatcher) {
+        val account = TestFactory.LINK_ACCOUNT_WITH_PK
+        val stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+            linkFundingSources = listOf(
+                ConsumerPaymentDetails.Card.TYPE,
+                ConsumerPaymentDetails.BankAccount.TYPE,
+            )
+        )
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(stripeIntent = stripeIntent)
+
+        assertThat(
+            createViewModel(
+                linkAccount = account,
+                configuration = configuration,
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card,
+            AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full),
+        )
+
+        assertThat(
+            createViewModel(
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                configuration = configuration,
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card,
+        )
+
+        assertThat(
+            createViewModel(
+                linkAccount = account,
+                configuration = configuration.copy(financialConnectionsAvailability = null),
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card,
+        )
+
+        assertThat(
+            createViewModel(
+                linkAccount = account,
+                configuration = configuration.copy(stripeIntent = stripeIntent.copy(linkFundingSources = emptyList()))
+            ).uiState.value.addPaymentMethodOptions
+        ).containsExactly(
+            AddPaymentMethodOption.Card, // Card is available by default.
+        )
+    }
+
+    @Test
     fun `viewModel should open update screen when onUpdateClicked`() = runTest(dispatcher) {
         val navigationManager = TestNavigationManager()
         val vm = createViewModel(navigationManager = navigationManager)
