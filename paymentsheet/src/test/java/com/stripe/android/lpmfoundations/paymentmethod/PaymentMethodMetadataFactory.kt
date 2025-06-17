@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -45,6 +46,7 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration = SHOP_PAY_CONFIGURATION
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -74,7 +76,8 @@ internal object PaymentMethodMetadataFactory {
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             elementsSessionId = elementsSessionId,
-            financialConnectionsAvailability = financialConnectionsAvailability
+            financialConnectionsAvailability = financialConnectionsAvailability,
+            shopPayConfiguration = shopPayConfiguration
         )
     }
 

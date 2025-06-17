@@ -38,5 +38,6 @@ internal object CommonConfigurationFactory {
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
         link = link,
+        shopPayConfiguration = SHOP_PAY_CONFIGURATION,
     )
 }

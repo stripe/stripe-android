@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
@@ -1142,7 +1143,8 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+            shopPayConfiguration = null
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1214,7 +1216,8 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            shopPayConfiguration = null
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1284,7 +1287,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
             linkState = null,
-            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
     }
 
@@ -1738,18 +1741,20 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `availableWallets contains all wallet types`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "card"),
+        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "link", "shop_pay", "card"),
         isGooglePayReady = true,
         hasLinkState = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+        hasShopPayConfiguration = true,
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link, WalletType.ShopPay),
     )
 
     @Test
     fun `availableWallets contains all wallet types in order`() = availableWalletsTest(
-        orderedPaymentMethodTypesAndWallets = listOf("link", "card", "google_pay"),
+        orderedPaymentMethodTypesAndWallets = listOf("shop_pay", "link", "card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
+        hasShopPayConfiguration = true,
+        expectedWalletTypes = listOf(WalletType.ShopPay, WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
@@ -1757,6 +1762,7 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = false,
+        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.GooglePay),
     )
 
@@ -1765,6 +1771,7 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = false,
         hasLinkState = false,
+        hasShopPayConfiguration = false,
         expectedWalletTypes = emptyList(),
     )
 
@@ -1773,7 +1780,26 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "link"),
         isGooglePayReady = false,
         hasLinkState = true,
+        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets contains only ShopPay`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay"),
+        isGooglePayReady = false,
+        hasLinkState = false,
+        hasShopPayConfiguration = true,
+        expectedWalletTypes = listOf(WalletType.ShopPay),
+    )
+
+    @Test
+    fun `availableWallets does not contain ShopPay if no configuration`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay"),
+        isGooglePayReady = false,
+        hasLinkState = false,
+        hasShopPayConfiguration = false,
+        expectedWalletTypes = emptyList(),
     )
 
     @Test
@@ -1781,6 +1807,7 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = false,
         hasLinkState = true,
+        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.Link),
     )
 
@@ -1789,13 +1816,42 @@ internal class PaymentMethodMetadataTest {
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
+        hasShopPayConfiguration = false,
         expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets respects order with ShopPay and Link not in types`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = true,
+        hasLinkState = true,
+        hasShopPayConfiguration = true,
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link, WalletType.ShopPay),
+    )
+
+    @Test
+    fun `availableWallets contains ShopPay and Link but not GooglePay`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("shop_pay", "link", "card"),
+        isGooglePayReady = false,
+        hasLinkState = true,
+        hasShopPayConfiguration = true,
+        expectedWalletTypes = listOf(WalletType.ShopPay, WalletType.Link),
+    )
+
+    @Test
+    fun `availableWallets contains ShopPay and GooglePay but not Link`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("google_pay", "shop_pay", "card"),
+        isGooglePayReady = true,
+        hasLinkState = false,
+        hasShopPayConfiguration = true,
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.ShopPay),
     )
 
     private fun availableWalletsTest(
         orderedPaymentMethodTypesAndWallets: List<String>,
         isGooglePayReady: Boolean,
         hasLinkState: Boolean,
+        hasShopPayConfiguration: Boolean,
         expectedWalletTypes: List<WalletType>,
     ) {
         val elementsSession = createElementsSession(
@@ -1807,12 +1863,19 @@ internal class PaymentMethodMetadataTest {
             ),
         )
 
+        val shopPayConfiguration = if (hasShopPayConfiguration) {
+            SHOP_PAY_CONFIGURATION
+        } else {
+            null
+        }
+
         val configuration = createPaymentSheetConfiguration(
             defaultBillingDetails = PaymentSheet.BillingDetails(),
             shippingDetails = AddressDetails(),
             billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
             customPaymentMethods = listOf(),
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+            shopPayConfiguration = shopPayConfiguration,
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
@@ -1901,7 +1964,8 @@ internal class PaymentMethodMetadataTest {
         defaultBillingDetails: PaymentSheet.BillingDetails,
         shippingDetails: AddressDetails,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
         allowsDelayedPaymentMethods = true,
@@ -1913,6 +1977,7 @@ internal class PaymentMethodMetadataTest {
         shippingDetails = shippingDetails,
         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
         customPaymentMethods = customPaymentMethods,
-        cardBrandAcceptance = cardBrandAcceptance
+        cardBrandAcceptance = cardBrandAcceptance,
+        shopPayConfiguration = shopPayConfiguration
     )
 }
