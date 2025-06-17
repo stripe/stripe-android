@@ -3,6 +3,7 @@
 package com.stripe.android.paymentsheet.example.playground.embedded
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -38,6 +40,7 @@ internal class EmbeddedExampleActivity : AppCompatActivity() {
 
 @Composable
 fun CheckoutScreen() {
+    val context = LocalContext.current
     val embeddedBuilder = remember {
         EmbeddedPaymentElement.Builder(
             createIntentCallback = { _, _ ->
@@ -47,12 +50,27 @@ fun CheckoutScreen() {
                 when (result) {
                     is EmbeddedPaymentElement.Result.Completed -> {
                         // Payment completed - show a confirmation screen.
+                        Toast.makeText(
+                            context,
+                            "Payment completed successfully!",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                     is EmbeddedPaymentElement.Result.Failed -> {
                         // Encountered an unrecoverable error. You can display the error to the user, log it, etc.
+                        Toast.makeText(
+                            context,
+                            "Payment failed: ${result.error.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                     is EmbeddedPaymentElement.Result.Canceled -> {
                         // Customer canceled - you should probably do nothing.
+                        Toast.makeText(
+                            context,
+                            "Payment canceled",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             },
