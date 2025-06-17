@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -19,7 +20,7 @@ internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
     private val embeddedViewDisplaysMandateText: Boolean,
     private val rowStyle: Embedded.RowStyle,
-    private val isImmediateAction: Boolean = false,
+    private val isImmediateAction: Boolean,
 ) {
     @Composable
     fun Content() {
@@ -33,11 +34,13 @@ internal data class EmbeddedContent(
          *
          * Having validation here ensures that we only validate when the embedded content is shown.
          */
-        if (rowStyle is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
-            throw IllegalArgumentException(
-                "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
-                    "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
-            )
+        LaunchedEffect(rowStyle, isImmediateAction) {
+            if (rowStyle is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
+                throw IllegalArgumentException(
+                    "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
+                        "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+                )
+            }
         }
 
         StripeTheme {
