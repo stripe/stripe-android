@@ -3,6 +3,8 @@ package com.stripe.android.link
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -156,6 +158,8 @@ internal object TestFactory {
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
 
+    val LINK_ACCOUNT_WITH_PK = LinkAccount(CONSUMER_SESSION, PUBLISHABLE_KEY)
+
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
         paymentDetails = listOf(
             CONSUMER_PAYMENT_DETAILS_CARD,
@@ -245,5 +249,22 @@ internal object TestFactory {
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+    )
+
+    val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(
+        id = "la_1KMGIuClCIKljWvsLzbigpVh",
+        displayName = "My Checking",
+        institutionName = "My Bank",
+        last4 = "3456",
+        category = FinancialConnectionsAccount.Category.CASH,
+        created = 1643221992,
+        livemode = true,
+        permissions = listOf(FinancialConnectionsAccount.Permissions.PAYMENT_METHOD),
+        status = FinancialConnectionsAccount.Status.ACTIVE,
+        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+        supportedPaymentMethodTypes = listOf(
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
+        )
     )
 }

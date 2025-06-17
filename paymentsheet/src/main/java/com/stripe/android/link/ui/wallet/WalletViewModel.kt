@@ -156,6 +156,7 @@ internal class WalletViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         selectedItemId = selectedItemId,
+                        isProcessing = if (isAfterAdding) false else it.isProcessing,
                         userSetIsExpanded = if (isAfterAdding) false else it.userSetIsExpanded,
                         errorMessage = if (isAfterAdding) null else it.errorMessage,
                         addBankAccountState = if (isAfterAdding) AddBankAccountState.Idle else it.addBankAccountState,
@@ -394,10 +395,10 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun onAddPaymentMethodOptionClick(option: AddPaymentMethodOption) {
+    fun onAddPaymentMethodOptionClicked(option: AddPaymentMethodOption) {
         when (option) {
             is AddPaymentMethodOption.Bank -> {
-                onAddBankAccountClick()
+                onAddBankAccountClicked()
             }
             AddPaymentMethodOption.Card -> {
                 navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
@@ -405,7 +406,7 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun onAddBankAccountClick() {
+    private fun onAddBankAccountClicked() {
         _uiState.update {
             it.copy(
                 isProcessing = true,
@@ -438,12 +439,23 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun onPresentFinancialConnections() {
-        _uiState.update {
-            it.copy(
-                isProcessing = true,
-                addBankAccountState = AddBankAccountState.PresentingFinancialConnections
-            )
+    fun onPresentFinancialConnections(success: Boolean) {
+        if (success) {
+            _uiState.update {
+                it.copy(
+                    isProcessing = true,
+                    addBankAccountState = AddBankAccountState.PresentingFinancialConnections
+                )
+            }
+        } else {
+            // This shouldn't happen, but we'll handle it just in case so the UI isn't stuck processing.
+            logger.warning("WalletViewModel: Failed to present Financial Connections")
+            _uiState.update {
+                it.copy(
+                    isProcessing = false,
+                    addBankAccountState = AddBankAccountState.Idle
+                )
+            }
         }
     }
 

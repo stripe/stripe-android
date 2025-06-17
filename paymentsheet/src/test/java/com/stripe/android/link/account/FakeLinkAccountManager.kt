@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.yield
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -184,6 +185,7 @@ internal open class FakeLinkAccountManager(
     override suspend fun createBankAccountPaymentDetails(
         bankAccountId: String
     ): Result<ConsumerPaymentDetails.PaymentDetails> {
+        yield()
         return createBankAccountPaymentDetailsResult
     }
 
@@ -203,6 +205,7 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
+        yield()
         return createLinkAccountSessionResult
     }
 

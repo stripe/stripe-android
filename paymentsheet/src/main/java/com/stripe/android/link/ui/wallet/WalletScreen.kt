@@ -103,8 +103,13 @@ internal fun WalletScreen(
     val addBankAccountState = state.addBankAccountState
     LaunchedEffect(addBankAccountState) {
         if (addBankAccountState is AddBankAccountState.FinancialConnectionsConfigured) {
-            financialConnectionsSheetLauncher?.present(addBankAccountState.config)
-            viewModel.onPresentFinancialConnections()
+            if (financialConnectionsSheetLauncher != null) {
+                financialConnectionsSheetLauncher.present(addBankAccountState.config)
+                viewModel.onPresentFinancialConnections(true)
+            } else {
+                // Should never happen.
+                viewModel.onPresentFinancialConnections(false)
+            }
         }
     }
 
@@ -124,13 +129,13 @@ internal fun WalletScreen(
         hideBottomSheetContent = hideBottomSheetContent,
         onAddNewPaymentMethodClicked = {
             if (state.addPaymentMethodOptions.size == 1) {
-                viewModel.onAddPaymentMethodOptionClick(state.addPaymentMethodOptions[0])
+                viewModel.onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
             } else {
                 showBottomSheetContent {
                     AddPaymentMethodMenu(
                         options = state.addPaymentMethodOptions,
                         onOptionClick = { option ->
-                            viewModel.onAddPaymentMethodOptionClick(option)
+                            viewModel.onAddPaymentMethodOptionClicked(option)
                             hideBottomSheetContent()
                         },
                     )
