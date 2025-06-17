@@ -91,7 +91,7 @@ fun CheckoutScreen() {
     }
 }
 
-suspend fun checkout(context: Context): CreateIntentResult {
+private suspend fun checkout(context: Context): CreateIntentResult {
     val request = ExampleCheckoutRequest(
         hotDogCount = 1,
         saladCount = 1,
@@ -117,7 +117,7 @@ suspend fun checkout(context: Context): CreateIntentResult {
     }
 }
 
-fun handlePaymentResult(context: Context, result: EmbeddedPaymentElement.Result) {
+private fun handlePaymentResult(context: Context, result: EmbeddedPaymentElement.Result) {
     when (result) {
         is EmbeddedPaymentElement.Result.Completed -> {
             // Payment completed - show a confirmation screen.
