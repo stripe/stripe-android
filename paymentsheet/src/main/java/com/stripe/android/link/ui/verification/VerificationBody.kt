@@ -43,6 +43,7 @@ import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
@@ -101,7 +102,7 @@ internal fun VerificationBody(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        StripeThemeForLink {
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             OTPElementUI(
                 enabled = !state.isProcessing,
                 element = otpElement,

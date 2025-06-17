@@ -44,6 +44,7 @@ import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -110,7 +111,7 @@ internal fun SignUpBody(
             style = LinkTheme.typography.body,
             color = LinkTheme.colors.textTertiary
         )
-        StripeThemeForLink {
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
                 enabled = signUpScreenState.canEditForm,
                 emailController = emailController,
@@ -215,7 +216,7 @@ private fun SecondaryFields(
     var emailFocused by rememberSaveable { mutableStateOf(false) }
     var nameFocused by rememberSaveable { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth()) {
-        StripeThemeForLink {
+        StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             PhoneNumberCollectionSection(
                 modifier = Modifier
                     .padding(vertical = 4.dp)
