@@ -763,10 +763,10 @@ private fun EmbeddedPicker(
     updateAppearance: (AppearanceStore.State) -> Unit
 ) {
     val embeddedAppearance = currentAppearance.embedded
-    val updateEmbedded: (AppearanceStore.State.Embedded) -> Unit = {
+    val updateEmbedded: (AppearanceStore.State.Embedded) -> Unit = { updatedEmbedded ->
         updateAppearance(
             currentAppearance.copy(
-                embedded = embeddedAppearance
+                embedded = updatedEmbedded
             )
         )
     }
