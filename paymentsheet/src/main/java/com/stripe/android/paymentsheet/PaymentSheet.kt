@@ -2859,6 +2859,7 @@ class PaymentSheet internal constructor(
             /**
              * @param handlers Handlers for shop-pay specific events like shipping method and contact updates.
              */
+            @WalletButtonsPreview
             fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
                 callbacksBuilder.shopPayHandlers(handlers)
             }
