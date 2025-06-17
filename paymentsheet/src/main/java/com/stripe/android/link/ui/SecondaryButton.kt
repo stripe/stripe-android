@@ -27,7 +27,7 @@ internal fun SecondaryButton(
             .fillMaxWidth()
             .height(PrimaryButtonHeight),
         enabled = enabled,
-        shape = LinkTheme.shapes.medium,
+        shape = LinkTheme.shapes.default,
         colors = ButtonDefaults.buttonColors(
             backgroundColor = Color.Transparent,
             disabledBackgroundColor = Color.Transparent,

@@ -384,10 +384,10 @@ private fun PaymentMethodPicker(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(LinkTheme.shapes.large)
+            .clip(LinkTheme.shapes.default)
             .background(
                 color = LinkTheme.colors.surfaceSecondary,
-                shape = LinkTheme.shapes.large
+                shape = LinkTheme.shapes.default
             )
     ) {
         EmailDetails(
