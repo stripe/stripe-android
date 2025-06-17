@@ -116,7 +116,15 @@ internal object PaymentMethodFixtures {
         type = PaymentMethod.Type.Link,
         billingDetails = BILLING_DETAILS,
         customerId = "cus_AQsHpvKfKwJDrF",
-        code = "link"
+        code = "link",
+        linkPaymentDetails = LinkPaymentDetails.Card(
+            nickname = null,
+            expMonth = 8,
+            expYear = 2040,
+            last4 = "4242",
+            brand = CardBrand.Visa,
+            funding = "CREDIT",
+        )
     )
 //
 //    val AU_BECS_DEBIT_PAYMENT_METHOD = PaymentMethod(
@@ -495,6 +503,14 @@ internal object PaymentMethodFixtures {
         ),
         instantDebits = null,
         screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
+    )
+
+    val US_BANK_PAYMENT_SELECTION_WITHOUT_BANK_NAME = US_BANK_PAYMENT_SELECTION.copy(
+        screenState = US_BANK_PAYMENT_SELECTION.screenState.copy(
+            linkedBankAccount = US_BANK_PAYMENT_SELECTION.screenState.linkedBankAccount?.copy(
+                bankName = null,
+            ),
+        )
     )
 
     val LINK_INLINE_PAYMENT_SELECTION = PaymentSelection.New.LinkInline(
