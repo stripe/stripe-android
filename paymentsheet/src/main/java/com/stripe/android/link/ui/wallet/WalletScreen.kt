@@ -95,7 +95,7 @@ internal fun WalletScreen(
     val state by viewModel.uiState.collectAsState()
 
     val financialConnectionsSheetLauncher =
-        rememberFinancialConnectionsSheet(
+        rememberFinancialConnectionsSheetInternal(
             state.addBankAccountOption?.financialConnectionsAvailability,
             viewModel::onFinancialConnectionsResult
         )
@@ -772,8 +772,9 @@ private fun AlertMessage(
     )
 }
 
+// We can't use FC's `rememberFinancialConnectionsSheet` because it doesn't support FC Lite.
 @Composable
-private fun rememberFinancialConnectionsSheet(
+private fun rememberFinancialConnectionsSheetInternal(
     financialConnectionsAvailability: FinancialConnectionsAvailability?,
     callback: (FinancialConnectionsSheetResult) -> Unit
 ): FinancialConnectionsSheetForDataLauncher? {

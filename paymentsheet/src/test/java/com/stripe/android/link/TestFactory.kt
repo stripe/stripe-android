@@ -4,7 +4,6 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
