@@ -46,6 +46,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
 
 private val LinkButtonVerticalPadding = 10.dp
@@ -108,7 +109,7 @@ internal fun LinkButton(
                 onClick = onClick,
                 modifier = modifier
                     .fillMaxWidth()
-                    .defaultMinSize(minHeight = 48.dp)
+                    .defaultMinSize(minHeight = PrimaryButtonTheme.shape.height)
                     .testTag(LinkButtonTestTag),
                 enabled = enabled,
                 shape = LinkButtonShape,
