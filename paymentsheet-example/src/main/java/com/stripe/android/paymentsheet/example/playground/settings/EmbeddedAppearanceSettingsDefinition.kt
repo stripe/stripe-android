@@ -4,12 +4,10 @@ import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 internal object EmbeddedAppearanceSettingsDefinition :
@@ -29,7 +27,7 @@ internal object EmbeddedAppearanceSettingsDefinition :
         return Json.encodeToString(value)
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     override fun setValue(value: EmbeddedAppearance) {
         super.setValue(value)
         AppearanceStore.state = AppearanceStore.state.copy(
@@ -44,7 +42,6 @@ internal enum class EmbeddedRow {
     FloatingButton
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Serializable
 @Parcelize
 internal data class EmbeddedAppearance(
