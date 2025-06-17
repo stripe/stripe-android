@@ -146,6 +146,7 @@ internal object AppearanceStore {
                 FloatingButton
             }
 
+            @Suppress("LongMethod")
             fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
                 return when (embeddedRowStyle) {
                     Row.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
