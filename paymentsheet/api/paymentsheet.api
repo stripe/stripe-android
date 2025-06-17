@@ -1848,7 +1848,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun primaryButtonColor (Landroid/content/res/ColorStateList;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun shippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
-	public final fun shopPayConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$ShopPayConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun walletButtons (Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 }
 
@@ -1942,7 +1941,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$B
 	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
-	public final fun shopPayHandlers (Lcom/stripe/android/paymentsheet/ShopPayHandlers;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Companion {
@@ -2821,13 +2819,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Failed$Cre
 
 public abstract interface class com/stripe/android/paymentsheet/PaymentSheetResultCallback {
 	public abstract fun onPaymentSheetResult (Lcom/stripe/android/paymentsheet/PaymentSheetResult;)V
-}
-
-public final class com/stripe/android/paymentsheet/ShopPayHandlers {
-	public static final field $stable I
-	public fun <init> (Lcom/stripe/android/paymentsheet/ShopPayHandlers$ShippingMethodHandler;Lcom/stripe/android/paymentsheet/ShopPayHandlers$ShippingContactHandler;)V
-	public final fun getShippingContactHandler ()Lcom/stripe/android/paymentsheet/ShopPayHandlers$ShippingContactHandler;
-	public final fun getShippingMethodUpdateHandler ()Lcom/stripe/android/paymentsheet/ShopPayHandlers$ShippingMethodHandler;
 }
 
 public final class com/stripe/android/paymentsheet/ShopPayHandlers$SelectedAddress : android/os/Parcelable {
