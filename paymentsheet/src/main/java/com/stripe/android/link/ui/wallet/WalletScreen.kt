@@ -323,9 +323,6 @@ private fun PaymentMethodSection(
                                 hideBottomSheetContent()
                                 onRemoveClicked(it)
                             },
-                            onCancelClick = {
-                                hideBottomSheetContent()
-                            },
                             onUpdateClick = {
                                 hideBottomSheetContent()
                                 onUpdateClicked(it)
