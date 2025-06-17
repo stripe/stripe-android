@@ -48,7 +48,8 @@ internal class LinkContentScreenshotTest {
                         navController = navController,
                         appBarState = LinkAppBarState(
                             canNavigateBack = false,
-                            showHeader = false,
+                            showHeader = true,
+                            title = null,
                         ),
                         bottomSheetContent = null,
                         initialDestination = LinkScreen.Loading,

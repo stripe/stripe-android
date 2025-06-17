@@ -3,21 +3,17 @@ package com.stripe.android.link.ui.paymentmenthod
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.ui.PaymentMethodForm
 import com.stripe.android.uicore.strings.resolve
@@ -48,14 +44,6 @@ internal fun PaymentMethodBody(
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
 
     ScrollableTopLevelColumn {
-        Text(
-            modifier = Modifier
-                .padding(bottom = 32.dp),
-            text = stringResource(R.string.stripe_add_payment_method),
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
-        )
-
         StripeThemeForLink {
             PaymentMethodForm(
                 uuid = uuid,
