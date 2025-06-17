@@ -478,8 +478,10 @@ private fun EmailDetails(
             .fillMaxWidth()
             .defaultMinSize(minHeight = 64.dp)
             .padding(
-                vertical = 16.dp,
-                horizontal = HorizontalPadding,
+                top = 16.dp,
+                start = 20.dp,
+                end = 14.dp,
+                bottom = 16.dp,
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
