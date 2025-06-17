@@ -1,11 +1,16 @@
 package com.stripe.android.link.ui.wallet
 
+import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
@@ -21,11 +26,13 @@ import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -39,7 +46,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -133,13 +143,127 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `viewmodel should open payment method screen when onAddNewPaymentMethodClicked`() = runTest(dispatcher) {
+    fun `viewmodel should open payment method screen when add card option clicked`() = runTest(dispatcher) {
         val navigationManager = TestNavigationManager()
         val vm = createViewModel(navigationManager = navigationManager)
 
-        vm.onAddPaymentMethodOptionClick(AddPaymentMethodOption.Card)
+        vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Card)
 
         navigationManager.assertNavigatedTo(LinkScreen.PaymentMethod.route)
+    }
+
+    @Test
+    fun `viewmodel should handle state updates through the add bank payment method happy path`() = runTest(dispatcher) {
+        val linkAccount = TestFactory.LINK_ACCOUNT_WITH_PK
+        val newBankAccountId = "pm_9872893"
+        testAddBankAccount(
+            linkAccount = linkAccount,
+        ) { vm, linkAccountManager ->
+            val newBankAccountDetails = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(id = newBankAccountId)
+            linkAccountManager.createBankAccountPaymentDetailsResult = Result.success(newBankAccountDetails)
+
+            awaitItem().run {
+                assertThat(userSetIsExpanded).isTrue()
+                assertThat(isProcessing).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+
+            vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
+            awaitItem().run {
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.ConfiguringFinancialConnections)
+            }
+            awaitItem().run {
+                val expectedConfig = FinancialConnectionsSheetConfiguration(
+                    financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
+                    publishableKey = linkAccount.consumerPublishableKey!!,
+                )
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState)
+                    .isEqualTo(AddBankAccountState.FinancialConnectionsConfigured(expectedConfig))
+            }
+
+            vm.onPresentFinancialConnections(true)
+            awaitItem().run {
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.PresentingFinancialConnections)
+            }
+
+            vm.onFinancialConnectionsResult(
+                FinancialConnectionsSheetResult.Completed(mockFinancialConnectionsSession())
+            )
+            awaitItem().run {
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.ProcessingFinancialConnectionsResult)
+            }
+            awaitItem().run {
+                assertThat(selectedItemId).isEqualTo(newBankAccountId)
+                assertThat(userSetIsExpanded).isFalse()
+                assertThat(isProcessing).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should handle link account session request error when adding bank account`() = runTest(dispatcher) {
+        testAddBankAccount { vm, linkAccountManager ->
+            awaitItem().run {
+                assertThat(isProcessing).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+
+            val error = Throwable("oops")
+            linkAccountManager.createLinkAccountSessionResult = Result.failure(error)
+            vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
+            awaitItem().run {
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.ConfiguringFinancialConnections)
+            }
+            awaitItem().run {
+                assertThat(isProcessing).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+                assertThat(alertMessage).isEqualTo(error.stripeErrorMessage())
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should handle onFinancialConnectionsResult with Canceled`() = runTest(dispatcher) {
+        testAddBankAccount { vm, _ ->
+            skipItems(1)
+            vm.onPresentFinancialConnections(true)
+            awaitItem().run {
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.PresentingFinancialConnections)
+            }
+
+            vm.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Canceled)
+            awaitItem().run {
+                assertThat(isProcessing).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should handle onFinancialConnectionsResult with Failed`() = runTest(dispatcher) {
+        testAddBankAccount { vm, _ ->
+            skipItems(1)
+            vm.onPresentFinancialConnections(true)
+            awaitItem().run {
+                assertThat(isProcessing).isTrue()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.PresentingFinancialConnections)
+            }
+
+            val error = Throwable("oops")
+            vm.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Failed(error))
+            awaitItem().run {
+                assertThat(isProcessing).isFalse()
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+                assertThat(alertMessage).isEqualTo(error.stripeErrorMessage())
+            }
+        }
     }
 
     @Test
@@ -774,6 +898,7 @@ class WalletViewModelTest {
     }
 
     private fun createViewModel(
+        linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
@@ -786,7 +911,7 @@ class WalletViewModelTest {
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,
-            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkAccount = linkAccount,
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
             logger = logger,
@@ -796,6 +921,33 @@ class WalletViewModelTest {
             dismissalCoordinator = dismissalCoordinator,
             linkLaunchMode = linkLaunchMode
         )
+    }
+
+    private suspend fun testAddBankAccount(
+        linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
+        validate: suspend TurbineTestContext<WalletUiState>.(WalletViewModel, WalletLinkAccountManager) -> Unit,
+    ) {
+        val linkAccountManager = WalletLinkAccountManager()
+        val vm = createViewModel(
+            linkAccount = linkAccount,
+            linkAccountManager = linkAccountManager,
+        )
+        vm.onExpandedChanged(true)
+
+        vm.uiState.test { validate(vm, linkAccountManager) }
+    }
+
+    private fun mockFinancialConnectionsSession(): FinancialConnectionsSession {
+        val financialConnectionsSession = mock<FinancialConnectionsSession>()
+        whenever(financialConnectionsSession.id).thenReturn("123")
+        whenever(financialConnectionsSession.accounts).thenReturn(
+            FinancialConnectionsAccountList(
+                data = listOf(TestFactory.FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT),
+                hasMore = false,
+                url = "url",
+            )
+        )
+        return financialConnectionsSession
     }
 
     companion object {
