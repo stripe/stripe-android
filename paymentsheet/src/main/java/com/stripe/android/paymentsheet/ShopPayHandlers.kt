@@ -20,6 +20,7 @@ class ShopPayHandlers(
     /**
      * Describes shipping rate updates Shop Pay should within its UI
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class ShippingRateUpdate(
@@ -30,6 +31,7 @@ class ShopPayHandlers(
     /**
      * Describes shipping contact updates Shop Pay should make within its UI
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class ShippingContactUpdate(
@@ -40,6 +42,7 @@ class ShopPayHandlers(
     /**
      * Describes the address selected by the customer.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class SelectedAddress(
@@ -52,6 +55,7 @@ class ShopPayHandlers(
     /**
      * The shipping rate selected by the customer.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class SelectedShippingRate(
@@ -65,6 +69,7 @@ class ShopPayHandlers(
      *
      * @see onRateSelected
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ShippingMethodHandler {
         /**
          * @param selectedRate The [SelectedShippingRate] that was selected by the user.
@@ -84,6 +89,7 @@ class ShopPayHandlers(
      *
      * @see onAddressSelected
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ShippingContactHandler {
         /**
          * @param address The [SelectedAddress] that was selected by the user.

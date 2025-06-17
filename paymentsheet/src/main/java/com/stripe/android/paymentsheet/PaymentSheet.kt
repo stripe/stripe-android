@@ -2677,6 +2677,7 @@ class PaymentSheet internal constructor(
      * @param shippingRates A list of [ShippingRate] objects. The first shipping rate listed
      * appears in the payment interface as the default option.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
     @Parcelize
     class ShopPayConfiguration(
@@ -2690,6 +2691,7 @@ class PaymentSheet internal constructor(
         /**
          * A type used to describe a single item for in the Shop Pay wallet UI.
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         @Parcelize
         class LineItem(
@@ -2700,6 +2702,7 @@ class PaymentSheet internal constructor(
         /**
          * A shipping rate option.
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         @Parcelize
         class ShippingRate(
@@ -2713,7 +2716,9 @@ class PaymentSheet internal constructor(
          * Type used to describe DeliveryEstimates for shipping.
          * See https://docs.stripe.com/js/elements_object/create_express_checkout_element#express_checkout_element_create-options-shippingRates-deliveryEstimate
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed interface DeliveryEstimate : Parcelable {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Poko
             @Parcelize
             class Range(
@@ -2721,18 +2726,22 @@ class PaymentSheet internal constructor(
                 val minimum: DeliveryEstimateUnit
             ) : DeliveryEstimate
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Poko
             @Parcelize
             class Text(
                 val value: String
             ) : DeliveryEstimate
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @Poko
             @Parcelize
             class DeliveryEstimateUnit(
                 val unit: TimeUnit,
                 val value: Int
             ) : Parcelable {
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 enum class TimeUnit {
                     HOUR,
                     DAY,
