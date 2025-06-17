@@ -158,6 +158,7 @@ internal class WalletViewModel @Inject constructor(
                         selectedItemId = selectedItemId,
                         userSetIsExpanded = if (isAfterAdding) false else it.userSetIsExpanded,
                         errorMessage = if (isAfterAdding) null else it.errorMessage,
+                        addBankAccountState = if (isAfterAdding) AddBankAccountState.Idle else it.addBankAccountState,
                     )
                 }
 
