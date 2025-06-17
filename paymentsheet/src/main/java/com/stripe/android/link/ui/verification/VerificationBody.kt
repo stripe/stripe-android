@@ -299,7 +299,7 @@ private fun ChangeEmailRow(
                 ),
             color = LinkTheme.colors.textBrand,
             maxLines = 1,
-            style = LinkTheme.typography.body
+            style = LinkTheme.typography.bodyEmphasized
         )
     }
 }

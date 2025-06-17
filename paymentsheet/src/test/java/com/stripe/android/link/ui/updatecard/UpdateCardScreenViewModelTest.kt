@@ -85,15 +85,6 @@ class UpdateCardScreenViewModelTest {
         navigationManager.assertNavigatedBack()
     }
 
-    @Test
-    fun `onCancelClicked navigates back`() = runTest(dispatcher) {
-        val navigationManager = TestNavigationManager()
-        val viewModel = createViewModel(navigationManager = navigationManager)
-
-        viewModel.onCancelClicked()
-        navigationManager.assertNavigatedBack()
-    }
-
     private fun createViewModel(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         navigationManager: NavigationManager = TestNavigationManager(),
