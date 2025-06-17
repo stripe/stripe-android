@@ -225,13 +225,12 @@ class PaymentSheetCustomerSessionTest {
         presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.").customer(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_1",
-                    ),
-                ),
+                    )
+                ).build(),
             )
         }
     }
@@ -241,13 +240,12 @@ class PaymentSheetCustomerSessionTest {
         presentPaymentSheet {
             presentWithSetupIntent(
                 setupIntentClientSecret = "seti_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.").customer(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_1",
-                    ),
-                ),
+                    )
+                ).build(),
             )
         }
     }

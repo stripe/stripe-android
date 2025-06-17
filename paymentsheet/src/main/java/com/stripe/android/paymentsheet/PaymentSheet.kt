@@ -36,6 +36,8 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -724,6 +726,24 @@ class PaymentSheet internal constructor(
     ) : Parcelable {
 
         @JvmOverloads
+        @Deprecated(
+            message = "This will be removed in a future release. Use PaymentSheet.Configuration.Builder instead.",
+            replaceWith = ReplaceWith(
+                expression = "PaymentSheet.Configuration.Builder(merchantDisplayName)" +
+                    ".customer(customer)" +
+                    ".googlePay(googlePay)" +
+                    ".primaryButtonColor(primaryButtonColor)" +
+                    ".defaultBillingDetails(defaultBillingDetails)" +
+                    ".shippingDetails(shippingDetails)" +
+                    ".allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)" +
+                    ".allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)" +
+                    ".appearance(appearance)" +
+                    ".primaryButtonLabel(primaryButtonLabel)" +
+                    ".billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)" +
+                    ".preferredNetworks(preferredNetworks)" +
+                    ".build()",
+            )
+        )
         constructor(
             /**
              * Your customer-facing business name.
@@ -1051,7 +1071,7 @@ class PaymentSheet internal constructor(
         internal companion object {
             fun default(context: Context): Configuration {
                 val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
-                return Configuration(appName)
+                return Builder(appName).build()
             }
         }
     }

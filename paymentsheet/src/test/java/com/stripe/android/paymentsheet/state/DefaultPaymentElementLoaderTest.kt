@@ -540,7 +540,8 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant",
                 allowsDelayedPaymentMethods = true,
             ),
             metadata = PaymentElementLoader.Metadata(
@@ -3239,29 +3240,31 @@ internal class DefaultPaymentElementLoaderTest {
         shippingDetails: AddressDetails? = null,
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
     ): PaymentSheet.Configuration {
-        return PaymentSheet.Configuration(
-            merchantDisplayName = "Merchant",
-            customer = customer,
-            shippingDetails = shippingDetails,
-            defaultBillingDetails = defaultBillingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = CountryCode.US.value
-            ).takeIf { isGooglePayEnabled }
-        )
+        return PaymentSheet.Configuration.Builder("Merchant")
+            .customer(customer)
+            .shippingDetails(shippingDetails)
+            .defaultBillingDetails(defaultBillingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = CountryCode.US.value
+                ).takeIf { isGooglePayEnabled }
+            )
+            .build()
     }
 
     private companion object {
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
-        private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
-            merchantDisplayName = "Some Name",
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_123",
-                ephemeralKeySecret = "ek_123",
-            ),
-        )
+        private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration.Builder("Some Name")
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                )
+            )
+            .build()
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
         )

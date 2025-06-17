@@ -202,17 +202,20 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             stripeAccountId = stripeAccountId,
         )
 
-        val config = PaymentSheet.Configuration(
-            allowsDelayedPaymentMethods = true,
-            merchantDisplayName = "Example, Inc.",
-            customer = PaymentSheet.CustomerConfiguration(
-                id = requireNotNull(customerId),
-                ephemeralKeySecret = requireNotNull(ephemeralKey),
-            ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
-                email = email.takeIf { it.isNotBlank() },
-            ),
-        )
+        val config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+            .customer(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = requireNotNull(customerId),
+                    ephemeralKeySecret = requireNotNull(ephemeralKey),
+                )
+            )
+            .defaultBillingDetails(
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    email = email.takeIf { it.isNotBlank() },
+                )
+            )
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods = true)
+            .build()
 
         paymentSheet.presentWithPaymentIntent(
             paymentIntentClientSecret = paymentIntentSecret,

@@ -22,7 +22,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
             Result.success(
                 PaymentElementLoader.State(
                     customer = null,
-                    config = PaymentSheet.Configuration("Example").asCommonConfiguration(),
+                    config = PaymentSheet.Configuration.Builder("Example").build().asCommonConfiguration(),
                     paymentSelection = null,
                     validationError = validationError,
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent),

@@ -489,12 +489,17 @@ internal class DefaultFlowControllerTest {
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
                 customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
+                config = PaymentSheet.Configuration
+                    .Builder("com.stripe.android.paymentsheet.test")
+                    .build()
+                    .asCommonConfiguration(),
                 paymentSelection = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
-            configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
+            configuration = PaymentSheet.Configuration
+                .Builder("com.stripe.android.paymentsheet.test")
+                .build(),
             enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             linkAccountInfo = LinkAccountUpdate.Value(null),
@@ -1625,9 +1630,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Monsters, Inc.",
-            ),
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Monsters, Inc.").build(),
         ) { _, _ ->
             throw AssertionError("ConfirmCallback shouldn't have been called")
         }
@@ -1663,9 +1666,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureExpectingError(
             clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Monsters, Inc.",
-            ),
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Monsters, Inc.").build(),
         )
 
         flowController.confirm()
@@ -1694,9 +1695,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureExpectingError(
             clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Example, Inc.",
-            ),
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.").build(),
         )
 
         flowController.presentPaymentOptions()
@@ -1717,9 +1716,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Example, Inc.",
-            ),
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.").build(),
         ) { _, _ ->
             throw AssertionError("ConfirmCallback shouldn't have been called")
         }
@@ -1856,16 +1853,17 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureExpectingSuccess(
             clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "My merchant",
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
-                    amount = 1234L,
-                    label = expectedLabel,
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "My merchant")
+                .googlePay(
+                    googlePay = PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                        amount = 1234L,
+                        label = expectedLabel,
+                    )
                 )
-            )
+                .build()
         )
 
         flowController.onPaymentOptionResult(
@@ -1891,16 +1889,17 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureExpectingSuccess(
             clientSecret = PaymentSheetFixtures.SETUP_CLIENT_SECRET,
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "My merchant",
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
-                    amount = expectedAmount,
-                    label = expectedLabel,
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "My merchant")
+                .googlePay(
+                    googlePay = PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                        amount = expectedAmount,
+                        label = expectedLabel,
+                    )
                 )
-            )
+                .build()
         )
 
         flowController.onPaymentOptionResult(
@@ -2301,21 +2300,22 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = "pi_123",
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant, Inc.",
-                shippingDetails = AddressDetails(
-                    name = "John Doe",
-                    phoneNumber = "11234567890",
-                    address = PaymentSheet.Address(
-                        line1 = "123 Apple Street",
-                        line2 = "Unit 47",
-                        city = "South San Francisco",
-                        state = "CA",
-                        country = "US",
-                        postalCode = "99899",
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                .shippingDetails(
+                    shippingDetails = AddressDetails(
+                        name = "John Doe",
+                        phoneNumber = "11234567890",
+                        address = PaymentSheet.Address(
+                            line1 = "123 Apple Street",
+                            line2 = "Unit 47",
+                            city = "South San Francisco",
+                            state = "CA",
+                            country = "US",
+                            postalCode = "99899",
+                        )
                     )
                 )
-            )
+                .build()
         ) { _, _ ->
             // Do nothing
         }
@@ -2337,7 +2337,6 @@ internal class DefaultFlowControllerTest {
         flowController.confirm()
 
         val call = fakeIntentConfirmationInterceptor.calls.awaitItem()
-
         assertThat(call).isEqualTo(
             FakeIntentConfirmationInterceptor.InterceptCall.WithExistingPaymentMethod(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -2369,10 +2368,11 @@ internal class DefaultFlowControllerTest {
 
         flowController.configureWithSetupIntent(
             setupIntentClientSecret = "si_123",
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant, Inc.",
-                shippingDetails = null
-            )
+            configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                .shippingDetails(
+                    shippingDetails = null
+                )
+                .build()
         ) { _, _ ->
             // Do nothing
         }
