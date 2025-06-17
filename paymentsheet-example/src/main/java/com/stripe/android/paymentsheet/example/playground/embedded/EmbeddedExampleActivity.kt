@@ -22,11 +22,14 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.R
 
 internal class EmbeddedExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        supportActionBar?.title = getString(R.string.embedded_example_title)
         PaymentConfiguration.init(this, publishableKey = "pk_test_TYooMQauvdEDq54NiTphI7jx")
+
         setContent {
             CheckoutScreen()
         }

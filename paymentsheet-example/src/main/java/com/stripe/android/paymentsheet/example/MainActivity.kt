@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
@@ -84,6 +85,12 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(
+                titleResId = R.string.embedded_example_title,
+                subtitleResId = R.string.embedded_subtitle,
+                klass = EmbeddedExampleActivity::class.java,
+                section = MenuItem.Section.Embedded,
+            ),
+            MenuItem(
                 titleResId = R.string.customersheet_example_title,
                 subtitleResId = R.string.customer_subtitle,
                 klass = CustomerSheetExampleActivity::class.java,
@@ -131,6 +138,7 @@ private data class MenuItem(
         CompleteFlow,
         CustomFlow,
         CustomerSheet,
+        Embedded,
         AddressElement,
     }
 }
@@ -155,6 +163,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Custom Flow",
             items = groupedItems.getOrElse(MenuItem.Section.CustomFlow) { emptyList() },
+        )
+
+        Section(
+            title = "Embedded Payment Element",
+            items = groupedItems.getOrElse(MenuItem.Section.Embedded) { emptyList() }
         )
 
         Section(
