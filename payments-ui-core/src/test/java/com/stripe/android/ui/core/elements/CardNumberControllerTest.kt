@@ -1,9 +1,14 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.compose.material.TextField
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -16,8 +21,11 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalAnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -38,6 +46,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
@@ -504,6 +513,64 @@ internal class CardNumberControllerTest {
             val fourthReported = awaitItem()
             assertEquals(CardBrand.MasterCard, fourthReported, "MasterCard should be reported once")
         }
+    }
+
+    @Test
+    fun `on card number incomplete requiring more than 16 digits, should report event`() {
+        val eventReporter: AnalyticsEventReporter = mock()
+
+        val cardNumberController = createController()
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalAnalyticsEventReporter provides eventReporter
+            ) {
+                cardNumberController.ComposeUI(
+                    enabled = true,
+                    field = SimpleTextElement(
+                        identifier = IdentifierSpec.Name,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = SimpleTextFieldConfig(
+                                label = "Card number".resolvableString
+                            )
+                        ),
+                    ),
+                    modifier = Modifier.testTag(TEST_TAG),
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                )
+                TextField(
+                    modifier = Modifier.testTag("SECOND_TEXT_FIELD"),
+                    value = TextFieldValue(),
+                    onValueChange = {},
+                )
+            }
+        }
+
+        composeTestRule.onNode(hasTestTag(TEST_TAG)).performClick()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasTestTag(TEST_TAG)).performTextInput("621682805")
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasTestTag(TEST_TAG)).performTextInput("764")
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNode(hasTestTag(TEST_TAG)).performTextInput("2532")
+        composeTestRule.waitForIdle()
+
+        verify(eventReporter, never())
+            .onAnalyticsEvent(
+                PaymentAnalyticsEvent.CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields
+            )
+
+        composeTestRule.onNode(hasTestTag("SECOND_TEXT_FIELD")).performClick()
+        composeTestRule.waitForIdle()
+
+        verify(eventReporter, times(1))
+            .onAnalyticsEvent(
+                PaymentAnalyticsEvent.CardMetadataExpectedExtraDigitsButUserEntered16ThenSwitchedFields
+            )
     }
 
     @Test
