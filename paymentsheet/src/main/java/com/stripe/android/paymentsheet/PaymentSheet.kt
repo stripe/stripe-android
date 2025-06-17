@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -1017,7 +1018,8 @@ class PaymentSheet internal constructor(
             /**
              * Configuration related to `ShopPay`
              */
-            @WalletButtonsPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ShopPayPreview
             fun shopPayConfiguration(shopPayConfiguration: ShopPayConfiguration) = apply {
                 this.shopPayConfiguration = shopPayConfiguration
             }
@@ -2859,7 +2861,8 @@ class PaymentSheet internal constructor(
             /**
              * @param handlers Handlers for shop-pay specific events like shipping method and contact updates.
              */
-            @WalletButtonsPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ShopPayPreview
             fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
                 callbacksBuilder.shopPayHandlers(handlers)
             }

@@ -7,6 +7,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBeha
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -16,7 +17,7 @@ import com.stripe.android.paymentsheet.ShopPayHandlers
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
-    WalletButtonsPreview::class
+    ShopPayPreview::class
 )
 internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
@@ -65,7 +66,7 @@ internal data class PaymentElementCallbacks private constructor(
             )
         }
 
-        @OptIn(WalletButtonsPreview::class)
+        @OptIn(ShopPayPreview::class)
         fun shopPayHandlers(shopPayHandlers: ShopPayHandlers?) = apply {
             this.shopPayHandlers = shopPayHandlers
         }

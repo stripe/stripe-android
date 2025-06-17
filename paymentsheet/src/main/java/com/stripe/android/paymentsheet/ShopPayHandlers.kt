@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.os.Parcelable
-import com.stripe.android.paymentelement.WalletButtonsPreview
+import androidx.annotation.RestrictTo
+import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import dev.drewhamilton.poko.Poko
@@ -10,7 +11,8 @@ import kotlinx.parcelize.Parcelize
 /**
  * Handler blocks for Shop Pay.
  */
-@WalletButtonsPreview
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@ShopPayPreview
 class ShopPayHandlers(
     val shippingMethodUpdateHandler: ShippingMethodHandler,
     val shippingContactHandler: ShippingContactHandler
