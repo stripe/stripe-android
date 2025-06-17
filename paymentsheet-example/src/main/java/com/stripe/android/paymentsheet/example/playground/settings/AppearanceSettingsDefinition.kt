@@ -16,7 +16,7 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        configurationBuilder.appearance(AppearanceStore.state)
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 
     @ExperimentalEmbeddedPaymentElementApi
@@ -26,7 +26,7 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationBuilder.appearance(AppearanceStore.state)
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 
     override fun configure(
@@ -35,6 +35,6 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
-        configurationBuilder.appearance(AppearanceStore.state)
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 }

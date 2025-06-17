@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
-import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -63,58 +62,28 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.fragment.app.setFragmentResult
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.EMBEDDED_KEY
-import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.ICON_STYLE_KEY
-import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.INSETS_KEY
-import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment.Companion.SECTION_SPACING_KEY
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedRow
-import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearance
-import com.stripe.android.paymentsheet.example.playground.settings.SectionSpacing
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
 private val SECTION_LABEL_COLOR = Color(159, 159, 169)
 private const val DEFAULT_PRIMARY_BUTTON_HEIGHT = 48f
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment() {
-
-    private var embeddedAppearance by mutableStateOf(EmbeddedAppearance())
-    private var formInsetsAppearance by mutableStateOf(FormInsetsAppearance())
-    private var sectionSpacing: SectionSpacing by mutableStateOf(SectionSpacing.Default)
-    private var iconStyle: PaymentSheet.IconStyle by mutableStateOf(PaymentSheet.IconStyle.Filled)
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        embeddedAppearance = arguments.getEmbeddedAppearance()
-        formInsetsAppearance = arguments.getFormInsetsAppearance()
-        sectionSpacing = arguments.getSectionSpacing()
-        iconStyle = arguments.getIconStyle()
-
         return ComposeView(requireContext()).apply {
             setContent {
                 AppearancePicker(
                     currentAppearance = AppearanceStore.state,
                     updateAppearance = { AppearanceStore.state = it },
-                    embeddedAppearance = embeddedAppearance,
-                    updateEmbedded = { embeddedAppearance = it },
-                    formInsetsAppearance = formInsetsAppearance,
-                    updateInsets = { formInsetsAppearance = it },
-                    sectionSpacing = sectionSpacing,
-                    updateSectionSpacing = { sectionSpacing = it },
-                    iconStyle = iconStyle,
-                    updateIconStyle = { iconStyle = it },
                     resetAppearance = ::resetAppearance
                 )
             }
@@ -123,49 +92,19 @@ internal class AppearanceBottomSheetDialogFragment : BottomSheetDialogFragment()
 
     private fun resetAppearance() {
         AppearanceStore.reset()
-        embeddedAppearance = EmbeddedAppearance()
-        formInsetsAppearance = FormInsetsAppearance()
-        sectionSpacing = SectionSpacing.Default
-        iconStyle = PaymentSheet.IconStyle.Filled
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        val result = Bundle().apply {
-            putParcelable(EMBEDDED_KEY, embeddedAppearance)
-            putParcelable(INSETS_KEY, formInsetsAppearance)
-            putParcelable(SECTION_SPACING_KEY, sectionSpacing)
-            putString(ICON_STYLE_KEY, iconStyle.name)
-        }
-        setFragmentResult(REQUEST_KEY, result)
     }
 
     companion object {
         fun newInstance(): AppearanceBottomSheetDialogFragment {
             return AppearanceBottomSheetDialogFragment()
         }
-
-        const val REQUEST_KEY = "REQUEST_KEY"
-        const val EMBEDDED_KEY = "EMBEDDED_APPEARANCE"
-        const val INSETS_KEY = "INSETS_APPEARANCE"
-        const val SECTION_SPACING_KEY = "SECTION_SPACING_KEY"
-        const val ICON_STYLE_KEY = "ICON_STYLE_KEY"
     }
 }
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun AppearancePicker(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
-    embeddedAppearance: EmbeddedAppearance,
-    updateEmbedded: (EmbeddedAppearance) -> Unit,
-    formInsetsAppearance: FormInsetsAppearance,
-    updateInsets: (FormInsetsAppearance) -> Unit,
-    sectionSpacing: SectionSpacing,
-    updateSectionSpacing: (SectionSpacing) -> Unit,
-    iconStyle: PaymentSheet.IconStyle,
-    updateIconStyle: (PaymentSheet.IconStyle) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
     resetAppearance: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -188,8 +127,8 @@ private fun AppearancePicker(
 
             CustomizationCard("Icons") {
                 Icons(
-                    iconStyle = iconStyle,
-                    updateIconStyle = updateIconStyle,
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
                 )
             }
             CustomizationCard("Colors") {
@@ -206,14 +145,19 @@ private fun AppearancePicker(
             }
             CustomizationCard("Form Insets") {
                 Insets(
-                    insetsAppearance = formInsetsAppearance,
-                    updateInsets = updateInsets
+                    currentInsets = currentAppearance.formInsetValues,
+                    defaultCustomInsets = AppearanceStore.State.Insets.defaultFormInsets,
+                    updateInsets = {
+                        updateAppearance(
+                            currentAppearance.copy(formInsetValues = it)
+                        )
+                    },
                 )
             }
             CustomizationCard("Section Spacing") {
                 SectionSpacing(
-                    spacing = sectionSpacing,
-                    updateSpacing = updateSectionSpacing,
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
                 )
             }
             CustomizationCard("Typography") {
@@ -230,8 +174,8 @@ private fun AppearancePicker(
             }
             CustomizationCard("Embedded") {
                 EmbeddedPicker(
-                    embeddedAppearance = embeddedAppearance,
-                    updateEmbedded = updateEmbedded
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
                 )
             }
 
@@ -281,24 +225,26 @@ private fun CustomizationCard(
     }
 }
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Icons(
-    iconStyle: PaymentSheet.IconStyle,
-    updateIconStyle: (PaymentSheet.IconStyle) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     IconStyleDropDown(
-        style = iconStyle,
+        style = currentAppearance.iconStyle,
     ) {
-        updateIconStyle(it)
+        updateAppearance(
+            currentAppearance.copy(
+                iconStyle = it
+            )
+        )
     }
 }
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Colors(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     ColorItem(
         label = "primary",
@@ -477,11 +423,10 @@ private fun Colors(
     )
 }
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Shapes(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     IncrementDecrementItem("cornerRadiusDp", currentAppearance.shapes.cornerRadiusDp) {
         updateAppearance(
@@ -516,62 +461,82 @@ private fun Shapes(
 
 @Composable
 private fun Insets(
-    insetsAppearance: FormInsetsAppearance,
-    updateInsets: (FormInsetsAppearance) -> Unit
+    currentInsets: AppearanceStore.State.Insets,
+    defaultCustomInsets: AppearanceStore.State.Insets.Custom,
+    updateInsets: (AppearanceStore.State.Insets) -> Unit,
 ) {
-    IncrementDecrementItem("start", insetsAppearance.start) {
+    AppearanceToggle("Custom", currentInsets is AppearanceStore.State.Insets.Custom) {
         updateInsets(
-            insetsAppearance.copy(
-                start = it
-            )
+            if (it) {
+                defaultCustomInsets
+            } else {
+                AppearanceStore.State.Insets.Default
+            }
         )
     }
-    Divider()
-    IncrementDecrementItem("top", insetsAppearance.top) {
-        updateInsets(
-            insetsAppearance.copy(
-                top = it
+
+    if (currentInsets is AppearanceStore.State.Insets.Custom) {
+        Divider()
+        IncrementDecrementItem("start", currentInsets.start) {
+            updateInsets(
+                currentInsets.copy(
+                    start = it
+                )
             )
-        )
-    }
-    Divider()
-    IncrementDecrementItem("end", insetsAppearance.end) {
-        updateInsets(
-            insetsAppearance.copy(
-                end = it
+        }
+        Divider()
+        IncrementDecrementItem("top", currentInsets.top) {
+            updateInsets(
+                currentInsets.copy(
+                    top = it
+                )
             )
-        )
-    }
-    Divider()
-    IncrementDecrementItem("bottom", insetsAppearance.bottom) {
-        updateInsets(
-            insetsAppearance.copy(
-                bottom = it
+        }
+        Divider()
+        IncrementDecrementItem("end", currentInsets.end) {
+            updateInsets(
+                currentInsets.copy(
+                    end = it
+                )
             )
-        )
+        }
+        Divider()
+        IncrementDecrementItem("bottom", currentInsets.bottom) {
+            updateInsets(
+                currentInsets.copy(
+                    bottom = it
+                )
+            )
+        }
     }
 }
 
 @Composable
 private fun SectionSpacing(
-    spacing: SectionSpacing,
-    updateSpacing: (SectionSpacing) -> Unit
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
-    AppearanceToggle("Custom", spacing is SectionSpacing.Custom) {
-        updateSpacing(
-            if (it) {
-                SectionSpacing.Custom()
-            } else {
-                SectionSpacing.Default
-            }
+    val sectionSpacing = currentAppearance.sectionSpacing
+
+    AppearanceToggle("Custom", sectionSpacing is AppearanceStore.State.SectionSpacing.Custom) {
+        updateAppearance(
+            currentAppearance.copy(
+                sectionSpacing = if (it) {
+                    AppearanceStore.State.SectionSpacing.Custom()
+                } else {
+                    AppearanceStore.State.SectionSpacing.Default
+                }
+            )
         )
     }
 
-    if (spacing is SectionSpacing.Custom) {
+    if (sectionSpacing is AppearanceStore.State.SectionSpacing.Custom) {
         Divider()
-        IncrementDecrementItem("value", spacing.spacingDp) {
-            updateSpacing(
-                spacing.copy(spacingDp = it)
+        IncrementDecrementItem("value", sectionSpacing.spacingDp) {
+            updateAppearance(
+                currentAppearance.copy(
+                    sectionSpacing = sectionSpacing.copy(it)
+                )
             )
         }
     }
@@ -580,8 +545,8 @@ private fun SectionSpacing(
 @OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Typography(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     FontScaleSlider(currentAppearance.typography.sizeScaleFactor) {
         updateAppearance(
@@ -604,11 +569,10 @@ private fun Typography(
     }
 }
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun PrimaryButton(
-    currentAppearance: PaymentSheet.Appearance,
-    updateAppearance: (PaymentSheet.Appearance) -> Unit,
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
 ) {
     val currentButton = currentAppearance.primaryButton
 
@@ -795,9 +759,18 @@ private fun PrimaryButton(
 
 @Composable
 private fun EmbeddedPicker(
-    embeddedAppearance: EmbeddedAppearance,
-    updateEmbedded: (EmbeddedAppearance) -> Unit
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit
 ) {
+    val embeddedAppearance = currentAppearance.embedded
+    val updateEmbedded: (AppearanceStore.State.Embedded) -> Unit = {
+        updateAppearance(
+            currentAppearance.copy(
+                embedded = embeddedAppearance
+            )
+        )
+    }
+
     RowStyleDropDown(embeddedAppearance.embeddedRowStyle) { style ->
         updateEmbedded(
             embeddedAppearance.copy(
@@ -1106,11 +1079,10 @@ private fun FontScaleSlider(sliderPosition: Float, onValueChange: (Float) -> Uni
     )
 }
 
-@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun IconStyleDropDown(
-    style: PaymentSheet.IconStyle,
-    onIconStyleSelected: (PaymentSheet.IconStyle) -> Unit
+    style: AppearanceStore.State.IconStyle,
+    onIconStyleSelected: (AppearanceStore.State.IconStyle) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -1133,7 +1105,7 @@ private fun IconStyleDropDown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            PaymentSheet.IconStyle.entries.forEach {
+            AppearanceStore.State.IconStyle.entries.forEach {
                 DropdownMenuItem(
                     onClick = {
                         expanded = false
@@ -1148,7 +1120,10 @@ private fun IconStyleDropDown(
 }
 
 @Composable
-private fun RowStyleDropDown(style: EmbeddedRow, rowStyleSelectedCallback: (EmbeddedRow) -> Unit) {
+private fun RowStyleDropDown(
+    style: AppearanceStore.State.Embedded.Row,
+    rowStyleSelectedCallback: (AppearanceStore.State.Embedded.Row) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Row(
@@ -1170,7 +1145,7 @@ private fun RowStyleDropDown(style: EmbeddedRow, rowStyleSelectedCallback: (Embe
             onDismissRequest = { expanded = false },
             modifier = Modifier.fillMaxWidth()
         ) {
-            EmbeddedRow.entries.forEach {
+            AppearanceStore.State.Embedded.Row.entries.forEach {
                 DropdownMenuItem(
                     onClick = {
                         expanded = false
@@ -1243,45 +1218,4 @@ private fun getFontFromResource(fontResId: Int?): FontFamily {
     } ?: run {
         FontFamily.Default
     }
-}
-
-internal fun Bundle?.getSectionSpacing(): SectionSpacing {
-    val sectionSpacing = if (SDK_INT >= 33) {
-        this?.getParcelable(SECTION_SPACING_KEY, SectionSpacing::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        this?.getParcelable(SECTION_SPACING_KEY)
-    }
-    return sectionSpacing ?: SectionSpacing.Default
-}
-
-@OptIn(AppearanceAPIAdditionsPreview::class)
-internal fun Bundle?.getIconStyle(): PaymentSheet.IconStyle {
-    return this?.getString(ICON_STYLE_KEY)?.let {
-        try {
-            PaymentSheet.IconStyle.valueOf(it)
-        } catch (exception: IllegalArgumentException) {
-            null
-        }
-    } ?: PaymentSheet.IconStyle.Filled
-}
-
-internal fun Bundle?.getEmbeddedAppearance(): EmbeddedAppearance {
-    val appearance = if (SDK_INT >= 33) {
-        this?.getParcelable(EMBEDDED_KEY, EmbeddedAppearance::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        this?.getParcelable(EMBEDDED_KEY)
-    }
-    return appearance ?: EmbeddedAppearance()
-}
-
-internal fun Bundle?.getFormInsetsAppearance(): FormInsetsAppearance {
-    val appearance = if (SDK_INT >= 33) {
-        this?.getParcelable(INSETS_KEY, FormInsetsAppearance::class.java)
-    } else {
-        @Suppress("DEPRECATION")
-        this?.getParcelable(INSETS_KEY)
-    }
-    return appearance ?: FormInsetsAppearance()
 }

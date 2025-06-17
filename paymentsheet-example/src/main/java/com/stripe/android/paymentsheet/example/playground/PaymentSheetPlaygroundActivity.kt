@@ -32,7 +32,6 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -52,21 +51,13 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
-import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.activity.getFormInsetsAppearance
-import com.stripe.android.paymentsheet.example.playground.activity.getIconStyle
-import com.stripe.android.paymentsheet.example.playground.activity.getSectionSpacing
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.FormInsetsAppearanceSettingDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.IconStyleAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
-import com.stripe.android.paymentsheet.example.playground.settings.SectionSpacingSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
@@ -260,44 +251,12 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    @OptIn(AppearanceAPIAdditionsPreview::class)
     @Composable
     private fun AppearanceButton() {
-        val settings = viewModel.playgroundSettingsFlow.collectAsState().value
-        val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
-        val insetsAppearance = settings?.get(FormInsetsAppearanceSettingDefinition)?.collectAsState()?.value
-        val sectionSpacing = settings?.get(SectionSpacingSettingsDefinition)?.collectAsState()?.value
-        val iconStyle = settings?.get(IconStyleAppearanceSettingsDefinition)?.collectAsState()?.value
-        supportFragmentManager.setFragmentResultListener(
-            AppearanceBottomSheetDialogFragment.REQUEST_KEY,
-            this@PaymentSheetPlaygroundActivity
-        ) { _, bundle ->
-            viewModel.updateSetting(
-                EmbeddedAppearanceSettingsDefinition,
-                bundle.getEmbeddedAppearance()
-            )
-            viewModel.updateSetting(
-                FormInsetsAppearanceSettingDefinition,
-                bundle.getFormInsetsAppearance()
-            )
-            viewModel.updateSetting(
-                SectionSpacingSettingsDefinition,
-                bundle.getSectionSpacing()
-            )
-            viewModel.updateSetting(
-                IconStyleAppearanceSettingsDefinition,
-                bundle.getIconStyle()
-            )
-        }
         Button(
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
-                bottomSheet.arguments = Bundle().apply {
-                    putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
-                    putParcelable(AppearanceBottomSheetDialogFragment.INSETS_KEY, insetsAppearance)
-                    putParcelable(AppearanceBottomSheetDialogFragment.SECTION_SPACING_KEY, sectionSpacing)
-                    putString(AppearanceBottomSheetDialogFragment.ICON_STYLE_KEY, iconStyle?.name)
-                }
+
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
             modifier = Modifier.fillMaxWidth(),
@@ -588,7 +547,7 @@ internal class PaymentSheetPlaygroundActivity :
                 val configuration = AddressLauncher.Configuration.Builder()
                     .address(address())
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
-                    .appearance(AppearanceStore.state)
+                    .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
                 addressLauncher.present(playgroundState.clientSecret, configuration)
             },
