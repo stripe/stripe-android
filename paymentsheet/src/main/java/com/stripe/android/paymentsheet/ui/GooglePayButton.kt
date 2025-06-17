@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.annotation.SuppressLint
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RestrictTo

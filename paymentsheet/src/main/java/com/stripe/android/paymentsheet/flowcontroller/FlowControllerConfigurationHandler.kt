@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import kotlinx.coroutines.CoroutineScope
@@ -73,6 +74,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         try {
             initializationMode.validate()
             configuration.asCommonConfiguration().validate()
+            configuration.appearance.parseAppearance()
         } catch (e: IllegalArgumentException) {
             onConfigured(error = e)
             return
