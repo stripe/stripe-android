@@ -2,7 +2,7 @@ package com.stripe.android.model.parsers
 
 import org.json.JSONException
 import org.json.JSONObject
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class LinkAccountSessionJsonParserTest {
@@ -19,7 +19,7 @@ class LinkAccountSessionJsonParserTest {
     @Test(expected = JSONException::class)
     fun `id is required`() {
         val json = """{"client_secret": "secret"}"""
-         LinkAccountSessionJsonParser.parse(JSONObject(json))
+        LinkAccountSessionJsonParser.parse(JSONObject(json))
     }
 
     @Test(expected = JSONException::class)
