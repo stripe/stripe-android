@@ -26,6 +26,7 @@ internal class EmbeddedContentScreenshotTest {
             interactor = interactor,
             embeddedViewDisplaysMandateText = true,
             rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
+            isImmediateAction = false,
         )
         paparazziRule.snapshot {
             content.Content()
@@ -42,7 +43,8 @@ internal class EmbeddedContentScreenshotTest {
         val content = EmbeddedContent(
             interactor = interactor,
             embeddedViewDisplaysMandateText = true,
-            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
+            isImmediateAction = false,
         )
         paparazziRule.snapshot {
             content.Content()
@@ -59,7 +61,8 @@ internal class EmbeddedContentScreenshotTest {
         val content = EmbeddedContent(
             interactor = interactor,
             embeddedViewDisplaysMandateText = false,
-            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
+            isImmediateAction = false,
         )
         paparazziRule.snapshot {
             content.Content()

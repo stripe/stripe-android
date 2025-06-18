@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -103,7 +105,7 @@ internal fun PaymentMethodRowButton(
                 style = style
             )
 
-            if (style !is RowStyle.FlatWithCheckmark) {
+            if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
@@ -139,7 +141,6 @@ private fun RowButtonOuterContent(
                     horizontal = ROW_CONTENT_HORIZONTAL_SPACING.dp,
                     vertical = contentPaddingValues + style.additionalInsetsDp.dp
                 ),
-                verticalArrangement = Arrangement.Center,
                 modifier = modifier,
             ) {
                 rowContent(true)
@@ -152,7 +153,19 @@ private fun RowButtonOuterContent(
                     horizontal = style.horizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
-                verticalArrangement = Arrangement.Center,
+                trailingContent = trailingContent,
+                style = style,
+                modifier = modifier
+            ) {
+                rowContent(false)
+            }
+        }
+        is RowStyle.FlatWithChevron -> {
+            RowButtonChevronOuterContent(
+                contentPaddingValues = PaddingValues(
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
+                ),
                 trailingContent = trailingContent,
                 style = style,
                 modifier = modifier
@@ -168,7 +181,6 @@ private fun RowButtonOuterContent(
                     horizontal = style.horizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
-                verticalArrangement = Arrangement.Center,
                 onClick = onClick,
                 style = style,
                 modifier = modifier
@@ -184,7 +196,6 @@ private fun RowButtonFloatingOuterContent(
     isEnabled: Boolean,
     isSelected: Boolean,
     contentPaddingValues: PaddingValues,
-    verticalArrangement: Arrangement.Vertical,
     modifier: Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
@@ -201,7 +212,7 @@ private fun RowButtonFloatingOuterContent(
     ) {
         Column(
             modifier = Modifier.padding(contentPaddingValues),
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = Arrangement.Center,
         ) {
             content()
         }
@@ -214,7 +225,6 @@ private fun RowButtonRadioOuterContent(
     isEnabled: Boolean,
     isSelected: Boolean,
     contentPaddingValues: PaddingValues,
-    verticalArrangement: Arrangement.Vertical,
     onClick: () -> Unit,
     modifier: Modifier,
     style: RowStyle.FlatWithRadio,
@@ -240,7 +250,7 @@ private fun RowButtonRadioOuterContent(
         Column(
             modifier = Modifier
                 .align(Alignment.CenterVertically),
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = Arrangement.Center,
         ) {
             content()
         }
@@ -252,10 +262,64 @@ private fun RowButtonRadioOuterContent(
 private fun RowButtonCheckmarkOuterContent(
     isSelected: Boolean,
     contentPaddingValues: PaddingValues,
-    verticalArrangement: Arrangement.Vertical,
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
     style: RowStyle.FlatWithCheckmark,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    RowButtonWithEndIconOuterContent(
+        contentPaddingValues = contentPaddingValues,
+        trailingContent = trailingContent,
+        modifier = modifier,
+        iconContent = {
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(end = style.checkmarkInsetDp.dp)
+                        .offset(3.dp),
+                    tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
+                )
+            }
+        },
+        content = content
+    )
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowButtonChevronOuterContent(
+    contentPaddingValues: PaddingValues,
+    trailingContent: (@Composable RowScope.() -> Unit)?,
+    modifier: Modifier,
+    style: RowStyle.FlatWithChevron,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    RowButtonWithEndIconOuterContent(
+        contentPaddingValues = contentPaddingValues,
+        trailingContent = trailingContent,
+        modifier = modifier,
+        iconContent = {
+            Icon(
+                painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically),
+                tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
+            )
+        },
+        content = content
+    )
+}
+
+@Composable
+private fun RowButtonWithEndIconOuterContent(
+    contentPaddingValues: PaddingValues,
+    trailingContent: (@Composable RowScope.() -> Unit)?,
+    modifier: Modifier,
+    iconContent: @Composable RowScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Row(
@@ -263,7 +327,7 @@ private fun RowButtonCheckmarkOuterContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            verticalArrangement = verticalArrangement
+            verticalArrangement = Arrangement.Center
         ) {
             content()
             Row {
@@ -274,17 +338,7 @@ private fun RowButtonCheckmarkOuterContent(
             }
         }
         Spacer(Modifier.weight(1f))
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Filled.Check,
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = style.checkmarkInsetDp.dp)
-                    .offset(3.dp),
-                tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
-            )
-        }
+        iconContent()
     }
 }
 

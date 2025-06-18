@@ -826,6 +826,18 @@ private fun EmbeddedPicker(
     )
     Divider()
 
+    ColorItem(
+        label = "chevronColor",
+        currentColor = Color(embeddedAppearance.chevronColor),
+        onColorPicked = {
+            embeddedAppearance.copy(
+                chevronColor = it.toArgb()
+            )
+        },
+        updateAppearance = updateEmbedded,
+    )
+    Divider()
+
     IncrementDecrementItem("startSeparatorInsetDp", embeddedAppearance.startSeparatorInset) {
         updateEmbedded(
             embeddedAppearance.copy(
