@@ -10,6 +10,8 @@
     <string name="customersheet_example_title">CustomerSheet Example</string>
     <string name="customersheet_playground_title">CustomerSheet Playground</string>
     <string name="customer_subtitle">Manage a customer</string>
+    <string name="embedded_example_title">Embedded Payment Element Example</string>
+    <string name="embedded_subtitle">Our simplest integration</string>
     <string name="address_element_title">Address Element</string>
     <string name="address_element_subtitle">Collect a customer\'s shipping address</string>
     <string name="beta_badge_label">This is currently in beta</string>
