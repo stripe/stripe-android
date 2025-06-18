@@ -46,7 +46,7 @@ internal object PaymentMethodMetadataFactory {
         financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
         customerMetadataPermissions: CustomerMetadata.Permissions =
             PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-        shopPayConfiguration: PaymentSheet.ShopPayConfiguration = SHOP_PAY_CONFIGURATION
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = SHOP_PAY_CONFIGURATION
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
