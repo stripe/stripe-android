@@ -16,12 +16,15 @@ internal enum class WalletType(val code: String) {
             isShopPayAvailable: Boolean
         ): List<WalletType> {
             val availableWallets = WalletType.entries.filter { type ->
+                val isInOrderedPaymentMethods = elementsSession.orderedPaymentMethodTypesAndWallets.contains(type.code)
                 when (type) {
                     GooglePay -> {
-                        isGooglePayReady && elementsSession.orderedPaymentMethodTypesAndWallets.contains(type.code)
+                        isGooglePayReady && isInOrderedPaymentMethods
                     }
                     Link -> linkState != null
-                    ShopPay -> isShopPayAvailable
+                    ShopPay -> {
+                        isShopPayAvailable && isInOrderedPaymentMethods
+                    }
                 }
             }
 
