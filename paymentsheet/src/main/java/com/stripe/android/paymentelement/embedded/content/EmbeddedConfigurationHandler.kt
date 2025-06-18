@@ -8,7 +8,6 @@ import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.EmbeddedPaymentElement.Configuration
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -52,21 +51,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
-        val isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
-        val hasGooglePayOrCustomerConfig = configuration.googlePay != null || configuration.customer != null
-        if (isRowSelectionImmediateAction &&
-            configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm &&
-            hasGooglePayOrCustomerConfig
-        ) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
-                        "when Google Pay or a customer configuration is provided. " +
-                        "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
-                )
-            )
-        }
-
         val targetConfiguration = configuration.asCommonConfiguration()
         eventReporter.onInit(
             commonConfiguration = targetConfiguration,
@@ -75,7 +59,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             primaryButtonColor = null,
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
                 configuration = configuration,
-                isRowSelectionImmediateAction = isRowSelectionImmediateAction
+                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
             ),
         )
 
