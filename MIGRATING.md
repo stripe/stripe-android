@@ -1,5 +1,54 @@
 # Migration Guide
 
+## Migrating from versions < 21.19.0
+- Changes to `PaymentSheet.Configuration`:
+* The constructors have been deprecated and will be removed in a future release. Use `PaymentSheet.Configuration.Builder` instead.
+    ```kotlin
+    // before
+    PaymentSheet.Configuration(
+        merchantDisplayName = "Merchant",
+        customer = customer,
+        shippingDetails = shippingDetails,
+        defaultBillingDetails = defaultBillingDetails,
+        allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+        googlePay = PaymentSheet.GooglePayConfiguration(
+            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            countryCode = CountryCode.US.value
+        ).takeIf { isGooglePayEnabled }
+    )
+
+    // apply ReplaceWith Quick Fix with Android studio 
+    PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant").customer(customer = customer)
+        .googlePay(
+            googlePay = PaymentSheet.GooglePayConfiguration(
+                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                countryCode = CountryCode.US.value
+            ).takeIf { isGooglePayEnabled }
+        ).primaryButtonColor(ConfigurationDefaults.primaryButtonColor)
+        .defaultBillingDetails(defaultBillingDetails = defaultBillingDetails)
+        .shippingDetails(shippingDetails = shippingDetails)
+        .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods = allowsDelayedPaymentMethods)
+        .allowsPaymentMethodsRequiringShippingAddress(ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress)
+        .appearance(ConfigurationDefaults.appearance)
+        .primaryButtonLabel(ConfigurationDefaults.primaryButtonLabel)
+        .billingDetailsCollectionConfiguration(ConfigurationDefaults.billingDetailsCollectionConfiguration)
+        .preferredNetworks(ConfigurationDefaults.preferredNetworks).build()
+  
+    // remove unnecessary defaults
+    PaymentSheet.Configuration.Builder("Merchant")
+        .customer(customer)
+        .shippingDetails(shippingDetails)
+        .defaultBillingDetails(defaultBillingDetails)
+        .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+        .googlePay(
+            PaymentSheet.GooglePayConfiguration(
+                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                countryCode = CountryCode.US.value
+            ).takeIf { isGooglePayEnabled }
+        )
+        .build()
+    ```
+  
 ## Migrating from versions < 21.18.0
 - Changes to `PaymentSheet`:
   * The constructors have been deprecated and will be removed in a future release. Use `PaymentSheet.Builder` instead.

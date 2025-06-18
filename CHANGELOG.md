@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [ADDED][10947](https://github.com/stripe/stripe-android/pull/10947) Added `FlatWithChevron` Embedded RowStyle to Appearance API
+* [DEPRECATED][10970](https://github.com/stripe/stripe-android/pull/10970) Deprecated PaymentSheet.Configuration constructors in favor of the new Builder pattern API.
 
 ## 21.18.0 - 2025-06-16
 
