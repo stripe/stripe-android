@@ -35,7 +35,7 @@ internal class ShopPayActivity : ComponentActivity() {
         Button(
             onClick = {
                 dismissWithResult(
-                    ShopPayActivityResult.Completed
+                    ShopPayActivityResult.Completed("")
                 )
             }
         ) {

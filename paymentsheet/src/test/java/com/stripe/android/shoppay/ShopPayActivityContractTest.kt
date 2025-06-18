@@ -6,8 +6,10 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -17,9 +19,8 @@ internal class ShopPayActivityContractTest {
 
     @Test
     fun `intent is created correctly`() {
-        val args = ShopPayActivityContract.Args(
-            checkoutUrl = "https://example.com/checkout"
-        )
+        val shopPayConfiguration: PaymentSheet.ShopPayConfiguration = mock()
+        val args = ShopPayActivityContract.Args(shopPayConfiguration)
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
         val intentArgs = intent.extras?.let {
@@ -27,16 +28,16 @@ internal class ShopPayActivityContractTest {
         }
 
         assertThat(intent.component?.className).isEqualTo(ShopPayActivity::class.java.name)
-        assertThat(intentArgs?.checkoutUrl).isEqualTo("https://example.com/checkout")
+        assertThat(intentArgs?.shopPayConfiguration).isEqualTo(shopPayConfiguration)
     }
 
     @Test
     fun `parseResult with completed result`() {
         val result = contract.parseResult(
             Activity.RESULT_OK,
-            intent(ShopPayActivityResult.Completed)
+            intent(ShopPayActivityResult.Completed("test"))
         )
-        assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
+        assertThat(result).isEqualTo(ShopPayActivityResult.Completed("test"))
     }
 
     @Test
@@ -75,9 +76,9 @@ internal class ShopPayActivityContractTest {
     fun `parseResult with different resultCode still parses result`() {
         val result = contract.parseResult(
             Activity.RESULT_CANCELED,
-            intent(ShopPayActivityResult.Completed)
+            intent(ShopPayActivityResult.Completed("test"))
         )
-        assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
+        assertThat(result).isEqualTo(ShopPayActivityResult.Completed("test"))
     }
 
     private fun intent(result: ShopPayActivityResult): Intent {
