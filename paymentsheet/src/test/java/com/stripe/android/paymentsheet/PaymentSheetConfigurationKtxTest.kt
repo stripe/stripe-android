@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import android.graphics.Color
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -136,7 +135,19 @@ class PaymentSheetConfigurationKtxTest {
                     buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
                 )
             )
-            .primaryButtonColor(primaryButtonColor = ColorStateList.valueOf(Color.BLUE)).defaultBillingDetails(
+            .appearance(
+                appearance = PaymentSheet.Appearance(
+                    primaryButton = PaymentSheet.PrimaryButton(
+                        colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(
+                            background = Color.BLUE,
+                        ),
+                        colorsDark = PaymentSheet.PrimaryButtonColors.defaultDark.copy(
+                            background = Color.BLUE,
+                        ),
+                    )
+                )
+            )
+            .defaultBillingDetails(
                 defaultBillingDetails = PaymentSheet.BillingDetails(
                     name = "Jenny Rosen",
                 )

@@ -34,6 +34,8 @@ data class CustomFlowViewState(
                         countryCode = "US",
                     )
                 )
+                // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
+                // methods that complete payment after a delay, like SEPA Debit and Sofort.
                 .allowsDelayedPaymentMethods(true)
                 .build()
     }

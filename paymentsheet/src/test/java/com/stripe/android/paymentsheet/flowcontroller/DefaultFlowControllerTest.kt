@@ -2295,6 +2295,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `On confirm existing payment method & PI, should send expected params to interceptor`() = testScope.runTest {
         val flowController = createFlowController()
 
