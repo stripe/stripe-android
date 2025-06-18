@@ -1803,6 +1803,15 @@ internal class PaymentMethodMetadataTest {
     )
 
     @Test
+    fun `availableWallets does not contain ShopPay if not in types and no configuration`() = availableWalletsTest(
+        orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
+        isGooglePayReady = false,
+        hasLinkState = false,
+        hasShopPayConfiguration = false,
+        expectedWalletTypes = emptyList(),
+    )
+
+    @Test
     fun `availableWallets contains Link if state is available but not in types`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = false,
@@ -1826,7 +1835,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link, WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
     )
 
     @Test
