@@ -1543,8 +1543,8 @@ class PaymentSheet internal constructor(
             }
 
             @AppearanceAPIAdditionsPreview
-            fun verticalModeRowPadding(verticalModeRowPadding: Float) = apply {
-                this.verticalModeRowPadding = verticalModeRowPadding
+            fun verticalModeRowPadding(verticalModeRowPaddingDp: Float) = apply {
+                this.verticalModeRowPadding = verticalModeRowPaddingDp
             }
 
             @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
