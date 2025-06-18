@@ -756,7 +756,4 @@ class DefaultWalletButtonsInteractorTest {
 
     private fun WalletButtonsInteractor.WalletButton.asGooglePayWalletButton() =
         this as WalletButtonsInteractor.WalletButton.GooglePay
-
-    private fun WalletButtonsInteractor.WalletButton.asShopPayWalletButton() =
-        this as WalletButtonsInteractor.WalletButton.ShopPay
 }

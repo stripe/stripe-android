@@ -22,6 +22,7 @@ internal object CommonConfigurationFactory {
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
+        shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -38,6 +39,6 @@ internal object CommonConfigurationFactory {
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
         link = link,
-        shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+        shopPayConfiguration = shopPayConfiguration,
     )
 }
