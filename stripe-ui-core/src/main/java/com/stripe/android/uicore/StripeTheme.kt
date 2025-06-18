@@ -332,6 +332,8 @@ object StripeThemeDefaults {
     val sectionStyle = SectionStyle.Bordered
 
     val iconStyle: IconStyle = IconStyle.Filled
+
+    val verticalModeRowPadding = embeddedCommon.additionalVerticalInsetsDp
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -610,6 +612,8 @@ object StripeTheme {
     var sectionStyle = StripeThemeDefaults.sectionStyle
 
     var iconStyle: IconStyle = StripeThemeDefaults.iconStyle
+
+    var verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable

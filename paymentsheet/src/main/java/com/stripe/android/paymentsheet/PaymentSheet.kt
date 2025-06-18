@@ -1121,6 +1121,8 @@ class PaymentSheet internal constructor(
          * Defines the visual style of icons in Payment Element
          */
         internal val iconStyle: IconStyle = IconStyle.default,
+
+        internal val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -1490,6 +1492,8 @@ class PaymentSheet internal constructor(
             @OptIn(AppearanceAPIAdditionsPreview::class)
             private var iconStyle: IconStyle = IconStyle.default
 
+            private var verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding
+
             @ExperimentalEmbeddedPaymentElementApi
             private var embeddedAppearance: Embedded =
                 Embedded.default
@@ -1538,6 +1542,11 @@ class PaymentSheet internal constructor(
                 this.iconStyle = iconStyle
             }
 
+            @AppearanceAPIAdditionsPreview
+            fun verticalModeRowPadding(verticalModeRowPadding: Float) = apply {
+                this.verticalModeRowPadding = verticalModeRowPadding
+            }
+
             @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
             fun build(): Appearance {
                 return Appearance(
@@ -1551,6 +1560,7 @@ class PaymentSheet internal constructor(
                     sectionSpacing = sectionSpacing,
                     textFieldInsets = textFieldInsets,
                     iconStyle = iconStyle,
+                    verticalModeRowPadding = verticalModeRowPadding,
                 )
             }
         }
