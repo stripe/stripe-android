@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -29,6 +30,7 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
+import kotlinx.coroutines.launch
 
 @SuppressWarnings("LongMethod")
 @Composable
@@ -37,7 +39,8 @@ internal fun LinkContent(
     navController: NavHostController,
     appBarState: LinkAppBarState,
     bottomSheetContent: BottomSheetContent?,
-    onUpdateSheetContent: (BottomSheetContent?) -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: suspend () -> Unit,
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -48,6 +51,8 @@ internal fun LinkContent(
     changeEmail: () -> Unit,
     initialDestination: LinkScreen
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     DefaultLinkTheme {
         Surface(
             modifier = modifier,
@@ -56,7 +61,9 @@ internal fun LinkContent(
             Column(modifier = Modifier.fillMaxWidth()) {
                 BackHandler {
                     if (bottomSheetContent != null) {
-                        onUpdateSheetContent(null)
+                        coroutineScope.launch {
+                            hideBottomSheetContent()
+                        }
                     } else if (navController.popBackStack().not()) {
                         handleViewAction(LinkAction.BackPressed)
                     }
@@ -77,13 +84,14 @@ internal fun LinkContent(
                     },
                     dismissWithResult = dismissWithResult,
                     getLinkAccount = getLinkAccount,
-                    showBottomSheetContent = onUpdateSheetContent,
+                    showBottomSheetContent = showBottomSheetContent,
                     changeEmail = changeEmail,
-                    hideBottomSheetContent = {
-                        onUpdateSheetContent(null)
-                    },
+                    hideBottomSheetContent = hideBottomSheetContent,
                     onLogoutClicked = {
-                        handleViewAction(LinkAction.LogoutClicked)
+                        coroutineScope.launch {
+                            hideBottomSheetContent()
+                            handleViewAction(LinkAction.LogoutClicked)
+                        }
                     },
                 )
             }
@@ -98,8 +106,8 @@ private fun Screens(
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit,
-    hideBottomSheetContent: () -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: suspend () -> Unit,
     moveToWeb: () -> Unit,
     changeEmail: () -> Unit,
     initialDestination: LinkScreen,
@@ -247,8 +255,8 @@ private fun WalletRoute(
     linkAccount: LinkAccount,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit,
-    hideBottomSheetContent: () -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
 ) {
     val viewModel: WalletViewModel = linkViewModel { parentComponent ->
