@@ -22,7 +22,7 @@ internal object EmbeddedRowSelectionBehaviorSettingsDefinition :
         return configurationData.integrationType == PlaygroundConfigurationData.IntegrationType.Embedded
     }
 
-    override val displayName: String = "Embedded Form Sheet Action"
+    override val displayName: String = "Embedded Row Selection Behavior"
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
