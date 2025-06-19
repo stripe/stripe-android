@@ -55,14 +55,6 @@ internal fun UpdateCardScreenBody(
     val focusManager = LocalFocusManager.current
 
     ScrollableTopLevelColumn {
-        Text(
-            modifier = Modifier
-                .padding(bottom = 32.dp),
-            text = stringResource(R.string.stripe_link_update_card_title),
-            style = LinkTheme.typography.title,
-            color = LinkTheme.colors.textPrimary,
-        )
-
         StripeThemeForLink {
             CardDetailsEditUI(
                 editCardDetailsInteractor = interactor,

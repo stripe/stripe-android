@@ -62,7 +62,7 @@ internal fun PrimaryButton(
                     .testTag(PrimaryButtonTag),
                 enabled = state == PrimaryButtonState.Enabled,
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
-                shape = LinkTheme.shapes.medium,
+                shape = LinkTheme.shapes.default,
                 colors = ButtonDefaults.buttonColors(
                     backgroundColor = LinkTheme.colors.buttonBrand,
                     disabledBackgroundColor = LinkTheme.colors.buttonBrand,

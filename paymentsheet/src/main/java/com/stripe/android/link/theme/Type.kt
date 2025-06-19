@@ -62,6 +62,14 @@ internal val linkTypography = LinkTypography(
     ).toCompat(),
 )
 
+internal val LinkTypography.appBarTitle: TextStyle
+    get() = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 18.sp,
+        lineHeight = 26.sp
+    ).toCompat()
+
 private fun TextStyle.toCompat(useDefaultLineHeight: Boolean = false): TextStyle {
     return copy(
         lineHeight = if (useDefaultLineHeight) {

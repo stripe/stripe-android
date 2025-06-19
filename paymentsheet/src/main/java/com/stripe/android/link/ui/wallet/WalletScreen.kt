@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,6 +75,7 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.launch
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -81,7 +83,7 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 internal fun WalletScreen(
     viewModel: WalletViewModel,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit,
+    hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -120,7 +122,7 @@ internal fun WalletBody(
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit,
 ) {
     AnimatedContent(
         targetState = state.paymentDetailsList.isEmpty(),
@@ -189,7 +191,7 @@ private fun PaymentDetailsSection(
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -288,8 +290,10 @@ private fun PaymentMethodSection(
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: () -> Unit
+    hideBottomSheetContent: suspend () -> Unit
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
 
@@ -316,19 +320,22 @@ private fun PaymentMethodSection(
                             modifier = Modifier.testTag(WALLET_SCREEN_MENU_SHEET_TAG),
                             paymentDetails = it,
                             onSetDefaultClick = {
-                                hideBottomSheetContent()
-                                onSetDefaultClicked(it)
+                                coroutineScope.launch {
+                                    hideBottomSheetContent()
+                                    onSetDefaultClicked(it)
+                                }
                             },
                             onRemoveClick = {
-                                hideBottomSheetContent()
-                                onRemoveClicked(it)
-                            },
-                            onCancelClick = {
-                                hideBottomSheetContent()
+                                coroutineScope.launch {
+                                    hideBottomSheetContent()
+                                    onRemoveClicked(it)
+                                }
                             },
                             onUpdateClick = {
-                                hideBottomSheetContent()
-                                onUpdateClicked(it)
+                                coroutineScope.launch {
+                                    hideBottomSheetContent()
+                                    onUpdateClicked(it)
+                                }
                             }
                         )
                     }
@@ -384,10 +391,10 @@ private fun PaymentMethodPicker(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(LinkTheme.shapes.large)
+            .clip(LinkTheme.shapes.default)
             .background(
                 color = LinkTheme.colors.surfaceSecondary,
-                shape = LinkTheme.shapes.large
+                shape = LinkTheme.shapes.default
             )
     ) {
         EmailDetails(
@@ -478,8 +485,10 @@ private fun EmailDetails(
             .fillMaxWidth()
             .defaultMinSize(minHeight = 64.dp)
             .padding(
-                vertical = 16.dp,
-                horizontal = HorizontalPadding,
+                top = 16.dp,
+                start = 20.dp,
+                end = 14.dp,
+                bottom = 16.dp,
             ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp),

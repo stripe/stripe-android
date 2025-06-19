@@ -6,7 +6,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -26,7 +25,6 @@ import com.stripe.android.uicore.navigation.NavigationEffects
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun FullScreenContent(
@@ -62,7 +60,6 @@ internal fun FullScreenContent(
         },
     )
 
-    val coroutineScope = rememberCoroutineScope()
     var linkContentBottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
     val linkContentBottomSheetState = rememberStripeBottomSheetState()
     LaunchedEffect(linkContentBottomSheetContent) {
@@ -85,14 +82,11 @@ internal fun FullScreenContent(
                 onBackPressed = onBackPressed,
                 moveToWeb = moveToWeb,
                 bottomSheetContent = linkContentBottomSheetContent,
-                onUpdateSheetContent = { content ->
-                    if (content != null) {
-                        linkContentBottomSheetContent = content
-                    } else {
-                        coroutineScope.launch {
-                            linkContentBottomSheetState.hide()
-                        }
-                    }
+                showBottomSheetContent = { content ->
+                    linkContentBottomSheetContent = content
+                },
+                hideBottomSheetContent = {
+                    linkContentBottomSheetState.hide()
                 },
                 handleViewAction = handleViewAction,
                 navigate = navigate,
