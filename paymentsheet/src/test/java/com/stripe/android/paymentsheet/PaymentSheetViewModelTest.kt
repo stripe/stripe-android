@@ -1459,10 +1459,11 @@ internal class PaymentSheetViewModelTest {
     fun `getSupportedPaymentMethods() does not filter payment methods when supportsDelayedSettlement = true`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = PaymentSheet.Configuration(
-                    merchantDisplayName = "Example, Inc.",
-                    allowsDelayedPaymentMethods = true
-                )
+                config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                    .allowsDelayedPaymentMethods(
+                        allowsDelayedPaymentMethods = true
+                    )
+                    .build()
             ),
             stripeIntent = PAYMENT_INTENT.copy(
                 paymentMethodTypes = listOf(

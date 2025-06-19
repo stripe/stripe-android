@@ -589,7 +589,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1120,7 +1120,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1142,13 +1142,14 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
-                ),
-            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some Name")
+                .customer(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                    )
+                )
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1214,7 +1215,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -1246,7 +1247,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1270,7 +1271,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                 ),
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1297,7 +1298,7 @@ internal class DefaultPaymentElementLoaderTest {
                     ),
                 ),
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1318,7 +1319,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = intent.clientSecret!!,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1341,7 +1342,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1361,7 +1362,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1380,13 +1381,14 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
-                ),
-            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some Name")
+                .customer(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                    )
+                )
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1443,12 +1445,13 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                ),
-            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some Name")
+                .billingDetailsCollectionConfiguration(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    )
+                )
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1495,14 +1498,15 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
-                    listOf(
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some Name")
+                .cardBrandAcceptance(
+                    cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                        listOf(
+                            PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                        )
                     )
                 )
-            ),
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1615,13 +1619,14 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "customer_client_secret",
-                ),
-            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                .customer(
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    )
+                )
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -1672,13 +1677,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1712,13 +1718,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1757,13 +1764,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1802,13 +1810,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1847,13 +1856,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1878,13 +1888,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1917,13 +1928,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -1957,13 +1969,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                        id = "cus_1",
-                        clientSecret = "customer_client_secret",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "cus_1",
+                            clientSecret = "customer_client_secret",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -2003,13 +2016,14 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret"
                 ),
-                paymentSheetConfiguration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123",
-                    ),
-                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        customer = PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -2436,7 +2450,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -2471,7 +2485,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -2506,7 +2520,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -2539,7 +2553,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = DEFAULT_INITIALIZATION_MODE,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -2582,7 +2596,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -2625,7 +2639,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -2870,7 +2884,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -2906,7 +2920,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -3015,7 +3029,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -3036,7 +3050,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder("Some Name").build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = true,
             ),
@@ -3088,13 +3102,14 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = initializationMode,
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "ek_123",
-                ),
-            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some Name")
+                .customer(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_123",
+                        ephemeralKeySecret = "ek_123",
+                    )
+                )
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -3240,29 +3255,31 @@ internal class DefaultPaymentElementLoaderTest {
         shippingDetails: AddressDetails? = null,
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
     ): PaymentSheet.Configuration {
-        return PaymentSheet.Configuration(
-            merchantDisplayName = "Merchant",
-            customer = customer,
-            shippingDetails = shippingDetails,
-            defaultBillingDetails = defaultBillingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = CountryCode.US.value
-            ).takeIf { isGooglePayEnabled }
-        )
+        return PaymentSheet.Configuration.Builder("Merchant")
+            .customer(customer)
+            .shippingDetails(shippingDetails)
+            .defaultBillingDetails(defaultBillingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = CountryCode.US.value
+                ).takeIf { isGooglePayEnabled }
+            )
+            .build()
     }
 
     private companion object {
         private val PAYMENT_METHODS =
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
-        private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
-            merchantDisplayName = "Some Name",
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_123",
-                ephemeralKeySecret = "ek_123",
-            ),
-        )
+        private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration.Builder("Some Name")
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "ek_123",
+                )
+            )
+            .build()
         private val DEFAULT_INITIALIZATION_MODE = PaymentElementLoader.InitializationMode.PaymentIntent(
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
         )

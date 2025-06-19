@@ -18,16 +18,17 @@ data class CompleteFlowViewState(
     ) {
 
         val paymentSheetConfig: PaymentSheet.Configuration
-            get() = PaymentSheet.Configuration(
-                merchantDisplayName = "Example, Inc.",
-                customer = customerConfiguration,
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "US",
-                ),
+            get() = PaymentSheet.Configuration.Builder("Example, Inc.")
+                .customer(customerConfiguration)
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "US",
+                    )
+                )
                 // Set `allowsDelayedPaymentMethods` to true if your business can handle payment
                 // methods that complete payment after a delay, like SEPA Debit and Sofort.
-                allowsDelayedPaymentMethods = true
-            )
+                .allowsDelayedPaymentMethods(true)
+                .build()
     }
 }
