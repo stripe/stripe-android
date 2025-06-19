@@ -14,11 +14,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -231,21 +235,25 @@ private fun SuccessFooter(
     merchantName: String?,
     onDoneClick: () -> Unit
 ) {
-    FinancialConnectionsButton(
-        loading = loading,
-        enabled = enabled,
-        onClick = onDoneClick,
-        modifier = modifier
-            .semantics { testTagsAsResourceId = true }
-            .testTag("done_button")
-            .fillMaxWidth()
-    ) {
-        MiddleEllipsisText(
-            text = when (merchantName) {
-                null -> stringResource(id = R.string.stripe_success_pane_done)
-                else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
-            }
-        )
+    Column {
+        FinancialConnectionsButton(
+            loading = loading,
+            enabled = enabled,
+            onClick = onDoneClick,
+            modifier = modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("done_button")
+                .fillMaxWidth()
+        ) {
+            MiddleEllipsisText(
+                text = when (merchantName) {
+                    null -> stringResource(id = R.string.stripe_success_pane_done)
+                    else -> stringResource(id = R.string.stripe_success_pane_done_with_merchant, merchantName)
+                }
+            )
+        }
+
+        Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
     }
 }
 
