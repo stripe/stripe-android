@@ -80,5 +80,9 @@
                     android:path="/${applicationId}" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name="com.stripe.android.shoppay.ShopPayActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
     </application>
 </manifest>
