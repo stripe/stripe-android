@@ -22,10 +22,13 @@ data class PlaygroundConfigurationData(
         Embedded,
 
         @SerialName("CustomerSheet")
-        CustomerSheet;
+        CustomerSheet,
+
+        @SerialName("ridesharingApp")
+        RidesharingApp;
 
         fun isPaymentFlow(): Boolean {
-            return this in setOf(PaymentSheet, FlowController, Embedded)
+            return this in setOf(PaymentSheet, FlowController, Embedded, RidesharingApp)
         }
 
         fun isCustomerFlow(): Boolean {

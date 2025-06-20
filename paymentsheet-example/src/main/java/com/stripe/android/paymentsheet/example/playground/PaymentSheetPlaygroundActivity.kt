@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.activity.RidesharingAppActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -356,6 +357,12 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
+                    PlaygroundConfigurationData.IntegrationType.RidesharingApp -> {
+                        RidesharingAppUi(
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     else -> Unit
                 }
             }
@@ -485,6 +492,28 @@ internal class PaymentSheetPlaygroundActivity :
                 .testTag(CHECKOUT_TEST_TAG),
         ) {
             Text("Checkout")
+        }
+    }
+
+    @Composable
+    fun RidesharingAppUi(
+        playgroundState: PlaygroundState.Payment,
+    ) {
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                context.startActivity(
+                    RidesharingAppActivity.createIntent(
+                        context = context,
+                        playgroundState = playgroundState
+                    )
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
+        ) {
+            Text("Launch Ridesharing App")
         }
     }
 

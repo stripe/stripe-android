@@ -125,6 +125,10 @@ private fun IntegrationTypeConfigurableSetting(
                 name = "Customer Sheet",
                 value = PlaygroundConfigurationData.IntegrationType.CustomerSheet
             ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Ridesharing App",
+                value = PlaygroundConfigurationData.IntegrationType.RidesharingApp
+            ),
         ),
         value = configurationData.integrationType
     ) { integrationType ->
