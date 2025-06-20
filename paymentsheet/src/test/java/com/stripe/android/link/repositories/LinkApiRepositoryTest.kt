@@ -461,7 +461,6 @@ class LinkApiRepositoryTest {
             bankAccountId = "id_123",
             userEmail = "email@stripe.com",
             consumerSessionClientSecret = "secret",
-            consumerPublishableKey = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 

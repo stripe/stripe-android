@@ -288,7 +288,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 bankAccountId = bankAccountId,
                 userEmail = linkAccount.email,
                 consumerSessionClientSecret = linkAccount.clientSecret,
-                consumerPublishableKey = linkAccount.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
             )
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)

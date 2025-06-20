@@ -87,7 +87,6 @@ internal interface LinkRepository {
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(

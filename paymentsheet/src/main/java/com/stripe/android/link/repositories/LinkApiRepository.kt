@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import android.app.Application
+import android.util.Log
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -209,7 +210,6 @@ internal class LinkApiRepository @Inject constructor(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
     ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -219,7 +219,7 @@ internal class LinkApiRepository @Inject constructor(
                 billingAddress = null
             ),
             requestSurface = REQUEST_SURFACE,
-            requestOptions = buildRequestOptions(consumerPublishableKey),
+            requestOptions = buildRequestOptions(),
         ).mapCatching {
             it.paymentDetails.first()
         }.onFailure {
@@ -435,6 +435,11 @@ internal class LinkApiRepository @Inject constructor(
     private fun buildRequestOptions(
         consumerAccountPublishableKey: String? = null,
     ): ApiRequest.Options {
+        val apiKey = consumerAccountPublishableKey ?: publishableKeyProvider()
+        Log.d(
+            "WTF",
+            "buildRequestOptions\nconsumerAccountPublishableKey=$consumerAccountPublishableKey\napiKey=$apiKey"
+        )
         return ApiRequest.Options(
             apiKey = consumerAccountPublishableKey ?: publishableKeyProvider(),
             stripeAccount = stripeAccountIdProvider().takeUnless { consumerAccountPublishableKey != null },
