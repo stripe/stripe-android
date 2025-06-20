@@ -30,6 +30,9 @@ data class PlaygroundConfigurationData(
         @SerialName("LinkController")
         LinkController;
 
+        @SerialName("ridesharingApp")
+        RidesharingApp;
+
         fun isPaymentFlow(): Boolean {
             return this in paymentFlows()
         }
@@ -44,7 +47,7 @@ data class PlaygroundConfigurationData(
 
         companion object {
             fun paymentFlows(): Set<IntegrationType> {
-                return setOf(PaymentSheet, FlowController, Embedded, LinkController)
+                return setOf(PaymentSheet, FlowController, Embedded, RidesharingApp, LinkController)
             }
 
             fun sptFlows(): Set<IntegrationType> {

@@ -133,6 +133,10 @@ private fun IntegrationTypeConfigurableSetting(
                 name = "Link Controller",
                 value = PlaygroundConfigurationData.IntegrationType.LinkController
             ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Ridesharing App",
+                value = PlaygroundConfigurationData.IntegrationType.RidesharingApp
+            ),
         ),
         value = configurationData.integrationType
     ) { integrationType ->
