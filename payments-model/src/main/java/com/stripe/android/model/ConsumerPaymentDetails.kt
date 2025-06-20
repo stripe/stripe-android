@@ -19,7 +19,7 @@ data class ConsumerPaymentDetails(
         open val isDefault: Boolean,
         open val type: String,
         open val nickname: String?,
-    ) : StripeModel {
+    ) : Parcelable {
 
         abstract val last4: String
     }
