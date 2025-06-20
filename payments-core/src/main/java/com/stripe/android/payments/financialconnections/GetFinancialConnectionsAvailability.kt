@@ -12,6 +12,9 @@ object GetFinancialConnectionsAvailability {
         isFullSdkAvailable: IsFinancialConnectionsSdkAvailable = DefaultIsFinancialConnectionsAvailable,
     ): FinancialConnectionsAvailability? {
         return when {
+            elementsSession.preferLite() -> {
+                FinancialConnectionsAvailability.Lite
+            }
             isFullSdkAvailable() && financialConnectionsFullSdkUnavailable.isEnabled.not() -> {
                 FinancialConnectionsAvailability.Full
             }
@@ -26,4 +29,7 @@ object GetFinancialConnectionsAvailability {
 
     private fun ElementsSession?.fcLiteKillSwitchEnabled(): Boolean =
         this?.flags[ElementsSession.Flag.ELEMENTS_DISABLE_FC_LITE] == true
+
+    private fun ElementsSession?.preferLite(): Boolean =
+        this?.flags?.get(ElementsSession.Flag.ELEMENTS_PREFER_FC_LITE) == true
 }
