@@ -39,11 +39,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheetResult
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.paymentsheet.LinkCoordinator
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.uicore.utils.collectAsState
@@ -64,7 +63,7 @@ internal class RidesharingAppActivity : ComponentActivity() {
     }
     
     private lateinit var playgroundState: PlaygroundState.Payment
-    private lateinit var flowController: PaymentSheet.FlowController
+    private var linkCoordinator: LinkCoordinator? = null
 
     private val _paymentOption = MutableStateFlow<PaymentOption?>(null)
     private val paymentOption: StateFlow<PaymentOption?> = _paymentOption.asStateFlow()
@@ -78,48 +77,62 @@ internal class RidesharingAppActivity : ComponentActivity() {
         playgroundState = intent.getParcelableExtra(EXTRA_PLAYGROUND_STATE)
             ?: throw IllegalStateException("PlaygroundState not provided")
 
-        flowController = PaymentSheet.FlowController.create(
-            this,
-            paymentResultCallback = { result ->
-                _isLoading.value = false
-                if (result is PaymentSheetResult.Completed) {
-                    setResult(RESULT_OK)
-                    finish()
-                }
-            },
-            paymentOptionCallback = { option ->
-                _paymentOption.value = option
-            }
-        )
-
-        configureFlowController()
+        setupLinkCoordinator()
 
         setContent {
             RidesharingTheme {
                 RidesharingAppContent()
             }
         }
-    }
-    
-    private fun configureFlowController() {
-        val callback: (Boolean, Throwable?) -> Unit = { success, _ ->
-            if (success) {
-                _paymentOption.value = flowController.getPaymentOption()
-            }
         }
 
-        if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
-            flowController.configureWithSetupIntent(
-                setupIntentClientSecret = playgroundState.clientSecret,
-                configuration = playgroundState.paymentSheetConfiguration(),
-                callback = callback
-            )
-        } else {
-            flowController.configureWithPaymentIntent(
-                paymentIntentClientSecret = playgroundState.clientSecret,
-                configuration = playgroundState.paymentSheetConfiguration(),
-                callback = callback
-            )
+    private fun setupLinkCoordinator() {
+        linkCoordinator = LinkCoordinator.Builder { paymentOption ->
+            _paymentOption.value = paymentOption
+        }.build(this)
+        
+        configureLinkCoordinator()
+    }
+
+    private fun handleLinkSuccess() {
+        _isLoading.value = false
+        setResult(RESULT_OK)
+        finish()
+    }
+
+    private fun handleLinkFailure(error: Throwable?) {
+        _isLoading.value = false
+        // In a real app, you'd show an error message to the user
+        error?.printStackTrace()
+    }
+
+    private fun configureLinkCoordinator() {
+        // Create a mock PaymentIntent for demonstration purposes
+        val mockPaymentIntent = PaymentIntent(
+            id = "pi_mock_demo",
+            paymentMethodTypes = listOf("card", "link"),
+            amount = 1000L, // $10.00
+            clientSecret = playgroundState.clientSecret,
+            countryCode = "US",
+            created = System.currentTimeMillis(),
+            currency = "usd",
+            isLiveMode = false,
+            unactivatedPaymentMethods = emptyList()
+        )
+
+        val configuration = LinkCoordinator.Configuration(
+            stripeIntent = mockPaymentIntent,
+            merchantName = playgroundState.paymentSheetConfiguration().merchantDisplayName,
+            customerEmail = "demo@example.com" // Mock email for demo
+        )
+
+        linkCoordinator?.configure(configuration) { success, error ->
+            if (success) {
+                _paymentOption.value = linkCoordinator?.getPaymentOption()
+            } else {
+                // Handle configuration error
+                error?.printStackTrace()
+            }
         }
     }
     
@@ -152,7 +165,7 @@ internal class RidesharingAppActivity : ComponentActivity() {
                             .padding(16.dp)
                     ) {
                         Text(
-                            "Choose a ride",
+                            "Choose a ride - Link Demo",
                             style = MaterialTheme.typography.h6,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
@@ -162,13 +175,23 @@ internal class RidesharingAppActivity : ComponentActivity() {
                             isEnabled = !loading,
                             paymentMethodLabel = currentPaymentOption?.label ?: "Select a payment method",
                             paymentMethodPainter = currentPaymentOption?.iconPainter,
-                            onClick = { flowController.presentPaymentOptions() }
+                            onClick = { 
+                                // This will eventually launch the Link payment flow
+                                linkCoordinator?.present()
+                            }
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
                                 _isLoading.value = true
-                                flowController.confirm()
+                                // For demo purposes, simulate a successful Link confirmation
+                                // In real implementation, linkCoordinator?.confirm() would handle this
+                                linkCoordinator?.confirm()
+                                
+                                // Simulate success after a short delay for demo
+                                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                    handleLinkSuccess()
+                                }, 1000)
                             },
                             enabled = currentPaymentOption != null && !loading,
                             modifier = Modifier
@@ -181,7 +204,7 @@ internal class RidesharingAppActivity : ComponentActivity() {
                                     color = Color.White
                                 )
                             } else {
-                                Text("Confirm Ride")
+                                Text("Confirm Ride with Link")
                             }
                         }
                     }

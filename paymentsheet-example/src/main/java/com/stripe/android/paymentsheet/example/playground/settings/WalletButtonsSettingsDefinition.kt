@@ -24,7 +24,8 @@ internal object WalletButtonsSettingsDefinition :
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,
-            PlaygroundConfigurationData.IntegrationType.RidesharingApp -> true
+            PlaygroundConfigurationData.IntegrationType.RidesharingApp,
+            PlaygroundConfigurationData.IntegrationType.LinkCoordinator -> true
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
             PlaygroundConfigurationData.IntegrationType.CustomerSheet -> false
         }
