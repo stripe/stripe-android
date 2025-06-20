@@ -253,7 +253,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     userEmail = account.email,
                     stripeIntent = config.stripeIntent,
                     consumerSessionClientSecret = account.clientSecret,
-                    consumerPublishableKey = account.consumerPublishableKey.takeIf { config.passthroughModeEnabled },
+                    consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                     active = config.passthroughModeEnabled,
                 ).mapCatching {
                     if (config.passthroughModeEnabled) {
@@ -288,7 +288,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 bankAccountId = bankAccountId,
                 userEmail = linkAccount.email,
                 consumerSessionClientSecret = linkAccount.clientSecret,
-                consumerPublishableKey = linkAccount.consumerPublishableKey.takeIf { config.passthroughModeEnabled },
+                consumerPublishableKey = linkAccount.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
             )
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)
