@@ -100,11 +100,12 @@ internal fun WalletScreen(
             viewModel::onFinancialConnectionsResult
         )
 
-    val addBankAccountState = state.addBankAccountState
-    LaunchedEffect(addBankAccountState) {
-        if (addBankAccountState is AddBankAccountState.FinancialConnectionsConfigured) {
+    val financialConnectionsSheetConfig =
+        (state.addBankAccountState as? AddBankAccountState.Processing)?.configToPresent
+    LaunchedEffect(financialConnectionsSheetConfig) {
+        if (financialConnectionsSheetConfig != null) {
             if (financialConnectionsSheetLauncher != null) {
-                financialConnectionsSheetLauncher.present(addBankAccountState.config)
+                financialConnectionsSheetLauncher.present(financialConnectionsSheetConfig)
                 viewModel.onPresentFinancialConnections(true)
             } else {
                 // Should never happen.
@@ -568,7 +569,9 @@ private fun ExpandedPaymentDetails(
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
-    val isInteractionEnabled = !uiState.primaryButtonState.isBlocking
+    val isInteractionEnabled =
+        !uiState.primaryButtonState.isBlocking &&
+            uiState.addBankAccountState == AddBankAccountState.Idle
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(

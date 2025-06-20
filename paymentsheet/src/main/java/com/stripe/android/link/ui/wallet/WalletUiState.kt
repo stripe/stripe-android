@@ -59,7 +59,8 @@ internal data class WalletUiState(
 
             val disableButton = (isExpired && isMissingExpiryDateInput) ||
                 (requiresCvcRecollection && isMissingCvcInput) || (cardBeingUpdated != null) ||
-                selectedItem?.let { isItemAvailable(it) } != true
+                selectedItem?.let { isItemAvailable(it) } != true ||
+                addBankAccountState is AddBankAccountState.Processing
 
             return when {
                 hasCompleted -> {

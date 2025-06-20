@@ -164,42 +164,32 @@ class WalletViewModelTest {
 
             awaitItem().run {
                 assertThat(userSetIsExpanded).isTrue()
-                assertThat(isProcessing).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
             }
 
             vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
             awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.ConfiguringFinancialConnections)
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
             }
             awaitItem().run {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
                 )
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState)
-                    .isEqualTo(AddBankAccountState.FinancialConnectionsConfigured(expectedConfig))
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
 
             vm.onPresentFinancialConnections(true)
             awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.PresentingFinancialConnections)
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
             }
 
             vm.onFinancialConnectionsResult(
                 FinancialConnectionsSheetResult.Completed(mockFinancialConnectionsSession())
             )
             awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.ProcessingFinancialConnectionsResult)
-            }
-            awaitItem().run {
                 assertThat(selectedItemId).isEqualTo(newBankAccountId)
                 assertThat(userSetIsExpanded).isFalse()
-                assertThat(isProcessing).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
             }
         }
@@ -209,7 +199,6 @@ class WalletViewModelTest {
     fun `viewmodel should handle link account session request error when adding bank account`() = runTest(dispatcher) {
         testAddBankAccount { vm, linkAccountManager ->
             awaitItem().run {
-                assertThat(isProcessing).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
             }
 
@@ -217,11 +206,9 @@ class WalletViewModelTest {
             linkAccountManager.createLinkAccountSessionResult = Result.failure(error)
             vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
             awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.ConfiguringFinancialConnections)
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
             }
             awaitItem().run {
-                assertThat(isProcessing).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
                 assertThat(alertMessage).isEqualTo(error.stripeErrorMessage())
             }
@@ -234,13 +221,11 @@ class WalletViewModelTest {
             skipItems(1)
             vm.onPresentFinancialConnections(true)
             awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.PresentingFinancialConnections)
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
             }
 
             vm.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Canceled)
             awaitItem().run {
-                assertThat(isProcessing).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
             }
         }
@@ -252,14 +237,12 @@ class WalletViewModelTest {
             skipItems(1)
             vm.onPresentFinancialConnections(true)
             awaitItem().run {
-                assertThat(isProcessing).isTrue()
-                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.PresentingFinancialConnections)
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
             }
 
             val error = Throwable("oops")
             vm.onFinancialConnectionsResult(FinancialConnectionsSheetResult.Failed(error))
             awaitItem().run {
-                assertThat(isProcessing).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
                 assertThat(alertMessage).isEqualTo(error.stripeErrorMessage())
             }
