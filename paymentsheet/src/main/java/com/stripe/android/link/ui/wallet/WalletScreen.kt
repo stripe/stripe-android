@@ -92,7 +92,6 @@ internal fun WalletScreen(
     hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
 
     val financialConnectionsSheetLauncher =
@@ -129,23 +128,7 @@ internal fun WalletScreen(
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
-        onAddNewPaymentMethodClicked = {
-            if (state.addPaymentMethodOptions.size == 1) {
-                viewModel.onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
-            } else {
-                showBottomSheetContent {
-                    AddPaymentMethodMenu(
-                        options = state.addPaymentMethodOptions,
-                        onOptionClick = { option ->
-                            viewModel.onAddPaymentMethodOptionClicked(option)
-                            coroutineScope.launch {
-                                hideBottomSheetContent()
-                            }
-                        },
-                    )
-                }
-            }
-        },
+        onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
         onDismissAlert = viewModel::onDismissAlert
     )
 }
@@ -157,7 +140,7 @@ internal fun WalletBody(
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
-    onAddNewPaymentMethodClicked: () -> Unit,
+    onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
@@ -168,6 +151,7 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     AnimatedContent(
         targetState = state.paymentDetailsList.isEmpty(),
         transitionSpec = { LinkScreenTransition },
@@ -204,7 +188,24 @@ internal fun WalletBody(
                     onUpdateClicked = onUpdateClicked,
                     onLogoutClicked = onLogoutClicked,
                     onSetDefaultClicked = onSetDefaultClicked,
-                    onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
+                    onAddNewPaymentMethodClicked = {
+                        if (state.addPaymentMethodOptions.size == 1) {
+                            onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
+                        } else {
+                            showBottomSheetContent {
+                                AddPaymentMethodMenu(
+                                    modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
+                                    options = state.addPaymentMethodOptions,
+                                    onOptionClick = { option ->
+                                        onAddPaymentMethodOptionClicked(option)
+                                        coroutineScope.launch {
+                                            hideBottomSheetContent()
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    },
                     hideBottomSheetContent = hideBottomSheetContent
                 )
 
@@ -813,6 +814,7 @@ internal const val COLLAPSED_WALLET_PAYMENT_DETAILS_TAG = "collapsed_wallet_paym
 internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
 internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
 internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
+internal const val WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU = "wallet_screen_add_payment_method_sheet"
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
 internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
 internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"

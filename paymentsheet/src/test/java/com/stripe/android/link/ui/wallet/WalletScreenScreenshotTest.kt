@@ -229,7 +229,7 @@ internal class WalletScreenScreenshotTest {
                     onSetDefaultClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
-                    onAddNewPaymentMethodClicked = {},
+                    onAddPaymentMethodOptionClicked = {},
                     onDismissAlert = {},
                     onLogoutClicked = {},
                     expiryDateController = SimpleTextFieldController(DateConfig()),
