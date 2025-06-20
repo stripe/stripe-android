@@ -5,13 +5,5 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 internal sealed interface AddBankAccountState {
     data object Idle : AddBankAccountState
 
-    data object ConfiguringFinancialConnections : AddBankAccountState
-
-    data class FinancialConnectionsConfigured(
-        val config: FinancialConnectionsSheetConfiguration
-    ) : AddBankAccountState
-
-    data object PresentingFinancialConnections : AddBankAccountState
-
-    data object ProcessingFinancialConnectionsResult : AddBankAccountState
+    data class Processing(val configToPresent: FinancialConnectionsSheetConfiguration? = null) : AddBankAccountState
 }

@@ -156,7 +156,6 @@ internal class WalletViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         selectedItemId = selectedItemId,
-                        isProcessing = if (isAfterAdding) false else it.isProcessing,
                         userSetIsExpanded = if (isAfterAdding) false else it.userSetIsExpanded,
                         errorMessage = if (isAfterAdding) null else it.errorMessage,
                         addBankAccountState = if (isAfterAdding) AddBankAccountState.Idle else it.addBankAccountState,
@@ -408,10 +407,7 @@ internal class WalletViewModel @Inject constructor(
 
     private fun onAddBankAccountClicked() {
         _uiState.update {
-            it.copy(
-                isProcessing = true,
-                addBankAccountState = AddBankAccountState.ConfiguringFinancialConnections
-            )
+            it.copy(addBankAccountState = AddBankAccountState.Processing())
         }
         viewModelScope.launch {
             linkAccountManager.createLinkAccountSession()
@@ -424,13 +420,11 @@ internal class WalletViewModel @Inject constructor(
                 .fold(
                     onSuccess = { config ->
                         _uiState.update {
-                            it.copy(
-                                addBankAccountState = AddBankAccountState.FinancialConnectionsConfigured(config)
-                            )
+                            it.copy(addBankAccountState = AddBankAccountState.Processing(configToPresent = config))
                         }
                     },
                     onFailure = { error ->
-                        updateErrorMessageAndStopProcessing(
+                        onAddBankAccountError(
                             error = error,
                             loggerMessage = "Failed to create Link account session"
                         )
@@ -442,19 +436,13 @@ internal class WalletViewModel @Inject constructor(
     fun onPresentFinancialConnections(success: Boolean) {
         if (success) {
             _uiState.update {
-                it.copy(
-                    isProcessing = true,
-                    addBankAccountState = AddBankAccountState.PresentingFinancialConnections
-                )
+                it.copy(addBankAccountState = AddBankAccountState.Processing(configToPresent = null))
             }
         } else {
             // This shouldn't happen, but we'll handle it just in case so the UI isn't stuck processing.
             logger.warning("WalletViewModel: Failed to present Financial Connections")
             _uiState.update {
-                it.copy(
-                    isProcessing = false,
-                    addBankAccountState = AddBankAccountState.Idle
-                )
+                it.copy(addBankAccountState = AddBankAccountState.Idle)
             }
         }
     }
@@ -463,11 +451,6 @@ internal class WalletViewModel @Inject constructor(
         viewModelScope.launch {
             when (result) {
                 is FinancialConnectionsSheetResult.Completed -> {
-                    _uiState.update {
-                        it.copy(
-                            addBankAccountState = AddBankAccountState.ProcessingFinancialConnectionsResult
-                        )
-                    }
                     val accountId = result.financialConnectionsSession.accounts.data.firstOrNull()?.id
                     if (accountId != null) {
                         linkAccountManager.createBankAccountPaymentDetails(accountId)
@@ -478,30 +461,24 @@ internal class WalletViewModel @Inject constructor(
                                 )
                             }
                             .onFailure {
-                                updateErrorMessageAndStopProcessing(
+                                onAddBankAccountError(
                                     error = it,
                                     loggerMessage = "Failed to create/load bank account"
                                 )
                             }
                     } else {
                         _uiState.update {
-                            it.copy(
-                                isProcessing = false,
-                                addBankAccountState = AddBankAccountState.Idle,
-                            )
+                            it.copy(addBankAccountState = AddBankAccountState.Idle)
                         }
                     }
                 }
                 FinancialConnectionsSheetResult.Canceled -> {
                     _uiState.update {
-                        it.copy(
-                            isProcessing = false,
-                            addBankAccountState = AddBankAccountState.Idle,
-                        )
+                        it.copy(addBankAccountState = AddBankAccountState.Idle)
                     }
                 }
                 is FinancialConnectionsSheetResult.Failed -> {
-                    updateErrorMessageAndStopProcessing(
+                    onAddBankAccountError(
                         error = result.error,
                         loggerMessage = "Failed to get Financial Connections result"
                     )
@@ -528,7 +505,22 @@ internal class WalletViewModel @Inject constructor(
             it.copy(
                 alertMessage = error.stripeErrorMessage(),
                 isProcessing = false,
-                cardBeingUpdated = null,
+                cardBeingUpdated = null
+            )
+        }
+    }
+
+    private fun onAddBankAccountError(
+        error: Throwable,
+        loggerMessage: String
+    ) {
+        logger.error(
+            msg = "WalletViewModel: $loggerMessage",
+            t = error
+        )
+        _uiState.update {
+            it.copy(
+                alertMessage = error.stripeErrorMessage(),
                 addBankAccountState = AddBankAccountState.Idle
             )
         }
