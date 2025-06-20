@@ -31,7 +31,8 @@ data class PlaygroundConfigurationData(
         LinkController;
 
         @SerialName("ridesharingApp")
-        RidesharingApp;
+        RidesharingApp,
+
 
         fun isPaymentFlow(): Boolean {
             return this in paymentFlows()
