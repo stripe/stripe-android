@@ -92,6 +92,7 @@ internal fun WalletScreen(
     hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
 
     val financialConnectionsSheetLauncher =
@@ -137,7 +138,9 @@ internal fun WalletScreen(
                         options = state.addPaymentMethodOptions,
                         onOptionClick = { option ->
                             viewModel.onAddPaymentMethodOptionClicked(option)
-                            hideBottomSheetContent()
+                            coroutineScope.launch {
+                                hideBottomSheetContent()
+                            }
                         },
                     )
                 }
