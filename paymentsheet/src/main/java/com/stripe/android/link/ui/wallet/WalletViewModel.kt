@@ -9,6 +9,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
@@ -67,6 +69,8 @@ internal class WalletViewModel @Inject constructor(
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
 
+    private val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+
     private val _uiState = MutableStateFlow(
         value = WalletUiState(
             paymentDetailsList = emptyList(),
@@ -81,8 +85,7 @@ internal class WalletViewModel @Inject constructor(
             userSetIsExpanded = linkLaunchMode.selectedItemId != null,
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
-            // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
-            canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
+            addPaymentMethodOptions = getAddPaymentMethodOptions(),
         )
     )
 
@@ -106,7 +109,7 @@ internal class WalletViewModel @Inject constructor(
 
     init {
         _uiState.update {
-            it.setProcessing()
+            it.copy(isProcessing = true)
         }
 
         viewModelScope.launch {
@@ -142,13 +145,21 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadPaymentDetails(selectedItemId: String?) {
+    private suspend fun loadPaymentDetails(
+        selectedItemId: String?,
+        isAfterAdding: Boolean = false
+    ) {
         linkAccountManager.listPaymentDetails(
             paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
         ).fold(
             onSuccess = { response ->
                 _uiState.update {
-                    it.copy(selectedItemId = selectedItemId)
+                    it.copy(
+                        selectedItemId = selectedItemId,
+                        userSetIsExpanded = if (isAfterAdding) false else it.userSetIsExpanded,
+                        errorMessage = if (isAfterAdding) null else it.errorMessage,
+                        addBankAccountState = if (isAfterAdding) AddBankAccountState.Idle else it.addBankAccountState,
+                    )
                 }
 
                 if (response.paymentDetails.isEmpty()) {
@@ -383,8 +394,97 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    fun onAddNewPaymentMethodClicked() {
-        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+    fun onAddPaymentMethodOptionClicked(option: AddPaymentMethodOption) {
+        when (option) {
+            is AddPaymentMethodOption.Bank -> {
+                onAddBankAccountClicked()
+            }
+            AddPaymentMethodOption.Card -> {
+                navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
+            }
+        }
+    }
+
+    private fun onAddBankAccountClicked() {
+        _uiState.update {
+            it.copy(addBankAccountState = AddBankAccountState.Processing())
+        }
+        viewModelScope.launch {
+            linkAccountManager.createLinkAccountSession()
+                .mapCatching { session ->
+                    FinancialConnectionsSheetConfiguration(
+                        financialConnectionsSessionClientSecret = session.clientSecret,
+                        publishableKey = linkAccount.consumerPublishableKey!!,
+                    )
+                }
+                .fold(
+                    onSuccess = { config ->
+                        _uiState.update {
+                            it.copy(addBankAccountState = AddBankAccountState.Processing(configToPresent = config))
+                        }
+                    },
+                    onFailure = { error ->
+                        onAddBankAccountError(
+                            error = error,
+                            loggerMessage = "Failed to create Link account session"
+                        )
+                    }
+                )
+        }
+    }
+
+    fun onPresentFinancialConnections(success: Boolean) {
+        if (success) {
+            _uiState.update {
+                it.copy(addBankAccountState = AddBankAccountState.Processing(configToPresent = null))
+            }
+        } else {
+            // This shouldn't happen, but we'll handle it just in case so the UI isn't stuck processing.
+            logger.warning("WalletViewModel: Failed to present Financial Connections")
+            _uiState.update {
+                it.copy(addBankAccountState = AddBankAccountState.Idle)
+            }
+        }
+    }
+
+    fun onFinancialConnectionsResult(result: FinancialConnectionsSheetResult) {
+        viewModelScope.launch {
+            when (result) {
+                is FinancialConnectionsSheetResult.Completed -> {
+                    val accountId = result.financialConnectionsSession.accounts.data.firstOrNull()?.id
+                    if (accountId != null) {
+                        linkAccountManager.createBankAccountPaymentDetails(accountId)
+                            .mapCatching { paymentDetails ->
+                                loadPaymentDetails(
+                                    selectedItemId = paymentDetails.id,
+                                    isAfterAdding = true
+                                )
+                            }
+                            .onFailure {
+                                onAddBankAccountError(
+                                    error = it,
+                                    loggerMessage = "Failed to create/load bank account"
+                                )
+                            }
+                    } else {
+                        _uiState.update {
+                            it.copy(addBankAccountState = AddBankAccountState.Idle)
+                        }
+                    }
+                }
+                FinancialConnectionsSheetResult.Canceled -> {
+                    _uiState.update {
+                        it.copy(addBankAccountState = AddBankAccountState.Idle)
+                    }
+                }
+                is FinancialConnectionsSheetResult.Failed -> {
+                    onAddBankAccountError(
+                        error = result.error,
+                        loggerMessage = "Failed to get Financial Connections result"
+                    )
+                }
+            }
+        }
     }
 
     fun onDismissAlert() {
@@ -407,6 +507,37 @@ internal class WalletViewModel @Inject constructor(
                 isProcessing = false,
                 cardBeingUpdated = null
             )
+        }
+    }
+
+    private fun onAddBankAccountError(
+        error: Throwable,
+        loggerMessage: String
+    ) {
+        logger.error(
+            msg = "WalletViewModel: $loggerMessage",
+            t = error
+        )
+        _uiState.update {
+            it.copy(
+                alertMessage = error.stripeErrorMessage(),
+                addBankAccountState = AddBankAccountState.Idle
+            )
+        }
+    }
+
+    private fun getAddPaymentMethodOptions(): List<AddPaymentMethodOption> {
+        return buildList {
+            if (
+                linkAccount.consumerPublishableKey != null &&
+                configuration.financialConnectionsAvailability != null &&
+                supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)
+            ) {
+                add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))
+            }
+            if (supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.Card.TYPE)) {
+                add(AddPaymentMethodOption.Card)
+            }
         }
     }
 

@@ -3,11 +3,13 @@ package com.stripe.android.link.ui.wallet
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
@@ -42,6 +44,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -187,6 +190,54 @@ internal class WalletScreenTest {
             .assertIsDisplayed()
             .assertIsEnabled()
             .assertHasClickAction()
+    }
+
+    @Test
+    fun `add payment method menu is shown when multiple options are available`() = runTest(dispatcher) {
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                var bottomSheetContent: BottomSheetContent? by remember { mutableStateOf(null) }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (bottomSheetContent == null) {
+                        TestWalletBody(
+                            addPaymentMethodOptions = listOf(
+                                AddPaymentMethodOption.Card,
+                                AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full),
+                            ),
+                            showBottomSheetContent = { bottomSheetContent = it },
+                            hideBottomSheetContent = { bottomSheetContent = null },
+                        )
+                    } else {
+                        Column {
+                            bottomSheetContent?.invoke(this)
+                        }
+                    }
+                }
+            }
+        }
+        onWalletAddPaymentMethodRow().performClick()
+        composeTestRule.waitForIdle()
+        onWalletAddPaymentMethodMenu().assertIsDisplayed()
+    }
+
+    @Test
+    fun `single payment method option is selected when only one available`() = runTest(dispatcher) {
+        var selectedAddPaymentMethodOptionClicked: AddPaymentMethodOption? = null
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    TestWalletBody(
+                        addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
+                        onAddPaymentMethodOptionClicked = { selectedAddPaymentMethodOptionClicked = it },
+                        showBottomSheetContent = {},
+                        hideBottomSheetContent = {},
+                    )
+                }
+            }
+        }
+        onWalletAddPaymentMethodRow().performClick()
+        composeTestRule.waitForIdle()
+        assertThat(selectedAddPaymentMethodOptionClicked).isEqualTo(AddPaymentMethodOption.Card)
     }
 
     @Test
@@ -686,10 +737,12 @@ internal class WalletScreenTest {
 
     @Composable
     private fun TestWalletBody(
+        addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
+        onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit = {},
         showBottomSheetContent: (BottomSheetContent?) -> Unit,
-        hideBottomSheetContent: () -> Unit
+        hideBottomSheetContent: () -> Unit,
     ) {
         val paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails
             .filterIsInstance<ConsumerPaymentDetails.Card>()
@@ -704,7 +757,7 @@ internal class WalletScreenTest {
                 hasCompleted = false,
                 primaryButtonLabel = "Buy".resolvableString,
                 secondaryButtonLabel = "Pay another way".resolvableString,
-                canAddNewPaymentMethod = true,
+                addPaymentMethodOptions = addPaymentMethodOptions,
                 userSetIsExpanded = true,
                 isSettingUp = false,
                 merchantName = "Example Inc.",
@@ -717,7 +770,7 @@ internal class WalletScreenTest {
             onSetDefaultClicked = onSetDefaultClicked,
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
-            onAddNewPaymentMethodClicked = {},
+            onAddPaymentMethodOptionClicked = onAddPaymentMethodOptionClicked,
             onDismissAlert = {},
             onUpdateClicked = {},
             onLogoutClicked = {},
@@ -760,6 +813,9 @@ internal class WalletScreenTest {
 
     private fun onWalletAddPaymentMethodRow() =
         composeTestRule.onNodeWithTag(WALLET_ADD_PAYMENT_METHOD_ROW, useUnmergedTree = true)
+
+    private fun onWalletAddPaymentMethodMenu() =
+        composeTestRule.onNodeWithTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU, useUnmergedTree = true)
 
     private fun onPaymentMethodList() = composeTestRule.onAllNodes(hasTestTag(WALLET_SCREEN_PAYMENT_METHODS_LIST))
 

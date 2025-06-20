@@ -21,6 +21,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -55,13 +56,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
-
-    /**
-     * The publishable key for the signed in Link account.
-     */
-    @Volatile
-    @VisibleForTesting
-    override var consumerPublishableKey: String? = null
 
     override val accountStatus = linkAccountHolder.linkAccountInfo
         .map { it.account.fetchAccountStatus(it.lastUpdateReason != UpdateReason.LoggedOut) }
@@ -103,6 +97,18 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {
+        return runCatching {
+            val linkAccount = requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+            linkRepository.createLinkAccountSession(
+                consumerSessionClientSecret = linkAccount.clientSecret,
+                stripeIntent = config.stripeIntent,
+                linkMode = config.linkMode,
+                consumerPublishableKey = linkAccount.consumerPublishableKey,
+            ).getOrThrow()
+        }
+    }
+
     override suspend fun signInWithUserInput(
         userInput: UserInput
     ): Result<LinkAccount> =
@@ -126,7 +132,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             runCatching {
                 linkRepository.logOut(
                     consumerSessionClientSecret = account.clientSecret,
-                    consumerAccountPublishableKey = consumerPublishableKey,
+                    consumerAccountPublishableKey = account.consumerPublishableKey,
                 ).getOrThrow()
             }.onSuccess {
                 errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
@@ -247,7 +253,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     userEmail = account.email,
                     stripeIntent = config.stripeIntent,
                     consumerSessionClientSecret = account.clientSecret,
-                    consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
+                    consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                     active = config.passthroughModeEnabled,
                 ).mapCatching {
                     if (config.passthroughModeEnabled) {
@@ -267,6 +273,24 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to create payment details")
+            )
+        }
+    }
+
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String
+    ): Result<ConsumerPaymentDetails.PaymentDetails> {
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+        return if (linkAccount != null) {
+            linkRepository.createBankAccountPaymentDetails(
+                bankAccountId = bankAccountId,
+                userEmail = linkAccount.email,
+                consumerSessionClientSecret = linkAccount.clientSecret,
+            )
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT)
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
@@ -294,8 +318,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         consumerSession: ConsumerSession,
         publishableKey: String?,
     ): LinkAccount {
-        maybeUpdateConsumerPublishableKey(consumerSession.emailAddress, publishableKey)
-        val newAccount = LinkAccount(consumerSession)
+        val currentAccount = linkAccountHolder.linkAccountInfo.value.account
+        val newConsumerPublishableKey = publishableKey
+            ?: currentAccount?.consumerPublishableKey
+                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+        val newAccount = LinkAccount(consumerSession, newConsumerPublishableKey)
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
         }
@@ -313,16 +340,19 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     publishableKey = lookup.publishableKey,
                 )
             } else {
-                LinkAccount(consumerSession)
+                LinkAccount(consumerSession, lookup.publishableKey)
             }
         }
     }
 
     override suspend fun startVerification(): Result<LinkAccount> {
-        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
-            ?: return Result.failure(Throwable("no link account found"))
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
         linkEventsReporter.on2FAStart()
-        return linkRepository.startVerification(clientSecret, consumerPublishableKey)
+        return linkRepository.startVerification(
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        )
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
@@ -331,9 +361,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun confirmVerification(code: String): Result<LinkAccount> {
-        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
-            ?: return Result.failure(Throwable("no link account found"))
-        return linkRepository.confirmVerification(code, clientSecret, consumerPublishableKey)
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
+            ?: return Result.failure(NoLinkAccountFoundException())
+        return linkRepository.confirmVerification(
+            verificationCode = code,
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
+        )
             .onSuccess {
                 linkEventsReporter.on2FAComplete()
             }.onFailure {
@@ -344,45 +378,45 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun listPaymentDetails(paymentMethodTypes: Set<String>): Result<ConsumerPaymentDetails> {
-        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listPaymentDetails(
             paymentMethodTypes = paymentMethodTypes,
-            consumerSessionClientSecret = clientSecret,
-            consumerPublishableKey = consumerPublishableKey
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { paymentDetailsList ->
             paymentDetailsList.also { _consumerPaymentDetails.value = it }
         }
     }
 
     override suspend fun listShippingAddresses(): Result<ConsumerShippingAddresses> {
-        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.listShippingAddresses(
-            consumerSessionClientSecret = clientSecret,
-            consumerPublishableKey = consumerPublishableKey,
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey,
         )
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
-        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.deletePaymentDetails(
             paymentDetailsId = paymentDetailsId,
-            consumerSessionClientSecret = clientSecret,
-            consumerPublishableKey = consumerPublishableKey
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
         )
     }
 
     override suspend fun updatePaymentDetails(
         updateParams: ConsumerPaymentDetailsUpdateParams
     ): Result<ConsumerPaymentDetails> {
-        val clientSecret = linkAccountHolder.linkAccountInfo.value.account?.clientSecret
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
         return linkRepository.updatePaymentDetails(
             updateParams = updateParams,
-            consumerSessionClientSecret = clientSecret,
-            consumerPublishableKey = consumerPublishableKey
+            consumerSessionClientSecret = linkAccount.clientSecret,
+            consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { updatedPaymentDetails ->
             updatedPaymentDetails.also {
                 updateCachedPaymentDetails(it.paymentDetails.first())
@@ -412,30 +446,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
                 _consumerPaymentDetails.value = null
             }
-            consumerPublishableKey = null
             cachedShippingAddresses = null
             null
-        }
-    }
-
-    /**
-     * Update the [consumerPublishableKey] value if needed.
-     *
-     * Only calls to [lookupConsumer] and [signUp] return the publishable key. For other calls, we
-     * want to keep using the current key unless the user signed out.
-     */
-    private fun maybeUpdateConsumerPublishableKey(
-        newEmail: String,
-        publishableKey: String?,
-    ) {
-        if (publishableKey != null) {
-            // If the session has a key, start using it
-            consumerPublishableKey = publishableKey
-        } else {
-            // Keep the current key if it's the same user, reset it if the user changed
-            if (linkAccountHolder.linkAccountInfo.value.account?.email != newEmail) {
-                consumerPublishableKey = null
-            }
         }
     }
 

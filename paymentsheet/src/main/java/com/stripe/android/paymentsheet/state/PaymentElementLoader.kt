@@ -585,6 +585,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
+            financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = elementsSession),
             flags = elementsSession.linkFlags,
             useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
             suppress2faModal = elementsSession.suppressLink2faModal,

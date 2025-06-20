@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -49,6 +50,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -62,6 +66,8 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.getIntentBuilder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
@@ -87,6 +93,27 @@ internal fun WalletScreen(
     onLogoutClicked: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    val financialConnectionsSheetLauncher =
+        rememberFinancialConnectionsSheetInternal(
+            state.addBankAccountOption?.financialConnectionsAvailability,
+            viewModel::onFinancialConnectionsResult
+        )
+
+    val financialConnectionsSheetConfig =
+        (state.addBankAccountState as? AddBankAccountState.Processing)?.configToPresent
+    LaunchedEffect(financialConnectionsSheetConfig) {
+        if (financialConnectionsSheetConfig != null) {
+            if (financialConnectionsSheetLauncher != null) {
+                financialConnectionsSheetLauncher.present(financialConnectionsSheetConfig)
+                viewModel.onPresentFinancialConnections(true)
+            } else {
+                // Should never happen.
+                viewModel.onPresentFinancialConnections(false)
+            }
+        }
+    }
+
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -101,7 +128,7 @@ internal fun WalletScreen(
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
-        onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
+        onAddPaymentMethodOptionClicked = viewModel::onAddPaymentMethodOptionClicked,
         onDismissAlert = viewModel::onDismissAlert
     )
 }
@@ -113,7 +140,7 @@ internal fun WalletBody(
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
-    onAddNewPaymentMethodClicked: () -> Unit,
+    onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
@@ -124,6 +151,7 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
     AnimatedContent(
         targetState = state.paymentDetailsList.isEmpty(),
         transitionSpec = { LinkScreenTransition },
@@ -160,7 +188,24 @@ internal fun WalletBody(
                     onUpdateClicked = onUpdateClicked,
                     onLogoutClicked = onLogoutClicked,
                     onSetDefaultClicked = onSetDefaultClicked,
-                    onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
+                    onAddNewPaymentMethodClicked = {
+                        if (state.addPaymentMethodOptions.size == 1) {
+                            onAddPaymentMethodOptionClicked(state.addPaymentMethodOptions[0])
+                        } else {
+                            showBottomSheetContent {
+                                AddPaymentMethodMenu(
+                                    modifier = Modifier.testTag(WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU),
+                                    options = state.addPaymentMethodOptions,
+                                    onOptionClick = { option ->
+                                        onAddPaymentMethodOptionClicked(option)
+                                        coroutineScope.launch {
+                                            hideBottomSheetContent()
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    },
                     hideBottomSheetContent = hideBottomSheetContent
                 )
 
@@ -528,7 +573,9 @@ private fun ExpandedPaymentDetails(
     onAddNewPaymentMethodClick: () -> Unit,
     onCollapse: () -> Unit
 ) {
-    val isInteractionEnabled = !uiState.primaryButtonState.isBlocking
+    val isInteractionEnabled =
+        !uiState.primaryButtonState.isBlocking &&
+            uiState.addBankAccountState == AddBankAccountState.Idle
 
     Column(modifier = Modifier.fillMaxWidth()) {
         ExpandedRowHeader(
@@ -732,6 +779,28 @@ private fun AlertMessage(
     )
 }
 
+// We can't use FC's `rememberFinancialConnectionsSheet` because it doesn't support FC Lite.
+@Composable
+private fun rememberFinancialConnectionsSheetInternal(
+    financialConnectionsAvailability: FinancialConnectionsAvailability?,
+    callback: (FinancialConnectionsSheetResult) -> Unit
+): FinancialConnectionsSheetForDataLauncher? {
+    financialConnectionsAvailability ?: return null
+
+    val context = LocalContext.current
+    val contract = remember(context, financialConnectionsAvailability) {
+        FinancialConnectionsSheetForDataContract(
+            intentBuilder = financialConnectionsAvailability.getIntentBuilder(context)
+        )
+    }
+    val activityResultLauncher = rememberLauncherForActivityResult(contract, callback)
+    return remember(activityResultLauncher) {
+        FinancialConnectionsSheetForDataLauncher(
+            activityResultLauncher
+        )
+    }
+}
+
 private fun String.replaceHyperlinks() = this.replace(
     "<terms>",
     "<a href=\"https://link.com/terms/ach-authorization\">"
@@ -745,6 +814,7 @@ internal const val COLLAPSED_WALLET_PAYMENT_DETAILS_TAG = "collapsed_wallet_paym
 internal const val COLLAPSED_WALLET_ROW = "collapsed_wallet_row_tag"
 internal const val WALLET_SCREEN_EXPANDED_ROW_HEADER = "wallet_screen_expanded_row_header"
 internal const val WALLET_ADD_PAYMENT_METHOD_ROW = "wallet_add_payment_method_row"
+internal const val WALLET_SCREEN_ADD_PAYMENT_METHOD_MENU = "wallet_screen_add_payment_method_sheet"
 internal const val WALLET_SCREEN_PAYMENT_METHODS_LIST = "wallet_screen_payment_methods_list"
 internal const val WALLET_SCREEN_PAY_BUTTON = "wallet_screen_pay_button"
 internal const val WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON = "wallet_screen_pay_another_way_button"

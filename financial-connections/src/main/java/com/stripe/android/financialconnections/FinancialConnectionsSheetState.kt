@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
+import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.ui.theme.Theme
@@ -21,7 +23,7 @@ internal data class FinancialConnectionsSheetState(
     val viewEffect: FinancialConnectionsSheetViewEffect?
 ) {
     val isInstantDebits: Boolean
-        get() = initialArgs is FinancialConnectionsSheetActivityArgs.ForInstantDebits
+        get() = initialArgs.flowType == FinancialConnectionsSheetFlowType.ForInstantDebits
 
     val theme: Theme
         // We can't rely on the value coming from the `manifest` here, because its initial value will be null
@@ -86,6 +88,7 @@ internal sealed class FinancialConnectionsSheetViewEffect {
      * Open the AuthFlow native activity.
      */
     data class OpenNativeAuthFlow(
+        val flowType: FinancialConnectionsSheetFlowType,
         val configuration: FinancialConnectionsSheetConfiguration,
         val initialSyncResponse: SynchronizeSessionResponse,
         val elementsSessionContext: ElementsSessionContext?,

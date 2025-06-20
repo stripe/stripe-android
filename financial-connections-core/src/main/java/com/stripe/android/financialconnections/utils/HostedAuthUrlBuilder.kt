@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.QueryStringFactory
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
+import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 
@@ -17,7 +19,7 @@ object HostedAuthUrlBuilder {
     ): String? {
         return create(
             hostedAuthUrl = hostedAuthUrl,
-            isInstantDebits = args is FinancialConnectionsSheetActivityArgs.ForInstantDebits,
+            isInstantDebits = args.flowType == FinancialConnectionsSheetFlowType.ForInstantDebits,
             linkMode = args.elementsSessionContext?.linkMode,
             billingDetails = args.elementsSessionContext?.billingDetails,
             prefillDetails = prefillDetails,
