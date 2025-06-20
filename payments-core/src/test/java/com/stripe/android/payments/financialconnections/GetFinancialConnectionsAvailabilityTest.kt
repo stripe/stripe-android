@@ -34,7 +34,7 @@ class GetFinancialConnectionsAvailabilityTest {
     }
 
     @Test
-    fun `when prefer lite flag is enabled should take priority over killswitch`() {
+    fun `when killswitch is enabled should take priority over prefer lite flag`() {
         val elementsSession = createSession(
             mapOf(
                 ELEMENTS_PREFER_FC_LITE to true,
@@ -42,10 +42,10 @@ class GetFinancialConnectionsAvailabilityTest {
             )
         )
         assertEquals(
-            FinancialConnectionsAvailability.Lite,
+            FinancialConnectionsAvailability.Full,
             GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
-                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
             )
         )
     }
