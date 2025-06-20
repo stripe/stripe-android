@@ -209,7 +209,6 @@ internal class LinkApiRepository @Inject constructor(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?,
     ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -219,7 +218,7 @@ internal class LinkApiRepository @Inject constructor(
                 billingAddress = null
             ),
             requestSurface = REQUEST_SURFACE,
-            requestOptions = buildRequestOptions(consumerPublishableKey),
+            requestOptions = buildRequestOptions(),
         ).mapCatching {
             it.paymentDetails.first()
         }.onFailure {

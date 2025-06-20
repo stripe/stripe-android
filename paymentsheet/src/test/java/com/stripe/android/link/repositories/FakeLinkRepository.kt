@@ -127,7 +127,6 @@ internal open class FakeLinkRepository : LinkRepository {
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
     ) = createBankAccountPaymentDetailsResult
 
     override suspend fun shareCardPaymentDetails(
