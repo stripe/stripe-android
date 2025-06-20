@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -82,6 +86,10 @@ internal fun Layout(
             Column(modifier = Modifier.padding(bodyPadding)) {
                 body()
             }
+
+            if (footer == null) {
+                Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+            }
         }
     }
 }
@@ -124,7 +132,15 @@ internal fun LazyLayout(
             state = lazyListState,
             verticalArrangement = verticalArrangement,
             contentPadding = bodyPadding,
-            content = body,
+            content = {
+                body()
+
+                if (footer == null) {
+                    item {
+                        Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+                    }
+                }
+            },
         )
     }
 }
@@ -183,16 +199,22 @@ private fun LayoutScaffold(
             },
             color = FinancialConnectionsTheme.colors.background,
         ) {
-            Box(contentAlignment = Alignment.BottomCenter) {
+            Box(
+                contentAlignment = Alignment.BottomCenter,
+                modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars)
+            ) {
                 footer?.let {
-                    Box(
+                    Column(
                         modifier = Modifier.padding(
                             top = 16.dp,
                             bottom = 24.dp,
                             start = 24.dp,
                             end = 24.dp,
                         ),
-                        content = { it() }
+                        content = {
+                            it()
+                            Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.navigationBars))
+                        }
                     )
                 }
 
