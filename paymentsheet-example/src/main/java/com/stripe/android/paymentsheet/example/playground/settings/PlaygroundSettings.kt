@@ -484,6 +484,7 @@ internal class PlaygroundSettings private constructor(
                 FeatureFlags.financialConnectionsFullSdkUnavailable,
                 PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
             ),
+            FeatureFlagSettingsDefinition(FeatureFlags.forceEnableNativeFinancialConnections),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
