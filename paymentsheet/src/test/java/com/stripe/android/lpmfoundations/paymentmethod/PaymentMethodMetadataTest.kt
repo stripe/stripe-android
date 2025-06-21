@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmailElement
@@ -1692,7 +1693,7 @@ internal class PaymentMethodMetadataTest {
             )
         )
 
-        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration, effectiveBillingDetails = null)
 
         assertThat(metadata.cbcEligibility).isEqualTo(
             CardBrandChoiceEligibility.Eligible(
@@ -1710,7 +1711,7 @@ internal class PaymentMethodMetadataTest {
             )
         )
 
-        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration, effectiveBillingDetails = null)
 
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
@@ -1913,7 +1914,7 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
         )
 
-        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration, effectiveBillingDetails = null)
 
         assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
     }
@@ -1943,7 +1944,8 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
-            disableRuxInFlowController = false
+            disableRuxInFlowController = false,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration()
         )
     }
 

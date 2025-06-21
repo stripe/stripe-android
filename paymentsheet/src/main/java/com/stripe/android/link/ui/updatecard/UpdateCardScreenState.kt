@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 @Immutable
 internal data class UpdateCardScreenState(
     val paymentDetailsId: String,
+    val isBillingDetailsUpdateFlow: Boolean = false,
+    val primaryButtonLabel: ResolvableString,
     val isDefault: Boolean = false,
     val cardUpdateParams: CardUpdateParams? = null,
     val preferredCardBrand: CardBrand? = null,
