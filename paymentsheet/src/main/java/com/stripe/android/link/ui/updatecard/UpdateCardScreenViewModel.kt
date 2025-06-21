@@ -17,7 +17,6 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.CompleteLinkWithPayment
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.ui.completePaymentButtonLabel
-import com.stripe.android.link.utils.effectiveBillingDetails
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -80,7 +79,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     isDefault = paymentDetails.isDefault
                 )
             }
-            interactor = initializeInteractor(isBillingDetailsUpdateFlow, paymentDetails)
+            interactor = initializeInteractor(paymentDetails)
         }.onFailure {
             logger.error("Failed to render payment update screen", it)
             navigationManager.tryNavigateBack()
@@ -143,21 +142,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     )
 
     private fun initializeInteractor(
-        isBillingDetailsUpdateFlow: Boolean,
         cardPaymentDetails: ConsumerPaymentDetails.Card
     ): EditCardDetailsInteractor {
-        val effectiveBillingDetails = if (isBillingDetailsUpdateFlow) {
-            // Use effective billing details when in billing details update flow
-            val linkAccount = linkAccountManager.linkAccountInfo.value.account
-            if (linkAccount != null) {
-                effectiveBillingDetails(
-                    configuration = configuration,
-                    linkAccount = linkAccount,
-                    originalBillingDetails = null // Start with empty billing details for new card entry
-                )
-            } else null
-        } else null
-
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
             areExpiryDateAndAddressModificationSupported = true,
@@ -166,14 +152,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             payload = EditCardPayload.create(
                 card = cardPaymentDetails,
                 billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
-            ).let { payload ->
-                // Apply effective billing details to the payload if available
-                if (effectiveBillingDetails != null) {
-                    payload.copy(billingDetails = effectiveBillingDetails)
-                } else {
-                    payload
-                }
-            },
+            ),
             addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             isCbcModifiable = cardPaymentDetails.availableNetworks.size > 1,

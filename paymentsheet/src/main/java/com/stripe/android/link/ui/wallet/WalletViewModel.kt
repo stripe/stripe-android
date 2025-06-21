@@ -191,111 +191,70 @@ internal class WalletViewModel @Inject constructor(
     fun onPrimaryButtonClicked() {
         val paymentDetail = _uiState.value.selectedItem ?: return
 
-        // Check if the payment method supports the required billing details collection configuration
-        val supportsBillingDetails =
-            paymentDetail.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)
-        val card = paymentDetail as? ConsumerPaymentDetails.Card
-        val isExpired = card != null && card.isExpired
+        setProcessingState(true)
 
-        // Determine the navigation strategy based on what's missing
-        when {
-            // If card is expired AND missing billing details, handle expiry first, then billing details
-            isExpired && !supportsBillingDetails -> {
-                _uiState.update {
-                    it.copy(
-                        isProcessing = true,
-                        errorMessage = null,
-                    )
-                }
-                viewModelScope.launch {
-                    performPaymentDetailsUpdate(paymentDetail).fold(
-                        onSuccess = { result ->
-                            val updatedPaymentDetails = result.paymentDetails.single {
-                                it.id == paymentDetail.id
-                            }
-                            // After updating expiry, check if billing details are still needed
-                            if (updatedPaymentDetails.supports(
-                                    billingDetailsConfig = configuration.billingDetailsCollectionConfiguration,
-                                    linkAccount = linkAccount
-                                ).not()
-                            ) {
-                                _uiState.update { it.copy(isProcessing = false) }
-                                navigationManager.tryNavigateTo(
-                                    route = LinkScreen.UpdateCard(
-                                        paymentDetailsId = updatedPaymentDetails.id,
-                                        isBillingDetailsUpdateFlow = true
-                                    ),
-                                )
-                            } else {
-                                // Both expiry and billing details are now valid, proceed with confirmation
-                                performPaymentConfirmation(updatedPaymentDetails)
-                            }
-                        },
-                        onFailure = { error ->
-                            _uiState.update {
-                                it.copy(
-                                    alertMessage = error.stripeErrorMessage(),
-                                    isProcessing = false
-                                )
-                            }
-                        }
-                    )
-                }
+        val card = paymentDetail as? ConsumerPaymentDetails.Card
+        val isExpired = card?.isExpired == true
+
+        viewModelScope.launch {
+            when {
+                isExpired -> handleExpiredCard(paymentDetail)
+                else -> performPaymentConfirmation(paymentDetail)
             }
-            // If only missing billing details (not expired)
-            !supportsBillingDetails -> {
-                navigationManager.tryNavigateTo(
-                    route = LinkScreen.UpdateCard(
-                        paymentDetailsId = paymentDetail.id,
-                        isBillingDetailsUpdateFlow = true
-                    ),
-                )
-            }
-            // If only expired (billing details are fine)
-            isExpired -> {
-                _uiState.update {
-                    it.copy(
-                        isProcessing = true,
-                        errorMessage = null,
-                    )
-                }
-                viewModelScope.launch {
-                    performPaymentDetailsUpdate(paymentDetail).fold(
-                        onSuccess = { result ->
-                            val updatedPaymentDetails = result.paymentDetails.single {
-                                it.id == paymentDetail.id
-                            }
-                            performPaymentConfirmation(updatedPaymentDetails)
-                        },
-                        onFailure = { error ->
-                            _uiState.update {
-                                it.copy(
-                                    alertMessage = error.stripeErrorMessage(),
-                                    isProcessing = false
-                                )
-                            }
-                        }
-                    )
-                }
-            }
-            // Card is valid, proceed with confirmation
-            else -> {
-                _uiState.update {
-                    it.copy(
-                        isProcessing = true,
-                        errorMessage = null,
-                    )
-                }
-                viewModelScope.launch {
-                    performPaymentConfirmation(paymentDetail)
-                }
-            }
+        }
+    }
+
+    private fun setProcessingState(isProcessing: Boolean, errorMessage: ResolvableString? = null) {
+        _uiState.update {
+            it.copy(
+                isProcessing = isProcessing,
+                errorMessage = errorMessage,
+            )
+        }
+    }
+
+    private suspend fun handleExpiredCard(paymentDetail: ConsumerPaymentDetails.PaymentDetails) {
+        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
+        dismissalCoordinator.withDismissalDisabled {
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = paymentDetail.id,
+                isDefault = paymentDetail.isDefault,
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+            )
+            linkAccountManager.updatePaymentDetails(updateParams)
+        }.fold(
+            onSuccess = { result ->
+                val updatedPaymentDetails = result.paymentDetails.single { it.id == paymentDetail.id }
+                performPaymentConfirmation(updatedPaymentDetails)
+            },
+            onFailure = { error -> handleUpdateError(error) }
+        )
+    }
+
+    private fun handleUpdateError(error: Throwable) {
+        _uiState.update {
+            it.copy(
+                alertMessage = error.stripeErrorMessage(),
+                isProcessing = false
+            )
         }
     }
 
     private suspend fun performPaymentConfirmation(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
     ) {
+        // Check if billing details are missing before proceeding with payment
+        if (!selectedPaymentDetails.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)) {
+            setProcessingState(false)
+            navigationManager.tryNavigateTo(
+                route = LinkScreen.UpdateCard(
+                    paymentDetailsId = selectedPaymentDetails.id,
+                    isBillingDetailsUpdateFlow = true
+                ),
+            )
+            return
+        }
+
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
         val result = completeLinkWithPayment(
@@ -304,42 +263,7 @@ internal class WalletViewModel @Inject constructor(
             cvc = cvc,
             linkLaunchMode = linkLaunchMode,
         )
-
-        when (result) {
-            is LinkActivityResult.Canceled -> {
-                _uiState.update { it.copy(isProcessing = false) }
-            }
-            is LinkActivityResult.Failed -> {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = result.error.message?.resolvableString ?: "Unknown error".resolvableString,
-                        isProcessing = false
-                    )
-                }
-            }
-            is LinkActivityResult.Completed -> {
-                dismissWithResult(result)
-            }
-            is LinkActivityResult.PaymentMethodObtained -> {
-                // This shouldn't happen in this flow, but handle it gracefully
-                _uiState.update { it.copy(isProcessing = false) }
-            }
-        }
-    }
-
-    private suspend fun performPaymentDetailsUpdate(
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails
-    ): Result<ConsumerPaymentDetails> {
-        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
-
-        return dismissalCoordinator.withDismissalDisabled {
-            val updateParams = ConsumerPaymentDetailsUpdateParams(
-                id = selectedPaymentDetails.id,
-                isDefault = selectedPaymentDetails.isDefault,
-                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
-            )
-            linkAccountManager.updatePaymentDetails(updateParams)
-        }
+        dismissWithResult(result)
     }
 
     fun onPayAnotherWayClicked() {
