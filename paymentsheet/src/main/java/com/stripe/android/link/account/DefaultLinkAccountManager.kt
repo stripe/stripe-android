@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -40,7 +41,8 @@ import javax.inject.Inject
  * Manages the Link account for the current user, persisting it across app usages.
  */
 @SuppressWarnings("TooManyFunctions")
-internal class DefaultLinkAccountManager @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultLinkAccountManager @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,

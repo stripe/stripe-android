@@ -1,5 +1,6 @@
 package com.stripe.android.link.attestation
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfiguration
@@ -14,7 +15,8 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class DefaultLinkAttestationCheck @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultLinkAttestationCheck @Inject constructor(
     private val linkGate: LinkGate,
     private val linkAuth: LinkAuth,
     private val integrityRequestManager: IntegrityRequestManager,

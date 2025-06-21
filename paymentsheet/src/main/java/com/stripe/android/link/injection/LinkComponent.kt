@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
@@ -25,7 +26,8 @@ internal annotation class LinkScope
         ApplicationIdModule::class,
     ]
 )
-internal abstract class LinkComponent {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+abstract class LinkComponent {
     internal abstract val linkAccountManager: LinkAccountManager
     internal abstract val configuration: LinkConfiguration
     internal abstract val linkGate: LinkGate

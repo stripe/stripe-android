@@ -89,7 +89,8 @@ internal class WalletViewModel @Inject constructor(
     val LinkLaunchMode.selectedItemId
         get() = when (this) {
             is LinkLaunchMode.Full,
-            is LinkLaunchMode.Confirmation -> null
+            is LinkLaunchMode.Confirmation,
+            is LinkLaunchMode.Authentication -> null
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
         }
 
@@ -246,6 +247,13 @@ internal class WalletViewModel @Inject constructor(
                             collectedCvc = cvc
                         ),
                         shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
+                    )
+                )
+                is LinkLaunchMode.Authentication -> dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                        selectedPayment = null, // No payment involved in authentication mode
+                        shippingAddress = null,
                     )
                 )
             }
@@ -468,6 +476,7 @@ private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): R
             is PaymentIntent -> resolvableString(R.string.stripe_wallet_pay_another_way)
             is SetupIntent -> resolvableString(R.string.stripe_wallet_continue_another_way)
         }
-        is LinkLaunchMode.PaymentMethodSelection -> resolvableString(R.string.stripe_wallet_continue_another_way)
+        is LinkLaunchMode.PaymentMethodSelection,
+        is LinkLaunchMode.Authentication -> resolvableString(R.string.stripe_wallet_continue_another_way)
     }
 }

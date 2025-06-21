@@ -154,6 +154,13 @@ internal class PaymentMethodViewModel @Inject constructor(
                     shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
                 )
             )
+            is LinkLaunchMode.Authentication -> dismissWithResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                    selectedPayment = null, // No payment involved in authentication mode
+                    shippingAddress = null,
+                )
+            )
         }
     }
 

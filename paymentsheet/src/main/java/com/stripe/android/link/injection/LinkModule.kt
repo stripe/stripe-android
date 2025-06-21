@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import android.app.Application
+import androidx.annotation.RestrictTo
 import com.stripe.android.Stripe
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
@@ -27,7 +28,8 @@ import dagger.Provides
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal interface LinkModule {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkModule {
     @Binds
     @LinkScope
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository

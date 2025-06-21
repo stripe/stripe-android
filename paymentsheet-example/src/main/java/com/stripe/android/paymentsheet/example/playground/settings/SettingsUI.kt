@@ -126,8 +126,8 @@ private fun IntegrationTypeConfigurableSetting(
                 value = PlaygroundConfigurationData.IntegrationType.CustomerSheet
             ),
             PlaygroundSettingDefinition.Displayable.Option(
-                name = "Ridesharing App",
-                value = PlaygroundConfigurationData.IntegrationType.RidesharingApp
+                name = "OnRamp",
+                value = PlaygroundConfigurationData.IntegrationType.OnRamp
             ),
         ),
         value = configurationData.integrationType

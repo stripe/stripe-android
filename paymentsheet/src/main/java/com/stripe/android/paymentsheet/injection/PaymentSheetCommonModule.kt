@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -57,6 +58,7 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @SuppressWarnings("TooManyFunctions")
 @Module(
     subcomponents = [
@@ -64,57 +66,57 @@ import kotlin.coroutines.CoroutineContext
         LinkComponent::class,
     ],
 )
-internal abstract class PaymentSheetCommonModule {
+abstract class PaymentSheetCommonModule {
 
     @Singleton
     @Binds
-    abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
+    internal abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
     @Binds
-    abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+    internal abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
     @Binds
-    abstract fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
+    internal abstract fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     @Binds
-    abstract fun bindsStripeIntentRepository(
+    internal abstract fun bindsStripeIntentRepository(
         impl: RealElementsSessionRepository,
     ): ElementsSessionRepository
 
     @Binds
-    abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
+    internal abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
 
     @Binds
-    abstract fun bindsRetrieveCustomerEmail(
+    internal abstract fun bindsRetrieveCustomerEmail(
         impl: DefaultRetrieveCustomerEmail,
     ): RetrieveCustomerEmail
 
     @Binds
-    abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
+    internal abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
     @Binds
-    abstract fun bindsLinkAccountStatusProvider(
+    internal abstract fun bindsLinkAccountStatusProvider(
         impl: DefaultLinkAccountStatusProvider,
     ): LinkAccountStatusProvider
 
     @Binds
-    abstract fun bindsPaymentSheetUpdater(
+    internal abstract fun bindsPaymentSheetUpdater(
         impl: DefaultPaymentSelectionUpdater,
     ): PaymentSelectionUpdater
 
     @Binds
-    abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
+    internal abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
     @Binds
-    abstract fun bindsAnalyticsRequestFactory(
+    internal abstract fun bindsAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
 
     @Binds
-    abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+    internal abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     @Binds
-    abstract fun bindsCardAccountRangeRepositoryFactory(
+    internal abstract fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
 
@@ -122,7 +124,7 @@ internal abstract class PaymentSheetCommonModule {
     companion object {
         @Provides
         @Singleton
-        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+        internal fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
         }
 
@@ -158,7 +160,7 @@ internal abstract class PaymentSheetCommonModule {
 
         @Provides
         @Singleton
-        fun providePrefsRepositoryFactory(
+        internal fun providePrefsRepositoryFactory(
             appContext: Context,
             @IOContext workContext: CoroutineContext
         ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
@@ -176,7 +178,7 @@ internal abstract class PaymentSheetCommonModule {
         }
 
         @Provides
-        fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
+        internal fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
             return DefaultCvcRecollectionInteractor.Factory
         }
 

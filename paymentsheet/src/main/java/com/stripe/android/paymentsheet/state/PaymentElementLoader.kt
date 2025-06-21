@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
@@ -60,7 +61,8 @@ import kotlin.coroutines.CoroutineContext
  * Loads the information necessary to display [PaymentSheet], either directly or via
  * [PaymentSheet.FlowController].
  */
-internal interface PaymentElementLoader {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface PaymentElementLoader {
 
     suspend fun load(
         initializationMode: InitializationMode,
@@ -73,6 +75,7 @@ internal interface PaymentElementLoader {
         val initializedViaCompose: Boolean,
     )
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
 

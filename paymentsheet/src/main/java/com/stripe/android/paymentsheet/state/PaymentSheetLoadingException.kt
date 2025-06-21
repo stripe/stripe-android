@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.state
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Unknown
 
-internal sealed class PaymentSheetLoadingException : Throwable() {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class PaymentSheetLoadingException : Throwable() {
 
     abstract val type: String
 

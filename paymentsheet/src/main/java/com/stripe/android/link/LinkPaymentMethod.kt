@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.parcelize.Parcelize
 
@@ -8,7 +9,8 @@ import kotlinx.parcelize.Parcelize
  * Link payment method payload needed to confirm the payment.
  */
 @Parcelize
-internal sealed class LinkPaymentMethod(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class LinkPaymentMethod(
     open val details: ConsumerPaymentDetails.PaymentDetails,
     open val collectedCvc: String?,
 ) : Parcelable {

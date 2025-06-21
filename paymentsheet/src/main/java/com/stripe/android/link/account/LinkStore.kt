@@ -2,12 +2,14 @@ package com.stripe.android.link.account
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.annotation.RestrictTo
 import androidx.core.content.edit
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal class LinkStore @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class LinkStore @Inject constructor(
     context: Context,
 ) {
 

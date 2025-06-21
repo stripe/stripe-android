@@ -1,9 +1,125 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24.0"
-    android:viewportHeight="24.0">
+    android:width="360dp"
+    android:height="640dp"
+    android:viewportWidth="360"
+    android:viewportHeight="640">
+    
+    <!-- Background -->
     <path
-        android:fillColor="#FF000000"
-        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2zM12,14l-4,-4h8l-4,4z"/>
+        android:fillColor="#F0F0F0"
+        android:pathData="M0,0h360v640H0z"/>
+    
+    <!-- City blocks -->
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M20,50h80v60H20z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M120,50h80v60H120z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M220,50h80v60H220z"/>
+    
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M20,130h80v60H20z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M120,130h80v60H120z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M220,130h80v60H220z"/>
+    
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M20,210h80v60H20z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M120,210h80v60H120z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M220,210h80v60H220z"/>
+    
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M20,290h80v60H20z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M120,290h80v60H120z"/>
+    <path
+        android:fillColor="#E8E8E8"
+        android:pathData="M220,290h80v60H220z"/>
+    
+    <!-- Streets (horizontal) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,40h360v10H0z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,120h360v10H0z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,200h360v10H0z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,280h360v10H0z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,360h360v10H0z"/>
+    
+    <!-- Streets (vertical) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M110,0h10v640H110z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M210,0h10v640H210z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M310,0h10v640H310z"/>
+    
+    <!-- Main route (thick blue line) -->
+    <path
+        android:strokeColor="#007AFF"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:pathData="M60,400 L60,320 L180,320 L180,240 L300,240"/>
+    
+    <!-- Start point (green circle using path) -->
+    <path
+        android:fillColor="#34C759"
+        android:pathData="M72,400 A12,12 0 1,1 48,400 A12,12 0 1,1 72,400"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M66,400 A6,6 0 1,1 54,400 A6,6 0 1,1 66,400"/>
+    
+    <!-- End point (red circle using path) -->
+    <path
+        android:fillColor="#FF3B30"
+        android:pathData="M312,240 A12,12 0 1,1 288,240 A12,12 0 1,1 312,240"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M306,240 A6,6 0 1,1 294,240 A6,6 0 1,1 306,240"/>
+    
+    <!-- Car icon on route -->
+    <path
+        android:fillColor="#007AFF"
+        android:pathData="M175,315 L185,315 L185,325 L175,325 Z"/>
+    <path
+        android:fillColor="#007AFF"
+        android:pathData="M172,318 L188,318 L188,322 L172,322 Z"/>
+    
+    <!-- Park areas (green) -->
+    <path
+        android:fillColor="#C7F2C7"
+        android:pathData="M320,50h30v120H320z"/>
+    <path
+        android:fillColor="#C7F2C7"
+        android:pathData="M10,450h100v80H10z"/>
+    
+    <!-- Water (blue) -->
+    <path
+        android:fillColor="#B3E5FC"
+        android:pathData="M250,400h100v150H250z"/>
+    
 </vector> 

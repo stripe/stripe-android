@@ -94,7 +94,19 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {
-            _linkScreenState.value = buildFullScreenState()
+            // For Authentication mode, return immediately with the authenticated LinkAccount
+            if (linkLaunchMode is LinkLaunchMode.Authentication) {
+                val authenticatedLinkAccount = linkAccount
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                        selectedPayment = null, // No payment involved in authentication mode
+                        shippingAddress = null,
+                    )
+                )
+            } else {
+                _linkScreenState.value = buildFullScreenState()
+            }
         }
     }
 
@@ -201,7 +213,8 @@ internal class LinkActivityViewModel @Inject constructor(
         viewModelScope.launch {
             when (linkLaunchMode) {
                 is LinkLaunchMode.Full,
-                is LinkLaunchMode.PaymentMethodSelection -> loadLink()
+                is LinkLaunchMode.PaymentMethodSelection,
+                is LinkLaunchMode.Authentication -> loadLink()
                 is LinkLaunchMode.Confirmation -> confirmLinkPayment(linkLaunchMode.selectedPayment)
             }
         }

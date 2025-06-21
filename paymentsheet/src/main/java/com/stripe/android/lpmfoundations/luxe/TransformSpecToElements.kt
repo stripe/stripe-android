@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
@@ -40,7 +41,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  * controller will be a pass through the field controller.
  *
  */
-internal class TransformSpecToElements(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class TransformSpecToElements(
     private val arguments: UiDefinitionFactory.Arguments,
 ) {
     fun transform(

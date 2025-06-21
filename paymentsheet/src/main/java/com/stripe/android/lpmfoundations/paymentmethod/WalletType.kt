@@ -1,9 +1,11 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentsheet.state.LinkState
 
-internal enum class WalletType(val code: String) {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class WalletType(val code: String) {
     GooglePay(code = "google_pay"),
     Link(code = "link"),
     ShopPay(code = "shop_pay");
