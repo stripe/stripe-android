@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
@@ -8,7 +9,8 @@ import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.PaymentMethod as PaymentMethodModel
 
 @Parcelize
-internal data class BankFormScreenState(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class BankFormScreenState(
     private val isPaymentFlow: Boolean,
     private val promoText: String? = null,
     private val _isProcessing: Boolean = false,

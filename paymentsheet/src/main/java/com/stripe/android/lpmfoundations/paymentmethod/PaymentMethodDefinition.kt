@@ -1,8 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 
-internal interface PaymentMethodDefinition {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface PaymentMethodDefinition {
     /**
      * The payment method type, for example: PaymentMethod.Type.Card, etc.
      */

@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -13,7 +14,8 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
-internal data class SupportedPaymentMethod(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class SupportedPaymentMethod(
     /**
      * This describes the PaymentMethod Type as described
      * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types

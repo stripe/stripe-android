@@ -1,51 +1,44 @@
-package com.stripe.android.paymentsheet.flowcontroller
+package com.stripe.onramp
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.paymentsheet.LinkCoordinator
-import com.stripe.android.paymentsheet.model.PaymentOption
 
-internal class LinkCoordinatorFactory(
+internal class OnRampCoordinatorFactory(
     private val viewModelStoreOwner: ViewModelStoreOwner,
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
-    private val paymentOptionCallback: (PaymentOption?) -> Unit,
+    private val onRampCallbacks: OnRampCoordinator.OnRampCallbacks,
     private val linkElementCallbackIdentifier: String = "LinkCoordinator",
 ) {
     constructor(
         activity: ComponentActivity,
-        paymentOptionCallback: (PaymentOption?) -> Unit
+        onRampCallbacks: OnRampCoordinator.OnRampCallbacks
     ) : this(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
         activityResultRegistryOwner = activity,
-        paymentOptionCallback = paymentOptionCallback,
+        onRampCallbacks = onRampCallbacks,
     )
 
     constructor(
         fragment: Fragment,
-        paymentOptionCallback: (PaymentOption?) -> Unit
+        onRampCallbacks: OnRampCoordinator.OnRampCallbacks
     ) : this(
         viewModelStoreOwner = fragment,
         lifecycleOwner = fragment,
         activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner) ?: fragment.requireActivity(),
-        paymentOptionCallback = paymentOptionCallback,
+        onRampCallbacks = onRampCallbacks,
     )
 
-    fun create(): LinkCoordinator =
-        DefaultLinkCoordinator.getInstance(
+    fun create(): OnRampCoordinator =
+        DefaultOnRampCoordinator.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
-            activityResultCaller = PaymentElementActivityResultCaller(
-                key = "LinkCoordinator(instance = $linkElementCallbackIdentifier)",
-                registryOwner = activityResultRegistryOwner,
-            ),
             activityResultRegistryOwner = activityResultRegistryOwner,
-            paymentOptionCallback = paymentOptionCallback,
+            onRampCallbacks = onRampCallbacks,
             linkElementCallbackIdentifier = linkElementCallbackIdentifier,
         )
-} 
+}

@@ -1,13 +1,15 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class CustomerState(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CustomerState(
     val id: String,
     val ephemeralKeySecret: String,
     val customerSessionClientSecret: String?,

@@ -1,7 +1,7 @@
 package com.stripe.android.link.confirmation
 
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAccountUpdate.Value
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -97,7 +97,7 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                     is LinkConfirmationResult.Failed -> Result.Failed(result.message)
                     LinkConfirmationResult.Succeeded -> Result.Completed(
                         linkActivityResult = LinkActivityResult.Completed(
-                            linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                            linkAccountUpdate = Value(null, PaymentConfirmed),
                             selectedPayment = null,
                         )
                     )
@@ -110,6 +110,7 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                     shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
                 )
             )
+            LinkLaunchMode.Authentication -> TODO()
         }
     }
 }

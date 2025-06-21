@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -24,7 +25,8 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
-internal sealed interface UiDefinitionFactory {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface UiDefinitionFactory {
     class Arguments(
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val linkConfigurationCoordinator: LinkConfigurationCoordinator?,

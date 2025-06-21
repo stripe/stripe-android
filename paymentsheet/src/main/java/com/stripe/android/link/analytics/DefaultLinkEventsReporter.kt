@@ -1,5 +1,6 @@
 package com.stripe.android.link.analytics
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.safeAnalyticsMessage
@@ -15,7 +16,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-internal class DefaultLinkEventsReporter @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultLinkEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val errorReporter: ErrorReporter,

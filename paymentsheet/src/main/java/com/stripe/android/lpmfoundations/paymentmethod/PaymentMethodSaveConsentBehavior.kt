@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.parcelize.Parcelize
@@ -9,7 +10,8 @@ import kotlinx.parcelize.Parcelize
  * [PaymentMethodSaveConsentBehavior] defines the behavior to use when saving a payment method. This controls
  * whether or not the "Save for future use" checkbox should be shown.
  */
-internal sealed interface PaymentMethodSaveConsentBehavior : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface PaymentMethodSaveConsentBehavior : Parcelable {
     /**
      * Default behavior for saving a payment method which shows a "Save for future use" checkbox when
      * in PI mode and has a customer to save the payment method to. PI w/SFU & SI modes do not show a checkbox.

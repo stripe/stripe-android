@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -22,7 +23,8 @@ import com.stripe.android.model.StripeIntent
  * Interface for a repository that interacts with Link services.
  */
 @SuppressWarnings("TooManyFunctions")
-internal interface LinkRepository {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkRepository {
 
     /**
      * Check if the email already has a link account.

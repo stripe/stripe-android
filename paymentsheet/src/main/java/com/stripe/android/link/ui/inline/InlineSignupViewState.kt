@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.inline
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
@@ -14,7 +15,8 @@ import com.stripe.android.link.ui.signup.requiresNameCollection
  *                  payment flow without Link.
  * @param signUpState The stage of the sign in or sign up flow.
  */
-internal data class InlineSignupViewState
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class InlineSignupViewState
 @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
 constructor(
     val userInput: UserInput?,
@@ -125,12 +127,14 @@ constructor(
     }
 }
 
-internal enum class LinkSignupMode {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class LinkSignupMode {
     InsteadOfSaveForFutureUse,
     AlongsideSaveForFutureUse,
 }
 
-internal enum class LinkSignupField {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class LinkSignupField {
     Email,
     Phone,
     Name,

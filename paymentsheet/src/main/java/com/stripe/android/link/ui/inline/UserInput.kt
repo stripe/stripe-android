@@ -1,12 +1,14 @@
 package com.stripe.android.link.ui.inline
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 
 /**
  * Valid user input into the inline sign up view.
  */
-internal sealed class UserInput : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class UserInput : Parcelable {
     /**
      * Represents an input that is valid for signing in to a link account.
      */

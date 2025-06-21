@@ -10,8 +10,11 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
@@ -46,7 +49,9 @@ internal class SignUpViewModel @Inject constructor(
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val linkLaunchMode: LinkLaunchMode,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
     private val useLinkConfigurationCustomerInfo =
@@ -225,12 +230,30 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
-        if (linkAccount?.completedSignup == true) {
-            navigateAndClearStack(LinkScreen.PaymentMethod)
-        } else if (linkAccount?.isVerified == true) {
-            navigateAndClearStack(LinkScreen.Wallet)
+        // For Authentication mode, only return immediately if the account is verified
+        if (linkLaunchMode is LinkLaunchMode.Authentication) {
+            if (linkAccount?.isVerified == true) {
+                // Account is verified, return immediately
+                dismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                        selectedPayment = null, // No payment involved in authentication mode
+                        shippingAddress = null,
+                    )
+                )
+            } else {
+                // Account is not verified, proceed to verification flow
+                navigateAndClearStack(LinkScreen.Verification)
+            }
         } else {
-            navigateAndClearStack(LinkScreen.Verification)
+            // Normal flow for other modes
+            if (linkAccount?.completedSignup == true) {
+                navigateAndClearStack(LinkScreen.PaymentMethod)
+            } else if (linkAccount?.isVerified == true) {
+                navigateAndClearStack(LinkScreen.Wallet)
+            } else {
+                navigateAndClearStack(LinkScreen.Verification)
+            }
         }
     }
 
@@ -278,6 +301,7 @@ internal class SignUpViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             navigateAndClearStack: (LinkScreen) -> Unit,
+            dismissWithResult: (LinkActivityResult) -> Unit,
             moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -289,7 +313,9 @@ internal class SignUpViewModel @Inject constructor(
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
                         navigateAndClearStack = navigateAndClearStack,
+                        dismissWithResult = dismissWithResult,
                         moveToWeb = moveToWeb
                     )
                 }

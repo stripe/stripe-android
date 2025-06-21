@@ -1,6 +1,7 @@
 package com.stripe.android.link.injection
 
 import android.app.Application
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
@@ -15,6 +16,7 @@ import dagger.Module
 import dagger.Provides
 
 @Module
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal interface LinkModule {
     @Binds
     @LinkScope

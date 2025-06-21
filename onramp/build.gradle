@@ -1,0 +1,76 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+dependencies {
+    implementation project(":paymentsheet")
+    implementation project(":stripe-ui-core")
+    implementation project(":payments-ui-core")
+    implementation project(":stripe-attestation")
+
+    implementation libs.accompanist.materialThemeAdapter
+    implementation libs.androidx.activity
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.lifecycleCompose
+    implementation libs.androidx.liveDataKtx
+    implementation libs.androidx.legacySupport
+    implementation libs.androidx.navigationFragment
+    implementation libs.androidx.navigationUi
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.liveData
+    implementation libs.compose.material
+    implementation libs.compose.navigation
+    implementation libs.compose.runtime
+    implementation libs.compose.viewModels
+    implementation libs.compose.uiToolingPreview
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.serialization
+    implementation libs.material
+
+    debugImplementation libs.compose.uiTestManifest
+
+    ksp libs.daggerCompiler
+
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.navigation
+    testImplementation testLibs.espresso.core
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+}
+
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+    buildFeatures {
+        compose true
+    }
+}
+
+ext {
+    artifactId = "onramp"
+    artifactName = "onramp"
+    artifactDescrption = "Stripe Onramp Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

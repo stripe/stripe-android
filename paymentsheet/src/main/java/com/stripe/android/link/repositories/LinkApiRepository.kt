@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import android.app.Application
+import androidx.annotation.RestrictTo
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -43,7 +44,8 @@ import kotlin.coroutines.CoroutineContext
  * Repository that uses [StripeRepository] for Link services.
  */
 @SuppressWarnings("TooManyFunctions")
-internal class LinkApiRepository @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class LinkApiRepository @Inject constructor(
     application: Application,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,

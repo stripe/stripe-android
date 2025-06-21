@@ -1,11 +1,13 @@
 package com.stripe.android.link.gate
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import javax.inject.Inject
 
-internal class DefaultLinkGate @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultLinkGate @Inject constructor(
     private val configuration: LinkConfiguration
 ) : LinkGate {
     override val useNativeLink: Boolean

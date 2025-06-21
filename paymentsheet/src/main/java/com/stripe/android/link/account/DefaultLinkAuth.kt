@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkEventException
@@ -13,7 +14,8 @@ import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
 import javax.inject.Named
 
-internal class DefaultLinkAuth @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class DefaultLinkAuth @Inject constructor(
     private val linkGate: LinkGate,
     private val linkAccountManager: LinkAccountManager,
     private val integrityRequestManager: IntegrityRequestManager,

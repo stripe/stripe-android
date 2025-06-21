@@ -1,10 +1,12 @@
 package com.stripe.android.lpmfoundations
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.IconStyle
 
-internal data class FormHeaderInformation(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class FormHeaderInformation(
     val displayName: ResolvableString,
     val shouldShowIcon: Boolean,
     @DrawableRes private val iconResource: Int,
