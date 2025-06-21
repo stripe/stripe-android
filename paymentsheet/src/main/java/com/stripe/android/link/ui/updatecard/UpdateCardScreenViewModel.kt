@@ -8,9 +8,15 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.CompleteLinkWithPayment
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -18,7 +24,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
@@ -35,10 +41,25 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val navigationManager: NavigationManager,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val configuration: LinkConfiguration,
+    private val linkLaunchMode: LinkLaunchMode,
+    private val completeLinkWithPayment: CompleteLinkWithPayment,
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
     paymentDetailsId: String,
+    isBillingDetailsUpdateFlow: Boolean,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UpdateCardScreenState(paymentDetailsId = paymentDetailsId))
+    private val _state = MutableStateFlow(
+        UpdateCardScreenState(
+            paymentDetailsId = paymentDetailsId,
+            isBillingDetailsUpdateFlow = isBillingDetailsUpdateFlow,
+            primaryButtonLabel = if (isBillingDetailsUpdateFlow) {
+                completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
+            } else {
+                R.string.stripe_link_update_card_confirm_cta.resolvableString
+            }
+        )
+    )
     val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
     var interactor: EditCardDetailsInteractor? = null
@@ -79,13 +100,31 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         isDefault = state.value.isDefault.takeIf { it == true },
                         cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
                     )
-                    linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
-                    _state.update { it.copy(processing = false, error = null) }
+                    val result = linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
+
+                    if (state.value.isBillingDetailsUpdateFlow) {
+                        // In billing details update flow, automatically confirm payment after updating
+                        val updatedPaymentDetails = result.paymentDetails.single { it.id == paymentDetailsId }
+                        val account = requireNotNull(linkAccountManager.linkAccountInfo.value.account) {
+                            "LinkAccount should not be null in billing details update flow"
+                        }
+
+                        val confirmationResult = completeLinkWithPayment(
+                            selectedPaymentDetails = updatedPaymentDetails,
+                            linkAccount = account,
+                            cvc = null, // CVC is already included in the updated payment details
+                            linkLaunchMode = linkLaunchMode,
+                        )
+
+                        dismissWithResult(confirmationResult)
+                    } else {
+                        // Regular update flow, just navigate back
+                        _state.update { it.copy(processing = false, error = null) }
+                        navigationManager.tryNavigateBack()
+                    }
                 }.onFailure { throwable ->
                     logger.error("Failed to update payment details", throwable)
                     _state.update { it.copy(processing = false, error = throwable) }
-                }.onSuccess {
-                    navigationManager.tryNavigateBack()
                 }
             }
         }
@@ -104,20 +143,22 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
     private fun initializeInteractor(
         cardPaymentDetails: ConsumerPaymentDetails.Card
-    ): EditCardDetailsInteractor = DefaultEditCardDetailsInteractor.Factory().create(
-        coroutineScope = viewModelScope,
-        areExpiryDateAndAddressModificationSupported = true,
-        // Until card brand filtering is supported in Link, we use the default filter (does not filter)
-        cardBrandFilter = DefaultCardBrandFilter,
-        payload = EditCardPayload.create(
-            card = cardPaymentDetails,
-            billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
-        ),
-        addressCollectionMode = AddressCollectionMode.Automatic,
-        onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-        isCbcModifiable = cardPaymentDetails.availableNetworks.size > 1,
-        onBrandChoiceChanged = ::onBrandChoiceChanged
-    )
+    ): EditCardDetailsInteractor {
+        return DefaultEditCardDetailsInteractor.Factory().create(
+            coroutineScope = viewModelScope,
+            areExpiryDateAndAddressModificationSupported = true,
+            // Until card brand filtering is supported in Link, we use the default filter (does not filter)
+            cardBrandFilter = DefaultCardBrandFilter,
+            payload = EditCardPayload.create(
+                card = cardPaymentDetails,
+                billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
+            ),
+            addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
+            onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
+            isCbcModifiable = cardPaymentDetails.availableNetworks.size > 1,
+            onBrandChoiceChanged = ::onBrandChoiceChanged
+        )
+    }
 
     @VisibleForTesting
     internal fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
@@ -131,7 +172,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     companion object {
         fun factory(
             parentComponent: NativeLinkComponent,
-            paymentDetailsId: String
+            paymentDetailsId: String,
+            isBillingDetailsUpdateFlow: Boolean,
+            dismissWithResult: (LinkActivityResult) -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -140,7 +183,18 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         navigationManager = parentComponent.navigationManager,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
-                        paymentDetailsId = paymentDetailsId
+                        configuration = parentComponent.configuration,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
+                        completeLinkWithPayment = CompleteLinkWithPayment(
+                            linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
+                                confirmationHandler = parentComponent.viewModel.confirmationHandler
+                            ),
+                            linkAccountManager = parentComponent.linkAccountManager,
+                            dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        ),
+                        dismissWithResult = dismissWithResult,
+                        paymentDetailsId = paymentDetailsId,
+                        isBillingDetailsUpdateFlow = isBillingDetailsUpdateFlow,
                     )
                 }
             }

@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.updatecard
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
@@ -90,6 +91,7 @@ class UpdateCardScreenViewModelTest {
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         paymentDetailsId: String = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id
     ): UpdateCardScreenViewModel {
         return UpdateCardScreenViewModel(
@@ -97,6 +99,7 @@ class UpdateCardScreenViewModelTest {
             linkAccountManager = linkAccountManager,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            configuration = configuration,
             paymentDetailsId = paymentDetailsId,
         )
     }

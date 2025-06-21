@@ -9,22 +9,20 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
-import com.stripe.android.link.account.loadDefaultShippingAddress
+import com.stripe.android.link.confirmation.CompleteLinkWithPayment
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.completePaymentButtonLabel
+import com.stripe.android.link.utils.supports
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -51,13 +49,13 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
     private val linkConfirmationHandler: LinkConfirmationHandler,
+    private val completeLinkWithPayment: CompleteLinkWithPayment,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     private val linkLaunchMode: LinkLaunchMode,
@@ -192,113 +190,80 @@ internal class WalletViewModel @Inject constructor(
 
     fun onPrimaryButtonClicked() {
         val paymentDetail = _uiState.value.selectedItem ?: return
-        _uiState.update {
-            it.copy(
-                isProcessing = true,
-                errorMessage = null,
-            )
-        }
+
+        setProcessingState(true)
+
+        val card = paymentDetail as? ConsumerPaymentDetails.Card
+        val isExpired = card?.isExpired == true
 
         viewModelScope.launch {
-            performPaymentConfirmation(paymentDetail)
+            when {
+                isExpired -> handleExpiredCard(paymentDetail)
+                else -> performPaymentConfirmation(paymentDetail)
+            }
+        }
+    }
+
+    private fun setProcessingState(isProcessing: Boolean, errorMessage: ResolvableString? = null) {
+        _uiState.update {
+            it.copy(
+                isProcessing = isProcessing,
+                errorMessage = errorMessage,
+            )
+        }
+    }
+
+    private suspend fun handleExpiredCard(paymentDetail: ConsumerPaymentDetails.PaymentDetails) {
+        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
+        dismissalCoordinator.withDismissalDisabled {
+            val updateParams = ConsumerPaymentDetailsUpdateParams(
+                id = paymentDetail.id,
+                isDefault = paymentDetail.isDefault,
+                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
+            )
+            linkAccountManager.updatePaymentDetails(updateParams)
+        }.fold(
+            onSuccess = { result ->
+                val updatedPaymentDetails = result.paymentDetails.single { it.id == paymentDetail.id }
+                performPaymentConfirmation(updatedPaymentDetails)
+            },
+            onFailure = { error -> handleUpdateError(error) }
+        )
+    }
+
+    private fun handleUpdateError(error: Throwable) {
+        _uiState.update {
+            it.copy(
+                alertMessage = error.stripeErrorMessage(),
+                isProcessing = false
+            )
         }
     }
 
     private suspend fun performPaymentConfirmation(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
     ) {
-        val card = selectedPaymentDetails as? ConsumerPaymentDetails.Card
-        val isExpired = card != null && card.isExpired
-
-        if (isExpired) {
-            performPaymentDetailsUpdate(selectedPaymentDetails).fold(
-                onSuccess = { result ->
-                    val updatedPaymentDetails = result.paymentDetails.single {
-                        it.id == selectedPaymentDetails.id
-                    }
-                    performPaymentConfirmation(updatedPaymentDetails)
-                },
-                onFailure = { error ->
-                    _uiState.update {
-                        it.copy(
-                            alertMessage = error.stripeErrorMessage(),
-                            isProcessing = false
-                        )
-                    }
-                }
+        // Check if billing details are missing before proceeding with payment
+        if (!selectedPaymentDetails.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)) {
+            setProcessingState(false)
+            navigationManager.tryNavigateTo(
+                route = LinkScreen.UpdateCard(
+                    paymentDetailsId = selectedPaymentDetails.id,
+                    isBillingDetailsUpdateFlow = true
+                ),
             )
-        } else {
-            // Confirm payment with LinkConfirmationHandler
-            val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
-            when (linkLaunchMode) {
-                is LinkLaunchMode.Full,
-                is LinkLaunchMode.Confirmation -> {
-                    performPaymentConfirmationWithCvc(
-                        selectedPaymentDetails = selectedPaymentDetails,
-                        cvc = cvc
-                    )
-                }
-                is LinkLaunchMode.PaymentMethodSelection -> dismissWithResult(
-                    LinkActivityResult.Completed(
-                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
-                        selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
-                            details = selectedPaymentDetails,
-                            collectedCvc = cvc
-                        ),
-                        shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
-                    )
-                )
-            }
+            return
         }
-    }
 
-    private suspend fun performPaymentConfirmationWithCvc(
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        cvc: String?
-    ) {
-        val result = dismissalCoordinator.withDismissalDisabled {
-            linkConfirmationHandler.confirm(
-                paymentDetails = selectedPaymentDetails,
-                linkAccount = linkAccount,
-                cvc = cvc
-            )
-        }
-        when (result) {
-            LinkConfirmationResult.Canceled -> Unit
-            is LinkConfirmationResult.Failed -> {
-                _uiState.update {
-                    it.copy(
-                        errorMessage = result.message,
-                        isProcessing = false
-                    )
-                }
-            }
-            LinkConfirmationResult.Succeeded -> {
-                dismissWithResult(
-                    LinkActivityResult.Completed(
-                        // After confirmation, clear the link account state so further launches
-                        // require authenticating again.
-                        linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
-                        selectedPayment = null,
-                    )
-                )
-            }
-        }
-    }
+        val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
-    private suspend fun performPaymentDetailsUpdate(
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails
-    ): Result<ConsumerPaymentDetails> {
-        val paymentMethodCreateParams = uiState.value.toPaymentMethodCreateParams()
-
-        return dismissalCoordinator.withDismissalDisabled {
-            val updateParams = ConsumerPaymentDetailsUpdateParams(
-                id = selectedPaymentDetails.id,
-                isDefault = selectedPaymentDetails.isDefault,
-                cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap()
-            )
-            linkAccountManager.updatePaymentDetails(updateParams)
-        }
+        val result = completeLinkWithPayment(
+            selectedPaymentDetails = selectedPaymentDetails,
+            linkAccount = linkAccount,
+            cvc = cvc,
+            linkLaunchMode = linkLaunchMode,
+        )
+        dismissWithResult(result)
     }
 
     fun onPayAnotherWayClicked() {
@@ -424,6 +389,13 @@ internal class WalletViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
                             confirmationHandler = parentComponent.viewModel.confirmationHandler
+                        ),
+                        completeLinkWithPayment = CompleteLinkWithPayment(
+                            linkConfirmationHandler = parentComponent.linkConfirmationHandlerFactory.create(
+                                confirmationHandler = parentComponent.viewModel.confirmationHandler
+                            ),
+                            linkAccountManager = parentComponent.linkAccountManager,
+                            dismissalCoordinator = parentComponent.dismissalCoordinator,
                         ),
                         logger = parentComponent.logger,
                         navigationManager = parentComponent.navigationManager,

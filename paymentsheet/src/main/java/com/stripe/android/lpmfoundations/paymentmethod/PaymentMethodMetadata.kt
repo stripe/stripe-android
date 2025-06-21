@@ -373,10 +373,11 @@ internal data class PaymentMethodMetadata(
 
         internal fun createForNativeLink(
             configuration: LinkConfiguration,
+            effectiveBillingDetails: PaymentSheet.BillingDetails?
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
-                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
@@ -389,7 +390,7 @@ internal data class PaymentMethodMetadata(
                     }.orEmpty(),
                 ),
                 merchantName = configuration.merchantName,
-                defaultBillingDetails = null,
+                defaultBillingDetails = effectiveBillingDetails,
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,

@@ -531,9 +531,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration? {
-        if (!configuration.link.shouldDisplay ||
-            configuration.billingDetailsCollectionConfiguration.collectsAnything ||
-            !elementsSession.isLinkEnabled
+        if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled
         ) {
             return null
         }
@@ -592,6 +590,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
         )
 
