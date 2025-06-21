@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import javax.inject.Inject
 
-internal class PaymentOptionFactory @Inject constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class PaymentOptionFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val context: Context,
 ) {

@@ -1,5 +1,6 @@
 package com.stripe.android.link.gate
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.LinkConfiguration
 
 /**
@@ -7,7 +8,8 @@ import com.stripe.android.link.LinkConfiguration
  * the logic for determining when to show special Link UI elements or trigger automatic
  * behaviors to enhance the Link payment experience.
  */
-internal interface LinkGate {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkGate {
     val useNativeLink: Boolean
     val useAttestationEndpoints: Boolean
     val suppress2faModal: Boolean

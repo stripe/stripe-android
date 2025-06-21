@@ -1,11 +1,13 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.uicore.IconStyle
 
-internal data class DisplayablePaymentMethod(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class DisplayablePaymentMethod(
     val code: PaymentMethodCode,
     val syntheticCode: String = code,
     val displayName: ResolvableString,

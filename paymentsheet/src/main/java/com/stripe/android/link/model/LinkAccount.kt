@@ -1,6 +1,7 @@
 package com.stripe.android.link.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
@@ -10,7 +11,8 @@ import kotlinx.parcelize.Parcelize
  * Immutable object representing a Link account.
  */
 @Parcelize
-internal class LinkAccount(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
 ) : Parcelable {

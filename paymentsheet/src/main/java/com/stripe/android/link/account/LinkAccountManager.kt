@@ -1,5 +1,6 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
@@ -20,7 +21,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 @SuppressWarnings("TooManyFunctions")
-internal interface LinkAccountManager {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkAccountManager {
     val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
     val accountStatus: Flow<AccountStatus>
 

@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
@@ -42,7 +43,8 @@ import javax.inject.Inject
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-internal sealed class PaymentSelection : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class PaymentSelection : Parcelable {
 
     var hasAcknowledgedSepaMandate: Boolean = false
 

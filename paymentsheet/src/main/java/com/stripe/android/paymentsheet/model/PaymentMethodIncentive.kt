@@ -1,13 +1,15 @@
 package com.stripe.android.paymentsheet.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class PaymentMethodIncentive(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodIncentive(
     private val identifier: String,
     val displayText: String,
 ) : Parcelable {

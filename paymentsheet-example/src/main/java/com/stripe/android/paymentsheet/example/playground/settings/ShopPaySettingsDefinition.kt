@@ -14,6 +14,7 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
+            PlaygroundConfigurationData.IntegrationType.OnRamp,
             PlaygroundConfigurationData.IntegrationType.FlowController,
             PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> true
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,

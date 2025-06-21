@@ -8,8 +8,10 @@ internal data class LinkControllerState(
     val presentedForEmail: String? = null,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
     val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
+    val presentForAuthenticationResult: LinkController.PresentForAuthenticationResult? = null,
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
     val createPaymentMethodResult: LinkController.CreatePaymentMethodResult? = null,
+    val registerNewLinkUserResult: LinkController.RegisterNewLinkUserResult? = null,
 ) {
     val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
 

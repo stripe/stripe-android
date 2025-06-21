@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
@@ -17,7 +18,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-internal interface LinkConfigurationCoordinator {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkConfigurationCoordinator {
     val emailFlow: StateFlow<String?>
 
     fun getComponent(configuration: LinkConfiguration): LinkComponent

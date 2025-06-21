@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
 import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
@@ -129,6 +130,7 @@ private fun Screens(
             MinScreenHeightBox(screenHeightPercentage = 1f) {
                 SignUpRoute(
                     navigateAndClearStack = navigateAndClearStack,
+                    dismissWithResult = dismissWithResult,
                     moveToWeb = moveToWeb
                 )
             }
@@ -152,9 +154,10 @@ private fun Screens(
             MinScreenHeightBox(screenHeightPercentage = if (initialDestination == LinkScreen.SignUp) 1f else 0f) {
                 VerificationRoute(
                     linkAccount = linkAccount,
+                    dismissWithResult = dismissWithResult,
                     changeEmail = changeEmail,
-                    navigateAndClearStack = navigateAndClearStack,
-                    goBack = goBack
+                    goBack = goBack,
+                    navigateAndClearStack = navigateAndClearStack
                 )
             }
         }
@@ -184,12 +187,14 @@ private fun Screens(
 @Composable
 private fun SignUpRoute(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit,
     moveToWeb: () -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
             navigateAndClearStack = navigateAndClearStack,
+            dismissWithResult = dismissWithResult,
             moveToWeb = moveToWeb
         )
     }
@@ -202,6 +207,7 @@ private fun SignUpRoute(
 private fun VerificationRoute(
     linkAccount: LinkAccount,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit,
     changeEmail: () -> Unit,
     goBack: () -> Unit
 ) {
@@ -212,7 +218,18 @@ private fun VerificationRoute(
             linkAccount = linkAccount,
             isDialog = false,
             onVerificationSucceeded = {
-                navigateAndClearStack(LinkScreen.Wallet)
+                // Check if we're in Authentication mode and return immediately
+                if (parentComponent.linkLaunchMode is LinkLaunchMode.Authentication) {
+                    dismissWithResult(
+                        LinkActivityResult.Completed(
+                            linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                            selectedPayment = null,
+                            shippingAddress = null,
+                        )
+                    )
+                } else {
+                    navigateAndClearStack(LinkScreen.Wallet)
+                }
             },
             onChangeEmailClicked = changeEmail
         )

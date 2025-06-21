@@ -37,6 +37,17 @@ interface LinkController {
     fun createPaymentMethod()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentForAuthentication(email: String)
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun registerNewLinkUser(
+        email: String,
+        name: String?,
+        phone: String,
+        country: String
+    )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun setConfiguration(configuration: PaymentSheet.Configuration)
 
     sealed interface PresentPaymentMethodsResult {
@@ -60,6 +71,25 @@ interface LinkController {
         class Failed(val error: Throwable) : CreatePaymentMethodResult
     }
 
+    sealed interface PresentForAuthenticationResult {
+        class Authenticated(val user: LinkUser) : PresentForAuthenticationResult
+        object Canceled : PresentForAuthenticationResult
+        class Failed(val error: Throwable) : PresentForAuthenticationResult
+    }
+
+    sealed interface RegisterNewLinkUserResult {
+        class Success(val user: LinkUser) : RegisterNewLinkUserResult
+        class Failed(val error: Throwable) : RegisterNewLinkUserResult
+    }
+
+    @Parcelize
+    data class LinkUser(
+        val email: String,
+        val phone: String?,
+        val isVerified: Boolean,
+        val completedSignup: Boolean
+    ) : Parcelable
+
     fun interface PresentPaymentMethodsCallback {
         fun onPresentPaymentMethodsResult(result: PresentPaymentMethodsResult)
     }
@@ -70,6 +100,14 @@ interface LinkController {
 
     fun interface CreatePaymentMethodCallback {
         fun onCreatePaymentMethodResult(result: CreatePaymentMethodResult)
+    }
+
+    fun interface PresentForAuthenticationCallback {
+        fun onPresentForAuthenticationResult(result: PresentForAuthenticationResult)
+    }
+
+    fun interface RegisterNewLinkUserCallback {
+        fun onRegisterNewLinkUserResult(result: RegisterNewLinkUserResult)
     }
 
     @Parcelize
@@ -84,8 +122,26 @@ interface LinkController {
         fun create(
             activity: ComponentActivity,
             presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
-            lookupConsumerCallback: LookupConsumerCallback,
-            createPaymentMethodCallback: CreatePaymentMethodCallback,
+            lookupConsumerCallback: LinkController.LookupConsumerCallback,
+            createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
+        ): LinkController {
+            return createInternal(
+                activity = activity,
+                presentPaymentMethodsCallback = presentPaymentMethodsCallback,
+                lookupConsumerCallback = lookupConsumerCallback,
+                createPaymentMethodCallback = createPaymentMethodCallback,
+                presentForAuthenticationCallback = null,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createInternal(
+            activity: ComponentActivity,
+            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+            lookupConsumerCallback: LinkController.LookupConsumerCallback,
+            createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
+            presentForAuthenticationCallback: LinkController.PresentForAuthenticationCallback? = null,
+            registerNewLinkUserCallback: LinkController.RegisterNewLinkUserCallback? = null,
         ): LinkController {
             val viewModelProvider = ViewModelProvider(
                 owner = activity,
@@ -100,6 +156,8 @@ interface LinkController {
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                 lookupConsumerCallback = lookupConsumerCallback,
                 createPaymentMethodCallback = createPaymentMethodCallback,
+                presentForAuthenticationCallback = presentForAuthenticationCallback,
+                registerNewLinkUserCallback = registerNewLinkUserCallback,
             )
         }
     }
@@ -111,8 +169,10 @@ internal class RealLinkController(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val viewModel: LinkControllerViewModel,
     private val presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
-    private val lookupConsumerCallback: LookupConsumerCallback,
-    private val createPaymentMethodCallback: CreatePaymentMethodCallback,
+    private val lookupConsumerCallback: LinkController.LookupConsumerCallback,
+    private val createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
+    private val presentForAuthenticationCallback: LinkController.PresentForAuthenticationCallback?,
+    private val registerNewLinkUserCallback: LinkController.RegisterNewLinkUserCallback?,
 ) : LinkController {
 
     private val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
@@ -120,6 +180,9 @@ internal class RealLinkController(
             key = "LinkController_LinkActivityResultLauncher",
             contract = viewModel.linkActivityContract,
         ) { result ->
+            // Route to appropriate result handler based on launch mode
+            // For now, we need to check if this was an authentication result
+            // This is a bit of a hack, but the ViewModel needs to know what type of operation was launched
             viewModel.onLinkActivityResult(context, result)
         }
 
@@ -145,6 +208,24 @@ internal class RealLinkController(
                         .map { it.createPaymentMethodResult }
                         .filterNotNull()
                         .collect(createPaymentMethodCallback::onCreatePaymentMethodResult)
+                }
+
+                presentForAuthenticationCallback?.let { callback ->
+                    launch {
+                        viewModel.state
+                            .map { it.presentForAuthenticationResult }
+                            .filterNotNull()
+                            .collect(callback::onPresentForAuthenticationResult)
+                    }
+                }
+
+                registerNewLinkUserCallback?.let { callback ->
+                    launch {
+                        viewModel.state
+                            .map { it.registerNewLinkUserResult }
+                            .filterNotNull()
+                            .collect(callback::onRegisterNewLinkUserResult)
+                    }
                 }
             }
         }
@@ -172,6 +253,19 @@ internal class RealLinkController(
 
     override fun createPaymentMethod() {
         viewModel.onCreatePaymentMethod()
+    }
+
+    override fun presentForAuthentication(email: String) {
+        viewModel.onPresentForAuthentication(linkActivityResultLauncher, email)
+    }
+
+    override fun registerNewLinkUser(
+        email: String,
+        name: String?,
+        phone: String,
+        country: String
+    ) {
+        viewModel.onRegisterNewLinkUser(email, name, phone, country)
     }
 
     override fun setConfiguration(configuration: PaymentSheet.Configuration) {

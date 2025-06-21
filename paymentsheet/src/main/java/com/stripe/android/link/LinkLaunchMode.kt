@@ -1,13 +1,15 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConsumerPaymentDetails
 import kotlinx.parcelize.Parcelize
 
 /**
  * The mode in which the Link flow is launched.
  */
-internal sealed interface LinkLaunchMode : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface LinkLaunchMode : Parcelable {
     /**
      * Link is launched with the intent to select a payment method ready for confirmation.
      */
@@ -33,4 +35,12 @@ internal sealed interface LinkLaunchMode : Parcelable {
          */
         val selectedPayment: LinkPaymentMethod
     ) : LinkLaunchMode
+
+    /**
+     * Link is launched in authentication mode, where the user needs to verify their account
+     * through the verification process (e.g., OTP, SMS). This mode is focused on authentication
+     * only and returns a Link account without any payment processing.
+     */
+    @Parcelize
+    data object Authentication: LinkLaunchMode
 }

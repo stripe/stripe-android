@@ -1,6 +1,7 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -9,7 +10,8 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class CommonConfiguration(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CommonConfiguration(
     val merchantDisplayName: String,
     val customer: PaymentSheet.CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,

@@ -1,6 +1,9 @@
 package com.stripe.android.link.analytics
 
-internal interface LinkEventsReporter {
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkEventsReporter {
     fun onInvalidSessionState(state: SessionState)
 
     fun onInlineSignupCheckboxChecked()

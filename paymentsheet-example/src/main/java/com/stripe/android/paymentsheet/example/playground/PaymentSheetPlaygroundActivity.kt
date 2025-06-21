@@ -50,7 +50,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
-import com.stripe.android.paymentsheet.example.playground.activity.RidesharingAppActivity
+import com.stripe.android.paymentsheet.example.playground.activity.OnRampExampleActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -382,8 +382,8 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
-                    PlaygroundConfigurationData.IntegrationType.RidesharingApp -> {
-                        RidesharingAppUi(
+                    PlaygroundConfigurationData.IntegrationType.OnRamp -> {
+                        OnRampAppUi(
                             playgroundState = playgroundState,
                         )
                     }
@@ -537,14 +537,14 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
-    fun RidesharingAppUi(
+    fun OnRampAppUi(
         playgroundState: PlaygroundState.Payment,
     ) {
         val context = LocalContext.current
         Button(
             onClick = {
                 context.startActivity(
-                    RidesharingAppActivity.createIntent(
+                    OnRampExampleActivity.createIntent(
                         context = context,
                         playgroundState = playgroundState
                     )
@@ -554,7 +554,7 @@ internal class PaymentSheetPlaygroundActivity :
                 .fillMaxWidth()
                 .testTag(CHECKOUT_TEST_TAG),
         ) {
-            Text("Launch Ridesharing App")
+            Text("Launch OnRamp Example")
         }
     }
 

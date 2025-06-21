@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
@@ -8,14 +9,16 @@ import com.stripe.android.model.ElementsSession
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class CustomerMetadata(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class CustomerMetadata(
     val hasCustomerConfiguration: Boolean,
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
 ) : Parcelable {
 
     @Parcelize
-    internal data class Permissions(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Permissions(
         val canRemovePaymentMethods: Boolean,
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,

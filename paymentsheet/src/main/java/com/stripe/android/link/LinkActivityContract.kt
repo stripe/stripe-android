@@ -3,13 +3,15 @@ package com.stripe.android.link
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.gate.LinkGate
 import javax.inject.Inject
 
 /**
  * Contract used to explicitly launch Link. It will launch either a native or web flow.
  */
-internal class LinkActivityContract @Inject internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class LinkActivityContract @Inject internal constructor(
     private val nativeLinkActivityContract: NativeLinkActivityContract,
     private val webLinkActivityContract: WebLinkActivityContract,
     private val linkGateFactory: LinkGate.Factory

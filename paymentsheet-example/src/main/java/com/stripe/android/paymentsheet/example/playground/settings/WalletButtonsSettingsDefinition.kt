@@ -25,8 +25,7 @@ internal object WalletButtonsSettingsDefinition :
             PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,
             PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt,
-            PlaygroundConfigurationData.IntegrationType.RidesharingApp,
-            PlaygroundConfigurationData.IntegrationType.LinkCoordinator -> true
+            PlaygroundConfigurationData.IntegrationType.OnRamp -> true
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
             PlaygroundConfigurationData.IntegrationType.CustomerSheet,
             PlaygroundConfigurationData.IntegrationType.LinkController -> false

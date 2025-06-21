@@ -1,11 +1,13 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
-internal enum class AddPaymentMethodRequirement {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
     Unsupported {
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean = false

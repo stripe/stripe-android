@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.ConsumerPaymentDetails
 
 /**
@@ -7,7 +8,8 @@ import com.stripe.android.model.ConsumerPaymentDetails
  * When null, payment details have not been loaded yet.
  * When non-null, contains the loaded payment details (which may be an empty list).
  */
-internal data class ConsumerState(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class ConsumerState(
     val paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>
 ) {
 

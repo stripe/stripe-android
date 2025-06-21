@@ -34,7 +34,7 @@ data class ElementsSession(
         get() = linkSettings?.linkFlags ?: emptyMap()
 
     val disableLinkSignup: Boolean
-        get() = linkSettings?.disableLinkSignup ?: false
+        get() = false
 
     val isLinkEnabled: Boolean
         get() {

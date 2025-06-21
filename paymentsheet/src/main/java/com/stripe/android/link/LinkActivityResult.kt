@@ -1,12 +1,14 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
-internal sealed class LinkActivityResult : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class LinkActivityResult : Parcelable {
 
     abstract val linkAccountUpdate: LinkAccountUpdate?
 
@@ -14,7 +16,8 @@ internal sealed class LinkActivityResult : Parcelable {
      * Indicates that the flow was completed successfully.
      */
     @Parcelize
-    internal data class Completed(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Completed(
         override val linkAccountUpdate: LinkAccountUpdate,
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
@@ -24,7 +27,8 @@ internal sealed class LinkActivityResult : Parcelable {
      * Indicates that the user selected a payment method. This payment method has not yet been confirmed.
      */
     @Parcelize
-    internal data class PaymentMethodObtained(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class PaymentMethodObtained(
         val paymentMethod: PaymentMethod
     ) : LinkActivityResult() {
 
@@ -36,7 +40,8 @@ internal sealed class LinkActivityResult : Parcelable {
      * The user cancelled the Link flow without completing it.
      */
     @Parcelize
-    internal data class Canceled(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Canceled(
         val reason: Reason = Reason.BackPressed,
         override val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult() {
@@ -51,15 +56,18 @@ internal sealed class LinkActivityResult : Parcelable {
      * Something went wrong. See [error] for more information.
      */
     @Parcelize
-    internal data class Failed(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Failed(
         val error: Throwable,
         override val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult()
 }
 
 @Parcelize
-internal sealed interface LinkAccountUpdate : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface LinkAccountUpdate : Parcelable {
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Value(
         val account: LinkAccount?,
         val lastUpdateReason: UpdateReason? = null
@@ -78,6 +86,7 @@ internal sealed interface LinkAccountUpdate : Parcelable {
     }
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object None : LinkAccountUpdate
 
     fun asValue(): Value = when (this) {

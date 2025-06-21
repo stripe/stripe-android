@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
@@ -43,7 +44,8 @@ internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = fals
  * The purpose of this is to be able to easily plumb this information into the locations it’s needed.
  */
 @Parcelize
-internal data class PaymentMethodMetadata(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,

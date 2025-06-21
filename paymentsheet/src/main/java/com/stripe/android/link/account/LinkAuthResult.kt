@@ -1,8 +1,10 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.model.LinkAccount
 
-internal sealed interface LinkAuthResult {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface LinkAuthResult {
     data class Success(val account: LinkAccount) : LinkAuthResult
     data object NoLinkAccountFound : LinkAuthResult
     data class AttestationFailed(val error: Throwable) : LinkAuthResult

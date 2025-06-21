@@ -1,8 +1,10 @@
 package com.stripe.android.link.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.paymentsheet.state.LinkState
 
-internal enum class AccountStatus {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class AccountStatus {
     Verified, // Customer is signed in
     NeedsVerification, // Customer needs to authenticate
     VerificationStarted, // Customer has started OTP verification

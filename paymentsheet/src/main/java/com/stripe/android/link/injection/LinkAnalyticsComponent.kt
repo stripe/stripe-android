@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
@@ -19,7 +20,8 @@ internal annotation class LinkAnalyticsScope
     ]
 )
 @LinkAnalyticsScope
-internal interface LinkAnalyticsComponent {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface LinkAnalyticsComponent {
     val linkAnalyticsHelper: LinkAnalyticsHelper
 
     @Subcomponent.Builder

@@ -1,10 +1,12 @@
 package com.stripe.android.link.account
 
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkAccountUpdate
 import kotlinx.coroutines.flow.StateFlow
 
-internal class LinkAccountHolder(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class LinkAccountHolder(
     private val savedStateHandle: SavedStateHandle
 ) {
     val linkAccountInfo: StateFlow<LinkAccountUpdate.Value> = savedStateHandle

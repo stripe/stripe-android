@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
@@ -8,10 +9,12 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class LinkConfiguration(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class LinkConfiguration(
     val stripeIntent: StripeIntent,
     val merchantName: String,
     val merchantCountryCode: String?,
@@ -27,7 +30,7 @@ internal data class LinkConfiguration(
     val useAttestationEndpointsForLink: Boolean,
     val suppress2faModal: Boolean,
     val disableRuxInFlowController: Boolean,
-    val initializationMode: PaymentElementLoader.InitializationMode,
+    val initializationMode: InitializationMode,
     val elementsSessionId: String,
     val linkMode: LinkMode?,
     val allowDefaultOptIn: Boolean,
