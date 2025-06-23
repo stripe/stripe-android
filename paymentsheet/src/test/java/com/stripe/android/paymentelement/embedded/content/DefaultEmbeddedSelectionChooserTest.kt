@@ -197,6 +197,35 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
+    fun `ShopPay selection returns null when used as previous selection`() = runScenario {
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethods = PaymentMethodFixtures.createCards(3),
+            previousSelection = PaymentSelection.ShopPay,
+            newSelection = null,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+        assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `Uses new selection when previous selection is ShopPay`() = runScenario {
+        val paymentMethod = PaymentMethodFixtures.createCard()
+        val newSelection = PaymentSelection.Saved(paymentMethod)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
+            previousSelection = PaymentSelection.ShopPay,
+            newSelection = newSelection,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+        assertThat(selection).isEqualTo(newSelection)
+    }
+
+    @Test
     fun `No payment selection when rowSelectionCallback not null and formSheetAction confirm`() = runScenario(
         internalRowSelectionCallback = {}
     ) {

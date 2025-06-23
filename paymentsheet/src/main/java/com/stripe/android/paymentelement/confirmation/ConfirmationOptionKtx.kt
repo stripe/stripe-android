@@ -26,6 +26,7 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(configuration)
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
+        is PaymentSelection.ShopPay -> null
     }
 }
 

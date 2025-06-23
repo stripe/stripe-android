@@ -160,7 +160,8 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canUpdateFullPaymentMethodDetails = false,
-                    )
+                    ),
+                    shopPayConfiguration = null
                 ),
             )
         )
