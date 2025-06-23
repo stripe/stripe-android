@@ -2,6 +2,8 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -23,6 +25,24 @@ internal class TestSatispay : BasePlaygroundTest() {
     fun testSatispay() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
+        )
+    }
+
+    @Test
+    fun testSatispayWithSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
+        )
+    }
+
+    @Test
+    fun testSatispayWithSetupIntent() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
         )
     }
 
