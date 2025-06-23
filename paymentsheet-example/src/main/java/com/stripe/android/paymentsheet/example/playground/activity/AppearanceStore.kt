@@ -7,7 +7,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -33,7 +32,7 @@ internal object AppearanceStore {
         val textFieldInsets: Insets = Insets.Default,
         val iconStyle: IconStyle = IconStyle.Filled,
     ) {
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class, AppearanceAPIAdditionsPreview::class)
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         fun toPaymentSheetAppearance(): PaymentSheet.Appearance {
             return PaymentSheet.Appearance.Builder()
                 .colorsLight(colorsLight)
@@ -119,7 +118,6 @@ internal object AppearanceStore {
             }
         }
 
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         @Serializable
         @Parcelize
         data class Embedded(

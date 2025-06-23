@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [ADDED][10947](https://github.com/stripe/stripe-android/pull/10947) Added `FlatWithChevron` Embedded RowStyle to Appearance API
+* [CHANGED][10705](https://github.com/stripe/stripe-android/pull/10705) `EmbeddedPaymentElement` is now GA.
 
 ## 21.18.0 - 2025-06-16
 

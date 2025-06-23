@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -19,7 +18,6 @@ internal interface PlaygroundSettingDefinition<T> {
     ) {
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
     fun configure(
         value: T,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
@@ -95,7 +93,6 @@ internal interface PlaygroundSettingDefinition<T> {
         }
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
     data class EmbeddedConfigurationData(
         private val configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
         var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =

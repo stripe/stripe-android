@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
@@ -24,7 +23,6 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 import kotlin.reflect.KClass
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)
@@ -263,7 +261,6 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Suppress("CyclomaticComplexMethod")
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     private fun <T : Embedded.RowStyle> getRowStyle(
         type: KClass<T>,
         separatorThicknessDp: Float? = null,
