@@ -1025,10 +1025,9 @@ internal class PaymentSheetActivityTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "abc",
             ),
-            config = PaymentSheet.Configuration(
-                merchantDisplayName = "Some name",
-                customer = invalidCustomerConfig,
-            ),
+            config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some name")
+                .customer(customer = invalidCustomerConfig)
+                .build(),
             statusBarColor = null,
             paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
@@ -1050,9 +1049,7 @@ internal class PaymentSheetActivityTest {
     fun `Handles invalid client secret correctly`() {
         val args = PaymentSheetContractV2.Args(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret = ""),
-            config = PaymentSheet.Configuration(
-                merchantDisplayName = "Some name",
-            ),
+            config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Some name").build(),
             statusBarColor = null,
             paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )

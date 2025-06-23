@@ -1,12 +1,10 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import android.graphics.Color
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
@@ -120,31 +118,51 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     private companion object {
-        val configuration = PaymentSheet.Configuration(
-            merchantDisplayName = "Merchant, Inc.",
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "1",
-                ephemeralKeySecret = "ek_123",
-            ),
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = "CA",
-                currencyCode = "CAD",
-                amount = 5099,
-                label = "Merchant, Inc.",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
-            ),
-            primaryButtonColor = ColorStateList.valueOf(Color.BLUE),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
-                name = "Jenny Rosen",
-            ),
-            shippingDetails = AddressDetails(
-                name = "Jenny Rosen",
-            ),
-            primaryButtonLabel = "Buy",
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            ),
-        )
+        val configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+            .customer(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "1",
+                    ephemeralKeySecret = "ek_123",
+                )
+            )
+            .googlePay(
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "CA",
+                    currencyCode = "CAD",
+                    amount = 5099,
+                    label = "Merchant, Inc.",
+                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                )
+            )
+            .appearance(
+                appearance = PaymentSheet.Appearance(
+                    primaryButton = PaymentSheet.PrimaryButton(
+                        colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(
+                            background = Color.BLUE,
+                        ),
+                        colorsDark = PaymentSheet.PrimaryButtonColors.defaultDark.copy(
+                            background = Color.BLUE,
+                        ),
+                    )
+                )
+            )
+            .defaultBillingDetails(
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    name = "Jenny Rosen",
+                )
+            )
+            .shippingDetails(
+                shippingDetails = AddressDetails(
+                    name = "Jenny Rosen",
+                )
+            )
+            .primaryButtonLabel(primaryButtonLabel = "Buy")
+            .billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                )
+            )
+            .build()
     }
 }

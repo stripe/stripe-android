@@ -347,7 +347,7 @@ class FlowControllerConfigurationHandlerTest {
                     initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
                     ),
-                    configuration = PaymentSheet.Configuration("Some name"),
+                    configuration = PaymentSheet.Configuration.Builder("Some name").build(),
                     initializedViaCompose = false,
                 ) { _, _ ->
                     onInitCallbacks++
@@ -382,7 +382,7 @@ class FlowControllerConfigurationHandlerTest {
                         )
                     )
                 ),
-                configuration = PaymentSheet.Configuration("Some name"),
+                configuration = PaymentSheet.Configuration.Builder("Some name").build(),
                 initializedViaCompose = false,
                 callback = { _, _ ->
                     resultTurbine.add(amount)
@@ -410,7 +410,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheet.Configuration("Some name"),
+            configuration = PaymentSheet.Configuration.Builder("Some name").build(),
             initializedViaCompose = false,
             callback = { _, _ ->
                 resultTurbine.add(Unit)
@@ -435,7 +435,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheet.Configuration("Some name"),
+            configuration = PaymentSheet.Configuration.Builder("Some name").build(),
             initializedViaCompose = false,
         ) { _, exception ->
             resultTurbine.add(exception)
@@ -453,7 +453,7 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_sk_456"),
-            configuration = PaymentSheet.Configuration("Some name"),
+            configuration = PaymentSheet.Configuration.Builder("Some name").build(),
             initializedViaCompose = false,
         ) { _, _ ->
             configureTurbine.close()
@@ -497,7 +497,7 @@ class FlowControllerConfigurationHandlerTest {
                     ),
                 ),
             ),
-            configuration = PaymentSheet.Configuration("Some name"),
+            configuration = PaymentSheet.Configuration.Builder("Some name").build(),
             initializedViaCompose = false,
         ) { _, _ ->
             configureTurbine.close()
@@ -541,7 +541,7 @@ class FlowControllerConfigurationHandlerTest {
                     ),
                 ),
             ),
-            configuration = PaymentSheet.Configuration("Some name"),
+            configuration = PaymentSheet.Configuration.Builder("Some name").build(),
             initializedViaCompose = false,
         ) { _, _ ->
             configureTurbine.close()

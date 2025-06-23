@@ -30,7 +30,8 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @RunWith(RobolectricTestRunner::class)
 class PaymentSelectionUpdaterTest {
 
-    private val defaultPaymentSheetConfiguration: PaymentSheet.Configuration = PaymentSheet.Configuration("Some name")
+    private val defaultPaymentSheetConfiguration: PaymentSheet.Configuration =
+        PaymentSheet.Configuration.Builder("Some name").build()
 
     @Test
     fun `Uses new payment selection if there's no existing one`() {
@@ -57,10 +58,9 @@ class PaymentSelectionUpdaterTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
-        val newConfig = PaymentSheet.Configuration(
-            merchantDisplayName = "Example, Inc.",
-            allowsDelayedPaymentMethods = true,
-        )
+        val newConfig = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+            .allowsDelayedPaymentMethods(true)
+            .build()
         val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentMethodTypes = listOf("card", "sofort"),
             config = newConfig
@@ -70,10 +70,9 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
-            previousConfig = PaymentSheet.Configuration(
-                merchantDisplayName = "Example, Inc.",
-                allowsDelayedPaymentMethods = true,
-            ),
+            previousConfig = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .allowsDelayedPaymentMethods(true)
+                .build(),
             newState = newState,
             newConfig = newConfig,
             walletButtonsAlreadyShown = false,
