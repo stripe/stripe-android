@@ -1459,7 +1459,7 @@ internal class DefaultFlowControllerTest {
                 .walletButtons(
                     PaymentSheet.WalletButtonsConfiguration(
                         willDisplayExternally = true,
-                        walletsToShow = listOf("google_pay", "shop_pay")
+                        walletsToShow = listOf("google_pay")
                     )
                 )
                 .build()
@@ -1498,7 +1498,7 @@ internal class DefaultFlowControllerTest {
                 .walletButtons(
                     PaymentSheet.WalletButtonsConfiguration(
                         willDisplayExternally = true,
-                        walletsToShow = listOf("link", "shop_pay")
+                        walletsToShow = listOf("link")
                     )
                 )
                 .build()
@@ -1510,45 +1510,6 @@ internal class DefaultFlowControllerTest {
             argWhere {
                 it.walletsToShow.size == 1 &&
                     it.walletsToShow.contains(WalletType.GooglePay)
-            },
-            anyOrNull(),
-        )
-    }
-
-    @OptIn(WalletButtonsPreview::class)
-    @Test
-    fun `On wallet buttons rendered and options launched, should show only Shop Pay in options screen`() = runTest {
-        val viewModel = createViewModel()
-
-        viewModel.walletButtonsRendered = true
-
-        val flowController = createFlowController(viewModel = viewModel)
-
-        flowController.configureExpectingSuccess(
-            configuration = PaymentSheet.Configuration.Builder(
-                merchantDisplayName = "Example, Inc."
-            )
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
-                .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
-                        willDisplayExternally = true,
-                        walletsToShow = listOf("link", "google_pay")
-                    )
-                )
-                .build()
-        )
-
-        flowController.presentPaymentOptions()
-
-        verify(paymentOptionActivityLauncher).launch(
-            argWhere {
-                it.walletsToShow.size == 1 &&
-                    it.walletsToShow.contains(WalletType.ShopPay)
             },
             anyOrNull(),
         )

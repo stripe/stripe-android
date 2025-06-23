@@ -65,8 +65,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
-    val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?
+    val elementsSessionId: String
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -299,7 +298,6 @@ internal data class PaymentMethodMetadata(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkState,
-                    isShopPayAvailable = configuration.shopPayConfiguration != null
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
@@ -321,8 +319,7 @@ internal data class PaymentMethodMetadata(
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                elementsSessionId = elementsSession.elementsSessionId,
-                shopPayConfiguration = configuration.shopPayConfiguration
+                elementsSessionId = elementsSession.elementsSessionId
             )
         }
 
@@ -343,8 +340,7 @@ internal data class PaymentMethodMetadata(
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
-                    linkState = null,
-                    isShopPayAvailable = false
+                    linkState = null
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
@@ -366,8 +362,7 @@ internal data class PaymentMethodMetadata(
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 elementsSessionId = elementsSession.elementsSessionId,
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
-                shopPayConfiguration = null
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession)
             )
         }
 
@@ -407,8 +402,7 @@ internal data class PaymentMethodMetadata(
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = configuration.cardBrandFilter,
                 elementsSessionId = configuration.elementsSessionId,
-                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
-                shopPayConfiguration = null
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
         }
     }

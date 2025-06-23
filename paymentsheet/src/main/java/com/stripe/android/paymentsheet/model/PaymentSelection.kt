@@ -86,14 +86,6 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
-    data object ShopPay : PaymentSelection() {
-        override val requiresConfirmation: Boolean
-            get() = false
-
-        override fun mandateText(merchantName: String, isSetupFlow: Boolean) = null
-    }
-
-    @Parcelize
     data class ExternalPaymentMethod(
         val type: String,
         val billingDetails: PaymentMethod.BillingDetails?,
@@ -333,7 +325,6 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod -> false
-        is PaymentSelection.ShopPay -> false
     }
 
 internal val PaymentSelection.isSaved: Boolean
@@ -353,7 +344,6 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
-        is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
     }
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
@@ -384,7 +374,6 @@ internal val PaymentSelection.lightThemeIconUrl: String?
         is PaymentSelection.New.LinkInline -> null
         is PaymentSelection.New.USBankAccount -> null
         is PaymentSelection.Saved -> null
-        is PaymentSelection.ShopPay -> null
     }
 
 internal val PaymentSelection.darkThemeIconUrl: String?
@@ -398,7 +387,6 @@ internal val PaymentSelection.darkThemeIconUrl: String?
         is PaymentSelection.New.LinkInline -> null
         is PaymentSelection.New.USBankAccount -> null
         is PaymentSelection.Saved -> null
-        is PaymentSelection.ShopPay -> null
     }
 
 internal val PaymentSelection.label: ResolvableString
@@ -412,7 +400,6 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.USBankAccount -> label.resolvableString
         is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
-        is PaymentSelection.ShopPay -> StripeR.string.stripe_shop_pay.resolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
@@ -433,7 +420,6 @@ internal val PaymentSelection.paymentMethodType: String
         is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code ?: "card"
-        is PaymentSelection.ShopPay -> "shop_pay"
     }
 
 internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
@@ -444,7 +430,6 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.Link -> null
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
         is PaymentSelection.Saved -> paymentMethod.billingDetails
-        is PaymentSelection.ShopPay -> null
     }
 
 internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
