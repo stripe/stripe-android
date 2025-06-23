@@ -239,6 +239,7 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         cvc: String?,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
@@ -254,7 +255,7 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,
             extraParams = paymentMethodParams + fraudParams + optionsParams,
-            billingPhone = null,
+            billingPhone = billingPhone,
         )
     }
 

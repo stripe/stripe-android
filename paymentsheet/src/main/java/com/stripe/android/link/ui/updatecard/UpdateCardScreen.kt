@@ -25,7 +25,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
@@ -131,7 +131,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     ),
                     onBrandChoiceChanged = {},
                     onCardUpdateParamsChanged = {},
-                    addressCollectionMode = AddressCollectionMode.Automatic
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration()
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",

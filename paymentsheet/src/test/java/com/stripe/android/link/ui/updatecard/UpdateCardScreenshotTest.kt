@@ -10,7 +10,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.CardUpdateParams
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.screenshottesting.FontSize
@@ -47,7 +47,7 @@ internal class UpdateCardScreenshotTest(
                         ),
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
-                        addressCollectionMode = AddressCollectionMode.Automatic
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration()
                     ),
                     state = testCase.state,
                     onUpdateClicked = {},

@@ -61,7 +61,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            cvc = CVC
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -93,7 +94,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = null,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -127,7 +130,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Failed(errorMessage))
@@ -148,7 +153,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Canceled)
@@ -167,7 +174,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val result = handler.confirm(
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
@@ -194,7 +203,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         val result = handler.confirm(
             paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            cvc = CVC
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -226,7 +236,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         val result = handler.confirm(
             paymentDetails = savedPaymentDetails,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            cvc = CVC
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -256,7 +267,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         val result = handler.confirm(
             paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            cvc = CVC
+            cvc = CVC,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -287,7 +299,8 @@ internal class DefaultLinkConfirmationHandlerTest {
             val result = handler.confirm(
                 paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                cvc = CVC
+                cvc = CVC,
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -323,7 +336,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
         val result = handler.confirm(
             paymentDetails = bankAccount,
-            linkAccount = TestFactory.LINK_ACCOUNT
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = null,
+            billingPhone = null
         )
 
         assertThat(result).isEqualTo(Result.Succeeded)
@@ -363,7 +378,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
             val result = handler.confirm(
                 paymentDetails = bankAccount,
-                linkAccount = TestFactory.LINK_ACCOUNT
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = null,
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)
@@ -397,7 +414,9 @@ internal class DefaultLinkConfirmationHandlerTest {
 
             val result = handler.confirm(
                 paymentDetails = passthroughDetails,
-                linkAccount = TestFactory.LINK_ACCOUNT
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = null,
+                billingPhone = null
             )
 
             assertThat(result).isEqualTo(Result.Succeeded)

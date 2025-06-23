@@ -28,13 +28,15 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     override suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): Result {
         return confirm {
             newConfirmationArgs(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
-                cvc = cvc
+                cvc = cvc,
+                billingPhone = billingPhone
             )
         }
     }
@@ -42,13 +44,15 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     override suspend fun confirm(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): Result {
         return confirm {
             confirmationArgs(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
-                cvc = cvc
+                cvc = cvc,
+                billingPhone = billingPhone
             )
         }
     }
@@ -91,14 +95,16 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private fun confirmationArgs(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): ConfirmationHandler.Args {
         return when (paymentDetails) {
             is LinkPaymentDetails.New -> {
                 newConfirmationArgs(
                     paymentDetails = paymentDetails.paymentDetails,
                     linkAccount = linkAccount,
-                    cvc = cvc
+                    cvc = cvc,
+                    billingPhone = billingPhone
                 )
             }
             is LinkPaymentDetails.Saved -> {
@@ -113,13 +119,15 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private fun newConfirmationArgs(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): ConfirmationHandler.Args {
         val confirmationOption = if (configuration.passthroughModeEnabled) {
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(paymentDetails),
-                cvc = cvc
+                cvc = cvc,
+                billingPhone = billingPhone
             )
         } else {
             PaymentMethodConfirmationOption.New(

@@ -27,8 +27,11 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
@@ -49,6 +52,7 @@ internal fun CardDetailsEditUI(
         paymentMethodIcon = state.paymentMethodIcon,
         expiryDateState = state.expiryDateState,
         billingDetailsForm = state.billingDetailsForm,
+        contactInformationForm = state.contactInformationForm,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
         },
@@ -68,6 +72,7 @@ private fun CardDetailsEditUI(
     payload: EditCardPayload,
     expiryDateState: ExpiryDateState,
     billingDetailsForm: BillingDetailsForm?,
+    contactInformationForm: FormElement?,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
@@ -123,6 +128,17 @@ private fun CardDetailsEditUI(
                     CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
                 }
             }
+        }
+
+        if (contactInformationForm != null) {
+            Spacer(Modifier.height(32.dp))
+
+            SectionElementUI(
+                enabled = true,
+                element = contactInformationForm as SectionElement,
+                hiddenIdentifiers = emptySet(),
+                lastTextFieldIdentifier = null
+            )
         }
 
         if (billingDetailsForm != null) {

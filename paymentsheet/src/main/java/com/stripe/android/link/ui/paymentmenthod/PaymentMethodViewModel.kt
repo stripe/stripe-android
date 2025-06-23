@@ -90,10 +90,13 @@ internal class PaymentMethodViewModel @Inject constructor(
                 linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                     .fold(
                         onSuccess = { linkPaymentDetails ->
-                            val cardMap = paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>?
+                            val params = paymentMethodCreateParams.toParamMap()
+                            val cardMap = params["card"] as? Map<*, *>?
+                            val billingDetailsMap = params["billing_details"] as? Map<*, *>?
                             performConfirmation(
                                 paymentDetails = linkPaymentDetails,
-                                cvc = cardMap?.get("cvc") as? String?
+                                cvc = cardMap?.get("cvc") as? String?,
+                                billingPhone = billingDetailsMap?.get("phone") as? String?
                             )
                             updateButtonState(PrimaryButtonState.Enabled)
                         },
@@ -116,12 +119,14 @@ internal class PaymentMethodViewModel @Inject constructor(
 
     private suspend fun performConfirmation(
         paymentDetails: LinkPaymentDetails,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ) {
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.LinkPaymentDetails(
                 linkPaymentDetails = paymentDetails,
-                collectedCvc = cvc
+                collectedCvc = cvc,
+                billingPhone = billingPhone
             ),
             linkAccount = linkAccount
         )

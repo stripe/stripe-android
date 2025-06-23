@@ -60,7 +60,7 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
     override suspend operator fun invoke(
         selectedPaymentDetails: LinkPaymentMethod,
         linkAccount: LinkAccount
-    ): Result {
+        ): Result {
         return completeLinkFlow(
             linkLaunchMode = linkLaunchMode,
             confirmPayment = {
@@ -68,12 +68,14 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                     is LinkPaymentMethod.ConsumerPaymentDetails -> linkConfirmationHandler.confirm(
                         paymentDetails = selectedPaymentDetails.details,
                         linkAccount = linkAccount,
-                        cvc = selectedPaymentDetails.collectedCvc
+                        cvc = selectedPaymentDetails.collectedCvc,
+                        billingPhone = selectedPaymentDetails.billingPhone
                     )
                     is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
                         paymentDetails = selectedPaymentDetails.linkPaymentDetails,
                         linkAccount = linkAccount,
-                        cvc = selectedPaymentDetails.collectedCvc
+                        cvc = selectedPaymentDetails.collectedCvc,
+                        billingPhone = selectedPaymentDetails.billingPhone
                     )
                 }
             },
