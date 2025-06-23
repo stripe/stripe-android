@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -98,14 +99,20 @@ class CustomPaymentMethodActivity : AppCompatActivity() {
 
     @Composable
     fun BillingDetails(billingDetails: PaymentMethod.BillingDetails) {
-        Text("Billing details: $billingDetails")
+        Text(
+            text = "Billing details: $billingDetails",
+            color = MaterialTheme.colors.onSurface
+        )
     }
 
     @Composable
     fun Title(
         customPaymentMethodType: PaymentSheet.CustomPaymentMethod,
     ) {
-        Text(customPaymentMethodType.id)
+        Text(
+            text = customPaymentMethodType.id,
+            color = MaterialTheme.colors.onSurface
+        )
     }
 
     companion object {
