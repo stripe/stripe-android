@@ -34,6 +34,8 @@
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (not accepted)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">By continuing, you authorize %1$s to debit your Cash App account for this payment and future payments in accordance with %2$s\'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">TODO</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Contact information</string>
   <!-- Text for continue button -->
