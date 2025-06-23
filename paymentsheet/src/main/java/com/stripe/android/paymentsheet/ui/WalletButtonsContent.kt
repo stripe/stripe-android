@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
-import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -82,11 +81,6 @@ internal class WalletButtonsContent(
                                     )
                                 },
                             )
-                            is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
-                                interactor.handleViewAction(
-                                    OnButtonPressed(button)
-                                )
-                            }
                         }
                     }
                 }

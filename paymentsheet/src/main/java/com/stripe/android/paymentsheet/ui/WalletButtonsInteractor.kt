@@ -96,12 +96,6 @@ internal interface WalletButtonsInteractor {
                 return PaymentSelection.GooglePay
             }
         }
-
-        data object ShopPay : WalletButton {
-            override fun createSelection(): PaymentSelection {
-                return PaymentSelection.ShopPay
-            }
-        }
     }
 
     sealed interface ViewAction {
@@ -154,11 +148,6 @@ internal class DefaultWalletButtonsInteractor(
                         // Only show Link button if the Link verification state is resolved.
                         linkEmbeddedState.verificationState is VerificationState.RenderButton &&
                             walletsAllowedByMerchant.contains(WalletType.Link)
-                    }
-                    WalletType.ShopPay -> {
-                        WalletButton.ShopPay.takeIf {
-                            walletsAllowedByMerchant.contains(WalletType.ShopPay)
-                        }
                     }
                 }
             }

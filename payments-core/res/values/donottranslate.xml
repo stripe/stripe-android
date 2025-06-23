@@ -14,5 +14,4 @@
     -->
     <string name="stripe_google_pay" translatable="false">Google Pay</string>
     <string name="stripe_link" translatable="false">Link</string>
-    <string name="stripe_shop_pay" translatable="false">Shop Pay</string>
 </resources>

@@ -60,16 +60,6 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
-    fun `create does not attach BillingDetails for ShopPay`() {
-        val option = displayDataFactory.create(
-            selection = PaymentSelection.ShopPay,
-            paymentMethodMetadata = paymentMethodMetadata
-        )
-
-        assertThat(option?.billingDetails).isNull()
-    }
-
-    @Test
     fun `selecting saved card does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -93,16 +83,6 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `selecting google pay does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.GooglePay,
-            paymentMethodMetadata = paymentMethodMetadata
-        )
-
-        assertThat(option?.mandateText).isNull()
-    }
-
-    @Test
-    fun `selecting shop pay does not attach mandate to paymentMethodMetadata`() {
-        val option = displayDataFactory.create(
-            selection = PaymentSelection.ShopPay,
             paymentMethodMetadata = paymentMethodMetadata
         )
 
