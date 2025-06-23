@@ -55,6 +55,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_update_card_title">Ενημέρωση κάρτας</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Εισαγάγετε τον κωδικό που στάλθηκε στο %s για να χρησιμοποιήσετε τα αποθηκευμένα στοιχεία σας.</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">Εισαγάγετε τον κωδικό που στάλθηκε στο %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Ενημέρωση κάρτας</string>
   <!-- Title of the logout action. -->
@@ -226,6 +228,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_payment_failed_title">Η πληρωμή απέτυχε</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Αλλαγή email</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">Δεν είστε εσείς;</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">Ο κωδικός εστάλη</string>
   <!-- Two factor authentication screen heading -->

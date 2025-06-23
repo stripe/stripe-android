@@ -55,6 +55,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_update_card_title">카드 업데이트</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">저장된 정보를 사용하려면 %s(으)로 보낸 코드를 입력하십시오.</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">%s번으로 보낸 코드를 입력해 주십시오.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">카드 업데이트</string>
   <!-- Title of the logout action. -->
@@ -226,6 +228,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_payment_failed_title">결제 실패</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">이메일 변경</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">본인이 아니십니까?</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">코드 전송 완료</string>
   <!-- Two factor authentication screen heading -->
