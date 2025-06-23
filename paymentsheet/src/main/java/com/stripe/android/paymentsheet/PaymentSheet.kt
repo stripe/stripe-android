@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -435,13 +436,48 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    class IntentConfiguration @JvmOverloads constructor(
+    class IntentConfiguration internal constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
         val paymentMethodConfigurationId: String? = null,
         val onBehalfOf: String? = null,
         internal val requireCvcRecollection: Boolean = false,
+        internal val intentBehavior: IntentBehavior = IntentBehavior.Default,
     ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String> = emptyList(),
+            paymentMethodConfigurationId: String? = null,
+            onBehalfOf: String? = null,
+            requireCvcRecollection: Boolean = false,
+        ) : this(
+            mode = mode,
+            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodConfigurationId = paymentMethodConfigurationId,
+            onBehalfOf = onBehalfOf,
+            requireCvcRecollection = requireCvcRecollection,
+            intentBehavior = IntentBehavior.Default,
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @SharedPaymentTokenSessionPreview
+        @JvmOverloads
+        constructor(
+            sharedPaymentTokenSessionWithMode: Mode,
+            sellerDetails: SellerDetails?,
+            paymentMethodTypes: List<String> = emptyList(),
+            paymentMethodConfigurationId: String? = null,
+            onBehalfOf: String? = null,
+            requireCvcRecollection: Boolean = false,
+        ) : this(
+            mode = sharedPaymentTokenSessionWithMode,
+            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodConfigurationId = paymentMethodConfigurationId,
+            onBehalfOf = onBehalfOf,
+            requireCvcRecollection = requireCvcRecollection,
+            intentBehavior = IntentBehavior.SharedPaymentToken(sellerDetails),
+        )
 
         /**
          * Contains information about the desired payment or setup flow.
@@ -567,6 +603,26 @@ class PaymentSheet internal constructor(
              * **Note**: Not all payment methods support this.
              */
             Manual,
+        }
+
+        @SharedPaymentTokenSessionPreview
+        @Parcelize
+        @Poko
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class SellerDetails(
+            val networkId: String,
+            val externalId: String,
+        ) : Parcelable
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        internal sealed interface IntentBehavior : Parcelable {
+            @Parcelize
+            data object Default : IntentBehavior
+
+            @Parcelize
+            data class SharedPaymentToken(
+                val sellerDetails: SellerDetails?,
+            ) : IntentBehavior
         }
 
         companion object {

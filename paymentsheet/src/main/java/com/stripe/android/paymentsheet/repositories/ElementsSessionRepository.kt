@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
@@ -168,6 +169,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 mobileSessionId = mobileSessionId,
+                sellerDetails = intentConfiguration.toSellerDetails(),
                 appId = appId
             )
         }
@@ -177,6 +179,19 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
 private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List<String> {
     return map { customPaymentMethod ->
         customPaymentMethod.id
+    }
+}
+
+@OptIn(SharedPaymentTokenSessionPreview::class)
+private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
+    return when (intentBehavior) {
+        is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
+            ElementsSessionParams.SellerDetails(
+                externalId = externalId,
+                networkId = networkId,
+            )
+        }
+        is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> null
     }
 }
 

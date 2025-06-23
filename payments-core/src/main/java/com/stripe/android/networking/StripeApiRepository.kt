@@ -1605,6 +1605,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.customPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["custom_payment_methods"] = it }
             params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
             params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
+            params.sellerDetails?.let { this.putAll(it.toQueryParams()) }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
