@@ -230,6 +230,7 @@ internal class DefaultManageScreenInteractor(
                 is PaymentSelection.CustomPaymentMethod,
                 PaymentSelection.GooglePay,
                 is PaymentSelection.Link,
+                is PaymentSelection.ShopPay,
                 is PaymentSelection.New -> return null
                 is PaymentSelection.Saved -> selection.paymentMethod.id
             }
