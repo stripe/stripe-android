@@ -318,7 +318,6 @@ class GooglePayLauncher internal constructor(
     companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
         internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
-
     }
 }
 

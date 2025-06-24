@@ -331,7 +331,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 
         // Error executing a network call
         const val NETWORK_ERROR = 3
-
     }
 }
 
