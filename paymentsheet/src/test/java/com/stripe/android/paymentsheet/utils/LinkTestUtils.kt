@@ -10,6 +10,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -90,7 +91,9 @@ internal object LinkTestUtils {
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
-            disableRuxInFlowController = false
+            disableRuxInFlowController = false,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            defaultBillingDetails = null
         )
     }
 }

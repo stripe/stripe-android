@@ -31,6 +31,7 @@ import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -743,7 +744,12 @@ internal class WalletScreenTest {
             dismissWithResult = {},
             navigationManager = navigationManager,
             linkLaunchMode = linkLaunchMode,
-            dismissalCoordinator = dismissalCoordinator
+            dismissalCoordinator = dismissalCoordinator,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = linkConfirmationHandler,
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator
+            )
         )
     }
 

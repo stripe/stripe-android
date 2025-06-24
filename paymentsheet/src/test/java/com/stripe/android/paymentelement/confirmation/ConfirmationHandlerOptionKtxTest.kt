@@ -555,6 +555,8 @@ class ConfirmationHandlerOptionKtxTest {
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            defaultBillingDetails = null,
         )
     }
 }

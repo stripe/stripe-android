@@ -2,10 +2,14 @@ package com.stripe.android.link.ui.updatecard
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -90,6 +94,7 @@ class UpdateCardScreenViewModelTest {
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         paymentDetailsId: String = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id
     ): UpdateCardScreenViewModel {
         return UpdateCardScreenViewModel(
@@ -97,7 +102,16 @@ class UpdateCardScreenViewModelTest {
             linkAccountManager = linkAccountManager,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            configuration = configuration,
             paymentDetailsId = paymentDetailsId,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = FakeLinkConfirmationHandler(),
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator
+            ),
+            isBillingDetailsUpdateFlow = false,
+            linkLaunchMode = LinkLaunchMode.Full,
+            dismissWithResult = {}
         )
     }
 }

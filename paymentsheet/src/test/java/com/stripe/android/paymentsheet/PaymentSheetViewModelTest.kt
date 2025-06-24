@@ -978,6 +978,8 @@ internal class PaymentSheetViewModelTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 allowDefaultOptIn = false,
                 disableRuxInFlowController = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                defaultBillingDetails = null
             )
 
             val viewModel = createViewModel(

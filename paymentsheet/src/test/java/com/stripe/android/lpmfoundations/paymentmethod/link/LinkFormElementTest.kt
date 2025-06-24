@@ -28,6 +28,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -148,6 +149,8 @@ class LinkFormElementTest {
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
+            defaultBillingDetails = null,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration()
         )
     }
 
