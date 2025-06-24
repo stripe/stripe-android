@@ -7,6 +7,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -29,6 +31,7 @@ internal data class WalletUiState(
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val alertMessage: ResolvableString? = null,
+    val shippingAddresses: List<ConsumerShippingAddress> = emptyList(),
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -88,9 +91,11 @@ internal data class WalletUiState(
 
     fun updateWithResponse(
         response: ConsumerPaymentDetails,
+        addresses: ConsumerShippingAddresses,
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.paymentDetails,
+            shippingAddresses = addresses.addresses,
             isProcessing = false,
             cardBeingUpdated = null
         )

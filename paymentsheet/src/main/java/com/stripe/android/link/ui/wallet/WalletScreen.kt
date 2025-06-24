@@ -65,8 +65,8 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.ui.core.elements.CvcController
@@ -321,26 +321,14 @@ private fun PaymentMethodSection(
 
     PaymentMethodPicker(
         email = state.email,
-        emailLabel = emailLabel,
-        labelMaxWidth = labelMaxWidthDp,
         expanded = isExpanded,
         selectedItem = state.selectedItem,
-        modifier = Modifier,
+        emailLabel = emailLabel,
+        labelMaxWidth = labelMaxWidthDp,
         onAccountMenuClicked = {
             showBottomSheetContent {
                 LinkAppBarMenu(onLogoutClicked)
             }
-        },
-        collapsedContent = { selectedItem ->
-            CollapsedPaymentDetails(
-                selectedPaymentMethod = selectedItem,
-                enabled = !state.primaryButtonState.isBlocking,
-                label = paymentLabel,
-                labelMaxWidth = labelMaxWidthDp,
-                onClick = {
-                    onExpandedChanged(true)
-                },
-            )
         },
         expandedContent = {
             ExpandedPaymentDetails(
@@ -378,8 +366,20 @@ private fun PaymentMethodSection(
                 }
             )
         },
+        collapsedContent = { selectedItem ->
+            CollapsedPaymentDetails(
+                selectedPaymentMethod = selectedItem,
+                enabled = !state.primaryButtonState.isBlocking,
+                label = paymentLabel,
+                labelMaxWidth = labelMaxWidthDp,
+                onClick = {
+                    onExpandedChanged(true)
+                },
+            )
+        },
         addressLauncher = addressLauncher,
-        selectedAddress = null,
+        selectedAddress = state.shippingAddresses.first(),
+        shippingAddresses = state.shippingAddresses
     )
 }
 
@@ -411,7 +411,8 @@ private fun PaymentMethodPicker(
     collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
     expandedContent: @Composable (() -> Unit),
     addressLauncher: AddressLauncher,
-    selectedAddress: AddressDetails?,
+    selectedAddress: ConsumerShippingAddress?,
+    shippingAddresses: List<ConsumerShippingAddress>,
 ) {
     Column(
         modifier = modifier
@@ -435,7 +436,8 @@ private fun PaymentMethodPicker(
             labelMaxWidth = labelMaxWidth,
             isExpanded = expanded,
             addressLauncher = addressLauncher,
-            selectedAddress = selectedAddress
+            selectedAddress = selectedAddress,
+            shippingAddresses = shippingAddresses
         )
 
         LinkDivider()
@@ -466,7 +468,8 @@ private fun ShippingAddressRow(
     labelMaxWidth: Dp,
     isExpanded: Boolean,
     addressLauncher: AddressLauncher,
-    selectedAddress: AddressDetails?
+    selectedAddress: ConsumerShippingAddress?,
+    shippingAddresses: List<ConsumerShippingAddress>,
 ) {
     val (isShippingExpanded, setShippingExpanded) = remember { mutableStateOf(false) }
     
@@ -483,33 +486,34 @@ private fun ShippingAddressRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "Shipping address",
+                text = "Shipping",
                 modifier = Modifier.width(labelMaxWidth),
                 color = LinkTheme.colors.textTertiary,
             )
 
+            // Show selected address or placeholder
             val addressText = selectedAddress?.let { address ->
                 val addressDetails = address.address
                 val cityAndState = buildString {
-                    addressDetails?.city?.let {
+                    addressDetails.locality?.let {
                         append(it)
                         append(", ")
                     }
-                    addressDetails?.state?.let {
+                    addressDetails.administrativeArea?.let {
                         append(it)
                         append(" ")
                     }
-                    addressDetails?.postalCode?.let {
+                    addressDetails.postalCode?.let {
                         append(it)
                     }
                 }.takeIf { it.isNotBlank() }
 
                 val lines = listOfNotNull(
-                    address.name,
-                    addressDetails?.line1,
-                    addressDetails?.line2,
+                    address.address.name,
+                    addressDetails.line1,
+                    addressDetails.line2,
                     cityAndState,
-                    addressDetails?.country,
+                    addressDetails.countryCode?.value,
                 )
 
                 lines.joinToString(", ")
@@ -541,9 +545,52 @@ private fun ShippingAddressRow(
                     .padding(horizontal = HorizontalPadding)
                     .padding(bottom = 16.dp)
             ) {
+                // Display existing addresses
+                if (shippingAddresses.isNotEmpty()) {
+                    shippingAddresses.forEach { address ->
+                        val addressText = remember(address) {
+                            val addressDetails = address.address
+                            val cityAndState = buildString {
+                                addressDetails.locality?.let {
+                                    append(it)
+                                    append(", ")
+                                }
+                                addressDetails.administrativeArea?.let {
+                                    append(it)
+                                    append(" ")
+                                }
+                                addressDetails.postalCode?.let {
+                                    append(it)
+                                }
+                            }.takeIf { it.isNotBlank() }
+
+                            val lines = listOfNotNull(
+                                address.address.name,
+                                addressDetails.line1,
+                                addressDetails.line2,
+                                cityAndState,
+                                addressDetails.countryCode?.value,
+                            )
+
+                            lines.joinToString("\n")
+                        }
+                        
+                        Text(
+                            text = addressText,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            color = LinkTheme.colors.textPrimary,
+                            style = LinkTheme.typography.body
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
                 PrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    label = if (selectedAddress != null) "Change shipping address" else "Add shipping address",
+                    label = "Add shipping address",
                     state = PrimaryButtonState.Enabled,
                     onButtonClick = {
                         val config = AddressLauncher.Configuration.Builder()

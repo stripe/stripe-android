@@ -116,7 +116,10 @@ internal class WalletViewModel @Inject constructor(
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
                     _uiState.update {
-                        it.updateWithResponse(consumerPaymentDetails)
+                        it.updateWithResponse(
+                            consumerPaymentDetails,
+                            consumerShippingAddresses
+                        )
                     }
                 }
             }
