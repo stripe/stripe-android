@@ -203,6 +203,8 @@ internal object TestFactory {
         cardBrandFilter = DefaultCardBrandFilter,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         passthroughModeEnabled = false,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        defaultBillingDetails = null,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
         initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
