@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -26,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 internal class DefaultEmbeddedStateHelperTest {
     @Test
@@ -97,7 +99,94 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
     }
 
+    @Test
+    fun `setState succeeds rowSelectionCallback not null, action confirm, customer null & gPay null`() = testScenario(
+        rowSelectionCallback = {}
+    ) {
+        setState {
+            googlePay(null)
+            customer(null)
+            formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+        }
+
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `setState succeeds rowSelectionCallback null, action confirm, customer & gPay`() = testScenario(
+        rowSelectionCallback = null
+    ) {
+        setState {
+            googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "US",
+                )
+            )
+            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+        }
+
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `setState succeeds rowSelectionCallback not null, action continue, customer & gPay`() = testScenario(
+        rowSelectionCallback = {}
+    ) {
+        setState {
+            googlePay(
+                PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = "US",
+                )
+            )
+            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+        }
+
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `setState fails rowSelectionCallback not null, action confirm, customer`() = testScenario(
+        rowSelectionCallback = {}
+    ) {
+        assertFailsWith<IllegalArgumentException>(
+            "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
+                "when Google Pay or a customer configuration is provided. " +
+                "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
+        ) {
+            setState {
+                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            }
+        }
+    }
+
+    @Test
+    fun `setState fails rowSelectionCallback not null, action confirm, gPay`() = testScenario(
+        rowSelectionCallback = {}
+    ) {
+        assertFailsWith<IllegalArgumentException>(
+            "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
+                "when Google Pay or a customer configuration is provided. " +
+                "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
+        ) {
+            setState {
+                googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "USD",
+                    )
+                )
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            }
+        }
+    }
+
     private fun testScenario(
+        rowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -120,6 +209,7 @@ internal class DefaultEmbeddedStateHelperTest {
             customerStateHolder = customerStateHolder,
             confirmationStateHolder = confirmationStateHolder,
             embeddedContentHelper = embeddedContentHelper,
+            internalRowSelectionCallback = { rowSelectionCallback }
         )
 
         Scenario(

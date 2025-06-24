@@ -48,21 +48,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
-        val isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
-        val hasGooglePayOrCustomerConfig = configuration.googlePay != null || configuration.customer != null
-        if (isRowSelectionImmediateAction &&
-            configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm &&
-            hasGooglePayOrCustomerConfig
-        ) {
-            return Result.failure(
-                IllegalArgumentException(
-                    "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
-                        "when Google Pay or a customer configuration is provided. " +
-                        "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
-                )
-            )
-        }
-
         val targetConfiguration = configuration.asCommonConfiguration()
         eventReporter.onInit(
             commonConfiguration = targetConfiguration,
@@ -71,7 +56,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             primaryButtonColor = null,
             configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(
                 configuration = configuration,
-                isRowSelectionImmediateAction = isRowSelectionImmediateAction
+                isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null
             ),
         )
 
