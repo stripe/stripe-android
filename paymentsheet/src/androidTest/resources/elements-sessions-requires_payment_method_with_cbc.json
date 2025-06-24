@@ -190,7 +190,6 @@
     "p24",
     "google_pay",
     "eps",
-    "giropay",
     "sepa_debit",
     "sofort",
     "bancontact",
@@ -207,7 +206,6 @@
       "klarna",
       "p24",
       "eps",
-      "giropay",
       "sepa_debit",
       "sofort",
       "bancontact",
@@ -244,7 +242,6 @@
         "card",
         "bancontact",
         "eps",
-        "giropay",
         "ideal",
         "p24",
         "sepa_debit",
@@ -445,22 +442,6 @@
         "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-eps-a79e75517cae239fc4ddfa2fbdb73b46.svg"
       },
       "type": "eps"
-    },
-    {
-      "async": false,
-      "fields": [
-        {
-          "api_path": {
-            "v1": "billing_details[name]"
-          },
-          "type": "name"
-        }
-      ],
-      "selector_icon": {
-        "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-giropay@3x-74f14911e865c99d67afe5699021d5bd.png",
-        "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-giropay-ac2e93b3fbd95f735b676064e6f47996.svg"
-      },
-      "type": "giropay"
     },
     {
       "async": false,
@@ -826,7 +807,6 @@
     "klarna",
     "p24",
     "eps",
-    "giropay",
     "sepa_debit",
     "sofort",
     "bancontact",
