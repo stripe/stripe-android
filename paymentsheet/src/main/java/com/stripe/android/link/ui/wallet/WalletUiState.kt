@@ -98,6 +98,7 @@ internal data class WalletUiState(
         return copy(
             paymentDetailsList = response.paymentDetails,
             shippingAddresses = addresses.addresses,
+            selectedShippingAddress = addresses.addresses.firstOrNull { it.isDefault } ?: addresses.addresses.firstOrNull(),
             isProcessing = false,
             cardBeingUpdated = null
         )

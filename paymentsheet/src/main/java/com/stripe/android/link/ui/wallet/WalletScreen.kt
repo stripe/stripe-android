@@ -504,7 +504,7 @@ private fun ShippingAddressRow(
                 }
             }
         ) { expanded ->
-            if (!expanded) {
+            if (!expanded && selectedAddress != null) {
                 // Collapsed row
                 Row(
                     modifier = Modifier
@@ -522,20 +522,26 @@ private fun ShippingAddressRow(
                         color = LinkTheme.colors.textTertiary,
                     )
 
-                    val addressText = selectedAddress?.let { address ->
-                        address.address.name?.takeIf { it.isNotBlank() }
-                            ?: address.address.line1
-                            ?: "No shipping address"
-                    } ?: "No shipping address"
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(
+                            text = selectedAddress.address.name ?: "",
+                            color = LinkTheme.colors.textPrimary,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            style = LinkTheme.typography.bodyEmphasized,
+                        )
 
-                    Text(
-                        text = addressText,
-                        color = LinkTheme.colors.textPrimary,
-                        style = LinkTheme.typography.bodyEmphasized,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        modifier = Modifier.weight(1f)
-                    )
+                        selectedAddress.address.line1?.let {
+                            Text(
+                                text = it,
+                                color = LinkTheme.colors.textTertiary,
+                                style = LinkTheme.typography.detail,
+                            )
+                        }
+                    }
 
                     Icon(
                         painter = painterResource(R.drawable.stripe_link_chevron),
@@ -548,15 +554,14 @@ private fun ShippingAddressRow(
             } else {
                 // Expanded section
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = HorizontalPadding)
-                        .padding(bottom = 16.dp)
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     // Header
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clickable { onShippingAddressesExpandedChanged(false) }
+                            .padding(start = 20.dp, end = 22.dp)
                             .padding(top = 20.dp, bottom = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -569,9 +574,7 @@ private fun ShippingAddressRow(
                         Icon(
                             painter = painterResource(id = R.drawable.stripe_link_chevron),
                             contentDescription = "Collapse shipping address",
-                            modifier = Modifier
-                                .rotate(CHEVRON_ICON_ROTATION)
-                                .clickable { onShippingAddressesExpandedChanged(false) },
+                            modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
                             tint = LinkTheme.colors.iconTertiary,
                         )
                     }
@@ -617,7 +620,8 @@ private fun AddressInfo(
             .clickable {
                 onClick(address)
             }
-            .padding(vertical = 4.dp)
+            .padding(horizontal = HorizontalPadding)
+            .padding(vertical = 8.dp)
     ) {
         Text(
             text = name,

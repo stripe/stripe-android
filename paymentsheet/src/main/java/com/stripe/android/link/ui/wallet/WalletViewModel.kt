@@ -124,16 +124,6 @@ internal class WalletViewModel @Inject constructor(
                     }
                 }
             }
-
-//            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
-//                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
-//                    navigateAndClearStack(LinkScreen.PaymentMethod)
-//                } else {
-//                    _uiState.update {
-//                        it.updateWithResponse(consumerPaymentDetails)
-//                    }
-//                }
-//            }
         }
 
         viewModelScope.launch {
@@ -283,7 +273,7 @@ internal class WalletViewModel @Inject constructor(
                             details = selectedPaymentDetails,
                             collectedCvc = cvc
                         ),
-                        shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
+                        shippingAddress = uiState.value.selectedShippingAddress,
                     )
                 )
             }
