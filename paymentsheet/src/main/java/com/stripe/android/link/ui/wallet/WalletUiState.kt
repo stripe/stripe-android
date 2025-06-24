@@ -32,6 +32,7 @@ internal data class WalletUiState(
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val alertMessage: ResolvableString? = null,
     val shippingAddresses: List<ConsumerShippingAddress> = emptyList(),
+    val selectedShippingAddress: ConsumerShippingAddress? = null,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?

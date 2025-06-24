@@ -30,6 +30,7 @@ import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
@@ -202,6 +203,14 @@ internal class WalletViewModel @Inject constructor(
             it.copy(
                 selectedItemId = item.id,
                 userSetIsExpanded = null,
+            )
+        }
+    }
+
+    fun onAddressSelected(address: ConsumerShippingAddress) {
+        _uiState.update {
+            it.copy(
+                selectedShippingAddress = address,
             )
         }
     }

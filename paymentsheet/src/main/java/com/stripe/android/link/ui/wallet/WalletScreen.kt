@@ -60,7 +60,6 @@ import com.stripe.android.link.ui.LinkAppBarMenu
 import com.stripe.android.link.ui.LinkDivider
 import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
-import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
@@ -117,7 +116,8 @@ internal fun WalletScreen(
         hideBottomSheetContent = hideBottomSheetContent,
         onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
         onDismissAlert = viewModel::onDismissAlert,
-        addressLauncher = addressLauncher
+        addressLauncher = addressLauncher,
+        onAddressSelected = viewModel::onAddressSelected,
     )
 }
 
@@ -139,6 +139,7 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
     addressLauncher: AddressLauncher,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
 ) {
     AnimatedContent(
         targetState = state.paymentDetailsList.isEmpty(),
@@ -178,7 +179,8 @@ internal fun WalletBody(
                     onSetDefaultClicked = onSetDefaultClicked,
                     onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
                     hideBottomSheetContent = hideBottomSheetContent,
-                    addressLauncher = addressLauncher
+                    addressLauncher = addressLauncher,
+                    onAddressSelected = onAddressSelected,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -210,6 +212,7 @@ private fun PaymentDetailsSection(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
     addressLauncher: AddressLauncher,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -226,7 +229,8 @@ private fun PaymentDetailsSection(
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent,
             onLogoutClicked = onLogoutClicked,
-            addressLauncher = addressLauncher
+            addressLauncher = addressLauncher,
+            onAddressSelected = onAddressSelected,
         )
 
         AnimatedVisibility(visible = state.mandate != null) {
@@ -311,6 +315,7 @@ private fun PaymentMethodSection(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
     addressLauncher: AddressLauncher,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -363,7 +368,7 @@ private fun PaymentMethodSection(
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClicked,
                 onCollapse = {
                     onExpandedChanged(false)
-                }
+                },
             )
         },
         collapsedContent = { selectedItem ->
@@ -378,8 +383,9 @@ private fun PaymentMethodSection(
             )
         },
         addressLauncher = addressLauncher,
-        selectedAddress = state.shippingAddresses.first(),
-        shippingAddresses = state.shippingAddresses
+        selectedAddress = state.selectedShippingAddress,
+        shippingAddresses = state.shippingAddresses,
+        onAddressSelected = onAddressSelected,
     )
 }
 
@@ -413,6 +419,7 @@ private fun PaymentMethodPicker(
     addressLauncher: AddressLauncher,
     selectedAddress: ConsumerShippingAddress?,
     shippingAddresses: List<ConsumerShippingAddress>,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -437,7 +444,8 @@ private fun PaymentMethodPicker(
             isExpanded = expanded,
             addressLauncher = addressLauncher,
             selectedAddress = selectedAddress,
-            shippingAddresses = shippingAddresses
+            shippingAddresses = shippingAddresses,
+            onAddressSelected = onAddressSelected,
         )
 
         LinkDivider()
@@ -470,6 +478,7 @@ private fun ShippingAddressRow(
     addressLauncher: AddressLauncher,
     selectedAddress: ConsumerShippingAddress?,
     shippingAddresses: List<ConsumerShippingAddress>,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
 ) {
     val (isShippingExpanded, setShippingExpanded) = remember { mutableStateOf(false) }
     
@@ -557,20 +566,17 @@ private fun ShippingAddressRow(
                     }
 
                     // Display existing addresses
-                    if (shippingAddresses.isNotEmpty()) {
-                        shippingAddresses.forEach { address ->
-                            AddressInfo(address)
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
+                    shippingAddresses.forEach { address ->
+                        AddressInfo(
+                            address = address,
+                            onClick = onAddressSelected,
+                        )
+                        LinkDivider(modifier = Modifier.padding(horizontal = 20.dp))
                     }
-                    
-                    PrimaryButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        label = "Add shipping address",
-                        state = PrimaryButtonState.Enabled,
-                        onButtonClick = {
+
+                    AddShippingAddressRow(
+                        isEnabled = true,
+                        onClick = {
                             val config = AddressLauncher.Configuration.Builder()
                                 .build()
 
@@ -587,13 +593,19 @@ private fun ShippingAddressRow(
 }
 
 @Composable
-private fun AddressInfo(address: ConsumerShippingAddress) {
+private fun AddressInfo(
+    address: ConsumerShippingAddress,
+    onClick: (ConsumerShippingAddress) -> Unit,
+) {
     val name = address.address.name ?: ""
     val line1 = address.address.line1 ?: ""
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable {
+                onClick(address)
+            }
             .padding(vertical = 4.dp)
     ) {
         Text(
@@ -801,6 +813,27 @@ private fun AddPaymentMethodRow(
     ) {
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            color = LinkTheme.colors.textBrand,
+            style = LinkTheme.typography.bodyEmphasized,
+        )
+    }
+}
+
+@Composable
+private fun AddShippingAddressRow(
+    isEnabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .clickable(enabled = isEnabled, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Add shipping address",
             modifier = Modifier.padding(horizontal = HorizontalPadding),
             color = LinkTheme.colors.textBrand,
             style = LinkTheme.typography.bodyEmphasized,
