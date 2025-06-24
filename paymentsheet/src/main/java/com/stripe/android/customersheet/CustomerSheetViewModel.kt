@@ -516,7 +516,7 @@ internal class CustomerSheetViewModel(
 
     private suspend fun removePaymentMethod(paymentMethod: PaymentMethod): CustomerSheetDataResult<PaymentMethod> {
         return awaitPaymentMethodDataSource().detachPaymentMethod(
-            paymentMethodId = paymentMethod.id!!,
+            paymentMethodId = paymentMethod.id,
         ).onSuccess {
             eventReporter.onRemovePaymentMethodSucceeded()
         }.onFailure { cause, _ ->
@@ -533,7 +533,7 @@ internal class CustomerSheetViewModel(
         cardUpdateParams: CardUpdateParams
     ): CustomerSheetDataResult<PaymentMethod> {
         return awaitPaymentMethodDataSource().updatePaymentMethod(
-            paymentMethodId = paymentMethod.id!!,
+            paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {
                     PaymentMethodUpdateParams.Card.Networks(
@@ -631,7 +631,7 @@ internal class CustomerSheetViewModel(
 
     private suspend fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {
         val currentCustomerState = customerState.value
-        val newSavedPaymentMethods = currentCustomerState.paymentMethods.filter { it.id != paymentMethod.id!! }
+        val newSavedPaymentMethods = currentCustomerState.paymentMethods.filter { it.id != paymentMethod.id }
 
         val currentSelection = currentCustomerState.currentSelection
         val originalSelection = originalPaymentSelection
@@ -664,7 +664,7 @@ internal class CustomerSheetViewModel(
                 val savedId = savedMethod.id
                 val updatedId = updatedMethod.id
 
-                if (updatedId != null && savedId != null && updatedId == savedId) {
+                if (updatedId == savedId) {
                     updatedMethod
                 } else {
                     savedMethod
@@ -999,7 +999,7 @@ internal class CustomerSheetViewModel(
             if (awaitIntentDataSource().canCreateSetupIntents) {
                 attachWithSetupIntent(paymentMethod = paymentMethod)
             } else {
-                attachPaymentMethod(id = paymentMethod.id!!)
+                attachPaymentMethod(id = paymentMethod.id)
             }
         }
     }
