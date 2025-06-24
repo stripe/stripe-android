@@ -389,7 +389,7 @@ internal data class PaymentMethodMetadata(
                     }.orEmpty(),
                 ),
                 merchantName = configuration.merchantName,
-                defaultBillingDetails = null,
+                defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
