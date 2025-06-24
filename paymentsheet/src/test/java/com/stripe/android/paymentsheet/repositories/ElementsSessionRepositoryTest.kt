@@ -7,10 +7,13 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -434,6 +437,70 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = "pm_123",
                     appId = APP_ID,
                     mobileSessionId = MOBILE_SESSION_ID,
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `Verify seller details is passed to 'StripeRepository'`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.success(ElementsSession.createFromFallback(PaymentIntentFixtures.PI_WITH_SHIPPING, null))
+        )
+
+        val repository = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+            { MOBILE_SESSION_ID },
+            appId = APP_ID
+        )
+
+        repository.get(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    sharedPaymentTokenSessionWithMode =
+                    PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
+                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        networkId = "network_123",
+                        externalId = "external_123",
+                    ),
+                ),
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.DeferredIntentType(
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
+                    savedPaymentMethodSelectionId = null,
+                    appId = APP_ID,
+                    mobileSessionId = MOBILE_SESSION_ID,
+                    deferredIntentParams = DeferredIntentParams(
+                        mode = DeferredIntentParams.Mode.Payment(
+                            amount = 1234,
+                            currency = "cad",
+                            captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                            setupFutureUsage = null,
+                            paymentMethodOptionsJsonString = null
+                        ),
+                        paymentMethodTypes = emptyList(),
+                        paymentMethodConfigurationId = null,
+                        onBehalfOf = null,
+                    ),
+                    sellerDetails = ElementsSessionParams.SellerDetails(
+                        networkId = "network_123",
+                        externalId = "external_123",
+                    )
                 )
             ),
             options = any()
