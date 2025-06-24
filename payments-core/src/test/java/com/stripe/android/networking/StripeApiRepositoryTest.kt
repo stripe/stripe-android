@@ -2629,7 +2629,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `Verify seller details not in params when provided`() = runTest {
+    fun `Verify seller details not in params when not provided`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
