@@ -24,15 +24,26 @@ internal sealed class LinkScreen(
 
     data object UpdateCard : LinkScreen(
         baseRoute = "updateCard",
-        args = listOf(navArgument(EXTRA_PAYMENT_DETAILS) { type = NavType.StringType })
-    ) {
-        operator fun invoke(paymentDetailsId: String) = baseRoute.appendParamValues(
-            mapOf(EXTRA_PAYMENT_DETAILS to paymentDetailsId)
+        args = listOf(
+            navArgument(EXTRA_PAYMENT_DETAILS) { type = NavType.StringType },
+            navArgument(EXTRA_IS_BILLING_UPDATE_FLOW) {
+                type = NavType.BoolType
+                defaultValue = false
+            }
         )
+    ) {
+        operator fun invoke(paymentDetailsId: String, isBillingDetailsUpdateFlow: Boolean = false) =
+            baseRoute.appendParamValues(
+                mapOf(
+                    EXTRA_PAYMENT_DETAILS to paymentDetailsId,
+                    EXTRA_IS_BILLING_UPDATE_FLOW to isBillingDetailsUpdateFlow.toString()
+                )
+            )
     }
 
     companion object {
         const val EXTRA_PAYMENT_DETAILS = "payment_details"
+        const val EXTRA_IS_BILLING_UPDATE_FLOW = "is_billing_update_flow"
     }
 }
 
