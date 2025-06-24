@@ -7,19 +7,19 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
-import com.stripe.android.shoppay.ShopPayLauncher
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.DummyActivityResultCaller
+import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 internal class ShopPayConfirmationDefinitionTest {
 
@@ -45,30 +45,30 @@ internal class ShopPayConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'createLauncher' should return shopPayLauncher and register it properly`() {
-        val mockShopPayLauncher = mock<ShopPayLauncher>()
-        val definition = createShopPayConfirmationDefinition(shopPayLauncher = mockShopPayLauncher)
+    fun `'createLauncher' should register launcher properly for activity result`() = runTest {
+        val definition = createShopPayConfirmationDefinition()
 
-        val activityResultCaller = DummyActivityResultCaller.noOp()
-        val onResult: (ShopPayActivityResult) -> Unit = {}
+        var onResultCalled = false
+        val onResult: (ShopPayActivityResult) -> Unit = { onResultCalled = true }
 
-        val launcher = definition.createLauncher(
-            activityResultCaller = activityResultCaller,
-            onResult = onResult,
-        )
+        DummyActivityResultCaller.test {
+            definition.createLauncher(
+                activityResultCaller = activityResultCaller,
+                onResult = onResult,
+            )
 
-        assertThat(launcher).isEqualTo(mockShopPayLauncher)
-        verify(mockShopPayLauncher).register(activityResultCaller, onResult)
-    }
+            val registerCall = awaitRegisterCall()
 
-    @Test
-    fun `'unregister' should unregister launcher properly`() {
-        val mockShopPayLauncher = mock<ShopPayLauncher>()
-        val definition = createShopPayConfirmationDefinition(shopPayLauncher = mockShopPayLauncher)
+            assertThat(awaitNextRegisteredLauncher()).isNotNull()
 
-        definition.unregister(mockShopPayLauncher)
+            assertThat(registerCall.contract).isInstanceOf<ShopPayActivityContract>()
 
-        verify(mockShopPayLauncher).unregister()
+            val callback = registerCall.callback.asCallbackFor<ShopPayActivityResult>()
+
+            callback.onActivityResult(ShopPayActivityResult.Completed("pm_test_123"))
+
+            assertThat(onResultCalled).isTrue()
+        }
     }
 
     @Test
@@ -90,18 +90,21 @@ internal class ShopPayConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'launch' should launch properly with provided parameters`() {
-        val mockShopPayLauncher = mock<ShopPayLauncher>()
-        val definition = createShopPayConfirmationDefinition(shopPayLauncher = mockShopPayLauncher)
+    fun `'launch' should launch properly with provided parameters`() = runTest {
+        val definition = createShopPayConfirmationDefinition()
+
+        val launcher = FakeActivityResultLauncher<ShopPayActivityContract.Args>()
 
         definition.launch(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
-            launcher = mockShopPayLauncher,
+            launcher = launcher,
             arguments = Unit,
         )
 
-        verify(mockShopPayLauncher).present(SHOP_PAY_CONFIRMATION_OPTION.shopPayConfiguration)
+        val launchCall = launcher.calls.awaitItem()
+
+        assertThat(launchCall.input.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.shopPayConfiguration)
     }
 
     @Test
@@ -168,12 +171,8 @@ internal class ShopPayConfirmationDefinitionTest {
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
-    private fun createShopPayConfirmationDefinition(
-        shopPayLauncher: ShopPayLauncher = mock()
-    ): ShopPayConfirmationDefinition {
-        return ShopPayConfirmationDefinition(
-            shopPayLauncher = shopPayLauncher
-        )
+    private fun createShopPayConfirmationDefinition(): ShopPayConfirmationDefinition {
+        return ShopPayConfirmationDefinition()
     }
 
     private companion object {

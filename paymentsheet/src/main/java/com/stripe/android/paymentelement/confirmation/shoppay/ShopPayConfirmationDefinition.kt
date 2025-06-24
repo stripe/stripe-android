@@ -1,17 +1,21 @@
 package com.stripe.android.paymentelement.confirmation.shoppay
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
-import com.stripe.android.shoppay.ShopPayLauncher
 import javax.inject.Inject
 
-internal class ShopPayConfirmationDefinition @Inject constructor(
-    private val shopPayLauncher: ShopPayLauncher,
-) : ConfirmationDefinition<ShopPayConfirmationOption, ShopPayLauncher, Unit, ShopPayActivityResult> {
+internal class ShopPayConfirmationDefinition @Inject constructor() : ConfirmationDefinition<
+    ShopPayConfirmationOption,
+    ActivityResultLauncher<ShopPayActivityContract.Args>,
+    Unit,
+    ShopPayActivityResult
+    > {
     override val key = "ShopPay"
 
     override fun option(confirmationOption: ConfirmationHandler.Option): ShopPayConfirmationOption? {
@@ -35,19 +39,22 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
         onResult: (ShopPayActivityResult) -> Unit
-    ): ShopPayLauncher {
-        return shopPayLauncher.apply {
-            register(activityResultCaller, onResult)
-        }
+    ): ActivityResultLauncher<ShopPayActivityContract.Args> {
+        return activityResultCaller.registerForActivityResult(
+            ShopPayActivityContract(),
+            onResult
+        )
     }
 
     override fun launch(
-        launcher: ShopPayLauncher,
+        launcher: ActivityResultLauncher<ShopPayActivityContract.Args>,
         arguments: Unit,
         confirmationOption: ShopPayConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ) {
-        launcher.present(confirmationOption.shopPayConfiguration)
+        launcher.launch(
+            ShopPayActivityContract.Args(confirmationOption.shopPayConfiguration)
+        )
     }
 
     override suspend fun action(
@@ -59,9 +66,5 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             receivesResultInProcess = false,
             deferredIntentConfirmationType = null,
         )
-    }
-
-    override fun unregister(launcher: ShopPayLauncher) {
-        launcher.unregister()
     }
 }
