@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.googlepaylauncher.GooglePayLauncher.Result
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -26,12 +25,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
-import kotlin.Boolean
-import kotlin.Long
-import kotlin.String
-import kotlin.Throwable
-import kotlin.also
-import kotlin.check
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect customer payment details and use it
