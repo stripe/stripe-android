@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -110,7 +111,7 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
+            linkAccountManager.combinedConsumerState.filterNotNull().collectLatest { (consumerPaymentDetails, consumerShippingAddresses) ->
                 if (consumerPaymentDetails.paymentDetails.isEmpty()) {
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
@@ -119,10 +120,28 @@ internal class WalletViewModel @Inject constructor(
                     }
                 }
             }
+
+//            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
+//                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
+//                    navigateAndClearStack(LinkScreen.PaymentMethod)
+//                } else {
+//                    _uiState.update {
+//                        it.updateWithResponse(consumerPaymentDetails)
+//                    }
+//                }
+//            }
         }
 
         viewModelScope.launch {
             loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+        }
+
+        viewModelScope.launch {
+            linkAccountManager.listShippingAddresses().onSuccess {
+                Log.d("WalletViewModel", "$it")
+            }.onFailure {
+                Log.e("WalletViewModel", "Error", it)
+            }
         }
 
         viewModelScope.launch {

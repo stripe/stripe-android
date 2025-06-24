@@ -35,6 +35,10 @@ internal interface LinkAccountManager {
      */
     var cachedShippingAddresses: ConsumerShippingAddresses?
 
+    val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?>
+
+    val combinedConsumerState: StateFlow<Pair<ConsumerPaymentDetails, ConsumerShippingAddresses>?>
+
     /**
      * Retrieves the Link account associated with the email if it exists.
      *

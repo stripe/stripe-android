@@ -27,6 +27,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -54,7 +55,21 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val _consumerPaymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
+    private val _consumerShippingAddresses: MutableStateFlow<ConsumerShippingAddresses?> = MutableStateFlow(null)
+    override val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?> = _consumerShippingAddresses.asStateFlow()
+
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
+
+    override val combinedConsumerState = combineAsStateFlow(
+        consumerPaymentDetails,
+        consumerShippingAddresses,
+    ) { paymentDetails, shippingAddresses ->
+        if (paymentDetails != null && shippingAddresses != null) {
+            paymentDetails to shippingAddresses
+        } else {
+            null
+        }
+    }
 
     /**
      * The publishable key for the signed in Link account.
@@ -350,8 +365,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
-        ).map { paymentDetailsList ->
-            paymentDetailsList.also { _consumerPaymentDetails.value = it }
+        ).onSuccess { paymentDetailsList ->
+            _consumerPaymentDetails.value = paymentDetailsList
         }
     }
 
@@ -361,7 +376,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
         return linkRepository.listShippingAddresses(
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey,
-        )
+        ).onSuccess {
+            _consumerShippingAddresses.value = it
+        }
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
@@ -411,6 +428,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             withContext(Dispatchers.Main.immediate) {
                 linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
                 _consumerPaymentDetails.value = null
+                _consumerShippingAddresses.value = null
             }
             consumerPublishableKey = null
             cachedShippingAddresses = null
