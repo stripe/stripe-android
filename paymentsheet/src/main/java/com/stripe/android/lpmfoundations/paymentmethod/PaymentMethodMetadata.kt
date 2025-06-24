@@ -376,7 +376,7 @@ internal data class PaymentMethodMetadata(
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
-                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
