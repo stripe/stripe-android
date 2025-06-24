@@ -52,6 +52,8 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
+import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
@@ -64,8 +66,10 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
@@ -588,10 +592,64 @@ private fun ShippingAddressRow(
                         LinkDivider(modifier = Modifier.padding(horizontal = 20.dp))
                     }
 
+                    val linkColors = LinkTheme.colors
+
                     AddShippingAddressRow(
                         isEnabled = true,
                         onClick = {
+                            val colors = PaymentSheet.Colors(
+                                primary = linkColors.borderSelected,
+                                surface = linkColors.surfacePrimary,
+                                component = linkColors.surfaceSecondary,
+                                componentBorder = linkColors.surfaceSecondary,
+                                componentDivider = linkColors.borderDefault,
+                                onComponent = linkColors.textPrimary,
+                                subtitle = linkColors.textSecondary, // TODO
+                                placeholderText = linkColors.textTertiary,
+                                onSurface = linkColors.textPrimary,
+                                appBarIcon = linkColors.iconTertiary,
+                                error = linkColors.textCritical,
+                            )
+
+                            // TODO: Colors dark
+
+                            val primaryButtonColors = PaymentSheet.PrimaryButtonColors(
+                                background = linkColors.buttonBrand,
+                                onBackground = linkColors.contentOnPrimaryButton,
+                                border = linkColors.buttonBrand,
+                            )
+
                             val config = AddressLauncher.Configuration.Builder()
+                                .title("Add a shipping address")
+                                .buttonTitle("Save shipping address")
+                                .additionalFields(
+                                    AdditionalFieldsConfiguration(
+                                        phone = AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                                        checkboxLabel = null,
+                                    )
+                                )
+                                .appearance(
+                                    appearance = PaymentSheet.Appearance.Builder()
+                                        .colorsLight(colors)
+                                        .colorsDark(colors)
+                                        .shapes(
+                                            PaymentSheet.Shapes(
+                                                cornerRadiusDp = 12f,
+                                                borderStrokeWidthDp = 1.5f,
+                                            )
+                                        )
+                                        .primaryButton(
+                                            PaymentSheet.PrimaryButton(
+                                                shape = PaymentSheet.PrimaryButtonShape(
+                                                    cornerRadiusDp = 12f,
+                                                    heightDp = PrimaryButtonHeight.value,
+                                                ),
+                                                colorsLight = primaryButtonColors,
+                                                colorsDark = primaryButtonColors,
+                                            )
+                                        )
+                                        .build()
+                                )
                                 .build()
 
                             addressLauncher.present(
