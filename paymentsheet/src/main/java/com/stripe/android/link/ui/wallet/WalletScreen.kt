@@ -548,41 +548,8 @@ private fun ShippingAddressRow(
                 // Display existing addresses
                 if (shippingAddresses.isNotEmpty()) {
                     shippingAddresses.forEach { address ->
-                        val addressText = remember(address) {
-                            val addressDetails = address.address
-                            val cityAndState = buildString {
-                                addressDetails.locality?.let {
-                                    append(it)
-                                    append(", ")
-                                }
-                                addressDetails.administrativeArea?.let {
-                                    append(it)
-                                    append(" ")
-                                }
-                                addressDetails.postalCode?.let {
-                                    append(it)
-                                }
-                            }.takeIf { it.isNotBlank() }
-
-                            val lines = listOfNotNull(
-                                address.address.name,
-                                addressDetails.line1,
-                                addressDetails.line2,
-                                cityAndState,
-                                addressDetails.countryCode?.value,
-                            )
-
-                            lines.joinToString("\n")
-                        }
-                        
-                        Text(
-                            text = addressText,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            color = LinkTheme.colors.textPrimary,
-                            style = LinkTheme.typography.body
-                        )
+                        AddressInfo(address)
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                     
                     Spacer(modifier = Modifier.height(16.dp))
@@ -590,7 +557,7 @@ private fun ShippingAddressRow(
                 
                 PrimaryButton(
                     modifier = Modifier.fillMaxWidth(),
-                    label = "Add shipping address",
+                    label = if (selectedAddress != null) "Change shipping address" else "Add shipping address",
                     state = PrimaryButtonState.Enabled,
                     onButtonClick = {
                         val config = AddressLauncher.Configuration.Builder()
@@ -603,6 +570,35 @@ private fun ShippingAddressRow(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun AddressInfo(address: ConsumerShippingAddress) {
+    val name = address.address.name ?: ""
+    val line1 = address.address.line1 ?: ""
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Text(
+            text = name,
+            style = LinkTheme.typography.bodyEmphasized,
+            color = LinkTheme.colors.textPrimary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (line1.isNotBlank()) {
+            Text(
+                text = line1,
+                style = LinkTheme.typography.caption,
+                color = LinkTheme.colors.textSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
