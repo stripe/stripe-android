@@ -9,6 +9,7 @@
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun EmbeddedPicker( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
+    <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@OptIn(AppearanceAPIAdditionsPreview::class) @Composable private fun Typography( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
     <ID>MagicNumber:AppearanceStore.kt$AppearanceStore.State.Embedded$0x33787880</ID>
     <ID>MagicNumber:AppearanceStore.kt$AppearanceStore.State.Embedded$0x40FFFFFF</ID>

@@ -8,6 +8,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore.State.Insets.Custom
+import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -30,6 +32,7 @@ internal object AppearanceStore {
         val formInsetValues: Insets = Insets.Default,
         val sectionSpacing: SectionSpacing = SectionSpacing.Default,
         val textFieldInsets: Insets = Insets.Default,
+        val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
         val iconStyle: IconStyle = IconStyle.Filled,
     ) {
         @OptIn(AppearanceAPIAdditionsPreview::class)
@@ -41,6 +44,7 @@ internal object AppearanceStore {
                 .typography(typography)
                 .primaryButton(primaryButton)
                 .embeddedAppearance(PaymentSheet.Appearance.Embedded(embedded.getRow()))
+                .verticalModeRowPadding(verticalModeRowPadding)
                 .apply {
                     formInsetValues.getPaymentSheetInsets()?.let {
                         formInsetValues(it)
@@ -114,6 +118,13 @@ internal object AppearanceStore {
                     top = 0f,
                     end = 20f,
                     bottom = 40f,
+                )
+
+                val defaultTextInsets = Custom(
+                    start = StripeThemeDefaults.textFieldInsets.start,
+                    top = StripeThemeDefaults.textFieldInsets.top,
+                    end = StripeThemeDefaults.textFieldInsets.end,
+                    bottom = StripeThemeDefaults.textFieldInsets.bottom,
                 )
             }
         }
@@ -220,6 +231,12 @@ internal object AppearanceStore {
                     Outlined -> PaymentSheet.IconStyle.Outlined
                 }
             }
+        }
+
+        companion object {
+            const val defaultCustomH1FontSizeDp = 20f
+            const val defaultCustomH1LetterSpacingSp = 0.13f
+            const val defaultCustomH1FontWeight = 400f
         }
     }
 }
