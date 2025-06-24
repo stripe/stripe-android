@@ -30,7 +30,7 @@ internal object PaymentOptionsStateFactory {
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
                     isCbcEligible = isCbcEligible,
-                    shouldShowDefaultBadge = it.id != null && it.id == defaultPaymentMethodId
+                    shouldShowDefaultBadge = it.id == defaultPaymentMethodId
                 ),
             )
         }
