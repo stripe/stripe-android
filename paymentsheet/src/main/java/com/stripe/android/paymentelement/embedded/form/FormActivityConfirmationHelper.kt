@@ -7,7 +7,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -22,7 +21,6 @@ internal interface FormActivityConfirmationHelper {
     fun confirm(): FormResult?
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @FormActivityScope
 internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val initializationMode: PaymentElementLoader.InitializationMode,

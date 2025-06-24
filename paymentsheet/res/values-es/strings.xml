@@ -55,6 +55,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_update_card_title">Actualiza la tarjeta</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message">Introduce el código enviado a %s para usar la información guardada.</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">Introduce el código que se ha enviado al %s.</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Actualiza la tarjeta</string>
   <!-- Title of the logout action. -->
@@ -226,6 +228,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_payment_failed_title">Error en el pago</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Cambiar correo electrónico</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">¿No eres tú?</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
   <string name="stripe_verification_code_sent">Código enviado</string>
   <!-- Two factor authentication screen heading -->

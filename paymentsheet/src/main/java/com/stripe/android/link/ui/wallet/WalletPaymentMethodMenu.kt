@@ -14,7 +14,6 @@ internal fun WalletPaymentMethodMenu(
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     onSetDefaultClick: () -> Unit,
     onRemoveClick: () -> Unit,
-    onCancelClick: () -> Unit,
     onUpdateClick: () -> Unit,
 ) {
     val items = remember(paymentDetails) {
@@ -32,7 +31,6 @@ internal fun WalletPaymentMethodMenu(
                     text = paymentDetails.removeLabel.resolvableString
                 )
             )
-            add(WalletPaymentMethodMenuItem.Cancel)
         }
     }
 
@@ -43,7 +41,6 @@ internal fun WalletPaymentMethodMenu(
             when (item) {
                 is WalletPaymentMethodMenuItem.SetAsDefault -> onSetDefaultClick()
                 is WalletPaymentMethodMenuItem.RemoveItem -> onRemoveClick()
-                is WalletPaymentMethodMenuItem.Cancel -> onCancelClick()
                 is WalletPaymentMethodMenuItem.Update -> onUpdateClick()
             }
         }

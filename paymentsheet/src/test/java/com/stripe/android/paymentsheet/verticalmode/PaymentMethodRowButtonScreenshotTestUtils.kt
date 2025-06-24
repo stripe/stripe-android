@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -28,7 +27,6 @@ internal fun DefaultPaymentMethodRowIcon(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal fun testPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,

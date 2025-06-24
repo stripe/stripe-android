@@ -6,7 +6,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -54,7 +53,6 @@ internal data class PaymentElementCallbacks private constructor(
             this.analyticEventCallback = analyticEventCallback
         }
 
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun rowSelectionImmediateActionCallback(
             rowSelectionBehavior: EmbeddedPaymentElement.RowSelectionBehavior,
             element: EmbeddedPaymentElement,

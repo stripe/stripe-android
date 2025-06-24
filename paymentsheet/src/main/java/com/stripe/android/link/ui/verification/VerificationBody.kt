@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +36,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.AppBarIcon
@@ -44,6 +48,8 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
@@ -77,14 +83,14 @@ internal fun VerificationBody(
         didShowCodeSentNotification = didShowCodeSentNotification
     )
 
-    ContentWrapper(
+    VerificationBodyContainer(
         isDialog = state.isDialog,
         onBackClicked = {
             focusManager.clearFocus()
             onBack()
         }
     ) {
-        Header(
+        Title(
             isDialog = state.isDialog
         )
 
@@ -109,7 +115,7 @@ internal fun VerificationBody(
                 middleSpacing = 8.dp,
                 boxSpacing = 8.dp,
                 otpInputPlaceholder = " ",
-                boxShape = LinkTheme.shapes.large,
+                boxShape = LinkTheme.shapes.default,
                 modifier = Modifier
                     // 48dp per OTP box plus 8dp per space
                     .width(328.dp)
@@ -197,27 +203,43 @@ private fun LaunchedEffects(
  * @param content the content to be displayed
  */
 @Composable
-private fun ContentWrapper(
+private fun VerificationBodyContainer(
     isDialog: Boolean,
     onBackClicked: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
     if (isDialog) {
-        Box {
-            AppBarIcon(
-                icon = R.drawable.stripe_link_close,
-                contentDescription = stringResource(id = com.stripe.android.R.string.stripe_close),
-                onPressed = onBackClicked,
+        Column {
+            Row(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(top = 29.dp, end = 24.dp)
-                    .testTag(VERIFICATION_HEADER_BUTTON_TAG),
-            )
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
+                    modifier = Modifier
+                        .testTag(VERIFICATION_HEADER_IMAGE_TAG),
+                    painter = painterResource(R.drawable.stripe_link_logo),
+                    contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                AppBarIcon(
+                    icon = R.drawable.stripe_link_close,
+                    contentDescription = stringResource(id = com.stripe.android.R.string.stripe_close),
+                    onPressed = onBackClicked,
+                    modifier = Modifier.testTag(VERIFICATION_HEADER_BUTTON_TAG),
+                )
+            }
+
             Column(
-                modifier = Modifier
-                    .padding(top = 32.dp)
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 24.dp),
+                modifier = Modifier.padding(
+                    top = 2.dp,
+                    start = 24.dp,
+                    end = 24.dp,
+                    bottom = 24.dp,
+                ),
                 horizontalAlignment = Alignment.Companion.CenterHorizontally,
                 content = content
             )
@@ -228,28 +250,10 @@ private fun ContentWrapper(
 }
 
 @Composable
-private fun Header(
+private fun Title(
     isDialog: Boolean,
 ) {
     if (isDialog) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Image(
-                modifier = Modifier
-                    .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-                painter = painterResource(R.drawable.stripe_link_logo),
-                contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
-        }
-
-        Spacer(
-            modifier = Modifier.size(24.dp)
-        )
         Text(
             text = stringResource(R.string.stripe_verification_dialog_header),
             modifier = Modifier
@@ -345,6 +349,42 @@ internal fun ResendCodeButton(
                     .testTag(VERIFICATION_RESEND_LOADER_TAG)
                     .size(18.dp)
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    DefaultLinkTheme {
+        Surface {
+            Surface(
+                modifier = Modifier.padding(16.dp),
+                shape = RoundedCornerShape(24.dp),
+                color = LinkTheme.colors.surfacePrimary,
+            ) {
+                VerificationBody(
+                    state = VerificationViewState(
+                        isProcessing = false,
+                        requestFocus = false,
+                        errorMessage = null,
+                        isSendingNewCode = false,
+                        didSendNewCode = false,
+                        redactedPhoneNumber = "(•••) ••• ••55",
+                        email = "email@email.com",
+                        isDialog = true,
+                    ),
+                    otpElement = OTPElement(
+                        identifier = IdentifierSpec.Generic("otp"),
+                        controller = OTPController(),
+                    ),
+                    onBack = {},
+                    onFocusRequested = {},
+                    didShowCodeSentNotification = {},
+                    onChangeEmailClick = {},
+                    onResendCodeClick = {},
+                )
+            }
         }
     }
 }

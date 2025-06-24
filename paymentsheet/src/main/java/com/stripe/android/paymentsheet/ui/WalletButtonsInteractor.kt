@@ -14,7 +14,6 @@ import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -96,6 +95,12 @@ internal interface WalletButtonsInteractor {
                 return PaymentSelection.GooglePay
             }
         }
+
+        data object ShopPay : WalletButton {
+            override fun createSelection(): PaymentSelection {
+                return PaymentSelection.ShopPay
+            }
+        }
     }
 
     sealed interface ViewAction {
@@ -148,6 +153,11 @@ internal class DefaultWalletButtonsInteractor(
                         // Only show Link button if the Link verification state is resolved.
                         linkEmbeddedState.verificationState is VerificationState.RenderButton &&
                             walletsAllowedByMerchant.contains(WalletType.Link)
+                    }
+                    WalletType.ShopPay -> {
+                        WalletButton.ShopPay.takeIf {
+                            walletsAllowedByMerchant.contains(WalletType.ShopPay)
+                        }
                     }
                 }
             }
@@ -268,7 +278,6 @@ internal class DefaultWalletButtonsInteractor(
             )
         }
 
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun create(
             linkInlineInteractor: LinkInlineInteractor,
             embeddedLinkHelper: EmbeddedLinkHelper,

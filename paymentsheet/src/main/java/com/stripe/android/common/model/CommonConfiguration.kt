@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
@@ -26,6 +25,7 @@ internal data class CommonConfiguration(
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
 ) : Parcelable {
 
     fun validate() {
@@ -137,9 +137,9 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
+    shopPayConfiguration = shopPayConfiguration
 )
 
-@ExperimentalEmbeddedPaymentElementApi
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = customer,
@@ -156,6 +156,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
+    shopPayConfiguration = null
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

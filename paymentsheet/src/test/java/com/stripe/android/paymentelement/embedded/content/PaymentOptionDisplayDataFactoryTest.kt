@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -24,7 +23,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionDisplayDataFactoryTest {
 
@@ -60,6 +58,16 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     @Test
+    fun `create does not attach BillingDetails for ShopPay`() {
+        val option = displayDataFactory.create(
+            selection = PaymentSelection.ShopPay,
+            paymentMethodMetadata = paymentMethodMetadata
+        )
+
+        assertThat(option?.billingDetails).isNull()
+    }
+
+    @Test
     fun `selecting saved card does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -83,6 +91,16 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `selecting google pay does not attach mandate to paymentMethodMetadata`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = paymentMethodMetadata
+        )
+
+        assertThat(option?.mandateText).isNull()
+    }
+
+    @Test
+    fun `selecting shop pay does not attach mandate to paymentMethodMetadata`() {
+        val option = displayDataFactory.create(
+            selection = PaymentSelection.ShopPay,
             paymentMethodMetadata = paymentMethodMetadata
         )
 

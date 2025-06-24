@@ -5,6 +5,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,12 +23,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.AppBarHeight
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.appBarTitle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
@@ -33,24 +40,38 @@ internal fun LinkAppBar(
     state: LinkAppBarState,
     onBackPressed: () -> Unit,
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = AppBarHeight)
             .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         if (state.canNavigateBack) {
             AppBarIcon(
                 icon = R.drawable.stripe_link_back,
                 contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
                 onPressed = onBackPressed,
-                modifier = Modifier.align(Alignment.CenterStart),
             )
         } else {
             LinkAppBarLogo(
                 showHeader = state.showHeader,
-                modifier = Modifier.align(Alignment.CenterStart),
             )
+        }
+
+        if (state.title != null) {
+            Text(
+                text = state.title.resolve(),
+                color = LinkTheme.colors.textPrimary,
+                style = LinkTheme.typography.appBarTitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp),
+            )
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
 
         if (state.canShowCloseIcon) {
@@ -58,7 +79,7 @@ internal fun LinkAppBar(
                 icon = R.drawable.stripe_link_close,
                 contentDescription = stringResource(id = com.stripe.android.R.string.stripe_close),
                 onPressed = onBackPressed,
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier.padding(start = 20.dp),
             )
         }
     }
@@ -115,11 +136,14 @@ private fun LinkAppBarLogo(
 @Composable
 private fun LinkAppBarPreview() {
     DefaultLinkTheme {
-        Surface {
+        Surface(
+            color = LinkTheme.colors.surfacePrimary,
+        ) {
             LinkAppBar(
                 state = LinkAppBarState(
                     showHeader = true,
                     canNavigateBack = false,
+                    title = null,
                 ),
                 onBackPressed = {},
             )
@@ -131,11 +155,14 @@ private fun LinkAppBarPreview() {
 @Composable
 private fun LinkAppBarChildScreen() {
     DefaultLinkTheme {
-        Surface {
+        Surface(
+            color = LinkTheme.colors.surfacePrimary,
+        ) {
             LinkAppBar(
                 state = LinkAppBarState(
                     showHeader = false,
                     canNavigateBack = true,
+                    title = "Add a payment method".resolvableString,
                 ),
                 onBackPressed = {},
             )

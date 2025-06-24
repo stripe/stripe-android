@@ -19,7 +19,6 @@ import java.util.UUID
  *
  * This *must* be called unconditionally as part of the initialization path.
  */
-@ExperimentalEmbeddedPaymentElementApi
 @Composable
 fun rememberEmbeddedPaymentElement(
     builder: EmbeddedPaymentElement.Builder

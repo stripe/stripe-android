@@ -22,9 +22,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -81,7 +82,6 @@ internal fun PaymentMethodVerticalLayoutUI(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -99,6 +99,13 @@ internal fun PaymentMethodVerticalLayoutUI(
     Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
+
+        val rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default.run {
+            PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
+                spacingDp = spacingDp,
+                additionalInsetsDp = StripeTheme.verticalModeRowPadding,
+            )
+        }
 
         if (displayedSavedPaymentMethod != null) {
             Text(
@@ -119,7 +126,8 @@ internal fun PaymentMethodVerticalLayoutUI(
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
-                }
+                },
+                rowStyle = rowStyle,
             )
             Spacer(Modifier.size(24.dp))
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
@@ -140,6 +148,7 @@ internal fun PaymentMethodVerticalLayoutUI(
             selectedIndex = selectedIndex,
             isEnabled = isEnabled,
             imageLoader = imageLoader,
+            rowStyle = rowStyle,
         )
     }
 }

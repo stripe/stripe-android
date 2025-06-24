@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -22,7 +21,6 @@ internal object ShippingAddressSettingsDefinition : PlaygroundSettingDefinition<
         configurationBuilder.shippingDetails(value)
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
     override fun configure(
         value: AddressDetails?,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,

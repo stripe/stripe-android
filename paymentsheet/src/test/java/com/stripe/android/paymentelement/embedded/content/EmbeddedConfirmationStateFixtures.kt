@@ -1,10 +1,8 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 

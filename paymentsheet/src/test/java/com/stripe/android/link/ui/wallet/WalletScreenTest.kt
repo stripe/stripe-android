@@ -619,13 +619,6 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `wallet menu is dismissed on cancel clicked`() = runTest(dispatcher) {
-        testMenu(
-            nodeTag = onWalletPaymentMethodMenuCancelTag()
-        )
-    }
-
-    @Test
     fun `wallet menu is dismissed on remove clicked`() = runTest(dispatcher) {
         testMenu(
             nodeTag = onWalletPaymentMethodMenuRemoveTag(),
@@ -795,9 +788,6 @@ internal class WalletScreenTest {
 
     private fun onWalletPaymentMethodMenu() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_MENU_SHEET_TAG, useUnmergedTree = true)
-
-    private fun onWalletPaymentMethodMenuCancelTag() =
-        composeTestRule.onNodeWithTag(WALLET_MENU_CANCEL_TAG, useUnmergedTree = true)
 
     private fun onWalletPaymentMethodMenuRemoveTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_REMOVE_ITEM_TAG, useUnmergedTree = true)

@@ -4,7 +4,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.menu.LinkMenuItem
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.R as StripeR
 
 internal sealed class WalletPaymentMethodMenuItem(
     override val text: ResolvableString,
@@ -24,11 +23,6 @@ internal sealed class WalletPaymentMethodMenuItem(
         testTag = WALLET_MENU_SET_AS_DEFAULT_TAG,
     )
 
-    data object Cancel : WalletPaymentMethodMenuItem(
-        text = StripeR.string.stripe_cancel.resolvableString,
-        testTag = WALLET_MENU_CANCEL_TAG,
-    )
-
     data object Update : WalletPaymentMethodMenuItem(
         text = R.string.stripe_link_wallet_menu_action_update_card.resolvableString,
         testTag = WALLET_MENU_UPDATE_TAG,
@@ -37,5 +31,4 @@ internal sealed class WalletPaymentMethodMenuItem(
 
 internal const val WALLET_MENU_REMOVE_ITEM_TAG = "WALLET_MENU_REMOVE_ITEM_TAG"
 internal const val WALLET_MENU_SET_AS_DEFAULT_TAG = "WALLET_MENU_SET_AS_DEFAULT_TAG"
-internal const val WALLET_MENU_CANCEL_TAG = "WALLET_MENU_CANCEL_TAG"
 internal const val WALLET_MENU_UPDATE_TAG = "WALLET_MENU_UPDATE_TAG"

@@ -106,6 +106,8 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         null
     }
 
+    StripeTheme.verticalModeRowPadding = verticalModeRowPadding
+
     StripeTheme.textFieldInsets = FormInsets(
         start = textFieldInsets.startDp,
         end = textFieldInsets.endDp,

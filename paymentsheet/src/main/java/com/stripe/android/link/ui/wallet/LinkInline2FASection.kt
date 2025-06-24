@@ -106,7 +106,7 @@ private fun OTPSection(
                 middleSpacing = 8.dp,
                 boxSpacing = 8.dp,
                 otpInputPlaceholder = " ",
-                boxShape = LinkTheme.shapes.large,
+                boxShape = LinkTheme.shapes.default,
                 modifier = Modifier
                     // 48dp per OTP box plus 8dp per space
                     .width(328.dp)

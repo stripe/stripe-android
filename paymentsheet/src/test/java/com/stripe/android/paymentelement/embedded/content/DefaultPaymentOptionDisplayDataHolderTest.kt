@@ -1,4 +1,3 @@
-@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 
 package com.stripe.android.paymentelement.embedded.content
 
@@ -6,7 +5,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
