@@ -431,7 +431,8 @@ internal class CardDetailsEditUITest {
                 payload = EditCardPayload.create(card, PaymentMethodFixtures.BILLING_DETAILS),
                 onBrandChoiceChanged = {},
                 onCardUpdateParamsChanged = {},
-                addressCollectionMode = addressCollectionMode
+                addressCollectionMode = addressCollectionMode,
+                requiresModification = true
             )
         composeRule.setContent {
             CardDetailsEditUI(

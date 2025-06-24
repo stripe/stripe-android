@@ -182,6 +182,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = onBrandChoiceSelected,
             areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
             addressCollectionMode = addressCollectionMode,
+            requiresModification = true
         )
     }
 
@@ -200,6 +201,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = onBrandChoiceSelected,
             areExpiryDateAndAddressModificationSupported = false,
             addressCollectionMode = AddressCollectionMode.Never,
+            requiresModification = true
         )
     }
 
