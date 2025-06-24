@@ -23,7 +23,7 @@ internal data class UpdateCardScreenState(
 
     val primaryButtonState: PrimaryButtonState
         get() = when {
-            cardModified.not() -> PrimaryButtonState.Disabled
+            cardModified.not() && isBillingDetailsUpdateFlow.not() -> PrimaryButtonState.Disabled
             processing -> PrimaryButtonState.Processing
             else -> PrimaryButtonState.Enabled
         }
