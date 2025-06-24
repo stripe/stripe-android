@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -320,6 +321,18 @@ class PaymentSheet internal constructor(
         @ExperimentalAnalyticEventCallbackApi
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             callbacksBuilder.analyticEventCallback(callback)
+        }
+
+        /**
+         * @param handler Called when a user calls confirm and their payment method is being handed off
+         * to an external provider to handle payment/setup.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @SharedPaymentTokenSessionPreview
+        fun preparePaymentMethodHandler(
+            handler: PreparePaymentMethodHandler
+        ) = apply {
+            callbacksBuilder.preparePaymentMethodHandler(handler)
         }
 
         /**
@@ -3044,6 +3057,18 @@ class PaymentSheet internal constructor(
             @ShopPayPreview
             fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
                 callbacksBuilder.shopPayHandlers(handlers)
+            }
+
+            /**
+             * @param handler Called when a user calls confirm and their payment method is being handed off
+             * to an external provider to handle payment/setup.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @SharedPaymentTokenSessionPreview
+            fun preparePaymentMethodHandler(
+                handler: PreparePaymentMethodHandler
+            ) = apply {
+                callbacksBuilder.preparePaymentMethodHandler(handler)
             }
 
             /**

@@ -22,6 +22,7 @@
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
+    <ID>LargeClass:DefaultIntentConfirmationInterceptorTest.kt$DefaultIntentConfirmationInterceptorTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>

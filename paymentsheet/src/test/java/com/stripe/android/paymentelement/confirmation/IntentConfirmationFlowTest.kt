@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
@@ -28,6 +29,7 @@ import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
+@OptIn(SharedPaymentTokenSessionPreview::class)
 internal class IntentConfirmationFlowTest {
     @Test
     fun `On payment intent, action should be to confirm intent`() = runTest {
@@ -261,6 +263,7 @@ internal class IntentConfirmationFlowTest {
                 intentCreationCallbackProvider = {
                     createIntentCallback
                 },
+                preparePaymentMethodHandlerProvider = { null }
             ),
             paymentLauncherFactory = {
                 FakePaymentLauncher()

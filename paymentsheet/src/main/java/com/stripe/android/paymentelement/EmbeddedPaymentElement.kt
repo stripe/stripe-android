@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
@@ -120,16 +121,41 @@ class EmbeddedPaymentElement @Inject internal constructor(
      *
      * Creation can be completed with [rememberEmbeddedPaymentElement].
      */
-    class Builder(
-        /**
-         * Called when the customer confirms the payment or setup.
-         */
-        internal val createIntentCallback: CreateIntentCallback,
-        /**
-         * Called with the result of the payment.
-         */
+    class Builder internal constructor(
+        internal val deferredHandler: DeferredHandler,
         internal val resultCallback: ResultCallback,
     ) {
+        constructor(
+            /**
+             * Called when the customer confirms the payment or setup.
+             */
+            createIntentCallback: CreateIntentCallback,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.Intent(createIntentCallback),
+            resultCallback = resultCallback,
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @SharedPaymentTokenSessionPreview
+        constructor(
+            /**
+             * Called when a user calls confirm and their payment method
+             * is being handed off to an external provider to handle payment/setup.
+             */
+            preparePaymentMethodHandler: PreparePaymentMethodHandler,
+            /**
+             * Called with the result of the payment.
+             */
+            resultCallback: ResultCallback,
+        ) : this(
+            deferredHandler = DeferredHandler.SharedPaymentToken(preparePaymentMethodHandler),
+            resultCallback = resultCallback,
+        )
+
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
@@ -174,6 +200,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
             this.rowSelectionBehavior = rowSelectionBehavior
+        }
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        internal sealed interface DeferredHandler {
+            class Intent(val createIntentCallback: CreateIntentCallback) : DeferredHandler
+
+            class SharedPaymentToken constructor(
+                val preparePaymentMethodHandler: PreparePaymentMethodHandler
+            ) : DeferredHandler
         }
     }
 

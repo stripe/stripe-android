@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import androidx.annotation.ColorInt
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
+import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -28,6 +30,14 @@ internal interface IntentConfirmationModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): CreateIntentCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.createIntentCallback
+        }
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        @Provides
+        fun providesPreparePaymentMethodHandler(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): PreparePaymentMethodHandler? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.preparePaymentMethodHandler
         }
 
         @JvmSuppressWildcards

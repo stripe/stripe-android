@@ -57,9 +57,22 @@ fun rememberEmbeddedPaymentElement(
     }
 
     val callbacks = remember(builder) {
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class, ExperimentalAnalyticEventCallbackApi::class)
+        @OptIn(
+            ExperimentalCustomPaymentMethodsApi::class,
+            ExperimentalAnalyticEventCallbackApi::class,
+            SharedPaymentTokenSessionPreview::class
+        )
         PaymentElementCallbacks.Builder()
-            .createIntentCallback(builder.createIntentCallback)
+            .apply {
+                when (val deferredHandler = builder.deferredHandler) {
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.Intent -> {
+                        createIntentCallback(deferredHandler.createIntentCallback)
+                    }
+                    is EmbeddedPaymentElement.Builder.DeferredHandler.SharedPaymentToken -> {
+                        preparePaymentMethodHandler(deferredHandler.preparePaymentMethodHandler)
+                    }
+                }
+            }
             .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
             .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
             .analyticEventCallback(builder.analyticEventCallback)
