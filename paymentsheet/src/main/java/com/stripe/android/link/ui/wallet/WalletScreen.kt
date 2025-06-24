@@ -474,101 +474,113 @@ private fun ShippingAddressRow(
     val (isShippingExpanded, setShippingExpanded) = remember { mutableStateOf(false) }
     
     Column {
-        // Collapsed shipping address row
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 64.dp)
-                .clickable { setShippingExpanded(!isShippingExpanded) }
-                .padding(vertical = 16.dp)
-                .padding(start = HorizontalPadding),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = "Shipping",
-                modifier = Modifier.width(labelMaxWidth),
-                color = LinkTheme.colors.textTertiary,
-            )
-
-            // Show selected address or placeholder
-            val addressText = selectedAddress?.let { address ->
-                val addressDetails = address.address
-                val cityAndState = buildString {
-                    addressDetails.locality?.let {
-                        append(it)
-                        append(", ")
-                    }
-                    addressDetails.administrativeArea?.let {
-                        append(it)
-                        append(" ")
-                    }
-                    addressDetails.postalCode?.let {
-                        append(it)
-                    }
-                }.takeIf { it.isNotBlank() }
-
-                val lines = listOfNotNull(
-                    address.address.name,
-                    addressDetails.line1,
-                    addressDetails.line2,
-                    cityAndState,
-                    addressDetails.countryCode?.value,
-                )
-
-                lines.joinToString(", ")
-            } ?: "No shipping address"
-
-            Text(
-                text = addressText,
-                color = LinkTheme.colors.textPrimary,
-                style = LinkTheme.typography.bodyEmphasized,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-            )
-
-            Icon(
-                painter = painterResource(R.drawable.stripe_link_chevron),
-                contentDescription = "Expand shipping address",
-                modifier = Modifier
-                    .padding(end = 22.dp)
-                    .rotate(if (isShippingExpanded) CHEVRON_ICON_ROTATION else 0f),
-                tint = LinkTheme.colors.iconTertiary
-            )
-        }
-
-        // Expanded shipping address content
-        AnimatedVisibility(visible = isShippingExpanded) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = HorizontalPadding)
-                    .padding(bottom = 16.dp)
-            ) {
-                // Display existing addresses
-                if (shippingAddresses.isNotEmpty()) {
-                    shippingAddresses.forEach { address ->
-                        AddressInfo(address)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
+        AnimatedContent(
+            targetState = isShippingExpanded,
+            transitionSpec = {
+                if (targetState) {
+                    (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
+                } else {
+                    fadeIn() togetherWith (fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top))
                 }
-                
-                PrimaryButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    label = if (selectedAddress != null) "Change shipping address" else "Add shipping address",
-                    state = PrimaryButtonState.Enabled,
-                    onButtonClick = {
-                        val config = AddressLauncher.Configuration.Builder()
-                            .build()
+            }
+        ) { expanded ->
+            if (!expanded) {
+                // Collapsed row
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .defaultMinSize(minHeight = 64.dp)
+                        .clickable { setShippingExpanded(true) }
+                        .padding(vertical = 16.dp)
+                        .padding(start = HorizontalPadding),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Text(
+                        text = "Shipping",
+                        modifier = Modifier.width(labelMaxWidth),
+                        color = LinkTheme.colors.textTertiary,
+                    )
 
-                        addressLauncher.present(
-                            publishableKey = "pk_test_placeholder", // You'll fill this in
-                            configuration = config,
+                    val addressText = selectedAddress?.let { address ->
+                        address.address.name?.takeIf { it.isNotBlank() }
+                            ?: address.address.line1
+                            ?: "No shipping address"
+                    } ?: "No shipping address"
+
+                    Text(
+                        text = addressText,
+                        color = LinkTheme.colors.textPrimary,
+                        style = LinkTheme.typography.bodyEmphasized,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    Icon(
+                        painter = painterResource(R.drawable.stripe_link_chevron),
+                        contentDescription = "Expand shipping address",
+                        modifier = Modifier
+                            .padding(end = 22.dp),
+                        tint = LinkTheme.colors.iconTertiary
+                    )
+                }
+            } else {
+                // Expanded section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = HorizontalPadding)
+                        .padding(bottom = 16.dp)
+                ) {
+                    // Header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 20.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = "Shipping addresses",
+                            color = LinkTheme.colors.textTertiary,
+                            style = LinkTheme.typography.body
+                        )
+                        Icon(
+                            painter = painterResource(id = R.drawable.stripe_link_chevron),
+                            contentDescription = "Collapse shipping address",
+                            modifier = Modifier
+                                .rotate(CHEVRON_ICON_ROTATION)
+                                .clickable { setShippingExpanded(false) },
+                            tint = LinkTheme.colors.iconTertiary,
                         )
                     }
-                )
+
+                    // Display existing addresses
+                    if (shippingAddresses.isNotEmpty()) {
+                        shippingAddresses.forEach { address ->
+                            AddressInfo(address)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    
+                    PrimaryButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        label = "Add shipping address",
+                        state = PrimaryButtonState.Enabled,
+                        onButtonClick = {
+                            val config = AddressLauncher.Configuration.Builder()
+                                .build()
+
+                            addressLauncher.present(
+                                publishableKey = "pk_test_placeholder", // You'll fill this in
+                                configuration = config,
+                            )
+                        }
+                    )
+                }
             }
         }
     }
