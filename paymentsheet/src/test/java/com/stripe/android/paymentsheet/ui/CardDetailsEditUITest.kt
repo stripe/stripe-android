@@ -435,6 +435,7 @@ internal class CardDetailsEditUITest {
                 billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                     address = addressCollectionMode
                 ),
+                requiresModification = true
             )
         composeRule.setContent {
             CardDetailsEditUI(

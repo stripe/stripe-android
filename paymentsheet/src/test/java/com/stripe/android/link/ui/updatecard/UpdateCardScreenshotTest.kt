@@ -41,6 +41,7 @@ internal class UpdateCardScreenshotTest(
                     interactor = DefaultEditCardDetailsInteractor.Factory().create(
                         coroutineScope = rememberCoroutineScope(),
                         isCbcModifiable = false,
+                        requiresModification = true,
                         areExpiryDateAndAddressModificationSupported = true,
                         cardBrandFilter = DefaultCardBrandFilter,
                         payload = EditCardPayload.create(

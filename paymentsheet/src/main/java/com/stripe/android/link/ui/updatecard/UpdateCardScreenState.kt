@@ -19,7 +19,7 @@ internal data class UpdateCardScreenState(
     val processing: Boolean = false,
 ) {
 
-    val cardModified: Boolean
+    private val readyToSubmit: Boolean
         get() = cardUpdateParams != null
 
     val isBillingDetailsUpdateFlow: Boolean
@@ -27,7 +27,7 @@ internal data class UpdateCardScreenState(
 
     val primaryButtonState: PrimaryButtonState
         get() = when {
-            cardModified.not() && isBillingDetailsUpdateFlow.not() -> PrimaryButtonState.Disabled
+            readyToSubmit.not() -> PrimaryButtonState.Disabled
             processing -> PrimaryButtonState.Processing
             else -> PrimaryButtonState.Enabled
         }
