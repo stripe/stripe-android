@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -61,7 +62,7 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        if (state.isDefault) {
+        if (state.isDefault && !state.isBillingDetailsUpdateFlow) {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
@@ -70,7 +71,7 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        state.errorMessage?.let {
+        state.error?.let {
             ErrorText(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -81,7 +82,7 @@ internal fun UpdateCardScreenBody(
 
         PrimaryButton(
             modifier = Modifier.padding(vertical = 16.dp),
-            label = stringResource(R.string.stripe_link_update_card_confirm_cta),
+            label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = {
                 focusManager.clearFocus()
@@ -134,10 +135,12 @@ internal fun UpdateCardScreenBodyPreview() {
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",
+                    isBillingDetailsUpdateFlow = false,
+                    primaryButtonLabel = R.string.stripe_link_update_card_confirm_cta.resolvableString,
                     isDefault = false,
                     cardUpdateParams = null,
                     preferredCardBrand = null,
-                    error = IllegalArgumentException("Random error."),
+                    error = "Random error.".resolvableString,
                     processing = false,
                 ),
                 onUpdateClicked = {},
