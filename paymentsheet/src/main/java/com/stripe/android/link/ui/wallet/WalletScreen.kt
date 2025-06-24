@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -58,6 +59,7 @@ import com.stripe.android.link.ui.LinkAppBarMenu
 import com.stripe.android.link.ui.LinkDivider
 import com.stripe.android.link.ui.LinkLoadingScreen
 import com.stripe.android.link.ui.PrimaryButton
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
@@ -301,14 +303,26 @@ private fun PaymentMethodSection(
 
     PaymentMethodPicker(
         email = state.email,
-        expanded = isExpanded,
-        selectedItem = state.selectedItem,
         emailLabel = emailLabel,
         labelMaxWidth = labelMaxWidthDp,
+        expanded = isExpanded,
+        selectedItem = state.selectedItem,
+        modifier = Modifier,
         onAccountMenuClicked = {
             showBottomSheetContent {
                 LinkAppBarMenu(onLogoutClicked)
             }
+        },
+        collapsedContent = {
+            CollapsedPaymentDetails(
+                selectedPaymentMethod = it,
+                enabled = !state.primaryButtonState.isBlocking,
+                label = paymentLabel,
+                labelMaxWidth = labelMaxWidthDp,
+                onClick = {
+                    onExpandedChanged(true)
+                },
+            )
         },
         expandedContent = {
             ExpandedPaymentDetails(
@@ -344,17 +358,6 @@ private fun PaymentMethodSection(
                 onCollapse = {
                     onExpandedChanged(false)
                 }
-            )
-        },
-        collapsedContent = { selectedItem ->
-            CollapsedPaymentDetails(
-                selectedPaymentMethod = selectedItem,
-                enabled = !state.primaryButtonState.isBlocking,
-                label = paymentLabel,
-                labelMaxWidth = labelMaxWidthDp,
-                onClick = {
-                    onExpandedChanged(true)
-                },
             )
         },
     )
@@ -406,6 +409,13 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
+        ShippingAddressRow(
+            labelMaxWidth = labelMaxWidth,
+            isExpanded = expanded
+        )
+
+        LinkDivider()
+
         AnimatedContent(
             targetState = expanded || selectedItem == null,
             transitionSpec = {
@@ -422,6 +432,67 @@ private fun PaymentMethodPicker(
                 expandedContent()
             } else {
                 collapsedContent(selectedItem!!)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShippingAddressRow(
+    labelMaxWidth: Dp,
+    isExpanded: Boolean
+) {
+    val (isShippingExpanded, setShippingExpanded) = remember { mutableStateOf(false) }
+    
+    Column {
+        // Collapsed shipping address row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 64.dp)
+                .clickable { setShippingExpanded(!isShippingExpanded) }
+                .padding(vertical = 16.dp)
+                .padding(start = HorizontalPadding),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text(
+                text = "Shipping",
+                modifier = Modifier.width(labelMaxWidth),
+                color = LinkTheme.colors.textTertiary,
+            )
+
+            Text(
+                text = "No shipping address",
+                color = LinkTheme.colors.textPrimary,
+                style = LinkTheme.typography.bodyEmphasized,
+                modifier = Modifier.weight(1f),
+            )
+
+            Icon(
+                painter = painterResource(R.drawable.stripe_link_chevron),
+                contentDescription = "Expand shipping address",
+                modifier = Modifier
+                    .padding(end = 22.dp)
+                    .rotate(if (isShippingExpanded) CHEVRON_ICON_ROTATION else 0f),
+                tint = LinkTheme.colors.iconTertiary
+            )
+        }
+
+        // Expanded shipping address content
+        AnimatedVisibility(visible = isShippingExpanded) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = HorizontalPadding)
+                    .padding(bottom = 16.dp)
+            ) {
+                PrimaryButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    label = "Add shipping address",
+                    state = PrimaryButtonState.Enabled,
+                    onButtonClick = { /* TODO: Add click logic */ }
+                )
             }
         }
     }
