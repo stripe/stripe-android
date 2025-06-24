@@ -19,6 +19,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -30,12 +31,22 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Locale
+import kotlin.Boolean
+import kotlin.Deprecated
+import kotlin.IllegalStateException
+import kotlin.Int
+import kotlin.Long
+import kotlin.ReplaceWith
+import kotlin.String
+import kotlin.Throwable
+import kotlin.also
+import kotlin.check
 
 /**
  * A drop-in class that presents a Google Pay sheet to collect a customer's payment details.
  * When successful, will return a [PaymentMethod] via [Result.Completed.paymentMethod].
  *
- * Use [GooglePayPaymentMethodLauncher] for Jetpack Compose integrations.
+ * Use [rememberGooglePayPaymentMethodLauncher] for Jetpack Compose integrations.
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
@@ -360,29 +371,6 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         // Error executing a network call
         const val NETWORK_ERROR = 3
 
-        /**
-         * Create a [GooglePayPaymentMethodLauncher] used for Jetpack Compose.
-         *
-         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
-         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
-         * initialization path.
-         * The GooglePayPaymentMethodLauncher created is remembered across recompositions.
-         * Recomposition will always return the value produced by composition.
-         */
-        @Deprecated(
-            message = "Use rememberGooglePayPaymentMethodLauncher() instead",
-            replaceWith = ReplaceWith(
-                expression = "rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)",
-            ),
-        )
-        @Composable
-        fun rememberLauncher(
-            config: Config,
-            readyCallback: ReadyCallback,
-            resultCallback: ResultCallback
-        ): GooglePayPaymentMethodLauncher {
-            return rememberGooglePayPaymentMethodLauncher(config, readyCallback, resultCallback)
-        }
     }
 }
 
