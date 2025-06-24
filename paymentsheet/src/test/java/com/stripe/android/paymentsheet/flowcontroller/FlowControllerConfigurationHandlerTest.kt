@@ -23,8 +23,10 @@ import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
@@ -84,12 +86,27 @@ class FlowControllerConfigurationHandlerTest {
         val configurationHandler = createConfigurationHandler()
 
         val beforeSessionId = AnalyticsRequestFactory.sessionId
+
+        val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.prefilledBuilder()
+            .appearance(
+                PaymentSheet.Appearance.Builder()
+                    .primaryButton(
+                        PaymentSheet.PrimaryButton(
+                            shape = PaymentSheet.PrimaryButtonShape(
+                                heightDp = 80f
+                            )
+                        )
+                    )
+                    .build()
+            )
+            .build()
+
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            configuration = configuration,
             initializedViaCompose = false,
         ) { _, exception ->
             configureErrors.add(exception)
@@ -100,13 +117,13 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
         assertThat(viewModel.state).isNotNull()
+        assertThat(StripeTheme.primaryButtonStyle.shape.height).isEqualTo(80f)
 
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            commonConfiguration = config.asCommonConfiguration(),
-            appearance = config.appearance,
-            primaryButtonColor = config.primaryButtonColorUsage(),
-            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             isDeferred = false,
         )
         // Configure should regenerate the analytics sessionId.
