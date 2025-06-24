@@ -18,11 +18,14 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
@@ -53,6 +56,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
+import com.stripe.android.link.theme.LinkThemeConfig.radioButtonColors
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.BottomSheetContent
@@ -535,7 +539,7 @@ private fun ShippingAddressRow(
                             color = LinkTheme.colors.textPrimary,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1,
-                            style = LinkTheme.typography.bodyEmphasized,
+                            style = LinkTheme.typography.detail,
                         )
 
                         selectedAddress.address.line1?.let {
@@ -588,6 +592,10 @@ private fun ShippingAddressRow(
                         AddressInfo(
                             address = address,
                             onClick = onAddressSelected,
+                            isSelected = address.id == selectedAddress?.id,
+                            onMenuButtonClick = {
+                                onAddressSelected(address)
+                            },
                         )
                         LinkDivider(modifier = Modifier.padding(horizontal = 20.dp))
                     }
@@ -668,33 +676,64 @@ private fun ShippingAddressRow(
 private fun AddressInfo(
     address: ConsumerShippingAddress,
     onClick: (ConsumerShippingAddress) -> Unit,
+    isSelected: Boolean,
+    onMenuButtonClick: () -> Unit,
 ) {
     val name = address.address.name ?: ""
     val line1 = address.address.line1 ?: ""
 
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                onClick(address)
-            }
+            .clickable { onClick(address) }
             .padding(horizontal = HorizontalPadding)
-            .padding(vertical = 8.dp)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Text(
-            text = name,
-            style = LinkTheme.typography.bodyEmphasized,
-            color = LinkTheme.colors.textPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+        // Radio button
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            modifier = Modifier
+                .testTag(WALLET_ADDRESS_ITEM_RADIO_BUTTON),
+            colors = LinkTheme.colors.radioButtonColors,
         )
-        if (line1.isNotBlank()) {
+
+        // Address content
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center,
+        ) {
             Text(
-                text = line1,
-                style = LinkTheme.typography.caption,
-                color = LinkTheme.colors.textSecondary,
+                text = name,
+                style = LinkTheme.typography.bodyEmphasized,
+                color = LinkTheme.colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+            )
+            if (line1.isNotBlank()) {
+                Text(
+                    text = line1,
+                    style = LinkTheme.typography.caption,
+                    color = LinkTheme.colors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        // Menu icon
+        IconButton(
+            modifier = Modifier
+                .testTag(WALLET_ADDRESS_ITEM_MENU_BUTTON),
+            onClick = onMenuButtonClick,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.stripe_show_menu),
+                tint = LinkTheme.colors.iconTertiary,
+                modifier = Modifier.size(24.dp),
             )
         }
     }
@@ -1048,3 +1087,5 @@ internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
 internal const val WALLET_SCREEN_DIALOG_TAG = "wallet_screen_dialog_tag"
 internal const val WALLET_SCREEN_DIALOG_BUTTON_TAG = "wallet_screen_dialog_button_tag"
 internal const val WALLET_SCREEN_ERROR_TAG = "wallet_screen_error_tag"
+internal const val WALLET_ADDRESS_ITEM_RADIO_BUTTON = "wallet_address_item_radio_button"
+internal const val WALLET_ADDRESS_ITEM_MENU_BUTTON = "wallet_address_item_menu_button"
