@@ -211,7 +211,14 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 selectedShippingAddress = address,
+                shippingAddressesExpanded = false,
             )
+        }
+    }
+
+    fun onShippingAddressesExpandedChanged(expanded: Boolean) {
+        _uiState.update {
+            it.copy(shippingAddressesExpanded = expanded)
         }
     }
 

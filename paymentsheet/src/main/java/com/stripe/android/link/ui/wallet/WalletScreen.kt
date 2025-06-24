@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -118,6 +117,7 @@ internal fun WalletScreen(
         onDismissAlert = viewModel::onDismissAlert,
         addressLauncher = addressLauncher,
         onAddressSelected = viewModel::onAddressSelected,
+        onShippingAddressesExpandedChanged = viewModel::onShippingAddressesExpandedChanged,
     )
 }
 
@@ -140,6 +140,7 @@ internal fun WalletBody(
     hideBottomSheetContent: suspend () -> Unit,
     addressLauncher: AddressLauncher,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     AnimatedContent(
         targetState = state.paymentDetailsList.isEmpty(),
@@ -181,6 +182,7 @@ internal fun WalletBody(
                     hideBottomSheetContent = hideBottomSheetContent,
                     addressLauncher = addressLauncher,
                     onAddressSelected = onAddressSelected,
+                    onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -213,6 +215,7 @@ private fun PaymentDetailsSection(
     hideBottomSheetContent: suspend () -> Unit,
     addressLauncher: AddressLauncher,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -231,6 +234,7 @@ private fun PaymentDetailsSection(
             onLogoutClicked = onLogoutClicked,
             addressLauncher = addressLauncher,
             onAddressSelected = onAddressSelected,
+            onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
         )
 
         AnimatedVisibility(visible = state.mandate != null) {
@@ -316,6 +320,7 @@ private fun PaymentMethodSection(
     hideBottomSheetContent: suspend () -> Unit,
     addressLauncher: AddressLauncher,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -386,6 +391,8 @@ private fun PaymentMethodSection(
         selectedAddress = state.selectedShippingAddress,
         shippingAddresses = state.shippingAddresses,
         onAddressSelected = onAddressSelected,
+        shippingAddressesExpanded = state.shippingAddressesExpanded,
+        onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
     )
 }
 
@@ -420,6 +427,8 @@ private fun PaymentMethodPicker(
     selectedAddress: ConsumerShippingAddress?,
     shippingAddresses: List<ConsumerShippingAddress>,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    shippingAddressesExpanded: Boolean,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -446,6 +455,8 @@ private fun PaymentMethodPicker(
             selectedAddress = selectedAddress,
             shippingAddresses = shippingAddresses,
             onAddressSelected = onAddressSelected,
+            shippingAddressesExpanded = shippingAddressesExpanded,
+            onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
         )
 
         LinkDivider()
@@ -479,12 +490,12 @@ private fun ShippingAddressRow(
     selectedAddress: ConsumerShippingAddress?,
     shippingAddresses: List<ConsumerShippingAddress>,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    shippingAddressesExpanded: Boolean,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
-    val (isShippingExpanded, setShippingExpanded) = remember { mutableStateOf(false) }
-    
     Column {
         AnimatedContent(
-            targetState = isShippingExpanded,
+            targetState = shippingAddressesExpanded,
             transitionSpec = {
                 if (targetState) {
                     (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
@@ -499,7 +510,7 @@ private fun ShippingAddressRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 64.dp)
-                        .clickable { setShippingExpanded(true) }
+                        .clickable { onShippingAddressesExpandedChanged(true) }
                         .padding(vertical = 16.dp)
                         .padding(start = HorizontalPadding),
                     verticalAlignment = Alignment.CenterVertically,
@@ -560,7 +571,7 @@ private fun ShippingAddressRow(
                             contentDescription = "Collapse shipping address",
                             modifier = Modifier
                                 .rotate(CHEVRON_ICON_ROTATION)
-                                .clickable { setShippingExpanded(false) },
+                                .clickable { onShippingAddressesExpandedChanged(false) },
                             tint = LinkTheme.colors.iconTertiary,
                         )
                     }

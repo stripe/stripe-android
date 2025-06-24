@@ -33,6 +33,7 @@ internal data class WalletUiState(
     val alertMessage: ResolvableString? = null,
     val shippingAddresses: List<ConsumerShippingAddress> = emptyList(),
     val selectedShippingAddress: ConsumerShippingAddress? = null,
+    val shippingAddressesExpanded: Boolean = false,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
