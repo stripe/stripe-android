@@ -151,7 +151,10 @@ class WalletViewModelTest {
         vm.onUpdateClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
         navigationManager.assertNavigatedTo(
-            route = LinkScreen.UpdateCard(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
+            route = LinkScreen.UpdateCard(
+                paymentDetailsId = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id,
+                billingDetailsUpdateFlow = null
+            )
         )
     }
 
@@ -789,7 +792,6 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             logger = logger,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult,
@@ -798,7 +800,8 @@ class WalletViewModelTest {
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
-                dismissalCoordinator = dismissalCoordinator
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
             ),
             linkLaunchMode = linkLaunchMode
         )

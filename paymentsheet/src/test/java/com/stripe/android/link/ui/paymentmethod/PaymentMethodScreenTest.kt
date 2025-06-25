@@ -182,6 +182,7 @@ internal class PaymentMethodScreenTest {
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = LinkLaunchMode.Full
             ),
             logger = FakeLogger(),
             formHelper = formHelper,

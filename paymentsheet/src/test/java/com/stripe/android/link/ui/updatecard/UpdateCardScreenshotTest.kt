@@ -102,7 +102,7 @@ internal class UpdateCardScreenshotTest(
                 preferredCardBrand = null,
                 error = error?.stripeErrorMessage(),
                 processing = processing,
-                isBillingDetailsUpdateFlow = false,
+                billingDetailsUpdateFlow = null,
                 primaryButtonLabel = "Update card".resolvableString
             )
         }

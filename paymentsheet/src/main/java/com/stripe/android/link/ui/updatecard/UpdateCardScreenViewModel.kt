@@ -15,6 +15,8 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
@@ -51,14 +53,14 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val completeLinkFlow: CompleteLinkFlow,
     private val dismissWithResult: (LinkActivityResult) -> Unit,
     paymentDetailsId: String,
-    isBillingDetailsUpdateFlow: Boolean,
+    billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
         UpdateCardScreenState(
             paymentDetailsId = paymentDetailsId,
-            isBillingDetailsUpdateFlow = isBillingDetailsUpdateFlow,
-            primaryButtonLabel = primaryButtonLabel(isBillingDetailsUpdateFlow)
+            billingDetailsUpdateFlow = billingDetailsUpdateFlow,
+            primaryButtonLabel = primaryButtonLabel(billingDetailsUpdateFlow)
         )
     )
 
@@ -114,10 +116,11 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         }
 
                         val confirmationResult = completeLinkFlow(
-                            selectedPaymentDetails = updatedPaymentDetails,
-                            linkAccount = account,
-                            cvc = null, // CVC is already included in the updated payment details
-                            linkLaunchMode = linkLaunchMode,
+                            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+                                details = updatedPaymentDetails,
+                                collectedCvc = state.value.billingDetailsUpdateFlow?.cvc
+                            ),
+                            linkAccount = account
                         )
 
                         _state.update { it.copy(processing = false) }
@@ -188,8 +191,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     }
 
     private fun primaryButtonLabel(
-        isBillingDetailsUpdateFlow: Boolean
-    ): ResolvableString = if (isBillingDetailsUpdateFlow) {
+        billingDetailsUpdateFlow: BillingDetailsUpdateFlow?
+    ): ResolvableString = if (billingDetailsUpdateFlow != null) {
         // In billing details update flow, payment details are updated and then confirmed,
         completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
     } else {
@@ -201,7 +204,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             paymentDetailsId: String,
-            isBillingDetailsUpdateFlow: Boolean,
+            billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
             dismissWithResult: (LinkActivityResult) -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -219,10 +222,11 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             ),
                             linkAccountManager = parentComponent.linkAccountManager,
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
+                            linkLaunchMode = parentComponent.linkLaunchMode,
                         ),
                         dismissWithResult = dismissWithResult,
                         paymentDetailsId = paymentDetailsId,
-                        isBillingDetailsUpdateFlow = isBillingDetailsUpdateFlow,
+                        billingDetailsUpdateFlow = billingDetailsUpdateFlow,
                     )
                 }
             }

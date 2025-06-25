@@ -6,7 +6,6 @@ import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfi
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
@@ -14,7 +13,6 @@ import com.stripe.android.link.account.loadDefaultShippingAddress
 import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.withDismissalDisabled
-import com.stripe.android.model.ConsumerPaymentDetails
 import javax.inject.Inject
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -29,20 +27,8 @@ internal interface CompleteLinkFlow {
      * Confirms payment with the given payment details and CVC.
      */
     suspend operator fun invoke(
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        linkLaunchMode: LinkLaunchMode,
-    ): Result
-
-    /**
-     * Confirms payment with LinkPaymentDetails (for newly created payment methods).
-     */
-    suspend operator fun invoke(
-        linkPaymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        linkLaunchMode: LinkLaunchMode,
+        selectedPaymentDetails: LinkPaymentMethod,
+        linkAccount: LinkAccount
     ): Result
 
     sealed interface Result {
@@ -68,60 +54,37 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val linkAccountManager: LinkAccountManager,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val linkLaunchMode: LinkLaunchMode
 ) : CompleteLinkFlow {
 
     override suspend operator fun invoke(
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        linkLaunchMode: LinkLaunchMode,
+        selectedPaymentDetails: LinkPaymentMethod,
+        linkAccount: LinkAccount
     ): Result {
         return completeLinkFlow(
             linkLaunchMode = linkLaunchMode,
             confirmPayment = {
-                linkConfirmationHandler.confirm(
-                    paymentDetails = selectedPaymentDetails,
-                    linkAccount = linkAccount,
-                    cvc = cvc
-                )
+                when (selectedPaymentDetails) {
+                    is LinkPaymentMethod.ConsumerPaymentDetails -> linkConfirmationHandler.confirm(
+                        paymentDetails = selectedPaymentDetails.details,
+                        linkAccount = linkAccount,
+                        cvc = selectedPaymentDetails.collectedCvc
+                    )
+                    is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
+                        paymentDetails = selectedPaymentDetails.linkPaymentDetails,
+                        linkAccount = linkAccount,
+                        cvc = selectedPaymentDetails.collectedCvc
+                    )
+                }
             },
-            createPaymentMethodSelection = {
-                LinkPaymentMethod.ConsumerPaymentDetails(
-                    details = selectedPaymentDetails,
-                    collectedCvc = cvc
-                )
-            }
-        )
-    }
-
-    override suspend operator fun invoke(
-        linkPaymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        linkLaunchMode: LinkLaunchMode,
-    ): Result {
-        return completeLinkFlow(
-            linkLaunchMode = linkLaunchMode,
-            confirmPayment = {
-                linkConfirmationHandler.confirm(
-                    paymentDetails = linkPaymentDetails,
-                    linkAccount = linkAccount,
-                    cvc = cvc
-                )
-            },
-            createPaymentMethodSelection = {
-                LinkPaymentMethod.LinkPaymentDetails(
-                    linkPaymentDetails = linkPaymentDetails,
-                    collectedCvc = cvc,
-                )
-            }
+            paymentMethodSelection = selectedPaymentDetails
         )
     }
 
     private suspend fun completeLinkFlow(
         linkLaunchMode: LinkLaunchMode,
         confirmPayment: suspend () -> LinkConfirmationResult,
-        createPaymentMethodSelection: () -> LinkPaymentMethod,
+        paymentMethodSelection: LinkPaymentMethod,
     ): Result {
         return when (linkLaunchMode) {
             is LinkLaunchMode.Full,
@@ -141,7 +104,7 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
             is LinkLaunchMode.PaymentMethodSelection -> Result.Completed(
                 linkActivityResult = LinkActivityResult.Completed(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                    selectedPayment = createPaymentMethodSelection(),
+                    selectedPayment = paymentMethodSelection,
                     shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
                 )
             )
