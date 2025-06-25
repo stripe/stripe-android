@@ -23,6 +23,8 @@ internal class SharedPaymentTokenPlaygroundRequester(
     private val playgroundSnapshot: PlaygroundSettings.Snapshot,
     private val applicationContext: Context,
 ) {
+    private val json = Json { explicitNulls = false }
+
     suspend fun session(): Result<PlaygroundState> {
         val customerId = playgroundSnapshot[CustomerSettingsDefinition].run {
             when (this) {
@@ -38,9 +40,9 @@ internal class SharedPaymentTokenPlaygroundRequester(
 
         val apiResponse = withContext(Dispatchers.IO) {
             Fuel.post(BASE_URL + CUSTOMER_PATH)
-                .jsonBody(Json.encodeToString(SharedPaymentTokenCreateSessionRequest.serializer(), request))
+                .jsonBody(json.encodeToString(SharedPaymentTokenCreateSessionRequest.serializer(), request))
                 .suspendable()
-                .awaitModel(SharedPaymentTokenCreateSessionResponse.serializer())
+                .awaitModel(SharedPaymentTokenCreateSessionResponse.serializer(), json)
         }
 
         return when (apiResponse) {
@@ -97,9 +99,9 @@ internal class SharedPaymentTokenPlaygroundRequester(
 
         val apiResponse = withContext(Dispatchers.IO) {
             Fuel.post(BASE_URL + CREATE_INTENT_PATH)
-                .jsonBody(Json.encodeToString(SharedPaymentTokenCreateIntentRequest.serializer(), request))
+                .jsonBody(json.encodeToString(SharedPaymentTokenCreateIntentRequest.serializer(), request))
                 .suspendable()
-                .awaitModel(SharedPaymentTokenCreateIntentResponse.serializer())
+                .awaitModel(SharedPaymentTokenCreateIntentResponse.serializer(), json)
         }
 
         return when (apiResponse) {
