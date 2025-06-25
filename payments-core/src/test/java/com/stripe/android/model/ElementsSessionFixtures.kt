@@ -453,6 +453,8 @@ internal object ElementsSessionFixtures {
         paymentMethodSyncDefaultFeature: String = "disabled",
         enableLinkSpm: Boolean = false,
         paymentMethodsWithLinkDetails: String = "",
+        passMobilePaymentElement: Boolean = true,
+        passCustomerSheet: Boolean = true,
     ): JSONObject {
         return JSONObject(
             """
@@ -534,24 +536,40 @@ internal object ElementsSessionFixtures {
                       "enabled": false,
                       "features": null
                     },
-                    "mobile_payment_element": {
-                      "enabled": true,
-                      "features": {
-                        "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
-                        "payment_method_save": "disabled",
-                        "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"},
-                        "payment_method_set_as_default": $paymentMethodSetAsDefaultFeature,
-                      }
-                    },
-                    "customer_sheet": {
-                      "enabled": true,
-                      "features": {
-                        "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
-                        "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
-                      }
-                    },
+                    "mobile_payment_element": ${
+                if (passMobilePaymentElement) {
+                    """
+                            {
+                              "enabled": true,
+                              "features": {
+                                "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
+                                "payment_method_save": "disabled",
+                                "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                                "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"},
+                                "payment_method_set_as_default": $paymentMethodSetAsDefaultFeature,
+                              }
+                            }
+                    """.trimIndent()
+                } else {
+                    "null"
+                }
+            },
+                    "customer_sheet": ${
+                if (passCustomerSheet) {
+                    """
+                                {
+                                  "enabled": true,
+                                  "features": {
+                                    "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
+                                    "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                                    "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
+                                  }
+                                }
+                    """.trimIndent()
+                } else {
+                    "null"
+                }
+            },
                     "pricing_table": {
                       "enabled": false
                     }
