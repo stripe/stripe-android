@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -36,7 +37,9 @@ internal open class FakeLinkAccountManager(
         MutableStateFlow<ConsumerPaymentDetails?>(TestFactory.CONSUMER_PAYMENT_DETAILS)
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
-    override var cachedShippingAddresses: ConsumerShippingAddresses? = null
+    private val _consumerShippingAddresses =
+        MutableStateFlow<ConsumerShippingAddresses?>(null)
+    override val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?> = _consumerShippingAddresses.asStateFlow()
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -61,7 +64,7 @@ internal open class FakeLinkAccountManager(
     var listShippingAddressesResult: Result<ConsumerShippingAddresses> = Result.success(CONSUMER_SHIPPING_ADDRESSES)
         set(value) {
             field = value
-            cachedShippingAddresses = value.getOrNull()
+            _consumerShippingAddresses.value = value.getOrNull()
         }
 
     private val lookupTurbine = Turbine<LookupCall>()

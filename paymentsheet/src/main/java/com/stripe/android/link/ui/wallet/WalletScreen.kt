@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -55,10 +54,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.radioButtonColors
-import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.theme.toAddressElementAppearance
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkAppBarMenu
@@ -70,7 +68,6 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerShippingAddress
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration
@@ -99,14 +96,13 @@ internal fun WalletScreen(
     onLogoutClicked: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
-    
+
     val addressLauncher = rememberAddressLauncher(
-//        callback = viewModel::handleAddressResult,
         callback = {
-            Log.d("WalletScreen", "$it")
+            // TODO: Implement the callback
         },
     )
-    
+
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -123,9 +119,29 @@ internal fun WalletScreen(
         hideBottomSheetContent = hideBottomSheetContent,
         onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
         onDismissAlert = viewModel::onDismissAlert,
-        addressLauncher = addressLauncher,
         onAddressSelected = viewModel::onAddressSelected,
         onShippingAddressesExpandedChanged = viewModel::onShippingAddressesExpandedChanged,
+        launchAddressElement = {
+            val appearance = LinkTheme.toAddressElementAppearance()
+
+            val additionalFields = AdditionalFieldsConfiguration(
+                phone = AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                checkboxLabel = null,
+            )
+
+            val config = AddressLauncher.Configuration.Builder()
+                .title("Add a shipping address") // TODO: Localize
+                .buttonTitle("Save shipping address") // TODO: Localize
+                .additionalFields(additionalFields)
+                .appearance(appearance)
+                .build()
+
+            addressLauncher.present(
+                // This is unfortunately still in the API, but not necessary anymore
+                publishableKey = "",
+                configuration = config,
+            )
+        },
     )
 }
 
@@ -146,7 +162,7 @@ internal fun WalletBody(
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
-    addressLauncher: AddressLauncher,
+    launchAddressElement: () -> Unit,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
     onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
@@ -188,7 +204,7 @@ internal fun WalletBody(
                     onSetDefaultClicked = onSetDefaultClicked,
                     onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
                     hideBottomSheetContent = hideBottomSheetContent,
-                    addressLauncher = addressLauncher,
+                    launchAddressElement = launchAddressElement,
                     onAddressSelected = onAddressSelected,
                     onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
                 )
@@ -221,7 +237,7 @@ private fun PaymentDetailsSection(
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
-    addressLauncher: AddressLauncher,
+    launchAddressElement: () -> Unit,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
     onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
@@ -240,7 +256,7 @@ private fun PaymentDetailsSection(
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent,
             onLogoutClicked = onLogoutClicked,
-            addressLauncher = addressLauncher,
+            launchAddressElement = launchAddressElement,
             onAddressSelected = onAddressSelected,
             onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
         )
@@ -326,7 +342,7 @@ private fun PaymentMethodSection(
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
-    addressLauncher: AddressLauncher,
+    launchAddressElement: () -> Unit,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
     onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
@@ -335,7 +351,10 @@ private fun PaymentMethodSection(
     val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
 
-    val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel)
+    // TODO: Localize this
+    val shippingLabel = "Shipping"
+
+    val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel, shippingLabel)
 
     PaymentMethodPicker(
         email = state.email,
@@ -381,7 +400,7 @@ private fun PaymentMethodSection(
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClicked,
                 onCollapse = {
                     onExpandedChanged(false)
-                },
+                }
             )
         },
         collapsedContent = { selectedItem ->
@@ -395,7 +414,7 @@ private fun PaymentMethodSection(
                 },
             )
         },
-        addressLauncher = addressLauncher,
+        launchAddressElement = launchAddressElement,
         selectedAddress = state.selectedShippingAddress,
         shippingAddresses = state.shippingAddresses,
         onAddressSelected = onAddressSelected,
@@ -431,7 +450,7 @@ private fun PaymentMethodPicker(
     onAccountMenuClicked: () -> Unit,
     collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
     expandedContent: @Composable (() -> Unit),
-    addressLauncher: AddressLauncher,
+    launchAddressElement: () -> Unit,
     selectedAddress: ConsumerShippingAddress?,
     shippingAddresses: List<ConsumerShippingAddress>,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
@@ -458,12 +477,11 @@ private fun PaymentMethodPicker(
 
         ShippingAddressRow(
             labelMaxWidth = labelMaxWidth,
-            isExpanded = expanded,
-            addressLauncher = addressLauncher,
+            launchAddressElement = launchAddressElement,
             selectedAddress = selectedAddress,
             shippingAddresses = shippingAddresses,
             onAddressSelected = onAddressSelected,
-            shippingAddressesExpanded = shippingAddressesExpanded,
+            isExpanded = shippingAddressesExpanded,
             onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
         )
 
@@ -493,17 +511,16 @@ private fun PaymentMethodPicker(
 @Composable
 private fun ShippingAddressRow(
     labelMaxWidth: Dp,
-    isExpanded: Boolean,
-    addressLauncher: AddressLauncher,
+    launchAddressElement: () -> Unit,
     selectedAddress: ConsumerShippingAddress?,
     shippingAddresses: List<ConsumerShippingAddress>,
     onAddressSelected: (ConsumerShippingAddress) -> Unit,
-    shippingAddressesExpanded: Boolean,
+    isExpanded: Boolean,
     onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     Column {
         AnimatedContent(
-            targetState = shippingAddressesExpanded,
+            targetState = isExpanded,
             transitionSpec = {
                 if (targetState) {
                     (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
@@ -513,162 +530,127 @@ private fun ShippingAddressRow(
             }
         ) { expanded ->
             if (!expanded && selectedAddress != null) {
-                // Collapsed row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .defaultMinSize(minHeight = 64.dp)
-                        .clickable { onShippingAddressesExpandedChanged(true) }
-                        .padding(vertical = 16.dp)
-                        .padding(start = HorizontalPadding),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Text(
-                        text = "Shipping",
-                        modifier = Modifier.width(labelMaxWidth),
-                        color = LinkTheme.colors.textTertiary,
-                    )
-
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(
-                            text = selectedAddress.address.name ?: "",
-                            color = LinkTheme.colors.textPrimary,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                            style = LinkTheme.typography.detail,
-                        )
-
-                        selectedAddress.address.line1?.let {
-                            Text(
-                                text = it,
-                                color = LinkTheme.colors.textTertiary,
-                                style = LinkTheme.typography.detail,
-                            )
-                        }
-                    }
-
-                    Icon(
-                        painter = painterResource(R.drawable.stripe_link_chevron),
-                        contentDescription = "Expand shipping address",
-                        modifier = Modifier
-                            .padding(end = 22.dp),
-                        tint = LinkTheme.colors.iconTertiary
-                    )
-                }
+                CollapsedShippingAddressRow(
+                    labelMaxWidth = labelMaxWidth,
+                    selectedAddress = selectedAddress,
+                    modifier = Modifier.clickable { onShippingAddressesExpandedChanged(true) },
+                )
             } else {
                 // Expanded section
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    // Header
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onShippingAddressesExpandedChanged(false) }
-                            .padding(start = 20.dp, end = 22.dp)
-                            .padding(top = 20.dp, bottom = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = "Shipping addresses",
-                            color = LinkTheme.colors.textTertiary,
-                            style = LinkTheme.typography.body
-                        )
-                        Icon(
-                            painter = painterResource(id = R.drawable.stripe_link_chevron),
-                            contentDescription = "Collapse shipping address",
-                            modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
-                            tint = LinkTheme.colors.iconTertiary,
-                        )
-                    }
-
-                    // Display existing addresses
-                    shippingAddresses.forEach { address ->
-                        AddressInfo(
-                            address = address,
-                            onClick = onAddressSelected,
-                            isSelected = address.id == selectedAddress?.id,
-                            onMenuButtonClick = {
-                                onAddressSelected(address)
-                            },
-                        )
-                        LinkDivider(modifier = Modifier.padding(horizontal = 20.dp))
-                    }
-
-                    val linkColors = LinkTheme.colors
-
-                    AddShippingAddressRow(
-                        isEnabled = true,
-                        onClick = {
-                            val colors = PaymentSheet.Colors(
-                                primary = linkColors.borderSelected,
-                                surface = linkColors.surfacePrimary,
-                                component = linkColors.surfaceSecondary,
-                                componentBorder = linkColors.surfaceSecondary,
-                                componentDivider = linkColors.borderDefault,
-                                onComponent = linkColors.textPrimary,
-                                subtitle = linkColors.textSecondary, // TODO
-                                placeholderText = linkColors.textTertiary,
-                                onSurface = linkColors.textPrimary,
-                                appBarIcon = linkColors.iconTertiary,
-                                error = linkColors.textCritical,
-                            )
-
-                            // TODO: Colors dark
-
-                            val primaryButtonColors = PaymentSheet.PrimaryButtonColors(
-                                background = linkColors.buttonBrand,
-                                onBackground = linkColors.contentOnPrimaryButton,
-                                border = linkColors.buttonBrand,
-                            )
-
-                            val config = AddressLauncher.Configuration.Builder()
-                                .title("Add a shipping address")
-                                .buttonTitle("Save shipping address")
-                                .additionalFields(
-                                    AdditionalFieldsConfiguration(
-                                        phone = AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
-                                        checkboxLabel = null,
-                                    )
-                                )
-                                .appearance(
-                                    appearance = PaymentSheet.Appearance.Builder()
-                                        .colorsLight(colors)
-                                        .colorsDark(colors)
-                                        .shapes(
-                                            PaymentSheet.Shapes(
-                                                cornerRadiusDp = 12f,
-                                                borderStrokeWidthDp = 1.5f,
-                                            )
-                                        )
-                                        .primaryButton(
-                                            PaymentSheet.PrimaryButton(
-                                                shape = PaymentSheet.PrimaryButtonShape(
-                                                    cornerRadiusDp = 12f,
-                                                    heightDp = PrimaryButtonHeight.value,
-                                                ),
-                                                colorsLight = primaryButtonColors,
-                                                colorsDark = primaryButtonColors,
-                                            )
-                                        )
-                                        .build()
-                                )
-                                .build()
-
-                            addressLauncher.present(
-                                publishableKey = "pk_test_placeholder", // You'll fill this in
-                                configuration = config,
-                            )
-                        }
-                    )
-                }
+                ExpandedShippingAddressesSection(
+                    launchAddressElement = launchAddressElement,
+                    selectedAddress = selectedAddress,
+                    shippingAddresses = shippingAddresses,
+                    onAddressSelected = onAddressSelected,
+                    onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun CollapsedShippingAddressRow(
+    labelMaxWidth: Dp,
+    selectedAddress: ConsumerShippingAddress,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 64.dp)
+            .padding(vertical = 16.dp)
+            .padding(start = HorizontalPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Shipping",
+            modifier = Modifier.width(labelMaxWidth),
+            color = LinkTheme.colors.textTertiary,
+        )
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = selectedAddress.address.name ?: "",
+                color = LinkTheme.colors.textPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = LinkTheme.typography.detail,
+            )
+
+            selectedAddress.address.line1?.let {
+                Text(
+                    text = it,
+                    color = LinkTheme.colors.textTertiary,
+                    style = LinkTheme.typography.detail,
+                )
+            }
+        }
+
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_chevron),
+            contentDescription = "Expand shipping address",
+            modifier = Modifier.padding(end = 22.dp),
+            tint = LinkTheme.colors.iconTertiary
+        )
+    }
+}
+
+@Composable
+private fun ExpandedShippingAddressesSection(
+    launchAddressElement: () -> Unit,
+    selectedAddress: ConsumerShippingAddress?,
+    shippingAddresses: List<ConsumerShippingAddress>,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onShippingAddressesExpandedChanged(false) }
+                .padding(start = 20.dp, end = 22.dp)
+                .padding(top = 20.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                // TODO: Localize
+                text = "Shipping addresses",
+                color = LinkTheme.colors.textTertiary,
+                style = LinkTheme.typography.body
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.stripe_link_chevron),
+                contentDescription = "Collapse shipping address",
+                modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
+                tint = LinkTheme.colors.iconTertiary,
+            )
+        }
+
+        shippingAddresses.forEach { address ->
+            AddressInfo(
+                address = address,
+                onClick = onAddressSelected,
+                isSelected = address.id == selectedAddress?.id,
+                onMenuButtonClick = {
+                    onAddressSelected(address)
+                },
+            )
+            LinkDivider(modifier = Modifier.padding(horizontal = 20.dp))
+        }
+
+        AddShippingAddressRow(
+            isEnabled = true,
+            onClick = launchAddressElement,
+        )
     }
 }
 

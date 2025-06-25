@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.wallet
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -20,7 +19,6 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
-import com.stripe.android.link.account.loadDefaultShippingAddress
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -31,6 +29,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
@@ -45,10 +44,12 @@ import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -112,18 +113,7 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.combinedConsumerState.filterNotNull().collectLatest { (consumerPaymentDetails, consumerShippingAddresses) ->
-                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
-                } else {
-                    _uiState.update {
-                        it.updateWithResponse(
-                            consumerPaymentDetails,
-                            consumerShippingAddresses
-                        )
-                    }
-                }
-            }
+            observeLinkAccountState()
         }
 
         viewModelScope.launch {
@@ -131,11 +121,7 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.listShippingAddresses().onSuccess {
-                Log.d("WalletViewModel", "$it")
-            }.onFailure {
-                Log.e("WalletViewModel", "Error", it)
-            }
+            linkAccountManager.listShippingAddresses()
         }
 
         viewModelScope.launch {
@@ -150,6 +136,30 @@ internal class WalletViewModel @Inject constructor(
             cvcController.formFieldValue.collectLatest { input ->
                 _uiState.update {
                     it.copy(cvcInput = input)
+                }
+            }
+        }
+    }
+
+    private suspend fun observeLinkAccountState() {
+        val collectShipping = false
+
+        val paymentDetails = linkAccountManager.consumerPaymentDetails.filterNotNull()
+
+        val shippingAddresses = if (collectShipping) {
+            linkAccountManager.consumerShippingAddresses.filterNotNull()
+        } else {
+            stateFlowOf(ConsumerShippingAddresses(emptyList()))
+        }
+
+        combine(paymentDetails, shippingAddresses) { paymentDetails, shippingAddresses ->
+            paymentDetails to shippingAddresses
+        }.collect { (paymentDetails, shippingAddresses) ->
+            if (paymentDetails.paymentDetails.isEmpty()) {
+                navigateAndClearStack(LinkScreen.PaymentMethod)
+            } else {
+                _uiState.update {
+                    it.updateWithResponse(paymentDetails, shippingAddresses)
                 }
             }
         }

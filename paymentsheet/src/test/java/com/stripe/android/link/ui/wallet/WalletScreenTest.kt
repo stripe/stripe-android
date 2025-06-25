@@ -722,7 +722,10 @@ internal class WalletScreenTest {
             onUpdateClicked = {},
             onLogoutClicked = {},
             expiryDateController = SimpleTextFieldController(DateConfig()),
-            cvcController = CvcController(cardBrandFlow = stateFlowOf(CardBrand.Visa))
+            cvcController = CvcController(cardBrandFlow = stateFlowOf(CardBrand.Visa)),
+            launchAddressElement = {},
+            onAddressSelected = {},
+            onShippingAddressesExpandedChanged = {},
         )
     }
 

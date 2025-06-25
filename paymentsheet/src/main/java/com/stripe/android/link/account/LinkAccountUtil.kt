@@ -15,8 +15,7 @@ internal fun LinkAccountUpdate.updateLinkAccount(linkAccountHolder: LinkAccountH
 
 // TODO: Remove this
 internal suspend fun LinkAccountManager.loadDefaultShippingAddress(): ConsumerShippingAddress? {
-    val shippingAddresses = cachedShippingAddresses ?: listShippingAddresses().getOrNull() ?: return null
-    cachedShippingAddresses = shippingAddresses
+    val shippingAddresses = listShippingAddresses().getOrNull() ?: return null
     val address = shippingAddresses.addresses.firstOrNull { it.isDefault } ?: shippingAddresses.addresses.firstOrNull()
     return address?.copy(unredactedPhoneNumber = linkAccountInfo.value.account?.unredactedPhoneNumber)
 }

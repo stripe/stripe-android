@@ -235,7 +235,10 @@ internal class WalletScreenScreenshotTest {
                     expiryDateController = SimpleTextFieldController(DateConfig()),
                     cvcController = CvcController(
                         cardBrandFlow = stateFlowOf(CardBrand.Unknown)
-                    )
+                    ),
+                    launchAddressElement = {},
+                    onAddressSelected = {},
+                    onShippingAddressesExpandedChanged = {},
                 )
             }
         }
