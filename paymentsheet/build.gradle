@@ -29,6 +29,7 @@ dependencies {
     implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
+    implementation("androidx.webkit:webkit:1.14.0")
 
     // DI
     implementation libs.dagger

@@ -3,16 +3,16 @@ package com.stripe.android.shoppay
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -23,7 +23,7 @@ internal class ShopPayActivityTest {
     val intentsTestRule = IntentsRule()
 
     @Test
-    fun `finishes with failed result when no args are passed`() {
+    fun `finishes with failed result when ViewModel factory fails`() {
         val intent = Intent(ApplicationProvider.getApplicationContext(), ShopPayActivity::class.java)
 
         val scenario = ActivityScenario.launchActivityForResult<ShopPayActivity>(intent)
@@ -37,14 +37,16 @@ internal class ShopPayActivityTest {
 
         assertThat(result).isInstanceOf(ShopPayActivityResult.Failed::class.java)
         val failedResult = result as ShopPayActivityResult.Failed
-        assertThat(failedResult.error.message).isEqualTo("No args")
+        assertThat(failedResult.error.message).isEqualTo("Failed to create ShopPayViewModel")
         assertNoUnverifiedIntents()
     }
 
     @Test
     fun `createIntent creates correct intent with args`() {
-        val shopPayConfiguration = mock<PaymentSheet.ShopPayConfiguration>()
-        val args = ShopPayArgs(shopPayConfiguration)
+        val args = ShopPayArgs(
+            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+            publishableKey = "pk_test_123"
+        )
 
         val intent = ShopPayActivity.createIntent(context, args)
 
@@ -52,6 +54,33 @@ internal class ShopPayActivityTest {
         val intentArgs = intent.extras?.let {
             BundleCompat.getParcelable(it, ShopPayActivity.EXTRA_ARGS, ShopPayArgs::class.java)
         }
-        assertThat(intentArgs?.shopPayConfiguration).isEqualTo(shopPayConfiguration)
+        assertThat(intentArgs?.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIGURATION)
+        assertThat(intentArgs?.publishableKey).isEqualTo("pk_test_123")
+    }
+
+    @Test
+    fun `getArgs returns correct args from SavedStateHandle`() {
+        val args = ShopPayArgs(
+            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+            publishableKey = "pk_test_456"
+        )
+
+        val savedStateHandle = SavedStateHandle()
+        savedStateHandle[ShopPayActivity.EXTRA_ARGS] = args
+
+        val retrievedArgs = ShopPayActivity.getArgs(savedStateHandle)
+
+        assertThat(retrievedArgs).isEqualTo(args)
+        assertThat(retrievedArgs?.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIGURATION)
+        assertThat(retrievedArgs?.publishableKey).isEqualTo("pk_test_456")
+    }
+
+    @Test
+    fun `getArgs returns null when no args in SavedStateHandle`() {
+        val savedStateHandle = SavedStateHandle()
+
+        val retrievedArgs = ShopPayActivity.getArgs(savedStateHandle)
+
+        assertThat(retrievedArgs).isNull()
     }
 }

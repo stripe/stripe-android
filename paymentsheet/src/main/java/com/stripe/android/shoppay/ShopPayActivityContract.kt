@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
@@ -11,7 +12,13 @@ internal class ShopPayActivityContract @Inject constructor() :
     ActivityResultContract<ShopPayActivityContract.Args, ShopPayActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        return ShopPayActivity.createIntent(context, ShopPayArgs(input.shopPayConfiguration))
+        return ShopPayActivity.createIntent(
+            context,
+            ShopPayArgs(
+                shopPayConfiguration = input.shopPayConfiguration,
+                publishableKey = PaymentConfiguration.getInstance(context).publishableKey
+            )
+        )
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): ShopPayActivityResult {
