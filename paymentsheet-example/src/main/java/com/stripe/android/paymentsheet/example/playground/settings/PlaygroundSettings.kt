@@ -147,6 +147,20 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        fun paymentSheetConfiguration(
+            playgroundState: PlaygroundState.SharedPaymentToken
+        ): PaymentSheet.Configuration {
+            val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
+            val paymentSheetConfigurationData =
+                PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(value, builder, playgroundState, paymentSheetConfigurationData)
+            }
+            return builder.build()
+        }
+
         fun embeddedConfiguration(
             playgroundState: PlaygroundState.Payment
         ): EmbeddedPaymentElement.Configuration {
@@ -209,6 +223,21 @@ internal class PlaygroundSettings private constructor(
             configurationBuilder: CustomerSheet.Configuration.Builder,
             playgroundState: PlaygroundState.Customer,
             configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = configurationData,
+            )
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: PaymentSheet.Configuration.Builder,
+            playgroundState: PlaygroundState.SharedPaymentToken,
+            configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(
@@ -474,7 +503,6 @@ internal class PlaygroundSettings private constructor(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
-            SharedPaymentTokenDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

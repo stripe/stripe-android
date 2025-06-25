@@ -36,6 +36,14 @@ internal interface PlaygroundSettingDefinition<T> {
 
     fun configure(
         value: T,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PaymentSheetConfigurationData,
+    ) {
+    }
+
+    fun configure(
+        value: T,
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
     }

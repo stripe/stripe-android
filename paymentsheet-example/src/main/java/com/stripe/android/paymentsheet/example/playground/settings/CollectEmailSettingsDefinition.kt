@@ -36,4 +36,13 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
     ) {
         configurationData.updateBillingDetails { copy(email = value) }
     }
+
+    override fun configure(
+        value: CollectionMode,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { copy(email = value) }
+    }
 }

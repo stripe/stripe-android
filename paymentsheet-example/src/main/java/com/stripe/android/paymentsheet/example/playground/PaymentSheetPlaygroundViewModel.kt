@@ -38,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CreateSetupInten
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
+import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -98,10 +99,11 @@ internal class PaymentSheetPlaygroundViewModel(
         customerSheetState.value = null
 
         if (
-            playgroundSettings.configurationData.value.integrationType.isPaymentFlow() ||
-            playgroundSettings.configurationData.value.integrationType.isSptFlow()
+            playgroundSettings.configurationData.value.integrationType.isPaymentFlow()
         ) {
             prepareCheckout(playgroundSettings)
+        } else if (playgroundSettings.configurationData.value.integrationType.isSptFlow()) {
+            prepareSharedPaymentToken(playgroundSettings)
         } else {
             prepareCustomer(playgroundSettings)
         }
@@ -130,6 +132,31 @@ internal class PaymentSheetPlaygroundViewModel(
                 onFailure = { exception ->
                     status.value = StatusMessage(
                         "Preparing checkout failed:\n${exception.message}"
+                    )
+                },
+            )
+        }
+    }
+
+    private fun prepareSharedPaymentToken(
+        playgroundSettings: PlaygroundSettings,
+    ) {
+        viewModelScope.launch {
+            // Snapshot before making the network request to not rely on UI staying in sync.
+            val playgroundSettingsSnapshot = playgroundSettings.snapshot()
+
+            withContext(Dispatchers.IO) {
+                playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            }
+
+            SharedPaymentTokenPlaygroundRequester(playgroundSettingsSnapshot, getApplication()).session().fold(
+                onSuccess = { state ->
+                    playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
+                    setPlaygroundState(state)
+                },
+                onFailure = { exception ->
+                    status.value = StatusMessage(
+                        "Preparing SPT session failed:\n${exception.message}"
                     )
                 },
             )
@@ -603,6 +630,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.SharedPaymentToken -> state.copy(snapshot = updatedSnapshot)
                     }
                 }
             )
@@ -619,6 +647,8 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        // Does not support custom URLs
+                        is PlaygroundState.SharedPaymentToken -> state
                     }
                 }
             )
@@ -637,6 +667,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     when (state) {
                         is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                         is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.SharedPaymentToken -> state.copy(snapshot = updatedSnapshot)
                     }
                 }
             )

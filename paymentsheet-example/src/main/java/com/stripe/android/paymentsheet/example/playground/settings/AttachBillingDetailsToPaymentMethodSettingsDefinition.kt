@@ -36,4 +36,13 @@ internal object AttachBillingDetailsToPaymentMethodSettingsDefinition : BooleanS
     ) {
         configurationData.updateBillingDetails { copy(attachDefaultsToPaymentMethod = value) }
     }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { copy(attachDefaultsToPaymentMethod = value) }
+    }
 }

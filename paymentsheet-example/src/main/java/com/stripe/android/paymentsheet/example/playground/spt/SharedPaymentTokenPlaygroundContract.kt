@@ -6,8 +6,9 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-internal class SharedPaymentTokenPlaygroundContract : ActivityResultContract<PlaygroundState.Payment, Boolean>() {
-    override fun createIntent(context: Context, input: PlaygroundState.Payment): Intent {
+internal class SharedPaymentTokenPlaygroundContract :
+    ActivityResultContract<PlaygroundState.SharedPaymentToken, Boolean>() {
+    override fun createIntent(context: Context, input: PlaygroundState.SharedPaymentToken): Intent {
         return SharedPaymentTokenPlaygroundActivity.create(context, input)
     }
 

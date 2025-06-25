@@ -36,4 +36,13 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
     ) {
         configurationData.updateBillingDetails { copy(phone = value) }
     }
+
+    override fun configure(
+        value: CollectionMode,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { copy(phone = value) }
+    }
 }

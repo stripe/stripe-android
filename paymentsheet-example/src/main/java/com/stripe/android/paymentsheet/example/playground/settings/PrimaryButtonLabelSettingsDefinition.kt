@@ -45,4 +45,15 @@ internal object PrimaryButtonLabelSettingsDefinition :
             configurationBuilder.primaryButtonLabel(value)
         }
     }
+
+    override fun configure(
+        value: String,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.primaryButtonLabel(value)
+        }
+    }
 }

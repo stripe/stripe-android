@@ -354,12 +354,6 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
-                    PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> {
-                        FlowControllerWithSptUi(
-                            playgroundState = playgroundState,
-                        )
-                    }
-
                     PlaygroundConfigurationData.IntegrationType.Embedded -> {
                         EmbeddedUi(
                             playgroundState = playgroundState,
@@ -373,6 +367,7 @@ internal class PaymentSheetPlaygroundActivity :
                 customerSheet = customerSheet,
                 playgroundState = playgroundState,
             )
+            is PlaygroundState.SharedPaymentToken -> FlowControllerWithSptUi(playgroundState)
         }
     }
 
@@ -441,9 +436,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
-    fun FlowControllerWithSptUi(
-        playgroundState: PlaygroundState.Payment,
-    ) {
+    fun FlowControllerWithSptUi(playgroundState: PlaygroundState.SharedPaymentToken) {
         Button(
             onClick = {
                 sharedPaymentTokenPlaygroundLauncher.launch(playgroundState)
