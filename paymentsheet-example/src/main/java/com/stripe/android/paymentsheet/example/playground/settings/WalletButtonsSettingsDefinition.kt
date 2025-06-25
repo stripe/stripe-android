@@ -30,12 +30,28 @@ internal object WalletButtonsSettingsDefinition :
         }
     }
 
-    @OptIn(WalletButtonsPreview::class)
     override fun configure(
         value: WalletButtonsPlaygroundType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        configureWalletButtons(value, configurationBuilder)
+    }
+
+    override fun configure(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        configureWalletButtons(value, configurationBuilder)
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    private fun configureWalletButtons(
+        value: WalletButtonsPlaygroundType,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
     ) {
         val configuration = when (value) {
             WalletButtonsPlaygroundType.Disabled -> {

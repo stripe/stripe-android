@@ -52,4 +52,15 @@ internal object PaymentMethodOrderSettingsDefinition :
             configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
         }
     }
+
+    override fun configure(
+        value: String,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        if (value.isNotEmpty()) {
+            configurationBuilder.paymentMethodOrder(value.split(",").map { it.trim() })
+        }
+    }
 }

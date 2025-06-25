@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.BorderStroke
@@ -22,6 +24,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -49,6 +52,7 @@ import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -62,7 +66,7 @@ import kotlinx.coroutines.launch
 internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
     @Suppress("DEPRECATION")
     private val playgroundState by lazy {
-        intent.getParcelableExtra<PlaygroundState.Payment>(PLAYGROUND_STATE_KEY)
+        intent.getParcelableExtra<PlaygroundState.SharedPaymentToken>(PLAYGROUND_STATE_KEY)
             ?: throw IllegalStateException("Cannot launch SPT flow without playground state!")
     }
 
@@ -75,15 +79,38 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
             var paymentOption by remember { mutableStateOf<PaymentOption?>(null) }
 
             val coroutineScope = rememberCoroutineScope()
+            val requester = remember {
+                SharedPaymentTokenPlaygroundRequester(
+                    playgroundState.snapshot,
+                    applicationContext,
+                )
+            }
+
+            val context = LocalContext.current
 
             val preparePaymentMethodHandler by rememberUpdatedState(
-                remember(coroutineScope) {
-                    PreparePaymentMethodHandler { _, _ ->
+                remember(coroutineScope, requester, context) {
+                    PreparePaymentMethodHandler { paymentMethod, _ ->
                         confirming = false
 
                         coroutineScope.launch {
-                            setResult(Activity.RESULT_OK)
-                            finish()
+                            requester.spt(paymentMethod).onSuccess {
+                                confirming = false
+
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }.onFailure {
+                                confirming = false
+
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Failed to create SPT: ${it.message}",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }
                         }
                     }
                 }
@@ -108,8 +135,10 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                     flowController.configureWithIntentConfiguration(
                         intentConfiguration = playgroundState.intentConfiguration(),
                         configuration = playgroundState.paymentSheetConfiguration(),
-                        callback = { success, _ ->
+                        callback = { success, error ->
                             paymentOption = flowController.getPaymentOption()
+
+                            Log.d("TEST", error?.message ?: "")
 
                             screenContent = if (success) {
                                 ScreenContent.Complete
@@ -245,7 +274,8 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                 ) {
                     Text(
                         text = label,
-                        color = Color(primaryButtonStyle.getOnBackgroundColor(context)),
+                        color = Color(primaryButtonStyle.getOnBackgroundColor(context))
+                            .copy(alpha = LocalContentColor.current.alpha),
                         style = TextStyle(
                             fontFamily = primaryButtonStyle.typography.fontFamily?.let {
                                 FontFamily(Font(it))
@@ -326,7 +356,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
 
         fun create(
             context: Context,
-            playgroundState: PlaygroundState.Payment,
+            playgroundState: PlaygroundState.SharedPaymentToken,
         ): Intent {
             return Intent(context, SharedPaymentTokenPlaygroundActivity::class.java).apply {
                 putExtra(PLAYGROUND_STATE_KEY, playgroundState)

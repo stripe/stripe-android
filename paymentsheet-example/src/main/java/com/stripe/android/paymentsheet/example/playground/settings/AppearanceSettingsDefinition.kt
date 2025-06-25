@@ -35,4 +35,13 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
     ) {
         configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
+
+    override fun configure(
+        value: Unit,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
+    }
 }

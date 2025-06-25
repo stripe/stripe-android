@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -15,15 +16,18 @@ internal object CustomerSettingsDefinition :
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> {
+        val guest = option("Guest", CustomerType.GUEST)
+
         val configurableOptions = if (configurationData.integrationType.isPaymentFlow()) {
-            listOf(option("Guest", CustomerType.GUEST))
+            listOf(guest)
+        } else if (configurationData.integrationType.isCustomerFlow()) {
+            listOf(guest, option("Returning", CustomerType.RETURNING))
         } else {
-            listOf()
+            emptyList()
         }
 
         return configurableOptions + listOf(
             option("New", CustomerType.NEW),
-            option("Returning", CustomerType.RETURNING),
         )
     }
 
@@ -57,6 +61,21 @@ internal object CustomerSettingsDefinition :
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    override fun configure(
+        value: CustomerType,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationBuilder.customer(
+            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = playgroundState.customerId,
+                clientSecret = playgroundState.customerSessionClientSecret
+            )
+        )
     }
 
     override val key: String = "customer"

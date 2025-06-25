@@ -50,6 +50,15 @@ internal object CollectAddressSettingsDefinition :
         configurationData.updateBillingDetails { copy(address = value) }
     }
 
+    override fun configure(
+        value: CollectionMode,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { copy(address = value) }
+    }
+
     override fun convertToString(value: CollectionMode): String = when (value) {
         CollectionMode.Automatic -> "auto"
         CollectionMode.Never -> "never"

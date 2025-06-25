@@ -20,12 +20,28 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
         }
     }
 
-    @OptIn(ShopPayPreview::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        configure(value, configurationBuilder)
+    }
+
+    override fun configure(
+        value: Boolean,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        configure(value, configurationBuilder)
+    }
+
+    @OptIn(ShopPayPreview::class)
+    private fun configure(
+        value: Boolean,
+        configurationBuilder: PaymentSheet.Configuration.Builder
     ) {
         if (value.not()) return
         val configuration = PaymentSheet.ShopPayConfiguration(
