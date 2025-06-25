@@ -25,12 +25,14 @@ internal class CompleteLinkFlowTest {
 
     val consumerPaymentMethod = ConsumerPaymentDetails(
         consumerPaymentDetails,
-        collectedCvc = cvc
+        collectedCvc = cvc,
+        billingPhone = null
     )
 
     val linkPaymentMethod = LinkPaymentDetails(
         linkPaymentDetails,
-        collectedCvc = cvc
+        collectedCvc = cvc,
+        billingPhone = null
     )
 
     @Test
@@ -79,7 +81,8 @@ internal class CompleteLinkFlowTest {
             linkLaunchMode = LinkLaunchMode.Confirmation(
                 selectedPayment = ConsumerPaymentDetails(
                     details = consumerPaymentDetails,
-                    collectedCvc = cvc
+                    collectedCvc = cvc,
+                    billingPhone = null
                 )
             )
         )

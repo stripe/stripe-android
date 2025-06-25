@@ -120,7 +120,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                                 details = updatedPaymentDetails,
                                 collectedCvc = state.value.billingDetailsUpdateFlow?.cvc,
                                 billingPhone = cardParams.billingDetails?.phone,
-                                ),
+                            ),
                             linkAccount = account
                         )
 

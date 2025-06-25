@@ -1,9 +1,10 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.text.input.KeyboardCapitalization.Companion.Words
+import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.luxe.ContactInformationCollectionMode
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
@@ -286,38 +287,22 @@ internal class DefaultEditCardDetailsInteractor(
     }
 
     private fun hasContactInformationChanged(contactInformation: Map<IdentifierSpec, String?>): Boolean {
+        // Only check for contact information changes if the contact information form exists
+        if (contactInformationForm == null) return false
+
         val originalEmail = payload.billingDetails?.email
         val originalPhone = payload.billingDetails?.phone
         val originalName = payload.billingDetails?.name
-
-        val currentEmail = contactInformation[IdentifierSpec.Email]
-        val currentPhone = contactInformation[IdentifierSpec.Phone]
-        val currentName = contactInformation[IdentifierSpec.Name]
-
-        // If any current value differs from original, there's a change
-        val hasActualChanges = originalEmail != currentEmail ||
-            originalPhone != currentPhone ||
-            originalName != currentName
-
-        // If there are no actual changes, but we have valid contact information to submit,
-        // consider it as "changed" to allow submission (this handles prefilled forms)
-        val hasValidContactInfo = !currentEmail.isNullOrBlank() ||
-            !currentPhone.isNullOrBlank() ||
-            !currentName.isNullOrBlank()
-
-        return hasActualChanges || hasValidContactInfo
+        return originalEmail != contactInformation[IdentifierSpec.Email] ||
+            originalPhone != contactInformation[IdentifierSpec.Phone] ||
+            originalName != contactInformation[IdentifierSpec.Name]
     }
 
     private fun isContactInformationComplete(contactInformation: Map<IdentifierSpec, String?>): Boolean {
-        // Check if required contact information fields are complete
-        val emailRequired = ContactInformationCollectionMode.Email.isRequired(billingDetailsCollectionConfiguration)
-        val phoneRequired = ContactInformationCollectionMode.Phone.isRequired(billingDetailsCollectionConfiguration)
-        val nameRequired = ContactInformationCollectionMode.Name.isRequired(billingDetailsCollectionConfiguration)
-
-        if (emailRequired && contactInformation[IdentifierSpec.Email].isNullOrBlank()) return false
-        if (phoneRequired && contactInformation[IdentifierSpec.Phone].isNullOrBlank()) return false
-        if (nameRequired && contactInformation[IdentifierSpec.Name].isNullOrBlank()) return false
-
+        val configuration = billingDetailsCollectionConfiguration
+        if (configuration.collectsEmail && contactInformation[IdentifierSpec.Email].isNullOrBlank()) return false
+        if (configuration.collectsPhone && contactInformation[IdentifierSpec.Phone].isNullOrBlank()) return false
+        if (configuration.collectsName && contactInformation[IdentifierSpec.Name].isNullOrBlank()) return false
         return true
     }
 
@@ -372,9 +357,9 @@ internal class DefaultEditCardDetailsInteractor(
 
         return contactInformationElement(
             initialValues = initialValues,
-            collectEmail = ContactInformationCollectionMode.Email.isAllowed(billingDetailsCollectionConfiguration),
-            collectPhone = ContactInformationCollectionMode.Phone.isAllowed(billingDetailsCollectionConfiguration),
-            collectName = ContactInformationCollectionMode.Name.isAllowed(billingDetailsCollectionConfiguration)
+            collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
+            collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
+            collectName = billingDetailsCollectionConfiguration.collectsName
         )
     }
 
@@ -399,8 +384,8 @@ internal class DefaultEditCardDetailsInteractor(
                 controller = SimpleTextFieldController(
                     SimpleTextFieldConfig(
                         label = resolvableString(com.stripe.android.core.R.string.stripe_address_label_name),
-                        capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Words,
-                        keyboard = androidx.compose.ui.text.input.KeyboardType.Text
+                        capitalization = Words,
+                        keyboard = Text
                     ),
                     initialValue = initialValues[IdentifierSpec.Name]
                 )
