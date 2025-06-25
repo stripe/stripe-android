@@ -8,6 +8,9 @@ import kotlinx.parcelize.Parcelize
  * The mode in which the Link flow is launched.
  */
 internal sealed interface LinkLaunchMode : Parcelable {
+
+    val collectShippingAddress: Boolean
+
     /**
      * Link is launched with the intent to select a payment method ready for confirmation.
      */
@@ -16,7 +19,8 @@ internal sealed interface LinkLaunchMode : Parcelable {
         /**
          * A previously selected payment that will be preselected at launch
          */
-        val selectedPayment: ConsumerPaymentDetails.PaymentDetails?
+        val selectedPayment: ConsumerPaymentDetails.PaymentDetails?,
+        override val collectShippingAddress: Boolean,
     ) : LinkLaunchMode
 
     /**
@@ -24,7 +28,10 @@ internal sealed interface LinkLaunchMode : Parcelable {
      * to payment.
      */
     @Parcelize
-    data object Full : LinkLaunchMode
+    data object Full : LinkLaunchMode {
+        override val collectShippingAddress: Boolean
+            get() = false
+    }
 
     @Parcelize
     data class Confirmation(
@@ -32,5 +39,8 @@ internal sealed interface LinkLaunchMode : Parcelable {
          * The selected Link payment method to be used for confirmation.
          */
         val selectedPayment: LinkPaymentMethod
-    ) : LinkLaunchMode
+    ) : LinkLaunchMode {
+        override val collectShippingAddress: Boolean
+            get() = false
+    }
 }

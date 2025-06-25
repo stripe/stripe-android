@@ -31,6 +31,7 @@ internal data class WalletUiState(
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val alertMessage: ResolvableString? = null,
+    val showShippingAddressSection: Boolean = false,
     val shippingAddresses: List<ConsumerShippingAddress> = emptyList(),
     val selectedShippingAddress: ConsumerShippingAddress? = null,
     val shippingAddressesExpanded: Boolean = false,

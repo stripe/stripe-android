@@ -11,6 +11,7 @@ object FeatureFlags {
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
+    val shippingAddressInLink = FeatureFlag("Shipping Address in Link")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

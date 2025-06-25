@@ -458,6 +458,7 @@ internal class PlaygroundSettings private constructor(
             WalletButtonsSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.showInlineOtpInWalletButtons),
             ShopPaySettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.shippingAddressInLink),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

@@ -350,7 +350,6 @@ private fun PaymentMethodSection(
 
     val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
-
     // TODO: Localize this
     val shippingLabel = "Shipping"
 
@@ -417,6 +416,7 @@ private fun PaymentMethodSection(
         launchAddressElement = launchAddressElement,
         selectedAddress = state.selectedShippingAddress,
         shippingAddresses = state.shippingAddresses,
+        showShippingAddressSection = state.showShippingAddressSection,
         onAddressSelected = onAddressSelected,
         shippingAddressesExpanded = state.shippingAddressesExpanded,
         onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
@@ -446,6 +446,7 @@ private fun PaymentMethodPicker(
     labelMaxWidth: Dp,
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    showShippingAddressSection: Boolean,
     modifier: Modifier = Modifier,
     onAccountMenuClicked: () -> Unit,
     collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
@@ -475,17 +476,19 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
-        ShippingAddressRow(
-            labelMaxWidth = labelMaxWidth,
-            launchAddressElement = launchAddressElement,
-            selectedAddress = selectedAddress,
-            shippingAddresses = shippingAddresses,
-            onAddressSelected = onAddressSelected,
-            isExpanded = shippingAddressesExpanded,
-            onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
-        )
+        if (showShippingAddressSection) {
+            ShippingAddressRow(
+                labelMaxWidth = labelMaxWidth,
+                launchAddressElement = launchAddressElement,
+                selectedAddress = selectedAddress,
+                shippingAddresses = shippingAddresses,
+                onAddressSelected = onAddressSelected,
+                isExpanded = shippingAddressesExpanded,
+                onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
+            )
 
-        LinkDivider()
+            LinkDivider()
+        }
 
         AnimatedContent(
             targetState = expanded || selectedItem == null,
