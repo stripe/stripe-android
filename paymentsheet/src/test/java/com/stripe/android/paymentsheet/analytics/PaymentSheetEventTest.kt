@@ -1832,7 +1832,7 @@ class PaymentSheetEventTest {
         googlePay: Boolean = false,
         primaryButtonColor: Boolean? = false,
         defaultBillingDetails: Boolean = false,
-        allowsDelayedPaymentMethods: Boolean = false,
+        allowsDelayedPaymentMethods: Boolean = true,
         appearanceMap: Map<String, Any?> = buildAppearanceMap(false),
         paymentMethodOrder: List<String> = listOf(),
         allowPaymentMethodsRequiringShippingAddress: Boolean = false,
