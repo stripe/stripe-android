@@ -4,7 +4,6 @@ import androidx.navigation.NavBackStackEntry
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.LinkScreen.Companion.EXTRA_IS_BILLING_UPDATE_FLOW
 import com.stripe.android.paymentsheet.R
 
 internal data class LinkAppBarState(
@@ -58,12 +57,13 @@ internal data class LinkAppBarState(
         }
 
         private fun updateCardTitle(currentEntry: NavBackStackEntry): ResolvableString {
+            // Use the companion function to check if it's a billing details update flow
             val isBillingDetailsUpdateFlow =
-                currentEntry.arguments?.getString(EXTRA_IS_BILLING_UPDATE_FLOW).toBoolean()
+                currentEntry.arguments?.let { LinkScreen.billingDetailsUpdateFlow(it) } != null
             return if (isBillingDetailsUpdateFlow) {
-                R.string.stripe_paymentsheet_confirm.resolvableString
-            } else {
                 R.string.stripe_link_confirm_payment_title.resolvableString
+            } else {
+                R.string.stripe_link_update_card_title.resolvableString
             }
         }
     }

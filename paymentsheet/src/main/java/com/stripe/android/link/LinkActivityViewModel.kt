@@ -142,8 +142,7 @@ internal class LinkActivityViewModel @Inject constructor(
             LinkAppBarState.create(
                 currentEntry = currentEntry,
                 previousEntryRoute = previousEntry,
-                consumerIsSigningUp = linkAccount?.completedSignup == true,
-
+                consumerIsSigningUp = linkAccount?.completedSignup == true
             )
         }
     }

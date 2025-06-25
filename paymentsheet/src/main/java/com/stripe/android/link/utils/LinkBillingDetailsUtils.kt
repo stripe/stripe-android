@@ -6,7 +6,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
 /**
  * Returns the effective billing details, which refers to billing details that have been
@@ -21,29 +20,12 @@ internal fun effectiveBillingDetails(
     val defaultBillingDetails = configuration.defaultBillingDetails
         ?: PaymentSheet.BillingDetails()
     return defaultBillingDetails.copy(
-        email = supplementFieldIfRequired(
-            currentValue = defaultBillingDetails.email,
-            linkValue = linkAccount.email,
-            isRequired = billingConfig.email == CollectionMode.Always
-        ),
-        phone = supplementFieldIfRequired(
-            currentValue = defaultBillingDetails.phone,
-            linkValue = linkAccount.unredactedPhoneNumber,
-            isRequired = billingConfig.phone == CollectionMode.Always
-        )
+        email = defaultBillingDetails.email
+            ?: linkAccount.email.takeIf { billingConfig.collectsEmail },
+        phone = defaultBillingDetails.phone
+            ?: linkAccount.unredactedPhoneNumber.takeIf { billingConfig.collectsPhone },
         // Name and address cannot be supplemented from Link account data
     )
-}
-
-/**
- * Supplements a field with Link account data if required and the current value is missing.
- */
-private fun supplementFieldIfRequired(
-    currentValue: String?,
-    linkValue: String?,
-    isRequired: Boolean
-): String? {
-    return if (isRequired) currentValue ?: linkValue else currentValue
 }
 
 /**
@@ -84,21 +66,10 @@ internal fun ConsumerPaymentDetails.Card.withEffectiveBillingDetails(
 ): ConsumerPaymentDetails.Card {
     if (linkAccount == null) return this
     val effectiveBillingDetails = effectiveBillingDetails(configuration, linkAccount)
-    val effectiveAddress = effectiveBillingDetails.toConsumerBillingAddress()
-    val currentAddress = billingAddress
-
-    val effectiveBillingAddress = when {
-        currentAddress != null && effectiveAddress != null -> currentAddress.copy(
-            name = currentAddress.name ?: effectiveAddress.name,
-            line1 = currentAddress.line1 ?: effectiveAddress.line1,
-            line2 = currentAddress.line2 ?: effectiveAddress.line2,
-            locality = currentAddress.locality ?: effectiveAddress.locality,
-            administrativeArea = currentAddress.administrativeArea ?: effectiveAddress.administrativeArea,
-            postalCode = currentAddress.postalCode ?: effectiveAddress.postalCode,
-            countryCode = currentAddress.countryCode ?: effectiveAddress.countryCode
-        )
-        else -> currentAddress ?: effectiveAddress
-    }
+    val effectiveBillingAddress = mergeAddresses(
+        currentAddress = billingAddress,
+        effectiveAddress = effectiveBillingDetails.toConsumerBillingAddress()
+    )
 
     return copy(
         billingAddress = effectiveBillingAddress,
@@ -117,4 +88,31 @@ private fun PaymentSheet.BillingDetails.toConsumerBillingAddress(): ConsumerPaym
         postalCode = billingAddress.postalCode,
         countryCode = billingAddress.country?.let { CountryCode.create(it) }
     )
+}
+
+/**
+ * Merges two billing addresses, only using merchant-provided address data when
+ * country and postal code align.
+ */
+private fun mergeAddresses(
+    currentAddress: ConsumerPaymentDetails.BillingAddress?,
+    effectiveAddress: ConsumerPaymentDetails.BillingAddress?
+): ConsumerPaymentDetails.BillingAddress? {
+    if (currentAddress == null) return effectiveAddress
+    if (effectiveAddress == null) return currentAddress
+
+    val addressesAreCompatible = currentAddress.countryCode == effectiveAddress.countryCode &&
+        currentAddress.postalCode == effectiveAddress.postalCode
+
+    return if (addressesAreCompatible) {
+        currentAddress.copy(
+            name = currentAddress.name ?: effectiveAddress.name,
+            line1 = currentAddress.line1 ?: effectiveAddress.line1,
+            line2 = currentAddress.line2 ?: effectiveAddress.line2,
+            locality = currentAddress.locality ?: effectiveAddress.locality,
+            administrativeArea = currentAddress.administrativeArea ?: effectiveAddress.administrativeArea,
+        )
+    } else {
+        currentAddress
+    }
 }

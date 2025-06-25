@@ -17,12 +17,13 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
-import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
@@ -59,7 +60,6 @@ internal class WalletViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkAccount: LinkAccount,
     private val linkAccountManager: LinkAccountManager,
-    private val linkConfirmationHandler: LinkConfirmationHandler,
     private val completeLinkFlow: CompleteLinkFlow,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
@@ -260,10 +260,13 @@ internal class WalletViewModel @Inject constructor(
         // Check if billing details are missing before proceeding with payment
         if (!selectedPaymentDetails.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)) {
             setProcessingState(false)
+            val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
+            val billingDetailsUpdateFlow = BillingDetailsUpdateFlow(cvc = cvc)
+
             navigationManager.tryNavigateTo(
                 route = LinkScreen.UpdateCard(
                     paymentDetailsId = selectedPaymentDetails.id,
-                    isBillingDetailsUpdateFlow = true
+                    billingDetailsUpdateFlow = billingDetailsUpdateFlow
                 ),
             )
             return
@@ -272,10 +275,11 @@ internal class WalletViewModel @Inject constructor(
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = selectedPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = linkLaunchMode,
+            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+                details = selectedPaymentDetails,
+                collectedCvc = cvc
+            ),
+            linkAccount = linkAccount
         )
 
         when (result) {
@@ -331,7 +335,8 @@ internal class WalletViewModel @Inject constructor(
     fun onUpdateClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         navigationManager.tryNavigateTo(
             route = LinkScreen.UpdateCard(
-                paymentDetailsId = item.id
+                paymentDetailsId = item.id,
+                billingDetailsUpdateFlow = null
             ),
         )
     }
@@ -540,11 +545,11 @@ internal class WalletViewModel @Inject constructor(
                     WalletViewModel(
                         configuration = parentComponent.configuration,
                         linkAccountManager = parentComponent.linkAccountManager,
-                        linkConfirmationHandler = confirmationHandler,
                         completeLinkFlow = DefaultCompleteLinkFlow(
                             linkConfirmationHandler = confirmationHandler,
                             linkAccountManager = parentComponent.linkAccountManager,
-                            dismissalCoordinator = parentComponent.dismissalCoordinator
+                            dismissalCoordinator = parentComponent.dismissalCoordinator,
+                            linkLaunchMode = parentComponent.linkLaunchMode
                         ),
                         logger = parentComponent.logger,
                         navigationManager = parentComponent.navigationManager,

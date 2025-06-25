@@ -243,7 +243,7 @@ class LinkBillingDetailsUtilsTest {
     }
 
     @Test
-    fun `withEffectiveBillingDetails enhances card with effective billing details`() {
+    fun `withEffectiveBillingDetails enhances card with effective billing details if same country and postcode`() {
         val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
@@ -269,7 +269,7 @@ class LinkBillingDetailsUtilsTest {
                     line2 = "Default Line 2",
                     city = "Default City",
                     state = "CA",
-                    postalCode = "54321",
+                    postalCode = "12345",
                     country = "US"
                 )
             )

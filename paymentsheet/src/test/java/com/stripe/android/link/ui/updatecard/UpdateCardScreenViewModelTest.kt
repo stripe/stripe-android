@@ -107,9 +107,10 @@ class UpdateCardScreenViewModelTest {
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = FakeLinkConfirmationHandler(),
                 linkAccountManager = linkAccountManager,
-                dismissalCoordinator = dismissalCoordinator
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = LinkLaunchMode.Full
             ),
-            isBillingDetailsUpdateFlow = false,
+            billingDetailsUpdateFlow = null,
             linkLaunchMode = LinkLaunchMode.Full,
             dismissWithResult = {}
         )

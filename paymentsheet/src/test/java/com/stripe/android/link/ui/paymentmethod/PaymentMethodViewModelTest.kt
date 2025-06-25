@@ -249,7 +249,8 @@ class PaymentMethodViewModelTest {
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
-                dismissalCoordinator = dismissalCoordinator
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = LinkLaunchMode.Full
             ),
         )
     }

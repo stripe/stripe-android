@@ -62,7 +62,7 @@ internal fun UpdateCardScreenBody(
             )
         }
 
-        if (state.isDefault && !state.isBillingDetailsUpdateFlow) {
+        if (state.shouldShowDefaultTag) {
             Text(
                 modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
@@ -135,7 +135,7 @@ internal fun UpdateCardScreenBodyPreview() {
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",
-                    isBillingDetailsUpdateFlow = false,
+                    billingDetailsUpdateFlow = null,
                     primaryButtonLabel = R.string.stripe_link_update_card_confirm_cta.resolvableString,
                     isDefault = false,
                     cardUpdateParams = null,

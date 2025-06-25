@@ -13,8 +13,8 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.LinkScreen.Companion.EXTRA_IS_BILLING_UPDATE_FLOW
 import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
+import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
@@ -134,13 +134,16 @@ private fun Screens(
         }
 
         composable(LinkScreen.UpdateCard.route) { backStackEntry ->
-            val paymentDetailsId = backStackEntry.arguments?.getString(EXTRA_PAYMENT_DETAILS)
+            val paymentDetailsId = backStackEntry
+                .arguments?.getString(EXTRA_PAYMENT_DETAILS)
                 ?: return@composable dismissWithResult(noPaymentDetailsResult())
-            val isBillingDetailsUpdateFlow = backStackEntry.arguments
-                ?.getString(EXTRA_IS_BILLING_UPDATE_FLOW).toBoolean()
+
+            val billingDetailsUpdateFlow = backStackEntry
+                .arguments?.let { LinkScreen.billingDetailsUpdateFlow(it) }
+
             UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId,
-                isBillingDetailsUpdateFlow = isBillingDetailsUpdateFlow,
+                billingDetailsUpdateFlow = billingDetailsUpdateFlow,
                 dismissWithResult = dismissWithResult
             )
         }
@@ -223,14 +226,14 @@ private fun VerificationRoute(
 @Composable
 private fun UpdateCardRoute(
     paymentDetailsId: String,
-    isBillingDetailsUpdateFlow: Boolean,
+    billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: UpdateCardScreenViewModel = linkViewModel { parentComponent ->
         UpdateCardScreenViewModel.factory(
             parentComponent = parentComponent,
             paymentDetailsId = paymentDetailsId,
-            isBillingDetailsUpdateFlow = isBillingDetailsUpdateFlow,
+            billingDetailsUpdateFlow = billingDetailsUpdateFlow,
             dismissWithResult = dismissWithResult
         )
     }

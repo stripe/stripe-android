@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
@@ -20,7 +21,6 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
-import com.stripe.android.link.utils.effectiveBillingDetails
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -119,10 +119,11 @@ internal class PaymentMethodViewModel @Inject constructor(
         cvc: String?
     ) {
         val result = completeLinkFlow(
-            linkPaymentDetails = paymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = linkLaunchMode,
+            selectedPaymentDetails = LinkPaymentMethod.LinkPaymentDetails(
+                linkPaymentDetails = paymentDetails,
+                collectedCvc = cvc
+            ),
+            linkAccount = linkAccount
         )
         when (result) {
             is Result.Canceled -> Unit
@@ -153,15 +154,6 @@ internal class PaymentMethodViewModel @Inject constructor(
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    val paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
-                        configuration = parentComponent.configuration
-                    ).copy(
-                        // Use effective billing details to prefill billing details in new card flows
-                        defaultBillingDetails = effectiveBillingDetails(
-                            configuration = parentComponent.configuration,
-                            linkAccount = linkAccount
-                        )
-                    )
                     PaymentMethodViewModel(
                         configuration = parentComponent.configuration,
                         linkAccount = linkAccount,
@@ -172,11 +164,15 @@ internal class PaymentMethodViewModel @Inject constructor(
                             ),
                             linkAccountManager = parentComponent.linkAccountManager,
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
+                            linkLaunchMode = parentComponent.linkLaunchMode
                         ),
                         formHelper = DefaultFormHelper.create(
                             coroutineScope = parentComponent.viewModel.viewModelScope,
                             cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
-                            paymentMethodMetadata = paymentMethodMetadata,
+                            paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
+                                configuration = parentComponent.configuration,
+                                linkAccount = linkAccount,
+                            ),
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,
                         ),

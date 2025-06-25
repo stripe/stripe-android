@@ -791,7 +791,6 @@ internal class WalletScreenTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             logger = FakeLogger(),
             navigateAndClearStack = {},
             dismissWithResult = {},
@@ -801,7 +800,8 @@ internal class WalletScreenTest {
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
-                dismissalCoordinator = dismissalCoordinator
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
             )
         )
     }

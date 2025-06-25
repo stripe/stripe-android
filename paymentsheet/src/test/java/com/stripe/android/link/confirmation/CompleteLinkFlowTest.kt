@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkPaymentMethod.ConsumerPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod.LinkPaymentDetails
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -22,6 +23,16 @@ internal class CompleteLinkFlowTest {
     private val linkPaymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
     private val cvc = "123"
 
+    val consumerPaymentMethod = ConsumerPaymentDetails(
+        consumerPaymentDetails,
+        collectedCvc = cvc
+    )
+
+    val linkPaymentMethod = LinkPaymentDetails(
+        linkPaymentDetails,
+        collectedCvc = cvc
+    )
+
     @Test
     fun `invoke with ConsumerPaymentDetails on Full mode - success`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
@@ -32,14 +43,13 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full
         )
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = LinkLaunchMode.Full
+            selectedPaymentDetails = consumerPaymentMethod,
+            linkAccount = linkAccount
         )
 
         // Verify confirmation was called correctly
@@ -65,19 +75,18 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = FakeLinkAccountManager(),
-            dismissalCoordinator = RealLinkDismissalCoordinator()
-        )
-
-        val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
             linkLaunchMode = LinkLaunchMode.Confirmation(
                 selectedPayment = ConsumerPaymentDetails(
                     details = consumerPaymentDetails,
                     collectedCvc = cvc
                 )
             )
+        )
+
+        val result = completeLinkFlow(
+            selectedPaymentDetails = consumerPaymentMethod,
+            linkAccount = linkAccount
         )
 
         assertThat(linkConfirmationHandler.calls).hasSize(1)
@@ -93,14 +102,13 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
         )
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
+            selectedPaymentDetails = consumerPaymentMethod,
+            linkAccount = linkAccount
         )
 
         // Verify no confirmation was called
@@ -125,14 +133,13 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full
         )
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = LinkLaunchMode.Full
+            selectedPaymentDetails = consumerPaymentMethod,
+            linkAccount = linkAccount
         )
 
         // Verify confirmation was called
@@ -153,14 +160,13 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full
         )
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = LinkLaunchMode.Full
+            selectedPaymentDetails = consumerPaymentMethod,
+            linkAccount = linkAccount
         )
 
         // Verify confirmation was called
@@ -179,14 +185,13 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full
         )
 
         val result = completeLinkFlow(
-            linkPaymentDetails = linkPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = LinkLaunchMode.Full
+            selectedPaymentDetails = linkPaymentMethod,
+            linkAccount = linkAccount
         )
 
         // Verify confirmation was called
@@ -210,14 +215,13 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
         )
 
         val result = completeLinkFlow(
-            linkPaymentDetails = linkPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = cvc,
-            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null)
+            selectedPaymentDetails = linkPaymentMethod,
+            linkAccount = linkAccount
         )
 
         // Verify no confirmation was called
@@ -241,19 +245,20 @@ internal class CompleteLinkFlowTest {
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
             linkAccountManager = linkAccountManager,
-            dismissalCoordinator = RealLinkDismissalCoordinator()
-        )
-
-        val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentDetails,
-            linkAccount = linkAccount,
-            cvc = null,
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
             linkLaunchMode = LinkLaunchMode.Full
         )
 
+        val result = completeLinkFlow(
+            selectedPaymentDetails = linkPaymentMethod.copy(
+                collectedCvc = null // Pass null cvc
+            ),
+            linkAccount = linkAccount
+        )
+
         // Verify confirmation was called with null cvc
-        assertThat(linkConfirmationHandler.calls).hasSize(1)
-        assertThat(linkConfirmationHandler.calls[0].cvc).isNull()
+        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).hasSize(1)
+        assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall[0].cvc).isNull()
 
         // Verify result is successful
         assertThat(result).isInstanceOf(Result.Completed::class.java)
