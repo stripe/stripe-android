@@ -92,6 +92,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            allowsDelayedPaymentMethods = false,
         ),
         isDeferredIntent: Boolean = false
     )

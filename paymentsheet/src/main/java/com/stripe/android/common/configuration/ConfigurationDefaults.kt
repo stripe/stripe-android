@@ -7,7 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object ConfigurationDefaults {
-    const val allowsDelayedPaymentMethods: Boolean = false
+    const val allowsDelayedPaymentMethods: Boolean = true
     const val allowsPaymentMethodsRequiringShippingAddress: Boolean = false
     const val allowsRemovalOfLastSavedPaymentMethod: Boolean = true
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()

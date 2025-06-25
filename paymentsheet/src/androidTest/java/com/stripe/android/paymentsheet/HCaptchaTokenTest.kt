@@ -11,10 +11,10 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ConfirmationType
+import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
-import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
@@ -120,7 +120,8 @@ internal class HCaptchaTokenTest {
             id = CUSTOMER_ID,
             ephemeralKeySecret = EPHEMERAL_KEY_SECRET,
         ),
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        allowsDelayedPaymentMethods = false,
     )
 
     private fun enqueuePaymentMethodsGet() {

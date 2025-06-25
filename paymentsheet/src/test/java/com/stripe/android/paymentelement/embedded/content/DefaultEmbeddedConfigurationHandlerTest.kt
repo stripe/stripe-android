@@ -112,7 +112,9 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
     @Test
     fun `configure calls loader twice when using different configurations`() = runScenario {
-        val configuration1 = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val configuration1 = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .allowsDelayedPaymentMethods(false)
+            .build()
         loader.emit(loader.createSuccess(configuration1.asCommonConfiguration()))
         val configuration2 = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .allowsDelayedPaymentMethods(true)
