@@ -170,6 +170,7 @@ internal class LinkTest {
                         ephemeralKeySecret = "ek_123"
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    allowsDelayedPaymentMethods = false,
                 )
             )
 
@@ -457,6 +458,7 @@ internal class LinkTest {
                         ephemeralKeySecret = "ek_123"
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    allowsDelayedPaymentMethods = false,
                 )
             )
 
