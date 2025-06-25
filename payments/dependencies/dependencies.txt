@@ -949,6 +949,11 @@
 |    +--- androidx.lifecycle:lifecycle-runtime-compose:2.8.7 (*)
 |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.7 (*)
 |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 (*)
+|    +--- androidx.webkit:webkit:1.14.0
+|    |    +--- androidx.annotation:annotation:1.8.1 -> 1.9.1 (*)
+|    |    +--- androidx.annotation:annotation-experimental:1.4.1 (*)
+|    |    +--- androidx.core:core:1.1.0 -> 1.13.1 (*)
+|    |    \--- org.jspecify:jspecify:1.0.0
 |    +--- com.google.dagger:dagger:2.55 (*)
 |    +--- androidx.compose.ui:ui-viewbinding:1.7.8
 |    |    +--- androidx.compose.ui:ui:1.7.8 (*)
