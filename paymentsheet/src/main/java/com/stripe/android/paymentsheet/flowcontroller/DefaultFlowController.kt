@@ -685,7 +685,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 confirm()
             }
             SepaMandateResult.Canceled -> {
-                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled)
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Canceled())
             }
         }
     }
@@ -714,8 +714,8 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun PaymentResult.convertToPaymentSheetResult() = when (this) {
-        is PaymentResult.Completed -> PaymentSheetResult.Completed
-        is PaymentResult.Canceled -> PaymentSheetResult.Canceled
+        is PaymentResult.Completed -> PaymentSheetResult.Completed()
+        is PaymentResult.Canceled -> PaymentSheetResult.Canceled()
         is PaymentResult.Failed -> PaymentSheetResult.Failed(throwable)
     }
 

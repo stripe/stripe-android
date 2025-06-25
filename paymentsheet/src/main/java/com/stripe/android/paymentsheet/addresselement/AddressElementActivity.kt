@@ -123,7 +123,7 @@ internal class AddressElementActivity : ComponentActivity() {
         }
     }
 
-    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
+    private fun setResult(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
         setResult(
             result.resultCode,
             Intent().putExtras(

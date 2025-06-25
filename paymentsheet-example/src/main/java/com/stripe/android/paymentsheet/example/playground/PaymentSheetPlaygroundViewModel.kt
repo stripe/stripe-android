@@ -575,7 +575,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
         when (addressLauncherResult) {
-            AddressLauncherResult.Canceled -> {
+            is AddressLauncherResult.Canceled -> {
                 status.value = StatusMessage("Canceled")
             }
 
