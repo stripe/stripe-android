@@ -408,7 +408,7 @@ internal class PlaygroundSettings private constructor(
             return settings
         }
 
-        private val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
+        val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
@@ -447,8 +447,14 @@ internal class PlaygroundSettings private constructor(
             CustomPaymentMethodsSettingDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-            FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.instantDebitsIncentives,
+                PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            ),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.financialConnectionsFullSdkUnavailable,
+                PlaygroundConfigurationData.IntegrationType.paymentFlows().toList(),
+            ),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
@@ -456,7 +462,11 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
             WalletButtonsSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.showInlineOtpInWalletButtons),
+            FeatureFlagSettingsDefinition(
+                FeatureFlags.showInlineOtpInWalletButtons,
+                allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList() +
+                    PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
+            ),
             ShopPaySettingsDefinition,
         )
 
@@ -464,6 +474,7 @@ internal class PlaygroundSettings private constructor(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
+            SharedPaymentTokenDefinition,
         )
 
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =

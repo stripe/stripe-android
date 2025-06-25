@@ -97,7 +97,10 @@ internal class PaymentSheetPlaygroundViewModel(
         flowControllerState.value = null
         customerSheetState.value = null
 
-        if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
+        if (
+            playgroundSettings.configurationData.value.integrationType.isPaymentFlow() ||
+            playgroundSettings.configurationData.value.integrationType.isSptFlow()
+        ) {
             prepareCheckout(playgroundSettings)
         } else {
             prepareCustomer(playgroundSettings)
@@ -397,7 +400,7 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onEmbeddedResult(success: Boolean) {
+    fun onResult(success: Boolean) {
         if (success) {
             setPlaygroundState(null)
             status.value = StatusMessage(SUCCESS_RESULT)

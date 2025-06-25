@@ -58,6 +58,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSet
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentTokenPlaygroundContract
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -90,10 +91,16 @@ internal class PaymentSheetPlaygroundActivity :
 
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
 
+    private val sharedPaymentTokenPlaygroundLauncher = registerForActivityResult(
+        SharedPaymentTokenPlaygroundContract()
+    ) { success ->
+        viewModel.onResult(success)
+    }
+
     private val embeddedPlaygroundOneStepLauncher = registerForActivityResult(
         EmbeddedPlaygroundOneStepContract()
     ) { success ->
-        viewModel.onEmbeddedResult(success)
+        viewModel.onResult(success)
     }
 
     private val embeddedPlaygroundTwoStepLauncher = registerForActivityResult(
@@ -101,7 +108,7 @@ internal class PaymentSheetPlaygroundActivity :
     ) { result ->
         when (result) {
             EmbeddedPlaygroundTwoStepContract.Result.Cancelled -> Unit
-            EmbeddedPlaygroundTwoStepContract.Result.Complete -> viewModel.onEmbeddedResult(true)
+            EmbeddedPlaygroundTwoStepContract.Result.Complete -> viewModel.onResult(true)
             is EmbeddedPlaygroundTwoStepContract.Result.Updated -> {
                 embeddedPaymentElement.state = result.embeddedPaymentElementState
             }
@@ -347,6 +354,12 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
+                    PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> {
+                        FlowControllerWithSptUi(
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     PlaygroundConfigurationData.IntegrationType.Embedded -> {
                         EmbeddedUi(
                             playgroundState = playgroundState,
@@ -425,6 +438,23 @@ internal class PaymentSheetPlaygroundActivity :
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
         )
+    }
+
+    @Composable
+    fun FlowControllerWithSptUi(
+        playgroundState: PlaygroundState.Payment,
+    ) {
+        Button(
+            onClick = {
+                sharedPaymentTokenPlaygroundLauncher.launch(playgroundState)
+            },
+            enabled = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
+        ) {
+            Text("Launch flow")
+        }
     }
 
     @Composable
