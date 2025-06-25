@@ -22,7 +22,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.BillingDetailsFormState
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.mockito.kotlin.mock
