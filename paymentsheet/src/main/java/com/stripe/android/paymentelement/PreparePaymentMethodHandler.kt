@@ -10,7 +10,7 @@ fun interface PreparePaymentMethodHandler {
     /**
      * Prepares a payment method and shipping address to be passed through an external provider
      *
-     * After the call of to this method, the session will be completed in Payment Element successfully.
+     * After the call to this method, the session will be completed in Payment Element successfully.
      *
      * @param paymentMethod The [PaymentMethod] representing the customer's payment details. If your
      * server needs the payment method, send [PaymentMethod.id] to your server and have it fetch the

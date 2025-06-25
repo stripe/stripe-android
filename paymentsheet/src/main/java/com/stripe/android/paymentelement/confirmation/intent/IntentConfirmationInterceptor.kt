@@ -7,6 +7,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -362,12 +363,19 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (val handler = waitForPreparePaymentMethodHandler()) {
             is PreparePaymentMethodHandler -> {
-                handler.onPreparePaymentMethod(
-                    paymentMethod = paymentMethod,
-                    shippingAddress = shippingValues?.toAddressDetails(),
-                )
+                try {
+                    handler.onPreparePaymentMethod(
+                        paymentMethod = paymentMethod,
+                        shippingAddress = shippingValues?.toAddressDetails(),
+                    )
 
-                NextStep.Complete(isForceSuccess = true)
+                    NextStep.Complete(isForceSuccess = true)
+                } catch (exception: Exception) {
+                    NextStep.Fail(
+                        cause = exception,
+                        message = exception.errorMessage,
+                    )
+                }
             }
 
             else -> {
