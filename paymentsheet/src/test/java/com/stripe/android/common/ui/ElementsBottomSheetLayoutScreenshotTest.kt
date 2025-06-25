@@ -50,11 +50,13 @@ class ElementsBottomSheetLayoutScreenshotTest {
     private enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
         DefaultAppearance(appearance = PaymentSheet.Appearance()),
         AppearanceWithCustomRadiusForBottomSheet(
-            appearance = PaymentSheet.Appearance(
-                shapes = DefaultAppearance.appearance.shapes.copy(
-                    bottomSheetCornerRadiusDp = 50f,
+            appearance = DefaultAppearance.appearance.newBuilder()
+                .shapes(
+                    DefaultAppearance.appearance.shapes.copy(
+                        bottomSheetCornerRadiusDp = 50f,
+                    )
                 )
-            )
+                .build()
         );
 
         override fun initialize() {

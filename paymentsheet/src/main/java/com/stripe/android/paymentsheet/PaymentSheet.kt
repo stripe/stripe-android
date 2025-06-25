@@ -1284,6 +1284,20 @@ class PaymentSheet internal constructor(
             return if (isDark) colorsDark else colorsLight
         }
 
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        internal fun newBuilder(): Builder = Builder()
+            .colorsLight(colorsLight)
+            .colorsDark(colorsDark)
+            .shapes(shapes)
+            .typography(typography)
+            .primaryButton(primaryButton)
+            .embeddedAppearance(embeddedAppearance)
+            .formInsetValues(formInsetValues)
+            .sectionSpacing(sectionSpacing)
+            .textFieldInsets(textFieldInsets)
+            .iconStyle(iconStyle)
+            .verticalModeRowPadding(verticalModeRowPadding)
+
         @Parcelize
         @Poko
         class Embedded(
