@@ -131,7 +131,8 @@ internal fun UpdateCardScreenBodyPreview() {
                     ),
                     onBrandChoiceChanged = {},
                     onCardUpdateParamsChanged = {},
-                    addressCollectionMode = AddressCollectionMode.Automatic
+                    addressCollectionMode = AddressCollectionMode.Automatic,
+                    requiresModification = true
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",
