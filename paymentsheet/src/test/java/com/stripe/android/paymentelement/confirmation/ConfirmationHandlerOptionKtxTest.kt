@@ -397,7 +397,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf())
                 .build()
                 .asCommonConfiguration(),
@@ -426,7 +426,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf(customPaymentMethod))
                 .build()
                 .asCommonConfiguration(),

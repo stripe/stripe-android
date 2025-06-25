@@ -87,7 +87,7 @@ class FlowControllerConfigurationHandlerTest {
 
         val beforeSessionId = AnalyticsRequestFactory.sessionId
 
-        val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.prefilledBuilder()
+        val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
             .appearance(
                 PaymentSheet.Appearance.Builder()
                     .primaryButton(

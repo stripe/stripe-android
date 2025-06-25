@@ -975,7 +975,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
                 .build()
         )

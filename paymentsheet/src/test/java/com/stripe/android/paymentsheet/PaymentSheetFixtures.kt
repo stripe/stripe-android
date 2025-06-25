@@ -236,7 +236,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_WITHOUT_CUSTOMER
         get() = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .customer(null)
                 .build()
         )
