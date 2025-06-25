@@ -16,6 +16,10 @@ internal object CustomPaymentMethodsSettingDefinition :
     PlaygroundSettingDefinition.Displayable<CustomPaymentMethodPlaygroundType> {
     override val displayName: String = "Custom payment methods"
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = CustomPaymentMethodPlaygroundType.entries.map {

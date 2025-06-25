@@ -23,7 +23,8 @@ internal object WalletButtonsSettingsDefinition :
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
         return when (configurationData.integrationType) {
             PlaygroundConfigurationData.IntegrationType.Embedded,
-            PlaygroundConfigurationData.IntegrationType.FlowController -> true
+            PlaygroundConfigurationData.IntegrationType.FlowController,
+            PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> true
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
             PlaygroundConfigurationData.IntegrationType.CustomerSheet -> false
         }

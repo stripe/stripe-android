@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -84,13 +85,27 @@ internal sealed interface PlaygroundState : Parcelable {
                 return getPMOSFUFromStringMap(map)
             }
 
+        @OptIn(SharedPaymentTokenSessionPreview::class)
         fun intentConfiguration(): PaymentSheet.IntentConfiguration {
-            return PaymentSheet.IntentConfiguration(
-                mode = checkoutMode.intentConfigurationMode(this),
-                paymentMethodTypes = paymentMethodTypes,
-                paymentMethodConfigurationId = paymentMethodConfigurationId,
-                requireCvcRecollection = requireCvcRecollectionForDeferred
-            )
+            return if (integrationType.isSptFlow()) {
+                PaymentSheet.IntentConfiguration(
+                    sharedPaymentTokenSessionWithMode = checkoutMode.intentConfigurationMode(this),
+                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        networkId = "networkId",
+                        externalId = "externalId"
+                    ),
+                    paymentMethodTypes = paymentMethodTypes,
+                    paymentMethodConfigurationId = paymentMethodConfigurationId,
+                    requireCvcRecollection = requireCvcRecollectionForDeferred
+                )
+            } else {
+                PaymentSheet.IntentConfiguration(
+                    mode = checkoutMode.intentConfigurationMode(this),
+                    paymentMethodTypes = paymentMethodTypes,
+                    paymentMethodConfigurationId = paymentMethodConfigurationId,
+                    requireCvcRecollection = requireCvcRecollectionForDeferred
+                )
+            }
         }
 
         fun paymentSheetConfiguration(): PaymentSheet.Configuration {

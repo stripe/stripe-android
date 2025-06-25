@@ -9,6 +9,11 @@ internal object CustomerSessionRemoveLastSettingsDefinition : BooleanSettingsDef
     displayName = "Customer Session Remove Last Payment Method",
     key = "customer_session_payment_method_remove"
 ) {
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow() ||
+            configurationData.integrationType.isCustomerFlow()
+    }
+
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ) = listOf(
