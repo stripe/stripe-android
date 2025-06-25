@@ -37,8 +37,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -1132,6 +1130,7 @@ class PaymentSheet internal constructor(
             WalletButtonsPreview::class,
             ShopPayPreview::class
         )
+        @Suppress("DEPRECATION")
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
             .googlePay(googlePay)
