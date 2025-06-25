@@ -263,12 +263,6 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun testLinkFinancialConnectionsSessionUrlUrl() {
-        assertThat(StripeApiRepository.linkFinancialConnectionsSessionUrl)
-            .isEqualTo("https://api.stripe.com/v1/consumers/link_account_sessions")
-    }
-
-    @Test
     fun testDeferredFinancialConnectionsSessionUrlUrl() {
         assertThat(StripeApiRepository.deferredFinancialConnectionsSessionUrl)
             .isEqualTo("https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment")
