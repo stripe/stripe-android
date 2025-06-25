@@ -28,6 +28,14 @@ internal fun MainWebView(
                     assetLoader = assetLoader,
                     onPageLoaded = viewModel::onPageLoaded
                 ),
+                webChromeClient = PopUpWebChromeClient(
+                    context = ctx,
+                    bridgeHandler = viewModel.bridgeHandler,
+                    assetLoader = assetLoader,
+                    setPopUpView = viewModel::setPopupWebView,
+                    closeWebView = viewModel::closePopup,
+                    onPageLoaded = viewModel::onPageLoaded,
+                )
             ).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,

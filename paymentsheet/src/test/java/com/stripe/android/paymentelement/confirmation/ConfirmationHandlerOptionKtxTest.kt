@@ -452,6 +452,19 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
+                    shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+                    customer = null
+                ),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @Test
     fun `On ShopPay selection with config with shopPay config, should return expected option`() {
         assertThat(
             PaymentSelection.ShopPay.toConfirmationOption(
@@ -462,7 +475,9 @@ class ConfirmationHandlerOptionKtxTest {
             )
         ).isEqualTo(
             ShopPayConfirmationOption(
-                shopPayConfiguration = SHOP_PAY_CONFIGURATION
+                shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+                customerSessionClientSecret = "css_test_123",
+                businessName = "Merchant, Inc."
             )
         )
     }

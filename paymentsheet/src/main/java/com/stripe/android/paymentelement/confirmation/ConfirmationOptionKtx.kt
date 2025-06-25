@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
@@ -153,9 +154,15 @@ private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
 private fun PaymentSelection.ShopPay.toConfirmationOption(
     configuration: CommonConfiguration
 ): ShopPayConfirmationOption? {
+    val customerSessionClientSecret = when (val accessType = configuration.customer?.accessType) {
+        is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
+        else -> return null
+    }
     return configuration.shopPayConfiguration?.let { config ->
         ShopPayConfirmationOption(
-            shopPayConfiguration = config
+            shopPayConfiguration = config,
+            customerSessionClientSecret = customerSessionClientSecret,
+            businessName = configuration.merchantDisplayName
         )
     }
 }

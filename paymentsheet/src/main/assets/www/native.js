@@ -38,32 +38,51 @@
     });
 })();
 
+// Helper function to parse native response
+function parseNativeResponse(nativeResponseString) {
+    try {
+        const parsedResponse = typeof nativeResponseString === 'string' ?
+            JSON.parse(nativeResponseString) : nativeResponseString;
+
+        if (parsedResponse && parsedResponse.type === 'data') {
+            return parsedResponse.data;
+        } else if (parsedResponse && parsedResponse.type === 'error') {
+            throw new Error(parsedResponse.message || 'Native call returned an error');
+        } else {
+            throw new Error(`Invalid response structure from native: ${JSON.stringify(parsedResponse)}`);
+        }
+    } catch (e) {
+        if (e.message.includes('Invalid response structure') || e.message.includes('Native call returned an error')) {
+            throw e;
+        }
+        throw new Error(`Failed to parse native response: ${e.message}`);
+    }
+}
+
 // Function to call native methods
 function callNative(methodName, payload) {
     return new Promise((resolve, reject) => {
         try {
             // Add common fields to payload
-            const requestPayload = {
+            const requestPayload = payload ? {
                 ...payload,
-            };
+            } : {};
 
             if (window.androidBridge && typeof window.androidBridge[methodName] === 'function') {
-                console.log(`Sending to Android bridge (${methodName}):`, JSON.stringify(requestPayload));
-                const nativeResponseString = window.androidBridge[methodName](JSON.stringify(requestPayload));
+                let nativeResponseString;
+                if (payload) {
+                    console.log(`Sending to Android bridge (${methodName}):`, JSON.stringify(requestPayload));
+                    nativeResponseString = window.androidBridge[methodName](JSON.stringify(requestPayload));
+                } else {
+                    console.log(`Calling Android bridge (${methodName}) without payload`);
+                    nativeResponseString = window.androidBridge[methodName]();
+                }
 
                 try {
-                    const parsedResponse = typeof nativeResponseString === 'string' ?
-                        JSON.parse(nativeResponseString) : nativeResponseString;
-
-                    if (parsedResponse && parsedResponse.type === 'data') {
-                        resolve(parsedResponse.data);
-                    } else if (parsedResponse && parsedResponse.type === 'error') {
-                        reject(new Error(parsedResponse.message || 'Native call returned an error'));
-                    } else {
-                        reject(new Error(`Invalid response structure from native: ${JSON.stringify(parsedResponse)}`));
-                    }
+                    const result = parseNativeResponse(nativeResponseString);
+                    resolve(result);
                 } catch (e) {
-                    reject(new Error(`Failed to parse native response: ${e.message}`));
+                    reject(e);
                 }
                 return;
             } else {
@@ -98,34 +117,23 @@ window.NativeStripeECE = {
         console.log("result", result)
         return result
     },
-    getNativeAmountTotal: function() {
-        return 5000
+    getShopPayInitParams: function() {
+        try {
+            if (window.androidBridge && typeof window.androidBridge.getShopPayInitParams === 'function') {
+                console.log('Calling Android bridge (getShopPayInitParams) without payload');
+                const nativeResponseString = window.androidBridge.getShopPayInitParams();
+                return parseNativeResponse(nativeResponseString);
+            } else {
+                throw new Error('Native bridge not available for method: getShopPayInitParams');
+            }
+        } catch (e) {
+            console.error('Error calling native method getShopPayInitParams:', e);
+            throw new Error(`Failed to communicate with native: ${e.message}`);
+        }
     }
 };
 
 // Send ready notification to bridge
-(function notifyBridgeReady() {
-    try {
-        const readyPayload = {
-            type: 'bridgeReady',
-            timestamp: Date.now(),
-            userAgent: navigator.userAgent,
-            url: window.location.href,
-            origin: window.location.origin,
-            isTopFrame: window === window.top,
-            nativeShippingAvailable: true
-        };
-
-        if (window.androidBridge && typeof window.androidBridge.ready === 'function') {
-            window.androidBridge.ready(JSON.stringify(readyPayload));
-            console.log('Android bridge ready message sent.');
-        } else {
-            console.warn('Android bridge unavailable. Cannot send ready message.');
-        }
-    } catch(e) {
-        console.error('Error sending ready message to native bridge:', e.message);
-    }
-})();
-
-console.log('Native APIs available at window.NativeShipping, window.NativeECE, and window.NativePayment');
-initializeApp()
+window.androidBridge.ready(JSON.stringify({
+ type: 'bridgeReady'
+}));

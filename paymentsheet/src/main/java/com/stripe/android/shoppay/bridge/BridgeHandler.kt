@@ -10,5 +10,11 @@ internal interface BridgeHandler {
     fun getStripePublishableKey(): String
 
     @JavascriptInterface
+    fun handleECEClick(message: String): String
+
+    @JavascriptInterface
+    fun getShopPayInitParams(): String
+
+    @JavascriptInterface
     fun ready(message: String)
 }

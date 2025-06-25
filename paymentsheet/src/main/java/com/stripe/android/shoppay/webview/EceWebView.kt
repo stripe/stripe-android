@@ -3,6 +3,7 @@ package com.stripe.android.shoppay.webview
 import android.annotation.SuppressLint
 import android.content.Context
 import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.stripe.android.shoppay.bridge.BridgeHandler
@@ -12,10 +13,12 @@ internal class EceWebView(
     context: Context,
     bridgeHandler: BridgeHandler,
     webViewClient: WebViewClient,
+    webChromeClient: WebChromeClient
 ) : WebView(context) {
     init {
         configureDefaultSettings(bridgeHandler)
         this.webViewClient = webViewClient
+        this.webChromeClient = webChromeClient
     }
 
     override fun evaluateJavascript(script: String, resultCallback: ValueCallback<String>?) {

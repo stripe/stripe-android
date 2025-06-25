@@ -172,7 +172,11 @@ internal class ShopPayConfirmationDefinitionTest {
     }
 
     private fun createShopPayConfirmationDefinition(): ShopPayConfirmationDefinition {
-        return ShopPayConfirmationDefinition()
+        return ShopPayConfirmationDefinition(
+            shopPayActivityContract = ShopPayActivityContract(
+                paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier"
+            )
+        )
     }
 
     private companion object {
@@ -189,6 +193,8 @@ internal class ShopPayConfirmationDefinitionTest {
 
         private val SHOP_PAY_CONFIRMATION_OPTION = ShopPayConfirmationOption(
             shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+            customerSessionClientSecret = "customer_secret",
+            businessName = "Example Inc.",
         )
     }
 }

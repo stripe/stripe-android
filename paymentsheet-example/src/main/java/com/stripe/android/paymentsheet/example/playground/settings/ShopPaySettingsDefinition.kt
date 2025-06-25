@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 
 internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
     key = "shopPay",
@@ -29,13 +30,15 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
         configure(value, configurationBuilder)
     }
 
+    @OptIn(ShopPayPreview::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        configure(value, configurationBuilder)
+        if (value.not()) return
+        configurationBuilder.shopPayConfiguration(ShopPayData.shopPayConfiguration())
     }
 
     @OptIn(ShopPayPreview::class)
@@ -44,36 +47,6 @@ internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
         configurationBuilder: PaymentSheet.Configuration.Builder
     ) {
         if (value.not()) return
-        val configuration = PaymentSheet.ShopPayConfiguration(
-            shopId = "shop_1234",
-            billingAddressRequired = true,
-            emailRequired = true,
-            shippingAddressRequired = true,
-            lineItems = listOf(
-                PaymentSheet.ShopPayConfiguration.LineItem(
-                    name = "Potato",
-                    amount = 5000
-                ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
-                    name = "Bread",
-                    amount = 5000
-                ),
-                PaymentSheet.ShopPayConfiguration.LineItem(
-                    name = "Potato",
-                    amount = 5000
-                ),
-            ),
-            shippingRates = listOf(
-                PaymentSheet.ShopPayConfiguration.ShippingRate(
-                    id = "1",
-                    amount = 200,
-                    displayName = "Delivery Fee",
-                    deliveryEstimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Text(
-                        value = "2-3 business days"
-                    )
-                )
-            )
-        )
-        configurationBuilder.shopPayConfiguration(configuration)
+        configurationBuilder.shopPayConfiguration(ShopPayData.shopPayConfiguration())
     }
 }

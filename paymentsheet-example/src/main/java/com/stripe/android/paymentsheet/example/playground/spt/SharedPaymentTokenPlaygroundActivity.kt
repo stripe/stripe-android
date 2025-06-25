@@ -31,6 +31,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,9 +50,11 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
+import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 import com.stripe.android.paymentsheet.example.playground.network.SharedPaymentTokenPlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
@@ -78,7 +81,6 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
             var screenContent by remember { mutableStateOf(ScreenContent.Loading) }
             var paymentOption by remember { mutableStateOf<PaymentOption?>(null) }
 
-            val coroutineScope = rememberCoroutineScope()
             val requester = remember {
                 SharedPaymentTokenPlaygroundRequester(
                     playgroundState.snapshot,
@@ -86,46 +88,12 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                 )
             }
 
-            val context = LocalContext.current
+            val preparePaymentMethodHandler by rememberPreparePaymentMethodHandler(requester) {
+                confirming = it
+            }
 
-            val preparePaymentMethodHandler by rememberUpdatedState(
-                remember(coroutineScope, requester, context) {
-                    PreparePaymentMethodHandler { paymentMethod, _ ->
-                        confirming = false
-
-                        coroutineScope.launch {
-                            requester.spt(paymentMethod).onSuccess {
-                                confirming = false
-
-                                setResult(Activity.RESULT_OK)
-                                finish()
-                            }.onFailure {
-                                confirming = false
-
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Failed to create SPT: ${it.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-
-                                setResult(Activity.RESULT_OK)
-                                finish()
-                            }
-                        }
-                    }
-                }
-            )
-
-            val flowController = remember {
-                PaymentSheet.FlowController.Builder(
-                    paymentOptionCallback = { result ->
-                        paymentOption = result
-                    },
-                    resultCallback = {}
-                )
-                    .preparePaymentMethodHandler { paymentMethod, shippingAddress ->
-                        preparePaymentMethodHandler.onPreparePaymentMethod(paymentMethod, shippingAddress)
-                    }
+            val flowController = rememberFlowControllerBuilder(preparePaymentMethodHandler) {
+                paymentOption = it
             }.build()
 
             val configure = remember(flowController) {
@@ -172,6 +140,61 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    @OptIn(ShopPayPreview::class)
+    @Composable
+    private fun rememberFlowControllerBuilder(
+        preparePaymentMethodHandler: PreparePaymentMethodHandler,
+        onPaymentOptionChanged: (PaymentOption?) -> Unit
+    ): PaymentSheet.FlowController.Builder {
+        return remember {
+            PaymentSheet.FlowController.Builder(
+                paymentOptionCallback = { result ->
+                    onPaymentOptionChanged(result)
+                },
+                resultCallback = {}
+            ).shopPayHandlers(ShopPayData.shopPayHandlers())
+                .preparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                    preparePaymentMethodHandler.onPreparePaymentMethod(paymentMethod, shippingAddress)
+                }
+        }
+    }
+
+    @Composable
+    private fun rememberPreparePaymentMethodHandler(
+        requester: SharedPaymentTokenPlaygroundRequester,
+        onConfirmingChanged: (Boolean) -> Unit
+    ): State<PreparePaymentMethodHandler> {
+        val coroutineScope = rememberCoroutineScope()
+        val context = LocalContext.current
+        return rememberUpdatedState(
+            remember(coroutineScope, requester, context) {
+                PreparePaymentMethodHandler { paymentMethod, _ ->
+                    onConfirmingChanged(false)
+
+                    coroutineScope.launch {
+                        requester.spt(paymentMethod).onSuccess {
+                            onConfirmingChanged(false)
+
+                            setResult(Activity.RESULT_OK)
+                            finish()
+                        }.onFailure {
+                            onConfirmingChanged(false)
+
+                            Toast.makeText(
+                                applicationContext,
+                                "Failed to create SPT: ${it.message}",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            setResult(Activity.RESULT_OK)
+                            finish()
+                        }
+                    }
+                }
+            }
+        )
     }
 
     private enum class ScreenContent {
