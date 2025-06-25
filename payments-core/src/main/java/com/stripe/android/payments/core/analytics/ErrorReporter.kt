@@ -167,6 +167,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CREATE_INTENT_CALLBACK_NULL(
             eventName = "paymentsheet.create_intent_callback.is_null"
         ),
+        PREPARE_PAYMENT_METHOD_HANDLER_NULL(
+            eventName = "paymentsheet.prepare_payment_method_handler.is_null"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -300,6 +303,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"
+        ),
+        FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),
     }
 }

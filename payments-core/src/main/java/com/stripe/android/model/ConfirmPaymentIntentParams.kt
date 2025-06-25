@@ -300,6 +300,15 @@ constructor(
          */
         internal val trackingNumber: String? = null
     ) : StripeParamsModel, Parcelable {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getPhone() = phone
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getName() = name
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun getAddress() = address
+
         override fun toParamMap(): Map<String, Any> {
             return listOf(
                 PARAM_ADDRESS to address.toParamMap(),
