@@ -9,11 +9,11 @@ import android.webkit.WebView
 import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
-import com.stripe.android.shoppay.bridge.BridgeHandler
+import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 
 internal class PopUpWebChromeClient(
     private val context: Context,
-    private val bridgeHandler: BridgeHandler,
+    private val bridgeHandler: ShopPayBridgeHandler,
     private val assetLoader: WebViewAssetLoader,
     private val setPopUpView: (WebView) -> Unit,
     private val closeWebView: () -> Unit,

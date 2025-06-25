@@ -16,8 +16,16 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
-import com.stripe.android.shoppay.bridge.BridgeHandler
+import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
+import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
+import com.stripe.android.shoppay.bridge.ShopPayConfirmationState.Pending
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -110,11 +118,20 @@ internal class ShopPayViewModelTest {
         testOnPageLoaded("https://example.com/test")
     }
 
+    @OptIn(ShopPayPreview::class)
     @Test
     fun `factory creates ViewModel when args are valid`() {
         val savedStateHandle = createSavedStateHandleWithValidArgs()
         val factory = ShopPayViewModel.factory(savedStateHandle)
 
+        PaymentElementCallbackReferences["paymentElementCallbackIdentifier"] = PaymentElementCallbacks.Builder()
+            .shopPayHandlers(
+                shopPayHandlers = ShopPayHandlers(
+                    shippingMethodUpdateHandler = { null },
+                    shippingContactHandler = { null }
+                )
+            )
+            .build()
         val viewModel = factory.create(ShopPayViewModel::class.java, createCreationExtras())
 
         assertThat(viewModel).isNotNull()
@@ -194,20 +211,25 @@ internal class ShopPayViewModelTest {
     }
 
     private fun createViewModel(
-        bridgeHandler: BridgeHandler = createFakeBridgeHandler()
+        bridgeHandler: ShopPayBridgeHandler = createFakeBridgeHandler()
     ): ShopPayViewModel {
         return ShopPayViewModel(bridgeHandler)
     }
 
-    private fun createFakeBridgeHandler(): FakeBridgeHandler {
-        return FakeBridgeHandler()
+    private fun createFakeBridgeHandler(): FakeShopPayBridgeHandler {
+        return FakeShopPayBridgeHandler()
     }
 
-    private class FakeBridgeHandler : BridgeHandler {
+    private class FakeShopPayBridgeHandler(
+        override val confirmationState: StateFlow<ShopPayConfirmationState> = stateFlowOf(Pending)
+    ) : ShopPayBridgeHandler {
         override fun consoleLog(level: String, message: String, origin: String, url: String) = Unit
         override fun getStripePublishableKey(): String = "pk_test_fake_key"
         override fun handleECEClick(message: String): String = ""
         override fun getShopPayInitParams(): String = ""
+        override fun calculateShipping(message: String) = null
+        override fun calculateShippingRateChange(message: String) = null
+        override fun confirmPayment(message: String): String = ""
         override fun ready(message: String) = Unit
     }
 }

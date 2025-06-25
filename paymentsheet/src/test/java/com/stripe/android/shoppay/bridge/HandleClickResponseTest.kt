@@ -11,20 +11,20 @@ internal class HandleClickResponseTest {
 
     @Test
     fun `toJson should handle multiple line items and shipping rates`() {
-        val lineItems = listOf(
+        val paymentSheetLineItems = listOf(
             PaymentSheet.ShopPayConfiguration.LineItem("Item 1", 1000),
             PaymentSheet.ShopPayConfiguration.LineItem("Item 2", 2000),
             PaymentSheet.ShopPayConfiguration.LineItem("Discount", -500)
         )
 
-        val shippingRates = listOf(
+        val paymentSheetShippingRates = listOf(
             PaymentSheet.ShopPayConfiguration.ShippingRate("rate_1", 500, "Express", null),
             PaymentSheet.ShopPayConfiguration.ShippingRate("rate_2", 0, "Free", null)
         )
 
         val response = HandleClickResponse(
-            lineItems = lineItems,
-            shippingRates = shippingRates,
+            lineItems = paymentSheetLineItems.map { it.toECELineItem() },
+            shippingRates = paymentSheetShippingRates.map { it.toECEShippingRate() },
             billingAddressRequired = true,
             emailRequired = true,
             phoneNumberRequired = false,
