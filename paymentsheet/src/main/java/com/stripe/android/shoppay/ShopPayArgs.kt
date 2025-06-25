@@ -7,4 +7,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class ShopPayArgs(
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration,
+    val publishableKey: String,
 ) : Parcelable

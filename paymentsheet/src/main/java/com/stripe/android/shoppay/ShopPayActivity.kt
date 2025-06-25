@@ -3,43 +3,129 @@ package com.stripe.android.shoppay
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
-import androidx.core.os.BundleCompat
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.core.Logger
+import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.shoppay.webview.MainWebView
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 
 internal class ShopPayActivity : ComponentActivity() {
+    @VisibleForTesting
+    internal var viewModelFactory: ViewModelProvider.Factory = ShopPayViewModel.factory()
 
+    internal var viewModel: ShopPayViewModel? = null
+
+    @SuppressWarnings("TooGenericExceptionCaught")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val args = intent.extras?.let { args ->
-            BundleCompat.getParcelable(args, EXTRA_ARGS, ShopPayArgs::class.java)
+        try {
+            viewModel = ViewModelProvider(this, viewModelFactory)[ShopPayViewModel::class.java]
+        } catch (e: Throwable) {
+            Logger.getInstance(BuildConfig.DEBUG).error("Failed to create ShopPayViewModel", e)
+            dismissWithResult(ShopPayActivityResult.Failed(Throwable("Failed to create ShopPayViewModel")))
         }
 
-        if (args == null) {
-            dismissWithResult(ShopPayActivityResult.Failed(Throwable("No args")))
-            return
-        }
-
+        val vm = viewModel ?: return
         setContent {
-            Content()
+            Content(vm)
         }
     }
 
     @Composable
-    private fun Content() {
-        Button(
-            onClick = {
-                dismissWithResult(
-                    ShopPayActivityResult.Completed("")
-                )
+    private fun Content(viewModel: ShopPayViewModel) {
+        val bottomSheetState = rememberStripeBottomSheetState()
+
+        ElementsBottomSheetLayout(
+            state = bottomSheetState,
+            onDismissed = {
+                dismissWithResult(ShopPayActivityResult.Canceled)
             }
         ) {
-            Text("Complete")
+            BottomSheetScaffold(
+                topBar = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    ) {
+                        IconButton(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            onClick = {
+                                dismissWithResult(ShopPayActivityResult.Canceled)
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
+                                contentDescription = "Close"
+                            )
+                        }
+                    }
+                },
+                content = {
+                    ComposeWebView(viewModel)
+                }
+            )
+        }
+    }
+
+    @Composable
+    private fun ComposeWebView(viewModel: ShopPayViewModel) {
+        val showPopup by viewModel.showPopup.collectAsState()
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                MainWebView(
+                    viewModel = viewModel,
+                )
+
+                if (showPopup) {
+                    PopupWebViewDialog(viewModel = viewModel)
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun PopupWebViewDialog(viewModel: ShopPayViewModel) {
+        val popupWebView by viewModel.popupWebView.collectAsState()
+
+        popupWebView?.let { webView ->
+            AndroidView(
+                factory = {
+                    webView.apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 
@@ -61,6 +147,10 @@ internal class ShopPayActivity : ComponentActivity() {
         ): Intent {
             return Intent(context, ShopPayActivity::class.java)
                 .putExtra(EXTRA_ARGS, args)
+        }
+
+        internal fun getArgs(savedStateHandle: SavedStateHandle): ShopPayArgs? {
+            return savedStateHandle.get<ShopPayArgs>(EXTRA_ARGS)
         }
     }
 }
