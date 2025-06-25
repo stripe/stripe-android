@@ -141,9 +141,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with vertical mode should return expected params`() {
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-        )
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+            .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = config.asCommonConfiguration(),
@@ -211,9 +211,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with preferred networks`() {
-        val config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-            preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-        )
+        val config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+            .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+            .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = config.asCommonConfiguration(),
@@ -248,12 +248,13 @@ class PaymentSheetEventTest {
     @Test
     fun `Init with legacy customer has expected keys`() {
         val event = createInitEvent(
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123"
-                )
-            )
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                .customer(
+                    PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123"
+                    )
+                ).build()
         )
 
         val config = event.params["mpe_config"]?.asMap()
@@ -266,12 +267,13 @@ class PaymentSheetEventTest {
     @Test
     fun `Init with customer session enabled customer has expected keys`() {
         val event = createInitEvent(
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "ek_123",
-                )
-            )
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                .customer(
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "ek_123",
+                    )
+                ).build()
         )
 
         val config = event.params["mpe_config"]?.asMap()

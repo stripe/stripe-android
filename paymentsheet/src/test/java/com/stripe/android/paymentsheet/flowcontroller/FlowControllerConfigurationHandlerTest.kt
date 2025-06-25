@@ -286,9 +286,9 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                merchantDisplayName = "",
-            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .merchantDisplayName("")
+                .build(),
             initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
@@ -308,11 +308,12 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                    id = " "
-                )
-            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .customer(
+                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
+                        id = " "
+                    )
+                ).build(),
             initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)
@@ -332,11 +333,12 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                customer = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                    ephemeralKeySecret = " "
-                )
-            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .customer(
+                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
+                        ephemeralKeySecret = " "
+                    )
+                ).build(),
             initializedViaCompose = false,
         ) { _, error ->
             configureErrors.add(error)

@@ -398,9 +398,9 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                    ),
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
                     linkState = null,
@@ -420,9 +420,9 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                    ),
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     isGooglePayReady = false,
                     linkState = null,
@@ -442,9 +442,9 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-                    ),
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
                     linkState = null,
@@ -464,9 +464,9 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
-                    ),
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                        .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
                     linkState = null,
@@ -486,9 +486,9 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
-                    ),
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                        .build(),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     isGooglePayReady = false,
                     linkState = null,
@@ -508,9 +508,9 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
-                    ),
+                    config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                        .build(),
                     paymentMethods = listOf(),
                     isGooglePayReady = false,
                     linkState = null,

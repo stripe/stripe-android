@@ -121,9 +121,9 @@ internal class DefaultFlowController @Inject internal constructor(
             val state = viewModel.state
             if (state != null) {
                 viewModel.state = state.copy(
-                    config = state.config.copy(
-                        shippingDetails = value
-                    )
+                    config = state.config.newBuilder()
+                        .shippingDetails(value)
+                        .build()
                 )
             }
         }
