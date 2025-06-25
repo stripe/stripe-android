@@ -1112,9 +1112,9 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
-                allowsDelayedPaymentMethods = true,
-            )
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
+                .allowsDelayedPaymentMethods(true)
+                .build()
         )
 
         fakeIntentConfirmationInterceptor.enqueueConfirmStep(
@@ -1148,9 +1148,9 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
-                allowsDelayedPaymentMethods = true,
-            )
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
+                .allowsDelayedPaymentMethods(true)
+                .build()
         )
 
         fakeIntentConfirmationInterceptor.enqueueConfirmStep(
@@ -1182,9 +1182,9 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
-                allowsDelayedPaymentMethods = true,
-            )
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
+                .allowsDelayedPaymentMethods(true)
+                .build()
         )
 
         fakeIntentConfirmationInterceptor.enqueueConfirmStep(
@@ -2176,12 +2176,13 @@ internal class DefaultFlowControllerTest {
         val flowController = createFlowController()
 
         flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                ),
-            )
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    )
+                ).build()
         )
 
         flowController.onPaymentOptionResult(
@@ -2203,12 +2204,13 @@ internal class DefaultFlowControllerTest {
         val flowController = createFlowController()
 
         flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                ),
-            )
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                    )
+                ).build()
         )
 
         flowController.onPaymentOptionResult(

@@ -541,9 +541,9 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
-                allowsDelayedPaymentMethods = true,
-            ),
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
+                .allowsDelayedPaymentMethods(true)
+                .build(),
             metadata = PaymentElementLoader.Metadata(
                 initializedViaCompose = false,
             ),
@@ -2672,11 +2672,12 @@ internal class DefaultPaymentElementLoaderTest {
             customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
         )
 
-        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
-                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
-            )
-        )
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+            .cardBrandAcceptance(
+                PaymentSheet.CardBrandAcceptance.disallowed(
+                    listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+                )
+            ).build()
 
         val state = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(

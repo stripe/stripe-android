@@ -6,18 +6,20 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
     @Test
     fun `'validate' should fail when ephemeral key secret is blank`() {
-        val configWithBlankEphemeralKeySecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_1",
-                ephemeralKeySecret = "   "
-            ),
-        ).asCommonConfiguration()
+        val configWithBlankEphemeralKeySecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_1",
+                    ephemeralKeySecret = "   "
+                )
+            )
+            .build()
+            .asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -29,12 +31,13 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     private fun getConfig(eKey: String): CommonConfiguration {
-        return configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "cus_1",
-                ephemeralKeySecret = eKey
-            ),
-        ).asCommonConfiguration()
+        return configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration(
+                    id = "cus_1",
+                    ephemeralKeySecret = eKey
+                ),
+            ).build().asCommonConfiguration()
     }
 
     @Test
@@ -65,12 +68,13 @@ class PaymentSheetConfigurationKtxTest {
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
-        val configWithBlankCustomerSessionClientSecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = "cus_1",
-                clientSecret = "   "
-            ),
-        ).asCommonConfiguration()
+        val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "   "
+                ),
+            ).build().asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -84,12 +88,13 @@ class PaymentSheetConfigurationKtxTest {
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
-        val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = "cus_1",
-                clientSecret = "ek_12345"
-            ),
-        ).asCommonConfiguration()
+        val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "ek_12345"
+                ),
+            ).build().asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -103,12 +108,13 @@ class PaymentSheetConfigurationKtxTest {
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
-        val configWithInvalidCustomerSessionClientSecret = configuration.copy(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = "cus_1",
-                clientSecret = "total_12345"
-            ),
-        ).asCommonConfiguration()
+        val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()
+            .customer(
+                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "total_12345"
+                ),
+            ).build().asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
