@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -227,13 +226,16 @@ class ConfirmationHandlerOptionKtxTest {
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
         assertThat(
             PaymentSelection.GooglePay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.copy(
-                    googlePay = PaymentSheetFixtures.CONFIG_GOOGLEPAY.googlePay?.copy(
-                        label = "Merchant Payments",
-                        amount = 5000,
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production
+                configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                    .googlePay(
+                        PaymentSheetFixtures.CONFIG_GOOGLEPAY.googlePay?.copy(
+                            label = "Merchant Payments",
+                            amount = 5000,
+                            environment = PaymentSheet.GooglePayConfiguration.Environment.Production
+                        )
                     )
-                ).asCommonConfiguration(),
+                    .build()
+                    .asCommonConfiguration(),
                 linkConfiguration = null,
             )
         ).isEqualTo(
@@ -394,7 +396,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf())
                 .build()
                 .asCommonConfiguration(),
@@ -423,7 +425,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf(customPaymentMethod))
                 .build()
                 .asCommonConfiguration(),

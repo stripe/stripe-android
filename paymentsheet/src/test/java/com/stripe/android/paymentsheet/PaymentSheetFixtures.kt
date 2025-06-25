@@ -12,6 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -21,7 +22,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.BillingDetailsFormState
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.mockito.kotlin.mock
@@ -121,30 +121,33 @@ internal object PaymentSheetFixtures {
         )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        get() = CONFIG_CUSTOMER.copy(
-            googlePay = ConfigFixtures.GOOGLE_PAY
-        )
+        get() = CONFIG_CUSTOMER.newBuilder()
+            .googlePay(ConfigFixtures.GOOGLE_PAY)
+            .build()
 
     internal val CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
-        get() = CONFIG_CUSTOMER.copy(
-            externalPaymentMethods = listOf("external_paypal", "external_fawry")
-        )
+        get() = CONFIG_CUSTOMER.newBuilder()
+            .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
+            .build()
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     internal val CONFIG_CUSTOMER_WITH_CUSTOM_PAYMENT_METHODS
-        get() = CONFIG_CUSTOMER.copy(
-            customPaymentMethods = listOf(
-                PaymentSheet.CustomPaymentMethod(
-                    id = "cpmt_123",
-                    subtitle = "Pay now with BuFoPay".resolvableString,
-                    disableBillingDetailCollection = false,
-                ),
-                PaymentSheet.CustomPaymentMethod(
-                    id = "cpmt_456",
-                    subtitle = "Pay now with PayPal".resolvableString,
-                    disableBillingDetailCollection = true,
-                ),
+        get() = CONFIG_CUSTOMER.newBuilder()
+            .customPaymentMethods(
+                listOf(
+                    PaymentSheet.CustomPaymentMethod(
+                        id = "cpmt_123",
+                        subtitle = "Pay now with BuFoPay".resolvableString,
+                        disableBillingDetailCollection = false,
+                    ),
+                    PaymentSheet.CustomPaymentMethod(
+                        id = "cpmt_456",
+                        subtitle = "Pay now with PayPal".resolvableString,
+                        disableBillingDetailCollection = true,
+                    ),
+                )
             )
-        )
+            .build()
 
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
@@ -232,7 +235,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_WITHOUT_CUSTOMER
         get() = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .customer(null)
                 .build()
         )

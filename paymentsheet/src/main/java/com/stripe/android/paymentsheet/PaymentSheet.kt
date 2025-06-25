@@ -1123,6 +1123,37 @@ class PaymentSheet internal constructor(
                 return Configuration(appName)
             }
         }
+
+        @OptIn(
+            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            ExperimentalCustomPaymentMethodsApi::class,
+            WalletButtonsPreview::class,
+            ShopPayPreview::class
+        )
+        @Suppress("DEPRECATION")
+        internal fun newBuilder(): Builder = Builder(merchantDisplayName)
+            .customer(customer)
+            .googlePay(googlePay)
+            .primaryButtonColor(primaryButtonColor)
+            .defaultBillingDetails(defaultBillingDetails)
+            .shippingDetails(shippingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .preferredNetworks(preferredNetworks)
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .paymentMethodOrder(paymentMethodOrder)
+            .externalPaymentMethods(externalPaymentMethods)
+            .paymentMethodLayout(paymentMethodLayout)
+            .cardBrandAcceptance(cardBrandAcceptance)
+            .customPaymentMethods(customPaymentMethods)
+            .link(link)
+            .walletButtons(walletButtons)
+            .apply {
+                primaryButtonLabel?.let { primaryButtonLabel(it) }
+                shopPayConfiguration?.let { shopPayConfiguration(it) }
+            }
     }
 
     /**

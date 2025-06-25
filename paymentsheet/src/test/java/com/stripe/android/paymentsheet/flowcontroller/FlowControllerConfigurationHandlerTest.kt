@@ -23,7 +23,6 @@ import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.uicore.StripeTheme
@@ -87,7 +86,7 @@ class FlowControllerConfigurationHandlerTest {
 
         val beforeSessionId = AnalyticsRequestFactory.sessionId
 
-        val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.prefilledBuilder()
+        val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
             .appearance(
                 PaymentSheet.Appearance.Builder()
                     .primaryButton(

@@ -85,7 +85,6 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -975,7 +974,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
                 .build()
         )
