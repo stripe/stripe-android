@@ -1,11 +1,10 @@
 package com.stripe.android.paymentelement
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 @SharedPaymentTokenSessionPreview
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface PreparePaymentMethodHandler {
     /**
      * Prepares a payment method and shipping address to be passed through an external provider
