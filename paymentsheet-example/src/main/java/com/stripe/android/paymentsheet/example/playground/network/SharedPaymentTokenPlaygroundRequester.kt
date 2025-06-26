@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.network
 
 import android.content.Context
+import android.util.Log
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
@@ -106,15 +107,18 @@ internal class SharedPaymentTokenPlaygroundRequester(
 
         return when (apiResponse) {
             is com.github.kittinunf.result.Result.Failure -> Result.failure(apiResponse.getException())
-            is com.github.kittinunf.result.Result.Success -> Result.success(apiResponse.value.nextActionValue)
+            is com.github.kittinunf.result.Result.Success -> {
+                Log.d("PI", apiResponse.value.paymentIntentId)
+                Result.success(apiResponse.value.nextActionValue)
+            }
         }
     }
 
-    private companion object {
-        const val BASE_URL = "https://rough-lying-carriage.glitch.me/"
+    companion object {
+        private const val BASE_URL = "https://rough-lying-carriage.glitch.me/"
 
-        const val CREATE_INTENT_PATH = "create-intent"
-        const val CUSTOMER_PATH = "customer"
+        private const val CREATE_INTENT_PATH = "create-intent"
+        private const val CUSTOMER_PATH = "customer"
 
         const val PUBLISHABLE_KEY = "pk_test_51LsBpsAoVfWZ5CNZi82L5ALZB9C89AyblMIWBHERPJRvSTaLYjaTsj" +
             "T7hMeVRuXzTIc9VkkiZQ59KqXqVxYL7Rn600Homq7UPk"
