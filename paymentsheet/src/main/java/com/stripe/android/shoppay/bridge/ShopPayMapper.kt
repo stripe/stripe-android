@@ -21,7 +21,7 @@ internal fun PaymentSheet.ShopPayConfiguration.ShippingRate.toJSON(): JSONObject
     }
 }
 
-private fun PaymentSheet.ShopPayConfiguration.DeliveryEstimate.toJSON(): Any {
+internal fun PaymentSheet.ShopPayConfiguration.DeliveryEstimate.toJSON(): Any {
     return when (this) {
         is PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Text -> {
             value
@@ -35,7 +35,7 @@ private fun PaymentSheet.ShopPayConfiguration.DeliveryEstimate.toJSON(): Any {
     }
 }
 
-private fun PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.toJSON(): JSONObject {
+internal fun PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.toJSON(): JSONObject {
     return JSONObject().apply {
         put("unit", unit.name.lowercase())
         put("value", value)
