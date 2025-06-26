@@ -16,19 +16,17 @@ internal object CustomerSettingsDefinition :
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> {
-        val guest = option("Guest", CustomerType.GUEST)
+        return buildList {
+            if (configurationData.integrationType.isPaymentFlow()) {
+                add(option("Guest", CustomerType.GUEST))
+            }
 
-        val configurableOptions = if (configurationData.integrationType.isPaymentFlow()) {
-            listOf(guest)
-        } else if (configurationData.integrationType.isCustomerFlow()) {
-            listOf(guest, option("Returning", CustomerType.RETURNING))
-        } else {
-            emptyList()
+            add(option("New", CustomerType.NEW))
+
+            if (!configurationData.integrationType.isSptFlow()) {
+                option("Returning", CustomerType.RETURNING)
+            }
         }
-
-        return configurableOptions + listOf(
-            option("New", CustomerType.NEW),
-        )
     }
 
     override fun configure(

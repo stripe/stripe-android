@@ -301,7 +301,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                     Icon(
                         option.iconPainter,
                         contentDescription = null,
-                        tint = MaterialTheme.colors.onBackground,
+                        tint = Color.Unspecified,
                     )
 
                     Column(
