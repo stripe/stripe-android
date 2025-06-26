@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -31,7 +32,6 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -327,7 +327,6 @@ class PaymentSheet internal constructor(
          * @param handler Called when a user calls confirm and their payment method is being handed off
          * to an external provider to handle payment/setup.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @SharedPaymentTokenSessionPreview
         fun preparePaymentMethodHandler(
             handler: PreparePaymentMethodHandler
@@ -472,7 +471,6 @@ class PaymentSheet internal constructor(
             intentBehavior = IntentBehavior.Default,
         )
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @SharedPaymentTokenSessionPreview
         @JvmOverloads
         constructor(
@@ -620,7 +618,6 @@ class PaymentSheet internal constructor(
         @SharedPaymentTokenSessionPreview
         @Parcelize
         @Poko
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class SellerDetails(
             val networkId: String,
             val externalId: String,
@@ -2977,7 +2974,6 @@ class PaymentSheet internal constructor(
         /**
          * Displays a list of wallet buttons that can be used to checkout instantly
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @WalletButtonsPreview
         @Composable
         fun WalletButtons()
@@ -3094,7 +3090,6 @@ class PaymentSheet internal constructor(
              * @param handler Called when a user calls confirm and their payment method is being handed off
              * to an external provider to handle payment/setup.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @SharedPaymentTokenSessionPreview
             fun preparePaymentMethodHandler(
                 handler: PreparePaymentMethodHandler

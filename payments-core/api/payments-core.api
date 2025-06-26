@@ -620,6 +620,9 @@ public final class com/stripe/android/SetupIntentResult$Creator : android/os/Par
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/SharedPaymentTokenSessionPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/Stripe {
 	public static final field $stable I
 	public static final field API_VERSION Ljava/lang/String;
