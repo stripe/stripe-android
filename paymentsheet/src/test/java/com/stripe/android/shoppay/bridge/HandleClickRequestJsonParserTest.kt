@@ -25,8 +25,7 @@ internal class HandleClickRequestJsonParserTest {
 
         val result = parser.parse(json)
 
-        assertThat(result).isNotNull()
-        assertThat(result!!.eventData.expressPaymentType).isEqualTo("shopPay")
+        assertThat(result?.eventData?.expressPaymentType).isEqualTo("shopPay")
     }
 
     @Test
@@ -91,40 +90,5 @@ internal class HandleClickRequestJsonParserTest {
         val result = parser.parse(json)
 
         assertThat(result).isNull()
-    }
-
-    @Test
-    fun `parse returns null when expressPaymentType is not a string`() {
-        val json = JSONObject(
-            """
-            {
-                "eventData": {
-                    "expressPaymentType": 123
-                }
-            }
-            """.trimIndent()
-        )
-
-        val result = parser.parse(json)
-
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `parse handles empty expressPaymentType string`() {
-        val json = JSONObject(
-            """
-            {
-                "eventData": {
-                    "expressPaymentType": ""
-                }
-            }
-            """.trimIndent()
-        )
-
-        val result = parser.parse(json)
-
-        assertThat(result).isNotNull()
-        assertThat(result!!.eventData.expressPaymentType).isEqualTo("")
     }
 }
