@@ -1786,7 +1786,7 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    class Colors(
+    data class Colors(
         /**
          * A primary color used throughout PaymentSheet.
          */
