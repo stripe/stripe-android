@@ -1,9 +1,9 @@
 package com.stripe.android.link.ui
 
-import android.graphics.Color
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
@@ -20,12 +20,8 @@ private enum class LinkButtonAppearance(private val appearance: PaymentSheet.App
 
     TestSurfaceBackgroundAppearance(
         appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.defaultLight.copy(
-                surface = Color.RED,
-            ),
-            colorsDark = PaymentSheet.Colors.defaultDark.copy(
-                surface = Color.RED,
-            ),
+            colorsLight = PaymentSheet.Colors.configureDefaultLight(surface = Color.Red),
+            colorsDark = PaymentSheet.Colors.configureDefaultDark(surface = Color.Red),
         ),
     );
 
