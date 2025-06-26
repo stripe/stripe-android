@@ -2977,7 +2977,6 @@ class PaymentSheet internal constructor(
         /**
          * Displays a list of wallet buttons that can be used to checkout instantly
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @WalletButtonsPreview
         @Composable
         fun WalletButtons()
