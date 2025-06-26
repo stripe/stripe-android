@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
+import com.stripe.android.uicore.StripeThemeDefaults
 
 enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
@@ -15,8 +16,9 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
             colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color.Red),
-            shapes = PaymentSheet.Shapes.default.copy(
+            shapes = PaymentSheet.Shapes(
                 cornerRadiusDp = 8f,
+                borderStrokeWidthDp = StripeThemeDefaults.shapes.borderStrokeWidth
             ),
             typography = PaymentSheet.Typography(
                 fontResId = R.font.cursive,
