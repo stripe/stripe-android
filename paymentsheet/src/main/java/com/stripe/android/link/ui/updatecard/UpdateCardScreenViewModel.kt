@@ -71,8 +71,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     init {
         runCatching {
             val paymentDetails = linkAccountManager.consumerPaymentDetails.value
-                ?.paymentDetails
-                ?.firstOrNull { it.id == paymentDetailsId }
+                .find { it.details.id == paymentDetailsId }
+                ?.details
             require(
                 value = paymentDetails is ConsumerPaymentDetails.Card,
                 lazyMessage = { "Payment details with id $paymentDetailsId is not a card" }
@@ -105,7 +105,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
                     )
                     val result = linkAccountManager.updatePaymentDetails(
-                        updateParams = updateParams
+                        updateParams = updateParams,
+                        phone = cardParams.billingDetails?.phone
                     ).getOrThrow()
 
                     if (state.value.isBillingDetailsUpdateFlow) {
