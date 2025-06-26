@@ -29,7 +29,7 @@ internal object CollectAddressSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(address = value) }
+        configurationData.updateBillingDetails { address = value }
     }
 
     override fun configure(
@@ -38,7 +38,7 @@ internal object CollectAddressSettingsDefinition :
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationData.updateBillingDetails { copy(address = value) }
+        configurationData.updateBillingDetails { address = value }
     }
 
     override fun configure(
@@ -47,7 +47,7 @@ internal object CollectAddressSettingsDefinition :
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(address = value) }
+        configurationData.updateBillingDetails { address = value }
     }
 
     override fun configure(
@@ -56,7 +56,7 @@ internal object CollectAddressSettingsDefinition :
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(address = value) }
+        configurationData.updateBillingDetails { address = value }
     }
 
     override fun convertToString(value: CollectionMode): String = when (value) {

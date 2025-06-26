@@ -16,7 +16,7 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(phone = value) }
+        configurationData.updateBillingDetails { phone = value }
     }
 
     override fun configure(
@@ -25,7 +25,7 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationData.updateBillingDetails { copy(phone = value) }
+        configurationData.updateBillingDetails { phone = value }
     }
 
     override fun configure(
@@ -34,7 +34,7 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(phone = value) }
+        configurationData.updateBillingDetails { phone = value }
     }
 
     override fun configure(
@@ -43,6 +43,6 @@ internal object CollectPhoneSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(phone = value) }
+        configurationData.updateBillingDetails { phone = value }
     }
 }
