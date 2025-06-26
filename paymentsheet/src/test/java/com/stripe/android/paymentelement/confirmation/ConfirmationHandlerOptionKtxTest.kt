@@ -228,10 +228,12 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .googlePay(
-                        PaymentSheetFixtures.CONFIG_GOOGLEPAY.googlePay?.copy(
-                            label = "Merchant Payments",
+                        PaymentSheet.GooglePayConfiguration(
+                            environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                            countryCode = "US",
+                            currencyCode = "USD",
                             amount = 5000,
-                            environment = PaymentSheet.GooglePayConfiguration.Environment.Production
+                            label = "Merchant Payments",
                         )
                     )
                     .build()
