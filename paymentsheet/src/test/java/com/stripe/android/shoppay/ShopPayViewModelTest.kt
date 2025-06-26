@@ -1,7 +1,17 @@
 package com.stripe.android.shoppay
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.webkit.WebView
+import androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.MutableCreationExtras
+import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -112,7 +122,7 @@ internal class ShopPayViewModelTest {
 
     @Test
     fun `factory throws exception when args are null`() {
-        val savedStateHandle = androidx.lifecycle.SavedStateHandle().apply {
+        val savedStateHandle = SavedStateHandle().apply {
             set(ShopPayActivity.EXTRA_ARGS, null)
         }
 
@@ -121,7 +131,7 @@ internal class ShopPayViewModelTest {
 
     @Test
     fun `factory throws exception when args are missing from savedStateHandle`() {
-        val savedStateHandle = androidx.lifecycle.SavedStateHandle()
+        val savedStateHandle = SavedStateHandle()
 
         testFactoryWithInvalidArgs(savedStateHandle)
     }
@@ -130,7 +140,7 @@ internal class ShopPayViewModelTest {
         val viewModel = createViewModel()
         val mockWebView = mock<WebView>()
         val mockContext = mock<Context>()
-        val mockAssets = mock<android.content.res.AssetManager>()
+        val mockAssets = mock<AssetManager>()
         val mockInputStream = "mock js bridge content".byteInputStream()
 
         whenever(mockWebView.context).thenReturn(mockContext)
@@ -142,7 +152,7 @@ internal class ShopPayViewModelTest {
         verify(mockAssets).open("www/native.js")
     }
 
-    private fun testFactoryWithInvalidArgs(savedStateHandle: androidx.lifecycle.SavedStateHandle) {
+    private fun testFactoryWithInvalidArgs(savedStateHandle: SavedStateHandle) {
         val factory = ShopPayViewModel.factory(savedStateHandle)
 
         val exception = assertFailsWith<IllegalArgumentException> {
@@ -152,31 +162,34 @@ internal class ShopPayViewModelTest {
         assertThat(exception.message).isEqualTo("No args found")
     }
 
-    private fun createSavedStateHandleWithValidArgs(): androidx.lifecycle.SavedStateHandle {
-        return androidx.lifecycle.SavedStateHandle().apply {
+    private fun createSavedStateHandleWithValidArgs(): SavedStateHandle {
+        return SavedStateHandle().apply {
             set(
                 ShopPayActivity.EXTRA_ARGS,
                 ShopPayArgs(
                     shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                    publishableKey = "pk_test_valid_key"
+                    publishableKey = "pk_test_valid_key",
+                    paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier",
+                    customerSessionClientSecret = "customer_secret",
+                    businessName = "Example Inc"
                 )
             )
         }
     }
 
-    private fun createCreationExtras(): androidx.lifecycle.viewmodel.CreationExtras {
-        val mockOwner = mock<androidx.savedstate.SavedStateRegistryOwner>()
-        val mockViewModelStoreOwner = mock<androidx.lifecycle.ViewModelStoreOwner>()
-        whenever(mockViewModelStoreOwner.viewModelStore).thenReturn(androidx.lifecycle.ViewModelStore())
+    private fun createCreationExtras(): CreationExtras {
+        val mockOwner = mock<SavedStateRegistryOwner>()
+        val mockViewModelStoreOwner = mock<ViewModelStoreOwner>()
+        whenever(mockViewModelStoreOwner.viewModelStore).thenReturn(ViewModelStore())
 
-        return androidx.lifecycle.viewmodel.MutableCreationExtras().apply {
-            set(androidx.lifecycle.SAVED_STATE_REGISTRY_OWNER_KEY, mockOwner)
+        return MutableCreationExtras().apply {
+            set(SAVED_STATE_REGISTRY_OWNER_KEY, mockOwner)
             set(
-                androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY,
+                ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY,
                 ApplicationProvider.getApplicationContext()
             )
-            set(androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY, mockViewModelStoreOwner)
-            set(androidx.lifecycle.ViewModelProvider.Companion.VIEW_MODEL_KEY, ShopPayViewModel::class.java.name)
+            set(VIEW_MODEL_STORE_OWNER_KEY, mockViewModelStoreOwner)
+            set(ViewModelProvider.VIEW_MODEL_KEY, ShopPayViewModel::class.java.name)
         }
     }
 
@@ -193,6 +206,8 @@ internal class ShopPayViewModelTest {
     private class FakeBridgeHandler : BridgeHandler {
         override fun consoleLog(level: String, message: String, origin: String, url: String) = Unit
         override fun getStripePublishableKey(): String = "pk_test_fake_key"
+        override fun handleECEClick(message: String): String = ""
+        override fun getShopPayInitParams(): String = ""
         override fun ready(message: String) = Unit
     }
 }

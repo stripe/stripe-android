@@ -10,7 +10,9 @@ import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.shoppay.ShopPayActivityResult
 import javax.inject.Inject
 
-internal class ShopPayConfirmationDefinition @Inject constructor() : ConfirmationDefinition<
+internal class ShopPayConfirmationDefinition @Inject constructor(
+    private val shopPayActivityContract: ShopPayActivityContract
+) : ConfirmationDefinition<
     ShopPayConfirmationOption,
     ActivityResultLauncher<ShopPayActivityContract.Args>,
     Unit,
@@ -41,7 +43,7 @@ internal class ShopPayConfirmationDefinition @Inject constructor() : Confirmatio
         onResult: (ShopPayActivityResult) -> Unit
     ): ActivityResultLauncher<ShopPayActivityContract.Args> {
         return activityResultCaller.registerForActivityResult(
-            ShopPayActivityContract(),
+            shopPayActivityContract,
             onResult
         )
     }
@@ -53,7 +55,11 @@ internal class ShopPayConfirmationDefinition @Inject constructor() : Confirmatio
         confirmationParameters: ConfirmationDefinition.Parameters
     ) {
         launcher.launch(
-            ShopPayActivityContract.Args(confirmationOption.shopPayConfiguration)
+            ShopPayActivityContract.Args(
+                shopPayConfiguration = confirmationOption.shopPayConfiguration,
+                customerSessionClientSecret = confirmationOption.customerSessionClientSecret,
+                businessName = confirmationOption.businessName
+            )
         )
     }
 

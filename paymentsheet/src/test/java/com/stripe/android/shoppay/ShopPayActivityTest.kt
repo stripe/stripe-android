@@ -43,11 +43,6 @@ internal class ShopPayActivityTest {
 
     @Test
     fun `createIntent creates correct intent with args`() {
-        val args = ShopPayArgs(
-            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-            publishableKey = "pk_test_123"
-        )
-
         val intent = ShopPayActivity.createIntent(context, args)
 
         assertThat(intent.component?.className).isEqualTo(ShopPayActivity::class.java.name)
@@ -55,16 +50,11 @@ internal class ShopPayActivityTest {
             BundleCompat.getParcelable(it, ShopPayActivity.EXTRA_ARGS, ShopPayArgs::class.java)
         }
         assertThat(intentArgs?.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIGURATION)
-        assertThat(intentArgs?.publishableKey).isEqualTo("pk_test_123")
+        assertThat(intentArgs?.publishableKey).isEqualTo(args.publishableKey)
     }
 
     @Test
     fun `getArgs returns correct args from SavedStateHandle`() {
-        val args = ShopPayArgs(
-            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-            publishableKey = "pk_test_456"
-        )
-
         val savedStateHandle = SavedStateHandle()
         savedStateHandle[ShopPayActivity.EXTRA_ARGS] = args
 
@@ -72,7 +62,7 @@ internal class ShopPayActivityTest {
 
         assertThat(retrievedArgs).isEqualTo(args)
         assertThat(retrievedArgs?.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIGURATION)
-        assertThat(retrievedArgs?.publishableKey).isEqualTo("pk_test_456")
+        assertThat(retrievedArgs?.publishableKey).isEqualTo(args.publishableKey)
     }
 
     @Test
@@ -82,5 +72,15 @@ internal class ShopPayActivityTest {
         val retrievedArgs = ShopPayActivity.getArgs(savedStateHandle)
 
         assertThat(retrievedArgs).isNull()
+    }
+
+    companion object {
+        val args = ShopPayArgs(
+            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+            publishableKey = "pk_test_123",
+            paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier",
+            customerSessionClientSecret = "customer_secret",
+            businessName = "Example Inc."
+        )
     }
 }

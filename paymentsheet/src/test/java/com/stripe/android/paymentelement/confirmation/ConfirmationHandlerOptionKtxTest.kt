@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -452,17 +453,41 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
-    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
+    fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
         assertThat(
             PaymentSelection.ShopPay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
-                    shopPayConfiguration = SHOP_PAY_CONFIGURATION
+                    shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+                    customer = null
                 ),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
+                    .copy(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "",
+                            clientSecret = "css_test_123"
+                        )
+                    )
+                    .asCommonConfiguration()
+                    .copy(
+                        shopPayConfiguration = SHOP_PAY_CONFIGURATION
+                    ),
                 linkConfiguration = null,
             )
         ).isEqualTo(
             ShopPayConfirmationOption(
-                shopPayConfiguration = SHOP_PAY_CONFIGURATION
+                shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+                customerSessionClientSecret = "css_test_123",
+                businessName = "Merchant, Inc."
             )
         )
     }

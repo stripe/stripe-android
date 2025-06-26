@@ -80,8 +80,8 @@ internal class ShopPayViewModel @Inject constructor(
                 DaggerShopPayComponent
                     .builder()
                     .context(app)
-                    .configuration(args.shopPayConfiguration)
-                    .publishableKey(args.publishableKey)
+                    .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
+                    .shopPayArgs(args)
                     .build()
                     .viewModel
             }

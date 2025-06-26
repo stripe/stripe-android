@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://js.stripe.com/v3/"></script>
     <title>Stripe Mobile SDK ECE Bridge</title>
 </head>
@@ -25,11 +25,20 @@
     `);
 
     function initializeStripeElements() {
+        const initParams = window.NativeStripeECE.getShopPayInitParams();
+        console.log("initParams", JSON.stringify(initParams));
         var options = {
           mode: "payment",
-          amount: window.NativeStripeECE.getNativeAmountTotal(),
+          amount: initParams.amountTotal,
           currency: "usd",
           payment_method_types: ["card", "link", "shop_pay"],
+          customerSessionClientSecret: initParams.customerSessionClientSecret,
+          //paymentMethodOptions: {
+          //  shop_pay: {
+          //    shop_id: initParams.shopId,
+          //  },
+          //},
+          __elementsInitSource: 'native_sdk',
         };
 
       console.log("Initializing stripe elements with options", options);
@@ -78,6 +87,7 @@
         } else {
           expressCheckoutDiv.style.visibility = "initial";
         }
+        expressCheckoutElement._sendNativeSdkClick({paymentMethodType: 'shop_pay'})
       });
 
       expressCheckoutElement.on("click", async function (event) {
@@ -209,7 +219,7 @@
               shippingRate: event.shippingRate,
               mode: mode,
               captureMethod: captureMethod,
-              //paymentMethod: paymentMethod,
+              paymentMethodOptions: event._paymentMethodOptions,
             };
 
             const response = await window.NativeStripeECE.confirmPayment(paymentDetails);
