@@ -20,7 +20,7 @@ internal sealed interface LinkLaunchMode : Parcelable {
          * A previously selected payment that will be preselected at launch
          */
         val selectedPayment: ConsumerPaymentDetails.PaymentDetails?,
-        override val collectShippingAddress: Boolean,
+        override val collectShippingAddress: Boolean = false,
     ) : LinkLaunchMode
 
     /**
