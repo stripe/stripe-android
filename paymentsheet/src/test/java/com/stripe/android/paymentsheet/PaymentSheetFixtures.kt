@@ -94,9 +94,11 @@ internal object PaymentSheetFixtures {
         )
     )
 
+    const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
         id = "customer_id",
-        ephemeralKeySecret = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+        ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )
 
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
