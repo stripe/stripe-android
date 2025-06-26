@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -111,19 +112,19 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.consumerPaymentDetails.collectLatest { consumerPaymentDetails ->
-                if (consumerPaymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
-                } else {
-                    _uiState.update {
-                        it.updateWithResponse(consumerPaymentDetails)
-                    }
-                }
-            }
+            loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
         }
 
         viewModelScope.launch {
-            loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { paymentDetailsState ->
+                if (paymentDetailsState.paymentDetails.isEmpty()) {
+                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                } else {
+                    _uiState.update {
+                        it.updateWithResponse(paymentDetailsState.paymentDetails)
+                    }
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -273,7 +274,7 @@ internal class WalletViewModel @Inject constructor(
 
         // Use the cached phone for this payment detail if available (ie the user updated it locally)
         val linkPaymentMethod = linkAccountManager.consumerPaymentDetails.value
-            .find { it.details.id == selectedPaymentDetails.id }
+            ?.paymentDetails?.find { it.details.id == selectedPaymentDetails.id }
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                 details = selectedPaymentDetails,

@@ -2,7 +2,7 @@ package com.stripe.android.link.account
 
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkPaymentDetailsState
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -29,7 +29,7 @@ internal interface LinkAccountManager {
      * [listPaymentDetails] calls will refresh this value.
      * [updatePaymentDetails] calls will refresh the edited payment details on the list.
      */
-    val consumerPaymentDetails: StateFlow<List<LinkPaymentMethod.ConsumerPaymentDetails>>
+    val consumerPaymentDetails: StateFlow<LinkPaymentDetailsState?>
 
     /**
      * Cached shipping addresses for the current Link account.

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentDetailsState
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
@@ -36,11 +37,11 @@ internal open class FakeLinkAccountManager(
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
     private val _consumerPaymentDetails =
-        MutableStateFlow<List<LinkPaymentMethod.ConsumerPaymentDetails>>(
-            TestFactory.CONSUMER_PAYMENT_DETAILS.toLinkPaymentMethod()
+        MutableStateFlow<LinkPaymentDetailsState?>(
+            LinkPaymentDetailsState(paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.toLinkPaymentMethod())
         )
 
-    override val consumerPaymentDetails: StateFlow<List<LinkPaymentMethod.ConsumerPaymentDetails>> =
+    override val consumerPaymentDetails: StateFlow<LinkPaymentDetailsState?> =
         _consumerPaymentDetails.asStateFlow()
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
@@ -69,7 +70,9 @@ internal open class FakeLinkAccountManager(
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
         set(value) {
             field = value
-            _consumerPaymentDetails.value = value.getOrNull()?.toLinkPaymentMethod() ?: emptyList()
+            _consumerPaymentDetails.value = value.getOrNull()?.toLinkPaymentMethod()?.let {
+                LinkPaymentDetailsState(paymentDetails = it)
+            }
         }
     var listShippingAddressesResult: Result<ConsumerShippingAddresses> = Result.success(CONSUMER_SHIPPING_ADDRESSES)
         set(value) {
@@ -90,7 +93,9 @@ internal open class FakeLinkAccountManager(
     private val logoutCall = Turbine<Unit>()
 
     fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
-        _consumerPaymentDetails.value = consumerPaymentDetails?.toLinkPaymentMethod() ?: emptyList()
+        _consumerPaymentDetails.value = consumerPaymentDetails?.toLinkPaymentMethod()?.let {
+            LinkPaymentDetailsState(paymentDetails = it)
+        }
     }
 
     fun setLinkAccount(account: LinkAccountUpdate.Value) {
