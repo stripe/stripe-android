@@ -144,7 +144,6 @@ internal class PaymentSheetPlaygroundActivity :
                     .confirmCustomPaymentMethodCallback(this)
                     .createIntentCallback(viewModel::createIntentCallback)
                     .analyticEventCallback(viewModel::analyticCallback)
-                    .shopPayHandlers(viewModel.shopPayHandlers())
             }
                 .build()
             val embeddedPaymentElementBuilder = remember {
