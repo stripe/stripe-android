@@ -437,21 +437,23 @@ internal class DefaultLinkAccountManager @Inject constructor(
             consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { updatedPaymentDetails ->
             updatedPaymentDetails.also {
-                updateCachedPaymentDetails(it.paymentDetails.first(), phone)
+                updateCachedPaymentDetails(
+                    updatedPayment = it.paymentDetails.first(),
+                    phone = phone
+                )
             }
         }
     }
 
     private fun updateCachedPaymentDetails(
         updatedPayment: ConsumerPaymentDetails.PaymentDetails,
-        phone: String? = null
+        phone: String?
     ) {
-        // Update the PaymentDetailWithPhone list
-        _consumerPaymentDetails.value = _consumerPaymentDetails.value.map { paymentDetailWithPhone ->
-            if (paymentDetailWithPhone.details.id == updatedPayment.id) {
-                paymentDetailWithPhone.copy(details = updatedPayment, billingPhone = phone)
+        _consumerPaymentDetails.value = _consumerPaymentDetails.value.map { paymentDetails ->
+            if (paymentDetails.details.id == updatedPayment.id) {
+                paymentDetails.copy(details = updatedPayment, billingPhone = phone)
             } else {
-                paymentDetailWithPhone
+                paymentDetails
             }
         }
     }
