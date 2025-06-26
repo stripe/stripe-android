@@ -71,7 +71,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     init {
         runCatching {
             val paymentDetails = linkAccountManager.consumerPaymentDetails.value
-                .find { it.details.id == paymentDetailsId }
+                ?.paymentDetails?.find { it.details.id == paymentDetailsId }
                 ?.details
             require(
                 value = paymentDetails is ConsumerPaymentDetails.Card,
