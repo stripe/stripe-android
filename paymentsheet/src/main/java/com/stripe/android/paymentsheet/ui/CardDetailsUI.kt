@@ -139,22 +139,10 @@ private fun CardDetailsEditUI(
         if (contactInformationForm != null) {
             Spacer(Modifier.height(32.dp))
 
-            SectionElementUI(
-                enabled = true,
-                element = contactInformationForm as SectionElement,
-                hiddenIdentifiers = emptySet(),
-                lastTextFieldIdentifier = null
+            ContactInformationFormUI(
+                contactInformationForm = contactInformationForm,
+                onContactInformationChanged = onContactInformationChanged
             )
-
-            // Observe contact information form changes and emit ViewAction
-            LaunchedEffect(contactInformationForm) {
-                contactInformationForm.getFormFieldValueFlow().collect { formFields ->
-                    val contactInfo = formFields.associate { (identifier, entry) ->
-                        identifier to entry.value
-                    }
-                    onContactInformationChanged(contactInfo)
-                }
-            }
         }
 
         if (billingDetailsForm != null) {
@@ -163,6 +151,27 @@ private fun CardDetailsEditUI(
             BillingDetailsFormUI(
                 form = billingDetailsForm,
                 onValuesChanged = onAddressChanged
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContactInformationFormUI(
+    contactInformationForm: FormElement,
+    onContactInformationChanged: (Map<IdentifierSpec, String?>) -> Unit
+) {
+    SectionElementUI(
+        enabled = true,
+        element = contactInformationForm as SectionElement,
+        hiddenIdentifiers = emptySet(),
+        lastTextFieldIdentifier = null
+    )
+
+    LaunchedEffect(contactInformationForm) {
+        contactInformationForm.getFormFieldValueFlow().collect { formFields ->
+            onContactInformationChanged(
+                formFields.associate { (spec, entry) -> spec to entry.value }
             )
         }
     }
