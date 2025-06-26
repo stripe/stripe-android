@@ -24,13 +24,11 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
@@ -523,24 +521,6 @@ internal class PaymentSheetPlaygroundViewModel(
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     fun analyticCallback(event: AnalyticEvent) {
         Log.d("AnalyticEvent", "Event: $event")
-    }
-
-    @OptIn(ShopPayPreview::class)
-    fun shopPayHandlers(): ShopPayHandlers {
-        return ShopPayHandlers(
-            shippingMethodUpdateHandler = {
-                ShopPayHandlers.ShippingRateUpdate(
-                    lineItems = listOf(),
-                    shippingRates = listOf()
-                )
-            },
-            shippingContactHandler = {
-                ShopPayHandlers.ShippingContactUpdate(
-                    lineItems = listOf(),
-                    shippingRates = listOf()
-                )
-            }
-        )
     }
 
     @OptIn(DelicatePaymentSheetApi::class)

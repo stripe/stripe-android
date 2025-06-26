@@ -4,7 +4,7 @@ import com.stripe.android.core.model.StripeModel
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class HandleClickRequest(
+internal data class HandleClickRequest(
     val eventData: EventData,
 ) : StripeModel {
     @Parcelize

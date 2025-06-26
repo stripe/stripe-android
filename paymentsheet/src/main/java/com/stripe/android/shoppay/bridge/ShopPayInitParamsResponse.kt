@@ -2,7 +2,7 @@ package com.stripe.android.shoppay.bridge
 
 import org.json.JSONObject
 
-data class ShopPayInitParamsResponse(
+internal data class ShopPayInitParamsResponse(
     val shopId: String,
     val customerSessionClientSecret: String,
     val amountTotal: Int,

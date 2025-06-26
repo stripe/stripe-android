@@ -38,7 +38,6 @@
     });
 })();
 
-// Helper function to parse native response
 function parseNativeResponse(nativeResponseString) {
     try {
         const parsedResponse = typeof nativeResponseString === 'string' ?
@@ -59,7 +58,6 @@ function parseNativeResponse(nativeResponseString) {
     }
 }
 
-// Function to call native methods
 function callNative(methodName, payload) {
     return new Promise((resolve, reject) => {
         try {
@@ -74,7 +72,6 @@ function callNative(methodName, payload) {
                     console.log(`Sending to Android bridge (${methodName}):`, JSON.stringify(requestPayload));
                     nativeResponseString = window.androidBridge[methodName](JSON.stringify(requestPayload));
                 } else {
-                    console.log(`Calling Android bridge (${methodName}) without payload`);
                     nativeResponseString = window.androidBridge[methodName]();
                 }
 
@@ -95,7 +92,6 @@ function callNative(methodName, payload) {
     });
 }
 
-// Unified ECE API
 window.NativeStripeECE = {
     handleClick: function(eventData) {
         return callNative('handleECEClick', { eventData });
@@ -120,7 +116,6 @@ window.NativeStripeECE = {
     getShopPayInitParams: function() {
         try {
             if (window.androidBridge && typeof window.androidBridge.getShopPayInitParams === 'function') {
-                console.log('Calling Android bridge (getShopPayInitParams) without payload');
                 const nativeResponseString = window.androidBridge.getShopPayInitParams();
                 return parseNativeResponse(nativeResponseString);
             } else {
@@ -133,7 +128,6 @@ window.NativeStripeECE = {
     }
 };
 
-// Send ready notification to bridge
 window.androidBridge.ready(JSON.stringify({
  type: 'bridgeReady'
 }));

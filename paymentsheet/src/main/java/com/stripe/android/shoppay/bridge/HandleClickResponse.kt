@@ -4,7 +4,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import org.json.JSONArray
 import org.json.JSONObject
 
-data class HandleClickResponse(
+internal data class HandleClickResponse(
     val lineItems: List<PaymentSheet.ShopPayConfiguration.LineItem>?,
     val shippingRates: List<PaymentSheet.ShopPayConfiguration.ShippingRate>?,
     val billingAddressRequired: Boolean?,

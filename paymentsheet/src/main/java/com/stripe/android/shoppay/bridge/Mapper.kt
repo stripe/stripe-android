@@ -3,14 +3,14 @@ package com.stripe.android.shoppay.bridge
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.json.JSONObject
 
-fun PaymentSheet.ShopPayConfiguration.LineItem.toJSON(): JSONObject {
+internal fun PaymentSheet.ShopPayConfiguration.LineItem.toJSON(): JSONObject {
     return JSONObject().apply {
         put("name", name)
         put("amount", amount)
     }
 }
 
-fun PaymentSheet.ShopPayConfiguration.ShippingRate.toJSON(): JSONObject {
+internal fun PaymentSheet.ShopPayConfiguration.ShippingRate.toJSON(): JSONObject {
     return JSONObject().apply {
         put("id", id)
         put("amount", amount)
