@@ -16,7 +16,7 @@ internal object CollectNameSettingsDefinition : CollectionModeSettingsDefinition
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(name = value) }
+        configurationData.updateBillingDetails { name = value }
     }
 
     override fun configure(
@@ -25,7 +25,7 @@ internal object CollectNameSettingsDefinition : CollectionModeSettingsDefinition
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationData.updateBillingDetails { copy(name = value) }
+        configurationData.updateBillingDetails { name = value }
     }
 
     override fun configure(
@@ -34,7 +34,7 @@ internal object CollectNameSettingsDefinition : CollectionModeSettingsDefinition
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(name = value) }
+        configurationData.updateBillingDetails { name = value }
     }
 
     override fun configure(
@@ -43,6 +43,6 @@ internal object CollectNameSettingsDefinition : CollectionModeSettingsDefinition
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(name = value) }
+        configurationData.updateBillingDetails { name = value }
     }
 }
