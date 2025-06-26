@@ -134,6 +134,7 @@ internal interface EditCardDetailsInteractor {
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction
         data class DateChanged(val text: String) : ViewAction
         data class BillingDetailsChanged(val billingDetailsFormState: BillingDetailsFormState) : ViewAction
+        data class ContactInformationChanged(val contactInformation: Map<IdentifierSpec, String?>) : ViewAction
     }
 
     fun interface Factory {
@@ -191,18 +192,6 @@ internal class DefaultEditCardDetailsInteractor(
 
     init {
         coroutineScope.launch(Dispatchers.Main) {
-            // Observe contact information form changes if available
-            contactInformationForm?.let { form ->
-                launch {
-                    form.getFormFieldValueFlow().collectLatest { formFields ->
-                        val contactInfo = formFields.associate { (identifier, entry) ->
-                            identifier to entry.value
-                        }
-                        contactInformationEntry.value = contactInfo
-                    }
-                }
-            }
-
             combine(
                 flow = cardDetailsEntry,
                 flow2 = billingDetailsEntry,
@@ -286,6 +275,10 @@ internal class DefaultEditCardDetailsInteractor(
         )
     }
 
+    private fun onContactInformationChanged(contactInformation: Map<IdentifierSpec, String?>) {
+        contactInformationEntry.value = contactInformation
+    }
+
     private fun hasContactInformationChanged(contactInformation: Map<IdentifierSpec, String?>): Boolean {
         // Only check for contact information changes if the contact information form exists
         if (contactInformationForm == null) return false
@@ -316,6 +309,9 @@ internal class DefaultEditCardDetailsInteractor(
             }
             is EditCardDetailsInteractor.ViewAction.BillingDetailsChanged -> {
                 onBillingAddressFormChanged(viewAction.billingDetailsFormState)
+            }
+            is EditCardDetailsInteractor.ViewAction.ContactInformationChanged -> {
+                onContactInformationChanged(viewAction.contactInformation)
             }
         }
     }

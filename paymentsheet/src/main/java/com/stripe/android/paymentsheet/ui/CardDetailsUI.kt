@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
@@ -54,13 +56,16 @@ internal fun CardDetailsEditUI(
         billingDetailsForm = state.billingDetailsForm,
         contactInformationForm = state.contactInformationForm,
         onBrandChoiceChanged = {
-            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
+            editCardDetailsInteractor.handleViewAction(ViewAction.BrandChoiceChanged(it))
         },
         onExpDateChanged = {
-            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged(it))
+            editCardDetailsInteractor.handleViewAction(ViewAction.DateChanged(it))
         },
         onAddressChanged = {
-            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(it))
+            editCardDetailsInteractor.handleViewAction(ViewAction.BillingDetailsChanged(it))
+        },
+        onContactInformationChanged = {
+            editCardDetailsInteractor.handleViewAction(ViewAction.ContactInformationChanged(it))
         }
     )
 }
@@ -77,7 +82,8 @@ private fun CardDetailsEditUI(
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onExpDateChanged: (String) -> Unit,
-    onAddressChanged: (BillingDetailsFormState) -> Unit
+    onAddressChanged: (BillingDetailsFormState) -> Unit,
+    onContactInformationChanged: (Map<IdentifierSpec, String?>) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -139,6 +145,16 @@ private fun CardDetailsEditUI(
                 hiddenIdentifiers = emptySet(),
                 lastTextFieldIdentifier = null
             )
+
+            // Observe contact information form changes and emit ViewAction
+            LaunchedEffect(contactInformationForm) {
+                contactInformationForm.getFormFieldValueFlow().collect { formFields ->
+                    val contactInfo = formFields.associate { (identifier, entry) ->
+                        identifier to entry.value
+                    }
+                    onContactInformationChanged(contactInfo)
+                }
+            }
         }
 
         if (billingDetailsForm != null) {
