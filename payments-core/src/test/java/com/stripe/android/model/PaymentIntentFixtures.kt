@@ -910,6 +910,40 @@ internal object PaymentIntentFixtures {
         )
     }
 
+    val REDACTED_PAYMENT_INTENT_JSON by lazy {
+        JSONObject(
+            """
+        {
+            "id" : "pi_1234",
+            "object" : "payment_intent",
+            "created" : 1750900060,
+            "last_payment_error" : null,
+            "livemode" : false,
+            "next_action" : {
+                "type" : "use_stripe_sdk",
+                "use_stripe_sdk" : {
+                "directory_server_encryption" : {
+                "algorithm" : "RSA",
+                    "certificate" : "-----BEGIN CERTIFICATE-----CERTIFICATE-----END CERTIFICATE-----",
+                    "directory_server_id" : "ID1",
+                    "root_certificate_authorities" : [ "-----BEGIN CERTIFICATE-----CERTIFICATE-----END CERTIFICATE-----" ]
+                },
+                "directory_server_name" : "visa",
+                "merchant" : "acct_1",
+                "one_click_authn" : null,
+                "server_transaction_id" : "transaction_123",
+                "three_d_secure_2_source" : "payatt_123",
+                "three_ds_method_url" : "",
+                "three_ds_optimizations" : "kf",
+                "type" : "stripe_3ds2_fingerprint"
+            }
+        },
+        "status" : "requires_action"
+    }
+            """.trimIndent()
+        )
+    }
+
     val PI_WITH_SHIPPING_JSON by lazy {
         JSONObject(
             """

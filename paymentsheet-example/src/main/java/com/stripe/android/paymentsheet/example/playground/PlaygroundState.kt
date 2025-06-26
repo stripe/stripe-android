@@ -181,6 +181,7 @@ internal sealed interface PlaygroundState : Parcelable {
                 sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = amount,
                     currency = currencyCode.value,
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Manual,
                 ),
                 sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
                     networkId = "internal",

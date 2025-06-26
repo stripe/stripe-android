@@ -26,6 +26,16 @@ class PaymentIntentJsonParserTest {
     }
 
     @Test
+    fun parse_withRedactedPaymentIntent_shouldCreateExpectedObject() {
+        val paymentIntent = PaymentIntentJsonParser().parse(
+            PaymentIntentFixtures.REDACTED_PAYMENT_INTENT_JSON
+        )
+
+        assertThat(paymentIntent?.clientSecret).isEqualTo(PaymentIntent.VALUE_REDACTED_CLIENT_SECRET)
+        assertThat(paymentIntent?.isRedacted).isTrue()
+    }
+
+    @Test
     fun parse_withShipping_shouldCreateExpectedObject() {
         val paymentIntent = PaymentIntentJsonParser().parse(
             PaymentIntentFixtures.PI_WITH_SHIPPING_JSON

@@ -84,7 +84,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             canceledAt = canceledAt,
             cancellationReason = cancellationReason,
             captureMethod = captureMethod,
-            clientSecret = clientSecret,
+            clientSecret = clientSecret ?: PaymentIntent.VALUE_REDACTED_CLIENT_SECRET,
             confirmationMethod = confirmationMethod,
             countryCode = countryCode,
             created = created,

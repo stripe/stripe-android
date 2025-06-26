@@ -52,6 +52,9 @@ import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.payments.paymentlauncher.PaymentLauncher
+import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.payments.paymentlauncher.rememberPaymentLauncher
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
@@ -88,7 +91,11 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                 )
             }
 
-            val preparePaymentMethodHandler by rememberPreparePaymentMethodHandler(requester) {
+            val paymentLauncher = rememberPlaygroundPaymentLauncher {
+                confirming = it
+            }
+
+            val preparePaymentMethodHandler by rememberPreparePaymentMethodHandler(paymentLauncher, requester) {
                 confirming = it
             }
 
@@ -142,6 +149,45 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
         }
     }
 
+    @Composable
+    private fun rememberPlaygroundPaymentLauncher(
+        onConfirmingChanged: (Boolean) -> Unit
+    ): PaymentLauncher {
+        return rememberPaymentLauncher(
+            publishableKey = SharedPaymentTokenPlaygroundRequester.PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ) { result ->
+            onConfirmingChanged(false)
+
+            when (result) {
+                is PaymentResult.Completed -> {
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+                is PaymentResult.Failed -> {
+                    Toast.makeText(
+                        applicationContext,
+                        "Failed next action: ${result.throwable.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+                is PaymentResult.Canceled -> {
+                    Toast.makeText(
+                        applicationContext,
+                        "Canceled",
+                        Toast.LENGTH_LONG
+                    ).show()
+
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
+            }
+        }
+    }
+
     @OptIn(ShopPayPreview::class)
     @Composable
     private fun rememberFlowControllerBuilder(
@@ -163,6 +209,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
 
     @Composable
     private fun rememberPreparePaymentMethodHandler(
+        paymentLauncher: PaymentLauncher,
         requester: SharedPaymentTokenPlaygroundRequester,
         onConfirmingChanged: (Boolean) -> Unit
     ): State<PreparePaymentMethodHandler> {
@@ -175,10 +222,14 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
 
                     coroutineScope.launch {
                         requester.spt(paymentMethod).onSuccess {
-                            onConfirmingChanged(false)
+                            it?.let {
+                                paymentLauncher.handleNextActionForHashedPaymentIntent(it)
+                            } ?: run {
+                                onConfirmingChanged(false)
 
-                            setResult(Activity.RESULT_OK)
-                            finish()
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }
                         }.onFailure {
                             onConfirmingChanged(false)
 

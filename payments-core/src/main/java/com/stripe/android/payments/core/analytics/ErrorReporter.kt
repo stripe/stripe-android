@@ -143,6 +143,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
             eventName = "payments.paymentlauncherconfirmation.null_args"
         ),
+        PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS(
+            eventName = "payments.paymentlauncherconfirmation.invalid_args"
+        ),
         BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND(
             eventName = "payments.browserlauncher.activity_not_found"
         ),
