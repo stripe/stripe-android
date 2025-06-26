@@ -49,7 +49,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -112,8 +111,8 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
-                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
+            linkAccountManager.consumerPaymentDetails.collectLatest { consumerPaymentDetails ->
+                if (consumerPaymentDetails.isEmpty()) {
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
                     _uiState.update {
@@ -272,11 +271,14 @@ internal class WalletViewModel @Inject constructor(
 
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
+        // Use the cached phone for this payment detail if available (ie the user updated it locally)
+        val linkPaymentMethod = linkAccountManager.consumerPaymentDetails.value
+            .find { it.details.id == selectedPaymentDetails.id }
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                 details = selectedPaymentDetails,
                 collectedCvc = cvc,
-                billingPhone = linkAccount.unredactedPhoneNumber
+                billingPhone = linkPaymentMethod?.billingPhone ?: linkAccount.unredactedPhoneNumber
             ),
             linkAccount = linkAccount
         )
