@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -310,8 +311,9 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
                 .customer(
-                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                        id = " "
+                    PaymentSheet.CustomerConfiguration(
+                        id = " ",
+                        ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
                     )
                 ).build(),
             initializedViaCompose = false,
@@ -335,8 +337,10 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
                 .customer(
-                    PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.customer?.copy(
-                        ephemeralKeySecret = " "
+                    PaymentSheet.CustomerConfiguration(
+                        id = "customer_id",
+                        ephemeralKeySecret = " ",
+                        accessType = LegacyCustomerEphemeralKey(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY),
                     )
                 ).build(),
             initializedViaCompose = false,
