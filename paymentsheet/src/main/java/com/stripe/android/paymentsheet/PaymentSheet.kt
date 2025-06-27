@@ -2083,19 +2083,19 @@ class PaymentSheet internal constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
-        val colorsLight: PrimaryButtonColors = PrimaryButtonColors.defaultLight,
+        internal val colorsLight: PrimaryButtonColors = PrimaryButtonColors.defaultLight,
         /**
          * Describes the colors used while the system is in dark mode.
          */
-        val colorsDark: PrimaryButtonColors = PrimaryButtonColors.defaultDark,
+        internal val colorsDark: PrimaryButtonColors = PrimaryButtonColors.defaultDark,
         /**
          * Describes the shape of the primary button.
          */
-        val shape: PrimaryButtonShape = PrimaryButtonShape(),
+        internal val shape: PrimaryButtonShape = PrimaryButtonShape(),
         /**
          * Describes the typography of the primary button.
          */
-        val typography: PrimaryButtonTypography = PrimaryButtonTypography()
+        internal val typography: PrimaryButtonTypography = PrimaryButtonTypography()
     ) : Parcelable
 
     @Parcelize
@@ -2105,29 +2105,29 @@ class PaymentSheet internal constructor(
          * Note: If 'null', {@link Colors#primary} is used.
          */
         @ColorInt
-        val background: Int?,
+        internal val background: Int?,
         /**
          * The color of the text and icon in the primary button.
          */
         @ColorInt
-        val onBackground: Int,
+        internal val onBackground: Int,
         /**
          * The border color of the primary button.
          */
         @ColorInt
-        val border: Int,
+        internal val border: Int,
         /**
          * The background color for the primary button when in a success state. Defaults
          * to base green background color.
          */
         @ColorInt
-        val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+        internal val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
         /**
          * The success color for the primary button text when in a success state. Defaults
          * to `onBackground`.
          */
         @ColorInt
-        val onSuccessBackgroundColor: Int = onBackground,
+        internal val onSuccessBackgroundColor: Int = onBackground,
     ) : Parcelable {
         constructor(
             background: Int?,
@@ -2189,17 +2189,17 @@ class PaymentSheet internal constructor(
          * The corner radius of the primary button.
          * Note: If 'null', {@link Shapes#cornerRadiusDp} is used.
          */
-        val cornerRadiusDp: Float? = null,
+        internal val cornerRadiusDp: Float? = null,
         /**
          * The border width of the primary button.
          * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
          */
-        val borderStrokeWidthDp: Float? = null,
+        internal val borderStrokeWidthDp: Float? = null,
         /**
          * The height of the primary button.
          * Note: If 'null', the default height is 48dp.
          */
-        val heightDp: Float? = null
+        internal val heightDp: Float? = null
     ) : Parcelable {
         @Deprecated("Use @DimenRes constructor")
         constructor(
@@ -2240,13 +2240,13 @@ class PaymentSheet internal constructor(
          * Note: If 'null', Appearance.Typography.fontResId is used.
          */
         @FontRes
-        val fontResId: Int? = null,
+        internal val fontResId: Int? = null,
 
         /**
          * The font size in the primary button.
          * Note: If 'null', {@link Typography#sizeScaleFactor} is used.
          */
-        val fontSizeSp: Float? = null
+        internal val fontSizeSp: Float? = null
     ) : Parcelable {
         constructor(
             context: Context,
