@@ -1788,68 +1788,68 @@ class PaymentSheet internal constructor(
          * A primary color used throughout PaymentSheet.
          */
         @ColorInt
-        val primary: Int,
+        internal val primary: Int,
 
         /**
          * The color used for the surfaces (backgrounds) of PaymentSheet.
          */
         @ColorInt
-        val surface: Int,
+        internal val surface: Int,
 
         /**
          * The color used for the background of inputs, tabs, and other components.
          */
         @ColorInt
-        val component: Int,
+        internal val component: Int,
 
         /**
          * The color used for borders of inputs, tabs, and other components.
          */
         @ColorInt
-        val componentBorder: Int,
+        internal val componentBorder: Int,
 
         /**
          * The color of the divider lines used inside inputs, tabs, and other components.
          */
         @ColorInt
-        val componentDivider: Int,
+        internal val componentDivider: Int,
 
         /**
          * The default color used for text and on other elements that live on components.
          */
         @ColorInt
-        val onComponent: Int,
+        internal val onComponent: Int,
 
         /**
          * The color used for items appearing over the background in Payment Sheet.
          */
         @ColorInt
-        val onSurface: Int,
+        internal val onSurface: Int,
 
         /**
          * The color used for text of secondary importance.
          * For example, this color is used for the label above input fields.
          */
         @ColorInt
-        val subtitle: Int,
+        internal val subtitle: Int,
 
         /**
          * The color used for input placeholder text.
          */
         @ColorInt
-        val placeholderText: Int,
+        internal val placeholderText: Int,
 
         /**
          * The color used for icons in PaymentSheet, such as the close or back icons.
          */
         @ColorInt
-        val appBarIcon: Int,
+        internal val appBarIcon: Int,
 
         /**
          * A color used to indicate errors or destructive actions in PaymentSheet.
          */
         @ColorInt
-        val error: Int
+        internal val error: Int
     ) : Parcelable {
         constructor(
             primary: Color,
