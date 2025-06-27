@@ -2713,12 +2713,12 @@ class PaymentSheet internal constructor(
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
          */
-        val id: String,
+        internal val id: String,
 
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
          */
-        val ephemeralKeySecret: String,
+        internal val ephemeralKeySecret: String,
 
         internal val accessType: CustomerAccessType,
     ) : Parcelable {
