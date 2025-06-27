@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.ColorInt
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -67,7 +66,6 @@ import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import kotlin.math.roundToInt
 
@@ -260,32 +258,6 @@ private fun Icons(
         )
     }
 }
-
-private fun PaymentSheet.Colors.copy(
-    @ColorInt primary: Int = this.primary,
-    @ColorInt surface: Int = this.surface,
-    @ColorInt component: Int = this.component,
-    @ColorInt componentBorder: Int = this.componentBorder,
-    @ColorInt componentDivider: Int = this.componentDivider,
-    @ColorInt onComponent: Int = this.onComponent,
-    @ColorInt onSurface: Int = this.onSurface,
-    @ColorInt subtitle: Int = this.subtitle,
-    @ColorInt placeholderText: Int = this.placeholderText,
-    @ColorInt appBarIcon: Int = this.appBarIcon,
-    @ColorInt error: Int = this.error
-) = PaymentSheet.Colors(
-    primary = primary,
-    surface = surface,
-    component = component,
-    componentBorder = componentBorder,
-    componentDivider = componentDivider,
-    onComponent = onComponent,
-    onSurface = onSurface,
-    subtitle = subtitle,
-    placeholderText = placeholderText,
-    appBarIcon = appBarIcon,
-    error = error
-)
 
 @Composable
 private fun Colors(

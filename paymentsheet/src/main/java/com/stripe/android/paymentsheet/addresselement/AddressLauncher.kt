@@ -83,47 +83,47 @@ class AddressLauncher internal constructor(
         /**
          * Configuration for the look and feel of the UI
          */
-        val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        internal val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 
         /**
          * The values to pre-populate shipping address fields with.
          */
-        val address: AddressDetails? = null,
+        internal val address: AddressDetails? = null,
 
         /**
          * A list of two-letter country codes representing countries the customers can select.
          * If the list is empty (the default), we display all countries.
          */
-        val allowedCountries: Set<String> = emptySet(),
+        internal val allowedCountries: Set<String> = emptySet(),
 
         /**
          * The title of the primary button displayed at the bottom of the screen.
          * Defaults to "Save address".
          */
-        val buttonTitle: String? = null,
+        internal val buttonTitle: String? = null,
 
         /**
          * Configuration for fields to collect in addition to the physical shipping address
          */
-        val additionalFields: AdditionalFieldsConfiguration? = null,
+        internal val additionalFields: AdditionalFieldsConfiguration? = null,
 
         /**
          * Configuration for the title displayed at the top of the screen.
          * Defaults to "Address"
          */
-        val title: String? = null,
+        internal val title: String? = null,
 
         /**
          * Google Places api key used to provide autocomplete suggestions
          * When null, autocomplete is disabled.
          */
-        val googlePlacesApiKey: String? = null,
+        internal val googlePlacesApiKey: String? = null,
 
         /**
          * A list of two-letter country codes that support autocomplete. Defaults to a list of
          * countries that Stripe has audited to ensure a good autocomplete experience.
          */
-        val autocompleteCountries: Set<String> = setOf(
+        internal val autocompleteCountries: Set<String> = setOf(
             "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IT", "MX", "NO", "NL",
             "PL", "RU", "SE", "TR", "US", "ZA"
         )
@@ -185,8 +185,8 @@ class AddressLauncher internal constructor(
      */
     @Parcelize
     data class AdditionalFieldsConfiguration @JvmOverloads constructor(
-        val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
-        val checkboxLabel: String? = null
+        internal val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+        internal val checkboxLabel: String? = null
     ) : Parcelable {
         @Parcelize
         enum class FieldConfiguration : Parcelable {
