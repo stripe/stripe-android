@@ -471,14 +471,12 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(
             PaymentSelection.ShopPay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
+                    .asCommonConfiguration()
                     .copy(
                         customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                             id = "",
                             clientSecret = "css_test_123"
-                        )
-                    )
-                    .asCommonConfiguration()
-                    .copy(
+                        ),
                         shopPayConfiguration = SHOP_PAY_CONFIGURATION
                     ),
                 linkConfiguration = null,
