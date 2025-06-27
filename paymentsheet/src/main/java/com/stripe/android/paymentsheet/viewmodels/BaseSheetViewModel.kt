@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.uicore.elements.ManagedAddressManager
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -60,6 +61,8 @@ internal abstract class BaseSheetViewModel(
     ) { poppedScreen ->
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
+
+    abstract val managedAddressManagerFactory: ManagedAddressManager.Factory?
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>

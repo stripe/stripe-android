@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
+import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -49,6 +50,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Provider
 
 @VisibleForTesting
@@ -57,6 +59,7 @@ internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawa
 @Composable
 internal fun AutocompleteScreen(
     autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    navigator: AddressElementNavigator,
     country: String?
 ) {
     val application = LocalContext.current.applicationContext as Application
@@ -70,6 +73,21 @@ internal fun AutocompleteScreen(
                 applicationSupplier = { application }
             )
         )
+
+    LaunchedEffect(Unit) {
+        viewModel.event.collectLatest { event ->
+            when (event) {
+                is AutocompleteViewModel.Event.GoBack -> Unit
+                is AutocompleteViewModel.Event.EnterManually -> {
+                    navigator.setResult(FORCE_EXPANDED_FORM_KEY, true)
+                }
+            }
+
+            navigator.setResult(AddressDetails.KEY, event.addressDetails)
+
+            navigator.onBack()
+        }
+    }
 
     AutocompleteScreenUI(viewModel = viewModel)
 }

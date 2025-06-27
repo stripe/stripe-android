@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +25,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.DefaultManagedAddressManager
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -93,6 +97,17 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val _error = MutableStateFlow<ResolvableString?>(null)
     override val error: StateFlow<ResolvableString?> = _error
 
+    private val autocompleteLauncher = config.googlePlacesApiKey?.let {
+        DefaultAutocompleteLauncher(
+            googlePlacesApiKey = it,
+            appearance = config.appearance,
+        )
+    }
+
+    override val managedAddressManagerFactory = autocompleteLauncher?.let {
+        DefaultManagedAddressManager.Factory(it)
+    }
+
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
@@ -155,6 +170,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+    }
+
+    fun registerForActivityResult(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        autocompleteLauncher?.register(activityResultCaller, lifecycleOwner)
     }
 
     fun onLinkAuthenticationResult(result: LinkActivityResult) {

@@ -12,6 +12,8 @@ import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.ManagedAddressElement
+import com.stripe.android.uicore.elements.ManagedAddressManager
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import kotlinx.parcelize.Parcelize
@@ -57,6 +59,7 @@ data class AddressSpec(
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         shippingValues: Map<IdentifierSpec, String?>?,
+        managedAddressManagerFactory: ManagedAddressManager.Factory? = null
     ): List<FormElement> {
         val label = if (showLabel) resolvableString(R.string.stripe_billing_details) else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
@@ -82,15 +85,27 @@ data class AddressSpec(
                             controller = SameAsShippingController(it)
                         )
                     }
-            val addressElement = AddressElement(
-                _identifier = apiPath,
-                rawValuesMap = initialValues,
-                countryCodes = allowedCountryCodes,
-                addressType = type,
-                sameAsShippingElement = sameAsShippingElement,
-                shippingValuesMap = shippingValues,
-                hideCountry = hideCountry,
-            )
+            val addressElement = managedAddressManagerFactory?.let {
+                ManagedAddressElement(
+                    identifier = apiPath,
+                    rawValuesMap = initialValues,
+                    countryCodes = allowedCountryCodes,
+                    sameAsShippingElement = sameAsShippingElement,
+                    shippingValuesMap = shippingValues,
+                    hideCountry = hideCountry,
+                    managedAddressManagerFactory = it,
+                )
+            } ?: run {
+                AddressElement(
+                    _identifier = apiPath,
+                    rawValuesMap = initialValues,
+                    countryCodes = allowedCountryCodes,
+                    addressType = type,
+                    sameAsShippingElement = sameAsShippingElement,
+                    shippingValuesMap = shippingValues,
+                    hideCountry = hideCountry,
+                )
+            }
             listOfNotNull(
                 createSectionElement(
                     sectionFieldElement = addressElement,

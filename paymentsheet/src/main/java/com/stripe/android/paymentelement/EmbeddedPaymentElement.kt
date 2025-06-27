@@ -234,6 +234,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
+        internal val googlePlacesApiKey: String?,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -265,6 +266,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
+            private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -463,6 +465,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.formSheetAction = formSheetAction
             }
 
+            /**
+             * Google Places API key to support autocomplete when collecting billing details
+             */
+            fun googlePlacesApiKey(googlePlacesApiKey: String?): Builder = apply {
+                this.googlePlacesApiKey = googlePlacesApiKey
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -483,6 +492,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
                 formSheetAction = formSheetAction,
+                googlePlacesApiKey = googlePlacesApiKey,
             )
         }
     }

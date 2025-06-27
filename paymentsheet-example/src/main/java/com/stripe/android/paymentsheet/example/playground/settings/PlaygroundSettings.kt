@@ -134,9 +134,10 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun paymentSheetConfiguration(
-            playgroundState: PlaygroundState.Payment
+            playgroundState: PlaygroundState.Payment,
+            builder: PaymentSheet.Configuration.Builder =
+                PaymentSheet.Configuration.Builder("Example, Inc.")
         ): PaymentSheet.Configuration {
-            val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
             val paymentSheetConfigurationData =
                 PlaygroundSettingDefinition.PaymentSheetConfigurationData(builder)
             settings.filter { (definition, _) ->

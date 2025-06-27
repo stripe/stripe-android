@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.addresselement.DefaultManagedAddressManager
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -22,6 +23,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.ManagedAddressManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -39,6 +41,7 @@ internal class DefaultFormHelper(
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
+    private val managedAddressManagerFactory: ManagedAddressManager.Factory?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -62,12 +65,14 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
+                managedAddressManagerFactory = viewModel.managedAddressManagerFactory,
             )
         }
 
         fun create(
             coroutineScope: CoroutineScope,
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+            managedAddressManagerFactory: ManagedAddressManager.Factory?,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
             savedStateHandle: SavedStateHandle,
@@ -83,6 +88,7 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
+                managedAddressManagerFactory = managedAddressManagerFactory,
             )
         }
     }
@@ -154,6 +160,7 @@ internal class DefaultFormHelper(
                     else -> null
                 },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+                managedAddressManagerFactory = managedAddressManagerFactory,
             ),
         ) ?: emptyList()
     }
