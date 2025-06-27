@@ -1921,18 +1921,18 @@ class PaymentSheet internal constructor(
         /**
          * The corner radius used for tabs, inputs, buttons, and other components in PaymentSheet.
          */
-        val cornerRadiusDp: Float,
+        internal val cornerRadiusDp: Float,
 
         /**
          * The border used for inputs, tabs, and other components in PaymentSheet.
          */
-        val borderStrokeWidthDp: Float,
+        internal val borderStrokeWidthDp: Float,
 
         /**
          * The corner radius used for specifically for the sheets displayed by Payment Element. Be default, this is
          * set to the same value as [cornerRadiusDp].
          */
-        val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
+        internal val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
     ) : Parcelable {
         @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
