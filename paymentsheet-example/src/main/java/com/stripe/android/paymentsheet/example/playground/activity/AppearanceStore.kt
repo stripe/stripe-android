@@ -27,7 +27,7 @@ internal object AppearanceStore {
     data class State(
         val colorsLight: PaymentSheet.Colors = PaymentSheet.Colors.defaultLight,
         val colorsDark: PaymentSheet.Colors = PaymentSheet.Colors.defaultDark,
-        val shapes: PaymentSheet.Shapes = PaymentSheet.Shapes.default,
+        val shapes: Shapes = Shapes(),
         val typography: PaymentSheet.Typography = PaymentSheet.Typography.default,
         val primaryButton: PrimaryButton = PrimaryButton(),
         val embedded: Embedded = Embedded(),
@@ -42,7 +42,7 @@ internal object AppearanceStore {
             return PaymentSheet.Appearance.Builder()
                 .colorsLight(colorsLight)
                 .colorsDark(colorsDark)
-                .shapes(shapes)
+                .shapes(shapes.build())
                 .typography(typography)
                 .primaryButton(primaryButton.build())
                 .embeddedAppearance(PaymentSheet.Appearance.Embedded(embedded.getRow()))
@@ -233,6 +233,19 @@ internal object AppearanceStore {
                     Outlined -> PaymentSheet.IconStyle.Outlined
                 }
             }
+        }
+
+        data class Shapes(
+            val cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius,
+            val borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth,
+            val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
+        ) {
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun build(): PaymentSheet.Shapes = PaymentSheet.Shapes(
+                cornerRadiusDp = cornerRadiusDp,
+                borderStrokeWidthDp = borderStrokeWidthDp,
+                bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp,
+            )
         }
 
         data class PrimaryButton(

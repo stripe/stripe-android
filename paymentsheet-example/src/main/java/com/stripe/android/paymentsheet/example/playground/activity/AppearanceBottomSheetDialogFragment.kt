@@ -478,7 +478,7 @@ private fun Shapes(
     IncrementDecrementItem("cornerRadiusDp", currentAppearance.shapes.cornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = PaymentSheet.Shapes(
+                shapes = AppearanceStore.State.Shapes(
                     cornerRadiusDp = it,
                     borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
                     bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
@@ -490,7 +490,7 @@ private fun Shapes(
     IncrementDecrementItem("borderStrokeWidthDp", currentAppearance.shapes.borderStrokeWidthDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = PaymentSheet.Shapes(
+                shapes = AppearanceStore.State.Shapes(
                     cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
                     borderStrokeWidthDp = it,
                     bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
@@ -502,7 +502,7 @@ private fun Shapes(
     IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = PaymentSheet.Shapes(
+                shapes = AppearanceStore.State.Shapes(
                     cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
                     borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
                     bottomSheetCornerRadiusDp = it,
