@@ -597,8 +597,10 @@ private fun Typography(
     FontScaleSlider(currentAppearance.typography.sizeScaleFactor) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    sizeScaleFactor = it
+                typography = PaymentSheet.Typography(
+                    sizeScaleFactor = it,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
@@ -607,8 +609,10 @@ private fun Typography(
     FontDropDown(currentAppearance.typography.fontResId) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    fontResId = it
+                typography = PaymentSheet.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = it,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
@@ -620,7 +624,9 @@ private fun Typography(
     AppearanceToggle("customH1", h1 != null) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
+                typography = PaymentSheet.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = currentAppearance.typography.fontResId,
                     custom = PaymentSheet.Typography.Custom(
                         h1 = if (it) {
                             PaymentSheet.Typography.Font(
@@ -642,7 +648,9 @@ private fun Typography(
         FontDropDown(fontFamily) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = currentAppearance.typography.copy(
+                    typography = PaymentSheet.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
                         custom = PaymentSheet.Typography.Custom(
                             h1 = PaymentSheet.Typography.Font(
                                 fontFamily = it,
@@ -662,7 +670,9 @@ private fun Typography(
         ) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = currentAppearance.typography.copy(
+                    typography = PaymentSheet.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
                         custom = PaymentSheet.Typography.Custom(
                             h1 = PaymentSheet.Typography.Font(
                                 fontFamily = fontFamily,
@@ -683,7 +693,9 @@ private fun Typography(
         ) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = currentAppearance.typography.copy(
+                    typography = PaymentSheet.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
                         custom = PaymentSheet.Typography.Custom(
                             h1 = PaymentSheet.Typography.Font(
                                 fontFamily = fontFamily,
@@ -704,7 +716,9 @@ private fun Typography(
         ) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = currentAppearance.typography.copy(
+                    typography = PaymentSheet.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
                         custom = PaymentSheet.Typography.Custom(
                             h1 = PaymentSheet.Typography.Font(
                                 fontFamily = fontFamily,
