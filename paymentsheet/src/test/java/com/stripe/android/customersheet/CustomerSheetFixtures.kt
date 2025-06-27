@@ -33,8 +33,8 @@ internal object CustomerSheetFixtures {
                     fontResId = 0
                 ),
                 primaryButton = PaymentSheet.PrimaryButton(
-                    colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
-                    colorsDark = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
+                    colorsLight = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                    colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
                     shape = PaymentSheet.PrimaryButtonShape(
                         cornerRadiusDp = 0.0f,
                         borderStrokeWidthDp = 20.0f
