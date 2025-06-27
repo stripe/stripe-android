@@ -663,19 +663,19 @@ class PaymentSheet internal constructor(
          *
          * The default value is the name of your app.
          */
-        val merchantDisplayName: String,
+        internal val merchantDisplayName: String,
 
         /**
          * If set, the customer can select a previously saved payment method within PaymentSheet.
          */
-        val customer: CustomerConfiguration? = ConfigurationDefaults.customer,
+        internal val customer: CustomerConfiguration? = ConfigurationDefaults.customer,
 
         /**
          * Configuration related to the Stripe Customer making a payment.
          *
          * If set, PaymentSheet displays Google Pay as a payment option.
          */
-        val googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
+        internal val googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
 
         /**
          * The color of the Pay or Add button. Keep in mind the text color is white.
@@ -689,7 +689,7 @@ class PaymentSheet internal constructor(
                     "or PrimaryButton.colorsLight/colorsDark.background"
             )
         )
-        val primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
+        internal val primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
 
         /**
          * The billing information for the customer.
@@ -699,7 +699,7 @@ class PaymentSheet internal constructor(
          * these values will be attached to the payment method even if they are not collected by
          * the PaymentSheet UI.
          */
-        val defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
+        internal val defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
 
         /**
          * The shipping information for the customer.
@@ -707,7 +707,7 @@ class PaymentSheet internal constructor(
          * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
          * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
          */
-        val shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
+        internal val shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
 
         /**
          * If true, allows payment methods that do not move money at the end of the checkout.
@@ -721,7 +721,7 @@ class PaymentSheet internal constructor(
          *
          * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
          */
-        val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
+        internal val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
 
         /**
          * If `true`, allows payment methods that require a shipping address, like Afterpay and
@@ -733,13 +733,13 @@ class PaymentSheet internal constructor(
          * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
          * on the PaymentIntent when PaymentSheet loads.
          */
-        val allowsPaymentMethodsRequiringShippingAddress: Boolean =
+        internal val allowsPaymentMethodsRequiringShippingAddress: Boolean =
             ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
 
         /**
          * Describes the appearance of Payment Sheet.
          */
-        val appearance: Appearance = ConfigurationDefaults.appearance,
+        internal val appearance: Appearance = ConfigurationDefaults.appearance,
 
         /**
          * The label to use for the primary button.
@@ -747,7 +747,7 @@ class PaymentSheet internal constructor(
          * If not set, Payment Sheet will display suitable default labels for payment and setup
          * intents.
          */
-        val primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
+        internal val primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
 
         /**
          * Describes how billing details should be collected.
@@ -755,7 +755,7 @@ class PaymentSheet internal constructor(
          * If `never` is used for a required field for the Payment Method used during checkout,
          * you **must** provide an appropriate value as part of [defaultBillingDetails].
          */
-        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+        internal val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             ConfigurationDefaults.billingDetailsCollectionConfiguration,
 
         /**
@@ -767,7 +767,7 @@ class PaymentSheet internal constructor(
          * be used. If no preferred network is applicable, Stripe will select
          * the network.
          */
-        val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
+        internal val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
