@@ -1,6 +1,6 @@
 package com.stripe.android.shoppay.bridge
 
-internal interface ShopPayConfirmationState {
+internal sealed interface ShopPayConfirmationState {
     data object Pending : ShopPayConfirmationState
     data class Success(
         val externalSourceId: String,

@@ -31,8 +31,8 @@ internal class ECEShippingRateJsonParser @Inject constructor() : ModelJsonParser
 
         val objectValue = json.optJSONObject(fieldName) ?: return null
 
-        val maxJson = objectValue.optJSONObject("maximum")
-        val minJson = objectValue.optJSONObject("minimum")
+        val maxJson = objectValue.optJSONObject(FIELD_MAXIMUM)
+        val minJson = objectValue.optJSONObject(FIELD_MINIMUM)
         if (maxJson != null && minJson != null) {
             val maximum = parseDeliveryEstimateUnit(maxJson)
             val minimum = parseDeliveryEstimateUnit(minJson)
@@ -46,8 +46,8 @@ internal class ECEShippingRateJsonParser @Inject constructor() : ModelJsonParser
     }
 
     private fun parseDeliveryEstimateUnit(json: JSONObject): ECEDeliveryEstimateUnit? {
-        val unitString = json.optString("unit")
-        val value = json.optInt("value", -1)
+        val unitString = json.optString(FIELD_UNIT)
+        val value = json.optInt(FIELD_VALUE, -1)
 
         if (value == -1 || unitString.isEmpty()) return null
 
@@ -61,5 +61,9 @@ internal class ECEShippingRateJsonParser @Inject constructor() : ModelJsonParser
         private const val FIELD_DISPLAY_NAME = "displayName"
         private const val FIELD_AMOUNT = "amount"
         private const val FIELD_DELIVERY_ESTIMATE = "deliveryEstimate"
+        private const val FIELD_MAXIMUM = "maximum"
+        private const val FIELD_MINIMUM = "minimum"
+        private const val FIELD_UNIT = "unit"
+        private const val FIELD_VALUE = "value"
     }
 }

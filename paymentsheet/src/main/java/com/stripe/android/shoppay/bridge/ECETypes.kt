@@ -13,9 +13,14 @@ internal data class ECELineItem(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            put("name", name)
-            put("amount", amount)
+            put(FIELD_NAME, name)
+            put(FIELD_AMOUNT, amount)
         }
+    }
+
+    private companion object {
+        private const val FIELD_NAME = "name"
+        private const val FIELD_AMOUNT = "amount"
     }
 }
 
@@ -28,11 +33,18 @@ internal data class ECEBillingDetails(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            name?.let { put("name", it) }
-            email?.let { put("email", it) }
-            phone?.let { put("phone", it) }
-            address?.let { put("address", it.toJson()) }
+            name?.let { put(FIELD_NAME, it) }
+            email?.let { put(FIELD_EMAIL, it) }
+            phone?.let { put(FIELD_PHONE, it) }
+            address?.let { put(FIELD_ADDRESS, it.toJson()) }
         }
+    }
+
+    private companion object {
+        private const val FIELD_NAME = "name"
+        private const val FIELD_EMAIL = "email"
+        private const val FIELD_PHONE = "phone"
+        private const val FIELD_ADDRESS = "address"
     }
 }
 
@@ -43,9 +55,14 @@ internal data class ECEShippingAddressData(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            name?.let { put("name", it) }
-            address?.let { put("address", it.toJson()) }
+            name?.let { put(FIELD_NAME, it) }
+            address?.let { put(FIELD_ADDRESS, it.toJson()) }
         }
+    }
+
+    private companion object {
+        private const val FIELD_NAME = "name"
+        private const val FIELD_ADDRESS = "address"
     }
 }
 
@@ -60,13 +77,22 @@ internal data class ECEFullAddress(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            line1?.let { put("line1", it) }
-            line2?.let { put("line2", it) }
-            city?.let { put("city", it) }
-            state?.let { put("state", it) }
-            postalCode?.let { put("postal_code", it) }
-            country?.let { put("country", it) }
+            line1?.let { put(FIELD_LINE1, it) }
+            line2?.let { put(FIELD_LINE2, it) }
+            city?.let { put(FIELD_CITY, it) }
+            state?.let { put(FIELD_STATE, it) }
+            postalCode?.let { put(FIELD_POSTAL_CODE, it) }
+            country?.let { put(FIELD_COUNTRY, it) }
         }
+    }
+
+    private companion object {
+        private const val FIELD_LINE1 = "line1"
+        private const val FIELD_LINE2 = "line2"
+        private const val FIELD_CITY = "city"
+        private const val FIELD_STATE = "state"
+        private const val FIELD_POSTAL_CODE = "postal_code"
+        private const val FIELD_COUNTRY = "country"
     }
 }
 
@@ -82,14 +108,24 @@ internal data class ECEPartialAddress(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            addressLine?.let { put("addressLine", JSONArray(it)) }
-            city?.let { put("city", it) }
-            state?.let { put("state", it) }
-            postalCode?.let { put("postalCode", it) }
-            country?.let { put("country", it) }
-            phone?.let { put("phone", it) }
-            organization?.let { put("organization", it) }
+            addressLine?.let { put(FIELD_ADDRESS_LINE, JSONArray(it)) }
+            city?.let { put(FIELD_CITY, it) }
+            state?.let { put(FIELD_STATE, it) }
+            postalCode?.let { put(FIELD_POSTAL_CODE, it) }
+            country?.let { put(FIELD_COUNTRY, it) }
+            phone?.let { put(FIELD_PHONE, it) }
+            organization?.let { put(FIELD_ORGANIZATION, it) }
         }
+    }
+
+    private companion object {
+        private const val FIELD_ADDRESS_LINE = "addressLine"
+        private const val FIELD_CITY = "city"
+        private const val FIELD_STATE = "state"
+        private const val FIELD_POSTAL_CODE = "postalCode"
+        private const val FIELD_COUNTRY = "country"
+        private const val FIELD_PHONE = "phone"
+        private const val FIELD_ORGANIZATION = "organization"
     }
 }
 
@@ -102,16 +138,23 @@ internal data class ECEShippingRate(
 ) : JsonSerializer, StripeModel {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            put("id", id)
-            put("amount", amount)
-            put("displayName", displayName)
+            put(FIELD_ID, id)
+            put(FIELD_AMOUNT, amount)
+            put(FIELD_DISPLAY_NAME, displayName)
             deliveryEstimate?.let {
                 when (it) {
-                    is ECEDeliveryEstimate.Text -> put("deliveryEstimate", it.value)
-                    is ECEDeliveryEstimate.Range -> put("deliveryEstimate", it.value.toJson())
+                    is ECEDeliveryEstimate.Text -> put(FIELD_DELIVERY_ESTIMATE, it.value)
+                    is ECEDeliveryEstimate.Range -> put(FIELD_DELIVERY_ESTIMATE, it.value.toJson())
                 }
             }
         }
+    }
+
+    private companion object {
+        private const val FIELD_ID = "id"
+        private const val FIELD_AMOUNT = "amount"
+        private const val FIELD_DISPLAY_NAME = "displayName"
+        private const val FIELD_DELIVERY_ESTIMATE = "deliveryEstimate"
     }
 }
 
@@ -135,9 +178,14 @@ internal data class ECEStructuredDeliveryEstimate(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            maximum?.let { put("maximum", it.toJson()) }
-            minimum?.let { put("minimum", it.toJson()) }
+            maximum?.let { put(FIELD_MAXIMUM, it.toJson()) }
+            minimum?.let { put(FIELD_MINIMUM, it.toJson()) }
         }
+    }
+
+    private companion object {
+        private const val FIELD_MAXIMUM = "maximum"
+        private const val FIELD_MINIMUM = "minimum"
     }
 }
 
@@ -148,9 +196,14 @@ internal data class ECEDeliveryEstimateUnit(
 ) : JsonSerializer, Parcelable {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            put("unit", unit.name.lowercase())
-            put("value", value)
+            put(FIELD_UNIT, unit.name.lowercase())
+            put(FIELD_VALUE, value)
         }
+    }
+
+    private companion object {
+        private const val FIELD_UNIT = "unit"
+        private const val FIELD_VALUE = "value"
     }
 }
 
@@ -173,14 +226,22 @@ internal data class ECEPaymentMethodOptions(
     ) : JsonSerializer, Parcelable {
         override fun toJson(): JSONObject {
             return JSONObject().apply {
-                put("externalSourceId", externalSourceId)
+                put(FIELD_EXTERNAL_SOURCE_ID, externalSourceId)
             }
+        }
+
+        private companion object {
+            private const val FIELD_EXTERNAL_SOURCE_ID = "externalSourceId"
         }
     }
 
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            shopPay?.let { put("shopPay", it.toJson()) }
+            shopPay?.let { put(FIELD_SHOP_PAY, it.toJson()) }
         }
+    }
+
+    private companion object {
+        private const val FIELD_SHOP_PAY = "shopPay"
     }
 }
