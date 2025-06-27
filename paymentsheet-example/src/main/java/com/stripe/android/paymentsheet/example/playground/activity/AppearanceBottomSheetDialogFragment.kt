@@ -604,7 +604,7 @@ private fun Typography(
     FontScaleSlider(currentAppearance.typography.sizeScaleFactor) {
         updateAppearance(
             currentAppearance.copy(
-                typography = PaymentSheet.Typography(
+                typography = AppearanceStore.State.Typography(
                     sizeScaleFactor = it,
                     fontResId = currentAppearance.typography.fontResId,
                     custom = currentAppearance.typography.custom,
@@ -616,7 +616,7 @@ private fun Typography(
     FontDropDown(currentAppearance.typography.fontResId) {
         updateAppearance(
             currentAppearance.copy(
-                typography = PaymentSheet.Typography(
+                typography = AppearanceStore.State.Typography(
                     sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
                     fontResId = it,
                     custom = currentAppearance.typography.custom,
@@ -631,12 +631,12 @@ private fun Typography(
     AppearanceToggle("customH1", h1 != null) {
         updateAppearance(
             currentAppearance.copy(
-                typography = PaymentSheet.Typography(
+                typography = AppearanceStore.State.Typography(
                     sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
                     fontResId = currentAppearance.typography.fontResId,
-                    custom = PaymentSheet.Typography.Custom(
+                    custom = AppearanceStore.State.Typography.Custom(
                         h1 = if (it) {
-                            PaymentSheet.Typography.Font(
+                            AppearanceStore.State.Typography.Font(
                                 fontSizeSp = 20f,
                                 fontWeight = 400,
                                 letterSpacingSp = 0.13f
@@ -655,11 +655,11 @@ private fun Typography(
         FontDropDown(fontFamily) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = PaymentSheet.Typography(
+                    typography = AppearanceStore.State.Typography(
                         sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
                         fontResId = currentAppearance.typography.fontResId,
-                        custom = PaymentSheet.Typography.Custom(
-                            h1 = PaymentSheet.Typography.Font(
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
                                 fontFamily = it,
                                 fontWeight = fontWeight,
                                 fontSizeSp = fontSizeSp,
@@ -677,11 +677,11 @@ private fun Typography(
         ) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = PaymentSheet.Typography(
+                    typography = AppearanceStore.State.Typography(
                         sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
                         fontResId = currentAppearance.typography.fontResId,
-                        custom = PaymentSheet.Typography.Custom(
-                            h1 = PaymentSheet.Typography.Font(
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
                                 fontFamily = fontFamily,
                                 fontWeight = fontWeight,
                                 fontSizeSp = it,
@@ -700,11 +700,11 @@ private fun Typography(
         ) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = PaymentSheet.Typography(
+                    typography = AppearanceStore.State.Typography(
                         sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
                         fontResId = currentAppearance.typography.fontResId,
-                        custom = PaymentSheet.Typography.Custom(
-                            h1 = PaymentSheet.Typography.Font(
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
                                 fontFamily = fontFamily,
                                 fontWeight = it.roundToInt(),
                                 fontSizeSp = fontSizeSp,
@@ -723,11 +723,11 @@ private fun Typography(
         ) {
             updateAppearance(
                 currentAppearance.copy(
-                    typography = PaymentSheet.Typography(
+                    typography = AppearanceStore.State.Typography(
                         sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
                         fontResId = currentAppearance.typography.fontResId,
-                        custom = PaymentSheet.Typography.Custom(
-                            h1 = PaymentSheet.Typography.Font(
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
                                 fontFamily = fontFamily,
                                 fontWeight = fontWeight,
                                 fontSizeSp = fontSizeSp,
