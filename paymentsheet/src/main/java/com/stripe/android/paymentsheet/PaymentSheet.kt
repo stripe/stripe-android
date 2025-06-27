@@ -2765,12 +2765,12 @@ class PaymentSheet internal constructor(
      */
     @Parcelize
     data class GooglePayConfiguration @JvmOverloads constructor(
-        val environment: Environment,
-        val countryCode: String,
-        val currencyCode: String? = null,
-        val amount: Long? = null,
-        val label: String? = null,
-        val buttonType: ButtonType = ButtonType.Pay
+        internal val environment: Environment,
+        internal val countryCode: String,
+        internal val currencyCode: String? = null,
+        internal val amount: Long? = null,
+        internal val label: String? = null,
+        internal val buttonType: ButtonType = ButtonType.Pay
     ) : Parcelable {
 
         enum class Environment {
