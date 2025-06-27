@@ -3,6 +3,7 @@ package com.stripe.android.link
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -19,11 +20,13 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
@@ -131,6 +134,11 @@ internal object TestFactory {
         last4 = "4242",
     )
 
+    val LINK_ACCOUNT_SESSION = LinkAccountSession(
+        id = "fcsess_123",
+        clientSecret = CLIENT_SECRET,
+    )
+
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
@@ -148,6 +156,8 @@ internal object TestFactory {
     )
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
+
+    val LINK_ACCOUNT_WITH_PK = LinkAccount(CONSUMER_SESSION, PUBLISHABLE_KEY)
 
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
         paymentDetails = listOf(
@@ -191,6 +201,7 @@ internal object TestFactory {
         flags = emptyMap(),
         cardBrandChoice = null,
         cardBrandFilter = DefaultCardBrandFilter,
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         passthroughModeEnabled = false,
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
@@ -237,5 +248,22 @@ internal object TestFactory {
         linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+    )
+
+    val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(
+        id = "la_1KMGIuClCIKljWvsLzbigpVh",
+        displayName = "My Checking",
+        institutionName = "My Bank",
+        last4 = "3456",
+        category = FinancialConnectionsAccount.Category.CASH,
+        created = 1643221992,
+        livemode = true,
+        permissions = listOf(FinancialConnectionsAccount.Permissions.PAYMENT_METHOD),
+        status = FinancialConnectionsAccount.Status.ACTIVE,
+        subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
+        supportedPaymentMethodTypes = listOf(
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
+            FinancialConnectionsAccount.SupportedPaymentMethodTypes.LINK
+        )
     )
 }

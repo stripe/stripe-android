@@ -23,10 +23,9 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
+import com.stripe.android.financialconnections.launcher.flowType
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
@@ -87,9 +86,13 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     }
 
     private fun setupProgressBar() {
-        val color = when (getArgs(intent)) {
-            null, is ForData, is ForToken -> R.color.stripe_financial_connections
-            is ForInstantDebits -> R.color.stripe_link
+        val color = when (getArgs(intent)?.flowType) {
+            null,
+            FinancialConnectionsSheetFlowType.ForData,
+            FinancialConnectionsSheetFlowType.ForToken ->
+                R.color.stripe_financial_connections
+            FinancialConnectionsSheetFlowType.ForInstantDebits ->
+                R.color.stripe_link
         }.let { ContextCompat.getColor(this, it) }
         progressBar.progressDrawable.setTint(color)
         progressBar.indeterminateDrawable.setTint(color)

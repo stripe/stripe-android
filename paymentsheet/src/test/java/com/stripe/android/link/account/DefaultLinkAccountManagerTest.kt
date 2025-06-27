@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -21,6 +22,8 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -660,7 +663,7 @@ class DefaultLinkAccountManagerTest {
 
         val result = accountManager.confirmVerification("123")
 
-        assertThat(result.exceptionOrNull()?.message).isEqualTo("no link account found")
+        assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
     }
 
     @Test
@@ -973,6 +976,47 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
+    fun `createLinkAccountSession returns repository result on success`() = runSuspendTest {
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createLinkAccountSession(
+                consumerSessionClientSecret: String,
+                stripeIntent: StripeIntent,
+                linkMode: LinkMode?,
+                consumerPublishableKey: String?
+            ): Result<LinkAccountSession> {
+                return Result.success(TestFactory.LINK_ACCOUNT_SESSION)
+            }
+        }
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+        )
+        assertThat(accountManager.createLinkAccountSession().getOrNull())
+            .isEqualTo(TestFactory.LINK_ACCOUNT_SESSION)
+    }
+
+    @Test
+    fun `createLinkAccountSession returns error on failure`() = runSuspendTest {
+        val error = Throwable("oops")
+        val linkRepository = FakeLinkRepository()
+        linkRepository.createLinkAccountSessionResult = Result.failure(error)
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = TestFactory.CONSUMER_SESSION_LOOKUP,
+            startSession = true,
+        )
+
+        val result = accountManager.createLinkAccountSession()
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    @Test
     fun `allow_redisplay equals null when sharing card payment details in passthrough mode`() =
         allowRedisplayTest(expectedAllowRedisplay = null)
 
@@ -1009,8 +1053,8 @@ class DefaultLinkAccountManagerTest {
                 passthroughModeEnabled = passthroughModeEnabled,
                 customerInfo = customerInfo
             ),
-            linkRepository,
-            linkEventsReporter,
+            linkRepository = linkRepository,
+            linkEventsReporter = linkEventsReporter,
             errorReporter = FakeErrorReporter()
         )
     }

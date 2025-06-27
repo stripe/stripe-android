@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.financialConnectionsSessionWithNo
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.launcher.InstantDebitsResult
 import com.stripe.android.financialconnections.model.BankAccount
@@ -306,6 +307,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
 
         val initialState = FinancialConnectionsSheetNativeState(
+            flowType = FinancialConnectionsSheetFlowType.ForInstantDebits,
             webAuthFlow = WebAuthFlowState.Uninitialized,
             firstInit = true,
             configuration = configuration,
@@ -363,6 +365,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
 
         val initialState = FinancialConnectionsSheetNativeState(
+            flowType = FinancialConnectionsSheetFlowType.ForInstantDebits,
             webAuthFlow = WebAuthFlowState.Uninitialized,
             firstInit = true,
             configuration = configuration,
@@ -417,6 +420,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
 
         val initialState = FinancialConnectionsSheetNativeState(
+            flowType = FinancialConnectionsSheetFlowType.ForInstantDebits,
             webAuthFlow = WebAuthFlowState.Uninitialized,
             firstInit = true,
             configuration = configuration,
@@ -463,6 +467,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
 
         val initialState = FinancialConnectionsSheetNativeState(
+            flowType = FinancialConnectionsSheetFlowType.ForData,
             webAuthFlow = WebAuthFlowState.Uninitialized,
             firstInit = true,
             configuration = configuration,
@@ -501,6 +506,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private fun createViewModel(
         initialState: FinancialConnectionsSheetNativeState = FinancialConnectionsSheetNativeState(
             args = FinancialConnectionsSheetNativeActivityArgs(
+                flowType = FinancialConnectionsSheetFlowType.ForData,
                 configuration = configuration,
                 initialSyncResponse = ApiKeyFixtures.syncResponse(),
             ),

@@ -442,7 +442,32 @@ class LinkApiRepositoryTest {
 
         assertThat(result.isFailure).isTrue()
         assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE.eventName)
+        assertThat(loggedErrors.first())
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE.eventName)
+    }
+
+    @Test
+    fun `createBankAccountPaymentDetails catches exception and returns failure`() = runTest {
+        whenever(
+            consumersApiService.createPaymentDetails(
+                consumerSessionClientSecret = any(),
+                paymentDetailsCreateParams = any(),
+                requestSurface = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.failure(RuntimeException("error")))
+
+        val result = linkRepository.createBankAccountPaymentDetails(
+            bankAccountId = "id_123",
+            userEmail = "email@stripe.com",
+            consumerSessionClientSecret = "secret",
+        )
+        val loggedErrors = errorReporter.getLoggedErrors()
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(loggedErrors.size).isEqualTo(1)
+        assertThat(loggedErrors.first())
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE.eventName)
     }
 
     @Test

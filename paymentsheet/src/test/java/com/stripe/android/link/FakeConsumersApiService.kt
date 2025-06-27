@@ -9,6 +9,8 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.CustomEmailType
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
@@ -151,6 +153,16 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options
     ): Result<UpdateAvailableIncentives> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options
+    ): Result<LinkAccountSession> {
         TODO("Not yet implemented")
     }
 

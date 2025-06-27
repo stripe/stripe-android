@@ -62,6 +62,13 @@ class WalletUiStateTest {
     }
 
     @Test
+    fun testDisabledButtonStateWhenAddingBankAccount() {
+        val state = walletUiState(addBankAccountState = AddBankAccountState.Processing())
+
+        assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
+    }
+
+    @Test
     fun testEnabledButtonState() {
         val state = walletUiState(
             selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099),
@@ -243,7 +250,8 @@ class WalletUiStateTest {
         secondaryButtonLabel: ResolvableString = LINK_WALLET_SECONDARY_BUTTON_LABEL,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
-        canAddNewPaymentMethod: Boolean = true,
+        addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
+        addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         cardBeingUpdated: String? = null,
         isSettingUp: Boolean = false,
         merchantName: String = "Example Inc.",
@@ -259,7 +267,8 @@ class WalletUiStateTest {
             secondaryButtonLabel = secondaryButtonLabel,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
-            canAddNewPaymentMethod = canAddNewPaymentMethod,
+            addBankAccountState = addBankAccountState,
+            addPaymentMethodOptions = addPaymentMethodOptions,
             cardBeingUpdated = cardBeingUpdated,
             isSettingUp = isSettingUp,
             merchantName = merchantName,

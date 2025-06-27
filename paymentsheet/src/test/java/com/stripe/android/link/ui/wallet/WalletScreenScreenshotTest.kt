@@ -177,7 +177,7 @@ internal class WalletScreenScreenshotTest {
     fun testCannotAddCreditCard() {
         snapshot(
             state = walletUiState(
-                canAddNewPaymentMethod = false,
+                addPaymentMethodOptions = emptyList(),
                 userSetIsExpanded = true,
             ),
         )
@@ -193,7 +193,7 @@ internal class WalletScreenScreenshotTest {
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         alertMessage: ResolvableString? = null,
-        canAddNewPaymentMethod: Boolean = true,
+        addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
         userSetIsExpanded: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
@@ -208,7 +208,7 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            canAddNewPaymentMethod = canAddNewPaymentMethod,
+            addPaymentMethodOptions = addPaymentMethodOptions,
             userSetIsExpanded = userSetIsExpanded,
             isSettingUp = false,
             merchantName = "Example Inc.",
@@ -229,7 +229,7 @@ internal class WalletScreenScreenshotTest {
                     onSetDefaultClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
-                    onAddNewPaymentMethodClicked = {},
+                    onAddPaymentMethodOptionClicked = {},
                     onDismissAlert = {},
                     onLogoutClicked = {},
                     expiryDateController = SimpleTextFieldController(DateConfig()),

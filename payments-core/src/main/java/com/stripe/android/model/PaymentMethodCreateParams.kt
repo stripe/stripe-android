@@ -1123,7 +1123,6 @@ constructor(
                 billingDetails = billingDetails,
                 metadata = metadata,
                 allowRedisplay = allowRedisplay,
-
             )
         }
 
@@ -1314,9 +1313,9 @@ constructor(
             return PaymentMethodCreateParams(
                 type = PaymentMethod.Type.Link,
                 link = Link(
-                    paymentDetailsId,
-                    consumerSessionClientSecret,
-                    extraParams
+                    paymentDetailsId = paymentDetailsId,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    extraParams = extraParams
                 ),
                 allowRedisplay = allowRedisplay,
             )

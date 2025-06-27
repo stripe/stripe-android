@@ -74,6 +74,7 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationI
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
@@ -969,6 +970,7 @@ internal class PaymentSheetViewModelTest {
                 passthroughModeEnabled = false,
                 cardBrandChoice = null,
                 cardBrandFilter = DefaultCardBrandFilter,
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                 shippingDetails = null,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,

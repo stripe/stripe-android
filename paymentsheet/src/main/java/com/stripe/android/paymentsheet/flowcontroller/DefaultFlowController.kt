@@ -557,7 +557,7 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             null,
             is PaymentOptionResult.Canceled -> {
-                viewModel.paymentSelection = result?.paymentSelection
+                viewModel.paymentSelection = (result as? PaymentOptionResult.Canceled)?.paymentSelection
                 onPaymentSelection()
             }
             is PaymentOptionResult.Failed -> {

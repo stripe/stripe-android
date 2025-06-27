@@ -13,7 +13,7 @@ import javax.inject.Inject
  * Contract used to explicitly launch Link natively.
  */
 internal class NativeLinkActivityContract @Inject constructor(
-    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {

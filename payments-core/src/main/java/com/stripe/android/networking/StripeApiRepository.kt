@@ -1948,13 +1948,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             get() = getApiUrl("consumers/payment_details/share")
 
         /**
-         * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
-         */
-        internal val linkFinancialConnectionsSessionUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/link_account_sessions")
-
-        /**
          * @return `https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment`
          */
         internal val deferredFinancialConnectionsSessionUrl: String

@@ -56,6 +56,7 @@
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
     <ID>LongMethod:UpdatePaymentMethodUI.kt$@Composable internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, modifier: Modifier)</ID>
     <ID>LongMethod:VerificationBody.kt$@Composable internal fun VerificationBody( state: VerificationViewState, otpElement: OTPElement, onBack: () -> Unit, onFocusRequested: () -> Unit, didShowCodeSentNotification: () -> Unit, onChangeEmailClick: () -> Unit, onResendCodeClick: () -> Unit, )</ID>
+    <ID>LongMethod:WalletScreen.kt$@Composable internal fun WalletBody( state: WalletUiState, expiryDateController: TextFieldController, cvcController: CvcController, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onExpandedChanged: (Boolean) -> Unit, onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit, onPrimaryButtonClick: () -> Unit, onPayAnotherWayClicked: () -> Unit, onDismissAlert: () -> Unit, onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onLogoutClicked: () -> Unit, showBottomSheetContent: (BottomSheetContent) -> Unit, hideBottomSheetContent: suspend () -> Unit, )</ID>
     <ID>LongMethod:WalletScreen.kt$@Composable private fun PaymentMethodSection( state: WalletUiState, isExpanded: Boolean, onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onExpandedChanged: (Boolean) -> Unit, onAddNewPaymentMethodClicked: () -> Unit, onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit, onLogoutClicked: () -> Unit, showBottomSheetContent: (BottomSheetContent) -> Unit, hideBottomSheetContent: suspend () -> Unit )</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.4f</ID>
@@ -106,6 +107,7 @@
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt$com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance$Builder</ID>
+    <ID>TooManyFunctions:WalletViewModel.kt$WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

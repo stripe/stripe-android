@@ -10,6 +10,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -83,6 +84,7 @@ internal object LinkTestUtils {
             passthroughModeEnabled = false,
             cardBrandChoice = cardBrandChoice,
             cardBrandFilter = cardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

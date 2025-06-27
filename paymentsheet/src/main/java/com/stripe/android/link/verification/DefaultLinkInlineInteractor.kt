@@ -101,9 +101,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     ) {
         result
             .onSuccess {
+                val accountManager = verificationState.linkAccountManager()
                 linkLauncher.present(
                     configuration = verificationState.linkConfiguration,
-                    linkAccountInfo = verificationState.linkAccountManager().linkAccountInfo.value,
+                    linkAccountInfo = accountManager.linkAccountInfo.value,
                     launchMode = LinkLaunchMode.PaymentMethodSelection(null),
                     useLinkExpress = true
                 )

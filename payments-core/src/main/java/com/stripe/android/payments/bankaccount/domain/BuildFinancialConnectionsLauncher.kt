@@ -1,17 +1,14 @@
 package com.stripe.android.payments.bankaccount.domain
 
-import android.content.Intent
 import androidx.activity.ComponentActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
-import com.stripe.android.financialconnections.intentBuilder
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.financialconnections.lite.intentBuilder as liteIntentBuilder
+import com.stripe.android.payments.financialconnections.getIntentBuilder
 
 internal object BuildFinancialConnectionsLauncher {
     operator fun invoke(
@@ -34,15 +31,6 @@ internal object BuildFinancialConnectionsLauncher {
                 callback = onConnectionsForACHResult,
                 intentBuilder = financialConnectionsAvailability.getIntentBuilder(activity)
             )
-        }
-    }
-
-    private fun FinancialConnectionsAvailability.getIntentBuilder(
-        activity: ComponentActivity
-    ): (FinancialConnectionsSheetActivityArgs) -> Intent {
-        return when (this) {
-            FinancialConnectionsAvailability.Full -> intentBuilder(activity)
-            FinancialConnectionsAvailability.Lite -> liteIntentBuilder(activity)
         }
     }
 }
