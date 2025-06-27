@@ -2875,14 +2875,14 @@ class PaymentSheet internal constructor(
          * ensure the Payment Element is not initialized with a displayed
          * wallet option as the default payment option.
          */
-        val willDisplayExternally: Boolean = false,
+        internal val willDisplayExternally: Boolean = false,
 
         /**
          * Identifies the list of wallets that can be shown in `WalletButtons`. Wallets
          * are identified by their wallet identifier (google_pay, link, shop_pay). An
          * empty list means all wallets will be shown.
          */
-        val walletsToShow: List<String> = emptyList(),
+        internal val walletsToShow: List<String> = emptyList(),
     ) : Parcelable
 
     /**
