@@ -2629,7 +2629,7 @@ class PaymentSheet internal constructor(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CustomPaymentMethod internal constructor(
-        internal val id: String,
+        val id: String,
         internal val subtitle: ResolvableString?,
         internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
