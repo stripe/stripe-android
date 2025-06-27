@@ -11,8 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.uicore.utils.AnimationConstants
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -79,7 +79,8 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
+    @Poko
+    class Configuration @JvmOverloads constructor(
         /**
          * Configuration for the look and feel of the UI
          */
@@ -184,7 +185,8 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration @JvmOverloads constructor(
+    @Poko
+    class AdditionalFieldsConfiguration @JvmOverloads constructor(
         val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
         val checkboxLabel: String? = null
     ) : Parcelable {
