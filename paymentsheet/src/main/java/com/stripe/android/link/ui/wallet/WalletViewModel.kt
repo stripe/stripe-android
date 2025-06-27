@@ -21,6 +21,7 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.account.ConsumerState
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
+import com.stripe.android.link.account.loadDefaultShippingAddress
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
@@ -122,7 +123,7 @@ internal class WalletViewModel @Inject constructor(
             loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
         }
 
-        if (linkLaunchMode.collectShippingAddress) {
+        if (FeatureFlags.shippingAddressInLink.isEnabled) {
             viewModelScope.launch {
                 linkAccountManager.listShippingAddresses()
             }
@@ -148,7 +149,7 @@ internal class WalletViewModel @Inject constructor(
     private suspend fun observeLinkAccountState() {
         val paymentDetailsFlow = linkAccountManager.consumerPaymentDetails.mapAsStateFlow { it?.paymentDetails }
 
-        val shippingAddressesFlow = if (linkLaunchMode.collectShippingAddress) {
+        val shippingAddressesFlow = if (FeatureFlags.shippingAddressInLink.isEnabled) {
             linkAccountManager.consumerShippingAddresses.mapAsStateFlow { it?.addresses }
         } else {
             stateFlowOf(emptyList())
@@ -296,7 +297,11 @@ internal class WalletViewModel @Inject constructor(
                             details = selectedPaymentDetails,
                             collectedCvc = cvc
                         ),
-                        shippingAddress = uiState.value.selectedShippingAddress,
+                        shippingAddress = if (FeatureFlags.shippingAddressInLink.isEnabled) {
+                            uiState.value.selectedShippingAddress
+                        } else {
+                            linkAccountManager.loadDefaultShippingAddress()
+                        },
                     )
                 )
             }
