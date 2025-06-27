@@ -55,7 +55,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     private val _consumerShippingAddresses: MutableStateFlow<ConsumerShippingAddresses?> = MutableStateFlow(null)
-    override val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?> = _consumerShippingAddresses.asStateFlow()
+    override val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?> =
+        _consumerShippingAddresses.asStateFlow()
 
     /**
      * The publishable key for the signed in Link account.

@@ -13,7 +13,7 @@ internal fun LinkAccountUpdate.updateLinkAccount(linkAccountHolder: LinkAccountH
     }
 }
 
-// TODO: Remove this once we no longer confirm in the add-payment-method screen
+// TODO(tillh-stripe): Remove this once we no longer confirm in the add-payment-method screen
 internal suspend fun LinkAccountManager.loadDefaultShippingAddress(): ConsumerShippingAddress? {
     val shippingAddresses = listShippingAddresses().getOrNull() ?: return null
     val address = shippingAddresses.addresses.firstOrNull { it.isDefault } ?: shippingAddresses.addresses.firstOrNull()

@@ -99,7 +99,7 @@ internal fun WalletScreen(
 
     val addressLauncher = rememberAddressLauncher(
         callback = {
-            // TODO: Implement the callback
+            // TODO(tillh-stripe): Implement the callback
         },
     )
 
@@ -130,8 +130,6 @@ internal fun WalletScreen(
             )
 
             val config = AddressLauncher.Configuration.Builder()
-                .title("Add a shipping address") // TODO: Localize
-                .buttonTitle("Save shipping address") // TODO: Localize
                 .additionalFields(additionalFields)
                 .appearance(appearance)
                 .build()
@@ -350,7 +348,7 @@ private fun PaymentMethodSection(
 
     val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
-    // TODO: Localize this
+    // TODO(tillh-stripe): Localize this
     val shippingLabel = "Shipping"
 
     val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel, shippingLabel)
@@ -625,7 +623,7 @@ private fun ExpandedShippingAddressesSection(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                // TODO: Localize
+                // TODO(tillh-stripe): Localize
                 text = "Shipping addresses",
                 color = LinkTheme.colors.textTertiary,
                 style = LinkTheme.typography.body

@@ -8,7 +8,6 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.model.ConsumerShippingAddress
-import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -93,13 +92,13 @@ internal data class WalletUiState(
     }
 
     fun updateWithResponse(
-        response: ConsumerPaymentDetails,
-        addresses: ConsumerShippingAddresses,
+        paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
+        shippingAddresses: List<ConsumerShippingAddress>,
     ): WalletUiState {
         return copy(
-            paymentDetailsList = response.paymentDetails,
-            shippingAddresses = addresses.addresses,
-            selectedShippingAddress = addresses.addresses.firstOrNull { it.isDefault } ?: addresses.addresses.firstOrNull(),
+            paymentDetailsList = paymentDetails,
+            shippingAddresses = shippingAddresses,
+            selectedShippingAddress = shippingAddresses.firstOrNull { it.isDefault } ?: shippingAddresses.firstOrNull(),
             isProcessing = false,
             cardBeingUpdated = null
         )

@@ -18,6 +18,7 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.ConsumerState
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
@@ -30,7 +31,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerShippingAddress
-import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
@@ -87,7 +87,7 @@ internal class WalletViewModel @Inject constructor(
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
             canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
-            showShippingAddressSection = FeatureFlags.shippingAddressInLink.isEnabled && linkLaunchMode.collectShippingAddress,
+            showShippingAddressSection = FeatureFlags.shippingAddressInLink.isEnabled,
         )
     )
 
@@ -122,8 +122,10 @@ internal class WalletViewModel @Inject constructor(
             loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
         }
 
-        viewModelScope.launch {
-            linkAccountManager.listShippingAddresses()
+        if (linkLaunchMode.collectShippingAddress) {
+            viewModelScope.launch {
+                linkAccountManager.listShippingAddresses()
+            }
         }
 
         viewModelScope.launch {
@@ -144,24 +146,33 @@ internal class WalletViewModel @Inject constructor(
     }
 
     private suspend fun observeLinkAccountState() {
-        val collectShipping = false
+        val paymentDetailsFlow = linkAccountManager.consumerPaymentDetails.mapAsStateFlow { it?.paymentDetails }
 
-        val paymentDetails = linkAccountManager.consumerPaymentDetails.filterNotNull()
-
-        val shippingAddresses = if (collectShipping) {
-            linkAccountManager.consumerShippingAddresses.filterNotNull()
+        val shippingAddressesFlow = if (linkLaunchMode.collectShippingAddress) {
+            linkAccountManager.consumerShippingAddresses.mapAsStateFlow { it?.addresses }
         } else {
-            stateFlowOf(ConsumerShippingAddresses(emptyList()))
+            stateFlowOf(emptyList())
         }
 
-        combine(paymentDetails, shippingAddresses) { paymentDetails, shippingAddresses ->
-            paymentDetails to shippingAddresses
-        }.collect { (paymentDetails, shippingAddresses) ->
-            if (paymentDetails.paymentDetails.isEmpty()) {
+        val consumerStateFlow = combine(
+            paymentDetailsFlow.filterNotNull(),
+            shippingAddressesFlow.filterNotNull(),
+        ) { paymentDetails, shippingAddresses ->
+            ConsumerState(
+                paymentDetails = paymentDetails,
+                shippingAddresses = shippingAddresses,
+            )
+        }
+
+        consumerStateFlow.collect { consumerState ->
+            if (consumerState.paymentDetails.isEmpty()) {
                 navigateAndClearStack(LinkScreen.PaymentMethod)
             } else {
                 _uiState.update {
-                    it.updateWithResponse(paymentDetails, shippingAddresses)
+                    it.updateWithResponse(
+                        paymentDetails = consumerState.paymentDetails,
+                        shippingAddresses = consumerState.shippingAddresses,
+                    )
                 }
             }
         }

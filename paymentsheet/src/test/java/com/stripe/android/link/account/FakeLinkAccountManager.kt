@@ -38,7 +38,8 @@ internal open class FakeLinkAccountManager(
 
     private val _consumerShippingAddresses =
         MutableStateFlow<ConsumerShippingAddresses?>(null)
-    override val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?> = _consumerShippingAddresses.asStateFlow()
+    override val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?> =
+        _consumerShippingAddresses.asStateFlow()
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
