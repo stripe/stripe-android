@@ -53,6 +53,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             callback = viewModel::onLinkAuthenticationResult
         )
 
+        viewModel.registerForActivityResult(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
         setContent {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()

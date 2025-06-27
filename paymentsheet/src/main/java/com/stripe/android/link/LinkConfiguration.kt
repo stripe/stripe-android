@@ -28,6 +28,7 @@ internal data class LinkConfiguration(
     val elementsSessionId: String,
     val linkMode: LinkMode?,
     val allowDefaultOptIn: Boolean,
+    val googlePlacesApiKey: String?,
 ) : Parcelable {
     @Parcelize
     data class CustomerInfo(

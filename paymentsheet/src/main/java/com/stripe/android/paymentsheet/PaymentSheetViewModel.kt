@@ -30,6 +30,8 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.DefaultManagedAddressManager
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -57,6 +59,7 @@ import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.uicore.elements.ManagedAddressManager
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -137,6 +140,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private val isConfirmingWithLinkExpress: Boolean
         get() = (inProgressSelection as? PaymentSelection.Link)?.useLinkExpress == true
+
+    private val autocompleteLauncher = config.googlePlacesApiKey?.let {
+        DefaultAutocompleteLauncher(
+            googlePlacesApiKey = it,
+            appearance = config.appearance,
+        )
+    }
+
+    override val managedAddressManagerFactory = autocompleteLauncher?.let {
+        DefaultManagedAddressManager.Factory(it)
+    }
 
     override var newPaymentSelection: NewPaymentOptionSelection? = null
 
@@ -450,6 +464,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         lifecycleOwner: LifecycleOwner,
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
+        autocompleteLauncher?.register(activityResultCaller, lifecycleOwner)
     }
 
     @Suppress("ComplexCondition")

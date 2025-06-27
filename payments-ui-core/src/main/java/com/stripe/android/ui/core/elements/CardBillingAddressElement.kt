@@ -3,11 +3,11 @@ package com.stripe.android.ui.core.elements
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
-import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.AddressType
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.ManagedAddressElement
+import com.stripe.android.uicore.elements.ManagedAddressManager
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,14 +30,15 @@ class CardBillingAddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
         BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-) : AddressElement(
+    managedAddressManagerFactory: ManagedAddressManager.Factory? = null
+) : ManagedAddressElement(
     identifier,
     rawValuesMap,
-    AddressType.Normal(),
     countryCodes,
     countryDropdownFieldController,
     sameAsShippingElement,
-    shippingValuesMap
+    shippingValuesMap,
+    managedAddressManagerFactory = managedAddressManagerFactory,
 ) {
     // Save for future use puts this in the controller rather than element
     // card and achv2 uses save for future use

@@ -47,6 +47,7 @@ internal object FormControllerModule {
             },
             cardBrandFilter = DefaultCardBrandFilter,
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            managedAddressManagerFactory = null,
         )
     )
 }

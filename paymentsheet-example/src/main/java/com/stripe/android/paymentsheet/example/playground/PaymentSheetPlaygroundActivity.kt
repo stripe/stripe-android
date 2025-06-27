@@ -583,18 +583,18 @@ internal class PaymentSheetPlaygroundActivity :
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
-                    configuration = playgroundState.paymentSheetConfiguration()
+                    configuration = playgroundState.paymentSheetConfiguration(applicationContext)
                 )
             } else {
                 paymentSheet.presentWithPaymentIntent(
                     paymentIntentClientSecret = playgroundState.clientSecret,
-                    configuration = playgroundState.paymentSheetConfiguration()
+                    configuration = playgroundState.paymentSheetConfiguration(applicationContext)
                 )
             }
         } else {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),
-                configuration = playgroundState.paymentSheetConfiguration(),
+                configuration = playgroundState.paymentSheetConfiguration(applicationContext),
             )
         }
     }
@@ -607,20 +607,20 @@ internal class PaymentSheetPlaygroundActivity :
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 flowController.configureWithSetupIntent(
                     setupIntentClientSecret = playgroundState.clientSecret,
-                    configuration = playgroundState.paymentSheetConfiguration(),
+                    configuration = playgroundState.paymentSheetConfiguration(applicationContext),
                     callback = viewModel::onFlowControllerConfigured,
                 )
             } else {
                 flowController.configureWithPaymentIntent(
                     paymentIntentClientSecret = playgroundState.clientSecret,
-                    configuration = playgroundState.paymentSheetConfiguration(),
+                    configuration = playgroundState.paymentSheetConfiguration(applicationContext),
                     callback = viewModel::onFlowControllerConfigured,
                 )
             }
         } else {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),
-                configuration = playgroundState.paymentSheetConfiguration(),
+                configuration = playgroundState.paymentSheetConfiguration(applicationContext),
                 callback = viewModel::onFlowControllerConfigured,
             )
         }
