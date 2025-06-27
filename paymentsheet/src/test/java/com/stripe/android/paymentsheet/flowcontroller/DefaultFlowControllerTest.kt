@@ -626,12 +626,13 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.configureExpectingSuccess(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    // Enable default payment method feature
-                    attachDefaultsToPaymentMethod = true
-                )
-            )
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        // Enable default payment method feature
+                        attachDefaultsToPaymentMethod = true
+                    )
+                ).build()
         )
 
         // Verify initial state - should have Link selected (getPaymentOption() returns null for Link)

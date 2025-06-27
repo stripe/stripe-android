@@ -17,6 +17,7 @@ import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.utils.AnimationConstants
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -100,7 +101,8 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    data class Configuration internal constructor(
+    @Poko
+    class Configuration internal constructor(
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         val address: AddressDetails? = null,
         val allowedCountries: Set<String> = emptySet(),
@@ -232,7 +234,8 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration(
+    @Poko
+    class AdditionalFieldsConfiguration(
         val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
         val checkboxLabel: String? = null,
     ) : Parcelable {

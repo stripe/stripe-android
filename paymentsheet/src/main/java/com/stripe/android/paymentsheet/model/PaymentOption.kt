@@ -15,7 +15,8 @@ import dev.drewhamilton.poko.Poko
 /**
  * The customer's selected payment option.
  */
-data class PaymentOption internal constructor(
+@Poko
+class PaymentOption internal constructor(
     /**
      * The drawable resource id of the icon that represents the payment option.
      */
