@@ -1976,19 +1976,19 @@ class PaymentSheet internal constructor(
          * The scale factor for all fonts in PaymentSheet, the default value is 1.0.
          * When this value increases fonts will increase in size and decrease when this value is lowered.
          */
-        val sizeScaleFactor: Float,
+        internal val sizeScaleFactor: Float,
 
         /**
          * The font used in text. This should be a resource ID value.
          */
         @FontRes
-        val fontResId: Int?,
+        internal val fontResId: Int?,
 
         /**
          * Custom font configuration for specific text styles
          * Note: When set, these fonts override the default font calculations for their respective text styles
          */
-        val custom: Custom,
+        internal val custom: Custom,
     ) : Parcelable {
         @OptIn(AppearanceAPIAdditionsPreview::class)
         constructor(
@@ -2016,7 +2016,7 @@ class PaymentSheet internal constructor(
              *
              * Note: If `null`, uses the calculated font based on `base` and `sizeScaleFactor`
              */
-            val h1: Font? = null,
+            internal val h1: Font? = null,
         ) : Parcelable
 
         @AppearanceAPIAdditionsPreview
@@ -2026,19 +2026,19 @@ class PaymentSheet internal constructor(
              * The font used in text. This should be a resource ID value.
              */
             @FontRes
-            val fontFamily: Int? = null,
+            internal val fontFamily: Int? = null,
             /**
              * The font size used for the text. This should represent a sp value.
              */
-            val fontSizeSp: Float? = null,
+            internal val fontSizeSp: Float? = null,
             /**
              * The font weight used for the text.
              */
-            val fontWeight: Int? = null,
+            internal val fontWeight: Int? = null,
             /**
              * The letter spacing used for the text. This should represent a sp value.
              */
-            val letterSpacingSp: Float? = null,
+            internal val letterSpacingSp: Float? = null,
         ) : Parcelable
 
         companion object {
