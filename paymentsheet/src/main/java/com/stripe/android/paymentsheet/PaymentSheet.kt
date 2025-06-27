@@ -37,6 +37,8 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -1876,9 +1878,12 @@ class PaymentSheet internal constructor(
         )
 
         companion object {
-            val defaultLight = Colors(
-                primary = StripeThemeDefaults.colorsLight.materialColors.primary,
-                surface = StripeThemeDefaults.colorsLight.materialColors.surface,
+            internal fun configureDefaultLight(
+                primary: Color = StripeThemeDefaults.colorsLight.materialColors.primary,
+                surface: Color = StripeThemeDefaults.colorsLight.materialColors.surface,
+            ) = Colors(
+                primary = primary,
+                surface = surface,
                 component = StripeThemeDefaults.colorsLight.component,
                 componentBorder = StripeThemeDefaults.colorsLight.componentBorder,
                 componentDivider = StripeThemeDefaults.colorsLight.componentDivider,
@@ -1889,10 +1894,14 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
                 error = StripeThemeDefaults.colorsLight.materialColors.error
             )
+            val defaultLight = configureDefaultLight()
 
-            val defaultDark = Colors(
-                primary = StripeThemeDefaults.colorsDark.materialColors.primary,
-                surface = StripeThemeDefaults.colorsDark.materialColors.surface,
+            internal fun configureDefaultDark(
+                primary: Color = StripeThemeDefaults.colorsDark.materialColors.primary,
+                surface: Color = StripeThemeDefaults.colorsDark.materialColors.surface,
+            ) = Colors(
+                primary = primary,
+                surface = surface,
                 component = StripeThemeDefaults.colorsDark.component,
                 componentBorder = StripeThemeDefaults.colorsDark.componentBorder,
                 componentDivider = StripeThemeDefaults.colorsDark.componentDivider,
@@ -1903,6 +1912,7 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
                 error = StripeThemeDefaults.colorsDark.materialColors.error
             )
+            val defaultDark = configureDefaultDark()
         }
     }
 
