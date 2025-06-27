@@ -2261,10 +2261,10 @@ class PaymentSheet internal constructor(
     @Parcelize
     @Poko
     class Insets(
-        val startDp: Float,
-        val topDp: Float,
-        val endDp: Float,
-        val bottomDp: Float
+        internal val startDp: Float,
+        internal val topDp: Float,
+        internal val endDp: Float,
+        internal val bottomDp: Float
     ) : Parcelable {
         constructor(
             context: Context,
