@@ -76,6 +76,7 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         return wrapInBridgeResponse(response)
     }
 
+    @JavascriptInterface
     override fun calculateShipping(message: String) = handleRequest(message) { jsonObject ->
         val calculateShippingRequest = shippingRateRequestJsonParser.parse(jsonObject)
             ?: throw IllegalArgumentException("Failed to parse shipping rate request")

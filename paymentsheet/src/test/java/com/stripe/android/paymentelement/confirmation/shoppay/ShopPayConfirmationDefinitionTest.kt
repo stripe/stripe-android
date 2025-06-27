@@ -8,8 +8,10 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
+import com.stripe.android.paymentelement.confirmation.asCanceled
 import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
+import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -65,7 +67,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
             val callback = registerCall.callback.asCallbackFor<ShopPayActivityResult>()
 
-            callback.onActivityResult(ShopPayActivityResult.Completed("pm_test_123"))
+            callback.onActivityResult(ShopPayActivityResult.Completed)
 
             assertThat(onResultCalled).isTrue()
         }
@@ -105,27 +107,28 @@ internal class ShopPayConfirmationDefinitionTest {
         val launchCall = launcher.calls.awaitItem()
 
         assertThat(launchCall.input.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.shopPayConfiguration)
+        assertThat(launchCall.input.customerSessionClientSecret)
+            .isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.customerSessionClientSecret)
+        assertThat(launchCall.input.businessName).isEqualTo(SHOP_PAY_CONFIRMATION_OPTION.businessName)
     }
 
     @Test
-    fun `'toResult' should return 'Failed' when result is 'Completed'`() {
+    fun `'toResult' should return 'Succeeded' when result is 'Completed'`() {
         val definition = createShopPayConfirmationDefinition()
 
         val result = definition.toResult(
             confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
             confirmationParameters = CONFIRMATION_PARAMETERS,
             deferredIntentConfirmationType = null,
-            result = ShopPayActivityResult.Completed("pm_test_123"),
+            result = ShopPayActivityResult.Completed,
         )
 
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Succeeded>()
 
-        val failedResult = result.asFailed()
+        val succeededResult = result.asSucceeded()
 
-        assertThat(failedResult.cause).isInstanceOf<Throwable>()
-        assertThat(failedResult.cause.message).isEqualTo("ShopPay is not supported yet")
-        assertThat(failedResult.message).isEqualTo("ShopPay is not supported yet".resolvableString)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
+        assertThat(succeededResult.deferredIntentConfirmationType).isNull()
     }
 
     @Test
@@ -144,14 +147,13 @@ internal class ShopPayConfirmationDefinitionTest {
 
         val failedResult = result.asFailed()
 
-        assertThat(failedResult.cause).isInstanceOf<Throwable>()
-        assertThat(failedResult.cause.message).isEqualTo("ShopPay is not supported yet")
-        assertThat(failedResult.message).isEqualTo("ShopPay is not supported yet".resolvableString)
+        assertThat(failedResult.cause).isEqualTo(exception)
+        assertThat(failedResult.message).isEqualTo(exception.message.orEmpty().resolvableString)
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
     @Test
-    fun `'toResult' should return 'Failed' when result is 'Canceled'`() {
+    fun `'toResult' should return 'Canceled' when result is 'Canceled'`() {
         val definition = createShopPayConfirmationDefinition()
 
         val result = definition.toResult(
@@ -161,13 +163,31 @@ internal class ShopPayConfirmationDefinitionTest {
             result = ShopPayActivityResult.Canceled,
         )
 
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Canceled>()
+
+        val canceledResult = result.asCanceled()
+
+        assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.None)
+    }
+
+    @Test
+    fun `'toResult' should return 'Failed' when result is 'Failed' with null message`() {
+        val definition = createShopPayConfirmationDefinition()
+
+        val exception = Exception("oops")
+        val result = definition.toResult(
+            confirmationOption = SHOP_PAY_CONFIRMATION_OPTION,
+            confirmationParameters = CONFIRMATION_PARAMETERS,
+            deferredIntentConfirmationType = null,
+            result = ShopPayActivityResult.Failed(exception),
+        )
+
         assertThat(result).isInstanceOf<ConfirmationDefinition.Result.Failed>()
 
         val failedResult = result.asFailed()
 
-        assertThat(failedResult.cause).isInstanceOf<Throwable>()
-        assertThat(failedResult.cause.message).isEqualTo("ShopPay is not supported yet")
-        assertThat(failedResult.message).isEqualTo("ShopPay is not supported yet".resolvableString)
+        assertThat(failedResult.cause).isEqualTo(exception)
+        assertThat(failedResult.message).isEqualTo("oops".resolvableString)
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
     }
 
