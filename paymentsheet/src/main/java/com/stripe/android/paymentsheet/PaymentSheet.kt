@@ -2428,22 +2428,22 @@ class PaymentSheet internal constructor(
         /**
          * How to collect the name field.
          */
-        val name: CollectionMode = CollectionMode.Automatic,
+        internal val name: CollectionMode = CollectionMode.Automatic,
 
         /**
          * How to collect the phone field.
          */
-        val phone: CollectionMode = CollectionMode.Automatic,
+        internal val phone: CollectionMode = CollectionMode.Automatic,
 
         /**
          * How to collect the email field.
          */
-        val email: CollectionMode = CollectionMode.Automatic,
+        internal val email: CollectionMode = CollectionMode.Automatic,
 
         /**
          * How to collect the billing address.
          */
-        val address: AddressCollectionMode = AddressCollectionMode.Automatic,
+        internal val address: AddressCollectionMode = AddressCollectionMode.Automatic,
 
         /**
          * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
@@ -2451,7 +2451,7 @@ class PaymentSheet internal constructor(
          *
          * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
          */
-        val attachDefaultsToPaymentMethod: Boolean = false,
+        internal val attachDefaultsToPaymentMethod: Boolean = false,
     ) : Parcelable {
 
         internal val collectsName: Boolean
