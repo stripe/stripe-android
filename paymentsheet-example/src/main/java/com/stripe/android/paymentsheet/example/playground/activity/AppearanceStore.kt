@@ -28,7 +28,7 @@ internal object AppearanceStore {
         val colorsLight: PaymentSheet.Colors = PaymentSheet.Colors.defaultLight,
         val colorsDark: PaymentSheet.Colors = PaymentSheet.Colors.defaultDark,
         val shapes: Shapes = Shapes(),
-        val typography: PaymentSheet.Typography = PaymentSheet.Typography.default,
+        val typography: Typography = Typography(),
         val primaryButton: PrimaryButton = PrimaryButton(),
         val embedded: Embedded = Embedded(),
         val formInsetValues: Insets = Insets.Default,
@@ -43,7 +43,7 @@ internal object AppearanceStore {
                 .colorsLight(colorsLight)
                 .colorsDark(colorsDark)
                 .shapes(shapes.build())
-                .typography(typography)
+                .typography(typography.build())
                 .primaryButton(primaryButton.build())
                 .embeddedAppearance(PaymentSheet.Appearance.Embedded(embedded.getRow()))
                 .verticalModeRowPadding(verticalModeRowPadding)
@@ -232,6 +232,43 @@ internal object AppearanceStore {
                     Filled -> PaymentSheet.IconStyle.Filled
                     Outlined -> PaymentSheet.IconStyle.Outlined
                 }
+            }
+        }
+
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        data class Typography(
+            val sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier,
+            @FontRes
+            val fontResId: Int? = StripeThemeDefaults.typography.fontFamily,
+            val custom: Custom = Custom(),
+        ) {
+            fun build(): PaymentSheet.Typography = PaymentSheet.Typography(
+                sizeScaleFactor = sizeScaleFactor,
+                fontResId = fontResId,
+                custom = custom.build()
+            )
+
+            data class Custom(
+                val h1: Font? = null,
+            ) {
+                fun build(): PaymentSheet.Typography.Custom = PaymentSheet.Typography.Custom(
+                    h1 = h1?.build()
+                )
+            }
+
+            data class Font(
+                @FontRes
+                val fontFamily: Int? = null,
+                val fontSizeSp: Float? = null,
+                val fontWeight: Int? = null,
+                val letterSpacingSp: Float? = null,
+            ) {
+                fun build(): PaymentSheet.Typography.Font = PaymentSheet.Typography.Font(
+                    fontFamily = fontFamily,
+                    fontSizeSp = fontSizeSp,
+                    fontWeight = fontWeight,
+                    letterSpacingSp = letterSpacingSp,
+                )
             }
         }
 
