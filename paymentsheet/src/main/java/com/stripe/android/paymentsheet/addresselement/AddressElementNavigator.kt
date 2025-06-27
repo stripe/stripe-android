@@ -30,7 +30,7 @@ internal class AddressElementNavigator @Inject constructor() {
             .filterNotNull()
     }
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled) {
+    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled()) {
         onDismiss?.invoke(result)
     }
 
