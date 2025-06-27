@@ -9,6 +9,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
@@ -17,6 +18,7 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.account.ConsumerState
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.account.loadDefaultShippingAddress
@@ -29,6 +31,7 @@ import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
@@ -43,10 +46,12 @@ import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -83,6 +88,7 @@ internal class WalletViewModel @Inject constructor(
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
             canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
+            showShippingAddressSection = FeatureFlags.shippingAddressInLink.isEnabled,
         )
     )
 
@@ -110,19 +116,17 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
-                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
-                } else {
-                    _uiState.update {
-                        it.updateWithResponse(consumerPaymentDetails)
-                    }
-                }
-            }
+            observeLinkAccountState()
         }
 
         viewModelScope.launch {
             loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+        }
+
+        if (FeatureFlags.shippingAddressInLink.isEnabled) {
+            viewModelScope.launch {
+                linkAccountManager.listShippingAddresses()
+            }
         }
 
         viewModelScope.launch {
@@ -137,6 +141,39 @@ internal class WalletViewModel @Inject constructor(
             cvcController.formFieldValue.collectLatest { input ->
                 _uiState.update {
                     it.copy(cvcInput = input)
+                }
+            }
+        }
+    }
+
+    private suspend fun observeLinkAccountState() {
+        val paymentDetailsFlow = linkAccountManager.consumerPaymentDetails.mapAsStateFlow { it?.paymentDetails }
+
+        val shippingAddressesFlow = if (FeatureFlags.shippingAddressInLink.isEnabled) {
+            linkAccountManager.consumerShippingAddresses.mapAsStateFlow { it?.addresses }
+        } else {
+            stateFlowOf(emptyList())
+        }
+
+        val consumerStateFlow = combine(
+            paymentDetailsFlow.filterNotNull(),
+            shippingAddressesFlow.filterNotNull(),
+        ) { paymentDetails, shippingAddresses ->
+            ConsumerState(
+                paymentDetails = paymentDetails,
+                shippingAddresses = shippingAddresses,
+            )
+        }
+
+        consumerStateFlow.collect { consumerState ->
+            if (consumerState.paymentDetails.isEmpty()) {
+                navigateAndClearStack(LinkScreen.PaymentMethod)
+            } else {
+                _uiState.update {
+                    it.updateWithResponse(
+                        paymentDetails = consumerState.paymentDetails,
+                        shippingAddresses = consumerState.shippingAddresses,
+                    )
                 }
             }
         }
@@ -181,6 +218,21 @@ internal class WalletViewModel @Inject constructor(
                 selectedItemId = item.id,
                 userSetIsExpanded = null,
             )
+        }
+    }
+
+    fun onAddressSelected(address: ConsumerShippingAddress) {
+        _uiState.update {
+            it.copy(
+                selectedShippingAddress = address,
+                shippingAddressesExpanded = false,
+            )
+        }
+    }
+
+    fun onShippingAddressesExpandedChanged(expanded: Boolean) {
+        _uiState.update {
+            it.copy(shippingAddressesExpanded = expanded)
         }
     }
 
@@ -245,7 +297,11 @@ internal class WalletViewModel @Inject constructor(
                             details = selectedPaymentDetails,
                             collectedCvc = cvc
                         ),
-                        shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
+                        shippingAddress = if (FeatureFlags.shippingAddressInLink.isEnabled) {
+                            uiState.value.selectedShippingAddress
+                        } else {
+                            linkAccountManager.loadDefaultShippingAddress()
+                        },
                     )
                 )
             }

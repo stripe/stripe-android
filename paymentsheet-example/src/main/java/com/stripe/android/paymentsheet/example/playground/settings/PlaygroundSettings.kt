@@ -497,6 +497,7 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
             ShopPaySettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.shippingAddressInLink),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

@@ -100,6 +100,11 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         return result
     }
 
+    override fun onResume() {
+        super.onResume()
+        starterArgs?.config?.appearance?.parseAppearance()
+    }
+
     override fun setActivityResult(result: PaymentSheetResult) {
         setResult(
             Activity.RESULT_OK,

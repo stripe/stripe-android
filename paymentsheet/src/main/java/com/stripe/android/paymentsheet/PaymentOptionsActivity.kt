@@ -86,6 +86,11 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         return starterArgs
     }
 
+    override fun onResume() {
+        super.onResume()
+        starterArgs?.configuration?.appearance?.parseAppearance()
+    }
+
     override fun setActivityResult(result: PaymentOptionResult) {
         setResult(
             result.resultCode,

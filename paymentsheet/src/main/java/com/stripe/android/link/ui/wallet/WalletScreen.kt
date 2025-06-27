@@ -17,11 +17,14 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
@@ -51,7 +54,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.LinkThemeConfig.radioButtonColors
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.theme.toAddressElementAppearance
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkAppBarMenu
@@ -62,7 +67,11 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerShippingAddress
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration
+import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -87,6 +96,13 @@ internal fun WalletScreen(
     onLogoutClicked: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
+
+    val addressLauncher = rememberAddressLauncher(
+        callback = {
+            // TODO(tillh-stripe): Implement the callback
+        },
+    )
+
     WalletBody(
         state = state,
         expiryDateController = viewModel.expiryDateController,
@@ -102,7 +118,28 @@ internal fun WalletScreen(
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
         onAddNewPaymentMethodClicked = viewModel::onAddNewPaymentMethodClicked,
-        onDismissAlert = viewModel::onDismissAlert
+        onDismissAlert = viewModel::onDismissAlert,
+        onAddressSelected = viewModel::onAddressSelected,
+        onShippingAddressesExpandedChanged = viewModel::onShippingAddressesExpandedChanged,
+        launchAddressElement = {
+            val appearance = LinkTheme.toAddressElementAppearance()
+
+            val additionalFields = AdditionalFieldsConfiguration(
+                phone = AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
+                checkboxLabel = null,
+            )
+
+            val config = AddressLauncher.Configuration.Builder()
+                .additionalFields(additionalFields)
+                .appearance(appearance)
+                .build()
+
+            addressLauncher.present(
+                // This is unfortunately still in the API, but not necessary anymore
+                publishableKey = "",
+                configuration = config,
+            )
+        },
     )
 }
 
@@ -123,6 +160,9 @@ internal fun WalletBody(
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
+    launchAddressElement: () -> Unit,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     AnimatedContent(
         targetState = state.paymentDetailsList.isEmpty(),
@@ -161,7 +201,10 @@ internal fun WalletBody(
                     onLogoutClicked = onLogoutClicked,
                     onSetDefaultClicked = onSetDefaultClicked,
                     onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
-                    hideBottomSheetContent = hideBottomSheetContent
+                    hideBottomSheetContent = hideBottomSheetContent,
+                    launchAddressElement = launchAddressElement,
+                    onAddressSelected = onAddressSelected,
+                    onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -192,6 +235,9 @@ private fun PaymentDetailsSection(
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
+    launchAddressElement: () -> Unit,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -208,6 +254,9 @@ private fun PaymentDetailsSection(
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent,
             onLogoutClicked = onLogoutClicked,
+            launchAddressElement = launchAddressElement,
+            onAddressSelected = onAddressSelected,
+            onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
         )
 
         AnimatedVisibility(visible = state.mandate != null) {
@@ -290,14 +339,19 @@ private fun PaymentMethodSection(
     onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onLogoutClicked: () -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
-    hideBottomSheetContent: suspend () -> Unit
+    hideBottomSheetContent: suspend () -> Unit,
+    launchAddressElement: () -> Unit,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
     val emailLabel = stringResource(StripeUiCoreR.string.stripe_email)
     val paymentLabel = stringResource(R.string.stripe_wallet_collapsed_payment)
+    // TODO(tillh-stripe): Localize this
+    val shippingLabel = "Shipping"
 
-    val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel)
+    val labelMaxWidthDp = computeMaxLabelWidth(emailLabel, paymentLabel, shippingLabel)
 
     PaymentMethodPicker(
         email = state.email,
@@ -357,6 +411,13 @@ private fun PaymentMethodSection(
                 },
             )
         },
+        launchAddressElement = launchAddressElement,
+        selectedAddress = state.selectedShippingAddress,
+        shippingAddresses = state.shippingAddresses,
+        showShippingAddressSection = state.showShippingAddressSection,
+        onAddressSelected = onAddressSelected,
+        shippingAddressesExpanded = state.shippingAddressesExpanded,
+        onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
     )
 }
 
@@ -383,10 +444,17 @@ private fun PaymentMethodPicker(
     labelMaxWidth: Dp,
     expanded: Boolean,
     selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    showShippingAddressSection: Boolean,
     modifier: Modifier = Modifier,
     onAccountMenuClicked: () -> Unit,
     collapsedContent: @Composable ((ConsumerPaymentDetails.PaymentDetails) -> Unit),
     expandedContent: @Composable (() -> Unit),
+    launchAddressElement: () -> Unit,
+    selectedAddress: ConsumerShippingAddress?,
+    shippingAddresses: List<ConsumerShippingAddress>,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    shippingAddressesExpanded: Boolean,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
 ) {
     Column(
         modifier = modifier
@@ -406,6 +474,20 @@ private fun PaymentMethodPicker(
 
         LinkDivider()
 
+        if (showShippingAddressSection) {
+            ShippingAddressRow(
+                labelMaxWidth = labelMaxWidth,
+                launchAddressElement = launchAddressElement,
+                selectedAddress = selectedAddress,
+                shippingAddresses = shippingAddresses,
+                onAddressSelected = onAddressSelected,
+                isExpanded = shippingAddressesExpanded,
+                onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
+            )
+
+            LinkDivider()
+        }
+
         AnimatedContent(
             targetState = expanded || selectedItem == null,
             transitionSpec = {
@@ -423,6 +505,219 @@ private fun PaymentMethodPicker(
             } else {
                 collapsedContent(selectedItem!!)
             }
+        }
+    }
+}
+
+@Composable
+private fun ShippingAddressRow(
+    labelMaxWidth: Dp,
+    launchAddressElement: () -> Unit,
+    selectedAddress: ConsumerShippingAddress?,
+    shippingAddresses: List<ConsumerShippingAddress>,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    isExpanded: Boolean,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
+) {
+    Column {
+        AnimatedContent(
+            targetState = isExpanded,
+            transitionSpec = {
+                if (targetState) {
+                    (fadeIn() + expandVertically(expandFrom = Alignment.Top)) togetherWith fadeOut()
+                } else {
+                    fadeIn() togetherWith (fadeOut() + shrinkVertically(shrinkTowards = Alignment.Top))
+                }
+            }
+        ) { expanded ->
+            if (!expanded && selectedAddress != null) {
+                CollapsedShippingAddressRow(
+                    labelMaxWidth = labelMaxWidth,
+                    selectedAddress = selectedAddress,
+                    modifier = Modifier.clickable { onShippingAddressesExpandedChanged(true) },
+                )
+            } else {
+                // Expanded section
+                ExpandedShippingAddressesSection(
+                    launchAddressElement = launchAddressElement,
+                    selectedAddress = selectedAddress,
+                    shippingAddresses = shippingAddresses,
+                    onAddressSelected = onAddressSelected,
+                    onShippingAddressesExpandedChanged = onShippingAddressesExpandedChanged,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CollapsedShippingAddressRow(
+    labelMaxWidth: Dp,
+    selectedAddress: ConsumerShippingAddress,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 64.dp)
+            .padding(vertical = 16.dp)
+            .padding(start = HorizontalPadding),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Shipping",
+            modifier = Modifier.width(labelMaxWidth),
+            color = LinkTheme.colors.textTertiary,
+        )
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.weight(1f),
+        ) {
+            Text(
+                text = selectedAddress.address.name ?: "",
+                color = LinkTheme.colors.textPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = LinkTheme.typography.detail,
+            )
+
+            selectedAddress.address.line1?.let {
+                Text(
+                    text = it,
+                    color = LinkTheme.colors.textTertiary,
+                    style = LinkTheme.typography.detail,
+                )
+            }
+        }
+
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_chevron),
+            contentDescription = "Expand shipping address",
+            modifier = Modifier.padding(end = 22.dp),
+            tint = LinkTheme.colors.iconTertiary
+        )
+    }
+}
+
+@Composable
+private fun ExpandedShippingAddressesSection(
+    launchAddressElement: () -> Unit,
+    selectedAddress: ConsumerShippingAddress?,
+    shippingAddresses: List<ConsumerShippingAddress>,
+    onAddressSelected: (ConsumerShippingAddress) -> Unit,
+    onShippingAddressesExpandedChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onShippingAddressesExpandedChanged(false) }
+                .padding(start = 20.dp, end = 22.dp)
+                .padding(top = 20.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Text(
+                // TODO(tillh-stripe): Localize
+                text = "Shipping addresses",
+                color = LinkTheme.colors.textTertiary,
+                style = LinkTheme.typography.body
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.stripe_link_chevron),
+                contentDescription = "Collapse shipping address",
+                modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
+                tint = LinkTheme.colors.iconTertiary,
+            )
+        }
+
+        shippingAddresses.forEach { address ->
+            AddressInfo(
+                address = address,
+                onClick = onAddressSelected,
+                isSelected = address.id == selectedAddress?.id,
+                onMenuButtonClick = {
+                    onAddressSelected(address)
+                },
+            )
+            LinkDivider(modifier = Modifier.padding(horizontal = 20.dp))
+        }
+
+        AddShippingAddressRow(
+            isEnabled = true,
+            onClick = launchAddressElement,
+        )
+    }
+}
+
+@Composable
+private fun AddressInfo(
+    address: ConsumerShippingAddress,
+    onClick: (ConsumerShippingAddress) -> Unit,
+    isSelected: Boolean,
+    onMenuButtonClick: () -> Unit,
+) {
+    val name = address.address.name ?: ""
+    val line1 = address.address.line1 ?: ""
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick(address) }
+            .padding(horizontal = HorizontalPadding)
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        // Radio button
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            modifier = Modifier
+                .testTag(WALLET_ADDRESS_ITEM_RADIO_BUTTON),
+            colors = LinkTheme.colors.radioButtonColors,
+        )
+
+        // Address content
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = name,
+                style = LinkTheme.typography.bodyEmphasized,
+                color = LinkTheme.colors.textPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (line1.isNotBlank()) {
+                Text(
+                    text = line1,
+                    style = LinkTheme.typography.caption,
+                    color = LinkTheme.colors.textSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        // Menu icon
+        IconButton(
+            modifier = Modifier
+                .testTag(WALLET_ADDRESS_ITEM_MENU_BUTTON),
+            onClick = onMenuButtonClick,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.stripe_show_menu),
+                tint = LinkTheme.colors.iconTertiary,
+                modifier = Modifier.size(24.dp),
+            )
         }
     }
 }
@@ -621,6 +916,27 @@ private fun AddPaymentMethodRow(
 }
 
 @Composable
+private fun AddShippingAddressRow(
+    isEnabled: Boolean,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .clickable(enabled = isEnabled, onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Add shipping address",
+            modifier = Modifier.padding(horizontal = HorizontalPadding),
+            color = LinkTheme.colors.textBrand,
+            style = LinkTheme.typography.bodyEmphasized,
+        )
+    }
+}
+
+@Composable
 private fun LinkMandate(text: String) {
     Html(
         html = text.replaceHyperlinks(),
@@ -754,3 +1070,5 @@ internal const val WALLET_SCREEN_MENU_SHEET_TAG = "wallet_screen_menu_sheet_tag"
 internal const val WALLET_SCREEN_DIALOG_TAG = "wallet_screen_dialog_tag"
 internal const val WALLET_SCREEN_DIALOG_BUTTON_TAG = "wallet_screen_dialog_button_tag"
 internal const val WALLET_SCREEN_ERROR_TAG = "wallet_screen_error_tag"
+internal const val WALLET_ADDRESS_ITEM_RADIO_BUTTON = "wallet_address_item_radio_button"
+internal const val WALLET_ADDRESS_ITEM_MENU_BUTTON = "wallet_address_item_menu_button"

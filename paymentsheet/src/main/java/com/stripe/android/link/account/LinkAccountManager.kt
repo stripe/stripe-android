@@ -32,8 +32,9 @@ internal interface LinkAccountManager {
 
     /**
      * Cached shipping addresses for the current Link account.
+     * [listShippingAddresses] calls will update this value.
      */
-    var cachedShippingAddresses: ConsumerShippingAddresses?
+    val consumerShippingAddresses: StateFlow<ConsumerShippingAddresses?>
 
     /**
      * Retrieves the Link account associated with the email if it exists.
