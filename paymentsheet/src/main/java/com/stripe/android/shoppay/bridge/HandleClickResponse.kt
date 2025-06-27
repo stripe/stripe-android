@@ -1,12 +1,11 @@
 package com.stripe.android.shoppay.bridge
 
-import com.stripe.android.paymentsheet.PaymentSheet
 import org.json.JSONArray
 import org.json.JSONObject
 
 internal data class HandleClickResponse(
-    val lineItems: List<PaymentSheet.ShopPayConfiguration.LineItem>?,
-    val shippingRates: List<PaymentSheet.ShopPayConfiguration.ShippingRate>?,
+    val lineItems: List<ECELineItem>?,
+    val shippingRates: List<ECEShippingRate>?,
     val billingAddressRequired: Boolean?,
     val emailRequired: Boolean?,
     val phoneNumberRequired: Boolean?,
@@ -17,8 +16,8 @@ internal data class HandleClickResponse(
 ) : JsonSerializer {
     override fun toJson(): JSONObject {
         return JSONObject().apply {
-            putOpt("lineItems", lineItems?.let { JSONArray(it.map { item -> item.toJSON() }) })
-            putOpt("shippingRates", shippingRates?.let { JSONArray(it.map { rate -> rate.toJSON() }) })
+            putOpt("lineItems", lineItems?.let { JSONArray(it.map { item -> item.toJson() }) })
+            putOpt("shippingRates", shippingRates?.let { JSONArray(it.map { rate -> rate.toJson() }) })
             putOpt("billingAddressRequired", billingAddressRequired)
             putOpt("emailRequired", emailRequired)
             putOpt("phoneNumberRequired", phoneNumberRequired)

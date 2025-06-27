@@ -14,7 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
-import com.stripe.android.shoppay.bridge.BridgeHandler
+import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.di.DaggerShopPayComponent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,7 +25,7 @@ import java.io.BufferedReader
 import javax.inject.Inject
 
 internal class ShopPayViewModel @Inject constructor(
-    val bridgeHandler: BridgeHandler
+    val bridgeHandler: ShopPayBridgeHandler
 ) : ViewModel() {
     private val _popupWebView = MutableStateFlow<WebView?>(null)
     val popupWebView: StateFlow<WebView?> = _popupWebView

@@ -1,7 +1,7 @@
 package com.stripe.android.shoppay.di
 
 import com.stripe.android.shoppay.ShopPayViewModel
-import com.stripe.android.shoppay.bridge.BridgeHandler
+import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import dagger.Module
 import dagger.Provides
 
@@ -9,7 +9,7 @@ import dagger.Provides
 internal object ShopPayViewModelModule {
     @Provides
     fun provideShopPayViewModel(
-        bridgeHandler: BridgeHandler
+        bridgeHandler: ShopPayBridgeHandler
     ): ShopPayViewModel {
         return ShopPayViewModel(bridgeHandler)
     }
