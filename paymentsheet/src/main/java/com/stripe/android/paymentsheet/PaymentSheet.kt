@@ -1185,27 +1185,27 @@ class PaymentSheet internal constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
-        val colorsLight: Colors = Colors.defaultLight,
+        internal val colorsLight: Colors = Colors.defaultLight,
 
         /**
          * Describes the colors used while the system is in dark mode.
          */
-        val colorsDark: Colors = Colors.defaultDark,
+        internal val colorsDark: Colors = Colors.defaultDark,
 
         /**
          * Describes the appearance of shapes.
          */
-        val shapes: Shapes = Shapes.default,
+        internal val shapes: Shapes = Shapes.default,
 
         /**
          * Describes the typography used for text.
          */
-        val typography: Typography = Typography.default,
+        internal val typography: Typography = Typography.default,
 
         /**
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
-        val primaryButton: PrimaryButton = PrimaryButton(),
+        internal val primaryButton: PrimaryButton = PrimaryButton(),
 
         /**
          * Describes the appearance of the Embedded Payment Element
