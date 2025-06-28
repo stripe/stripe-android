@@ -2,10 +2,9 @@ package com.stripe.android.shoppay
 
 import android.content.Context
 import android.content.Intent
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
@@ -15,7 +14,6 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.ShopPayPreview
@@ -32,7 +30,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +42,6 @@ import org.robolectric.Shadows.shadowOf
 internal class ShopPayActivityTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val dispatcher = StandardTestDispatcher()
-    private lateinit var confirmationState: MutableStateFlow<ShopPayConfirmationState>
 
     @get:Rule
     val intentsTestRule = IntentsRule()
@@ -53,32 +49,21 @@ internal class ShopPayActivityTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
-    @Before
-    fun setUp() {
-        confirmationState = MutableStateFlow(ShopPayConfirmationState.Pending)
-        setupPaymentElementCallbacks()
-    }
-
-    private fun setupPaymentElementCallbacks() {
-        PaymentElementCallbackReferences["paymentElementCallbackIdentifier"] = PaymentElementCallbacks.Builder()
-            .shopPayHandlers(
-                shopPayHandlers = ShopPayHandlers(
-                    shippingMethodUpdateHandler = { null },
-                    shippingContactHandler = { null }
-                )
-            )
-            .preparePaymentMethodHandler { _, _ -> }
-            .build()
-    }
+    @get:Rule
+    val composeTestRule = createAndroidComposeRule<ShopPayActivity>()
 
     @Test
     fun `finishes with failed result when ViewModel factory fails`() {
-        val intent = Intent(context, ShopPayActivity::class.java)
+        val intent = Intent(ApplicationProvider.getApplicationContext(), ShopPayActivity::class.java)
+
         val scenario = ActivityScenario.launchActivityForResult<ShopPayActivity>(intent)
 
         assertThat(scenario.result.resultCode).isEqualTo(ShopPayActivity.RESULT_COMPLETE)
 
-        val result = getResultFromActivityScenario(scenario)
+        val resultIntent = scenario.result.resultData
+        val result = resultIntent.extras?.let {
+            BundleCompat.getParcelable(it, ShopPayActivityContract.EXTRA_RESULT, ShopPayActivityResult::class.java)
+        }
 
         assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
         val failedResult = result as ShopPayActivityResult.Failed
@@ -91,17 +76,17 @@ internal class ShopPayActivityTest {
         val intent = ShopPayActivity.createIntent(context, ShopPayTestFactory.SHOP_PAY_ARGS)
 
         assertThat(intent.component?.className).isEqualTo(ShopPayActivity::class.java.name)
-        val intentArgs = getArgsFromIntent(intent)
-
+        val intentArgs = intent.extras?.let {
+            BundleCompat.getParcelable(it, ShopPayActivity.EXTRA_ARGS, ShopPayArgs::class.java)
+        }
         assertThat(intentArgs?.shopPayConfiguration).isEqualTo(SHOP_PAY_CONFIGURATION)
         assertThat(intentArgs?.publishableKey).isEqualTo(ShopPayTestFactory.SHOP_PAY_ARGS.publishableKey)
     }
 
     @Test
     fun `getArgs returns correct args from SavedStateHandle`() {
-        val savedStateHandle = SavedStateHandle().apply {
-            set(ShopPayActivity.EXTRA_ARGS, ShopPayTestFactory.SHOP_PAY_ARGS)
-        }
+        val savedStateHandle = SavedStateHandle()
+        savedStateHandle[ShopPayActivity.EXTRA_ARGS] = ShopPayTestFactory.SHOP_PAY_ARGS
 
         val retrievedArgs = ShopPayActivity.getArgs(savedStateHandle)
 
@@ -112,12 +97,18 @@ internal class ShopPayActivityTest {
 
     @Test
     fun `getArgs returns null when no args in SavedStateHandle`() {
-        val retrievedArgs = ShopPayActivity.getArgs(SavedStateHandle())
+        val savedStateHandle = SavedStateHandle()
+
+        val retrievedArgs = ShopPayActivity.getArgs(savedStateHandle)
+
         assertThat(retrievedArgs).isNull()
     }
 
     @Test
     fun `finishes with Completed result when payment succeeds`() = runTest(dispatcher) {
+        setupPaymentElementCallbackReferences()
+
+        val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
         val bridgeHandler = createTestBridgeHandler(confirmationState)
         val stripeRepository = createTestStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -130,13 +121,18 @@ internal class ShopPayActivityTest {
 
         advanceUntilIdle()
 
-        val result = verifyActivityFinishedAndGetResult(activity)
+        val shadowActivity = shadowOf(activity)
+        assertThat(shadowActivity.resultCode).isEqualTo(63636)
+        val result = getResultFromIntent(shadowActivity.resultIntent)
         assertThat(result).isInstanceOf<ShopPayActivityResult.Completed>()
         assertNoUnverifiedIntents()
     }
 
     @Test
     fun `finishes with Failed result when payment fails`() = runTest(dispatcher) {
+        setupPaymentElementCallbackReferences()
+
+        val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
         val bridgeHandler = createTestBridgeHandler(confirmationState)
         val exception = RuntimeException("Payment failed")
         val stripeRepository = createTestStripeRepository(Result.failure(exception))
@@ -150,7 +146,9 @@ internal class ShopPayActivityTest {
 
         advanceUntilIdle()
 
-        val result = verifyActivityFinishedAndGetResult(activity)
+        val shadowActivity = shadowOf(activity)
+        assertThat(shadowActivity.resultCode).isEqualTo(63636)
+        val result = getResultFromIntent(shadowActivity.resultIntent)
         assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
         assertThat((result as ShopPayActivityResult.Failed).error).isEqualTo(exception)
         assertNoUnverifiedIntents()
@@ -158,6 +156,9 @@ internal class ShopPayActivityTest {
 
     @Test
     fun `finishes with Failed result when confirmation state fails`() = runTest(dispatcher) {
+        setupPaymentElementCallbackReferences()
+
+        val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
         val bridgeHandler = createTestBridgeHandler(confirmationState)
         val stripeRepository = createTestStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -168,22 +169,12 @@ internal class ShopPayActivityTest {
 
         advanceUntilIdle()
 
-        val result = verifyActivityFinishedAndGetResult(activity)
+        val shadowActivity = shadowOf(activity)
+        assertThat(shadowActivity.resultCode).isEqualTo(63636)
+        val result = getResultFromIntent(shadowActivity.resultIntent)
         assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
         assertThat((result as ShopPayActivityResult.Failed).error).isEqualTo(exception)
         assertNoUnverifiedIntents()
-    }
-
-    private fun getResultFromActivityScenario(scenario: ActivityScenario<ShopPayActivity>): ShopPayActivityResult? {
-        return scenario.result.resultData.extras?.let {
-            BundleCompat.getParcelable(it, ShopPayActivityContract.EXTRA_RESULT, ShopPayActivityResult::class.java)
-        }
-    }
-
-    private fun getArgsFromIntent(intent: Intent): ShopPayArgs? {
-        return intent.extras?.let {
-            BundleCompat.getParcelable(it, ShopPayActivity.EXTRA_ARGS, ShopPayArgs::class.java)
-        }
     }
 
     private fun createTestBridgeHandler(
@@ -202,12 +193,30 @@ internal class ShopPayActivityTest {
         }
     }
 
-    private fun createTestStripeRepository(result: Result<PaymentMethod>): StripeRepository {
+    private fun createTestStripeRepository(result: Result<com.stripe.android.model.PaymentMethod>): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
                 paymentMethodCreateParams: com.stripe.android.model.PaymentMethodCreateParams,
                 options: ApiRequest.Options
-            ): Result<PaymentMethod> = result
+            ): Result<com.stripe.android.model.PaymentMethod> = result
+        }
+    }
+
+    private fun createTestViewModelFactory(
+        bridgeHandler: ShopPayBridgeHandler,
+        stripeRepository: StripeRepository
+    ): androidx.lifecycle.ViewModelProvider.Factory {
+        return object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ShopPayViewModel(
+                    bridgeHandler = bridgeHandler,
+                    stripeApiRepository = stripeRepository,
+                    requestOptions = ApiRequest.Options("pk_test"),
+                    paymentMethodHandler = { _, _ -> },
+                    workContext = dispatcher,
+                ) as T
+            }
         }
     }
 
@@ -233,38 +242,28 @@ internal class ShopPayActivityTest {
         }
     }
 
-    private fun verifyActivityFinishedAndGetResult(activity: ShopPayActivity): ShopPayActivityResult? {
-        val shadowActivity = shadowOf(activity)
-        assertThat(shadowActivity.resultCode).isEqualTo(63636)
-        return getResultFromIntent(shadowActivity.resultIntent)
-    }
-
     private fun setupActivityController(
         bridgeHandler: ShopPayBridgeHandler,
         stripeRepository: StripeRepository
     ): ShopPayActivity {
         val intent = ShopPayActivity.createIntent(context, ShopPayTestFactory.SHOP_PAY_ARGS)
+
         val activityController = Robolectric.buildActivity(ShopPayActivity::class.java, intent)
 
         activityController.get().viewModelFactory = createTestViewModelFactory(bridgeHandler, stripeRepository)
+        activityController.intent
         return activityController.setup().get()
     }
 
-    private fun createTestViewModelFactory(
-        bridgeHandler: ShopPayBridgeHandler,
-        stripeRepository: StripeRepository
-    ): ViewModelProvider.Factory {
-        return object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ShopPayViewModel(
-                    bridgeHandler = bridgeHandler,
-                    stripeApiRepository = stripeRepository,
-                    requestOptions = ApiRequest.Options("pk_test"),
-                    paymentMethodHandler = { _, _ -> },
-                    workContext = dispatcher,
-                ) as T
-            }
-        }
+    private fun setupPaymentElementCallbackReferences() {
+        PaymentElementCallbackReferences["paymentElementCallbackIdentifier"] = PaymentElementCallbacks.Builder()
+            .shopPayHandlers(
+                shopPayHandlers = ShopPayHandlers(
+                    shippingMethodUpdateHandler = { null },
+                    shippingContactHandler = { null }
+                )
+            )
+            .preparePaymentMethodHandler { _, _ -> }
+            .build()
     }
 }
