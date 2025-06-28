@@ -1,2 +1,4 @@
 jdk:
-  - openjdk11
+  - openjdk17
+install:
+  - GRADLE_OPTS="-Dorg.gradle.jvmargs='Xms4g -Xmx8g -XX:+UseParallelGC -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8'" ./gradlew clean publishToMavenLocal
