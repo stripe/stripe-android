@@ -272,13 +272,11 @@ constructor(
 
     private constructor(
         shopPay: ShopPay,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
         billingDetails: PaymentMethod.BillingDetails?,
         metadata: Map<String, String>?,
     ) : this(
         type = PaymentMethod.Type.ShopPay,
         shopPay = shopPay,
-        allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata,
     )
