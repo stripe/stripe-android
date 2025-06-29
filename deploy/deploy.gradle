@@ -92,7 +92,9 @@ afterEvaluate { project ->
                         final depName = dep.hasProperty("dependencyProject") && dep.dependencyProject.hasProperty("artifactId") ?
                                 dep.dependencyProject.artifactId : dep.name
 
-                        final depVersion = dep.version != 'unspecified' ? dep.version : VERSION_NAME
+                        final defaultVersion = System.getenv("JITPACK") ? System.getenv("VERSION") : VERSION_NAME
+
+                        final depVersion = dep.version != 'unspecified' ? dep.version : defaultVersion
 
                         final dependencyNode = dependenciesNode.appendNode("dependency")
                         dependencyNode.appendNode("groupId", depGroup)
