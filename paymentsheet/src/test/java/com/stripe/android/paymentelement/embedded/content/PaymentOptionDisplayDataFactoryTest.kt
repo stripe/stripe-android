@@ -115,6 +115,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null,
+                    billingPhone = null,
                 ),
                 shippingAddress = ConsumerShippingAddress(
                     id = "csmr_addr_123",

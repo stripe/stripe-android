@@ -174,7 +174,7 @@ internal class CardDetailsEntryTest {
             expYear = 2030
         )
 
-        val params = entry.toUpdateParams(billingDetailsEntry())
+        val params = entry.toUpdateParams(billingDetailsEntry(), emptyMap())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)
@@ -191,7 +191,7 @@ internal class CardDetailsEntryTest {
             expYear = null
         )
 
-        val params = entry.toUpdateParams(billingDetailsEntry())
+        val params = entry.toUpdateParams(billingDetailsEntry(), emptyMap())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isNull()
@@ -209,7 +209,7 @@ internal class CardDetailsEntryTest {
             expYear = 2030,
         )
 
-        val params = entry.toUpdateParams(billingDetailsEntry())
+        val params = entry.toUpdateParams(billingDetailsEntry(), emptyMap())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)

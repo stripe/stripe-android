@@ -300,6 +300,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         cvc: String?,
     ): Result<SharePaymentDetails> {
         return runCatching {
@@ -309,6 +310,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 paymentDetailsId = paymentDetailsId,
                 consumerSessionClientSecret = account.clientSecret,
                 expectedPaymentMethodType = expectedPaymentMethodType,
+                billingPhone = billingPhone,
                 cvc = cvc,
             ).getOrThrow()
         }

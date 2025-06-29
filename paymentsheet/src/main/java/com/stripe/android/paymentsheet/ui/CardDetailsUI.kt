@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,8 +28,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
@@ -49,14 +54,18 @@ internal fun CardDetailsEditUI(
         paymentMethodIcon = state.paymentMethodIcon,
         expiryDateState = state.expiryDateState,
         billingDetailsForm = state.billingDetailsForm,
+        contactInformationForm = state.contactInformationForm,
         onBrandChoiceChanged = {
-            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
+            editCardDetailsInteractor.handleViewAction(ViewAction.BrandChoiceChanged(it))
         },
         onExpDateChanged = {
-            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged(it))
+            editCardDetailsInteractor.handleViewAction(ViewAction.DateChanged(it))
         },
         onAddressChanged = {
-            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(it))
+            editCardDetailsInteractor.handleViewAction(ViewAction.BillingDetailsChanged(it))
+        },
+        onContactInformationChanged = {
+            editCardDetailsInteractor.handleViewAction(ViewAction.ContactInformationChanged(it))
         }
     )
 }
@@ -68,11 +77,13 @@ private fun CardDetailsEditUI(
     payload: EditCardPayload,
     expiryDateState: ExpiryDateState,
     billingDetailsForm: BillingDetailsForm?,
+    contactInformationForm: FormElement?,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onExpDateChanged: (String) -> Unit,
-    onAddressChanged: (BillingDetailsFormState) -> Unit
+    onAddressChanged: (BillingDetailsFormState) -> Unit,
+    onContactInformationChanged: (Map<IdentifierSpec, String?>) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -125,12 +136,42 @@ private fun CardDetailsEditUI(
             }
         }
 
+        if (contactInformationForm != null) {
+            Spacer(Modifier.height(32.dp))
+
+            ContactInformationFormUI(
+                contactInformationForm = contactInformationForm,
+                onContactInformationChanged = onContactInformationChanged
+            )
+        }
+
         if (billingDetailsForm != null) {
             Spacer(Modifier.height(32.dp))
 
             BillingDetailsFormUI(
                 form = billingDetailsForm,
                 onValuesChanged = onAddressChanged
+            )
+        }
+    }
+}
+
+@Composable
+private fun ContactInformationFormUI(
+    contactInformationForm: FormElement,
+    onContactInformationChanged: (Map<IdentifierSpec, String?>) -> Unit
+) {
+    SectionElementUI(
+        enabled = true,
+        element = contactInformationForm as SectionElement,
+        hiddenIdentifiers = emptySet(),
+        lastTextFieldIdentifier = null
+    )
+
+    LaunchedEffect(contactInformationForm) {
+        contactInformationForm.getFormFieldValueFlow().collect { formFields ->
+            onContactInformationChanged(
+                formFields.associate { (spec, entry) -> spec to entry.value }
             )
         }
     }
