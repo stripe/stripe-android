@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import androidx.core.net.toUri
 import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
@@ -72,7 +73,8 @@ internal sealed class LinkScreen(
          * Extracts and rebuilds the BillingDetailsUpdateFlow object from navigation arguments.
          * Returns null if not a billing details update flow.
          */
-        fun billingDetailsUpdateFlow(arguments: android.os.Bundle): BillingDetailsUpdateFlow? {
+        fun NavBackStackEntry.billingDetailsUpdateFlow(): BillingDetailsUpdateFlow? {
+            val arguments = arguments ?: return null
             val isBillingDetailsUpdateFlow = arguments
                 .getString(EXTRA_IS_BILLING_UPDATE_FLOW).toBoolean()
             if (!isBillingDetailsUpdateFlow) {

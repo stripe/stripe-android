@@ -277,13 +277,15 @@ class LinkBillingDetailsUtilsTest {
 
         val result = card.withEffectiveBillingDetails(configuration, linkAccount)
 
-        // Should supplement name from effective billing details
+        // Should use effective address when addresses are compatible (same country and postal code)
         assertThat(result.billingAddress?.name).isEqualTo("Default Name")
-        // Should preserve original line1
-        assertThat(result.billingAddress?.line1).isEqualTo("Original Line 1")
-        // Should supplement missing locality from effective billing details
+        assertThat(result.billingAddress?.line1).isEqualTo("Default Line 1")
+        assertThat(result.billingAddress?.line2).isEqualTo("Default Line 2")
         assertThat(result.billingAddress?.locality).isEqualTo("Default City")
-        // Should supplement email from Default
+        assertThat(result.billingAddress?.administrativeArea).isEqualTo("CA")
+        assertThat(result.billingAddress?.postalCode).isEqualTo("12345")
+        assertThat(result.billingAddress?.countryCode).isEqualTo(CountryCode.US)
+        // Should supplement email from effective billing details
         assertThat(result.billingEmailAddress).isEqualTo("default@example.com")
     }
 
@@ -319,6 +321,50 @@ class LinkBillingDetailsUtilsTest {
         assertThat(result.billingAddress?.locality).isEqualTo("Default City")
         assertThat(result.billingAddress?.countryCode).isEqualTo(CountryCode.US)
         // Should supplement email from default billing details
+        assertThat(result.billingEmailAddress).isEqualTo("default@example.com")
+    }
+
+    @Test
+    fun `withEffectiveBillingDetails preserves original address when different country or postcode`() {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "Original Name",
+                line1 = "Original Line 1",
+                locality = "Original City",
+                postalCode = "11111",
+                countryCode = CountryCode.create("CA"), // Different country
+                line2 = null,
+                administrativeArea = "ON"
+            ),
+            billingEmailAddress = "original@example.com"
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                email = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = "Default Name",
+                email = "default@example.com",
+                address = PaymentSheet.Address(
+                    line1 = "Default Line 1",
+                    city = "Default City",
+                    state = "CA",
+                    postalCode = "22222", // Different postcode
+                    country = "US" // Different country
+                )
+            )
+        )
+
+        val result = card.withEffectiveBillingDetails(configuration, linkAccount)
+
+        // Should preserve original address when addresses are incompatible
+        assertThat(result.billingAddress?.name).isEqualTo("Original Name")
+        assertThat(result.billingAddress?.line1).isEqualTo("Original Line 1")
+        assertThat(result.billingAddress?.locality).isEqualTo("Original City")
+        assertThat(result.billingAddress?.postalCode).isEqualTo("11111")
+        assertThat(result.billingAddress?.countryCode).isEqualTo(CountryCode.create("CA"))
+        // Should still supplement email from effective billing details
         assertThat(result.billingEmailAddress).isEqualTo("default@example.com")
     }
 }
