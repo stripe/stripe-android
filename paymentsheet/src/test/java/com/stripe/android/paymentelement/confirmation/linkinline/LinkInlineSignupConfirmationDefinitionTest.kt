@@ -710,6 +710,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 allowDefaultOptIn = false,
                 disableRuxInFlowController = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                defaultBillingDetails = null
             ),
             userInput = userInput,
         )

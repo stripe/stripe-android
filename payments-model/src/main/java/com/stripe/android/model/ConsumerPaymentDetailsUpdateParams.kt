@@ -37,7 +37,7 @@ data class ConsumerPaymentDetailsUpdateParams(
     }
 
     private fun MutableMap<String, Any>.addAddressParams(map: Map<String, @RawValue Any>) {
-        ConsumerPaymentDetails.Card.getAddressFromMap(map)?.let {
+        getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(map)?.let {
             this[it.first] = it.second
         }
     }

@@ -531,8 +531,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration? {
+        val collectsUnsupportedBillingDetails = with(configuration.billingDetailsCollectionConfiguration) {
+            // Keep Link disabled until [CardDetailsUI] supports collecting the following billing details:
+            collectsEmail || collectsName || collectsPhone
+        }
         if (!configuration.link.shouldDisplay ||
-            configuration.billingDetailsCollectionConfiguration.collectsAnything ||
+            collectsUnsupportedBillingDetails ||
             !elementsSession.isLinkEnabled
         ) {
             return null
@@ -593,6 +597,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            defaultBillingDetails = configuration.defaultBillingDetails,
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
         )
 

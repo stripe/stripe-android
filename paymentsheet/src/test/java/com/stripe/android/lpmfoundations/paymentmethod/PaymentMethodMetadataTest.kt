@@ -7,6 +7,8 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
@@ -1692,7 +1694,10 @@ internal class PaymentMethodMetadataTest {
             )
         )
 
-        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+        val metadata = PaymentMethodMetadata.createForNativeLink(
+            configuration = linkConfiguration,
+            linkAccount = linkAccount()
+        )
 
         assertThat(metadata.cbcEligibility).isEqualTo(
             CardBrandChoiceEligibility.Eligible(
@@ -1710,7 +1715,10 @@ internal class PaymentMethodMetadataTest {
             )
         )
 
-        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+        val metadata = PaymentMethodMetadata.createForNativeLink(
+            configuration = linkConfiguration,
+            linkAccount = linkAccount()
+        )
 
         assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
@@ -1913,7 +1921,10 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
         )
 
-        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+        val metadata = PaymentMethodMetadata.createForNativeLink(
+            configuration = linkConfiguration,
+            linkAccount = linkAccount()
+        )
 
         assertThat(metadata.cardBrandFilter).isEqualTo(linkConfiguration.cardBrandFilter)
     }
@@ -1944,9 +1955,15 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,
             allowDefaultOptIn = false,
-            disableRuxInFlowController = false
+            disableRuxInFlowController = false,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            defaultBillingDetails = null
         )
     }
+
+    private fun linkAccount() = LinkAccount(
+        consumerSession = TestFactory.CONSUMER_SESSION
+    )
 
     private fun createBillingDetailsCollectionConfiguration() =
         PaymentSheet.BillingDetailsCollectionConfiguration(

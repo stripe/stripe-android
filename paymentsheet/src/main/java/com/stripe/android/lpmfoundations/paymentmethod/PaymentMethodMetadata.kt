@@ -6,6 +6,8 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.utils.effectiveBillingDetails
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
@@ -373,10 +375,11 @@ internal data class PaymentMethodMetadata(
 
         internal fun createForNativeLink(
             configuration: LinkConfiguration,
+            linkAccount: LinkAccount,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = configuration.stripeIntent,
-                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
@@ -389,7 +392,11 @@ internal data class PaymentMethodMetadata(
                     }.orEmpty(),
                 ),
                 merchantName = configuration.merchantName,
-                defaultBillingDetails = null,
+                // Use effective billing details to prefill billing details in new card flows
+                defaultBillingDetails = effectiveBillingDetails(
+                    configuration = configuration,
+                    linkAccount = linkAccount
+                ),
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
