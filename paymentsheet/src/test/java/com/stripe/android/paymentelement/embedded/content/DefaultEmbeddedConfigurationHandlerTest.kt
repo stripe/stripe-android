@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -52,131 +51,6 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             configuration = configuration,
         )
         assertThat(result.exceptionOrNull()?.message).isEqualTo("Configuring while a sheet is open is not supported.")
-    }
-
-    @Test
-    fun `configuration fails rowSelectionCallback not null, action confirm, gPay`() = runScenario(
-        rowSelectionCallback = {}
-    ) {
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "USD",
-                    )
-                )
-                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-                .build(),
-        )
-
-        assertThat(result.exceptionOrNull()?.message).isEqualTo(
-            "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
-                "when Google Pay or a customer configuration is provided. " +
-                "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
-        )
-    }
-
-    @Test
-    fun `configuration fails rowSelectionCallback not null, action confirm, customer`() = runScenario(
-        rowSelectionCallback = {}
-    ) {
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
-                .customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
-                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-                .build(),
-        )
-
-        assertThat(result.exceptionOrNull()?.message).isEqualTo(
-            "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
-                "when Google Pay or a customer configuration is provided. " +
-                "Use RowSelectionBehavior.Default or disable Apple Pay and saved payment methods."
-        )
-    }
-
-    @Test
-    fun `configuration succeeds rowSelectionCallback null, action confirm, customer & gPay`() = runScenario(
-        rowSelectionCallback = null
-    ) {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
-            .googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "USD",
-                )
-            )
-            .customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
-            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-            .build()
-        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
-
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
-            configuration = configuration,
-        )
-
-        assertThat(result.getOrThrow())
-            .isInstanceOf<PaymentElementLoader.State>()
-        assertThat(result.isSuccess)
-    }
-
-    @Test
-    fun `configuration succeeds rowSelectionCallback !null, action confirm, no gpay, no customer`() = runScenario(
-        rowSelectionCallback = {}
-    ) {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
-            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
-            .build()
-        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
-
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
-            configuration = configuration,
-        )
-
-        assertThat(result.getOrThrow())
-            .isInstanceOf<PaymentElementLoader.State>()
-        assertThat(result.isSuccess)
-    }
-
-    @Test
-    fun `configuration succeeds rowSelectionCallback !null, action continue, gPay & Customer`() = runScenario(
-        rowSelectionCallback = {}
-    ) {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example Inc.")
-            .googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "USD",
-                )
-            )
-            .customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
-            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
-            .build()
-
-        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
-
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
-            ),
-            configuration = configuration,
-        )
-
-        assertThat(result.getOrThrow())
-            .isInstanceOf<PaymentElementLoader.State>()
-        assertThat(result.isSuccess)
     }
 
     @Test
@@ -426,7 +300,6 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     private fun runScenario(
-        rowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit
     ) {
         runTest {
@@ -439,7 +312,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 savedStateHandle,
                 sheetStateHolder,
                 eventReporter
-            ) { rowSelectionCallback }
+            ) { null }
             Scenario(
                 loader = loader,
                 savedStateHandle = savedStateHandle,

@@ -15,12 +15,18 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class ShopPayActivityContractTest {
 
-    private val contract = ShopPayActivityContract()
+    private val contract = ShopPayActivityContract(
+        paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier"
+    )
 
     @Test
     fun `intent is created correctly`() {
         val shopPayConfiguration: PaymentSheet.ShopPayConfiguration = mock()
-        val args = ShopPayActivityContract.Args(shopPayConfiguration)
+        val args = ShopPayActivityContract.Args(
+            shopPayConfiguration = shopPayConfiguration,
+            customerSessionClientSecret = "customer_secret",
+            businessName = "Example Inc."
+        )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
         val intentArgs = intent.extras?.let {

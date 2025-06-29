@@ -2,6 +2,7 @@ package com.stripe.android.testing
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -27,6 +28,11 @@ class FakePaymentLauncher : PaymentLauncher {
         _calls.add(Call.HandleNextAction.SetupIntent(clientSecret))
     }
 
+    @SharedPaymentTokenSessionPreview
+    override fun handleNextActionForHashedPaymentIntent(hashedValue: String) {
+        _calls.add(Call.HandleHashedNextAction.PaymentIntent(hashedValue))
+    }
+
     sealed interface Call {
         sealed interface Confirm<T : ConfirmStripeIntentParams> : Call {
             val params: T
@@ -50,6 +56,14 @@ class FakePaymentLauncher : PaymentLauncher {
             data class SetupIntent(
                 override val clientSecret: String
             ) : HandleNextAction
+        }
+
+        sealed interface HandleHashedNextAction : Call {
+            val hashedValue: String
+
+            data class PaymentIntent(
+                override val hashedValue: String
+            ) : HandleHashedNextAction
         }
     }
 }

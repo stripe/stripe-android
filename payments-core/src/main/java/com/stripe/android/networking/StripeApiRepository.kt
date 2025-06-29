@@ -1605,6 +1605,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.customPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["custom_payment_methods"] = it }
             params.mobileSessionId?.takeIf { it.isNotEmpty() }?.let { this["mobile_session_id"] = it }
             params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
+            params.sellerDetails?.let { this.putAll(it.toQueryParams()) }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
@@ -1945,13 +1946,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val sharePaymentDetailsUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/payment_details/share")
-
-        /**
-         * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
-         */
-        internal val linkFinancialConnectionsSessionUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/link_account_sessions")
 
         /**
          * @return `https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment`

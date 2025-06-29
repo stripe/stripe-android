@@ -757,6 +757,144 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession has expected CS information in the response if 'mobile_payment_element' is null`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            passMobilePaymentElement = false,
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer).isEqualTo(
+            ElementsSession.Customer(
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    apiKey = "ek_test_1234",
+                    apiKeyExpiry = 1713890664,
+                    customerId = "cus_1",
+                    liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
+                            isPaymentMethodSyncDefaultEnabled = false,
+                        ),
+                    )
+                ),
+                defaultPaymentMethod = "pm_123",
+                paymentMethods = listOf(
+                    PaymentMethod(
+                        id = "pm_123",
+                        customerId = "cus_1",
+                        type = PaymentMethod.Type.Card,
+                        code = "card",
+                        created = 1550757934255,
+                        liveMode = false,
+                        billingDetails = null,
+                        card = PaymentMethod.Card(
+                            brand = CardBrand.Visa,
+                            last4 = "4242",
+                            expiryMonth = 8,
+                            expiryYear = 2032,
+                            country = "US",
+                            funding = "credit",
+                            fingerprint = "fingerprint123",
+                            checks = PaymentMethod.Card.Checks(
+                                addressLine1Check = "unchecked",
+                                cvcCheck = "unchecked",
+                                addressPostalCodeCheck = null,
+                            ),
+                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
+                                isSupported = true
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer session information in the response if 'customer_sheet' is null`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            passCustomerSheet = false,
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer).isEqualTo(
+            ElementsSession.Customer(
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    apiKey = "ek_test_1234",
+                    apiKeyExpiry = 1713890664,
+                    customerId = "cus_1",
+                    liveMode = false,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                            isPaymentMethodSaveEnabled = false,
+                            isPaymentMethodRemoveEnabled = true,
+                            canRemoveLastPaymentMethod = true,
+                            allowRedisplayOverride = PaymentMethod.AllowRedisplay.LIMITED,
+                            isPaymentMethodSetAsDefaultEnabled = false,
+                        ),
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                    )
+                ),
+                defaultPaymentMethod = "pm_123",
+                paymentMethods = listOf(
+                    PaymentMethod(
+                        id = "pm_123",
+                        customerId = "cus_1",
+                        type = PaymentMethod.Type.Card,
+                        code = "card",
+                        created = 1550757934255,
+                        liveMode = false,
+                        billingDetails = null,
+                        card = PaymentMethod.Card(
+                            brand = CardBrand.Visa,
+                            last4 = "4242",
+                            expiryMonth = 8,
+                            expiryYear = 2032,
+                            country = "US",
+                            funding = "credit",
+                            fingerprint = "fingerprint123",
+                            checks = PaymentMethod.Card.Checks(
+                                addressLine1Check = "unchecked",
+                                cvcCheck = "unchecked",
+                                addressPostalCodeCheck = null,
+                            ),
+                            threeDSecureUsage = PaymentMethod.Card.ThreeDSecureUsage(
+                                isSupported = true
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+
+    @Test
     fun `ElementsSession has 'unspecified' allow redisplay override`() {
         allowRedisplayTest(
             rawAllowRedisplayValue = "unspecified",

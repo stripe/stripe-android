@@ -14,6 +14,7 @@ import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
+import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.NoPaymentDetailsFoundException
@@ -137,13 +138,9 @@ private fun Screens(
             val paymentDetailsId = backStackEntry
                 .arguments?.getString(EXTRA_PAYMENT_DETAILS)
                 ?: return@composable dismissWithResult(noPaymentDetailsResult())
-
-            val billingDetailsUpdateFlow = backStackEntry
-                .arguments?.let { LinkScreen.billingDetailsUpdateFlow(it) }
-
             UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId,
-                billingDetailsUpdateFlow = billingDetailsUpdateFlow,
+                billingDetailsUpdateFlow = backStackEntry.billingDetailsUpdateFlow(),
                 dismissWithResult = dismissWithResult
             )
         }

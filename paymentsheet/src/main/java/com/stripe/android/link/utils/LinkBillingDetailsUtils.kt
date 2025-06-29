@@ -66,10 +66,17 @@ internal fun ConsumerPaymentDetails.Card.withEffectiveBillingDetails(
 ): ConsumerPaymentDetails.Card {
     if (linkAccount == null) return this
     val effectiveBillingDetails = effectiveBillingDetails(configuration, linkAccount)
-    val effectiveBillingAddress = mergeAddresses(
-        currentAddress = billingAddress,
-        effectiveAddress = effectiveBillingDetails.toConsumerBillingAddress()
-    )
+    val effectiveAddress = effectiveBillingDetails.toConsumerBillingAddress()
+    val addressesAreCompatible = billingAddress?.let { current ->
+        effectiveAddress?.countryCode == current.countryCode &&
+            effectiveAddress?.postalCode == current.postalCode
+    } == true
+    // Prefer effective address when current is missing or addresses are compatible,
+    // otherwise keep the current address to avoid data conflicts
+    val effectiveBillingAddress = when {
+        billingAddress == null || addressesAreCompatible -> effectiveAddress
+        else -> billingAddress
+    }
 
     return copy(
         billingAddress = effectiveBillingAddress,
@@ -88,31 +95,4 @@ private fun PaymentSheet.BillingDetails.toConsumerBillingAddress(): ConsumerPaym
         postalCode = billingAddress.postalCode,
         countryCode = billingAddress.country?.let { CountryCode.create(it) }
     )
-}
-
-/**
- * Merges two billing addresses, only using merchant-provided address data when
- * country and postal code align.
- */
-private fun mergeAddresses(
-    currentAddress: ConsumerPaymentDetails.BillingAddress?,
-    effectiveAddress: ConsumerPaymentDetails.BillingAddress?
-): ConsumerPaymentDetails.BillingAddress? {
-    if (currentAddress == null) return effectiveAddress
-    if (effectiveAddress == null) return currentAddress
-
-    val addressesAreCompatible = currentAddress.countryCode == effectiveAddress.countryCode &&
-        currentAddress.postalCode == effectiveAddress.postalCode
-
-    return if (addressesAreCompatible) {
-        currentAddress.copy(
-            name = currentAddress.name ?: effectiveAddress.name,
-            line1 = currentAddress.line1 ?: effectiveAddress.line1,
-            line2 = currentAddress.line2 ?: effectiveAddress.line2,
-            locality = currentAddress.locality ?: effectiveAddress.locality,
-            administrativeArea = currentAddress.administrativeArea ?: effectiveAddress.administrativeArea,
-        )
-    } else {
-        currentAddress
-    }
 }

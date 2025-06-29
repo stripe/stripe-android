@@ -7,6 +7,11 @@ internal object SupportedPaymentMethodsSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<String>,
     PlaygroundSettingDefinition.Saveable<String> {
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow() ||
+            configurationData.integrationType.isCustomerFlow()
+    }
+
     override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {
         if (value.isNotEmpty()) {
             checkoutRequestBuilder.supportedPaymentMethods(value.split(","))

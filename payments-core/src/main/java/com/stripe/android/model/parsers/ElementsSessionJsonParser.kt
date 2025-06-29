@@ -285,7 +285,6 @@ internal class ElementsSessionJsonParser(
         }
 
         val paymentElementComponent = parsePaymentElementComponent(json.optJSONObject(FIELD_MOBILE_PAYMENT_ELEMENT))
-            ?: return null
         val customerSheetComponent = parseCustomerSheetComponent(json.optJSONObject(FIELD_CUSTOMER_SHEET))
             ?: return null
 
@@ -297,15 +296,16 @@ internal class ElementsSessionJsonParser(
 
     private fun parsePaymentElementComponent(
         json: JSONObject?
-    ): ElementsSession.Customer.Components.MobilePaymentElement? {
+    ): ElementsSession.Customer.Components.MobilePaymentElement {
         if (json == null) {
-            return null
+            return ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         }
 
         val paymentSheetEnabled = json.optBoolean(FIELD_ENABLED)
 
         return if (paymentSheetEnabled) {
-            val paymentSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
+            val paymentSheetFeatures = json.optJSONObject(FIELD_FEATURES)
+                ?: return ElementsSession.Customer.Components.MobilePaymentElement.Disabled
 
             val paymentMethodSaveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_SAVE)
             val paymentMethodRemoveFeature = paymentSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
@@ -332,13 +332,14 @@ internal class ElementsSessionJsonParser(
 
     private fun parseCustomerSheetComponent(json: JSONObject?): ElementsSession.Customer.Components.CustomerSheet? {
         if (json == null) {
-            return null
+            return ElementsSession.Customer.Components.CustomerSheet.Disabled
         }
 
         val customerSheetEnabled = json.optBoolean(FIELD_ENABLED)
 
         return if (customerSheetEnabled) {
-            val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES) ?: return null
+            val customerSheetFeatures = json.optJSONObject(FIELD_FEATURES)
+                ?: return ElementsSession.Customer.Components.CustomerSheet.Disabled
 
             val paymentMethodRemoveFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE)
             val paymentMethodRemoveLastFeature = customerSheetFeatures.optString(FIELD_PAYMENT_METHOD_REMOVE_LAST)

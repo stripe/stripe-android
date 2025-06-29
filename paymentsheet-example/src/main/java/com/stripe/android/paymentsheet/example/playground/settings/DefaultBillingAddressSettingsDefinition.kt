@@ -59,6 +59,17 @@ internal object DefaultBillingAddressSettingsDefinition :
         }
     }
 
+    override fun configure(
+        value: DefaultBillingAddress,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        createBillingDetails(value)?.let { billingDetails ->
+            configurationBuilder.defaultBillingDetails(billingDetails)
+        }
+    }
+
     private fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
         val email = when (value) {
             DefaultBillingAddress.On -> "email@email.com"

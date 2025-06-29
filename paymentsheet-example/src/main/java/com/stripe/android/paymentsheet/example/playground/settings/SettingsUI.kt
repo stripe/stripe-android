@@ -118,6 +118,10 @@ private fun IntegrationTypeConfigurableSetting(
                 value = PlaygroundConfigurationData.IntegrationType.FlowController
             ),
             PlaygroundSettingDefinition.Displayable.Option(
+                name = "Flow Controller w/ SPT",
+                value = PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt
+            ),
+            PlaygroundSettingDefinition.Displayable.Option(
                 name = "Embedded",
                 value = PlaygroundConfigurationData.IntegrationType.Embedded
             ),

@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import androidx.compose.ui.graphics.Color
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -21,8 +22,8 @@ internal object CustomerSheetFixtures {
         .headerTextForSelectionScreen("Select a payment method!")
         .appearance(
             PaymentSheet.Appearance(
-                colorsLight = PaymentSheet.Colors.defaultLight.copy(primary = 0),
-                colorsDark = PaymentSheet.Colors.defaultDark.copy(primary = 0),
+                colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color(0)),
+                colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color(0)),
                 shapes = PaymentSheet.Shapes(
                     cornerRadiusDp = 0.0f,
                     borderStrokeWidthDp = 0.0f
@@ -32,8 +33,8 @@ internal object CustomerSheetFixtures {
                     fontResId = 0
                 ),
                 primaryButton = PaymentSheet.PrimaryButton(
-                    colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
-                    colorsDark = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
+                    colorsLight = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                    colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
                     shape = PaymentSheet.PrimaryButtonShape(
                         cornerRadiusDp = 0.0f,
                         borderStrokeWidthDp = 20.0f

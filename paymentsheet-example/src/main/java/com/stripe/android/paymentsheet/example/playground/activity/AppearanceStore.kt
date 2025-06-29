@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.os.Parcelable
+import androidx.annotation.ColorInt
+import androidx.annotation.FontRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
+import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
@@ -23,13 +27,14 @@ internal object AppearanceStore {
     data class State(
         val colorsLight: PaymentSheet.Colors = PaymentSheet.Colors.defaultLight,
         val colorsDark: PaymentSheet.Colors = PaymentSheet.Colors.defaultDark,
-        val shapes: PaymentSheet.Shapes = PaymentSheet.Shapes.default,
-        val typography: PaymentSheet.Typography = PaymentSheet.Typography.default,
-        val primaryButton: PaymentSheet.PrimaryButton = PaymentSheet.PrimaryButton(),
+        val shapes: Shapes = Shapes(),
+        val typography: Typography = Typography(),
+        val primaryButton: PrimaryButton = PrimaryButton(),
         val embedded: Embedded = Embedded(),
         val formInsetValues: Insets = Insets.Default,
         val sectionSpacing: SectionSpacing = SectionSpacing.Default,
         val textFieldInsets: Insets = Insets.Default,
+        val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
         val iconStyle: IconStyle = IconStyle.Filled,
     ) {
         @OptIn(AppearanceAPIAdditionsPreview::class)
@@ -37,10 +42,11 @@ internal object AppearanceStore {
             return PaymentSheet.Appearance.Builder()
                 .colorsLight(colorsLight)
                 .colorsDark(colorsDark)
-                .shapes(shapes)
-                .typography(typography)
-                .primaryButton(primaryButton)
+                .shapes(shapes.build())
+                .typography(typography.build())
+                .primaryButton(primaryButton.build())
                 .embeddedAppearance(PaymentSheet.Appearance.Embedded(embedded.getRow()))
+                .verticalModeRowPadding(verticalModeRowPadding)
                 .apply {
                     formInsetValues.getPaymentSheetInsets()?.let {
                         formInsetValues(it)
@@ -114,6 +120,13 @@ internal object AppearanceStore {
                     top = 0f,
                     end = 20f,
                     bottom = 40f,
+                )
+
+                val defaultTextInsets = Custom(
+                    start = StripeThemeDefaults.textFieldInsets.start,
+                    top = StripeThemeDefaults.textFieldInsets.top,
+                    end = StripeThemeDefaults.textFieldInsets.end,
+                    bottom = StripeThemeDefaults.textFieldInsets.bottom,
                 )
             }
         }
@@ -220,6 +233,132 @@ internal object AppearanceStore {
                     Outlined -> PaymentSheet.IconStyle.Outlined
                 }
             }
+        }
+
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        data class Typography(
+            val sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier,
+            @FontRes
+            val fontResId: Int? = StripeThemeDefaults.typography.fontFamily,
+            val custom: Custom = Custom(),
+        ) {
+            fun build(): PaymentSheet.Typography = PaymentSheet.Typography(
+                sizeScaleFactor = sizeScaleFactor,
+                fontResId = fontResId,
+                custom = custom.build()
+            )
+
+            data class Custom(
+                val h1: Font? = null,
+            ) {
+                fun build(): PaymentSheet.Typography.Custom = PaymentSheet.Typography.Custom(
+                    h1 = h1?.build()
+                )
+            }
+
+            data class Font(
+                @FontRes
+                val fontFamily: Int? = null,
+                val fontSizeSp: Float? = null,
+                val fontWeight: Int? = null,
+                val letterSpacingSp: Float? = null,
+            ) {
+                fun build(): PaymentSheet.Typography.Font = PaymentSheet.Typography.Font(
+                    fontFamily = fontFamily,
+                    fontSizeSp = fontSizeSp,
+                    fontWeight = fontWeight,
+                    letterSpacingSp = letterSpacingSp,
+                )
+            }
+        }
+
+        data class Shapes(
+            val cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius,
+            val borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth,
+            val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
+        ) {
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            fun build(): PaymentSheet.Shapes = PaymentSheet.Shapes(
+                cornerRadiusDp = cornerRadiusDp,
+                borderStrokeWidthDp = borderStrokeWidthDp,
+                bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp,
+            )
+        }
+
+        data class PrimaryButton(
+            val colorsLight: PrimaryButtonColors = PrimaryButtonColors(
+                background = null,
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+            ),
+            val colorsDark: PrimaryButtonColors = PrimaryButtonColors(
+                background = null,
+                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
+                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+            ),
+            val shape: PrimaryButtonShape = PrimaryButtonShape(),
+            val typography: PrimaryButtonTypography = PrimaryButtonTypography(),
+        ) {
+            fun build(): PaymentSheet.PrimaryButton = PaymentSheet.PrimaryButton(
+                colorsLight = colorsLight.build(),
+                colorsDark = colorsDark.build(),
+                shape = shape.build(),
+                typography = typography.build(),
+            )
+        }
+
+        data class PrimaryButtonTypography(
+            @FontRes
+            val fontResId: Int? = null,
+            val fontSizeSp: Float? = null,
+        ) {
+            fun build(): PaymentSheet.PrimaryButtonTypography = PaymentSheet.PrimaryButtonTypography(
+                fontResId = fontResId,
+                fontSizeSp = fontSizeSp,
+            )
+        }
+
+        data class PrimaryButtonColors(
+            @ColorInt
+            val background: Int?,
+            @ColorInt
+            val onBackground: Int,
+            @ColorInt
+            val border: Int,
+            @ColorInt
+            val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+            @ColorInt
+            val onSuccessBackgroundColor: Int = onBackground,
+        ) {
+            fun build(): PaymentSheet.PrimaryButtonColors = PaymentSheet.PrimaryButtonColors(
+                background = background,
+                onBackground = onBackground,
+                border = border,
+                successBackgroundColor = successBackgroundColor,
+                onSuccessBackgroundColor = onSuccessBackgroundColor,
+            )
+        }
+
+        data class PrimaryButtonShape(
+            val cornerRadiusDp: Float? = null,
+            val borderStrokeWidthDp: Float? = null,
+            val heightDp: Float? = null
+        ) {
+            fun build(): PaymentSheet.PrimaryButtonShape = PaymentSheet.PrimaryButtonShape(
+                cornerRadiusDp = cornerRadiusDp,
+                borderStrokeWidthDp = borderStrokeWidthDp,
+                heightDp = heightDp,
+            )
+        }
+
+        companion object {
+            const val defaultCustomH1FontSizeDp = 20f
+            const val defaultCustomH1LetterSpacingSp = 0.13f
+            const val defaultCustomH1FontWeight = 400f
         }
     }
 }

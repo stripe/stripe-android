@@ -24,7 +24,6 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
-        AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true

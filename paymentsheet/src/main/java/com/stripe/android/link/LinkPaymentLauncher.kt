@@ -18,7 +18,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
-    private val linkStore: LinkStore,
+    private val linkStore: LinkStore
 ) {
     private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 

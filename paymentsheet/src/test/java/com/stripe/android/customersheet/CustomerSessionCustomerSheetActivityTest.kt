@@ -10,7 +10,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
@@ -23,6 +22,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.RemoveDialog
@@ -400,10 +400,9 @@ class CustomerSessionCustomerSheetActivityTest {
                         merchantDisplayName = "Merchant, Inc.",
                         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
-                        billingDetailsCollectionConfiguration = ConfigurationDefaults
-                            .billingDetailsCollectionConfiguration.copy(
-                                address = addressCollectionMode
-                            )
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            address = addressCollectionMode
+                        )
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )

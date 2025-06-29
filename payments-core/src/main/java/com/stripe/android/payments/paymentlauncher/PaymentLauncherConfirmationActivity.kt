@@ -53,6 +53,17 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             return
         }
 
+        args.validate().onFailure {
+            finishWithResult(InternalPaymentResult.Failed(it))
+
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS,
+                    stripeException = StripeException.create(it),
+                )
+            return
+        }
+
         onBackPressedDispatcher.addCallback {
             // Prevent back presses while confirming payment
         }
@@ -76,6 +87,9 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
+            }
+            is PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs -> {
+                viewModel.handleNextActionForStripeIntent(args.paymentIntentClientSecret, host)
             }
             is PaymentLauncherContract.Args.PaymentIntentNextActionArgs -> {
                 viewModel.handleNextActionForStripeIntent(args.paymentIntentClientSecret, host)

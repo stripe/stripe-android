@@ -34,6 +34,7 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -58,6 +59,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSet
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
 import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentTokenPlaygroundContract
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
@@ -90,10 +92,16 @@ internal class PaymentSheetPlaygroundActivity :
 
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
 
+    private val sharedPaymentTokenPlaygroundLauncher = registerForActivityResult(
+        SharedPaymentTokenPlaygroundContract()
+    ) { success ->
+        viewModel.onResult(success)
+    }
+
     private val embeddedPlaygroundOneStepLauncher = registerForActivityResult(
         EmbeddedPlaygroundOneStepContract()
     ) { success ->
-        viewModel.onEmbeddedResult(success)
+        viewModel.onResult(success)
     }
 
     private val embeddedPlaygroundTwoStepLauncher = registerForActivityResult(
@@ -101,14 +109,14 @@ internal class PaymentSheetPlaygroundActivity :
     ) { result ->
         when (result) {
             EmbeddedPlaygroundTwoStepContract.Result.Cancelled -> Unit
-            EmbeddedPlaygroundTwoStepContract.Result.Complete -> viewModel.onEmbeddedResult(true)
+            EmbeddedPlaygroundTwoStepContract.Result.Complete -> viewModel.onResult(true)
             is EmbeddedPlaygroundTwoStepContract.Result.Updated -> {
                 embeddedPaymentElement.state = result.embeddedPaymentElementState
             }
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class, ShopPayPreview::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -360,6 +368,7 @@ internal class PaymentSheetPlaygroundActivity :
                 customerSheet = customerSheet,
                 playgroundState = playgroundState,
             )
+            is PlaygroundState.SharedPaymentToken -> FlowControllerWithSptUi(playgroundState)
         }
     }
 
@@ -425,6 +434,21 @@ internal class PaymentSheetPlaygroundActivity :
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
         )
+    }
+
+    @Composable
+    fun FlowControllerWithSptUi(playgroundState: PlaygroundState.SharedPaymentToken) {
+        Button(
+            onClick = {
+                sharedPaymentTokenPlaygroundLauncher.launch(playgroundState)
+            },
+            enabled = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
+        ) {
+            Text("Launch flow")
+        }
     }
 
     @Composable

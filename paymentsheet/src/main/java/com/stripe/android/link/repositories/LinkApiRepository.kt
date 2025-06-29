@@ -20,6 +20,8 @@ import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
@@ -196,7 +198,34 @@ internal class LinkApiRepository @Inject constructor(
                 originalParams = paymentMethodCreateParams,
             )
         }.onFailure {
-            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE, StripeException.create(it))
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
+                StripeException.create(it)
+            )
+        }
+    }
+
+    override suspend fun createBankAccountPaymentDetails(
+        bankAccountId: String,
+        userEmail: String,
+        consumerSessionClientSecret: String,
+    ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
+        consumersApiService.createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
+                bankAccountId = bankAccountId,
+                billingEmailAddress = userEmail,
+                billingAddress = null
+            ),
+            requestSurface = REQUEST_SURFACE,
+            requestOptions = buildRequestOptions(),
+        ).mapCatching {
+            it.paymentDetails.first()
+        }.onFailure {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
+                StripeException.create(it)
+            )
         }
     }
 
@@ -286,8 +315,8 @@ internal class LinkApiRepository @Inject constructor(
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
+                        apiKey = publishableKeyProvider(),
+                        stripeAccount = stripeAccountIdProvider()
                     )
                 )
             )
@@ -309,8 +338,8 @@ internal class LinkApiRepository @Inject constructor(
                     requestOptions = consumerPublishableKey?.let {
                         ApiRequest.Options(it)
                     } ?: ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
+                        apiKey = publishableKeyProvider(),
+                        stripeAccount = stripeAccountIdProvider()
                     )
                 )
             )
@@ -328,8 +357,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -343,8 +372,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -360,8 +389,8 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }
@@ -377,8 +406,28 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = consumerPublishableKey?.let {
                 ApiRequest.Options(it)
             } ?: ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
+            )
+        )
+    }
+
+    override suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        stripeIntent: StripeIntent,
+        linkMode: LinkMode?,
+        consumerPublishableKey: String?
+    ): Result<LinkAccountSession> {
+        return consumersApiService.createLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            intentToken = stripeIntent.clientSecret,
+            linkMode = linkMode,
+            requestSurface = REQUEST_SURFACE,
+            requestOptions = consumerPublishableKey?.let {
+                ApiRequest.Options(it)
+            } ?: ApiRequest.Options(
+                apiKey = publishableKeyProvider(),
+                stripeAccount = stripeAccountIdProvider()
             )
         )
     }

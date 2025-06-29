@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.model.Address
@@ -28,6 +29,7 @@ import com.stripe.android.testing.FakePaymentLauncher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
+@OptIn(SharedPaymentTokenSessionPreview::class)
 internal class IntentConfirmationFlowTest {
     @Test
     fun `On payment intent, action should be to confirm intent`() = runTest {
@@ -261,6 +263,7 @@ internal class IntentConfirmationFlowTest {
                 intentCreationCallbackProvider = {
                     createIntentCallback
                 },
+                preparePaymentMethodHandlerProvider = { null }
             ),
             paymentLauncherFactory = {
                 FakePaymentLauncher()

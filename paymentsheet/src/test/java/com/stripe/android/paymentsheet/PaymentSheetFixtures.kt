@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import android.content.res.ColorStateList
-import android.graphics.Color
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -12,6 +13,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -21,7 +23,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.BillingDetailsFormState
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.mockito.kotlin.mock
@@ -56,15 +57,15 @@ internal object PaymentSheetFixtures {
             "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
-        primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
+        primaryButtonColor = ColorStateList.valueOf(Color.Black.toArgb()),
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
         allowsRemovalOfLastSavedPaymentMethod = false,
         paymentMethodOrder = listOf("klarna", "afterpay", "card"),
         appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.defaultLight.copy(primary = 0),
-            colorsDark = PaymentSheet.Colors.defaultDark.copy(primary = 0),
+            colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color(0)),
+            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color(0)),
             shapes = PaymentSheet.Shapes(
                 cornerRadiusDp = 0.0f,
                 borderStrokeWidthDp = 0.0f
@@ -74,8 +75,8 @@ internal object PaymentSheetFixtures {
                 fontResId = 0
             ),
             primaryButton = PaymentSheet.PrimaryButton(
-                colorsLight = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
-                colorsDark = PaymentSheet.PrimaryButtonColors.defaultLight.copy(background = 0),
+                colorsLight = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
                 shape = PaymentSheet.PrimaryButtonShape(
                     cornerRadiusDp = 0.0f,
                     borderStrokeWidthDp = 20.0f
@@ -94,9 +95,11 @@ internal object PaymentSheetFixtures {
         )
     )
 
+    const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+
     private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
         id = "customer_id",
-        ephemeralKeySecret = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
+        ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )
 
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
@@ -121,30 +124,33 @@ internal object PaymentSheetFixtures {
         )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        get() = CONFIG_CUSTOMER.copy(
-            googlePay = ConfigFixtures.GOOGLE_PAY
-        )
+        get() = CONFIG_CUSTOMER.newBuilder()
+            .googlePay(ConfigFixtures.GOOGLE_PAY)
+            .build()
 
     internal val CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
-        get() = CONFIG_CUSTOMER.copy(
-            externalPaymentMethods = listOf("external_paypal", "external_fawry")
-        )
+        get() = CONFIG_CUSTOMER.newBuilder()
+            .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
+            .build()
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     internal val CONFIG_CUSTOMER_WITH_CUSTOM_PAYMENT_METHODS
-        get() = CONFIG_CUSTOMER.copy(
-            customPaymentMethods = listOf(
-                PaymentSheet.CustomPaymentMethod(
-                    id = "cpmt_123",
-                    subtitle = "Pay now with BuFoPay".resolvableString,
-                    disableBillingDetailCollection = false,
-                ),
-                PaymentSheet.CustomPaymentMethod(
-                    id = "cpmt_456",
-                    subtitle = "Pay now with PayPal".resolvableString,
-                    disableBillingDetailCollection = true,
-                ),
+        get() = CONFIG_CUSTOMER.newBuilder()
+            .customPaymentMethods(
+                listOf(
+                    PaymentSheet.CustomPaymentMethod(
+                        id = "cpmt_123",
+                        subtitle = "Pay now with BuFoPay".resolvableString,
+                        disableBillingDetailCollection = false,
+                    ),
+                    PaymentSheet.CustomPaymentMethod(
+                        id = "cpmt_456",
+                        subtitle = "Pay now with PayPal".resolvableString,
+                        disableBillingDetailCollection = true,
+                    ),
+                )
             )
-        )
+            .build()
 
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
@@ -232,7 +238,7 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_WITHOUT_CUSTOMER
         get() = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .customer(null)
                 .build()
         )

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaym
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -29,6 +31,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRec
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.utils.getPMOSFUFromStringMap
 import com.stripe.android.paymentsheet.example.utils.stringValueToMap
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 @Stable
@@ -144,6 +147,47 @@ internal sealed interface PlaygroundState : Parcelable {
 
         fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
             return snapshot.customerEphemeralKeyRequest()
+        }
+    }
+
+    @Parcelize
+    data class SharedPaymentToken(
+        override val snapshot: PlaygroundSettings.Snapshot,
+        val customerId: String,
+        val customerSessionClientSecret: String,
+    ) : PlaygroundState {
+        override val integrationType
+            get() = snapshot.configurationData.integrationType
+
+        override val countryCode
+            get() = snapshot[CountrySettingsDefinition]
+
+        @IgnoredOnParcel
+        val amount = 9999L
+
+        @IgnoredOnParcel
+        val currencyCode = Currency.USD
+
+        override val endpoint: String
+            get() = ""
+
+        fun paymentSheetConfiguration(): PaymentSheet.Configuration {
+            return snapshot.paymentSheetConfiguration(this)
+        }
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        fun intentConfiguration(): PaymentSheet.IntentConfiguration {
+            return PaymentSheet.IntentConfiguration(
+                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = amount,
+                    currency = currencyCode.value,
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Manual,
+                ),
+                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    networkId = "internal",
+                    externalId = "stripe_test_merchant"
+                ),
+            )
         }
     }
 

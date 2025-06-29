@@ -8,6 +8,10 @@ internal object PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<String>,
     PlaygroundSettingDefinition.Saveable<String> {
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(value: String, checkoutRequestBuilder: CheckoutRequest.Builder) {
         stringValueToMap(value)?.let {
             checkoutRequestBuilder.overridePaymentMethodOptionsSetupFutureUsage(valuesMap = it)

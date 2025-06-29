@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -25,12 +26,14 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -225,13 +228,18 @@ class ConfirmationHandlerOptionKtxTest {
     fun `On Google Pay selection with config with google pay config, should return expected option`() {
         assertThat(
             PaymentSelection.GooglePay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.copy(
-                    googlePay = PaymentSheetFixtures.CONFIG_GOOGLEPAY.googlePay?.copy(
-                        label = "Merchant Payments",
-                        amount = 5000,
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production
+                configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                    .googlePay(
+                        PaymentSheet.GooglePayConfiguration(
+                            environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                            countryCode = "US",
+                            currencyCode = "USD",
+                            amount = 5000,
+                            label = "Merchant Payments",
+                        )
                     )
-                ).asCommonConfiguration(),
+                    .build()
+                    .asCommonConfiguration(),
                 linkConfiguration = null,
             )
         ).isEqualTo(
@@ -392,7 +400,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf())
                 .build()
                 .asCommonConfiguration(),
@@ -421,7 +429,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
                 .customPaymentMethods(customPaymentMethods = listOf(customPaymentMethod))
                 .build()
                 .asCommonConfiguration(),
@@ -433,6 +441,54 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
             .isEqualTo(customPaymentMethod)
         assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
+    }
+
+    @Test
+    fun `On ShopPay selection with config with null shopPay config, should return null`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @Test
+    fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
+                    shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+                    customer = null
+                ),
+                linkConfiguration = null,
+            )
+        ).isNull()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
+        assertThat(
+            PaymentSelection.ShopPay.toConfirmationOption(
+                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
+                    .asCommonConfiguration()
+                    .copy(
+                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                            id = "",
+                            clientSecret = "css_test_123"
+                        ),
+                        shopPayConfiguration = SHOP_PAY_CONFIGURATION
+                    ),
+                linkConfiguration = null,
+            )
+        ).isEqualTo(
+            ShopPayConfirmationOption(
+                shopPayConfiguration = SHOP_PAY_CONFIGURATION,
+                customerSessionClientSecret = "css_test_123",
+                businessName = "Merchant, Inc."
+            )
+        )
     }
 
     private fun testLinkInlineSignupConfirmationOption(
@@ -545,6 +601,7 @@ class ConfirmationHandlerOptionKtxTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             cardBrandFilter = DefaultCardBrandFilter,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             flags = mapOf(),
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

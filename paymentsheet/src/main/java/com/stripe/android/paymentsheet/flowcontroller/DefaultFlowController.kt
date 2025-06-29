@@ -121,9 +121,9 @@ internal class DefaultFlowController @Inject internal constructor(
             val state = viewModel.state
             if (state != null) {
                 viewModel.state = state.copy(
-                    config = state.config.copy(
-                        shippingDetails = value
-                    )
+                    config = state.config.newBuilder()
+                        .shippingDetails(value)
+                        .build()
                 )
             }
         }
@@ -557,7 +557,7 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             null,
             is PaymentOptionResult.Canceled -> {
-                viewModel.paymentSelection = result?.paymentSelection
+                viewModel.paymentSelection = (result as? PaymentOptionResult.Canceled)?.paymentSelection
                 onPaymentSelection()
             }
             is PaymentOptionResult.Failed -> {

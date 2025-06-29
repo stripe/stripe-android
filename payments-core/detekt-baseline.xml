@@ -36,6 +36,8 @@
     <ID>LongMethod:CollectBankAccountViewModel.kt$CollectBankAccountViewModel$private suspend fun createFinancialConnectionsSession()</ID>
     <ID>LongMethod:ElementsSessionFixtures.kt$ElementsSessionFixtures$fun createWithCustomPaymentMethods( customPaymentMethodData: String, ): JSONObject</ID>
     <ID>LongMethod:ElementsSessionJsonParser.kt$ElementsSessionJsonParser$override fun parse(json: JSONObject): ElementsSession?</ID>
+    <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected CS information in the response if 'mobile_payment_element' is null`()</ID>
+    <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response if 'customer_sheet' is null`()</ID>
     <ID>LongMethod:ElementsSessionJsonParserTest.kt$ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`()</ID>
     <ID>LongMethod:GooglePayJsonFactoryTest.kt$GooglePayJsonFactoryTest$@Test fun testCreatePaymentMethodRequestJson()</ID>
     <ID>LongMethod:PaymentAuthConfigTest.kt$PaymentAuthConfigTest$@Test fun testUiCustomizationWrapper()</ID>

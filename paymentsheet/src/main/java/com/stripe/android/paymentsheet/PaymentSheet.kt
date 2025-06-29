@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -30,11 +31,14 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -322,6 +326,17 @@ class PaymentSheet internal constructor(
         }
 
         /**
+         * @param handler Called when a user calls confirm and their payment method is being handed off
+         * to an external provider to handle payment/setup.
+         */
+        @SharedPaymentTokenSessionPreview
+        fun preparePaymentMethodHandler(
+            handler: PreparePaymentMethodHandler
+        ) = apply {
+            callbacksBuilder.preparePaymentMethodHandler(handler)
+        }
+
+        /**
          * Returns a [PaymentSheet].
          *
          * @param activity The Activity that is presenting [PaymentSheet].
@@ -434,13 +449,47 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    class IntentConfiguration @JvmOverloads constructor(
+    class IntentConfiguration internal constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
         val paymentMethodConfigurationId: String? = null,
         val onBehalfOf: String? = null,
         internal val requireCvcRecollection: Boolean = false,
+        internal val intentBehavior: IntentBehavior = IntentBehavior.Default,
     ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String> = emptyList(),
+            paymentMethodConfigurationId: String? = null,
+            onBehalfOf: String? = null,
+            requireCvcRecollection: Boolean = false,
+        ) : this(
+            mode = mode,
+            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodConfigurationId = paymentMethodConfigurationId,
+            onBehalfOf = onBehalfOf,
+            requireCvcRecollection = requireCvcRecollection,
+            intentBehavior = IntentBehavior.Default,
+        )
+
+        @SharedPaymentTokenSessionPreview
+        @JvmOverloads
+        constructor(
+            sharedPaymentTokenSessionWithMode: Mode,
+            sellerDetails: SellerDetails?,
+            paymentMethodTypes: List<String> = emptyList(),
+            paymentMethodConfigurationId: String? = null,
+            onBehalfOf: String? = null,
+            requireCvcRecollection: Boolean = false,
+        ) : this(
+            mode = sharedPaymentTokenSessionWithMode,
+            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodConfigurationId = paymentMethodConfigurationId,
+            onBehalfOf = onBehalfOf,
+            requireCvcRecollection = requireCvcRecollection,
+            intentBehavior = IntentBehavior.SharedPaymentToken(sellerDetails),
+        )
 
         /**
          * Contains information about the desired payment or setup flow.
@@ -566,6 +615,25 @@ class PaymentSheet internal constructor(
              * **Note**: Not all payment methods support this.
              */
             Manual,
+        }
+
+        @SharedPaymentTokenSessionPreview
+        @Parcelize
+        @Poko
+        class SellerDetails(
+            val networkId: String,
+            val externalId: String,
+        ) : Parcelable
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        internal sealed interface IntentBehavior : Parcelable {
+            @Parcelize
+            data object Default : IntentBehavior
+
+            @Parcelize
+            data class SharedPaymentToken(
+                val sellerDetails: SellerDetails?,
+            ) : IntentBehavior
         }
 
         companion object {
@@ -1044,6 +1112,7 @@ class PaymentSheet internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
+                shopPayConfiguration = shopPayConfiguration
             )
         }
 
@@ -1053,6 +1122,37 @@ class PaymentSheet internal constructor(
                 return Configuration(appName)
             }
         }
+
+        @OptIn(
+            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            ExperimentalCustomPaymentMethodsApi::class,
+            WalletButtonsPreview::class,
+            ShopPayPreview::class
+        )
+        @Suppress("DEPRECATION")
+        internal fun newBuilder(): Builder = Builder(merchantDisplayName)
+            .customer(customer)
+            .googlePay(googlePay)
+            .primaryButtonColor(primaryButtonColor)
+            .defaultBillingDetails(defaultBillingDetails)
+            .shippingDetails(shippingDetails)
+            .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
+            .appearance(appearance)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .preferredNetworks(preferredNetworks)
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .paymentMethodOrder(paymentMethodOrder)
+            .externalPaymentMethods(externalPaymentMethods)
+            .paymentMethodLayout(paymentMethodLayout)
+            .cardBrandAcceptance(cardBrandAcceptance)
+            .customPaymentMethods(customPaymentMethods)
+            .link(link)
+            .walletButtons(walletButtons)
+            .apply {
+                primaryButtonLabel?.let { primaryButtonLabel(it) }
+                shopPayConfiguration?.let { shopPayConfiguration(it) }
+            }
     }
 
     /**
@@ -1778,9 +1878,12 @@ class PaymentSheet internal constructor(
         )
 
         companion object {
-            val defaultLight = Colors(
-                primary = StripeThemeDefaults.colorsLight.materialColors.primary,
-                surface = StripeThemeDefaults.colorsLight.materialColors.surface,
+            internal fun configureDefaultLight(
+                primary: Color = StripeThemeDefaults.colorsLight.materialColors.primary,
+                surface: Color = StripeThemeDefaults.colorsLight.materialColors.surface,
+            ) = Colors(
+                primary = primary,
+                surface = surface,
                 component = StripeThemeDefaults.colorsLight.component,
                 componentBorder = StripeThemeDefaults.colorsLight.componentBorder,
                 componentDivider = StripeThemeDefaults.colorsLight.componentDivider,
@@ -1791,10 +1894,14 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
                 error = StripeThemeDefaults.colorsLight.materialColors.error
             )
+            val defaultLight = configureDefaultLight()
 
-            val defaultDark = Colors(
-                primary = StripeThemeDefaults.colorsDark.materialColors.primary,
-                surface = StripeThemeDefaults.colorsDark.materialColors.surface,
+            internal fun configureDefaultDark(
+                primary: Color = StripeThemeDefaults.colorsDark.materialColors.primary,
+                surface: Color = StripeThemeDefaults.colorsDark.materialColors.surface,
+            ) = Colors(
+                primary = primary,
+                surface = surface,
                 component = StripeThemeDefaults.colorsDark.component,
                 componentBorder = StripeThemeDefaults.colorsDark.componentBorder,
                 componentDivider = StripeThemeDefaults.colorsDark.componentDivider,
@@ -1805,6 +1912,7 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
                 error = StripeThemeDefaults.colorsDark.materialColors.error
             )
+            val defaultDark = configureDefaultDark()
         }
     }
 
@@ -2876,7 +2984,6 @@ class PaymentSheet internal constructor(
         /**
          * Displays a list of wallet buttons that can be used to checkout instantly
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @WalletButtonsPreview
         @Composable
         fun WalletButtons()
@@ -2987,6 +3094,17 @@ class PaymentSheet internal constructor(
             @ShopPayPreview
             fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
                 callbacksBuilder.shopPayHandlers(handlers)
+            }
+
+            /**
+             * @param handler Called when a user calls confirm and their payment method is being handed off
+             * to an external provider to handle payment/setup.
+             */
+            @SharedPaymentTokenSessionPreview
+            fun preparePaymentMethodHandler(
+                handler: PreparePaymentMethodHandler
+            ) = apply {
+                callbacksBuilder.preparePaymentMethodHandler(handler)
             }
 
             /**

@@ -16,7 +16,7 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(email = value) }
+        configurationData.updateBillingDetails { email = value }
     }
 
     override fun configure(
@@ -25,7 +25,7 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.EmbeddedConfigurationData
     ) {
-        configurationData.updateBillingDetails { copy(email = value) }
+        configurationData.updateBillingDetails { email = value }
     }
 
     override fun configure(
@@ -34,6 +34,15 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
         playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
-        configurationData.updateBillingDetails { copy(email = value) }
+        configurationData.updateBillingDetails { email = value }
+    }
+
+    override fun configure(
+        value: CollectionMode,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.SharedPaymentToken,
+        configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+    ) {
+        configurationData.updateBillingDetails { email = value }
     }
 }

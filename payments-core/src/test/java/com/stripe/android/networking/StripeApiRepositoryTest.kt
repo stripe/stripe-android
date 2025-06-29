@@ -263,12 +263,6 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun testLinkFinancialConnectionsSessionUrlUrl() {
-        assertThat(StripeApiRepository.linkFinancialConnectionsSessionUrl)
-            .isEqualTo("https://api.stripe.com/v1/consumers/link_account_sessions")
-    }
-
-    @Test
     fun testDeferredFinancialConnectionsSessionUrlUrl() {
         assertThat(StripeApiRepository.deferredFinancialConnectionsSessionUrl)
             .isEqualTo("https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment")
@@ -2625,6 +2619,101 @@ internal class StripeApiRepositoryTest {
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["customer_session_client_secret"]).isEqualTo("customer_session_client_secret")
             assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
+        }
+    }
+
+    @Test
+    fun `Verify seller details not in params when not provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                customerSessionClientSecret = "customer_session_client_secret",
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd",
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = null
+                    ),
+                    paymentMethodTypes = listOf("card"),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                ),
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+                sellerDetails = null
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["seller_details[network_id]"]).isNull()
+            assertThat(this["seller_details[external_id]"]).isNull()
+        }
+    }
+
+    @Test
+    fun `Verify seller details in params when provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.DeferredIntentType(
+                customerSessionClientSecret = "customer_session_client_secret",
+                deferredIntentParams = DeferredIntentParams(
+                    mode = DeferredIntentParams.Mode.Payment(
+                        amount = 2000,
+                        currency = "usd",
+                        captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                        setupFutureUsage = null,
+                        paymentMethodOptionsJsonString = null
+                    ),
+                    paymentMethodTypes = listOf("card"),
+                    paymentMethodConfigurationId = null,
+                    onBehalfOf = null,
+                ),
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+                sellerDetails = ElementsSessionParams.SellerDetails(
+                    networkId = "network_123",
+                    externalId = "external_123",
+                )
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["seller_details[network_id]"]).isEqualTo("network_123")
+            assertThat(this["seller_details[external_id]"]).isEqualTo("external_123")
         }
     }
 

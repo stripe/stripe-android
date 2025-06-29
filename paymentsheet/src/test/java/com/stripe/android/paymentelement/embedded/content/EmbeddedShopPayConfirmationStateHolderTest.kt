@@ -14,7 +14,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-internal class EmbeddedConfirmationStateHolderTest {
+internal class EmbeddedShopPayConfirmationStateHolderTest {
     @Test
     fun `setting state updates savedStateHandle`() = testScenario {
         assertThat(savedStateHandle.get<State?>(CONFIRMATION_STATE_KEY)).isNull()

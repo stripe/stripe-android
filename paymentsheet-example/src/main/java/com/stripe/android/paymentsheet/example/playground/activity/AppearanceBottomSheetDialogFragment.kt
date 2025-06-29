@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.ColorInt
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -66,7 +67,9 @@ import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import kotlin.math.roundToInt
 
 private val BASE_FONT_SIZE = 20.sp
 private val BASE_PADDING = 8.dp
@@ -154,6 +157,17 @@ private fun AppearancePicker(
                     },
                 )
             }
+            CustomizationCard("Text Field Insets") {
+                Insets(
+                    currentInsets = currentAppearance.textFieldInsets,
+                    defaultCustomInsets = AppearanceStore.State.Insets.defaultTextInsets,
+                    updateInsets = {
+                        updateAppearance(
+                            currentAppearance.copy(textFieldInsets = it)
+                        )
+                    },
+                )
+            }
             CustomizationCard("Section Spacing") {
                 SectionSpacing(
                     currentAppearance = currentAppearance,
@@ -168,6 +182,12 @@ private fun AppearancePicker(
             }
             CustomizationCard("PrimaryButton") {
                 PrimaryButton(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
+            CustomizationCard("Vertical Mode") {
+                VerticalMode(
                     currentAppearance = currentAppearance,
                     updateAppearance = updateAppearance,
                 )
@@ -240,6 +260,32 @@ private fun Icons(
         )
     }
 }
+
+private fun PaymentSheet.Colors.copy(
+    @ColorInt primary: Int = this.primary,
+    @ColorInt surface: Int = this.surface,
+    @ColorInt component: Int = this.component,
+    @ColorInt componentBorder: Int = this.componentBorder,
+    @ColorInt componentDivider: Int = this.componentDivider,
+    @ColorInt onComponent: Int = this.onComponent,
+    @ColorInt onSurface: Int = this.onSurface,
+    @ColorInt subtitle: Int = this.subtitle,
+    @ColorInt placeholderText: Int = this.placeholderText,
+    @ColorInt appBarIcon: Int = this.appBarIcon,
+    @ColorInt error: Int = this.error
+) = PaymentSheet.Colors(
+    primary = primary,
+    surface = surface,
+    component = component,
+    componentBorder = componentBorder,
+    componentDivider = componentDivider,
+    onComponent = onComponent,
+    onSurface = onSurface,
+    subtitle = subtitle,
+    placeholderText = placeholderText,
+    appBarIcon = appBarIcon,
+    error = error
+)
 
 @Composable
 private fun Colors(
@@ -423,6 +469,7 @@ private fun Colors(
     )
 }
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun Shapes(
     currentAppearance: AppearanceStore.State,
@@ -431,8 +478,10 @@ private fun Shapes(
     IncrementDecrementItem("cornerRadiusDp", currentAppearance.shapes.cornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    cornerRadiusDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = it,
+                    borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
                 )
             )
         )
@@ -441,8 +490,10 @@ private fun Shapes(
     IncrementDecrementItem("borderStrokeWidthDp", currentAppearance.shapes.borderStrokeWidthDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    borderStrokeWidthDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
+                    borderStrokeWidthDp = it,
+                    bottomSheetCornerRadiusDp = currentAppearance.shapes.bottomSheetCornerRadiusDp
                 )
             )
         )
@@ -451,8 +502,10 @@ private fun Shapes(
     IncrementDecrementItem("bottomSheetCornerRadiusDp", currentAppearance.shapes.bottomSheetCornerRadiusDp) {
         updateAppearance(
             currentAppearance.copy(
-                shapes = currentAppearance.shapes.copy(
-                    bottomSheetCornerRadiusDp = it
+                shapes = AppearanceStore.State.Shapes(
+                    cornerRadiusDp = currentAppearance.shapes.cornerRadiusDp,
+                    borderStrokeWidthDp = currentAppearance.shapes.borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = it,
                 )
             )
         )
@@ -551,8 +604,10 @@ private fun Typography(
     FontScaleSlider(currentAppearance.typography.sizeScaleFactor) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    sizeScaleFactor = it
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = it,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
@@ -561,11 +616,128 @@ private fun Typography(
     FontDropDown(currentAppearance.typography.fontResId) {
         updateAppearance(
             currentAppearance.copy(
-                typography = currentAppearance.typography.copy(
-                    fontResId = it
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = it,
+                    custom = currentAppearance.typography.custom,
                 )
             )
         )
+    }
+    Divider()
+
+    val h1 = currentAppearance.typography.custom.h1
+
+    AppearanceToggle("customH1", h1 != null) {
+        updateAppearance(
+            currentAppearance.copy(
+                typography = AppearanceStore.State.Typography(
+                    sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                    fontResId = currentAppearance.typography.fontResId,
+                    custom = AppearanceStore.State.Typography.Custom(
+                        h1 = if (it) {
+                            AppearanceStore.State.Typography.Font(
+                                fontSizeSp = 20f,
+                                fontWeight = 400,
+                                letterSpacingSp = 0.13f
+                            )
+                        } else {
+                            null
+                        }
+                    )
+                )
+            )
+        )
+    }
+
+    h1?.run {
+        Divider()
+        FontDropDown(fontFamily) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = it,
+                                fontWeight = fontWeight,
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "fontSizeSp",
+            value = fontSizeSp ?: AppearanceStore.State.defaultCustomH1LetterSpacingSp,
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = fontWeight,
+                                fontSizeSp = it,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "fontWeight",
+            value = fontWeight?.toFloat() ?: AppearanceStore.State.defaultCustomH1FontSizeDp,
+            incrementDecrementAmount = 100f
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = it.roundToInt(),
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = letterSpacingSp,
+                            )
+                        )
+                    )
+                )
+            )
+        }
+        Divider()
+        IncrementDecrementItem(
+            label = "letterSpacingSp",
+            value = letterSpacingSp ?: AppearanceStore.State.defaultCustomH1LetterSpacingSp,
+            incrementDecrementAmount = 0.01f
+        ) {
+            updateAppearance(
+                currentAppearance.copy(
+                    typography = AppearanceStore.State.Typography(
+                        sizeScaleFactor = currentAppearance.typography.sizeScaleFactor,
+                        fontResId = currentAppearance.typography.fontResId,
+                        custom = AppearanceStore.State.Typography.Custom(
+                            h1 = AppearanceStore.State.Typography.Font(
+                                fontFamily = fontFamily,
+                                fontWeight = fontWeight,
+                                fontSizeSp = fontSizeSp,
+                                letterSpacingSp = it,
+                            )
+                        )
+                    )
+                )
+            )
+        }
     }
 }
 
@@ -752,6 +924,20 @@ private fun PrimaryButton(
                         fontResId = it
                     )
                 )
+            )
+        )
+    }
+}
+
+@Composable
+private fun VerticalMode(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
+) {
+    IncrementDecrementItem("verticalModeRowPaddingDp", currentAppearance.verticalModeRowPadding) {
+        updateAppearance(
+            currentAppearance.copy(
+                verticalModeRowPadding = it
             )
         )
     }
@@ -1010,7 +1196,12 @@ private fun ColorIcon(innerColor: Color) {
 }
 
 @Composable
-private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (Float) -> Unit) {
+private fun IncrementDecrementItem(
+    label: String,
+    value: Float,
+    incrementDecrementAmount: Float = 1f,
+    onValueChange: (Float) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1027,7 +1218,7 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
                     .height(32.dp)
                     .width(50.dp)
                     .clickable {
-                        val newValue = value - 1
+                        val newValue = value - incrementDecrementAmount
                         onValueChange(if (newValue < 0) 0.0f else newValue)
                     }
             ) {
@@ -1043,7 +1234,7 @@ private fun IncrementDecrementItem(label: String, value: Float, onValueChange: (
                     .height(32.dp)
                     .width(50.dp)
                     .clickable {
-                        onValueChange(value + 1)
+                        onValueChange(value + incrementDecrementAmount)
                     }
             ) {
                 Icon(

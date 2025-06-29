@@ -12,6 +12,11 @@ internal object CardBrandAcceptanceSettingsDefinition :
 
     override val displayName: String = "Card Brand Acceptance"
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow() ||
+            configurationData.integrationType.isCustomerFlow()
+    }
+
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<CardBrandAcceptanceType>> {

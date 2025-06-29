@@ -620,6 +620,9 @@ public final class com/stripe/android/SetupIntentResult$Creator : android/os/Par
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/SharedPaymentTokenSessionPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/Stripe {
 	public static final field $stable I
 	public static final field API_VERSION Ljava/lang/String;
@@ -2519,6 +2522,14 @@ public final class com/stripe/android/model/ElementsSessionParams$PaymentIntentT
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/ElementsSessionParams$SellerDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$SellerDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSessionParams$SellerDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/ElementsSessionParams$SetupIntentType$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSessionParams$SetupIntentType;
@@ -2543,14 +2554,6 @@ public final class com/stripe/android/model/ExpirationDate$Validated : com/strip
 	public final fun getYear ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/model/FinancialConnectionsSession$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/FinancialConnectionsSession;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/FinancialConnectionsSession;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/model/GooglePayResult : android/os/Parcelable {
@@ -6996,6 +6999,7 @@ public abstract interface class com/stripe/android/payments/paymentlauncher/Paym
 	public static fun create (Landroidx/activity/ComponentActivity;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
 	public static fun create (Landroidx/fragment/app/Fragment;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncher;
+	public abstract fun handleNextActionForHashedPaymentIntent (Ljava/lang/String;)V
 	public abstract fun handleNextActionForPaymentIntent (Ljava/lang/String;)V
 	public abstract fun handleNextActionForSetupIntent (Ljava/lang/String;)V
 }
@@ -7013,6 +7017,14 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentLauncher$C
 
 public abstract interface class com/stripe/android/payments/paymentlauncher/PaymentLauncher$PaymentResultCallback {
 	public abstract fun onPaymentResult (Lcom/stripe/android/payments/paymentlauncher/PaymentResult;)V
+}
+
+public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$HashedPaymentIntentNextActionArgs$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$HashedPaymentIntentNextActionArgs;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$HashedPaymentIntentNextActionArgs;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/payments/paymentlauncher/PaymentLauncherContract$Args$IntentConfirmationArgs$Creator : android/os/Parcelable$Creator {

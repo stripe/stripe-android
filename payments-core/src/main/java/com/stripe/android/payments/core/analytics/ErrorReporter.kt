@@ -122,7 +122,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PLACES_FETCH_PLACE_ERROR(
             eventName = "address_element.fetch_place.error"
         ),
-        LINK_CREATE_CARD_FAILURE(
+        LINK_CREATE_PAYMENT_DETAILS_FAILURE(
             eventName = "link.create_new_card.create_payment_details_failure"
         ),
         LINK_SHARE_CARD_FAILURE(
@@ -142,6 +142,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
             eventName = "payments.paymentlauncherconfirmation.null_args"
+        ),
+        PAYMENT_LAUNCHER_CONFIRMATION_INVALID_ARGS(
+            eventName = "payments.paymentlauncherconfirmation.invalid_args"
         ),
         BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND(
             eventName = "payments.browserlauncher.activity_not_found"
@@ -166,6 +169,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CREATE_INTENT_CALLBACK_NULL(
             eventName = "paymentsheet.create_intent_callback.is_null"
+        ),
+        PREPARE_PAYMENT_METHOD_HANDLER_NULL(
+            eventName = "paymentsheet.prepare_payment_method_handler.is_null"
         ),
     }
 
@@ -203,6 +209,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
+        ),
+        LINK_ATTACH_BANK_ACCOUNT_WITH_NULL_ACCOUNT(
+            partialEventName = "link.create_new_bank_account.missing_link_account"
         ),
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
@@ -300,6 +309,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"
+        ),
+        FOUND_PREPARE_PAYMENT_METHOD_HANDLER_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_prepare_payment_method_handler.found"
         ),
     }
 }
