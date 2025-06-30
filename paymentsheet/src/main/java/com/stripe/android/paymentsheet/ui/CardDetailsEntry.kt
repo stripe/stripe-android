@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 /**
  * Represents the editable details of a card payment method.
@@ -39,27 +40,48 @@ internal data class CardDetailsEntry(
 }
 
 /**
- * Converts the CardDetailsEntry to CardUpdateParams.
+ * Converts the CardDetailsEntry to CardUpdateParams with contact information.
  *
- * @return CardUpdateParams containing the updated card brand.
+ * @return CardUpdateParams containing the updated card brand and contact information.
  */
 internal fun CardDetailsEntry.toUpdateParams(
-    billingDetailsEntry: BillingDetailsEntry?
+    billingDetailsEntry: BillingDetailsEntry?,
+    contactInformationEntry: Map<IdentifierSpec, String?>
 ): CardUpdateParams {
     return CardUpdateParams(
         cardBrand = cardBrandChoice.brand,
         expiryMonth = expiryDateState.expiryMonth,
         expiryYear = expiryDateState.expiryYear,
-        billingDetails = billingDetailsEntry?.billingDetailsFormState?.let {
-            val address = Address(
-                city = it.city?.value,
-                country = it.country?.value,
-                line1 = it.line1?.value,
-                line2 = it.line2?.value,
-                postalCode = it.postalCode?.value,
-                state = it.state?.value
-            )
-            PaymentMethod.BillingDetails(address)
-        }
+        billingDetails = createBillingDetails(billingDetailsEntry, contactInformationEntry)
+    )
+}
+
+private fun createBillingDetails(
+    billingDetailsEntry: BillingDetailsEntry?,
+    contactInformationEntry: Map<IdentifierSpec, String?>
+): PaymentMethod.BillingDetails? {
+    val address = billingDetailsEntry?.billingDetailsFormState?.let {
+        Address(
+            city = it.city?.value,
+            country = it.country?.value,
+            line1 = it.line1?.value,
+            line2 = it.line2?.value,
+            postalCode = it.postalCode?.value,
+            state = it.state?.value
+        )
+    }
+
+    val email = contactInformationEntry[IdentifierSpec.Email]
+    val phone = contactInformationEntry[IdentifierSpec.Phone]
+    val name = contactInformationEntry[IdentifierSpec.Name]
+    val noContactInfoAvailable = listOf(email, phone, name).all { it.isNullOrBlank() }
+    // Only create BillingDetails if we have address or contact information
+    if (address == null && noContactInfoAvailable) { return null }
+
+    return PaymentMethod.BillingDetails(
+        address = address,
+        email = email,
+        phone = phone,
+        name = name
     )
 }
