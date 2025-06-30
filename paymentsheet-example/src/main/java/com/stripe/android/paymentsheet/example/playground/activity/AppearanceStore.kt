@@ -25,8 +25,8 @@ internal object AppearanceStore {
     }
 
     data class State(
-        val colorsLight: PaymentSheet.Colors = PaymentSheet.Colors.defaultLight,
-        val colorsDark: PaymentSheet.Colors = PaymentSheet.Colors.defaultDark,
+        val colorsLight: Colors = Colors.light(),
+        val colorsDark: Colors = Colors.dark(),
         val shapes: Shapes = Shapes(),
         val typography: Typography = Typography(),
         val primaryButton: PrimaryButton = PrimaryButton(),
@@ -40,8 +40,8 @@ internal object AppearanceStore {
         @OptIn(AppearanceAPIAdditionsPreview::class)
         fun toPaymentSheetAppearance(): PaymentSheet.Appearance {
             return PaymentSheet.Appearance.Builder()
-                .colorsLight(colorsLight)
-                .colorsDark(colorsDark)
+                .colorsLight(colorsLight.build())
+                .colorsDark(colorsDark.build())
                 .shapes(shapes.build())
                 .typography(typography.build())
                 .primaryButton(primaryButton.build())
@@ -232,6 +232,64 @@ internal object AppearanceStore {
                     Filled -> PaymentSheet.IconStyle.Filled
                     Outlined -> PaymentSheet.IconStyle.Outlined
                 }
+            }
+        }
+
+        data class Colors(
+            @ColorInt val primary: Int,
+            @ColorInt val surface: Int,
+            @ColorInt val component: Int,
+            @ColorInt val componentBorder: Int,
+            @ColorInt val componentDivider: Int,
+            @ColorInt val onComponent: Int,
+            @ColorInt val onSurface: Int,
+            @ColorInt val subtitle: Int,
+            @ColorInt val placeholderText: Int,
+            @ColorInt val appBarIcon: Int,
+            @ColorInt val error: Int,
+        ) {
+            fun build(): PaymentSheet.Colors = PaymentSheet.Colors(
+                primary = primary,
+                surface = surface,
+                component = component,
+                componentBorder = componentBorder,
+                componentDivider = componentDivider,
+                onComponent = onComponent,
+                onSurface = onSurface,
+                subtitle = subtitle,
+                placeholderText = placeholderText,
+                appBarIcon = appBarIcon,
+                error = error
+            )
+
+            companion object {
+                fun light() = Colors(
+                    primary = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsLight.materialColors.surface.toArgb(),
+                    component = StripeThemeDefaults.colorsLight.component.toArgb(),
+                    componentBorder = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    componentDivider = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
+                    onComponent = StripeThemeDefaults.colorsLight.onComponent.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsLight.materialColors.onSurface.toArgb(),
+                    subtitle = StripeThemeDefaults.colorsLight.subtitle.toArgb(),
+                    placeholderText = StripeThemeDefaults.colorsLight.placeholderText.toArgb(),
+                    appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon.toArgb(),
+                    error = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
+                )
+
+                fun dark() = Colors(
+                    primary = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
+                    surface = StripeThemeDefaults.colorsDark.materialColors.surface.toArgb(),
+                    component = StripeThemeDefaults.colorsDark.component.toArgb(),
+                    componentBorder = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    componentDivider = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
+                    onComponent = StripeThemeDefaults.colorsDark.onComponent.toArgb(),
+                    onSurface = StripeThemeDefaults.colorsDark.materialColors.onSurface.toArgb(),
+                    subtitle = StripeThemeDefaults.colorsDark.subtitle.toArgb(),
+                    placeholderText = StripeThemeDefaults.colorsDark.placeholderText.toArgb(),
+                    appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon.toArgb(),
+                    error = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
+                )
             }
         }
 
