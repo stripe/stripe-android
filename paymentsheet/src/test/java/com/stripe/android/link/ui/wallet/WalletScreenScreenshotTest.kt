@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -212,6 +213,8 @@ internal class WalletScreenScreenshotTest {
             userSetIsExpanded = userSetIsExpanded,
             isSettingUp = false,
             merchantName = "Example Inc.",
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
         )
     }
 

@@ -4,6 +4,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.PaymentDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 
@@ -31,13 +32,12 @@ internal fun effectiveBillingDetails(
 /**
  * Returns true if the payment method has all required billing details based on the configuration.
  */
-internal fun ConsumerPaymentDetails.PaymentDetails.supports(
+internal fun PaymentDetails.supports(
     billingDetailsConfig: PaymentSheet.BillingDetailsCollectionConfiguration,
     linkAccount: LinkAccount
-): Boolean {
-    // Non-card payment details don't have billing details requirements
-    if (this !is ConsumerPaymentDetails.Card) return true
-    return when {
+): Boolean = when (this) {
+    is ConsumerPaymentDetails.BankAccount,
+    is ConsumerPaymentDetails.Card -> when {
         // Check if full address is required but missing or incomplete
         billingDetailsConfig.address == AddressCollectionMode.Full && billingAddress.isIncomplete() -> false
         // Check if phone is required but missing from Link account
@@ -47,6 +47,8 @@ internal fun ConsumerPaymentDetails.PaymentDetails.supports(
         // All billing configuration details are supported.
         else -> true
     }
+    // Other payment details don't have billing details requirements
+    else -> true
 }
 
 /**

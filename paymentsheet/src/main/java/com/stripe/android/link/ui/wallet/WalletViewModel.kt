@@ -85,6 +85,8 @@ internal class WalletViewModel @Inject constructor(
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
+            linkAccount = linkAccount,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
         )
     )
 
@@ -515,10 +517,11 @@ internal class WalletViewModel @Inject constructor(
     }
 
     private fun getAddPaymentMethodOptions(): List<AddPaymentMethodOption> {
+        val clientSupportsBankAccount = linkAccount.consumerPublishableKey != null &&
+            configuration.financialConnectionsAvailability != null &&
+            configuration.billingDetailsCollectionConfiguration.collectsAnything == false
         return buildList {
-            if (
-                linkAccount.consumerPublishableKey != null &&
-                configuration.financialConnectionsAvailability != null &&
+            if (clientSupportsBankAccount &&
                 supportedPaymentMethodTypes.contains(ConsumerPaymentDetails.BankAccount.TYPE)
             ) {
                 add(AddPaymentMethodOption.Bank(configuration.financialConnectionsAvailability))

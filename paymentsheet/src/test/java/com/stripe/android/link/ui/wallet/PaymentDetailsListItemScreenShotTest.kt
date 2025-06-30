@@ -201,6 +201,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                     bankIconCode = null,
                     isDefault = false,
                     nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null
                 ),
                 enabled = true,
                 isSelected = false,
@@ -221,6 +223,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                     bankIconCode = "morganchase",
                     isDefault = false,
                     nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null
                 ),
                 enabled = true,
                 isSelected = false,

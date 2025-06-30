@@ -137,12 +137,94 @@ class LinkBillingDetailsUtilsTest {
     }
 
     @Test
-    fun `ConsumerPaymentDetails non-card payment details always supports requirements`() {
+    fun `ConsumerPaymentDetails BankAccount supports when address is complete`() {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "John Doe",
+                line1 = "123 Main St",
+                locality = "San Francisco",
+                postalCode = "94105",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = "CA"
+            )
+        )
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = AddressCollectionMode.Full
+        )
+
+        val result = bankAccount.supports(configuration, linkAccount)
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `ConsumerPaymentDetails BankAccount does not support when address is incomplete`() {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "John Doe",
+                line1 = null, // Missing required field
+                locality = "San Francisco",
+                postalCode = "94105",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = "CA"
+            )
+        )
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = AddressCollectionMode.Full
+        )
+
+        val result = bankAccount.supports(configuration, linkAccount)
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `ConsumerPaymentDetails BankAccount does not support when phone required but missing from Link account`() {
         val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
         val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            address = AddressCollectionMode.Full,
-            phone = CollectionMode.Always,
+            phone = CollectionMode.Always
+        )
+        val linkAccountWithoutPhone = LinkAccount(
+            ConsumerSession(
+                emailAddress = testEmail,
+                clientSecret = "secret",
+                verificationSessions = emptyList(),
+                redactedPhoneNumber = "+1********00",
+                redactedFormattedPhoneNumber = "(***) *** **00",
+                unredactedPhoneNumber = null
+            )
+        )
+
+        val result = bankAccount.supports(configuration, linkAccountWithoutPhone)
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `ConsumerPaymentDetails BankAccount does not support when name required but missing`() {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+            billingAddress = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.billingAddress?.copy(
+                name = null
+            )
+        )
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = CollectionMode.Always
+        )
+
+        val result = bankAccount.supports(configuration, linkAccount)
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `ConsumerPaymentDetails BankAccount supports when no billing details required`() {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = AddressCollectionMode.Never,
+            phone = CollectionMode.Never,
+            name = CollectionMode.Never
         )
 
         val result = bankAccount.supports(configuration, linkAccount)

@@ -4,9 +4,12 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.link.utils.supports
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 
@@ -23,6 +26,8 @@ internal data class WalletUiState(
     val secondaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
     val addPaymentMethodOptions: List<AddPaymentMethodOption>,
+    val linkAccount: LinkAccount,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val userSetIsExpanded: Boolean? = null,
     val cardBeingUpdated: String? = null,
     val errorMessage: ResolvableString? = null,
@@ -84,8 +89,17 @@ internal data class WalletUiState(
     val canAddNewPaymentMethod: Boolean
         get() = addPaymentMethodOptions.isNotEmpty()
 
-    fun isItemAvailable(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
-        return item !is Card || cardBrandFilter.isAccepted(item.brand)
+    fun isItemAvailable(
+        item: ConsumerPaymentDetails.PaymentDetails
+    ): Boolean {
+        return when (item) {
+            is ConsumerPaymentDetails.BankAccount -> item.supports(
+                billingDetailsConfig = billingDetailsCollectionConfiguration,
+                linkAccount = linkAccount
+            )
+            is Card -> cardBrandFilter.isAccepted(item.brand)
+            is ConsumerPaymentDetails.Passthrough -> true
+        }
     }
 
     fun updateWithResponse(

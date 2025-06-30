@@ -7,10 +7,12 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL
 import com.stripe.android.link.TestFactory.LINK_WALLET_SECONDARY_BUTTON_LABEL
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import org.junit.Test
@@ -252,6 +254,9 @@ class WalletUiStateTest {
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
         addPaymentMethodOptions: List<AddPaymentMethodOption> = listOf(AddPaymentMethodOption.Card),
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        linkAccount: LinkAccount = LinkAccount(TestFactory.CONSUMER_SESSION),
         cardBeingUpdated: String? = null,
         isSettingUp: Boolean = false,
         merchantName: String = "Example Inc.",
@@ -271,7 +276,9 @@ class WalletUiStateTest {
             addPaymentMethodOptions = addPaymentMethodOptions,
             cardBeingUpdated = cardBeingUpdated,
             isSettingUp = isSettingUp,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             merchantName = merchantName,
+            linkAccount = linkAccount
         )
     }
 }

@@ -34,6 +34,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -64,9 +65,11 @@ class WalletViewModelTest {
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
         val linkAccountManager = WalletLinkAccountManager()
+        val account = TestFactory.LINK_ACCOUNT
 
         val viewModel = createViewModel(
-            linkAccountManager = linkAccountManager
+            linkAccountManager = linkAccountManager,
+            linkAccount = account
         )
 
         assertThat(linkAccountManager.listPaymentDetailsCalls)
@@ -89,6 +92,8 @@ class WalletViewModelTest {
                 cvcInput = FormFieldEntry(""),
                 addPaymentMethodOptions = listOf(AddPaymentMethodOption.Card),
                 isSettingUp = false,
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                linkAccount = account,
                 merchantName = "merchantName",
             )
         )
