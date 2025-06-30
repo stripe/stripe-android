@@ -32,6 +32,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.shoppay.webview.MainWebView
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
@@ -118,6 +119,10 @@ internal class ShopPayActivity : ComponentActivity() {
 
                 if (showPopup) {
                     PopupWebViewDialog(viewModel = viewModel)
+                } else {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
             }
         }

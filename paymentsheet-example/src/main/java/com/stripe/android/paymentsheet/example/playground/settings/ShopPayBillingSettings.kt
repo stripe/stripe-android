@@ -6,8 +6,8 @@ import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 
 internal object ShopPayBillingSettings : BooleanSettingsDefinition(
     key = "shopPayBilling",
-    displayName = "Enable Billing Address for Shop Pay",
-    defaultValue = false
+    displayName = "Billing Address required for Shop Pay",
+    defaultValue = true
 ) {
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
         return when (configurationData.integrationType) {

@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 
 internal object ShopPayShippingAddressChangeSettings : BooleanSettingsDefinition(
     key = "ShopPayShippingAddressChange",
-    displayName = "Reject Shop Pay Shipping Address Change",
+    displayName = "Reject Shipping Address Change for Shop Pay",
     defaultValue = false
 ) {
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {

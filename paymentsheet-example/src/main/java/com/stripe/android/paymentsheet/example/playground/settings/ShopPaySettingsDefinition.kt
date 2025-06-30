@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.example.playground.data.ShopPayData
 internal object ShopPaySettingsDefinition : BooleanSettingsDefinition(
     key = "shopPay",
     displayName = "Enable ShopPay",
-    defaultValue = false
+    defaultValue = true
 ) {
 
     override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {

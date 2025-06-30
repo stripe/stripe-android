@@ -498,9 +498,9 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
             ShopPayBillingSettings,
+            ShopPayShippingAddressSettings,
             ShopPayEmailSettings,
             ShopPayShippingAddressChangeSettings,
-            ShopPayShippingAddressSettings,
             ShopPayShippingRateChangeSettings,
             ShopPaySettingsDefinition,
         )

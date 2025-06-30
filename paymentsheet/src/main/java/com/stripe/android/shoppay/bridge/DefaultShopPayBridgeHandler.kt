@@ -52,7 +52,9 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         val shopPayConfiguration = shopPayArgs.shopPayConfiguration
         HandleClickResponse(
             lineItems = shopPayConfiguration.lineItems.map { it.toECELineItem() },
-            shippingRates = shopPayConfiguration.shippingRates.map { it.toECEShippingRate() },
+            shippingRates = shopPayConfiguration.shippingRates.map { it.toECEShippingRate() }.takeIf {
+                true //shopPayConfiguration.shippingAddressRequired
+            },
             billingAddressRequired = shopPayConfiguration.billingAddressRequired,
             emailRequired = shopPayConfiguration.emailRequired,
             phoneNumberRequired = true, // Shop Pay always requires phone
@@ -92,10 +94,12 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         )
 
         val update = shopPayHandlers.shippingContactHandler.onAddressSelected(address)
-            ?: return@handleRequest null
+            ?: throw Exception("The user rejected the shipping address change")
         ShippingResponse(
             lineItems = update.lineItems.map { it.toECELineItem() },
-            shippingRates = update.shippingRates.map { it.toECEShippingRate() },
+            shippingRates = update.shippingRates.map { it.toECEShippingRate() }.takeIf {
+                shopPayArgs.shopPayConfiguration.shippingAddressRequired
+            },
             totalAmount = update.lineItems.sumOf { it.amount }
         )
     }
@@ -108,19 +112,39 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         logMessage("Parsed calculateShippingRateChange request: $calculateShippingRateChangeRequest")
 
         val rate = calculateShippingRateChangeRequest.shippingRate
+        val estimate = when (rate.deliveryEstimate) {
+            is ECEDeliveryEstimate.Range -> {
+                PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Range(
+                    minimum = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+                        unit = rate.deliveryEstimate.value.minimum!!.unit.toConf(),
+                        value = rate.deliveryEstimate.value.minimum!!.value
+                    ),
+                    maximum = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
+                        unit = rate.deliveryEstimate.value.maximum!!.unit.toConf(),
+                        value = rate.deliveryEstimate.value.maximum!!.value
+                    )
+                )
+            }
+            is ECEDeliveryEstimate.Text -> {
+                PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Text(rate.deliveryEstimate.value)
+            }
+            null -> null
+        }
         val selectedShippingRate = ShopPayHandlers.SelectedShippingRate(
             shippingRate = PaymentSheet.ShopPayConfiguration.ShippingRate(
                 id = rate.id,
                 displayName = rate.displayName,
                 amount = rate.amount,
-                deliveryEstimate = null
+                deliveryEstimate = estimate
             )
         )
         val update = shopPayHandlers.shippingMethodUpdateHandler.onRateSelected(selectedShippingRate)
-            ?: return@handleRequest null
+            ?: throw Exception("The user rejected the shipping rate change")
         ShippingResponse(
             lineItems = update.lineItems.map { it.toECELineItem() },
-            shippingRates = update.shippingRates.map { it.toECEShippingRate() },
+            shippingRates = update.shippingRates.map { it.toECEShippingRate() }.takeIf {
+                shopPayArgs.shopPayConfiguration.shippingAddressRequired
+            },
             totalAmount = update.lineItems.sumOf { it.amount }
         )
     }
@@ -184,6 +208,16 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
             onError(error)
             logger.error("❌ Error parsing request: ${error.message}", error)
             createErrorResponse<T>("❌ Error parsing request: ${error.message}")
+        }
+    }
+
+    private fun DeliveryTimeUnit.toConf(): PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit {
+        return when (this) {
+            DeliveryTimeUnit.HOUR -> PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.HOUR
+            DeliveryTimeUnit.DAY -> PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.DAY
+            DeliveryTimeUnit.BUSINESS_DAY -> PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.BUSINESS_DAY
+            DeliveryTimeUnit.WEEK -> PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.WEEK
+            DeliveryTimeUnit.MONTH -> PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit.TimeUnit.MONTH
         }
     }
 }
