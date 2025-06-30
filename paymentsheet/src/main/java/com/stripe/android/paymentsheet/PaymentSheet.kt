@@ -2713,7 +2713,7 @@ class PaymentSheet internal constructor(
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
          */
-        internal val id: String,
+        val id: String,
 
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
