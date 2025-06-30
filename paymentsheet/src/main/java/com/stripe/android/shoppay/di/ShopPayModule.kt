@@ -77,10 +77,9 @@ internal interface ShopPayModule {
         @Provides
         fun providePreparePaymentMethodHandler(
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): PreparePaymentMethodHandler {
+        ): PreparePaymentMethodHandler? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
                 ?.preparePaymentMethodHandler
-                ?: throw IllegalStateException("PreparePaymentMethodHandler not found")
         }
 
         @Provides
