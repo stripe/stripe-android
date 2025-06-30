@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.PhoneNumberState
 
 internal object AddressSpecFactory {
@@ -14,7 +14,7 @@ internal object AddressSpecFactory {
         val addressSpec = if (condensedForm) {
             AddressSpec(
                 showLabel = false,
-                type = AddressType.AutocompleteCondensed(
+                type = AddressInputMode.AutocompleteCondensed(
                     googleApiKey = config?.googlePlacesApiKey,
                     autocompleteCountries = config?.autocompleteCountries,
                     phoneNumberState = phoneNumberState,
@@ -24,7 +24,7 @@ internal object AddressSpecFactory {
         } else {
             AddressSpec(
                 showLabel = false,
-                type = AddressType.AutocompleteExpanded(
+                type = AddressInputMode.AutocompleteExpanded(
                     googleApiKey = config?.googlePlacesApiKey,
                     autocompleteCountries = config?.autocompleteCountries,
                     phoneNumberState = phoneNumberState,

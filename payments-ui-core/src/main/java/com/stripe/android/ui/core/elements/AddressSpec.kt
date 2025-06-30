@@ -6,7 +6,7 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -45,7 +45,7 @@ data class AddressSpec(
      * This field is not deserialized, this field is used for the Address Element
      */
     @Transient
-    val type: AddressType = AddressType.Normal(),
+    val type: AddressInputMode = AddressInputMode.NoAutocomplete(),
 
     /**
      * This field is not deserialized, it is used for the special case where the address element
@@ -86,7 +86,7 @@ data class AddressSpec(
                 _identifier = apiPath,
                 rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
-                addressType = type,
+                addressInputMode = type,
                 sameAsShippingElement = sameAsShippingElement,
                 shippingValuesMap = shippingValues,
                 hideCountry = hideCountry,
