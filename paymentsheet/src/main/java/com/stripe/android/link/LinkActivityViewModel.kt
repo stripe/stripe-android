@@ -121,6 +121,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    fun onContentScrolled(canScrollUp: Boolean) {
+        _linkAppBarState.update {
+            it.copy(isElevated = canScrollUp)
+        }
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
         GlobalScope.launch {
