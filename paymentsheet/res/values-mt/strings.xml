@@ -139,7 +139,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Jew ħallas bil-</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
-  <string name="stripe_paymentsheet_or_pay_with_card">Jew ħallas bil-kard</string>
+  <string name="stripe_paymentsheet_or_pay_with_card">Jew ħallas bil-karta</string>
   <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
   <string name="stripe_paymentsheet_or_use">Jew uża</string>
   <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
@@ -173,7 +173,7 @@ to be saved and used in future checkout sessions. -->
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Erfa\' għall-pagamenti fil-ġejjieni</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
-  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-kard għal pagamenti futuri %s</string>
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-karta għall-pagamenti tal-ġejjieni fuq %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Merfugħ</string>
   <!-- Title shown above a view containing the customer's cards -->
@@ -194,6 +194,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Buttuna ta\' Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Uri l-menù</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -203,7 +205,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
   <string name="stripe_sign_up_message">Ħallas lil %s u lil eluf ta\' negozjanti oħra iktar malajr.</string>
   <!-- Legal text shown when creating a Link account. -->
-  <string name="stripe_sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mat-<terms>Termini</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
+  <string name="stripe_sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Meta tagħti l-indirizz tal-email tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
@@ -249,7 +251,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Uri iktar</string>
   <!-- Mandate text displayed when paying via Link instant debit. -->
-  <string name="stripe_wallet_bank_account_terms"><![CDATA[Meta tkompli, inti taqbel li tawtorizza l-pagamenti skont dawn <terms>it-termini</terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont dar-<terms>regoli</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->
   <string name="stripe_wallet_collapsed_payment">Pagament</string>
   <!-- Label of a button that when tapped allows the user to select a different form of payment. -->

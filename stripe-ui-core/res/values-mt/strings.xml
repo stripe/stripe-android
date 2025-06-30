@@ -71,11 +71,11 @@
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_form_label_optional">%s (mhux obbligatorja)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="stripe_incomplete_expiry_date">Id-data tal-iskadenza tal-kard tiegħek mhijiex kompluta.</string>
+  <string name="stripe_incomplete_expiry_date">Id-data tal-iskadenza tal-karta tiegħek mhix sħiħa.</string>
   <!-- Error description for incomplete phone number -->
   <string name="stripe_incomplete_phone_number">In-numru tat-telefon mhuwiex komplut</string>
   <!-- String to describe an invalid month in expiry date. -->
-  <string name="stripe_invalid_expiry_month">Ix-xahar tal-iskadenza tal-kard tiegħek mhux validu.</string>
+  <string name="stripe_invalid_expiry_month">Ix-xahar tal-iskadenza tal-karta tiegħek mhux tajjeb.</string>
   <!-- String to describe an invalid year in expiry date. -->
-  <string name="stripe_invalid_expiry_year">Is-sena tal-iskadenza tal-kard tiegħek mhijiex valida.</string>
+  <string name="stripe_invalid_expiry_year">Is-sena tal-iskadenza tal-karta tiegħek mhix tajba.</string>
 </resources>
