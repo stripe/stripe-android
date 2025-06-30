@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
@@ -21,6 +22,8 @@ internal data class LinkConfiguration(
     val cardBrandChoice: CardBrandChoice?,
     val cardBrandFilter: CardBrandFilter,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val useAttestationEndpointsForLink: Boolean,
     val suppress2faModal: Boolean,
     val disableRuxInFlowController: Boolean,

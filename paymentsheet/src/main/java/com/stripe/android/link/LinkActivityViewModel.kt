@@ -12,6 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
@@ -135,13 +136,13 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntryUpdate) {
-        val route: String = entry.currentBackStackEntry?.destination?.route ?: return
+        val currentEntry: NavBackStackEntry = entry.currentBackStackEntry ?: return
         val previousEntry = entry.previousBackStackEntry?.destination?.route
         _linkAppBarState.update {
             LinkAppBarState.create(
-                route = route,
+                currentEntry = currentEntry,
                 previousEntryRoute = previousEntry,
-                consumerIsSigningUp = linkAccount?.completedSignup == true,
+                consumerIsSigningUp = linkAccount?.completedSignup == true
             )
         }
     }

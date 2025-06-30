@@ -24,6 +24,7 @@ import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
@@ -306,7 +307,10 @@ class WalletViewModelTest {
         vm.onUpdateClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
         navigationManager.assertNavigatedTo(
-            route = LinkScreen.UpdateCard(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
+            route = LinkScreen.UpdateCard(
+                paymentDetailsId = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id,
+                billingDetailsUpdateFlow = null
+            )
         )
     }
 
@@ -945,12 +949,17 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccount = linkAccount,
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             logger = logger,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            completeLinkFlow = DefaultCompleteLinkFlow(
+                linkConfirmationHandler = linkConfirmationHandler,
+                linkAccountManager = linkAccountManager,
+                dismissalCoordinator = dismissalCoordinator,
+                linkLaunchMode = linkLaunchMode
+            ),
             linkLaunchMode = linkLaunchMode
         )
     }
