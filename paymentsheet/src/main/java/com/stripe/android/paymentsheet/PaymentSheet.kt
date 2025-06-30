@@ -658,30 +658,12 @@ class PaymentSheet internal constructor(
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     data class Configuration internal constructor(
-        /**
-         * Your customer-facing business name.
-         *
-         * The default value is the name of your app.
-         */
         val merchantDisplayName: String,
 
-        /**
-         * If set, the customer can select a previously saved payment method within PaymentSheet.
-         */
         val customer: CustomerConfiguration? = ConfigurationDefaults.customer,
 
-        /**
-         * Configuration related to the Stripe Customer making a payment.
-         *
-         * If set, PaymentSheet displays Google Pay as a payment option.
-         */
         val googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
 
-        /**
-         * The color of the Pay or Add button. Keep in mind the text color is white.
-         *
-         * If set, PaymentSheet displays the button with this color.
-         */
         @Deprecated(
             message = "Use Appearance parameter to customize primary button color",
             replaceWith = ReplaceWith(
@@ -691,82 +673,22 @@ class PaymentSheet internal constructor(
         )
         val primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
 
-        /**
-         * The billing information for the customer.
-         *
-         * If set, PaymentSheet will pre-populate the form fields with the values provided.
-         * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
-         * these values will be attached to the payment method even if they are not collected by
-         * the PaymentSheet UI.
-         */
         val defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
 
-        /**
-         * The shipping information for the customer.
-         * If set, PaymentSheet will pre-populate the form fields with the values provided.
-         * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
-         * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
-         */
         val shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
 
-        /**
-         * If true, allows payment methods that do not move money at the end of the checkout.
-         * Defaults to false.
-         *
-         * Some payment methods can't guarantee you will receive funds from your customer at the end
-         * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
-         * or require customer action to complete (e.g. OXXO, Konbini, Boleto). If this is set to
-         * true, make sure your integration listens to webhooks for notifications on whether a
-         * payment has succeeded or not.
-         *
-         * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
-         */
         val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
 
-        /**
-         * If `true`, allows payment methods that require a shipping address, like Afterpay and
-         * Affirm. Defaults to `false`.
-         *
-         * Set this to `true` if you collect shipping addresses via [shippingDetails] or
-         * [FlowController.shippingDetails].
-         *
-         * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
-         * on the PaymentIntent when PaymentSheet loads.
-         */
         val allowsPaymentMethodsRequiringShippingAddress: Boolean =
             ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
 
-        /**
-         * Describes the appearance of Payment Sheet.
-         */
         val appearance: Appearance = ConfigurationDefaults.appearance,
 
-        /**
-         * The label to use for the primary button.
-         *
-         * If not set, Payment Sheet will display suitable default labels for payment and setup
-         * intents.
-         */
         val primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
 
-        /**
-         * Describes how billing details should be collected.
-         * All values default to `automatic`.
-         * If `never` is used for a required field for the Payment Method used during checkout,
-         * you **must** provide an appropriate value as part of [defaultBillingDetails].
-         */
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             ConfigurationDefaults.billingDetailsCollectionConfiguration,
 
-        /**
-         * A list of preferred networks that should be used to process payments
-         * made with a co-branded card if your user hasn't selected a network
-         * themselves.
-         *
-         * The first preferred network that matches any available network will
-         * be used. If no preferred network is applicable, Stripe will select
-         * the network.
-         */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
@@ -790,131 +712,8 @@ class PaymentSheet internal constructor(
         internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
     ) : Parcelable {
 
-        @JvmOverloads
-        constructor(
-            /**
-             * Your customer-facing business name.
-             *
-             * The default value is the name of your app.
-             */
-            merchantDisplayName: String,
-
-            /**
-             * If set, the customer can select a previously saved payment method within PaymentSheet.
-             */
-            customer: CustomerConfiguration? = ConfigurationDefaults.customer,
-
-            /**
-             * Configuration related to the Stripe Customer making a payment.
-             *
-             * If set, PaymentSheet displays Google Pay as a payment option.
-             */
-            googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
-
-            /**
-             * The color of the Pay or Add button. Keep in mind the text color is white.
-             *
-             * If set, PaymentSheet displays the button with this color.
-             */
-            primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
-
-            /**
-             * The billing information for the customer.
-             *
-             * If set, PaymentSheet will pre-populate the form fields with the values provided.
-             * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
-             * these values will be attached to the payment method even if they are not collected by
-             * the PaymentSheet UI.
-             */
-            defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails,
-
-            /**
-             * The shipping information for the customer.
-             * If set, PaymentSheet will pre-populate the form fields with the values provided.
-             * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
-             * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
-             */
-            shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails,
-
-            /**
-             * If true, allows payment methods that do not move money at the end of the checkout.
-             * Defaults to false.
-             *
-             * Some payment methods can't guarantee you will receive funds from your customer at the end
-             * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
-             * or require customer action to complete (e.g. OXXO, Konbini, Boleto). If this is set to
-             * true, make sure your integration listens to webhooks for notifications on whether a
-             * payment has succeeded or not.
-             *
-             * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
-             */
-            allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
-
-            /**
-             * If `true`, allows payment methods that require a shipping address, like Afterpay and
-             * Affirm. Defaults to `false`.
-             *
-             * Set this to `true` if you collect shipping addresses via [shippingDetails] or
-             * [FlowController.shippingDetails].
-             *
-             * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
-             * on the PaymentIntent when PaymentSheet loads.
-             */
-            allowsPaymentMethodsRequiringShippingAddress: Boolean =
-                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
-
-            /**
-             * Describes the appearance of Payment Sheet.
-             */
-            appearance: Appearance = ConfigurationDefaults.appearance,
-
-            /**
-             * The label to use for the primary button.
-             *
-             * If not set, Payment Sheet will display suitable default labels for payment and setup
-             * intents.
-             */
-            primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel,
-
-            /**
-             * Describes how billing details should be collected.
-             * All values default to `automatic`.
-             * If `never` is used for a required field for the Payment Method used during checkout,
-             * you **must** provide an appropriate value as part of [defaultBillingDetails].
-             */
-            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-                ConfigurationDefaults.billingDetailsCollectionConfiguration,
-
-            /**
-             * A list of preferred networks that should be used to process payments
-             * made with a co-branded card if your user hasn't selected a network
-             * themselves.
-             *
-             * The first preferred network that matches any available network will
-             * be used. If no preferred network is applicable, Stripe will select
-             * the network.
-             */
-            preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
-        ) : this(
-            merchantDisplayName = merchantDisplayName,
-            customer = customer,
-            googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
-            defaultBillingDetails = defaultBillingDetails,
-            shippingDetails = shippingDetails,
-            allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            appearance = appearance,
-            primaryButtonLabel = primaryButtonLabel,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            preferredNetworks = preferredNetworks,
-            allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-            externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
-            customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
-        )
-
         /**
-         * [Configuration] builder for cleaner object creation from Java.
+         * [Configuration] builder for cleaner object creation
          */
         @Suppress("TooManyFunctions")
         class Builder(
@@ -946,15 +745,33 @@ class PaymentSheet internal constructor(
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
 
+            /**
+             * Your customer-facing business name.
+             *
+             * The default value is the name of your app.
+             */
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
 
+            /**
+             * If set, the customer can select a previously saved payment method within PaymentSheet.
+             */
             fun customer(customer: CustomerConfiguration?) =
                 apply { this.customer = customer }
 
+            /**
+             * Configuration related to the Stripe Customer making a payment.
+             *
+             * If set, PaymentSheet displays Google Pay as a payment option.
+             */
             fun googlePay(googlePay: GooglePayConfiguration?) =
                 apply { this.googlePay = googlePay }
 
+            /**
+             * The color of the Pay or Add button. Keep in mind the text color is white.
+             *
+             * If set, PaymentSheet displays the button with this color.
+             */
             @Deprecated(
                 message = "Use Appearance parameter to customize primary button color",
                 replaceWith = ReplaceWith(
@@ -965,15 +782,52 @@ class PaymentSheet internal constructor(
             fun primaryButtonColor(primaryButtonColor: ColorStateList?) =
                 apply { this.primaryButtonColor = primaryButtonColor }
 
+            /**
+             * The billing information for the customer.
+             *
+             * If set, PaymentSheet will pre-populate the form fields with the values provided.
+             * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
+             * these values will be attached to the payment method even if they are not collected by
+             * the PaymentSheet UI.
+             */
             fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
+            /**
+             * The shipping information for the customer.
+             * If set, PaymentSheet will pre-populate the form fields with the values provided.
+             * This is used to display a "Billing address is same as shipping" checkbox if `defaultBillingDetails` is not provided.
+             * If `name` and `line1` are populated, it's also [attached to the PaymentIntent](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping) during payment.
+             */
+            @Suppress("MaxLineLength")
             fun shippingDetails(shippingDetails: AddressDetails?) =
                 apply { this.shippingDetails = shippingDetails }
 
+            /**
+             * If true, allows payment methods that do not move money at the end of the checkout.
+             * Defaults to false.
+             *
+             * Some payment methods can't guarantee you will receive funds from your customer at the end
+             * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
+             * or require customer action to complete (e.g. OXXO, Konbini, Boleto). If this is set to
+             * true, make sure your integration listens to webhooks for notifications on whether a
+             * payment has succeeded or not.
+             *
+             * See [payment-notification](https://stripe.com/docs/payments/payment-methods#payment-notification).
+             */
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
 
+            /**
+             * If `true`, allows payment methods that require a shipping address, like Afterpay and
+             * Affirm. Defaults to `false`.
+             *
+             * Set this to `true` if you collect shipping addresses via [shippingDetails] or
+             * [FlowController.shippingDetails].
+             *
+             * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
+             * on the PaymentIntent when PaymentSheet loads.
+             */
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
             ) = apply {
@@ -981,18 +835,42 @@ class PaymentSheet internal constructor(
                     allowsPaymentMethodsRequiringShippingAddress
             }
 
+            /**
+             * Describes the appearance of Payment Sheet.
+             */
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
+            /**
+             * The label to use for the primary button.
+             *
+             * If not set, Payment Sheet will display suitable default labels for payment and setup
+             * intents.
+             */
             fun primaryButtonLabel(primaryButtonLabel: String) =
                 apply { this.primaryButtonLabel = primaryButtonLabel }
 
+            /**
+             * Describes how billing details should be collected.
+             * All values default to `automatic`.
+             * If `never` is used for a required field for the Payment Method used during checkout,
+             * you **must** provide an appropriate value as part of [defaultBillingDetails].
+             */
             fun billingDetailsCollectionConfiguration(
                 billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
             ) = apply {
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
 
+            /**
+             * A list of preferred networks that should be used to process payments
+             * made with a co-branded card if your user hasn't selected a network
+             * themselves.
+             *
+             * The first preferred network that matches any available network will
+             * be used. If no preferred network is applicable, Stripe will select
+             * the network.
+             */
             fun preferredNetworks(
                 preferredNetworks: List<CardBrand>
             ) = apply {
