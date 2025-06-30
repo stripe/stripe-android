@@ -23,7 +23,7 @@ internal enum class WalletType(val code: String) {
                     }
                     Link -> linkState != null
                     ShopPay -> {
-                        isShopPayAvailable && isInOrderedPaymentMethods
+                        true // isShopPayAvailable && isInOrderedPaymentMethods
                     }
                 }
             }

@@ -8,6 +8,11 @@ import com.stripe.android.paymentsheet.ShopPayHandlers.ShippingRateUpdate
 
 @OptIn(ShopPayPreview::class)
 internal object ShopPayData {
+    var billingAddressRequired: Boolean = true
+    var emailRequired: Boolean = true
+    var shippingAddressRequired: Boolean = true
+    var rejectShippingAddressChange: Boolean = false
+    var rejectShippingRateChange: Boolean = false
 
     private val singleBusinessDay = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
         value = 1,
@@ -46,9 +51,9 @@ internal object ShopPayData {
     internal fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
         return PaymentSheet.ShopPayConfiguration(
             shopId = "shop_id_123",
-            billingAddressRequired = true,
-            emailRequired = true,
-            shippingAddressRequired = true,
+            billingAddressRequired = billingAddressRequired,
+            emailRequired = emailRequired,
+            shippingAddressRequired = shippingAddressRequired,
             lineItems = listOf(
                 PaymentSheet.ShopPayConfiguration.LineItem(
                     name = "Golden Potato",
@@ -74,9 +79,11 @@ internal object ShopPayData {
     internal fun shopPayHandlers(): ShopPayHandlers {
         return ShopPayHandlers(
             shippingMethodUpdateHandler = {
+                if (rejectShippingRateChange) return@ShopPayHandlers null
                 shippingMethodUpdateHandler(it)
             },
             shippingContactHandler = {
+                if (rejectShippingAddressChange) return@ShopPayHandlers null
                 shippingContactHandler()
             }
         )
