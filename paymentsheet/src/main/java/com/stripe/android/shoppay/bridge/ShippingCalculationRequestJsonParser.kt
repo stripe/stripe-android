@@ -61,7 +61,7 @@ internal class ShippingCalculationRequestJsonParser @Inject constructor() :
         private const val FIELD_ADDRESS_LINE = "addressLine"
         private const val FIELD_CITY = "city"
         private const val FIELD_STATE = "state"
-        private const val FIELD_POSTAL_CODE = "postalCode"
+        private const val FIELD_POSTAL_CODE = "postal_code"
         private const val FIELD_COUNTRY = "country"
         private const val FIELD_PHONE = "phone"
         private const val FIELD_ORGANIZATION = "organization"

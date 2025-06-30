@@ -525,6 +525,14 @@ constructor(
             // after redirecting following a successful payment.
             // This allows time for the intent to transition to its terminal state.
             afterRedirectAction = AfterRedirectAction.Poll(),
+        ),
+        ShopPay(
+            code = "shop_pay",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

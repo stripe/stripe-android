@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed interface ShopPayActivityResult : Parcelable {
     @Parcelize
-    data class Completed(val paymentMethodId: String) : ShopPayActivityResult
+    data object Completed : ShopPayActivityResult
 
     @Parcelize
     data object Canceled : ShopPayActivityResult

@@ -15,11 +15,13 @@ internal class ShopPayActivityContract @Inject constructor(
     ActivityResultContract<ShopPayActivityContract.Args, ShopPayActivityResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
+        val configuration = PaymentConfiguration.getInstance(context)
         return ShopPayActivity.createIntent(
             context,
             ShopPayArgs(
                 shopPayConfiguration = input.shopPayConfiguration,
-                publishableKey = PaymentConfiguration.getInstance(context).publishableKey,
+                publishableKey = configuration.publishableKey,
+                stripeAccountId = configuration.stripeAccountId,
                 paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 customerSessionClientSecret = input.customerSessionClientSecret,
                 businessName = input.businessName

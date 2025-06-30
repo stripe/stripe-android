@@ -30,12 +30,26 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: ShopPayActivityResult
     ): ConfirmationDefinition.Result {
-        val error = Throwable("ShopPay is not supported yet")
-        return ConfirmationDefinition.Result.Failed(
-            cause = error,
-            message = error.message.orEmpty().resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-        )
+        return when (result) {
+            ShopPayActivityResult.Canceled -> {
+                ConfirmationDefinition.Result.Canceled(
+                    action = ConfirmationHandler.Result.Canceled.Action.None
+                )
+            }
+            is ShopPayActivityResult.Completed -> {
+                ConfirmationDefinition.Result.Succeeded(
+                    intent = confirmationParameters.intent,
+                    deferredIntentConfirmationType = deferredIntentConfirmationType
+                )
+            }
+            is ShopPayActivityResult.Failed -> {
+                ConfirmationDefinition.Result.Failed(
+                    cause = result.error,
+                    message = result.error.message.orEmpty().resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        }
     }
 
     override fun createLauncher(

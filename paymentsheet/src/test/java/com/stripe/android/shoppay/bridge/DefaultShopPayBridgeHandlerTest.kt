@@ -6,7 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ShopPayHandlers
-import com.stripe.android.shoppay.ShopPayArgs
+import com.stripe.android.shoppay.ShopPayTestFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
@@ -24,7 +24,7 @@ internal class DefaultShopPayBridgeHandlerTest {
 
         val actualKey = handler.getStripePublishableKey()
 
-        assertThat(actualKey).isEqualTo(PUBLISHABLE_KEY)
+        assertThat(actualKey).isEqualTo(ShopPayTestFactory.SHOP_PAY_ARGS.publishableKey)
     }
 
     @Test
@@ -300,13 +300,7 @@ internal class DefaultShopPayBridgeHandlerTest {
         confirmationRequestJsonParser: ModelJsonParser<ConfirmationRequest> = FakeConfirmationRequestParser(),
         shopPayHandlers: ShopPayHandlers = createFakeShopPayHandlers()
     ): DefaultShopPayBridgeHandler {
-        val shopPayArgs = ShopPayArgs(
-            publishableKey = PUBLISHABLE_KEY,
-            shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-            customerSessionClientSecret = "css_test_123",
-            businessName = "Test Business",
-            paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier"
-        )
+        val shopPayArgs = ShopPayTestFactory.SHOP_PAY_ARGS
 
         return DefaultShopPayBridgeHandler(
             handleClickRequestJsonParser = handleClickRequestJsonParser,
@@ -405,9 +399,5 @@ internal class DefaultShopPayBridgeHandlerTest {
                 null
             }
         }
-    }
-
-    companion object {
-        const val PUBLISHABLE_KEY = "pk_test_123"
     }
 }
