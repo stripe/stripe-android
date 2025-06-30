@@ -192,7 +192,8 @@ internal open class FakeLinkAccountManager(
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): Result<SharePaymentDetails> {
         return sharePaymentDetails
     }

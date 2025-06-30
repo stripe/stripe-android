@@ -118,7 +118,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         val confirmationResult = completeLinkFlow(
                             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                                 details = updatedPaymentDetails,
-                                collectedCvc = state.value.billingDetailsUpdateFlow?.cvc
+                                collectedCvc = state.value.billingDetailsUpdateFlow?.cvc,
+                                billingPhone = cardParams.billingDetails?.phone,
                             ),
                             linkAccount = account
                         )
@@ -174,7 +175,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 card = paymentDetails,
                 billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
             ),
-            addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
+            billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             isCbcModifiable = paymentDetails.availableNetworks.size > 1,
             onBrandChoiceChanged = ::onBrandChoiceChanged

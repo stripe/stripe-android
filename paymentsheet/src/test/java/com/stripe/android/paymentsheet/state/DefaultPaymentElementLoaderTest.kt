@@ -1436,28 +1436,6 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Disables Link if BDCC collects anything`() = runTest {
-        val loader = createPaymentElementLoader()
-
-        val result = loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                ),
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(result.paymentMethodMetadata.linkState).isNull()
-    }
-
-    @Test
     fun `Returns correct Link enablement based on card brand filtering`() = runTest {
         testLinkEnablementWithCardBrandFiltering(
             passthroughModeEnabled = false,

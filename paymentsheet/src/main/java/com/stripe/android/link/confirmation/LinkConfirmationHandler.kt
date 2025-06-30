@@ -10,13 +10,15 @@ internal interface LinkConfirmationHandler {
     suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String? = null
+        cvc: String?,
+        billingPhone: String?
     ): Result
 
     suspend fun confirm(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String? = null
+        cvc: String?,
+        billingPhone: String?
     ): Result
 
     fun interface Factory {

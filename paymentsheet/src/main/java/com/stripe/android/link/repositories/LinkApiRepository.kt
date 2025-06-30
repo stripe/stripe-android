@@ -236,8 +236,12 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
     ): Result<LinkPaymentDetails> = withContext(workContext) {
-        val allowRedisplayParams = allowRedisplay?.let {
+        val allowRedisplay = allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
+        } ?: emptyMap()
+
+        val billingPhone: Map<String, String> = paymentMethodCreateParams.billingDetails?.phone?.let {
+            mapOf("billing_phone" to it)
         } ?: emptyMap()
 
         stripeRepository.sharePaymentDetails(
@@ -245,7 +249,8 @@ internal class LinkApiRepository @Inject constructor(
             id = id,
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-            ) + allowRedisplayParams,
+
+            ) + allowRedisplay + billingPhone,
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
@@ -268,6 +273,7 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
         expectedPaymentMethodType: String,
+        billingPhone: String?,
         cvc: String?,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
@@ -283,7 +289,7 @@ internal class LinkApiRepository @Inject constructor(
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,
             extraParams = paymentMethodParams + fraudParams + optionsParams,
-            billingPhone = null,
+            billingPhone = billingPhone,
         )
     }
 

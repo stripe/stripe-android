@@ -13,7 +13,8 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
     override suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): Result {
         calls.add(
             element = Call(
@@ -28,7 +29,8 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
     override suspend fun confirm(
         paymentDetails: LinkPaymentDetails,
         linkAccount: LinkAccount,
-        cvc: String?
+        cvc: String?,
+        billingPhone: String?
     ): Result {
         confirmWithLinkPaymentDetailsCall.add(
             element = ConfirmWithLinkPaymentDetailsCall(
