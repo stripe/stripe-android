@@ -1,9 +1,15 @@
 package com.stripe.android.shoppay.di
 
+import com.stripe.android.BuildConfig
+import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.shoppay.bridge.ConfirmationRequest
 import com.stripe.android.shoppay.bridge.ConfirmationRequestJsonParser
@@ -20,8 +26,13 @@ import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 
-@Module
+@Module(
+    includes = [
+        StripeRepositoryModule::class,
+    ]
+)
 internal interface ShopPayModule {
     @Binds
     fun bindBridgeHandler(bridgeHandler: DefaultShopPayBridgeHandler): ShopPayBridgeHandler
@@ -61,5 +72,22 @@ internal interface ShopPayModule {
                 ?.shopPayHandlers
                 ?: throw IllegalStateException("ShopPayHandlers not found")
         }
+
+        @OptIn(SharedPaymentTokenSessionPreview::class)
+        @Provides
+        fun providePreparePaymentMethodHandler(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
+        ): PreparePaymentMethodHandler? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.preparePaymentMethodHandler
+        }
+
+        @Provides
+        @Named(PRODUCT_USAGE)
+        fun provideProductUsageTokens() = setOf("PaymentSheet")
+
+        @Provides
+        @Named(ENABLE_LOGGING)
+        fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
     }
 }

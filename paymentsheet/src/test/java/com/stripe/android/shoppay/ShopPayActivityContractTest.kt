@@ -6,7 +6,9 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -18,6 +20,14 @@ internal class ShopPayActivityContractTest {
     private val contract = ShopPayActivityContract(
         paymentElementCallbackIdentifier = "paymentElementCallbackIdentifier"
     )
+
+    @Before
+    fun before() {
+        PaymentConfiguration.init(
+            context = ApplicationProvider.getApplicationContext(),
+            publishableKey = ShopPayTestFactory.SHOP_PAY_ARGS.publishableKey,
+        )
+    }
 
     @Test
     fun `intent is created correctly`() {
@@ -41,9 +51,9 @@ internal class ShopPayActivityContractTest {
     fun `parseResult with completed result`() {
         val result = contract.parseResult(
             Activity.RESULT_OK,
-            intent(ShopPayActivityResult.Completed("test"))
+            intent(ShopPayActivityResult.Completed)
         )
-        assertThat(result).isEqualTo(ShopPayActivityResult.Completed("test"))
+        assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
     }
 
     @Test
@@ -82,9 +92,9 @@ internal class ShopPayActivityContractTest {
     fun `parseResult with different resultCode still parses result`() {
         val result = contract.parseResult(
             Activity.RESULT_CANCELED,
-            intent(ShopPayActivityResult.Completed("test"))
+            intent(ShopPayActivityResult.Completed)
         )
-        assertThat(result).isEqualTo(ShopPayActivityResult.Completed("test"))
+        assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
     }
 
     private fun intent(result: ShopPayActivityResult): Intent {

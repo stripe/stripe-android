@@ -22,7 +22,7 @@ internal class ShippingCalculationRequestJsonParserTest {
                         "addressLine": ["123 Main St", "Apt 4B"],
                         "city": "San Francisco",
                         "state": "CA",
-                        "postalCode": "94105",
+                        "postal_code": "94105",
                         "country": "US",
                         "phone": "+1-555-123-4567",
                         "organization": "Acme Corp"
