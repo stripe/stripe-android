@@ -14,7 +14,7 @@ internal object AddressSpecFactory {
         val addressSpec = if (condensedForm) {
             AddressSpec(
                 showLabel = false,
-                type = AddressType.ShippingCondensed(
+                type = AddressType.AutocompleteCondensed(
                     googleApiKey = config?.googlePlacesApiKey,
                     autocompleteCountries = config?.autocompleteCountries,
                     phoneNumberState = phoneNumberState,
@@ -24,7 +24,7 @@ internal object AddressSpecFactory {
         } else {
             AddressSpec(
                 showLabel = false,
-                type = AddressType.ShippingExpanded(
+                type = AddressType.AutocompleteExpanded(
                     googleApiKey = config?.googlePlacesApiKey,
                     autocompleteCountries = config?.autocompleteCountries,
                     phoneNumberState = phoneNumberState,

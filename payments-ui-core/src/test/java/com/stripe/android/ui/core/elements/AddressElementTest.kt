@@ -142,7 +142,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 phoneNumberState = PhoneNumberState.REQUIRED
@@ -163,7 +163,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 phoneNumberState = PhoneNumberState.HIDDEN
@@ -183,7 +183,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 phoneNumberState = PhoneNumberState.OPTIONAL
@@ -239,7 +239,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            addressType = AddressType.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
                 phoneNumberState = PhoneNumberState.REQUIRED,
@@ -260,7 +260,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            addressType = AddressType.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
                 phoneNumberState = PhoneNumberState.HIDDEN,
@@ -280,7 +280,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            addressType = AddressType.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
                 phoneNumberState = PhoneNumberState.OPTIONAL,
@@ -333,7 +333,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 "some key",
                 setOf("US", "CA"),
                 PhoneNumberState.OPTIONAL
@@ -353,7 +353,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 "some key",
                 setOf("US", "CA"),
                 PhoneNumberState.OPTIONAL
@@ -376,7 +376,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 "some key",
                 setOf("US", "CA"),
                 PhoneNumberState.OPTIONAL
@@ -400,7 +400,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            addressType = AddressType.AutocompleteExpanded(
                 "some key",
                 setOf("US", "CA"),
                 PhoneNumberState.OPTIONAL
@@ -425,7 +425,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 null,
                 setOf(),
                 PhoneNumberState.OPTIONAL
@@ -445,7 +445,7 @@ class AddressElementTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingExpanded(
+            addressType = AddressType.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
                 phoneNumberState = PhoneNumberState.OPTIONAL,
@@ -527,7 +527,7 @@ class AddressElementTest {
             IdentifierSpec.Generic("address"),
             rawValuesMap = initialValues,
             countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
+            addressType = AddressType.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
                 phoneNumberState = PhoneNumberState.OPTIONAL

@@ -52,7 +52,7 @@ open class AddressElement(
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
         config = SimpleTextFieldConfig(label = resolvableString(R.string.stripe_address_label_address)),
-        onNavigation = (addressType as? AddressType.ShippingCondensed)?.onNavigation
+        onNavigation = (addressType as? AddressType.AutocompleteCondensed)?.onNavigation
     )
 
     @VisibleForTesting
@@ -172,7 +172,7 @@ open class AddressElement(
             countryElement.takeUnless { hideCountry },
         ).plus(otherFields)
         val baseElements = when (addressType) {
-            is AddressType.ShippingCondensed -> {
+            is AddressType.AutocompleteCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
                 // available, and country is supported, use autocomplete
                 if (addressType.supportsAutoComplete(country, isPlacesAvailable)) {
@@ -181,7 +181,7 @@ open class AddressElement(
                     expanded
                 }
             }
-            is AddressType.ShippingExpanded -> {
+            is AddressType.AutocompleteExpanded -> {
                 expanded
             }
             else -> {

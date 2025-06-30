@@ -17,7 +17,7 @@ class AddressSpecFactoryTest {
         )
         assertThat(addressSpec.showLabel).isFalse()
         assertThat(addressSpec.allowedCountryCodes).isNotEmpty()
-        val type = addressSpec.type as AddressType.ShippingCondensed
+        val type = addressSpec.type as AddressType.AutocompleteCondensed
         assertThat(type.googleApiKey).isNull()
         assertThat(type.autocompleteCountries).isNull()
         assertThat(type.phoneNumberState).isEqualTo(PhoneNumberState.OPTIONAL)
@@ -36,7 +36,7 @@ class AddressSpecFactoryTest {
         )
         assertThat(addressSpec.showLabel).isFalse()
         assertThat(addressSpec.allowedCountryCodes).isEmpty()
-        val type = addressSpec.type as AddressType.ShippingCondensed
+        val type = addressSpec.type as AddressType.AutocompleteCondensed
         assertThat(type.googleApiKey).isEqualTo("apiKey")
         assertThat(type.autocompleteCountries).isEqualTo(setOf("US", "CA"))
         assertThat(type.phoneNumberState).isEqualTo(PhoneNumberState.REQUIRED)
@@ -51,7 +51,7 @@ class AddressSpecFactoryTest {
         )
         assertThat(addressSpec.showLabel).isFalse()
         assertThat(addressSpec.allowedCountryCodes).isNotEmpty()
-        val type = addressSpec.type as AddressType.ShippingExpanded
+        val type = addressSpec.type as AddressType.AutocompleteExpanded
         assertThat(type.googleApiKey).isNull()
         assertThat(type.autocompleteCountries).isNull()
         assertThat(type.phoneNumberState).isEqualTo(PhoneNumberState.OPTIONAL)
@@ -70,7 +70,7 @@ class AddressSpecFactoryTest {
         )
         assertThat(addressSpec.showLabel).isFalse()
         assertThat(addressSpec.allowedCountryCodes).isEmpty()
-        val type = addressSpec.type as AddressType.ShippingExpanded
+        val type = addressSpec.type as AddressType.AutocompleteExpanded
         assertThat(type.googleApiKey).isEqualTo("apiKey")
         assertThat(type.autocompleteCountries).isEqualTo(setOf("US", "CA"))
         assertThat(type.phoneNumberState).isEqualTo(PhoneNumberState.REQUIRED)
@@ -87,7 +87,7 @@ class AddressSpecFactoryTest {
             config = null,
             onNavigation = onNavigation
         )
-        val type = addressSpec.type as AddressType.ShippingExpanded
+        val type = addressSpec.type as AddressType.AutocompleteExpanded
         assertThat(navigationCounter).isEqualTo(0)
         type.onNavigation()
         assertThat(navigationCounter).isEqualTo(1)

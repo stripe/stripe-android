@@ -81,7 +81,7 @@ internal class AutocompleteCapableAddressTypeTest {
         googleApiKey: String?,
         autocompleteCountries: Set<String>?,
     ): AutocompleteCapableAddressType {
-        return AddressType.ShippingExpanded(
+        return AddressType.AutocompleteExpanded(
             googleApiKey = googleApiKey,
             autocompleteCountries = autocompleteCountries,
             phoneNumberState = PhoneNumberState.REQUIRED

@@ -11,7 +11,7 @@ sealed class AddressType : Parcelable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
-    data class ShippingCondensed(
+    data class AutocompleteCondensed(
         override val googleApiKey: String?,
         override val autocompleteCountries: Set<String>?,
         override val phoneNumberState: PhoneNumberState,
@@ -20,7 +20,7 @@ sealed class AddressType : Parcelable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @Parcelize
-    data class ShippingExpanded(
+    data class AutocompleteExpanded(
         override val googleApiKey: String?,
         override val autocompleteCountries: Set<String>?,
         override val phoneNumberState: PhoneNumberState,
