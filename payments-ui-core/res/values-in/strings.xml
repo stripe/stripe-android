@@ -73,6 +73,8 @@
   <string name="stripe_pay_button_amount">Bayar %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bank</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">Kartu debit atau kredit</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">Tambahkan kartu</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

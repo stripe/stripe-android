@@ -194,6 +194,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">デフォルトの支払い方法として設定する</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">末尾が %s の銀行口座を削除する</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Shop Pay ボタン</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">メニューを表示</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

@@ -194,6 +194,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Pašalinti banko sąskaitą, kurios paskutiniai skaičiai %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">„Shop Pay“ mygtukas</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Rodyti meniu</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

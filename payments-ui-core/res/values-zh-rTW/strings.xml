@@ -73,6 +73,8 @@
   <string name="stripe_pay_button_amount">支付 %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">銀行</string>
+  <!-- Label shown in the payment type picker describing a card payment -->
+  <string name="stripe_payment_method_debit_or_credit_card">簽帳卡或信用卡</string>
   <!-- Label of a button displayed below a card entry form that saves the card details -->
   <string name="stripe_paymentsheet_add_card">添加卡</string>
   <!-- Title shown above a view allowing the customer to save a card. -->

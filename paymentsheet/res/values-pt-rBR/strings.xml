@@ -194,6 +194,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">Definir como forma de pagamento padrão</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Remover conta bancária com final %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Botão Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Mostrar o menu</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
