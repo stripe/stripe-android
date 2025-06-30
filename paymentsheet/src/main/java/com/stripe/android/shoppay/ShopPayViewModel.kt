@@ -109,9 +109,11 @@ internal class ShopPayViewModel @Inject constructor(
         return stripeApiRepository.createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = requestOptions
-        ).mapCatching { paymentMethod ->
+        ).map { paymentMethod ->
             val paymentMethodHandler = preparePaymentMethodHandlerProvider.get()
-                ?: throw IllegalStateException("PreparePaymentMethodHandler is required for ShopPay")
+                ?: return@map ShopPayActivityResult.Failed(
+                    error = IllegalStateException("PreparePaymentMethodHandler is required for ShopPay")
+                )
             paymentMethodHandler.onPreparePaymentMethod(
                 paymentMethod = paymentMethod,
                 shippingAddress = AddressDetails(
