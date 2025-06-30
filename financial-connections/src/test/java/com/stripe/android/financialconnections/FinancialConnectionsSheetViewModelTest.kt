@@ -32,10 +32,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
-import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestIntegrityRequestManager
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
+import com.stripe.android.uicore.presentation.withState
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
