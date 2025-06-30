@@ -1,6 +1,8 @@
 package com.stripe.android.shoppay.di
 
 import android.content.Context
+import com.stripe.android.core.injection.CoreCommonModule
+import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -10,11 +12,14 @@ import com.stripe.android.shoppay.ShopPayViewModel
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 @Component(
     modules = [
         ShopPayModule::class,
-        ShopPayViewModelModule::class
+        CoreCommonModule::class,
+        CoroutineContextModule::class,
     ]
 )
 internal interface ShopPayComponent {

@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -40,6 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
@@ -47,9 +49,9 @@ internal class ShopPayViewModel @Inject constructor(
     val bridgeHandler: ShopPayBridgeHandler,
     private val stripeApiRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
-    private val paymentMethodHandler: PreparePaymentMethodHandler,
-    workContext: CoroutineContext = Dispatchers.Main + SupervisorJob()
-) : ViewModel(CoroutineScope(workContext)) {
+    private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
+    @UIContext workContext: CoroutineContext = Dispatchers.Main
+) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
     private val _popupWebView = MutableStateFlow<WebView?>(null)
     val popupWebView: StateFlow<WebView?> = _popupWebView
 
@@ -107,7 +109,9 @@ internal class ShopPayViewModel @Inject constructor(
         return stripeApiRepository.createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = requestOptions
-        ).map { paymentMethod ->
+        ).mapCatching { paymentMethod ->
+            val paymentMethodHandler = preparePaymentMethodHandlerProvider.get()
+                ?: throw IllegalStateException("PreparePaymentMethodHandler is required for ShopPay")
             paymentMethodHandler.onPreparePaymentMethod(
                 paymentMethod = paymentMethod,
                 shippingAddress = AddressDetails(
