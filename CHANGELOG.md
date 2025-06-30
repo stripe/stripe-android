@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.20.0 - 2025-06-30
+
 ### PaymentSheet
 * [ADDED][11007](https://github.com/stripe/stripe-android/pull/11007) Added support for bacs with `setup_future_usage`.
 
