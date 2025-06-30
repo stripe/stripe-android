@@ -16,6 +16,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -213,7 +214,9 @@ internal class ShopPayActivityTest {
                     bridgeHandler = bridgeHandler,
                     stripeApiRepository = stripeRepository,
                     requestOptions = ApiRequest.Options("pk_test"),
-                    paymentMethodHandler = { _, _ -> },
+                    preparePaymentMethodHandlerProvider = {
+                        PreparePaymentMethodHandler { _, _ -> }
+                    },
                     workContext = dispatcher,
                 ) as T
             }
@@ -251,7 +254,6 @@ internal class ShopPayActivityTest {
         val activityController = Robolectric.buildActivity(ShopPayActivity::class.java, intent)
 
         activityController.get().viewModelFactory = createTestViewModelFactory(bridgeHandler, stripeRepository)
-        activityController.intent
         return activityController.setup().get()
     }
 

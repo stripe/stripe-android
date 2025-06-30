@@ -2,9 +2,7 @@ package com.stripe.android.shoppay.di
 
 import com.stripe.android.BuildConfig
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
@@ -28,13 +26,11 @@ import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
-import kotlin.coroutines.CoroutineContext
 
 @Module(
     includes = [
-        StripeRepositoryModule::class
+        StripeRepositoryModule::class,
     ]
 )
 internal interface ShopPayModule {
@@ -88,15 +84,8 @@ internal interface ShopPayModule {
         }
 
         @Provides
-        @IOContext
-        fun provideWorkContext(): CoroutineContext = Dispatchers.IO
-
-        @Provides
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet")
-
-        @Provides
-        fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) = Logger.getInstance(enableLogging)
 
         @Provides
         @Named(ENABLE_LOGGING)

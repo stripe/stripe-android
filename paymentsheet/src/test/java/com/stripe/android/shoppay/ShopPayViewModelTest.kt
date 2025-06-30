@@ -167,28 +167,8 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
-    fun `paymentResult emits Failed when confirmation state is Failure`() = runTest(dispatcher) {
-        val exception = RuntimeException("Test error")
-        val bridgeHandler = FakeShopPayBridgeHandler()
-        val viewModel = createViewModel(bridgeHandler = bridgeHandler)
-
-        viewModel.paymentResult.test {
-            bridgeHandler.confirmationState.value = ShopPayConfirmationState.Failure(exception)
-
-            val result = awaitItem()
-            assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
-            assertThat((result as ShopPayActivityResult.Failed).error).isEqualTo(exception)
-        }
-    }
-
-    @Test
     fun `paymentResult emits nothing when confirmation state is Pending`() = runTest(dispatcher) {
-        val bridgeHandler = FakeShopPayBridgeHandler(
-            confirmationState = MutableStateFlow(Pending)
-        )
-        val viewModel = createViewModel(bridgeHandler = bridgeHandler)
-
-        viewModel.paymentResult.test {
+        createViewModel().paymentResult.test {
             expectNoEvents()
         }
     }
@@ -203,43 +183,48 @@ internal class ShopPayViewModelTest {
             )
             val bridgeHandler = FakeShopPayBridgeHandler()
             val stripeRepository = FakeStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
-            val viewModel = createViewModel(
+
+            testPaymentResultWithConfirmationState(
                 bridgeHandler = bridgeHandler,
-                stripeApiRepository = stripeRepository
+                stripeRepository = stripeRepository,
+                confirmationState = confirmationState,
+                expectedResult = { result ->
+                    assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
+                }
             )
-
-            viewModel.paymentResult.test {
-                bridgeHandler.confirmationState.value = confirmationState
-
-                val result = awaitItem()
-                assertThat(result).isEqualTo(ShopPayActivityResult.Completed)
-            }
         }
 
     @Test
     fun `paymentResult emits Failed when confirmation state is Success but payment method creation fails`() =
         runTest(dispatcher) {
-            val billingDetails = createTestBillingDetails()
-            val confirmationState = ShopPayConfirmationState.Success(
-                externalSourceId = "test_external_id",
-                billingDetails = billingDetails
-            )
-            val bridgeHandler = FakeShopPayBridgeHandler()
             val exception = RuntimeException("Payment method creation failed")
-            val stripeRepository = FakeStripeRepository(Result.failure(exception))
-            val viewModel = createViewModel(
-                bridgeHandler = bridgeHandler,
-                stripeApiRepository = stripeRepository
+            val confirmationState = createSuccessConfirmationState()
+
+            testPaymentResultWithConfirmationState(
+                stripeRepository = FakeStripeRepository(Result.failure(exception)),
+                confirmationState = confirmationState,
+                expectedResult = { result ->
+                    assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
+                    assertThat((result as ShopPayActivityResult.Failed).error).isEqualTo(exception)
+                }
             )
-
-            viewModel.paymentResult.test {
-                bridgeHandler.confirmationState.value = confirmationState
-
-                val result = awaitItem()
-                assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
-                assertThat((result as ShopPayActivityResult.Failed).error).isEqualTo(exception)
-            }
         }
+
+    @Test
+    fun `paymentResult emits Failed when preparePaymentMethodHandler is unavailable`() = runTest(dispatcher) {
+        val confirmationState = createSuccessConfirmationState()
+
+        testPaymentResultWithConfirmationState(
+            preparePaymentMethodHandler = null,
+            confirmationState = confirmationState,
+            expectedResult = { result ->
+                assertThat(result).isInstanceOf<ShopPayActivityResult.Failed>()
+                val error = (result as ShopPayActivityResult.Failed).error
+                assertThat(error).isInstanceOf<IllegalStateException>()
+                assertThat(error.message).contains("PreparePaymentMethodHandler is required for ShopPay")
+            }
+        )
+    }
 
     @Test
     fun `handleSuccessfulPayment creates correct PaymentMethodCreateParams`() = runTest(dispatcher) {
@@ -351,29 +336,45 @@ internal class ShopPayViewModelTest {
 
     private fun createViewModel(
         bridgeHandler: ShopPayBridgeHandler = createFakeBridgeHandler(),
-        paymentMethodHandler: PreparePaymentMethodHandler = PreparePaymentMethodHandler { _, _ -> },
+        preparePaymentMethodHandler: PreparePaymentMethodHandler? = PreparePaymentMethodHandler { _, _ -> },
         stripeApiRepository: StripeRepository = FakeStripeRepository()
     ): ShopPayViewModel {
-        PaymentElementCallbacks.Builder()
-            .shopPayHandlers(
-                shopPayHandlers = ShopPayHandlers(
-                    shippingMethodUpdateHandler = { null },
-                    shippingContactHandler = { null }
-                )
-            ).preparePaymentMethodHandler(
-                handler = { _, _ -> }
-            ).build()
         return ShopPayViewModel(
             bridgeHandler,
             stripeApiRepository = stripeApiRepository,
             requestOptions = ApiRequest.Options("pk_123"),
-            paymentMethodHandler = paymentMethodHandler,
+            preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler },
             workContext = dispatcher
         )
     }
 
     private fun createFakeBridgeHandler(): FakeShopPayBridgeHandler {
         return FakeShopPayBridgeHandler()
+    }
+
+    private fun createSuccessConfirmationState() = ShopPayConfirmationState.Success(
+        externalSourceId = "test_external_id",
+        billingDetails = createTestBillingDetails()
+    )
+
+    private suspend fun testPaymentResultWithConfirmationState(
+        bridgeHandler: FakeShopPayBridgeHandler = FakeShopPayBridgeHandler(),
+        stripeRepository: FakeStripeRepository = FakeStripeRepository(),
+        preparePaymentMethodHandler: PreparePaymentMethodHandler? = mock(),
+        confirmationState: ShopPayConfirmationState.Success,
+        expectedResult: (ShopPayActivityResult) -> Unit
+    ) {
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            stripeApiRepository = stripeRepository,
+            preparePaymentMethodHandler = preparePaymentMethodHandler
+        )
+
+        viewModel.paymentResult.test {
+            bridgeHandler.confirmationState.value = confirmationState
+            val result = awaitItem()
+            expectedResult(result)
+        }
     }
 
     private class FakeShopPayBridgeHandler(
