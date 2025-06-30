@@ -238,11 +238,13 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkPaymentMethod.ConsumerPaymentDetails -> linkConfirmationHandler.confirm(
                 paymentDetails = selectedPayment.details,
                 cvc = selectedPayment.collectedCvc,
+                billingPhone = selectedPayment.billingPhone,
                 linkAccount = linkAccount,
             )
             is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
                 paymentDetails = selectedPayment.linkPaymentDetails,
                 cvc = selectedPayment.collectedCvc,
+                billingPhone = selectedPayment.billingPhone,
                 linkAccount = linkAccount,
             )
         }

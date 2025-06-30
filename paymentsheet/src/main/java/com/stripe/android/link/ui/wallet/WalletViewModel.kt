@@ -275,7 +275,8 @@ internal class WalletViewModel @Inject constructor(
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                 details = selectedPaymentDetails,
-                collectedCvc = cvc
+                collectedCvc = cvc,
+                billingPhone = linkAccount.unredactedPhoneNumber
             ),
             linkAccount = linkAccount
         )
