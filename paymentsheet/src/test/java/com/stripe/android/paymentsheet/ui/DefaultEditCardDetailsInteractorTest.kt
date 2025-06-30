@@ -7,6 +7,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
@@ -458,7 +459,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             payload = EditCardPayload.create(card, billingDetails),
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
             areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
-            addressCollectionMode = addressCollectionMode,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode
+            ),
         )
     }
 }
