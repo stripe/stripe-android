@@ -52,14 +52,12 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         val shopPayConfiguration = shopPayArgs.shopPayConfiguration
         HandleClickResponse(
             lineItems = shopPayConfiguration.lineItems.map { it.toECELineItem() },
-            shippingRates = shopPayConfiguration.shippingRates.map { it.toECEShippingRate() }.takeIf {
-                true //shopPayConfiguration.shippingAddressRequired
-            },
+            shippingRates = shopPayConfiguration.shippingRates.map { it.toECEShippingRate() },
             billingAddressRequired = shopPayConfiguration.billingAddressRequired,
             emailRequired = shopPayConfiguration.emailRequired,
             phoneNumberRequired = true, // Shop Pay always requires phone
             shippingAddressRequired = shopPayConfiguration.shippingAddressRequired,
-            allowedShippingCountries = listOf("US", "CA"),
+            allowedShippingCountries = shopPayConfiguration.allowedShippingCountries,
             businessName = shopPayArgs.businessName,
             shopId = shopPayConfiguration.shopId,
         )
@@ -160,6 +158,10 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
             ?: throw IllegalArgumentException("Failed to parse confirmation request")
 
         logMessage("Parsed confirmation request: $confirmationRequest")
+
+        if (shopPayArgs.shopPayConfiguration.simulatePaymentFailed) {
+            throw Exception("Simulating payment failure")
+        }
 
         val externalSourceId = confirmationRequest.paymentDetails.paymentMethodOptions?.shopPay?.externalSourceId
             ?: throw IllegalArgumentException("Missing external source id")

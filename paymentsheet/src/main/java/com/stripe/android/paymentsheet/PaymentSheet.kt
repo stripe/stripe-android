@@ -2907,7 +2907,9 @@ class PaymentSheet internal constructor(
         val emailRequired: Boolean = true,
         val shippingAddressRequired: Boolean,
         val lineItems: List<LineItem>,
-        val shippingRates: List<ShippingRate>
+        val shippingRates: List<ShippingRate>,
+        val allowedShippingCountries: List<String> = listOf("US"),
+        internal val simulatePaymentFailed: Boolean = false
     ) : Parcelable {
         /**
          * A type used to describe a single item for in the Shop Pay wallet UI.

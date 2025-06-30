@@ -502,6 +502,9 @@ internal class PlaygroundSettings private constructor(
             ShopPayEmailSettings,
             ShopPayShippingAddressChangeSettings,
             ShopPayShippingRateChangeSettings,
+            ShopPayAllowedCountriesSettingsDefinition,
+            ShopPayShopIdSettingsDefinition,
+            ShopPaySimulateFailureSettings,
             ShopPaySettingsDefinition,
         )
 

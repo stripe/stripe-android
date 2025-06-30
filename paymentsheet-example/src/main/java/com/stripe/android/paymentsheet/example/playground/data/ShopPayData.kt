@@ -13,6 +13,9 @@ internal object ShopPayData {
     var shippingAddressRequired: Boolean = true
     var rejectShippingAddressChange: Boolean = false
     var rejectShippingRateChange: Boolean = false
+    var allowedShippingCountries: String = "US"
+    var simulatePaymentFailed: Boolean = false
+    var shopId: String = "shop_id_123"
 
     private val singleBusinessDay = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
         value = 1,
@@ -50,7 +53,7 @@ internal object ShopPayData {
 
     internal fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
         return PaymentSheet.ShopPayConfiguration(
-            shopId = "shop_id_123",
+            shopId = shopId,
             billingAddressRequired = billingAddressRequired,
             emailRequired = emailRequired,
             shippingAddressRequired = shippingAddressRequired,
@@ -72,7 +75,10 @@ internal object ShopPayData {
                     amount = shippingRates.first().amount
                 ),
             ),
-            shippingRates = shippingRates
+            shippingRates = shippingRates,
+            allowedShippingCountries = this.allowedShippingCountries.split(",")
+                .map { it.trim() },
+            simulatePaymentFailed = simulatePaymentFailed
         )
     }
 
