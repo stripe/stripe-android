@@ -74,7 +74,8 @@ class AutocompleteScreenTest {
                         ),
                         eventReporter,
                         application
-                    )
+                    ),
+                    attributionDrawable = null,
                 )
             }
         }

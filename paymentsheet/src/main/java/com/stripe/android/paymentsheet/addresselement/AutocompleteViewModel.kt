@@ -5,7 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
@@ -137,18 +139,8 @@ internal class AutocompleteViewModel @Inject constructor(
     }
 
     fun onBackPressed() {
-        val result = if (queryFlow.value.isNotBlank()) {
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = queryFlow.value,
-                )
-            )
-        } else {
-            null
-        }
-
         viewModelScope.launch {
-            _event.emit(Event.GoBack(result))
+            _event.emit(Event.GoBack(null))
         }
     }
 
@@ -205,12 +197,11 @@ internal class AutocompleteViewModel @Inject constructor(
         private val autoCompleteViewModelSubcomponentBuilderProvider:
         Provider<AutocompleteViewModelSubcomponent.Builder>,
         private val args: Args,
-        private val applicationSupplier: () -> Application
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return autoCompleteViewModelSubcomponentBuilderProvider.get()
-                .application(applicationSupplier())
+                .application(extras.requireApplication())
                 .configuration(args)
                 .build().autoCompleteViewModel as T
         }

@@ -5,17 +5,21 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.FormControllerSubcomponent
+import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Module(
+    includes = [AddressElementViewModelModule.Bindings::class],
     subcomponents = [
         AddressElementViewModelSubcomponent::class,
         InputAddressViewModelSubcomponent::class,
@@ -58,4 +62,10 @@ internal class AddressElementViewModelModule {
     fun provideEventReporter(
         defaultAddressLauncherEventReporter: DefaultAddressLauncherEventReporter
     ): AddressLauncherEventReporter = defaultAddressLauncherEventReporter
+
+    @Module
+    interface Bindings {
+        @Binds
+        fun bindsAddressElementNavigator(navigator: NavHostAddressElementNavigator): AddressElementNavigator
+    }
 }

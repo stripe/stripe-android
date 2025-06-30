@@ -255,7 +255,7 @@ class AutocompleteViewModelTest {
     }
 
     @Test
-    fun `when query is not empty then return line1 on back`() = runTest {
+    fun `on back when query is not empty, should not return anything`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.event.test {
@@ -263,13 +263,7 @@ class AutocompleteViewModelTest {
             viewModel.onBackPressed()
 
             assertThat(awaitItem()).isEqualTo(
-                AutocompleteViewModel.Event.GoBack(
-                    addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
-                            line1 = "a"
-                        )
-                    )
-                )
+                AutocompleteViewModel.Event.GoBack(addressDetails = null)
             )
         }
     }

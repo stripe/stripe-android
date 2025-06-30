@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -31,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -62,7 +60,6 @@ internal fun AutocompleteScreen(
     navigator: AddressElementNavigator,
     country: String?
 ) {
-    val application = LocalContext.current.applicationContext as Application
     val viewModel: AutocompleteViewModel =
         viewModel(
             factory = AutocompleteViewModel.Factory(
@@ -70,7 +67,6 @@ internal fun AutocompleteScreen(
                 args = AutocompleteViewModel.Args(
                     country = country
                 ),
-                applicationSupplier = { application }
             )
         )
 
@@ -105,8 +101,7 @@ internal fun AutocompleteScreenUI(
 @Composable
 internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
-    attributionDrawable: Int? =
-        PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme()),
+    attributionDrawable: Int?,
 ) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState()
