@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,6 +52,11 @@ internal class ShopPayActivityTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ShopPayActivity>()
+
+    @Before
+    fun setup() {
+        setupPaymentElementCallbackReferences()
+    }
 
     @Test
     fun `finishes with failed result when ViewModel factory fails`() {
@@ -106,8 +112,6 @@ internal class ShopPayActivityTest {
 
     @Test
     fun `finishes with Completed result when payment succeeds`() = runTest(dispatcher) {
-        setupPaymentElementCallbackReferences()
-
         val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
         val bridgeHandler = createTestBridgeHandler(confirmationState)
         val stripeRepository = createTestStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
@@ -130,8 +134,6 @@ internal class ShopPayActivityTest {
 
     @Test
     fun `finishes with Failed result when payment fails`() = runTest(dispatcher) {
-        setupPaymentElementCallbackReferences()
-
         val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
         val bridgeHandler = createTestBridgeHandler(confirmationState)
         val exception = RuntimeException("Payment failed")
@@ -156,8 +158,6 @@ internal class ShopPayActivityTest {
 
     @Test
     fun `finishes with Failed result when confirmation state fails`() = runTest(dispatcher) {
-        setupPaymentElementCallbackReferences()
-
         val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
         val bridgeHandler = createTestBridgeHandler(confirmationState)
         val stripeRepository = createTestStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
