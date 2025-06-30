@@ -1,14 +1,14 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -20,8 +20,10 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -31,8 +33,6 @@ import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as UiCoreR
 
 internal class AutocompleteViewModel @Inject constructor(
-    val args: AddressElementActivityContract.Args,
-    val navigator: AddressElementNavigator,
     private val placesClient: PlacesClientProxy?,
     private val autocompleteArgs: Args,
     private val eventReporter: AddressLauncherEventReporter,
@@ -46,8 +46,8 @@ internal class AutocompleteViewModel @Inject constructor(
     val loading: StateFlow<Boolean>
         get() = _loading
 
-    @VisibleForTesting
-    val addressResult = MutableStateFlow<Result<AddressDetails?>?>(null)
+    private val _event = MutableSharedFlow<Event>()
+    val event = _event.asSharedFlow()
 
     private val config = SimpleTextFieldConfig(
         label = resolvableString(UiCoreR.string.stripe_address_label_address),
@@ -78,7 +78,6 @@ internal class AutocompleteViewModel @Inject constructor(
                         },
                         onFailure = {
                             _loading.value = false
-                            addressResult.value = Result.failure(it)
                         }
                     )
                 }
@@ -115,68 +114,52 @@ internal class AutocompleteViewModel @Inject constructor(
                 onSuccess = {
                     _loading.value = false
                     val address = it.place.transformGoogleToStripeAddress(getApplication())
-                    addressResult.value = Result.success(
-                        AddressDetails(
-                            address = PaymentSheet.Address(
-                                city = address.city,
-                                country = address.country,
-                                line1 = address.line1,
-                                line2 = address.line2,
-                                postalCode = address.postalCode,
-                                state = address.state
+
+                    _event.emit(
+                        Event.GoBack(
+                            addressDetails = AddressDetails(
+                                address = PaymentSheet.Address(
+                                    city = address.city,
+                                    country = address.country,
+                                    line1 = address.line1,
+                                    line2 = address.line2,
+                                    postalCode = address.postalCode,
+                                    state = address.state
+                                )
                             )
                         )
                     )
-                    setResultAndGoBack()
                 },
                 onFailure = {
                     _loading.value = false
-                    addressResult.value = Result.failure(it)
-                    setResultAndGoBack()
+                    _event.emit(Event.GoBack(addressDetails = null))
                 }
             )
         }
     }
 
     fun onBackPressed() {
-        val result = if (queryFlow.value.isNotBlank()) {
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = queryFlow.value
-                )
-            )
-        } else {
-            null
+        viewModelScope.launch {
+            _event.emit(Event.GoBack(null))
         }
-        setResultAndGoBack(result)
     }
 
     fun onEnterAddressManually() {
-        navigator.setResult(FORCE_EXPANDED_FORM_KEY, true)
-        setResultAndGoBack(
-            AddressDetails(
-                address = PaymentSheet.Address(
-                    line1 = queryFlow.value
+        viewModelScope.launch {
+            _event.emit(
+                Event.EnterManually(
+                    if (queryFlow.value.isNotBlank()) {
+                        AddressDetails(
+                            address = PaymentSheet.Address(
+                                line1 = queryFlow.value,
+                            )
+                        )
+                    } else {
+                        null
+                    }
                 )
             )
-        )
-    }
-
-    private fun setResultAndGoBack(addressDetails: AddressDetails? = null) {
-        if (addressDetails != null) {
-            navigator.setResult(AddressDetails.KEY, addressDetails)
-        } else {
-            addressResult.value?.fold(
-                onSuccess = {
-                    navigator.setResult(AddressDetails.KEY, it)
-                },
-                onFailure = {
-                    navigator.setResult(AddressDetails.KEY, null)
-                }
-            )
         }
-
-        navigator.onBack()
     }
 
     fun clearQuery() {
@@ -214,16 +197,22 @@ internal class AutocompleteViewModel @Inject constructor(
         private val autoCompleteViewModelSubcomponentBuilderProvider:
         Provider<AutocompleteViewModelSubcomponent.Builder>,
         private val args: Args,
-        private val applicationSupplier: () -> Application
     ) : ViewModelProvider.Factory {
-
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return autoCompleteViewModelSubcomponentBuilderProvider.get()
-                .application(applicationSupplier())
+                .application(extras.requireApplication())
                 .configuration(args)
                 .build().autoCompleteViewModel as T
         }
+    }
+
+    sealed interface Event {
+        val addressDetails: AddressDetails?
+
+        data class EnterManually(override val addressDetails: AddressDetails?) : Event
+
+        data class GoBack(override val addressDetails: AddressDetails?) : Event
     }
 
     data class Args(

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.app.Application
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.VisibleForTesting
@@ -31,13 +30,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
+import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -49,6 +48,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.collectLatest
 import javax.inject.Provider
 
 @VisibleForTesting
@@ -57,9 +57,9 @@ internal const val TEST_TAG_ATTRIBUTION_DRAWABLE = "AutocompleteAttributionDrawa
 @Composable
 internal fun AutocompleteScreen(
     autoCompleteViewModelSubcomponentBuilderProvider: Provider<AutocompleteViewModelSubcomponent.Builder>,
+    navigator: AddressElementNavigator,
     country: String?
 ) {
-    val application = LocalContext.current.applicationContext as Application
     val viewModel: AutocompleteViewModel =
         viewModel(
             factory = AutocompleteViewModel.Factory(
@@ -67,20 +67,45 @@ internal fun AutocompleteScreen(
                 args = AutocompleteViewModel.Args(
                     country = country
                 ),
-                applicationSupplier = { application }
             )
         )
 
-    AutocompleteScreenUI(viewModel = viewModel)
+    AutocompleteScreenUI(viewModel = viewModel, navigator = navigator)
 }
 
 @Composable
-internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
+internal fun AutocompleteScreenUI(
+    viewModel: AutocompleteViewModel,
+    navigator: AddressElementNavigator,
+    attributionDrawable: Int? =
+        PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
+) {
+    LaunchedEffect(Unit) {
+        viewModel.event.collectLatest { event ->
+            when (event) {
+                is AutocompleteViewModel.Event.GoBack -> Unit
+                is AutocompleteViewModel.Event.EnterManually -> {
+                    navigator.setResult(FORCE_EXPANDED_FORM_KEY, true)
+                }
+            }
+
+            navigator.setResult(AddressDetails.KEY, event.addressDetails)
+
+            navigator.onBack()
+        }
+    }
+
+    AutocompleteScreenUI(viewModel = viewModel, attributionDrawable)
+}
+
+@Composable
+internal fun AutocompleteScreenUI(
+    viewModel: AutocompleteViewModel,
+    attributionDrawable: Int?,
+) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState()
     val query by viewModel.textFieldController.fieldValue.collectAsState()
-    val attributionDrawable =
-        PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {

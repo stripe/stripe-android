@@ -29,10 +29,6 @@ class AutocompleteScreenTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val args = AddressElementActivityContract.Args(
-        "publishableKey",
-        AddressLauncher.Configuration(),
-    )
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val eventReporter = FakeEventReporter()
 
@@ -72,15 +68,14 @@ class AutocompleteScreenTest {
             DefaultStripeTheme {
                 AutocompleteScreenUI(
                     viewModel = AutocompleteViewModel(
-                        args,
-                        AddressElementNavigator(),
                         mockClient,
                         AutocompleteViewModel.Args(
                             "US"
                         ),
                         eventReporter,
                         application
-                    )
+                    ),
+                    attributionDrawable = null,
                 )
             }
         }
