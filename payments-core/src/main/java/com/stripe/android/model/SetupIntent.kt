@@ -22,7 +22,7 @@ constructor(
     /**
      * Unique identifier for the object.
      */
-    override val id: String?,
+    override val id: String,
 
     /**
      * Reason for cancellation of this [SetupIntent].

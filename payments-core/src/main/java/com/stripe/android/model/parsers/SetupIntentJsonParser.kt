@@ -33,7 +33,9 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
         val paymentMethodOptions = json.optJSONObject(FIELD_PAYMENT_METHOD_OPTIONS)?.toString()
 
         return SetupIntent(
-            id = optString(json, FIELD_ID),
+            id = requireNotNull(optString(json, FIELD_ID)) {
+                "SetupIntent id is required."
+            },
             created = json.optLong(FIELD_CREATED),
             clientSecret = optString(json, FIELD_CLIENT_SECRET),
             cancellationReason = SetupIntent.CancellationReason.fromCode(

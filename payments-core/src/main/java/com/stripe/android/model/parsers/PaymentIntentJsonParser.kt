@@ -18,7 +18,9 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
             return null
         }
 
-        val id = optString(json, FIELD_ID)
+        val id = requireNotNull(optString(json, FIELD_ID)) {
+            "PaymentIntent id is required."
+        }
         val paymentMethodTypes = jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )

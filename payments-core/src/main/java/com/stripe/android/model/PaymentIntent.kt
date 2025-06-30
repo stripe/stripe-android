@@ -3,8 +3,6 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.PaymentIntent.CaptureMethod
-import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -23,7 +21,7 @@ constructor(
     /**
      * Unique identifier for the object.
      */
-    override val id: String?,
+    override val id: String,
 
     /**
      * The list of payment method types (e.g. card) that this [PaymentIntent] is allowed to

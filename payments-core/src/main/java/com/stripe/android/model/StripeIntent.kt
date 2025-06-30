@@ -15,7 +15,7 @@ sealed interface StripeIntent : StripeModel {
     /**
      * Unique identifier for the object.
      */
-    val id: String?
+    val id: String
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.

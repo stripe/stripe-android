@@ -10,7 +10,7 @@ import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DeferredSetupIntentJsonParser(
-    private val elementsSessionId: String?,
+    private val elementsSessionId: String,
     private val setupMode: DeferredIntentParams.Mode.Setup,
     private val isLiveMode: Boolean,
     private val timeProvider: () -> Long
