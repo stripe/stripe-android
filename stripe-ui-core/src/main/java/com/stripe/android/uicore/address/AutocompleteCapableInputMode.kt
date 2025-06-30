@@ -6,7 +6,7 @@ import androidx.compose.ui.text.toLowerCase
 import com.stripe.android.uicore.elements.IsPlacesAvailable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface AutocompleteCapableAddressType {
+interface AutocompleteCapableInputMode {
     val googleApiKey: String?
     val autocompleteCountries: Set<String>?
     val onNavigation: () -> Unit

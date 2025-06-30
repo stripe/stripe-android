@@ -1,12 +1,12 @@
 package com.stripe.android.ui.core.elements
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.uicore.address.AutocompleteCapableAddressType
-import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.address.AutocompleteCapableInputMode
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.PhoneNumberState
 import org.junit.Test
 
-internal class AutocompleteCapableAddressTypeTest {
+internal class AutocompleteCapableAddressInputModeTest {
     @Test
     fun `supportsAutoComplete returns true when available and supported`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("US"))
@@ -80,8 +80,8 @@ internal class AutocompleteCapableAddressTypeTest {
     private fun createSubject(
         googleApiKey: String?,
         autocompleteCountries: Set<String>?,
-    ): AutocompleteCapableAddressType {
-        return AddressType.ShippingExpanded(
+    ): AutocompleteCapableInputMode {
+        return AddressInputMode.AutocompleteExpanded(
             googleApiKey = googleApiKey,
             autocompleteCountries = autocompleteCountries,
             phoneNumberState = PhoneNumberState.REQUIRED

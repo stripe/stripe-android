@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressElement
-import com.stripe.android.uicore.elements.AddressType
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,7 +33,7 @@ class CardBillingAddressElement(
 ) : AddressElement(
     identifier,
     rawValuesMap,
-    AddressType.Normal(),
+    AddressInputMode.NoAutocomplete(),
     countryCodes,
     countryDropdownFieldController,
     sameAsShippingElement,

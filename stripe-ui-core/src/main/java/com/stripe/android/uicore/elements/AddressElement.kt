@@ -6,7 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressSchemaRegistry
-import com.stripe.android.uicore.address.AutocompleteCapableAddressType
+import com.stripe.android.uicore.address.AutocompleteCapableInputMode
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -18,7 +18,7 @@ import com.stripe.android.core.R as CoreR
 open class AddressElement(
     _identifier: IdentifierSpec,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    private val addressType: AddressType = AddressType.Normal(),
+    private val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
@@ -52,7 +52,7 @@ open class AddressElement(
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
         config = SimpleTextFieldConfig(label = resolvableString(R.string.stripe_address_label_address)),
-        onNavigation = (addressType as? AddressType.ShippingCondensed)?.onNavigation
+        onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
     )
 
     @VisibleForTesting
@@ -60,8 +60,8 @@ open class AddressElement(
         IdentifierSpec.Phone,
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
-            showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL,
-            acceptAnyInput = addressType.phoneNumberState != PhoneNumberState.REQUIRED,
+            showOptionalLabel = addressInputMode.phoneNumberState == PhoneNumberState.OPTIONAL,
+            acceptAnyInput = addressInputMode.phoneNumberState != PhoneNumberState.REQUIRED,
         )
     )
 
@@ -78,7 +78,7 @@ open class AddressElement(
                 updateLine1WithAutocompleteAffordance(
                     field = field,
                     countryCode = countryCode,
-                    addressType = addressType,
+                    addressInputMode = addressInputMode,
                     isPlacesAvailable = isPlacesAvailable,
                 )
                 field.setRawValue(rawValuesMap)
@@ -171,17 +171,17 @@ open class AddressElement(
             nameElement,
             countryElement.takeUnless { hideCountry },
         ).plus(otherFields)
-        val baseElements = when (addressType) {
-            is AddressType.ShippingCondensed -> {
+        val baseElements = when (addressInputMode) {
+            is AddressInputMode.AutocompleteCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
                 // available, and country is supported, use autocomplete
-                if (addressType.supportsAutoComplete(country, isPlacesAvailable)) {
+                if (addressInputMode.supportsAutoComplete(country, isPlacesAvailable)) {
                     condensed
                 } else {
                     expanded
                 }
             }
-            is AddressType.ShippingExpanded -> {
+            is AddressInputMode.AutocompleteExpanded -> {
                 expanded
             }
             else -> {
@@ -191,7 +191,7 @@ open class AddressElement(
             }
         }
 
-        val fields = if (addressType.phoneNumberState != PhoneNumberState.HIDDEN) {
+        val fields = if (addressInputMode.phoneNumberState != PhoneNumberState.HIDDEN) {
             baseElements.plus(phoneNumberElement)
         } else {
             baseElements
@@ -238,7 +238,7 @@ open class AddressElement(
 internal fun updateLine1WithAutocompleteAffordance(
     field: SectionFieldElement,
     countryCode: String?,
-    addressType: AddressType,
+    addressInputMode: AddressInputMode,
     isPlacesAvailable: IsPlacesAvailable,
 ) {
     if (field.identifier == IdentifierSpec.Line1) {
@@ -249,7 +249,7 @@ internal fun updateLine1WithAutocompleteAffordance(
             updateLine1ConfigForAutocompleteAffordance(
                 textConfig = textConfig,
                 countryCode = countryCode,
-                addressType = addressType,
+                addressInputMode = addressInputMode,
                 isPlacesAvailable = isPlacesAvailable,
             )
         }
@@ -259,10 +259,10 @@ internal fun updateLine1WithAutocompleteAffordance(
 private fun updateLine1ConfigForAutocompleteAffordance(
     textConfig: SimpleTextFieldConfig,
     countryCode: String?,
-    addressType: AddressType,
+    addressInputMode: AddressInputMode,
     isPlacesAvailable: IsPlacesAvailable,
 ) {
-    val supportsAutocomplete = (addressType as? AutocompleteCapableAddressType)
+    val supportsAutocomplete = (addressInputMode as? AutocompleteCapableInputMode)
         ?.supportsAutoComplete(countryCode, isPlacesAvailable)
     val icon: TextFieldIcon.Trailing? = if (supportsAutocomplete == true) {
         TextFieldIcon.Trailing(
@@ -270,7 +270,7 @@ private fun updateLine1ConfigForAutocompleteAffordance(
             isTintable = true,
             contentDescription = R.string.stripe_address_search_content_description,
             onClick = {
-                addressType.onNavigation()
+                addressInputMode.onNavigation()
             }
         )
     } else {
