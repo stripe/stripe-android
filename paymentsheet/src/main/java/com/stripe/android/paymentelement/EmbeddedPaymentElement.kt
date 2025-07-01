@@ -636,7 +636,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * You can implement this method to immediately perform an action e.g. go back to the checkout screen
              * or confirm the payment.
              *
-             * Note that certain payment options like Apple Pay and saved payment methods are disabled in this mode if
+             * Note that certain payment options like Google Pay and saved payment methods are disabled in this mode if
              * you set [EmbeddedPaymentElement.Configuration.formSheetAction] to [FormSheetAction.Confirm].
              */
             fun immediateAction(didSelectPaymentOption: (EmbeddedPaymentElement) -> Unit): RowSelectionBehavior {
