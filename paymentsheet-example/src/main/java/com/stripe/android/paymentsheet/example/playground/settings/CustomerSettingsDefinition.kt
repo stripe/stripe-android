@@ -24,7 +24,7 @@ internal object CustomerSettingsDefinition :
             add(option("New", CustomerType.NEW))
 
             if (!configurationData.integrationType.isSptFlow()) {
-                option("Returning", CustomerType.RETURNING)
+                add(option("Returning", CustomerType.RETURNING))
             }
         }
     }
