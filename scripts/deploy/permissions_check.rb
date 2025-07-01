@@ -20,9 +20,9 @@ require_relative 'common'
         "error_actions" => -> { get_password_from_coworker() }
     },
     {
-        "password_key" => "bindings/java-maven-api-token",
+        "password_key" => "bindings/sonatype-central-api-token",
         "error_actions" => -> {
-            request_membership_at_link("https://ldapmanager.corp.stripe.com/request?group=password-bindings-java-maven-api-token")
+            request_membership_at_link("https://ldapmanager.corp.stripe.com/request?group=password-bindings-sonatype-central-api-token")
         }
     },
     {
@@ -42,10 +42,10 @@ require_relative 'common'
         }
     },
     {
-        "password_key" => "nexus-sonatype-login",
+        "password_key" => "secret-acl-stripe-android-sonatype",
         "error_actions" => -> {
             rputs "Follow the prompts:"
-            execute("fetch-password nexus-sonatype-login")
+            execute("fetch-password secret-acl-stripe-android-sonatype")
         }
     },
 ]

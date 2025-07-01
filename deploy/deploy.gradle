@@ -9,12 +9,12 @@ nexusStaging {
 
 def getReleaseRepositoryUrl() {
     return findProperty('RELEASE_REPOSITORY_URL') ?:
-            "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
 }
 
 def getSnapshotRepositoryUrl() {
     return findProperty('SNAPSHOT_REPOSITORY_URL') ?:
-            "https://oss.sonatype.org/content/repositories/snapshots/"
+            "https://central.sonatype.com/repository/maven-snapshots/"
 }
 
 def getRepositoryUsername() {
@@ -92,7 +92,9 @@ afterEvaluate { project ->
                         final depName = dep.hasProperty("dependencyProject") && dep.dependencyProject.hasProperty("artifactId") ?
                                 dep.dependencyProject.artifactId : dep.name
 
-                        final defaultVersion = System.getenv("JITPACK") ? System.getenv("VERSION") : VERSION_NAME
+                        final jitpackEnabled = System.getenv("JITPACK")
+                        final defaultVersion =
+                                jitpackEnabled != null && jitpackEnabled.toBoolean() ? System.getenv("VERSION") : VERSION_NAME
 
                         final depVersion = dep.version != 'unspecified' ? dep.version : defaultVersion
 
