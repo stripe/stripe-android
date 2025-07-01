@@ -24,6 +24,7 @@ com.stripe.android.financialconnections.features.linkaccountpicker
 com.stripe.android.financialconnections.model
 module:financial-connections-core
 com.stripe.android.financialconnections
+com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
