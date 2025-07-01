@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -27,7 +27,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.shoppay.webview.MainWebView
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -52,6 +51,7 @@ internal class ShopPayActivity : ComponentActivity() {
         }
 
         val vm = viewModel ?: return
+        vm.loadECEWebView(this)
         setContent {
             Content(vm)
         }
@@ -96,27 +96,19 @@ internal class ShopPayActivity : ComponentActivity() {
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                MainWebView(
-                    viewModel = viewModel,
+            if (showPopup) {
+                PopupWebViewDialog(viewModel = viewModel)
+            } else {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .size(64.dp),
+                    color = ShopPayBackgroundColor,
+                    strokeWidth = 4.dp
                 )
-
-                if (showPopup) {
-                    PopupWebViewDialog(viewModel = viewModel)
-                } else {
-                    CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(64.dp),
-                        color = ShopPayBackgroundColor,
-                        strokeWidth = 4.dp
-                    )
-                }
             }
         }
     }

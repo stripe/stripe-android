@@ -27,6 +27,9 @@ import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
 import com.stripe.android.shoppay.di.DaggerShopPayComponent
+import com.stripe.android.shoppay.webview.EceWebView
+import com.stripe.android.shoppay.webview.PopUpWebChromeClient
+import com.stripe.android.shoppay.webview.PopUpWebViewClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -50,8 +53,9 @@ internal class ShopPayViewModel @Inject constructor(
     private val stripeApiRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
-    @UIContext workContext: CoroutineContext = Dispatchers.Main
+    @UIContext workContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
+    private val mainWebView = MutableStateFlow<WebView?>(null)
     private val _popupWebView = MutableStateFlow<WebView?>(null)
     val popupWebView: StateFlow<WebView?> = _popupWebView
 
@@ -167,6 +171,29 @@ internal class ShopPayViewModel @Inject constructor(
                 Log.d("WebViewBridge", "initializeApp() => $it")
             }
         }
+    }
+
+    fun loadECEWebView(context: Context) {
+        if (mainWebView.value != null) return
+        val assetLoader = assetLoader(context)
+        val webView = EceWebView(
+            context = context,
+            bridgeHandler = bridgeHandler,
+            webViewClient = PopUpWebViewClient(
+                assetLoader = assetLoader,
+                onPageLoaded = ::onPageLoaded
+            ),
+            webChromeClient = PopUpWebChromeClient(
+                context = context,
+                bridgeHandler = bridgeHandler,
+                assetLoader = assetLoader,
+                setPopUpView = ::setPopupWebView,
+                closeWebView = ::closePopup,
+                onPageLoaded = ::onPageLoaded,
+            )
+        )
+        mainWebView.value = webView
+        webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
 
     companion object {
