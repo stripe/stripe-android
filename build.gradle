@@ -69,6 +69,7 @@ nexusPublishing {
 
     repositories {
         sonatype {
+            nexusUrl = uri("https://ossrh-staging-api.central.sonatype.com/service/local/")
             username = project.findProperty('NEXUS_USERNAME') ?: ""
             password = project.findProperty('NEXUS_PASSWORD') ?: ""
         }
