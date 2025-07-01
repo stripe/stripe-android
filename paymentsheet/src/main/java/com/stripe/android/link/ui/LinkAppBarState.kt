@@ -11,6 +11,7 @@ internal data class LinkAppBarState(
     val showHeader: Boolean,
     val canNavigateBack: Boolean,
     val title: ResolvableString?,
+    val isElevated: Boolean,
 ) {
 
     val canShowCloseIcon: Boolean
@@ -23,6 +24,7 @@ internal data class LinkAppBarState(
                 showHeader = true,
                 canNavigateBack = false,
                 title = null,
+                isElevated = false,
             )
         }
 
@@ -54,6 +56,7 @@ internal data class LinkAppBarState(
                 showHeader = route in showHeaderRoutes,
                 canNavigateBack = previousEntryRoute != null,
                 title = title,
+                isElevated = false,
             )
         }
 

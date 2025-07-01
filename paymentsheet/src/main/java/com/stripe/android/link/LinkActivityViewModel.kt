@@ -121,6 +121,12 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    fun onContentCanScrollBackwardChanged(canScrollBackward: Boolean) {
+        _linkAppBarState.update {
+            it.copy(isElevated = canScrollBackward)
+        }
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
         GlobalScope.launch {
