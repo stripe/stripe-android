@@ -27,20 +27,12 @@ import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
 import com.stripe.android.shoppay.di.DaggerShopPayComponent
-import com.stripe.android.shoppay.webview.EceWebView
-import com.stripe.android.shoppay.webview.PopUpWebChromeClient
-import com.stripe.android.shoppay.webview.PopUpWebViewClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import javax.inject.Inject
@@ -55,17 +47,6 @@ internal class ShopPayViewModel @Inject constructor(
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     @UIContext workContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
-    private val mainWebView = MutableStateFlow<WebView?>(null)
-    private val _popupWebView = MutableStateFlow<WebView?>(null)
-    val popupWebView: StateFlow<WebView?> = _popupWebView
-
-    val showPopup: StateFlow<Boolean> = _popupWebView.mapLatest {
-        it != null
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = false
-    )
 
     private val _paymentResult = MutableSharedFlow<ShopPayActivityResult>()
     val paymentResult: Flow<ShopPayActivityResult> = _paymentResult
@@ -142,10 +123,6 @@ internal class ShopPayViewModel @Inject constructor(
         webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
 
-    fun setPopupWebView(webView: WebView?) {
-        _popupWebView.value = webView
-    }
-
     fun closePopup() {
         viewModelScope.launch {
             _paymentResult.emit(ShopPayActivityResult.Canceled)
@@ -173,26 +150,7 @@ internal class ShopPayViewModel @Inject constructor(
         }
     }
 
-    fun loadECEWebView(context: Context) {
-        if (mainWebView.value != null) return
-        val assetLoader = assetLoader(context)
-        val webView = EceWebView(
-            context = context,
-            bridgeHandler = bridgeHandler,
-            webViewClient = PopUpWebViewClient(
-                assetLoader = assetLoader,
-                onPageLoaded = ::onPageLoaded
-            ),
-            webChromeClient = PopUpWebChromeClient(
-                context = context,
-                bridgeHandler = bridgeHandler,
-                assetLoader = assetLoader,
-                setPopUpView = ::setPopupWebView,
-                closeWebView = ::closePopup,
-                onPageLoaded = ::onPageLoaded,
-            )
-        )
-        mainWebView.value = webView
+    fun loadUrl(webView: WebView) {
         webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
 
@@ -201,7 +159,7 @@ internal class ShopPayViewModel @Inject constructor(
             initializer {
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
-                val args: ShopPayArgs = getArgs(handle) ?: throw IllegalArgumentException("No args found")
+                val args: ShopPayArgs = getArgs(handle) ?: throw NoArgsException()
                 DaggerShopPayComponent
                     .builder()
                     .context(app)
@@ -218,4 +176,6 @@ internal class ShopPayViewModel @Inject constructor(
             }
         }
     }
+
+    class NoArgsException : IllegalArgumentException("No args found")
 }

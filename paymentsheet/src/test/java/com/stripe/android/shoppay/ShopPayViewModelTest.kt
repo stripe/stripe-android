@@ -55,44 +55,6 @@ internal class ShopPayViewModelTest {
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
-    fun `popupWebView initial state is null`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-
-        viewModel.popupWebView.test {
-            assertThat(awaitItem()).isNull()
-        }
-    }
-
-    @Test
-    fun `showPopup emits false when popupWebView is null and true when not null`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        val mockWebView = mock<WebView>()
-
-        viewModel.showPopup.test {
-            assertThat(awaitItem()).isFalse()
-
-            viewModel.setPopupWebView(mockWebView)
-            assertThat(awaitItem()).isTrue()
-        }
-    }
-
-    @Test
-    fun `setPopupWebView updates popupWebView state flow`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        val mockWebView = mock<WebView>()
-
-        viewModel.popupWebView.test {
-            assertThat(awaitItem()).isNull()
-
-            viewModel.setPopupWebView(mockWebView)
-            assertThat(awaitItem()).isEqualTo(mockWebView)
-
-            viewModel.setPopupWebView(null)
-            assertThat(awaitItem()).isNull()
-        }
-    }
-
-    @Test
     fun `closePopup emits canceled result`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
