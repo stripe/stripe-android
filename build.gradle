@@ -23,7 +23,6 @@ buildscript {
         classpath buildLibs.kotlinGradlePlugin
         classpath buildLibs.kotlinSerializationPlugin
         classpath buildLibs.paparazzi
-        classpath buildLibs.shot
     }
 }
 
