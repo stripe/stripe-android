@@ -143,7 +143,9 @@ internal class ShopPayViewModel @Inject constructor(
     }
 
     fun closePopup() {
-        _popupWebView.value = null
+        viewModelScope.launch {
+            _paymentResult.emit(ShopPayActivityResult.Canceled)
+        }
     }
 
     fun assetLoader(context: Context): WebViewAssetLoader {

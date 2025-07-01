@@ -93,18 +93,13 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
-    fun `closePopup sets popupWebView to null`() = runTest(dispatcher) {
+    fun `closePopup emits canceled result`() = runTest(dispatcher) {
         val viewModel = createViewModel()
-        val mockWebView = mock<WebView>()
 
-        viewModel.popupWebView.test {
-            assertThat(awaitItem()).isNull()
-
-            viewModel.setPopupWebView(mockWebView)
-            assertThat(awaitItem()).isEqualTo(mockWebView)
-
+        viewModel.paymentResult.test {
             viewModel.closePopup()
-            assertThat(awaitItem()).isNull()
+
+            assertThat(awaitItem()).isEqualTo(ShopPayActivityResult.Canceled)
         }
     }
 

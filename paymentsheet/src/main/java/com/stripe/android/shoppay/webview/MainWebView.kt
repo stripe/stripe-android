@@ -2,11 +2,12 @@ package com.stripe.android.shoppay.webview
 
 import android.annotation.SuppressLint
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.stripe.android.shoppay.ShopPayViewModel
 
@@ -44,6 +45,6 @@ internal fun MainWebView(
                 viewModel.setWebView(this)
             }
         },
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.size(.5.dp)
     )
 }

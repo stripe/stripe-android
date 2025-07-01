@@ -9,29 +9,25 @@ import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.shoppay.webview.MainWebView
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
@@ -69,39 +65,16 @@ internal class ShopPayActivity : ComponentActivity() {
             }
         }
 
-        StripeTheme {
+        StripeTheme(
+            colors = StripeTheme.getColors(isDark = false)
+        ) {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
                     dismissWithResult(ShopPayActivityResult.Canceled)
                 }
             ) {
-                BottomSheetScaffold(
-                    modifier = Modifier
-                        .fillMaxHeight(SHOP_PAY_SHEET_HEIGHT_RATIO),
-                    topBar = {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                        ) {
-                            IconButton(
-                                modifier = Modifier.align(Alignment.CenterStart),
-                                onClick = {
-                                    dismissWithResult(ShopPayActivityResult.Canceled)
-                                }
-                            ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
-                                    contentDescription = "Close"
-                                )
-                            }
-                        }
-                    },
-                    content = {
-                        ComposeWebView(viewModel)
-                    }
-                )
+                ComposeWebView(viewModel)
             }
         }
     }
@@ -110,14 +83,28 @@ internal class ShopPayActivity : ComponentActivity() {
     private fun ComposeWebView(viewModel: ShopPayViewModel) {
         val showPopup by viewModel.showPopup.collectAsState()
 
-        Column(modifier = Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
                 MainWebView(
                     viewModel = viewModel,
                 )
 
                 if (showPopup) {
                     PopupWebViewDialog(viewModel = viewModel)
+                } else {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(64.dp),
+                        color = ShopPayBackgroundColor,
+                        strokeWidth = 4.dp
+                    )
                 }
             }
         }
@@ -126,6 +113,7 @@ internal class ShopPayActivity : ComponentActivity() {
     @Composable
     private fun PopupWebViewDialog(viewModel: ShopPayViewModel) {
         val popupWebView by viewModel.popupWebView.collectAsState()
+        val backgroundColor = MaterialTheme.colors.background.toArgb()
 
         popupWebView?.let { webView ->
             AndroidView(
@@ -133,8 +121,9 @@ internal class ShopPayActivity : ComponentActivity() {
                     webView.apply {
                         layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
+                            ViewGroup.LayoutParams.MATCH_PARENT
                         )
+                        setBackgroundColor(backgroundColor)
                     }
                 },
                 modifier = Modifier
@@ -168,5 +157,3 @@ internal class ShopPayActivity : ComponentActivity() {
         }
     }
 }
-
-private const val SHOP_PAY_SHEET_HEIGHT_RATIO = .75f
