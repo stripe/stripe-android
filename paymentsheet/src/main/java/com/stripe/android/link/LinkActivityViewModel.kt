@@ -121,9 +121,9 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun onContentScrolled(canScrollUp: Boolean) {
+    fun onContentCanScrollBackwardChanged(canScrollBackward: Boolean) {
         _linkAppBarState.update {
-            it.copy(isElevated = canScrollUp)
+            it.copy(isElevated = canScrollBackward)
         }
     }
 

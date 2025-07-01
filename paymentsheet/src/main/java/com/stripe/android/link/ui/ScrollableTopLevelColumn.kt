@@ -25,7 +25,7 @@ internal fun ScrollableTopLevelColumn(
     val scrollState = rememberScrollState()
 
     LaunchedEffect(scrollState.canScrollBackward) {
-        contentScrollHandler?.invoke(scrollState.canScrollBackward)
+        contentScrollHandler?.handleCanScrollBackwardChanged(scrollState.canScrollBackward)
     }
 
     Box(

@@ -3,11 +3,13 @@ package com.stripe.android.link
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.link.ui.LinkContentScrollHandler
 import com.stripe.android.link.ui.LocalLinkContentScrollHandler
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -25,8 +27,12 @@ internal fun LinkScreenContent(
     val screenState by viewModel.linkScreenState.collectAsState()
     val appBarState by viewModel.linkAppBarState.collectAsState()
 
+    val linkContentScrollHandler = remember(viewModel) {
+        LinkContentScrollHandler(onCanScrollBackwardChanged = viewModel::onContentCanScrollBackwardChanged)
+    }
+
     CompositionLocalProvider(
-        LocalLinkContentScrollHandler provides viewModel::onContentScrolled,
+        LocalLinkContentScrollHandler provides linkContentScrollHandler,
     ) {
         LinkScreenContentBody(
             bottomSheetState = bottomSheetState,
