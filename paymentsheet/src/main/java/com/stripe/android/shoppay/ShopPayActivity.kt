@@ -15,6 +15,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -31,6 +32,7 @@ import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.launch
 
 internal class ShopPayActivity : ComponentActivity() {
     @VisibleForTesting
@@ -58,29 +60,38 @@ internal class ShopPayActivity : ComponentActivity() {
     @Composable
     private fun Content(viewModel: ShopPayViewModel) {
         val bottomSheetState = rememberStripeBottomSheetState()
+        val scope = rememberCoroutineScope()
 
-        LaunchedEffect(Unit) {
-            viewModel.paymentResult.collect { result ->
+        fun dismiss(result: ShopPayActivityResult) {
+            scope.launch {
+                bottomSheetState.hide()
                 dismissWithResult(result)
             }
         }
 
+        LaunchedEffect(Unit) {
+            viewModel.paymentResult.collect { result ->
+                dismiss(result)
+            }
+        }
+
         StripeTheme(
+            // Shop Pay doesn't support dark mode, so we will only be supporting light mode on this screen.
             colors = StripeTheme.getColors(isDark = false)
         ) {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = {
-                    dismissWithResult(ShopPayActivityResult.Canceled)
+                    dismiss(ShopPayActivityResult.Canceled)
                 }
             ) {
-                ComposeWebView(viewModel)
+                ShopPayWebView(viewModel)
             }
         }
     }
 
     @Composable
-    private fun ComposeWebView(viewModel: ShopPayViewModel) {
+    private fun ShopPayWebView(viewModel: ShopPayViewModel) {
         val showPopup by viewModel.showPopup.collectAsState()
 
         Column(
