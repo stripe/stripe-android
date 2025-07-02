@@ -52,7 +52,9 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         val shopPayConfiguration = shopPayArgs.shopPayConfiguration
         HandleClickResponse(
             lineItems = shopPayConfiguration.lineItems.map { it.toECELineItem() },
-            shippingRates = shopPayConfiguration.shippingRates.map { it.toECEShippingRate() },
+            shippingRates = shopPayConfiguration.shippingRates.takeIf {
+                shopPayConfiguration.shippingAddressRequired
+            }?.map { it.toECEShippingRate() },
             billingAddressRequired = shopPayConfiguration.billingAddressRequired,
             emailRequired = shopPayConfiguration.emailRequired,
             phoneNumberRequired = true, // Shop Pay always requires phone
