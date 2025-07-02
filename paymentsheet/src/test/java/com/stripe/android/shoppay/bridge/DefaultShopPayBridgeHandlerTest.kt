@@ -2,10 +2,12 @@ package com.stripe.android.shoppay.bridge
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.common.model.shopPayConfiguration
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.shoppay.ShopPayArgs
 import com.stripe.android.shoppay.ShopPayTestFactory
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -48,12 +50,52 @@ internal class DefaultShopPayBridgeHandlerTest {
         assertThat(data.getJSONObject("business").getString("name")).isEqualTo("Test Business")
         assertThat(data.getString("shopId")).isEqualTo(SHOP_PAY_CONFIGURATION.shopId)
         assertThat(data.getBoolean("phoneNumberRequired")).isTrue()
+        assertThat(data.getBoolean("shippingAddressRequired")).isTrue()
+
+        val shippingRates = data.getJSONArray("shippingRates")
+        assertThat(shippingRates.length()).isEqualTo(1)
+        val shippingRate = shippingRates.getJSONObject(0)
+        assertThat(shippingRate.getString("id")).isEqualTo("1234")
+        assertThat(shippingRate.getString("displayName")).isEqualTo("Express")
+        assertThat(shippingRate.getInt("amount")).isEqualTo(50)
 
         val allowedShippingCountries = data.getJSONArray("allowedShippingCountries")
         for (i in 0 until allowedShippingCountries.length()) {
             assertThat(allowedShippingCountries[i])
                 .isEqualTo(ShopPayTestFactory.SHOP_PAY_ARGS.shopPayConfiguration.allowedShippingCountries[i])
         }
+    }
+
+    @Test
+    fun `handleECEClick returns null shippingRates when shippingAddressRequired is false`() {
+        val fakeParser = FakeHandleClickRequestParser(
+            returnValue = HandleClickRequest(
+                eventData = HandleClickRequest.EventData(
+                    expressPaymentType = "shopPay"
+                )
+            )
+        )
+
+        val shopPayConfigurationWithoutShipping = shopPayConfiguration(shippingAddressRequired = false)
+        val shopPayArgsWithoutShipping = ShopPayTestFactory.SHOP_PAY_ARGS.copy(
+            shopPayConfiguration = shopPayConfigurationWithoutShipping
+        )
+        val handler = createDefaultBridgeHandler(
+            handleClickRequestJsonParser = fakeParser,
+            shopPayArgs = shopPayArgsWithoutShipping
+        )
+        val message = """{"eventData": {"expressPaymentType": "shopPay"}}"""
+
+        val result = handler.handleECEClick(message)
+
+        val response = JSONObject(result)
+        assertThat(response.getString("type")).isEqualTo("data")
+
+        val data = response.getJSONObject("data")
+        assertThat(data.has("shippingRates")).isFalse()
+        assertThat(data.getBoolean("shippingAddressRequired")).isFalse()
+        assertThat(data.getString("shopId")).isEqualTo(shopPayConfigurationWithoutShipping.shopId)
+        assertThat(data.getBoolean("phoneNumberRequired")).isTrue()
     }
 
     @Test
@@ -297,10 +339,9 @@ internal class DefaultShopPayBridgeHandlerTest {
         shippingRateChangeRequestJsonParser: ModelJsonParser<ShippingRateChangeRequest> =
             FakeShippingRateChangeRequestParser(),
         confirmationRequestJsonParser: ModelJsonParser<ConfirmationRequest> = FakeConfirmationRequestParser(),
-        shopPayHandlers: ShopPayHandlers = createFakeShopPayHandlers()
+        shopPayHandlers: ShopPayHandlers = createFakeShopPayHandlers(),
+        shopPayArgs: ShopPayArgs = ShopPayTestFactory.SHOP_PAY_ARGS
     ): DefaultShopPayBridgeHandler {
-        val shopPayArgs = ShopPayTestFactory.SHOP_PAY_ARGS
-
         return DefaultShopPayBridgeHandler(
             handleClickRequestJsonParser = handleClickRequestJsonParser,
             shopPayArgs = shopPayArgs,
