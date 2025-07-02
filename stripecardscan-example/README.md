@@ -28,7 +28,7 @@ If you just want to test out the Card Scan example locally and don't want to bot
    for the `secret_key` field.
 
 //TODO replace this
-<img width="700" height="351" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/how_to_get_to_settings.png" />
+<img width="700" height="386" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/how_to_get_to_settings.png" />
 
 ### Configure the app
 1. If it doesn't exist, create a `gradle.properties` in a location defined in the
