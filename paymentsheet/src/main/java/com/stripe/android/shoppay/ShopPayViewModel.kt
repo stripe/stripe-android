@@ -56,7 +56,6 @@ internal class ShopPayViewModel @Inject constructor(
     private var didReceiveECEClick: Boolean = false
 
     init {
-        // Set up analytics callback for ECE clicks
         bridgeHandler.setOnECEClickCallback {
             didReceiveECEClick = true
         }

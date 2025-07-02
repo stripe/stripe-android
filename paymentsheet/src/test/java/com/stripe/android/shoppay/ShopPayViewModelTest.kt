@@ -193,10 +193,8 @@ internal class ShopPayViewModelTest {
             eventReporter = mockEventReporter
         )
 
-        // Trigger ECE click through bridge handler - this should set didReceiveECEClick to true
         bridgeHandler.handleECEClick("{}")
 
-        // Now when we close the popup, it should report that ECE click was received
         viewModel.closePopup()
 
         verify(mockEventReporter).onShopPayWebViewCancelled(true)
@@ -222,10 +220,8 @@ internal class ShopPayViewModelTest {
                 eventReporter = mockEventReporter
             )
 
-            // First trigger ECE click
             bridgeHandler.handleECEClick("{}")
 
-            // Then close popup
             viewModel.closePopup()
 
             verify(mockEventReporter).onShopPayWebViewCancelled(true)
