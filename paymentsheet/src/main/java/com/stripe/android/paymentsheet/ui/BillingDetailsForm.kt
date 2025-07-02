@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Stable
-import androidx.compose.ui.text.input.KeyboardCapitalization.Companion.Words
-import androidx.compose.ui.text.input.KeyboardType.Companion.Text
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.toInternal
 import com.stripe.android.model.PaymentMethod
@@ -11,12 +9,11 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
-import com.stripe.android.uicore.elements.SimpleTextFieldConfig
-import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -36,14 +33,7 @@ internal class BillingDetailsForm(
     val nameElement: SimpleTextElement? = if (collectName) {
         SimpleTextElement(
             identifier = IdentifierSpec.Name,
-            controller = SimpleTextFieldController(
-                SimpleTextFieldConfig(
-                    label = resolvableString(com.stripe.android.core.R.string.stripe_address_label_name),
-                    capitalization = Words,
-                    keyboard = Text
-                ),
-                initialValue = billingDetails?.name
-            )
+            controller = NameConfig.createController(billingDetails?.name)
         )
     } else {
         null
