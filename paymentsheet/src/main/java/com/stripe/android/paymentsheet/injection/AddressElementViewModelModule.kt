@@ -6,7 +6,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
-import com.stripe.android.paymentsheet.addresselement.FormControllerSubcomponent
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
@@ -24,7 +23,6 @@ import javax.inject.Singleton
         AddressElementViewModelSubcomponent::class,
         InputAddressViewModelSubcomponent::class,
         AutocompleteViewModelSubcomponent::class,
-        FormControllerSubcomponent::class
     ]
 )
 internal class AddressElementViewModelModule {

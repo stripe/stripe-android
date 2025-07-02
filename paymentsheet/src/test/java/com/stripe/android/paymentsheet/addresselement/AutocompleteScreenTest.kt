@@ -11,7 +11,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -50,15 +49,12 @@ class AutocompleteScreenTest {
             composeTestRule.waitForIdle()
             composeTestRule.onEnterAddressManually().performClick()
 
-            val forceExpandFormSetResultCall = setResultCalls.awaitItem()
+            val setResultCall = setResultCalls.awaitItem()
 
-            assertThat(forceExpandFormSetResultCall.key).isEqualTo(FORCE_EXPANDED_FORM_KEY)
-            assertThat(forceExpandFormSetResultCall.value).isEqualTo(true)
-
-            val addressDetailsResultCall = setResultCalls.awaitItem()
-
-            assertThat(addressDetailsResultCall.key).isEqualTo(AddressDetails.KEY)
-            assertThat(addressDetailsResultCall.value).isNull()
+            assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
+            assertThat(setResultCall.value).isEqualTo(
+                AddressElementNavigator.AutocompleteEvent.OnEnterManually(addressDetails = null)
+            )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
         }
@@ -83,10 +79,12 @@ class AutocompleteScreenTest {
             composeTestRule.waitForIdle()
             composeTestRule.onAddressOptionsAppBar().performClick()
 
-            val addressDetailsResultCall = setResultCalls.awaitItem()
+            val setResultCall = setResultCalls.awaitItem()
 
-            assertThat(addressDetailsResultCall.key).isEqualTo(AddressDetails.KEY)
-            assertThat(addressDetailsResultCall.value).isNull()
+            assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
+            assertThat(setResultCall.value).isEqualTo(
+                AddressElementNavigator.AutocompleteEvent.OnBack(addressDetails = null)
+            )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
         }
@@ -112,10 +110,12 @@ class AutocompleteScreenTest {
             composeTestRule.onQueryField().performTextInput("King Street")
             composeTestRule.onAddressOptionsAppBar().performClick()
 
-            val addressDetailsResultCall = setResultCalls.awaitItem()
+            val setResultCall = setResultCalls.awaitItem()
 
-            assertThat(addressDetailsResultCall.key).isEqualTo(AddressDetails.KEY)
-            assertThat(addressDetailsResultCall.value).isNull()
+            assertThat(setResultCall.key).isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
+            assertThat(setResultCall.value).isEqualTo(
+                AddressElementNavigator.AutocompleteEvent.OnBack(addressDetails = null)
+            )
 
             assertThat(onBackCalls.awaitItem()).isNotNull()
         }

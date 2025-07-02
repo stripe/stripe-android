@@ -11,33 +11,17 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
     private val args = mock<AddressElementActivityContract.Args>()
     private val config = mock<AddressLauncher.Configuration>()
     private val navigator = mock<AddressElementNavigator>()
-    private val formControllerSubcomponent = mock<FormControllerSubcomponent>().apply {
-        whenever(formController).thenReturn(mock())
-    }
-    private val formControllerProvider = Provider {
-        mock<FormControllerSubcomponent.Builder>().apply {
-            whenever(formSpec(anyOrNull())).thenReturn(this)
-            whenever(initialValues(anyOrNull())).thenReturn(this)
-            whenever(viewModelScope(anyOrNull())).thenReturn(this)
-            whenever(merchantName(anyOrNull())).thenReturn(this)
-            whenever(stripeIntent(anyOrNull())).thenReturn(this)
-            whenever(shippingValues(anyOrNull())).thenReturn(this)
-            whenever(build()).thenReturn(formControllerSubcomponent)
-        }
-    }
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
     private fun createViewModel(address: AddressDetails? = null): InputAddressViewModel {
@@ -49,7 +33,6 @@ class InputAddressViewModelTest {
             args,
             navigator,
             eventReporter,
-            formControllerProvider
         )
     }
 
@@ -68,8 +51,14 @@ class InputAddressViewModelTest {
     @Test
     fun `autocomplete address passed is collected to start`() = runTest(UnconfinedTestDispatcher()) {
         val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
-        val flow = MutableStateFlow<AddressDetails?>(expectedAddress)
-        whenever(navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)).thenReturn(flow)
+        val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
+            AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
+        )
+        whenever(
+            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                AddressElementNavigator.AutocompleteEvent.KEY
+            )
+        ).thenReturn(flow)
 
         val viewModel = createViewModel()
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
@@ -78,8 +67,14 @@ class InputAddressViewModelTest {
     @Test
     fun `takes only fields in new address`() = runTest(UnconfinedTestDispatcher()) {
         val usAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
-        val flow = MutableStateFlow<AddressDetails?>(usAddress)
-        whenever(navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)).thenReturn(flow)
+        val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
+            AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
+        )
+        whenever(
+            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                AddressElementNavigator.AutocompleteEvent.KEY
+            )
+        ).thenReturn(flow)
 
         val viewModel = createViewModel()
         assertThat(viewModel.collectedAddress.value).isEqualTo(usAddress)
@@ -88,7 +83,7 @@ class InputAddressViewModelTest {
             name = "skyler",
             address = PaymentSheet.Address(country = "CAN", line1 = "foobar")
         )
-        flow.tryEmit(expectedAddress)
+        flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
         assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
     }
 

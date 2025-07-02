@@ -138,7 +138,7 @@ class AddressElementTest {
     }
 
     @Test
-    fun `condensed shipping address element should have name and phone number fields when required`() = runTest {
+    fun `condensed address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
@@ -147,6 +147,7 @@ class AddressElementTest {
                 autocompleteCountries = setOf(),
                 phoneNumberState = PhoneNumberState.REQUIRED
             ) { throw AssertionError("Not Expected") },
+            hideName = false,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -235,7 +236,7 @@ class AddressElementTest {
     }
 
     @Test
-    fun `expanded shipping address element should have name and phone number fields when required`() = runTest {
+    fun `expanded address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
             countryDropdownFieldController = countryDropdownFieldController,
@@ -244,6 +245,7 @@ class AddressElementTest {
                 autocompleteCountries = null,
                 phoneNumberState = PhoneNumberState.REQUIRED,
             ) { throw AssertionError("Not Expected") },
+            hideName = false,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )

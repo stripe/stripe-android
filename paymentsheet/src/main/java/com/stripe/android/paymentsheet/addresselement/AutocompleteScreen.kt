@@ -36,7 +36,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
-import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator.Companion.FORCE_EXPANDED_FORM_KEY
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -83,13 +82,19 @@ internal fun AutocompleteScreenUI(
     LaunchedEffect(Unit) {
         viewModel.event.collectLatest { event ->
             when (event) {
-                is AutocompleteViewModel.Event.GoBack -> Unit
+                is AutocompleteViewModel.Event.GoBack -> {
+                    navigator.setResult(
+                        AddressElementNavigator.AutocompleteEvent.KEY,
+                        AddressElementNavigator.AutocompleteEvent.OnBack(event.addressDetails)
+                    )
+                }
                 is AutocompleteViewModel.Event.EnterManually -> {
-                    navigator.setResult(FORCE_EXPANDED_FORM_KEY, true)
+                    navigator.setResult(
+                        AddressElementNavigator.AutocompleteEvent.KEY,
+                        AddressElementNavigator.AutocompleteEvent.OnEnterManually(event.addressDetails)
+                    )
                 }
             }
-
-            navigator.setResult(AddressDetails.KEY, event.addressDetails)
 
             navigator.onBack()
         }
