@@ -90,6 +90,18 @@ private fun CardDetailsEditUI(
             modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
         ) {
             Column {
+                if (billingDetailsForm?.nameElement != null) {
+                    SectionElementUI(
+                        enabled = true,
+                        element = SectionElement.wrap(sectionFieldElement = billingDetailsForm.nameElement),
+                        hiddenIdentifiers = emptySet(),
+                        lastTextFieldIdentifier = null
+                    )
+                    Divider(
+                        color = MaterialTheme.stripeColors.componentDivider,
+                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                    )
+                }
                 CardNumberField(
                     last4 = payload.last4,
                     selectedBrand = selectedBrand,
@@ -98,20 +110,6 @@ private fun CardDetailsEditUI(
                     savedPaymentMethodIcon = paymentMethodIcon,
                     onBrandChoiceChanged = onBrandChoiceChanged,
                 )
-
-                if (billingDetailsForm?.nameElement != null) {
-                    Divider(
-                        color = MaterialTheme.stripeColors.componentDivider,
-                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                    )
-                    SectionElementUI(
-                        enabled = true,
-                        element = SectionElement.wrap(sectionFieldElement = billingDetailsForm.nameElement),
-                        hiddenIdentifiers = emptySet(),
-                        lastTextFieldIdentifier = null
-                    )
-                }
-
                 Divider(
                     color = MaterialTheme.stripeColors.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,

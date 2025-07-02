@@ -531,7 +531,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration? {
-        if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled) {
+        val collectsPhone = configuration.billingDetailsCollectionConfiguration.collectsPhone
+        if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled || collectsPhone) {
             return null
         }
 
