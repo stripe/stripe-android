@@ -266,6 +266,15 @@ internal class FakeEventReporter : EventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
+    override fun onShopPayWebViewLoadAttempt() {
+    }
+
+    override fun onShopPayWebViewConfirmSuccess() {
+    }
+
+    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
+    }
+
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection?,
         val error: PaymentSheetConfirmationError

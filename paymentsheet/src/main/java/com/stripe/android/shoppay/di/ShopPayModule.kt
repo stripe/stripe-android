@@ -4,6 +4,12 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -11,6 +17,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.bridge.ConfirmationRequest
 import com.stripe.android.shoppay.bridge.ConfirmationRequestJsonParser
 import com.stripe.android.shoppay.bridge.DefaultShopPayBridgeHandler
@@ -23,6 +31,7 @@ import com.stripe.android.shoppay.bridge.ShippingCalculationRequestJsonParser
 import com.stripe.android.shoppay.bridge.ShippingRateChangeRequest
 import com.stripe.android.shoppay.bridge.ShippingRateChangeRequestJsonParser
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
+import com.stripe.android.ui.core.di.CardScanModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -31,11 +40,18 @@ import javax.inject.Named
 @Module(
     includes = [
         StripeRepositoryModule::class,
+        CardScanModule::class
     ]
 )
 internal interface ShopPayModule {
     @Binds
     fun bindBridgeHandler(bridgeHandler: DefaultShopPayBridgeHandler): ShopPayBridgeHandler
+
+    @Binds
+    fun bindEventReporter(eventReporter: DefaultEventReporter): EventReporter
+
+    @Binds
+    fun bindUserFacingLogger(logger: RealUserFacingLogger): UserFacingLogger
 
     @Binds
     fun bindsHandleClickRequestJsonParser(
@@ -89,5 +105,19 @@ internal interface ShopPayModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+
+        @Provides
+        fun provideDurationProvider(): DurationProvider = DefaultDurationProvider.instance
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        fun provideAnalyticEventCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
+        ): AnalyticEventCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
     }
 }

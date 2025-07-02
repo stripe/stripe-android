@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface ShopPayBridgeHandler {
     val confirmationState: StateFlow<ShopPayConfirmationState>
 
+    fun setOnECEClickCallback(callback: () -> Unit)
+
     @JavascriptInterface
     fun consoleLog(level: String, message: String, origin: String, url: String)
 

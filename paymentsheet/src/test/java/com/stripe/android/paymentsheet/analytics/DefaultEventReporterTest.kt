@@ -1078,6 +1078,68 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowNewPaymentOptions()
     }
 
+    @Test
+    fun `onShopPayWebViewLoadAttempt should fire analytics request with expected event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewLoadAttempt()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_load_attempt"
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewConfirmSuccess should fire analytics request with expected event`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewConfirmSuccess()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_confirm_success"
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewCancelled should fire analytics request with expected event and params`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewCancelled(didReceiveECEClick = true)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_cancelled" &&
+                    req.params["did_receive_ece_click"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `onShopPayWebViewCancelled should fire analytics request with false ECE click param`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        completeEventReporter.onShopPayWebViewCancelled(didReceiveECEClick = false)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_shoppay_webview_cancelled" &&
+                    req.params["did_receive_ece_click"] == false
+            }
+        )
+    }
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,

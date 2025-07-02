@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
@@ -14,6 +16,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -21,6 +25,7 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEFullAddress
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
@@ -183,6 +188,7 @@ internal class ShopPayActivityTest {
     ): ShopPayBridgeHandler {
         return object : ShopPayBridgeHandler {
             override val confirmationState = confirmationState
+            override fun setOnECEClickCallback(callback: () -> Unit) = Unit
             override fun consoleLog(level: String, message: String, origin: String, url: String) = Unit
             override fun getStripePublishableKey(): String = "pk_test_fake_key"
             override fun handleECEClick(message: String): String = ""
@@ -194,22 +200,22 @@ internal class ShopPayActivityTest {
         }
     }
 
-    private fun createTestStripeRepository(result: Result<com.stripe.android.model.PaymentMethod>): StripeRepository {
+    private fun createTestStripeRepository(result: Result<PaymentMethod>): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
-                paymentMethodCreateParams: com.stripe.android.model.PaymentMethodCreateParams,
+                paymentMethodCreateParams: PaymentMethodCreateParams,
                 options: ApiRequest.Options
-            ): Result<com.stripe.android.model.PaymentMethod> = result
+            ): Result<PaymentMethod> = result
         }
     }
 
     private fun createTestViewModelFactory(
         bridgeHandler: ShopPayBridgeHandler,
         stripeRepository: StripeRepository
-    ): androidx.lifecycle.ViewModelProvider.Factory {
-        return object : androidx.lifecycle.ViewModelProvider.Factory {
+    ): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return ShopPayViewModel(
                     bridgeHandler = bridgeHandler,
                     stripeApiRepository = stripeRepository,
@@ -218,6 +224,7 @@ internal class ShopPayActivityTest {
                         PreparePaymentMethodHandler { _, _ -> }
                     },
                     workContext = dispatcher,
+                    eventReporter = FakeEventReporter(),
                 ) as T
             }
         }

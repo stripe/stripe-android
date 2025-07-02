@@ -642,6 +642,36 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
     }
 
+    class ShopPayWebviewLoadAttempt(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_shoppay_webview_load_attempt"
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class ShopPayWebviewConfirmSuccess(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_shoppay_webview_confirm_success"
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class ShopPayWebviewCancelled(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        didReceiveECEClick: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_shoppay_webview_cancelled"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "did_receive_ece_click" to didReceiveECEClick
+        )
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         linkEnabled: Boolean,
