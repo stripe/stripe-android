@@ -5,7 +5,7 @@
 ### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After [deploying the example backend to Glitch](#set-up-your-own-backend-with-glitch) and [configuring the app](#configure-the-app), build and run the project.
+3. After [deploying the example backend to Code Sandbox or using our existing backend](#set-up-your-own-backend-with-codesandbox) and [configuring the app](#configure-the-app), build and run the project.
 
 <img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/run_project.png" />
 
@@ -16,10 +16,10 @@ If you're from outside Stripe, contact Stripe support to request to be added to 
 
 If you're internal to Stripe, contact the Bouncer team for help.
 
-### Set up your own backend with Glitch
+### Set up your own backend with CodeSandbox
 1. [Create a Glitch account](https://glitch.com/signup/) if you don't have one.
-2. Create your own copy of the [example mobile backend application](https://stripe-card-scan-civ-example-app.glitch.me/)
-   by clicking "[Remix on Glitch](https://glitch.com/edit?utm_source=button&utm_medium=button&utm_campaign=glitchButton&utm_content=stripe-card-scan-civ-example-app/#!/remix/stripe-card-scan-civ-example-app)".
+2. Create your own copy of the [example mobile backend application](https://codesandbox.io/p/devbox/stripe-card-scan-civ-example-app-d7sjq9/), login/sign up for CodeSandbox
+   and press "Fork". You can also use the backend that we've already set up [Stripe Demo](https://https://stripe-card-scan-civ-example-app.stripedemos.com/)
 3. Set an _App Name_ of your choice (e.g. Stripe Example Mobile Backend).
 4. Under the `.env` file, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
    for the `secret_key` field.
@@ -33,8 +33,8 @@ If you're internal to Stripe, contact the Bouncer team for help.
 2. Append the following entries to `gradle.properties`.
 
 ```
-# Set to example backend deployed to Glitch
-STRIPE_CARDSCAN_EXAMPLE_BACKEND_URL=https://stripe-card-scan-civ-example-app.glitch.me/
+# Set to example backend deployed to Stripe Demos
+STRIPE_CARDSCAN_EXAMPLE_BACKEND_URL=https://https://stripe-card-scan-civ-example-app.stripedemos.com/
 
 # Set to a test publishable key from https://dashboard.stripe.com/test/apikeys
 STRIPE_CARDSCAN_EXAMPLE_PUBLISHABLE_KEY=pk_test_mykey
