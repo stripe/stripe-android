@@ -88,13 +88,10 @@ internal class DefaultShopPayBridgeHandlerTest {
             shippingAddress = ShippingCalculationRequest.ShippingAddress(
                 name = "John Doe",
                 address = ECEPartialAddress(
-                    addressLine = listOf("123 Main St"),
                     city = "San Francisco",
                     state = "CA",
                     postalCode = "94105",
                     country = "US",
-                    phone = null,
-                    organization = null
                 )
             )
         )
@@ -136,13 +133,10 @@ internal class DefaultShopPayBridgeHandlerTest {
             shippingAddress = ShippingCalculationRequest.ShippingAddress(
                 name = null,
                 address = ECEPartialAddress(
-                    addressLine = null,
                     city = "San Francisco",
                     state = null,
                     postalCode = null,
                     country = "US",
-                    phone = null,
-                    organization = null
                 )
             )
         )

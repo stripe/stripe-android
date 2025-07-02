@@ -19,7 +19,6 @@ internal class ShippingCalculationRequestJsonParserTest {
                 "shippingAddress": {
                     "name": "John Doe",
                     "address": {
-                        "addressLine": ["123 Main St", "Apt 4B"],
                         "city": "San Francisco",
                         "state": "CA",
                         "postal_code": "94105",
@@ -39,13 +38,10 @@ internal class ShippingCalculationRequestJsonParserTest {
         assertThat(result?.shippingAddress?.name).isEqualTo("John Doe")
 
         val address = result?.shippingAddress?.address
-        assertThat(address?.addressLine).containsExactly("123 Main St", "Apt 4B")
         assertThat(address?.city).isEqualTo("San Francisco")
         assertThat(address?.state).isEqualTo("CA")
         assertThat(address?.postalCode).isEqualTo("94105")
         assertThat(address?.country).isEqualTo("US")
-        assertThat(address?.phone).isEqualTo("+1-555-123-4567")
-        assertThat(address?.organization).isEqualTo("Acme Corp")
     }
 
     @Test
@@ -71,11 +67,8 @@ internal class ShippingCalculationRequestJsonParserTest {
         val address = result?.shippingAddress?.address
         assertThat(address?.city).isEqualTo("New York")
         assertThat(address?.country).isEqualTo("US")
-        assertThat(address?.addressLine).isNull()
         assertThat(address?.state).isNull()
         assertThat(address?.postalCode).isNull()
-        assertThat(address?.phone).isNull()
-        assertThat(address?.organization).isNull()
     }
 
     @Test
@@ -165,7 +158,6 @@ internal class ShippingCalculationRequestJsonParserTest {
             {
                 "shippingAddress": {
                     "address": {
-                        "addressLine": "123 Main St",
                         "city": "Boston",
                         "country": "US"
                     }
@@ -179,7 +171,6 @@ internal class ShippingCalculationRequestJsonParserTest {
         assertThat(result).isNotNull()
 
         val address = result?.shippingAddress?.address
-        assertThat(address?.addressLine).containsExactly("123 Main St")
         assertThat(address?.city).isEqualTo("Boston")
         assertThat(address?.country).isEqualTo("US")
     }
