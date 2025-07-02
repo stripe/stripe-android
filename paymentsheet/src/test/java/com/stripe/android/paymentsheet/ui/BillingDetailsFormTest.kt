@@ -79,7 +79,10 @@ internal class BillingDetailsFormTest {
     ) = runTest(testDispatcher) {
         val form = BillingDetailsForm(
             billingDetails = billingDetails,
-            addressCollectionMode = addressCollectionMode
+            addressCollectionMode = addressCollectionMode,
+            collectName = false,
+            collectEmail = false,
+            collectPhone = false,
         )
         block(form)
     }

@@ -310,6 +310,9 @@ internal object PaymentSheetFixtures {
         postalCode: FormFieldEntry? = FormFieldEntry("94111", isComplete = true),
         state: FormFieldEntry? = FormFieldEntry("CA", isComplete = true),
         country: FormFieldEntry? = FormFieldEntry("US", isComplete = true),
+        name: FormFieldEntry? = null,
+        email: FormFieldEntry? = null,
+        phone: FormFieldEntry? = null,
     ): BillingDetailsFormState {
         return BillingDetailsFormState(
             line1 = line1,
@@ -318,6 +321,9 @@ internal object PaymentSheetFixtures {
             postalCode = postalCode,
             state = state,
             country = country,
+            name = name,
+            email = email,
+            phone = phone,
         )
     }
 }

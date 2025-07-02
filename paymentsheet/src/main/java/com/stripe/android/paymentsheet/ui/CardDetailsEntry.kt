@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
-import com.stripe.android.uicore.elements.IdentifierSpec
 
 /**
  * Represents the editable details of a card payment method.
@@ -40,25 +39,23 @@ internal data class CardDetailsEntry(
 }
 
 /**
- * Converts the CardDetailsEntry to CardUpdateParams with contact information.
+ * Converts the CardDetailsEntry to CardUpdateParams with billing details.
  *
- * @return CardUpdateParams containing the updated card brand and contact information.
+ * @return CardUpdateParams containing the updated card brand and billing details.
  */
 internal fun CardDetailsEntry.toUpdateParams(
     billingDetailsEntry: BillingDetailsEntry?,
-    contactInformationEntry: Map<IdentifierSpec, String?>
 ): CardUpdateParams {
     return CardUpdateParams(
         cardBrand = cardBrandChoice.brand,
         expiryMonth = expiryDateState.expiryMonth,
         expiryYear = expiryDateState.expiryYear,
-        billingDetails = createBillingDetails(billingDetailsEntry, contactInformationEntry)
+        billingDetails = createBillingDetails(billingDetailsEntry)
     )
 }
 
 private fun createBillingDetails(
     billingDetailsEntry: BillingDetailsEntry?,
-    contactInformationEntry: Map<IdentifierSpec, String?>
 ): PaymentMethod.BillingDetails? {
     val address = billingDetailsEntry?.billingDetailsFormState?.let {
         Address(
@@ -71,9 +68,9 @@ private fun createBillingDetails(
         )
     }
 
-    val email = contactInformationEntry[IdentifierSpec.Email]
-    val phone = contactInformationEntry[IdentifierSpec.Phone]
-    val name = contactInformationEntry[IdentifierSpec.Name]
+    val email = billingDetailsEntry?.billingDetailsFormState?.email?.value
+    val phone = billingDetailsEntry?.billingDetailsFormState?.phone?.value
+    val name = billingDetailsEntry?.billingDetailsFormState?.name?.value
     val noContactInfoAvailable = listOf(email, phone, name).all { it.isNullOrBlank() }
     // Only create BillingDetails if we have address or contact information
     if (address == null && noContactInfoAvailable) { return null }

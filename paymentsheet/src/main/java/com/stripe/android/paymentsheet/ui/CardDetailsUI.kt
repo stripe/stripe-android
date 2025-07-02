@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +28,6 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor.ViewAction
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionElement
@@ -54,7 +52,6 @@ internal fun CardDetailsEditUI(
         paymentMethodIcon = state.paymentMethodIcon,
         expiryDateState = state.expiryDateState,
         billingDetailsForm = state.billingDetailsForm,
-        contactInformationForm = state.contactInformationForm,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(ViewAction.BrandChoiceChanged(it))
         },
@@ -63,9 +60,6 @@ internal fun CardDetailsEditUI(
         },
         onAddressChanged = {
             editCardDetailsInteractor.handleViewAction(ViewAction.BillingDetailsChanged(it))
-        },
-        onContactInformationChanged = {
-            editCardDetailsInteractor.handleViewAction(ViewAction.ContactInformationChanged(it))
         }
     )
 }
@@ -77,13 +71,11 @@ private fun CardDetailsEditUI(
     payload: EditCardPayload,
     expiryDateState: ExpiryDateState,
     billingDetailsForm: BillingDetailsForm?,
-    contactInformationForm: FormElement?,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onExpDateChanged: (String) -> Unit,
     onAddressChanged: (BillingDetailsFormState) -> Unit,
-    onContactInformationChanged: (Map<IdentifierSpec, String?>) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -93,9 +85,7 @@ private fun CardDetailsEditUI(
 
     Column {
         Section(
-            title = billingDetailsForm?.let {
-                resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
-            },
+            title = resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information),
             error = expiryDateState.sectionError()?.resolve(),
             modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
         ) {
@@ -108,6 +98,20 @@ private fun CardDetailsEditUI(
                     savedPaymentMethodIcon = paymentMethodIcon,
                     onBrandChoiceChanged = onBrandChoiceChanged,
                 )
+
+                if (billingDetailsForm?.nameElement != null) {
+                    Divider(
+                        color = MaterialTheme.stripeColors.componentDivider,
+                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                    )
+                    SectionElementUI(
+                        enabled = true,
+                        element = SectionElement.wrap(sectionFieldElement = billingDetailsForm.nameElement),
+                        hiddenIdentifiers = emptySet(),
+                        lastTextFieldIdentifier = null
+                    )
+                }
+
                 Divider(
                     color = MaterialTheme.stripeColors.componentDivider,
                     thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
@@ -136,13 +140,26 @@ private fun CardDetailsEditUI(
             }
         }
 
-        if (contactInformationForm != null) {
+        // Show email and phone from billing details in contact information section
+        if (billingDetailsForm?.emailElement != null || billingDetailsForm?.phoneElement != null) {
             Spacer(Modifier.height(32.dp))
 
-            ContactInformationFormUI(
-                contactInformationForm = contactInformationForm,
-                onContactInformationChanged = onContactInformationChanged
+            val contactElements = listOfNotNull(
+                billingDetailsForm.emailElement,
+                billingDetailsForm.phoneElement
             )
+
+            if (contactElements.isNotEmpty()) {
+                SectionElementUI(
+                    enabled = true,
+                    element = SectionElement.wrap(
+                        sectionFieldElements = contactElements,
+                        label = resolvableString(com.stripe.android.ui.core.R.string.stripe_contact_information)
+                    ),
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null
+                )
+            }
         }
 
         if (billingDetailsForm != null) {
@@ -151,27 +168,6 @@ private fun CardDetailsEditUI(
             BillingDetailsFormUI(
                 form = billingDetailsForm,
                 onValuesChanged = onAddressChanged
-            )
-        }
-    }
-}
-
-@Composable
-private fun ContactInformationFormUI(
-    contactInformationForm: FormElement,
-    onContactInformationChanged: (Map<IdentifierSpec, String?>) -> Unit
-) {
-    SectionElementUI(
-        enabled = true,
-        element = contactInformationForm as SectionElement,
-        hiddenIdentifiers = emptySet(),
-        lastTextFieldIdentifier = null
-    )
-
-    LaunchedEffect(contactInformationForm) {
-        contactInformationForm.getFormFieldValueFlow().collect { formFields ->
-            onContactInformationChanged(
-                formFields.associate { (spec, entry) -> spec to entry.value }
             )
         }
     }
