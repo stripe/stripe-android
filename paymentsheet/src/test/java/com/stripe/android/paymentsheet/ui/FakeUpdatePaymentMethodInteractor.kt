@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
@@ -55,7 +56,9 @@ internal class FakeUpdatePaymentMethodInteractor(
             onCardUpdateParamsChanged = {},
             areExpiryDateAndAddressModificationSupported =
             isModifiable && canUpdateFullPaymentMethodDetails,
-            addressCollectionMode = addressCollectionMode,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = addressCollectionMode
+            )
         )
     }
 

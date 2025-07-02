@@ -25,6 +25,7 @@ internal class FakeEditCardDetailsInteractor(
                 editPayload = payload,
                 enabled = expiryDateEditEnabled,
             ),
+            billingDetailsForm = null,
         )
     ),
 ) : EditCardDetailsInteractor {

@@ -39,27 +39,47 @@ internal data class CardDetailsEntry(
 }
 
 /**
- * Converts the CardDetailsEntry to CardUpdateParams.
+ * Builds [CardUpdateParams] from the provided [CardDetailsEntry] and [BillingDetailsEntry].
  *
- * @return CardUpdateParams containing the updated card brand.
+ * @return CardUpdateParams containing the updated card and billing information.
  */
-internal fun CardDetailsEntry.toUpdateParams(
-    billingDetailsEntry: BillingDetailsEntry?
+internal fun toUpdateParams(
+    cardDetailsEntry: CardDetailsEntry,
+    billingDetailsEntry: BillingDetailsEntry?,
 ): CardUpdateParams {
     return CardUpdateParams(
-        cardBrand = cardBrandChoice.brand,
-        expiryMonth = expiryDateState.expiryMonth,
-        expiryYear = expiryDateState.expiryYear,
-        billingDetails = billingDetailsEntry?.billingDetailsFormState?.let {
-            val address = Address(
-                city = it.city?.value,
-                country = it.country?.value,
-                line1 = it.line1?.value,
-                line2 = it.line2?.value,
-                postalCode = it.postalCode?.value,
-                state = it.state?.value
-            )
-            PaymentMethod.BillingDetails(address)
-        }
+        cardBrand = cardDetailsEntry.cardBrandChoice.brand,
+        expiryMonth = cardDetailsEntry.expiryDateState.expiryMonth,
+        expiryYear = cardDetailsEntry.expiryDateState.expiryYear,
+        billingDetails = createBillingDetails(billingDetailsEntry)
+    )
+}
+
+private fun createBillingDetails(
+    billingDetailsEntry: BillingDetailsEntry?,
+): PaymentMethod.BillingDetails? {
+    val address = billingDetailsEntry?.billingDetailsFormState?.let {
+        Address(
+            city = it.city?.value,
+            country = it.country?.value,
+            line1 = it.line1?.value,
+            line2 = it.line2?.value,
+            postalCode = it.postalCode?.value,
+            state = it.state?.value
+        )
+    }
+
+    val email = billingDetailsEntry?.billingDetailsFormState?.email?.value
+    val phone = billingDetailsEntry?.billingDetailsFormState?.phone?.value
+    val name = billingDetailsEntry?.billingDetailsFormState?.name?.value
+    val noContactInfoAvailable = listOf(email, phone, name).all { it.isNullOrBlank() }
+    // Only create BillingDetails if we have address or contact information
+    if (address == null && noContactInfoAvailable) { return null }
+
+    return PaymentMethod.BillingDetails(
+        address = address,
+        email = email,
+        phone = phone,
+        name = name
     )
 }

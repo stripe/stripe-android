@@ -14,6 +14,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.CoroutineTestRule
@@ -431,7 +432,9 @@ internal class CardDetailsEditUITest {
                 payload = EditCardPayload.create(card, PaymentMethodFixtures.BILLING_DETAILS),
                 onBrandChoiceChanged = {},
                 onCardUpdateParamsChanged = {},
-                addressCollectionMode = addressCollectionMode
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = addressCollectionMode
+                ),
             )
         composeRule.setContent {
             CardDetailsEditUI(

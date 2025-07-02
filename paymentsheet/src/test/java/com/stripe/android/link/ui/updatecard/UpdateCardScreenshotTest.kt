@@ -10,7 +10,9 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.screenshottesting.FontSize
@@ -47,7 +49,7 @@ internal class UpdateCardScreenshotTest(
                         ),
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
-                        addressCollectionMode = AddressCollectionMode.Automatic
+                        billingDetailsCollectionConfiguration = testCase.billingDetailsCollectionConfiguration
                     ),
                     state = testCase.state,
                     onUpdateClicked = {},
@@ -57,6 +59,7 @@ internal class UpdateCardScreenshotTest(
     }
 
     companion object {
+        @SuppressWarnings("LongMethod")
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data(): List<TestCase> {
@@ -64,30 +67,75 @@ internal class UpdateCardScreenshotTest(
                 TestCase(
                     name = "Canonical",
                     state = state(),
-                    card = card()
+                    card = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected()
                 ),
                 TestCase(
                     name = "Default",
                     state = state(isDefault = true),
-                    card = card()
+                    card = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected()
                 ),
                 TestCase(
                     name = "Processing",
                     state = state(processing = true),
-                    card = card()
+                    card = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected()
                 ),
                 TestCase(
                     name = "Error",
                     state = state(error = Exception("Error")),
-                    card = card()
+                    card = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected()
                 ),
                 TestCase(
                     name = "Unchanged",
                     state = state(cardUpdateParams = null),
-                    card = card()
+                    card = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected()
+                ),
+                TestCase(
+                    name = "All details collected",
+                    state = state(),
+                    card = card(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = AddressCollectionMode.Full,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        name = CollectionMode.Always
+                    )
+                ),
+                TestCase(
+                    name = "Contact info collected",
+                    state = state(),
+                    card = card(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = AddressCollectionMode.Never,
+                        email = CollectionMode.Always,
+                        phone = CollectionMode.Always,
+                        name = CollectionMode.Always
+                    )
+                ),
+                TestCase(
+                    name = "Address collected",
+                    state = state(),
+                    card = card(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = AddressCollectionMode.Full,
+                        email = CollectionMode.Never,
+                        phone = CollectionMode.Never,
+                        name = CollectionMode.Never
+                    )
                 ),
             )
         }
+
+        private fun nothingCollected(): BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            address = AddressCollectionMode.Automatic,
+            email = CollectionMode.Never,
+            phone = CollectionMode.Never,
+            name = CollectionMode.Never
+        )
 
         private fun state(
             isDefault: Boolean = false,
@@ -134,6 +182,7 @@ internal class UpdateCardScreenshotTest(
         val name: String,
         val state: UpdateCardScreenState,
         val card: ConsumerPaymentDetails.Card,
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
     ) {
         override fun toString(): String = name
     }

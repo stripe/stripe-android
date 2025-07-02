@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -112,7 +113,7 @@ internal interface EditCardDetailsInteractor {
         val shouldShowCardBrandDropdown: Boolean,
         val availableNetworks: List<CardBrandChoice>,
         val expiryDateState: ExpiryDateState,
-        val billingDetailsForm: BillingDetailsForm? = null
+        val billingDetailsForm: BillingDetailsForm?,
     )
 
     sealed interface ViewAction {
@@ -128,7 +129,7 @@ internal interface EditCardDetailsInteractor {
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             payload: EditCardPayload,
-            addressCollectionMode: AddressCollectionMode,
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
         ): EditCardDetailsInteractor
@@ -137,7 +138,7 @@ internal interface EditCardDetailsInteractor {
 
 internal class DefaultEditCardDetailsInteractor(
     private val payload: EditCardPayload,
-    private val addressCollectionMode: AddressCollectionMode,
+    private val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     private val cardBrandFilter: CardBrandFilter,
     private val isCbcModifiable: Boolean,
     // Local flag for whether expiry date and address can be edited.
@@ -187,11 +188,13 @@ internal class DefaultEditCardDetailsInteractor(
         cardDetailsEntry: CardDetailsEntry,
         billingDetailsEntry: BillingDetailsEntry?
     ): CardUpdateParams? {
-        val hasChanges = hasCardDetailsChanged(cardDetailsEntry) || hasBillingDetailsChanged(billingDetailsEntry)
-        val isComplete = cardDetailsEntry.isComplete() && isComplete(billingDetailsEntry)
+        val hasChanges = hasCardDetailsChanged(cardDetailsEntry) ||
+            hasBillingDetailsChanged(billingDetailsEntry)
+        val isComplete = cardDetailsEntry.isComplete() &&
+            billingDetailsEntry?.isComplete(billingDetailsCollectionConfiguration) != false
 
         return if (hasChanges && isComplete) {
-            cardDetailsEntry.toUpdateParams(billingDetailsEntry)
+            toUpdateParams(cardDetailsEntry, billingDetailsEntry)
         } else {
             null
         }
@@ -207,21 +210,8 @@ internal class DefaultEditCardDetailsInteractor(
     private fun hasBillingDetailsChanged(billingDetailsEntry: BillingDetailsEntry?): Boolean {
         return billingDetailsEntry?.hasChanged(
             billingDetails = payload.billingDetails,
-            addressCollectionMode = addressCollectionMode
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         ) ?: false
-    }
-
-    private fun isComplete(billingDetailsEntry: BillingDetailsEntry?): Boolean {
-        return when (addressCollectionMode) {
-            AddressCollectionMode.Never -> {
-                billingDetailsEntry == null
-            }
-            else -> {
-                billingDetailsEntry?.isComplete(
-                    addressCollectionMode = addressCollectionMode
-                ) ?: true
-            }
-        }
     }
 
     private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
@@ -281,20 +271,27 @@ internal class DefaultEditCardDetailsInteractor(
 
     private fun defaultBillingDetailsForm(): BillingDetailsForm? {
         val showAddressForm = areExpiryDateAndAddressModificationSupported &&
-            addressCollectionMode != AddressCollectionMode.Never
-        if (showAddressForm.not()) {
+            billingDetailsCollectionConfiguration.address != AddressCollectionMode.Never
+        val collectsContactDetails = billingDetailsCollectionConfiguration.collectsName ||
+            billingDetailsCollectionConfiguration.collectsEmail ||
+            billingDetailsCollectionConfiguration.collectsPhone
+
+        if (showAddressForm.not() && collectsContactDetails.not()) {
             return null
         }
         return BillingDetailsForm(
-            addressCollectionMode = addressCollectionMode,
+            addressCollectionMode = billingDetailsCollectionConfiguration.address,
             billingDetails = payload.billingDetails,
+            collectName = billingDetailsCollectionConfiguration.collectsName,
+            collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
+            collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
         )
     }
 
     private fun uiState(
         cardBrandChoice: CardBrandChoice,
         expiryDateState: ExpiryDateState,
-        billingDetailsForm: BillingDetailsForm?
+        billingDetailsForm: BillingDetailsForm?,
     ): EditCardDetailsInteractor.State {
         return EditCardDetailsInteractor.State(
             payload = payload,
@@ -303,7 +300,7 @@ internal class DefaultEditCardDetailsInteractor(
             shouldShowCardBrandDropdown = isCbcModifiable,
             availableNetworks = payload.getAvailableNetworks(cardBrandFilter),
             expiryDateState = expiryDateState,
-            billingDetailsForm = billingDetailsForm
+            billingDetailsForm = billingDetailsForm,
         )
     }
 
@@ -314,19 +311,19 @@ internal class DefaultEditCardDetailsInteractor(
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             payload: EditCardPayload,
-            addressCollectionMode: AddressCollectionMode,
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
         ): EditCardDetailsInteractor {
             return DefaultEditCardDetailsInteractor(
                 payload = payload,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 cardBrandFilter = cardBrandFilter,
                 isCbcModifiable = isCbcModifiable,
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
-                addressCollectionMode = addressCollectionMode
+                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported
             )
         }
     }
