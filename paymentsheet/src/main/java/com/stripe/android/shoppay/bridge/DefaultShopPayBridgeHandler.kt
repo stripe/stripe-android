@@ -57,7 +57,7 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
             emailRequired = shopPayConfiguration.emailRequired,
             phoneNumberRequired = true, // Shop Pay always requires phone
             shippingAddressRequired = shopPayConfiguration.shippingAddressRequired,
-            allowedShippingCountries = listOf("US", "CA"),
+            allowedShippingCountries = shopPayConfiguration.allowedShippingCountries,
             businessName = shopPayArgs.businessName,
             shopId = shopPayConfiguration.shopId,
         )

@@ -67,7 +67,8 @@ internal object ShopPayData {
                     amount = shippingRates.first().amount
                 ),
             ),
-            shippingRates = shippingRates
+            shippingRates = shippingRates,
+            allowedShippingCountries = listOf("US", "CA")
         )
     }
 
