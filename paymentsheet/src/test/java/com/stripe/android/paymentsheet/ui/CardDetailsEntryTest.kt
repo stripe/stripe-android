@@ -168,13 +168,13 @@ internal class CardDetailsEntryTest {
     @Test
     fun `toUpdateParams() should correctly convert to CardUpdateParams`() {
         val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
-        val entry = createEntry(
+        val cardDetailsEntry = createEntry(
             cardBrandChoice = cardBrandChoice,
             expMonth = 12,
             expYear = 2030
         )
 
-        val params = entry.toUpdateParams(billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)
@@ -185,13 +185,13 @@ internal class CardDetailsEntryTest {
     @Test
     fun `toUpdateParams() should handle null expiry values`() {
         val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
-        val entry = createEntry(
+        val cardDetailsEntry = createEntry(
             cardBrandChoice = cardBrandChoice,
             expMonth = null,
             expYear = null
         )
 
-        val params = entry.toUpdateParams(billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isNull()
@@ -203,13 +203,13 @@ internal class CardDetailsEntryTest {
     fun `toUpdateParams() should include billing details when available`() {
         val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
 
-        val entry = createEntry(
+        val cardDetailsEntry = createEntry(
             cardBrandChoice = cardBrandChoice,
             expMonth = 12,
             expYear = 2030,
         )
 
-        val params = entry.toUpdateParams(billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)

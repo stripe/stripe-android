@@ -39,17 +39,18 @@ internal data class CardDetailsEntry(
 }
 
 /**
- * Converts the CardDetailsEntry to CardUpdateParams with billing details.
+ * Builds [CardUpdateParams] from the provided [CardDetailsEntry] and [BillingDetailsEntry].
  *
- * @return CardUpdateParams containing the updated card brand and billing details.
+ * @return CardUpdateParams containing the updated card and billing information.
  */
-internal fun CardDetailsEntry.toUpdateParams(
+internal fun toUpdateParams(
+    cardDetailsEntry: CardDetailsEntry,
     billingDetailsEntry: BillingDetailsEntry?,
 ): CardUpdateParams {
     return CardUpdateParams(
-        cardBrand = cardBrandChoice.brand,
-        expiryMonth = expiryDateState.expiryMonth,
-        expiryYear = expiryDateState.expiryYear,
+        cardBrand = cardDetailsEntry.cardBrandChoice.brand,
+        expiryMonth = cardDetailsEntry.expiryDateState.expiryMonth,
+        expiryYear = cardDetailsEntry.expiryDateState.expiryYear,
         billingDetails = createBillingDetails(billingDetailsEntry)
     )
 }

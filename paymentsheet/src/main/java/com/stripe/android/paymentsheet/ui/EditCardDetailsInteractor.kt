@@ -194,7 +194,7 @@ internal class DefaultEditCardDetailsInteractor(
             billingDetailsEntry?.isComplete(billingDetailsCollectionConfiguration) != false
 
         return if (hasChanges && isComplete) {
-            cardDetailsEntry.toUpdateParams(billingDetailsEntry)
+            toUpdateParams(cardDetailsEntry, billingDetailsEntry)
         } else {
             null
         }
