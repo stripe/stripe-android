@@ -84,6 +84,10 @@ private fun CardDetailsEditUI(
         ?.collectAsState()
 
     Column {
+        if (billingDetailsForm?.emailElement != null || billingDetailsForm?.phoneElement != null) {
+            ContactInformationSection(billingDetailsForm)
+        }
+
         Section(
             title = billingDetailsForm?.let {
                 resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
@@ -111,6 +115,7 @@ private fun CardDetailsEditUI(
                     availableNetworks = availableNetworks,
                     savedPaymentMethodIcon = paymentMethodIcon,
                     onBrandChoiceChanged = onBrandChoiceChanged,
+                    isFirstField = billingDetailsForm?.nameElement == null,
                 )
                 Divider(
                     color = MaterialTheme.stripeColors.componentDivider,
@@ -140,28 +145,6 @@ private fun CardDetailsEditUI(
             }
         }
 
-        // Show email and phone from billing details in contact information section
-        if (billingDetailsForm?.emailElement != null || billingDetailsForm?.phoneElement != null) {
-            Spacer(Modifier.height(32.dp))
-
-            val contactElements = listOfNotNull(
-                billingDetailsForm.emailElement,
-                billingDetailsForm.phoneElement
-            )
-
-            if (contactElements.isNotEmpty()) {
-                SectionElementUI(
-                    enabled = true,
-                    element = SectionElement.wrap(
-                        sectionFieldElements = contactElements,
-                        label = resolvableString(com.stripe.android.ui.core.R.string.stripe_contact_information)
-                    ),
-                    hiddenIdentifiers = emptySet(),
-                    lastTextFieldIdentifier = null
-                )
-            }
-        }
-
         if (billingDetailsForm != null) {
             Spacer(Modifier.height(32.dp))
 
@@ -170,6 +153,27 @@ private fun CardDetailsEditUI(
                 onValuesChanged = onAddressChanged
             )
         }
+    }
+}
+
+@Composable
+private fun ContactInformationSection(billingDetailsForm: BillingDetailsForm) {
+    val contactElements = listOfNotNull(
+        billingDetailsForm.emailElement,
+        billingDetailsForm.phoneElement
+    )
+
+    if (contactElements.isNotEmpty()) {
+        SectionElementUI(
+            enabled = true,
+            element = SectionElement.wrap(
+                sectionFieldElements = contactElements,
+                label = resolvableString(CoreR.string.stripe_contact_information)
+            ),
+            hiddenIdentifiers = emptySet(),
+            lastTextFieldIdentifier = null
+        )
+        Spacer(Modifier.height(32.dp))
     }
 }
 
@@ -189,10 +193,21 @@ private fun CardNumberField(
     shouldShowCardBrandDropdown: Boolean,
     savedPaymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
+    isFirstField: Boolean,
 ) {
     CommonTextField(
         value = "•••• •••• •••• ${last4 ?: "••••"}",
         label = stringResource(id = R.string.stripe_acc_label_card_number),
+        shape = if (isFirstField) {
+            MaterialTheme.shapes.small
+        } else {
+            MaterialTheme.shapes.small.copy(
+                topStart = ZeroCornerSize,
+                topEnd = ZeroCornerSize,
+                bottomStart = ZeroCornerSize,
+                bottomEnd = ZeroCornerSize
+            )
+        },
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
                 CardBrandDropdown(

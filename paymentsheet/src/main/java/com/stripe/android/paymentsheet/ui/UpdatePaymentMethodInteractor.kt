@@ -186,6 +186,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
             // name, email, and phone are purposefully omitted (not collected) here.
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode,
+                email = CollectionMode.Never,
+                phone = CollectionMode.Never,
+                name = CollectionMode.Never
             ),
         )
     }
