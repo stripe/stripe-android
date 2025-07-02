@@ -103,7 +103,12 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 // TODO
             }
             is LinkActivityResult.Completed -> {
-                _state.update { it.copy(selectedPaymentMethod = result.selectedPayment) }
+                _state.update {
+                    it.copy(
+                        selectedPaymentMethod = result.selectedPayment,
+                        linkAccountUpdate = result.linkAccountUpdate,
+                    )
+                }
             }
             is LinkActivityResult.Failed -> {
                 // TODO
