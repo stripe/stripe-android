@@ -5,7 +5,7 @@
 ### Install
 1. Clone the `stripe-android` repository.
 2. Open the project in Android Studio.
-3. After [deploying the example backend to Code Sandbox or using our existing backend](#set-up-your-own-backend-with-codesandbox) and [configuring the app](#configure-the-app), build and run the project.
+3. After; [deploying the example backend to Code Sandbox](#set-up-your-own-backend-with-codesandbox) or [using our existing backend](#using-our-existing-backend), and then [configuring the app](#configure-the-app), build and run the project.
 
 <img width="215" height="108" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/run_project.png" />
 
@@ -16,14 +16,18 @@ If you're from outside Stripe, contact Stripe support to request to be added to 
 
 If you're internal to Stripe, contact the Bouncer team for help.
 
+### Using our existing backend
+If you just want to test out the Card Scan example locally and don't want to bother with spinning up a backend you can use the backend that we've already set up at [Stripedemos.com](https://https://stripe-card-scan-civ-example-app.stripedemos.com/)
+
 ### Set up your own backend with CodeSandbox
-1. [Create a Glitch account](https://glitch.com/signup/) if you don't have one.
-2. Create your own copy of the [example mobile backend application](https://codesandbox.io/p/devbox/stripe-card-scan-civ-example-app-d7sjq9/), login/sign up for CodeSandbox
-   and press "Fork". You can also use the backend that we've already set up [Stripe Demo](https://https://stripe-card-scan-civ-example-app.stripedemos.com/)
+1. [Create a CodeSandbox Account](https://codesandbox.io/signin) if you don't have one.
+2. Create your own copy of the [card scan example backend application](https://codesandbox.io/p/devbox/stripe-card-scan-civ-example-app-d7sjq9/),
+   and press "Fork". 
 3. Set an _App Name_ of your choice (e.g. Stripe Example Mobile Backend).
-4. Under the `.env` file, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
+4. Under the `.env` file (which you can find under Settings -> Env Variables, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
    for the `secret_key` field.
 
+//TODO replace this
 <img width="700" height="351" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/glitch_remix_project.png" />
 
 ### Configure the app
