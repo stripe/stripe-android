@@ -199,7 +199,10 @@ private fun CardNumberField(
         value = "•••• •••• •••• ${last4 ?: "••••"}",
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         shape = if (isFirstField) {
-            MaterialTheme.shapes.small
+            MaterialTheme.shapes.small.copy(
+                bottomStart = ZeroCornerSize,
+                bottomEnd = ZeroCornerSize
+            )
         } else {
             MaterialTheme.shapes.small.copy(
                 topStart = ZeroCornerSize,
