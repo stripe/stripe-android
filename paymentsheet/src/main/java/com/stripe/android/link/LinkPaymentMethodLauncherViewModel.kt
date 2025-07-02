@@ -67,7 +67,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
         launcher.launch(
             LinkActivityContract.Args(
                 configuration = configuration,
-                startWithVerificationDialog = false,
+                startWithVerificationDialog = true,
                 linkAccountInfo = (state.linkAccountUpdate as? LinkAccountUpdate.Value)
                     ?: LinkAccountUpdate.Value(null),
                 launchMode = LinkLaunchMode.PaymentMethodSelection(state.selectedPaymentMethod?.details),

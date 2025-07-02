@@ -12,7 +12,7 @@ import androidx.compose.material.TextField
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,16 +35,14 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
 
         setContent {
             PaymentSheetExampleTheme {
-                var email by remember { mutableStateOf("") }
-                var currentPreview by remember { mutableStateOf<LinkPaymentMethodLauncher.PaymentMethodPreview?>(null) }
+                var email by rememberSaveable { mutableStateOf("") }
+                var launcherState by rememberSaveable { mutableStateOf(linkPaymentMethodLauncher.state) }
 
                 LaunchedEffect(Unit) {
                     linkPaymentMethodLauncher.listener =
                         object : LinkPaymentMethodLauncher.Listener {
-                            override fun onPaymentMethodSelected(
-                                preview: LinkPaymentMethodLauncher.PaymentMethodPreview
-                            ) {
-                                currentPreview = preview
+                            override fun onStateChange(state: LinkPaymentMethodLauncher.State) {
+                                launcherState = state
                             }
                         }
                 }
@@ -63,7 +61,7 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                     Button(onClick = { linkPaymentMethodLauncher.present(email) }) {
                         Text("Launch")
                     }
-                    currentPreview?.let { preview ->
+                    launcherState.preview?.let { preview ->
                         Text(text = "Payment method:")
                         Text(text = preview.label)
                         Text(text = preview.sublabel ?: "")

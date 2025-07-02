@@ -1,34 +1,42 @@
 package com.stripe.android.link
 
-import android.graphics.drawable.Drawable
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.DrawableRes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.paymentsheet.R
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 interface LinkPaymentMethodLauncher {
+    val state: State
+
     var listener: Listener?
 
     fun present(email: String?)
 
     interface Listener {
-        fun onPaymentMethodSelected(preview: PaymentMethodPreview)
+        fun onStateChange(state: State)
     }
 
     @Parcelize
     @Poko
+    class State internal constructor(
+        val preview: PaymentMethodPreview? = null,
+    ) : Parcelable
+
+    @Parcelize
+    @Poko
     class PaymentMethodPreview internal constructor(
-//        val icon: Drawable, // TODO
+        @DrawableRes val icon: Int,
         val label: String,
         val sublabel: String?
     ) : Parcelable
@@ -50,6 +58,8 @@ internal class RealLinkPaymentMethodLauncher(
     private val viewModel: LinkPaymentMethodLauncherViewModel
 ) : LinkPaymentMethodLauncher {
 
+    override val state: LinkPaymentMethodLauncher.State get() = viewModel.state.value.toPublicState(activity)
+
     override var listener: LinkPaymentMethodLauncher.Listener? = null
 
     private var linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
@@ -62,21 +72,8 @@ internal class RealLinkPaymentMethodLauncher(
             activity.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.state
-                        .map { it.selectedPaymentMethod }
-                        .filterNotNull()
-                        .map { pm ->
-                            val sublabel = buildString {
-                                append(pm.details.displayName.resolve(activity))
-                                append(" •••• ")
-                                append(pm.details.last4)
-                            }
-                            LinkPaymentMethodLauncher.PaymentMethodPreview(
-                                label = "Link", // TODO
-                                sublabel = sublabel
-                            )
-                        }
-                        .distinctUntilChanged()
-                        .collect { listener?.onPaymentMethodSelected(it) }
+                        .map { it.toPublicState(activity) }
+                        .collect { listener?.onStateChange(it) }
                 }
             }
         }
@@ -85,4 +82,22 @@ internal class RealLinkPaymentMethodLauncher(
     override fun present(email: String?) {
         viewModel.onPresent(linkActivityResultLauncher, email)
     }
+}
+
+private fun LinkPaymentMethodLauncherState.toPublicState(context: Context) : LinkPaymentMethodLauncher.State {
+    val preview = selectedPaymentMethod?.let { pm ->
+        val sublabel = buildString {
+            append(pm.details.displayName.resolve(context))
+            append(" •••• ")
+            append(pm.details.last4)
+        }
+        LinkPaymentMethodLauncher.PaymentMethodPreview(
+            icon = R.drawable.stripe_ic_paymentsheet_link_arrow,
+            label = context.getString(com.stripe.android.R.string.stripe_link),
+            sublabel = sublabel
+        )
+    }
+    return LinkPaymentMethodLauncher.State(
+        preview = preview,
+    )
 }
