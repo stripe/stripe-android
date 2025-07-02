@@ -59,6 +59,7 @@ internal class UpdateCardScreenshotTest(
     }
 
     companion object {
+        @SuppressWarnings("LongMethod")
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun data(): List<TestCase> {
@@ -130,7 +131,7 @@ internal class UpdateCardScreenshotTest(
         }
 
         private fun nothingCollected(): BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-            address = AddressCollectionMode.Never,
+            address = AddressCollectionMode.Automatic,
             email = CollectionMode.Never,
             phone = CollectionMode.Never,
             name = CollectionMode.Never
@@ -182,7 +183,7 @@ internal class UpdateCardScreenshotTest(
         val state: UpdateCardScreenState,
         val card: ConsumerPaymentDetails.Card,
         val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
-    ){
+    ) {
         override fun toString(): String = name
     }
 }
