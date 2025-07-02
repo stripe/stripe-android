@@ -187,6 +187,7 @@ internal sealed interface PlaygroundState : Parcelable {
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),
+                paymentMethodTypes = listOf("card", "link", "shop_pay")
             )
         }
     }
