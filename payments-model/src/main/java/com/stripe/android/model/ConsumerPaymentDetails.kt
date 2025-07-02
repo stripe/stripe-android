@@ -19,9 +19,16 @@ data class ConsumerPaymentDetails(
         open val isDefault: Boolean,
         open val type: String,
         open val nickname: String?,
+        open val billingAddress: BillingAddress?,
+        open val billingEmailAddress: String?,
     ) : Parcelable {
 
         abstract val last4: String
+
+        abstract fun withBillingDetails(
+            billingAddress: BillingAddress?,
+            billingEmailAddress: String?
+        ): PaymentDetails
     }
 
     @Parcelize
@@ -31,19 +38,21 @@ data class ConsumerPaymentDetails(
         override val last4: String,
         override val isDefault: Boolean,
         override val nickname: String?,
+        override val billingAddress: BillingAddress? = null,
+        override val billingEmailAddress: String? = null,
         val expiryYear: Int,
         val expiryMonth: Int,
         val brand: CardBrand,
         val networks: List<String>,
         val cvcCheck: CvcCheck,
-        val funding: String,
-        val billingAddress: BillingAddress? = null,
-        val billingEmailAddress: String? = null,
+        val funding: String
     ) : PaymentDetails(
         id = id,
         isDefault = isDefault,
         type = TYPE,
         nickname = nickname,
+        billingAddress = billingAddress,
+        billingEmailAddress = billingEmailAddress
     ) {
 
         val requiresCardDetailsRecollection: Boolean
@@ -60,6 +69,16 @@ data class ConsumerPaymentDetails(
                 .map { CardBrand.fromCode(it) }
                 .filter { it != CardBrand.Unknown }
 
+        override fun withBillingDetails(
+            billingAddress: BillingAddress?,
+            billingEmailAddress: String?
+        ): PaymentDetails {
+            return copy(
+                billingAddress = billingAddress,
+                billingEmailAddress = billingEmailAddress
+            )
+        }
+
         companion object {
             const val TYPE = "card"
         }
@@ -70,12 +89,26 @@ data class ConsumerPaymentDetails(
     data class Passthrough(
         override val id: String,
         override val last4: String,
+        override val billingAddress: BillingAddress? = null,
+        override val billingEmailAddress: String? = null,
     ) : PaymentDetails(
         id = id,
         type = TYPE,
         isDefault = false,
         nickname = null,
+        billingAddress = billingAddress,
+        billingEmailAddress = billingEmailAddress
     ) {
+
+        override fun withBillingDetails(
+            billingAddress: BillingAddress?,
+            billingEmailAddress: String?
+        ): PaymentDetails {
+            return copy(
+                billingAddress = billingAddress,
+                billingEmailAddress = billingEmailAddress
+            )
+        }
 
         companion object {
             const val TYPE = "card"
@@ -91,12 +124,26 @@ data class ConsumerPaymentDetails(
         override val nickname: String?,
         val bankName: String?,
         val bankIconCode: String?,
+        override val billingAddress: BillingAddress?,
+        override val billingEmailAddress: String?,
     ) : PaymentDetails(
         id = id,
         type = TYPE,
         isDefault = isDefault,
         nickname = nickname,
+        billingAddress = billingAddress,
+        billingEmailAddress = billingEmailAddress
     ) {
+
+        override fun withBillingDetails(
+            billingAddress: BillingAddress?,
+            billingEmailAddress: String?
+        ): PaymentDetails {
+            return copy(
+                billingAddress = billingAddress,
+                billingEmailAddress = billingEmailAddress
+            )
+        }
 
         companion object {
             const val TYPE = "bank_account"

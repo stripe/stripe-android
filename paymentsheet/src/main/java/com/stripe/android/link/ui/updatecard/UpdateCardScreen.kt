@@ -28,6 +28,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
+import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
@@ -102,9 +103,11 @@ internal fun UpdateCardScreenBodyPreview() {
             UpdateCardScreenBody(
                 interactor = DefaultEditCardDetailsInteractor.Factory().create(
                     coroutineScope = rememberCoroutineScope(),
-                    isCbcModifiable = false,
-                    areExpiryDateAndAddressModificationSupported = true,
-                    cardBrandFilter = DefaultCardBrandFilter,
+                    cardEditConfiguration = CardEditConfiguration(
+                        cardBrandFilter = DefaultCardBrandFilter,
+                        isCbcModifiable = false,
+                        areExpiryDateAndAddressModificationSupported = true,
+                    ),
                     payload = EditCardPayload.create(
                         ConsumerPaymentDetails.Card(
                             id = "card_id_1234",

@@ -173,16 +173,19 @@ internal class DefaultUpdatePaymentMethodInteractor(
     ): EditCardDetailsInteractor {
         val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
+        val cardEditConfiguration = CardEditConfiguration(
+            cardBrandFilter = cardBrandFilter,
+            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
+        )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
+            cardEditConfiguration = cardEditConfiguration,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
-            cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
             // name, email, and phone are purposefully omitted (not collected) here.
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode,
@@ -198,16 +201,19 @@ internal class DefaultUpdatePaymentMethodInteractor(
         savedPaymentMethodCard: LinkPaymentDetails.Card,
     ): EditCardDetailsInteractor {
         val payload = EditCardPayload.create(savedPaymentMethodCard)
+        val cardEditConfiguration = CardEditConfiguration(
+            cardBrandFilter = cardBrandFilter,
+            isCbcModifiable = false,
+            areExpiryDateAndAddressModificationSupported = false,
+        )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
+            cardEditConfiguration = cardEditConfiguration,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
-            isCbcModifiable = false,
-            cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = false,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = AddressCollectionMode.Never,
                 email = CollectionMode.Never,

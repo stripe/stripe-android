@@ -45,12 +45,9 @@ internal fun CardDetailsEditUI(
     val state by editCardDetailsInteractor.state.collectAsState()
 
     CardDetailsEditUI(
-        shouldShowCardBrandDropdown = state.shouldShowCardBrandDropdown,
-        selectedBrand = state.selectedCardBrand,
+        cardDetailsState = state.cardDetailsState,
         payload = state.payload,
-        availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
-        expiryDateState = state.expiryDateState,
         billingDetailsForm = state.billingDetailsForm,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(ViewAction.BrandChoiceChanged(it))
@@ -66,13 +63,10 @@ internal fun CardDetailsEditUI(
 
 @Composable
 private fun CardDetailsEditUI(
-    shouldShowCardBrandDropdown: Boolean,
-    selectedBrand: CardBrandChoice,
+    cardDetailsState: EditCardDetailsInteractor.CardDetailsState?,
     payload: EditCardPayload,
-    expiryDateState: ExpiryDateState,
-    billingDetailsForm: BillingDetailsForm?,
-    availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
+    billingDetailsForm: BillingDetailsForm?,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onExpDateChanged: (String) -> Unit,
     onAddressChanged: (BillingDetailsFormState) -> Unit,
@@ -84,70 +78,85 @@ private fun CardDetailsEditUI(
         ?.collectAsState()
 
     Column {
-        if (billingDetailsForm?.emailElement != null || billingDetailsForm?.phoneElement != null) {
-            ContactInformationSection(billingDetailsForm)
+        val shouldShowNameInContactSection = cardDetailsState == null && billingDetailsForm?.nameElement != null
+        val shouldShowContactSection = billingDetailsForm?.emailElement != null ||
+            billingDetailsForm?.phoneElement != null || shouldShowNameInContactSection
+
+        if (shouldShowContactSection) {
+            ContactInformationSection(
+                billingDetailsForm = billingDetailsForm,
+                includeNameField = shouldShowNameInContactSection
+            )
         }
 
-        Section(
-            title = billingDetailsForm?.let {
-                resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
-            },
-            error = expiryDateState.sectionError()?.resolve(),
-            modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
-        ) {
-            Column {
-                if (billingDetailsForm?.nameElement != null) {
-                    SectionElementUI(
-                        enabled = true,
-                        element = SectionElement.wrap(sectionFieldElement = billingDetailsForm.nameElement),
-                        hiddenIdentifiers = emptySet(),
-                        lastTextFieldIdentifier = null
+        if (cardDetailsState != null) {
+            Section(
+                title = billingDetailsForm?.let {
+                    resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
+                },
+                error = cardDetailsState.expiryDateState.sectionError()?.resolve(),
+                modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
+            ) {
+                Column {
+                    // Only show name in card section if there's no contact info section to put it in
+                    val shouldShowNameInCardSection = billingDetailsForm?.nameElement != null &&
+                        (billingDetailsForm.emailElement == null && billingDetailsForm.phoneElement == null)
+
+                    if (shouldShowNameInCardSection) {
+                        SectionElementUI(
+                            enabled = true,
+                            element = SectionElement.wrap(sectionFieldElement = billingDetailsForm.nameElement),
+                            hiddenIdentifiers = emptySet(),
+                            lastTextFieldIdentifier = null
+                        )
+                        Divider(
+                            color = MaterialTheme.stripeColors.componentDivider,
+                            thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
+                        )
+                    }
+                    CardNumberField(
+                        last4 = payload.last4,
+                        selectedBrand = cardDetailsState.selectedCardBrand,
+                        shouldShowCardBrandDropdown = cardDetailsState.shouldShowCardBrandDropdown,
+                        availableNetworks = cardDetailsState.availableNetworks,
+                        savedPaymentMethodIcon = paymentMethodIcon,
+                        onBrandChoiceChanged = onBrandChoiceChanged,
+                        isFirstField = !shouldShowNameInCardSection,
                     )
                     Divider(
                         color = MaterialTheme.stripeColors.componentDivider,
                         thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                     )
-                }
-                CardNumberField(
-                    last4 = payload.last4,
-                    selectedBrand = selectedBrand,
-                    shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                    availableNetworks = availableNetworks,
-                    savedPaymentMethodIcon = paymentMethodIcon,
-                    onBrandChoiceChanged = onBrandChoiceChanged,
-                    isFirstField = billingDetailsForm?.nameElement == null,
-                )
-                Divider(
-                    color = MaterialTheme.stripeColors.componentDivider,
-                    thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                )
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    ExpiryTextField(
-                        modifier = Modifier
-                            .testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG)
-                            .weight(1F)
-                            .onSizeChanged {
-                                dividerHeight.value =
-                                    (it.height / Resources.getSystem().displayMetrics.density).dp
-                            },
-                        state = expiryDateState,
-                        hasNextField = hiddenBillingDetailsFields?.value?.hasFocusableFields() == true,
-                        onValueChange = onExpDateChanged,
-                    )
-                    Divider(
-                        modifier = Modifier
-                            .height(dividerHeight.value)
-                            .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
-                        color = MaterialTheme.stripeColors.componentDivider,
-                    )
-                    CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        ExpiryTextField(
+                            modifier = Modifier
+                                .testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG)
+                                .weight(1F)
+                                .onSizeChanged {
+                                    dividerHeight.value =
+                                        (it.height / Resources.getSystem().displayMetrics.density).dp
+                                },
+                            state = cardDetailsState.expiryDateState,
+                            hasNextField = hiddenBillingDetailsFields?.value?.hasFocusableFields() == true,
+                            onValueChange = onExpDateChanged,
+                        )
+                        Divider(
+                            modifier = Modifier
+                                .height(dividerHeight.value)
+                                .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
+                            color = MaterialTheme.stripeColors.componentDivider,
+                        )
+                        CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
+                    }
                 }
             }
         }
 
         if (billingDetailsForm != null) {
-            Spacer(Modifier.height(32.dp))
-
+            val shouldShowCardSection = cardDetailsState != null
+            if (shouldShowContactSection || shouldShowCardSection) {
+                Spacer(Modifier.height(32.dp))
+            }
             BillingDetailsFormUI(
                 form = billingDetailsForm,
                 onValuesChanged = onAddressChanged
@@ -157,11 +166,17 @@ private fun CardDetailsEditUI(
 }
 
 @Composable
-private fun ContactInformationSection(billingDetailsForm: BillingDetailsForm) {
-    val contactElements = listOfNotNull(
-        billingDetailsForm.emailElement,
-        billingDetailsForm.phoneElement
-    )
+private fun ContactInformationSection(
+    billingDetailsForm: BillingDetailsForm,
+    includeNameField: Boolean = false
+) {
+    val contactElements = buildList {
+        if (includeNameField && billingDetailsForm.nameElement != null) {
+            add(billingDetailsForm.nameElement)
+        }
+        billingDetailsForm.emailElement?.let { add(it) }
+        billingDetailsForm.phoneElement?.let { add(it) }
+    }
 
     if (contactElements.isNotEmpty()) {
         SectionElementUI(

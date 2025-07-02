@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
@@ -73,10 +74,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             val paymentDetails = linkAccountManager.consumerState.value
                 ?.paymentDetails?.find { it.details.id == paymentDetailsId }
                 ?.details
-            require(
-                value = paymentDetails is ConsumerPaymentDetails.Card,
-                lazyMessage = { "Payment details with id $paymentDetailsId is not a card" }
-            )
+            requireNotNull(paymentDetails) { "Payment details with id $paymentDetailsId not found" }
             _state.update {
                 it.copy(
                     paymentDetailsId = paymentDetailsId,
@@ -156,7 +154,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     )
 
     private fun initializeInteractor(
-        cardPaymentDetails: ConsumerPaymentDetails.Card
+        cardPaymentDetails: ConsumerPaymentDetails.PaymentDetails
     ): EditCardDetailsInteractor {
         // If this is a billing details update flow, we need to use the effective billing details
         val paymentDetails = if (state.value.isBillingDetailsUpdateFlow) {
@@ -168,17 +166,23 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             cardPaymentDetails
         }
 
+        val cardEditConfiguration = (paymentDetails as? ConsumerPaymentDetails.Card)?.let {
+            CardEditConfiguration(
+                cardBrandFilter = DefaultCardBrandFilter,
+                isCbcModifiable = it.availableNetworks.size > 1,
+                areExpiryDateAndAddressModificationSupported = true,
+            )
+        }
+
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
-            areExpiryDateAndAddressModificationSupported = true,
-            cardBrandFilter = DefaultCardBrandFilter,
+            cardEditConfiguration = cardEditConfiguration,
             payload = EditCardPayload.create(
-                card = paymentDetails,
+                details = paymentDetails,
                 billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
             ),
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-            isCbcModifiable = paymentDetails.availableNetworks.size > 1,
             onBrandChoiceChanged = ::onBrandChoiceChanged,
             // We prefill in the billing details update flow, so the form might
             // already be complete on first render. The user can submit without modifying.
