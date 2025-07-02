@@ -28,6 +28,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
@@ -121,7 +122,12 @@ internal class ShopPayActivity : ComponentActivity() {
                     dismiss(ShopPayActivityResult.Canceled)
                 }
             ) {
-                ShopPayWebView()
+                BottomSheetScaffold(
+                    topBar = {},
+                    content = {
+                        ShopPayWebView()
+                    }
+                )
             }
         }
     }
@@ -158,7 +164,7 @@ internal class ShopPayActivity : ComponentActivity() {
                 webView.apply {
                     layoutParams = ViewGroup.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
+                        ViewGroup.LayoutParams.WRAP_CONTENT
                     )
                     setBackgroundColor(backgroundColor)
                 }
