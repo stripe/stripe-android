@@ -48,7 +48,12 @@ internal class DefaultShopPayBridgeHandlerTest {
         assertThat(data.getJSONObject("business").getString("name")).isEqualTo("Test Business")
         assertThat(data.getString("shopId")).isEqualTo(SHOP_PAY_CONFIGURATION.shopId)
         assertThat(data.getBoolean("phoneNumberRequired")).isTrue()
-        assertThat(data.getJSONArray("allowedShippingCountries").length()).isEqualTo(2)
+
+        val allowedShippingCountries = data.getJSONArray("allowedShippingCountries")
+        for (i in 0 until allowedShippingCountries.length()) {
+            assertThat(allowedShippingCountries[i])
+                .isEqualTo(ShopPayTestFactory.SHOP_PAY_ARGS.shopPayConfiguration.allowedShippingCountries[i])
+        }
     }
 
     @Test
