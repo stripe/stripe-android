@@ -7,11 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
-import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.uicore.utils.combineAsStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,16 +23,24 @@ internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
-    formControllerProvider: Provider<FormControllerSubcomponent.Builder>
-) : ViewModel() {
+) : ViewModel(), AutocompleteAddressInteractor {
     private val _collectedAddress = MutableStateFlow(args.config?.address)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
-    private val _forceExpandedForm = MutableStateFlow<Boolean?>(false)
-    private val forceExpandedForm: StateFlow<Boolean?> = _forceExpandedForm
+    override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
+        googlePlacesApiKey = args.config?.googlePlacesApiKey,
+        autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
+    )
 
-    private val _formController = MutableStateFlow<FormController?>(null)
-    val formController: StateFlow<FormController?> = _formController
+    private val _autocompleteEvent = MutableSharedFlow<AutocompleteAddressInteractor.Event>()
+    override val autocompleteEvent: SharedFlow<AutocompleteAddressInteractor.Event> = _autocompleteEvent
+
+    override val interactorScope: CoroutineScope = viewModelScope
+
+    val addressFormController = AddressFormController(
+        interactor = this,
+        config = args.config,
+    )
 
     private val _formEnabled = MutableStateFlow(true)
     val formEnabled: StateFlow<Boolean> = _formEnabled
@@ -40,50 +50,32 @@ internal class InputAddressViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            navigator.getResultFlow<AddressDetails?>(AddressDetails.KEY)?.collect {
+            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
+                AddressElementNavigator.AutocompleteEvent.KEY
+            )?.collect { event ->
                 val oldAddress = _collectedAddress.value
+                val newAddress = event?.addressDetails
                 val autocompleteAddress = AddressDetails(
-                    name = oldAddress?.name ?: it?.name,
-                    address = it?.address ?: oldAddress?.address,
-                    phoneNumber = oldAddress?.phoneNumber ?: it?.phoneNumber,
+                    name = oldAddress?.name ?: newAddress?.name,
+                    address = newAddress?.address ?: oldAddress?.address,
+                    phoneNumber = oldAddress?.phoneNumber ?: newAddress?.phoneNumber,
                     isCheckboxSelected = oldAddress?.isCheckboxSelected
-                        ?: it?.isCheckboxSelected
+                        ?: newAddress?.isCheckboxSelected
                 )
+
+                val values = autocompleteAddress.toIdentifierMap()
+
+                when (event) {
+                    is AddressElementNavigator.AutocompleteEvent.OnEnterManually -> {
+                        _autocompleteEvent.emit(AutocompleteAddressInteractor.Event.OnExpandForm(values))
+                    }
+                    is AddressElementNavigator.AutocompleteEvent.OnBack -> {
+                        _autocompleteEvent.emit(AutocompleteAddressInteractor.Event.OnValues(values))
+                    }
+                    null -> Unit
+                }
+
                 _collectedAddress.emit(autocompleteAddress)
-            }
-        }
-
-        viewModelScope.launch {
-            navigator.getResultFlow<Boolean?>(
-                AddressElementNavigator.FORCE_EXPANDED_FORM_KEY
-            )?.collect {
-                _forceExpandedForm.emit(it)
-            }
-        }
-
-        viewModelScope.launch {
-            combineAsStateFlow(collectedAddress, forceExpandedForm) { collectedAddress, forceExpandedForm ->
-                Pair(
-                    collectedAddress,
-                    forceExpandedForm
-                )
-            }.collect { (addressDetails, forceExpandedFormNullable) ->
-                val forceExpandedForm = forceExpandedFormNullable ?: false
-                val initialValues: Map<IdentifierSpec, String?> = addressDetails
-                    ?.toIdentifierMap()
-                    ?: emptyMap()
-                _formController.value = formControllerProvider.get()
-                    .viewModelScope(viewModelScope)
-                    .stripeIntent(null)
-                    .merchantName("")
-                    .shippingValues(null)
-                    .formSpec(
-                        buildFormSpec(
-                            condensedForm = !forceExpandedForm && addressDetails?.address?.line1 == null
-                        )
-                    )
-                    .initialValues(initialValues)
-                    .build().formController
             }
         }
 
@@ -93,30 +85,21 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
-    private fun getCurrentAddress(): AddressDetails? {
-        return formController.value
-            ?.formValues
-            ?.value
-            ?.let {
-                AddressDetails(
-                    name = it[IdentifierSpec.Name]?.value,
-                    address = PaymentSheet.Address(
-                        city = it[IdentifierSpec.City]?.value,
-                        country = it[IdentifierSpec.Country]?.value,
-                        line1 = it[IdentifierSpec.Line1]?.value,
-                        line2 = it[IdentifierSpec.Line2]?.value,
-                        postalCode = it[IdentifierSpec.PostalCode]?.value,
-                        state = it[IdentifierSpec.State]?.value
-                    ),
-                    phoneNumber = it[IdentifierSpec.Phone]?.value
-                )
-            }
-    }
+    private fun getCurrentAddress(): AddressDetails {
+        val formValues = addressFormController.getCurrentFormValues()
 
-    private fun buildFormSpec(condensedForm: Boolean): LayoutSpec {
-        val config = args.config
-        val spec = AddressSpecFactory.create(condensedForm, config, ::navigateToAutocompleteScreen)
-        return LayoutSpec(listOf(spec))
+        return AddressDetails(
+            name = formValues[IdentifierSpec.Name]?.value,
+            address = PaymentSheet.Address(
+                city = formValues[IdentifierSpec.City]?.value,
+                country = formValues[IdentifierSpec.Country]?.value,
+                line1 = formValues[IdentifierSpec.Line1]?.value,
+                line2 = formValues[IdentifierSpec.Line2]?.value,
+                postalCode = formValues[IdentifierSpec.PostalCode]?.value,
+                state = formValues[IdentifierSpec.State]?.value
+            ),
+            phoneNumber = formValues[IdentifierSpec.Phone]?.value
+        )
     }
 
     fun clickPrimaryButton(
@@ -159,19 +142,14 @@ internal class InputAddressViewModel @Inject constructor(
         _checkboxChecked.value = newValue
     }
 
-    private fun navigateToAutocompleteScreen() {
+    override fun onAutocomplete(country: String) {
         viewModelScope.launch {
-            val addressDetails = getCurrentAddress()
-            addressDetails?.let {
-                _collectedAddress.emit(it)
-            }
-            addressDetails?.address?.country?.let {
-                navigator.navigateTo(
-                    AddressElementScreen.Autocomplete(
-                        country = it
-                    )
+            _collectedAddress.emit(getCurrentAddress())
+            navigator.navigateTo(
+                AddressElementScreen.Autocomplete(
+                    country = country
                 )
-            }
+            )
         }
     }
 

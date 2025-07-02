@@ -28,6 +28,7 @@ open class AddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
     private val hideCountry: Boolean = false,
+    private val hideName: Boolean = true,
 ) : SectionMultiFieldElement(_identifier) {
 
     override val allowsUserInteraction: Boolean = true
@@ -163,12 +164,12 @@ open class AddressElement(
         fieldsUpdatedFlow
     ) { country, otherFields, _, _ ->
         val condensed = listOfNotNull(
-            nameElement,
+            nameElement.takeUnless { hideName },
             countryElement.takeUnless { hideCountry },
             addressAutoCompleteElement,
         )
         val expanded = listOfNotNull(
-            nameElement,
+            nameElement.takeUnless { hideName },
             countryElement.takeUnless { hideCountry },
         ).plus(otherFields)
         val baseElements = when (addressInputMode) {
@@ -186,6 +187,7 @@ open class AddressElement(
             }
             else -> {
                 listOfNotNull(
+                    nameElement.takeUnless { hideName },
                     countryElement.takeUnless { hideCountry }
                 ).plus(otherFields)
             }

@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import android.os.Parcelable
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,8 +25,18 @@ internal interface AddressElementNavigator {
 
     fun onBack()
 
-    companion object {
-        internal const val FORCE_EXPANDED_FORM_KEY = "force_expanded_form"
+    sealed interface AutocompleteEvent : Parcelable {
+        val addressDetails: AddressDetails?
+
+        @Parcelize
+        data class OnBack(override val addressDetails: AddressDetails?) : AutocompleteEvent
+
+        @Parcelize
+        data class OnEnterManually(override val addressDetails: AddressDetails?) : AutocompleteEvent
+
+        companion object {
+            const val KEY = "AutocompleteEvent"
+        }
     }
 }
 
