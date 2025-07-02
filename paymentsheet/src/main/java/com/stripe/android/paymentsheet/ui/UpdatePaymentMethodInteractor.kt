@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -182,8 +183,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
             areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
+            // name, email, and phone are purposefully omitted (not collected) here.
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                address = addressCollectionMode
+                address = addressCollectionMode,
             ),
         )
     }
@@ -203,7 +205,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = onBrandChoiceSelected,
             areExpiryDateAndAddressModificationSupported = false,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
-                address = AddressCollectionMode.Never
+                address = AddressCollectionMode.Never,
+                email = CollectionMode.Never,
+                phone = CollectionMode.Never,
+                name = CollectionMode.Never
             ),
         )
     }
