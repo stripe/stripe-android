@@ -27,7 +27,6 @@ If you just want to test out the Card Scan example locally and don't want to bot
 4. Under the `.env` file (which you can find under Settings -> Env Variables, set your [Stripe testmode secret key](https://dashboard.stripe.com/test/apikeys)
    for the `secret_key` field.
 
-//TODO replace this
 <img width="700" height="386" src="https://raw.githubusercontent.com/stripe/stripe-android/master/stripecardscan-example/images/how_to_get_to_settings.png" />
 
 ### Configure the app
