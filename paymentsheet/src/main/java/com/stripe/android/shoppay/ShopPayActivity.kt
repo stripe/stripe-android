@@ -11,7 +11,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -132,7 +132,7 @@ internal class ShopPayActivity : ComponentActivity() {
 
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -164,7 +164,7 @@ internal class ShopPayActivity : ComponentActivity() {
                 }
             },
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
         )
     }
 
