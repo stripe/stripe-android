@@ -20,5 +20,6 @@ internal val SHOP_PAY_CONFIGURATION = PaymentSheet.ShopPayConfiguration(
             displayName = "Express",
             deliveryEstimate = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.Text("2 business days")
         )
-    )
+    ),
+    allowedShippingCountries = listOf("US", "CA")
 )

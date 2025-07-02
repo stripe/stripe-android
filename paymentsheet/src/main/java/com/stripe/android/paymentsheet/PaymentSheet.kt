@@ -2906,6 +2906,7 @@ class PaymentSheet internal constructor(
         val billingAddressRequired: Boolean = true,
         val emailRequired: Boolean = true,
         val shippingAddressRequired: Boolean,
+        val allowedShippingCountries: List<String>,
         val lineItems: List<LineItem>,
         val shippingRates: List<ShippingRate>
     ) : Parcelable {
