@@ -85,7 +85,9 @@ private fun CardDetailsEditUI(
 
     Column {
         Section(
-            title = resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information),
+            title = billingDetailsForm?.let {
+                resolvableString(CoreR.string.stripe_paymentsheet_add_payment_method_card_information)
+            },
             error = expiryDateState.sectionError()?.resolve(),
             modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
         ) {
