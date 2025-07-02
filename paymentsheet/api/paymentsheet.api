@@ -3574,12 +3574,6 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/shoppay/ComposableSingletons$ShopPayActivityKt {
-	public static final field INSTANCE Lcom/stripe/android/shoppay/ComposableSingletons$ShopPayActivityKt;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/shoppay/ComposableSingletons$ShopPayButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/shoppay/ComposableSingletons$ShopPayButtonKt;
 	public fun <init> ()V

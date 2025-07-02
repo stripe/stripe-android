@@ -32,12 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.mapLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import javax.inject.Inject
@@ -50,18 +45,8 @@ internal class ShopPayViewModel @Inject constructor(
     private val stripeApiRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
-    @UIContext workContext: CoroutineContext = Dispatchers.Main
+    @UIContext workContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
-    private val _popupWebView = MutableStateFlow<WebView?>(null)
-    val popupWebView: StateFlow<WebView?> = _popupWebView
-
-    val showPopup: StateFlow<Boolean> = _popupWebView.mapLatest {
-        it != null
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = false
-    )
 
     private val _paymentResult = MutableSharedFlow<ShopPayActivityResult>()
     val paymentResult: Flow<ShopPayActivityResult> = _paymentResult
@@ -138,12 +123,10 @@ internal class ShopPayViewModel @Inject constructor(
         webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
 
-    fun setPopupWebView(webView: WebView?) {
-        _popupWebView.value = webView
-    }
-
     fun closePopup() {
-        _popupWebView.value = null
+        viewModelScope.launch {
+            _paymentResult.emit(ShopPayActivityResult.Canceled)
+        }
     }
 
     fun assetLoader(context: Context): WebViewAssetLoader {
@@ -167,12 +150,16 @@ internal class ShopPayViewModel @Inject constructor(
         }
     }
 
+    fun loadUrl(webView: WebView) {
+        webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
+    }
+
     companion object {
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()
                 val app = this[APPLICATION_KEY] as Application
-                val args: ShopPayArgs = getArgs(handle) ?: throw IllegalArgumentException("No args found")
+                val args: ShopPayArgs = getArgs(handle) ?: throw NoArgsException()
                 DaggerShopPayComponent
                     .builder()
                     .context(app)
@@ -189,4 +176,6 @@ internal class ShopPayViewModel @Inject constructor(
             }
         }
     }
+
+    class NoArgsException : IllegalArgumentException("No args found")
 }
