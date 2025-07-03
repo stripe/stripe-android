@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEFullAddress
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
@@ -66,11 +67,11 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
-    fun `setWebView loads correct URL`() {
+    fun `loadUrl loads correct URL`() {
         val viewModel = createViewModel()
         val mockWebView = mock<WebView>()
 
-        viewModel.setWebView(mockWebView)
+        viewModel.loadUrl(mockWebView)
 
         verify(mockWebView).loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
@@ -184,6 +185,68 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
+    fun `ECE click callback is set up correctly when ViewModel is created`() = runTest(dispatcher) {
+        val mockEventReporter = mock<EventReporter>()
+        val bridgeHandler = FakeShopPayBridgeHandler()
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            eventReporter = mockEventReporter
+        )
+
+        bridgeHandler.handleECEClick("{}")
+
+        viewModel.closePopup()
+
+        verify(mockEventReporter).onShopPayWebViewCancelled(true)
+    }
+
+    @Test
+    fun `analytics tracks cancellation without ECE click when closePopup is called`() {
+        val mockEventReporter = mock<EventReporter>()
+        val viewModel = createViewModel(eventReporter = mockEventReporter)
+
+        viewModel.closePopup()
+
+        verify(mockEventReporter).onShopPayWebViewCancelled(false)
+    }
+
+    @Test
+    fun `analytics tracks cancellation with ECE click when closePopup is called after ECE click`() =
+        runTest(dispatcher) {
+            val mockEventReporter = mock<EventReporter>()
+            val bridgeHandler = FakeShopPayBridgeHandler()
+            val viewModel = createViewModel(
+                bridgeHandler = bridgeHandler,
+                eventReporter = mockEventReporter
+            )
+
+            bridgeHandler.handleECEClick("{}")
+
+            viewModel.closePopup()
+
+            verify(mockEventReporter).onShopPayWebViewCancelled(true)
+        }
+
+    @Test
+    fun `analytics tracks confirm success when payment completes successfully`() = runTest(dispatcher) {
+        val mockEventReporter = mock<EventReporter>()
+        val bridgeHandler = FakeShopPayBridgeHandler()
+        val confirmationState = createSuccessConfirmationState()
+
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            eventReporter = mockEventReporter
+        )
+
+        viewModel.paymentResult.test {
+            bridgeHandler.confirmationState.value = confirmationState
+            awaitItem()
+
+            verify(mockEventReporter).onShopPayWebViewConfirmSuccess()
+        }
+    }
+
+    @Test
     fun `handleSuccessfulPayment creates correct PaymentMethodCreateParams`() = runTest(dispatcher) {
         val address = ECEFullAddress(
             line1 = "123 Test St",
@@ -294,13 +357,15 @@ internal class ShopPayViewModelTest {
     private fun createViewModel(
         bridgeHandler: ShopPayBridgeHandler = createFakeBridgeHandler(),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = PreparePaymentMethodHandler { _, _ -> },
-        stripeApiRepository: StripeRepository = FakeStripeRepository()
+        stripeApiRepository: StripeRepository = FakeStripeRepository(),
+        eventReporter: EventReporter = mock()
     ): ShopPayViewModel {
         return ShopPayViewModel(
             bridgeHandler,
             stripeApiRepository = stripeApiRepository,
             requestOptions = ApiRequest.Options("pk_123"),
             preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler },
+            eventReporter = eventReporter,
             workContext = dispatcher
         )
     }
@@ -337,9 +402,19 @@ internal class ShopPayViewModelTest {
     private class FakeShopPayBridgeHandler(
         override val confirmationState: MutableStateFlow<ShopPayConfirmationState> = MutableStateFlow(Pending)
     ) : ShopPayBridgeHandler {
+        private var onECEClickCallback: (() -> Unit)? = null
+
+        override fun setOnECEClickCallback(callback: () -> Unit) {
+            onECEClickCallback = callback
+        }
+
         override fun consoleLog(level: String, message: String, origin: String, url: String) = Unit
         override fun getStripePublishableKey(): String = "pk_test_fake_key"
-        override fun handleECEClick(message: String): String = ""
+        override fun handleECEClick(message: String): String {
+            onECEClickCallback?.invoke()
+            return ""
+        }
+
         override fun getShopPayInitParams(): String = ""
         override fun calculateShipping(message: String) = null
         override fun calculateShippingRateChange(message: String) = null

@@ -560,6 +560,37 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    override fun onShopPayWebViewLoadAttempt() {
+        fireEvent(
+            PaymentSheetEvent.ShopPayWebviewLoadAttempt(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onShopPayWebViewConfirmSuccess() {
+        fireEvent(
+            PaymentSheetEvent.ShopPayWebviewConfirmSuccess(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
+        fireEvent(
+            PaymentSheetEvent.ShopPayWebviewCancelled(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                didReceiveECEClick = didReceiveECEClick,
+            )
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

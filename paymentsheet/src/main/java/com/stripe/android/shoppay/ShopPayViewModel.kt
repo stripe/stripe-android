@@ -23,6 +23,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
@@ -45,13 +46,20 @@ internal class ShopPayViewModel @Inject constructor(
     private val stripeApiRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
+    private val eventReporter: EventReporter,
     @UIContext workContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
 
     private val _paymentResult = MutableSharedFlow<ShopPayActivityResult>()
     val paymentResult: Flow<ShopPayActivityResult> = _paymentResult
 
+    private var didReceiveECEClick: Boolean = false
+
     init {
+        bridgeHandler.setOnECEClickCallback {
+            didReceiveECEClick = true
+        }
+
         viewModelScope.launch {
             listenToConfirmationState()
         }
@@ -65,7 +73,11 @@ internal class ShopPayViewModel @Inject constructor(
                 }
                 ShopPayConfirmationState.Pending -> Unit
                 is ShopPayConfirmationState.Success -> {
-                    _paymentResult.emit(handleSuccessfulPayment(confirmationState))
+                    val result = handleSuccessfulPayment(confirmationState)
+                    if (result is ShopPayActivityResult.Completed) {
+                        eventReporter.onShopPayWebViewConfirmSuccess()
+                    }
+                    _paymentResult.emit(result)
                 }
             }
         }
@@ -119,11 +131,8 @@ internal class ShopPayViewModel @Inject constructor(
         }
     }
 
-    fun setWebView(webView: WebView) {
-        webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
-    }
-
     fun closePopup() {
+        eventReporter.onShopPayWebViewCancelled(didReceiveECEClick)
         viewModelScope.launch {
             _paymentResult.emit(ShopPayActivityResult.Canceled)
         }
@@ -151,6 +160,7 @@ internal class ShopPayViewModel @Inject constructor(
     }
 
     fun loadUrl(webView: WebView) {
+        eventReporter.onShopPayWebViewLoadAttempt()
         webView.loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
 

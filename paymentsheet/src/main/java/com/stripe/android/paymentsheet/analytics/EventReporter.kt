@@ -236,6 +236,21 @@ internal interface EventReporter {
         event: USBankAccountFormViewModel.AnalyticsEvent
     )
 
+    /**
+     * Shop Pay webView loading has been attempted.
+     */
+    fun onShopPayWebViewLoadAttempt()
+
+    /**
+     * Shop Pay webView payment confirmation has succeeded.
+     */
+    fun onShopPayWebViewConfirmSuccess()
+
+    /**
+     * Shop Pay webView has been cancelled by the user.
+     */
+    fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom"),

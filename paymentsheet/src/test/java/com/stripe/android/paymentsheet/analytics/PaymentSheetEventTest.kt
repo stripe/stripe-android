@@ -1738,6 +1738,91 @@ class PaymentSheetEventTest {
         )
     }
 
+    @Test
+    fun `ShopPayWebviewLoadAttempt event should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewLoadAttempt(
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_shoppay_webview_load_attempt")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewConfirmSuccess event should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewConfirmSuccess(
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_shoppay_webview_confirm_success")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewCancelled event with ECE click should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewCancelled(
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            didReceiveECEClick = true,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_shoppay_webview_cancelled")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "did_receive_ece_click" to true,
+            )
+        )
+    }
+
+    @Test
+    fun `ShopPayWebviewCancelled event without ECE click should return expected event name and params`() {
+        val event = PaymentSheetEvent.ShopPayWebviewCancelled(
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            didReceiveECEClick = false,
+        )
+
+        assertThat(event.params["did_receive_ece_click"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `ShopPay events with different deferred and link states should return expected params`() {
+        val loadAttemptEvent = PaymentSheetEvent.ShopPayWebviewLoadAttempt(
+            isDeferred = true,
+            linkEnabled = true,
+            googlePaySupported = true,
+        )
+
+        assertThat(loadAttemptEvent.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to true,
+                "link_enabled" to true,
+                "google_pay_enabled" to true,
+            )
+        )
+    }
+
     private fun newCardPaymentMethod(
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         result: PaymentSheetEvent.Payment.Result

@@ -28,6 +28,12 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
     private val _confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
     override val confirmationState: StateFlow<ShopPayConfirmationState> = _confirmationState
 
+    private var onECEClickCallback: (() -> Unit)? = null
+
+    override fun setOnECEClickCallback(callback: () -> Unit) {
+        onECEClickCallback = callback
+    }
+
     @JavascriptInterface
     override fun consoleLog(level: String, message: String, origin: String, url: String) {
         val emoji = when (level.lowercase()) {
@@ -48,6 +54,8 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
             ?: throw IllegalArgumentException("Failed to parse handle click request")
 
         logMessage("Parsed handle click request: $handleClickRequest")
+
+        onECEClickCallback?.invoke()
 
         val shopPayConfiguration = shopPayArgs.shopPayConfiguration
         HandleClickResponse(
