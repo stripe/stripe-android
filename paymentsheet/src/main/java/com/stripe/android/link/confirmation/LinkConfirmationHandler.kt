@@ -14,13 +14,6 @@ internal interface LinkConfirmationHandler {
         billingPhone: String?
     ): Result
 
-    suspend fun confirm(
-        paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        billingPhone: String?
-    ): Result
-
     fun interface Factory {
         fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler
     }
