@@ -4,44 +4,36 @@ import android.os.Parcelable
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import kotlinx.parcelize.Parcelize
 
 /**
  * The payment method selected by the user within their Link account, including the parameters
  * needed to confirm the Stripe Intent.
- *
- * @param paymentDetails The [ConsumerPaymentDetails.PaymentDetails] selected by the user
- * @param paymentMethodCreateParams The [PaymentMethodCreateParams] to be used to confirm
- *                                  the Stripe Intent.
  */
 internal sealed interface LinkPaymentDetails : Parcelable {
 
     /**
-     * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
+     * The Link payment details used for confirmation in passthrough mode.
+     *
+     * @param paymentMethod The [PaymentMethod] of type 'card'
      */
     @Parcelize
-    // TODO: Rename to passthrough
-    class Saved(
+    class ForPassthroughMode(
         val paymentMethod: PaymentMethod,
     ) : LinkPaymentDetails
 
     /**
-     * A new [ConsumerPaymentDetails.PaymentDetails], whose data was just collected from the user.
-     * Must hold the original [PaymentMethodCreateParams] too in case we need to populate the form
+     * The Link payment details used for confirmation in payment method mode.
+     *
+     * @param paymentDetails The [ConsumerPaymentDetails] representing the Link payment details
+     * @param paymentMethodCreateParams The Link-specific payment method create params
+     * @param originalParams The original payment method create params in case we need to populate the form
      * fields with the user-entered values.
      */
     @Parcelize
-    data class New(
+    data class ForPaymentMethodMode(
         val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         val paymentMethodCreateParams: PaymentMethodCreateParams,
         val originalParams: PaymentMethodCreateParams
-    ) : LinkPaymentDetails {
-
-        /**
-         * Build a flat map of the values entered by the user when creating this payment method,
-         * in a format that can be used to set the initial values in the FormController.
-         */
-        fun buildFormValues() = convertToFormValuesMap(originalParams.toParamMap())
-    }
+    ) : LinkPaymentDetails
 }

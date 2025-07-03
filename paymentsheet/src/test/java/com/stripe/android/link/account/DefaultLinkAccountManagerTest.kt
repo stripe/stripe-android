@@ -489,7 +489,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 consumerPublishableKey: String?,
                 active: Boolean
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
                 val details = result.first()
                 if (result.size > 1) {
                     result = result.subList(1, result.size)
@@ -527,7 +527,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 consumerPublishableKey: String?,
                 active: Boolean
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
                 createCardPaymentDetailsCallCount += 1
                 return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
             }
@@ -538,7 +538,7 @@ class DefaultLinkAccountManagerTest {
                 last4: String,
                 consumerSessionClientSecret: String,
                 allowRedisplay: PaymentMethod.AllowRedisplay?,
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
                 val paymentDetailsMatch = paymentMethodCreateParams == TestFactory.PAYMENT_METHOD_CREATE_PARAMS &&
                     id == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id &&
                     last4 == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.last4
@@ -1082,7 +1082,7 @@ class DefaultLinkAccountManagerTest {
                 consumerSessionClientSecret: String,
                 consumerPublishableKey: String?,
                 active: Boolean
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
                 return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
             }
 
@@ -1092,7 +1092,7 @@ class DefaultLinkAccountManagerTest {
                 last4: String,
                 consumerSessionClientSecret: String,
                 allowRedisplay: PaymentMethod.AllowRedisplay?,
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
                 actualAllowRedisplay = allowRedisplay
 
                 return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)

@@ -141,7 +141,7 @@ internal object TestFactory {
         clientSecret = CLIENT_SECRET,
     )
 
-    val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
+    val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.ForPaymentMethodMode(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
@@ -152,7 +152,7 @@ internal object TestFactory {
         encodedPaymentMethod = "{\"id\": \"pm_123\"}",
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.ForPassthroughMode(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
     )

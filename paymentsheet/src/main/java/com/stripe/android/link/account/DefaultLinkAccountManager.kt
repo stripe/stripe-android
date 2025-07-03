@@ -244,7 +244,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun shareCardPaymentDetails(
-        paymentDetails: LinkPaymentDetails.New,
+        paymentDetails: LinkPaymentDetails.ForPaymentMethodMode,
     ): Result<LinkPaymentDetails> {
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccountValue != null) {
@@ -255,7 +255,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 paymentMethodCreateParams = paymentDetails.paymentMethodCreateParams,
                 allowRedisplay = paymentDetails.paymentMethodCreateParams.allowRedisplay,
             ).map {
-                LinkPaymentDetails.Saved(it)
+                LinkPaymentDetails.ForPassthroughMode(it)
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
@@ -267,7 +267,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails.New> {
+    ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
         val account = linkAccountHolder.linkAccountInfo.value.account
         return if (account != null) {
             linkRepository.createCardPaymentDetails(
@@ -279,7 +279,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 active = config.passthroughModeEnabled,
             ).map {
                 if (config.passthroughModeEnabled) {
-                    LinkPaymentDetails.New(
+                    LinkPaymentDetails.ForPaymentMethodMode(
                         paymentDetails = it,
                         paymentMethodCreateParams = paymentMethodCreateParams,
                         originalParams = paymentMethodCreateParams,
@@ -292,7 +292,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                         extraParams = extraParams,
                         allowRedisplay = paymentMethodCreateParams.allowRedisplay
                     )
-                    LinkPaymentDetails.New(
+                    LinkPaymentDetails.ForPaymentMethodMode(
                         paymentDetails = it,
                         paymentMethodCreateParams = createParams,
                         originalParams = paymentMethodCreateParams, // TODO: Why original?

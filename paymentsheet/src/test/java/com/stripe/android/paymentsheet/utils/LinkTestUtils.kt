@@ -17,7 +17,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 
 internal object LinkTestUtils {
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.ForPassthroughMode(
         paymentDetails = ConsumerPaymentDetails.Card(
             id = "pm_123",
             last4 = "4242",
@@ -42,7 +42,7 @@ internal object LinkTestUtils {
         paymentMethodCreateParams = mock(),
     )
 
-    val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
+    val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.ForPaymentMethodMode(
         paymentDetails = ConsumerPaymentDetails.Card(
             id = "pm_123",
             last4 = "4242",

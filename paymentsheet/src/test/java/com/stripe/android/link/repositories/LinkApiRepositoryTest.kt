@@ -493,7 +493,7 @@ class LinkApiRepositoryTest {
         )
 
         assertThat(result.isSuccess).isTrue()
-        val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.Saved
+        val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.ForPassthroughMode
 
         verify(stripeRepository).sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionSecret,

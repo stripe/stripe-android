@@ -24,7 +24,7 @@ import org.mockito.kotlin.mock
 
 internal class FakeLinkConfigurationCoordinator(
     private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
-        LinkPaymentDetails.New(
+        LinkPaymentDetails.ForPaymentMethodMode(
             paymentDetails = ConsumerPaymentDetails.Card(
                 id = "pm_123",
                 last4 = "4242",
