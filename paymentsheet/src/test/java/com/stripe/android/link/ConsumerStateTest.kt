@@ -256,19 +256,24 @@ class ConsumerStateTest {
         assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
         assertThat(result.paymentDetails[0].billingPhone).isEqualTo(newPhone)
         assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123") // Preserved
-        // Check that the other payment detail was not affected
+        // Check that the other payment detail keeps its existing phone (not overwritten)
         assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
-        assertThat(result.paymentDetails[1].billingPhone).isEqualTo("+0987654321")
+        assertThat(result.paymentDetails[1].billingPhone).isEqualTo("+0987654321") // Existing phone preserved
         assertThat(result.paymentDetails[1].collectedCvc).isNull()
     }
 
     @Test
-    fun `withUpdatedPaymentDetail with no matching ID returns same state`() {
+    fun `withUpdatedPaymentDetail with no matching ID keeps existing payment details unchanged`() {
         val existingPaymentDetails = listOf(
             LinkPaymentMethod.ConsumerPaymentDetails(
                 details = CONSUMER_PAYMENT_DETAILS_CARD,
                 collectedCvc = "123",
                 billingPhone = "+1234567890"
+            ),
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+                collectedCvc = null,
+                billingPhone = null // No phone
             )
         )
         val existingState = ConsumerState(existingPaymentDetails)
@@ -300,15 +305,19 @@ class ConsumerStateTest {
             billingPhone = "+9999999999"
         )
 
-        // Should return the same state since no ID matched
-        assertThat(result.paymentDetails).hasSize(1)
+        assertThat(result.paymentDetails).hasSize(2)
+        // First payment detail keeps existing phone (has one already)
         assertThat(result.paymentDetails[0].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_CARD)
-        assertThat(result.paymentDetails[0].billingPhone).isEqualTo("+1234567890")
+        assertThat(result.paymentDetails[0].billingPhone).isEqualTo("+1234567890") // Unchanged
         assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123")
+        // Second payment detail gets the new phone (didn't have one)
+        assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
+        assertThat(result.paymentDetails[1].billingPhone).isEqualTo("+9999999999") // Applied
+        assertThat(result.paymentDetails[1].collectedCvc).isNull()
     }
 
     @Test
-    fun `withUpdatedPaymentDetail with null billingPhone deletes existing billingPhone`() {
+    fun `withUpdatedPaymentDetail with null billingPhone preserves existing billingPhone`() {
         val existingPaymentDetails = listOf(
             LinkPaymentMethod.ConsumerPaymentDetails(
                 details = CONSUMER_PAYMENT_DETAILS_CARD,
@@ -327,7 +336,110 @@ class ConsumerStateTest {
 
         assertThat(result.paymentDetails).hasSize(1)
         assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
-        assertThat(result.paymentDetails[0].billingPhone).isNull() // Clears phone
+        assertThat(result.paymentDetails[0].billingPhone).isEqualTo("+1234567890") // Preserved existing
         assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123") // Preserved
+    }
+
+    @Test
+    fun `withUpdatedPaymentDetail with explicit billingPhone updates it`() {
+        val existingPaymentDetails = listOf(
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_CARD,
+                collectedCvc = "123",
+                billingPhone = "+1234567890"
+            )
+        )
+        val existingState = ConsumerState(existingPaymentDetails)
+
+        val updatedCard = CONSUMER_PAYMENT_DETAILS_CARD.copy(last4 = "9999")
+        val newPhone = "+9999999999"
+
+        val result = existingState.withUpdatedPaymentDetail(
+            updatedPayment = updatedCard,
+            billingPhone = newPhone
+        )
+
+        assertThat(result.paymentDetails).hasSize(1)
+        assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
+        assertThat(result.paymentDetails[0].billingPhone).isEqualTo(newPhone) // Updated
+        assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123") // Preserved
+    }
+
+    @Test
+    fun `withUpdatedPaymentDetail applies billing phone to other payment details without phones`() {
+        val existingPaymentDetails = listOf(
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_CARD,
+                collectedCvc = "123",
+                billingPhone = "+1234567890"
+            ),
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+                collectedCvc = null,
+                billingPhone = null // No phone
+            ),
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+                collectedCvc = null,
+                billingPhone = null // No phone
+            )
+        )
+        val existingState = ConsumerState(existingPaymentDetails)
+
+        val updatedCard = CONSUMER_PAYMENT_DETAILS_CARD.copy(last4 = "9999")
+        val newPhone = "+1111111111"
+
+        val result = existingState.withUpdatedPaymentDetail(
+            updatedPayment = updatedCard,
+            billingPhone = newPhone
+        )
+
+        assertThat(result.paymentDetails).hasSize(3)
+        // Updated payment detail
+        assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
+        assertThat(result.paymentDetails[0].billingPhone).isEqualTo(newPhone)
+        assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123")
+        // Bank account should get the new phone (was null)
+        assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
+        assertThat(result.paymentDetails[1].billingPhone).isEqualTo(newPhone) // Applied
+        assertThat(result.paymentDetails[1].collectedCvc).isNull()
+        // Passthrough should get the new phone (was null)
+        assertThat(result.paymentDetails[2].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH)
+        assertThat(result.paymentDetails[2].billingPhone).isEqualTo(newPhone) // Applied
+        assertThat(result.paymentDetails[2].collectedCvc).isNull()
+    }
+
+    @Test
+    fun `withUpdatedPaymentDetail with null billing phone does not propagate to other payment details`() {
+        val existingPaymentDetails = listOf(
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_CARD,
+                collectedCvc = "123",
+                billingPhone = "+1234567890"
+            ),
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                details = CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+                collectedCvc = null,
+                billingPhone = null // No phone
+            )
+        )
+        val existingState = ConsumerState(existingPaymentDetails)
+
+        val updatedCard = CONSUMER_PAYMENT_DETAILS_CARD.copy(last4 = "9999")
+
+        val result = existingState.withUpdatedPaymentDetail(
+            updatedPayment = updatedCard,
+            billingPhone = null // No phone to propagate
+        )
+
+        assertThat(result.paymentDetails).hasSize(2)
+        // Updated payment detail preserves existing phone
+        assertThat(result.paymentDetails[0].details).isEqualTo(updatedCard)
+        assertThat(result.paymentDetails[0].billingPhone).isEqualTo("+1234567890") // Preserved
+        assertThat(result.paymentDetails[0].collectedCvc).isEqualTo("123")
+        // Other payment detail remains unchanged (still null phone)
+        assertThat(result.paymentDetails[1].details).isEqualTo(CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
+        assertThat(result.paymentDetails[1].billingPhone).isNull() // Still null
+        assertThat(result.paymentDetails[1].collectedCvc).isNull()
     }
 }

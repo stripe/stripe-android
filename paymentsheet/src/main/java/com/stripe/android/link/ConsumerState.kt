@@ -35,6 +35,9 @@ internal data class ConsumerState(
     /**
      * Updates a single payment detail in the state while preserving all local data.
      *
+     * If a billing phone is provided, it will also be applied to all other payment details
+     * that don't currently have a billing phone.
+     *
      * @param updatedPayment The updated payment detail from the backend
      * @param billingPhone The billing phone to set, or null to preserve existing
      * @return A new [ConsumerState] with the updated payment detail, or the same state if no match found
@@ -46,14 +49,14 @@ internal data class ConsumerState(
         return copy(
             paymentDetails = paymentDetails.map { paymentDetail ->
                 if (paymentDetail.details.id == updatedPayment.id) {
+                    // Update the matching payment detail
                     paymentDetail.copy(
                         details = updatedPayment,
-                        billingPhone = billingPhone
+                        billingPhone = billingPhone ?: paymentDetail.billingPhone
                     )
                 } else {
-                    paymentDetail.copy(
-                        billingPhone = billingPhone
-                    )
+                    // Apply phone to payment details that don't have one, preserving existing if any
+                    paymentDetail.copy(billingPhone = paymentDetail.billingPhone ?: billingPhone)
                 }
             }
         )
