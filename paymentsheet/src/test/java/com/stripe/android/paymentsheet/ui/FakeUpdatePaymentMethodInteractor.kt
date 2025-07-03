@@ -47,6 +47,7 @@ internal class FakeUpdatePaymentMethodInteractor(
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
             isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+            requiresModification = true,
             cardBrandFilter = cardBrandFilter,
             payload = EditCardPayload.create(
                 card = displayableSavedPaymentMethod.paymentMethod.card!!,

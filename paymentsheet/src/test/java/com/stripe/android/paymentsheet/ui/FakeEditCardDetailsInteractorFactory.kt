@@ -11,6 +11,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
     override fun create(
         coroutineScope: CoroutineScope,
         isCbcModifiable: Boolean,
+        requiresModification: Boolean,
         areExpiryDateAndAddressModificationSupported: Boolean,
         cardBrandFilter: CardBrandFilter,
         payload: EditCardPayload,

@@ -435,6 +435,98 @@ internal class DefaultEditCardDetailsInteractorTest {
         assertThat(cardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("94444")
     }
 
+    @Test
+    fun whenRequiresModificationIsFalseAndFormIsCompleteThenCardUpdateParamsIsUpdated() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            requiresModification = false,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        // No changes made, but requiresModification is false, so params should be updated
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry(
+                    value = PaymentMethodFixtures.BILLING_DETAILS.address?.postalCode ?: "",
+                    isComplete = true
+                ),
+                country = FormFieldEntry(
+                    value = PaymentMethodFixtures.BILLING_DETAILS.address?.country ?: "",
+                    isComplete = true
+                ),
+            )
+        )
+
+        assertThat(cardUpdateParams).isNotNull()
+    }
+
+    @Test
+    fun whenRequiresModificationIsTrueAndNoChangesAndFormIsCompleteThenCardUpdateParamsIsNull() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            requiresModification = true,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        // No changes made, and requiresModification is true, so params should be null
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry(
+                    value = PaymentMethodFixtures.BILLING_DETAILS.address?.postalCode ?: "",
+                    isComplete = true
+                ),
+                country = FormFieldEntry(
+                    value = PaymentMethodFixtures.BILLING_DETAILS.address?.country ?: "",
+                    isComplete = true
+                ),
+            )
+        )
+
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun whenRequiresModificationIsFalseAndFormIsIncompleteThenCardUpdateParamsIsNull() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            requiresModification = false,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        // Form is incomplete, so params should be null regardless of requiresModification
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry("", isComplete = false),
+                country = FormFieldEntry("US", isComplete = true),
+            )
+        )
+
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun whenRequiresModificationIsFalseAndCardBrandNotChangedThenCardUpdateParamsIsUpdated() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            requiresModification = false,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        // Select the same card brand (no change)
+        handler.updateCardBrand(CardBrand.CartesBancaires)
+
+        assertThat(cardUpdateParams).isNotNull()
+        assertThat(cardUpdateParams?.cardBrand).isEqualTo(CardBrand.CartesBancaires)
+    }
+
     private val EditCardDetailsInteractor.uiState
         get() = this.state.value
 
@@ -448,6 +540,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         areExpiryDateAndAddressModificationSupported: Boolean = true,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
+        requiresModification: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
         onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
     ): EditCardDetailsInteractor {
@@ -456,6 +549,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
             isCbcModifiable = isCbcModifiable,
+            requiresModification = requiresModification,
             payload = EditCardPayload.create(card, billingDetails),
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
             areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,

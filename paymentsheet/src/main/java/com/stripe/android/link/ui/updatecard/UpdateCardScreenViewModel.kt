@@ -178,7 +178,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
             isCbcModifiable = paymentDetails.availableNetworks.size > 1,
-            onBrandChoiceChanged = ::onBrandChoiceChanged
+            onBrandChoiceChanged = ::onBrandChoiceChanged,
+            // We prefill in the billing details update flow, so the form might
+            // already be complete on first render. The user can submit without modifying.
+            requiresModification = state.value.isBillingDetailsUpdateFlow.not()
         )
     }
 

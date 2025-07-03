@@ -190,6 +190,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 phone = CollectionMode.Never,
                 name = CollectionMode.Never
             ),
+            requiresModification = true
         )
     }
 
@@ -213,6 +214,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 phone = CollectionMode.Never,
                 name = CollectionMode.Never
             ),
+            requiresModification = true
         )
     }
 

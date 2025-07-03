@@ -131,7 +131,8 @@ internal fun UpdateCardScreenBodyPreview() {
                     ),
                     onBrandChoiceChanged = {},
                     onCardUpdateParamsChanged = {},
-                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration()
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+                    requiresModification = true
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",

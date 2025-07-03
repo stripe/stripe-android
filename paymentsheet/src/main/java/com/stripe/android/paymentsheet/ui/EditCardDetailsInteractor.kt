@@ -114,6 +114,7 @@ internal interface EditCardDetailsInteractor {
         val availableNetworks: List<CardBrandChoice>,
         val expiryDateState: ExpiryDateState,
         val billingDetailsForm: BillingDetailsForm?,
+        val requireModification: Boolean = true,
     )
 
     sealed interface ViewAction {
@@ -126,6 +127,7 @@ internal interface EditCardDetailsInteractor {
         fun create(
             coroutineScope: CoroutineScope,
             isCbcModifiable: Boolean,
+            requiresModification: Boolean,
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             payload: EditCardPayload,
@@ -141,6 +143,10 @@ internal class DefaultEditCardDetailsInteractor(
     private val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     private val cardBrandFilter: CardBrandFilter,
     private val isCbcModifiable: Boolean,
+    // Whether the card details require modification to be submitted.
+    // on scenarios where we prefill details, we just want the form to be completed,
+    // not necessarily user-modified.
+    private val requiresModification: Boolean,
     // Local flag for whether expiry date and address can be edited.
     // This flag has no effect on Card Brand Choice.
     // It will be removed before release.
@@ -193,7 +199,7 @@ internal class DefaultEditCardDetailsInteractor(
         val isComplete = cardDetailsEntry.isComplete() &&
             billingDetailsEntry?.isComplete(billingDetailsCollectionConfiguration) != false
 
-        return if (hasChanges && isComplete) {
+        return if ((hasChanges || requiresModification.not()) && isComplete) {
             toUpdateParams(cardDetailsEntry, billingDetailsEntry)
         } else {
             null
@@ -308,6 +314,7 @@ internal class DefaultEditCardDetailsInteractor(
         override fun create(
             coroutineScope: CoroutineScope,
             isCbcModifiable: Boolean,
+            requiresModification: Boolean,
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             payload: EditCardPayload,
@@ -323,7 +330,8 @@ internal class DefaultEditCardDetailsInteractor(
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported
+                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
+                requiresModification = requiresModification
             )
         }
     }
