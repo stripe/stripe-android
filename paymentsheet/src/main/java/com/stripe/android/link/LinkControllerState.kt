@@ -6,7 +6,6 @@ internal data class LinkControllerState(
     val linkConfigurationResult: Result<LinkConfiguration?>? = null,
     val linkGate: LinkGate? = null,
     val presentedForEmail: String? = null,
-    val linkAccountUpdate: LinkAccountUpdate = LinkAccountUpdate.None,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
     val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,

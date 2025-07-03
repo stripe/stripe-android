@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -30,6 +31,7 @@ internal class LinkControllerViewModel @Inject constructor(
     application: Application,
     private val paymentElementLoader: PaymentElementLoader,
     private val linkGateFactory: LinkGate.Factory,
+    private val linkAccountHolder: LinkAccountHolder,
     val linkActivityContract: NativeLinkActivityContract,
 ) : AndroidViewModel(application) {
 
@@ -83,15 +85,14 @@ internal class LinkControllerViewModel @Inject constructor(
                 )
                 ?: return@launch
 
-            val linkAccountInfo = (state.linkAccountUpdate as? LinkAccountUpdate.Value)
-                ?.takeIf { email == state.presentedForEmail }
+            val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
+                .takeIf { email == state.presentedForEmail && email == it.account?.email }
                 ?: LinkAccountUpdate.Value(null)
             val selectedPaymentMethod = state.selectedPaymentMethod.takeIf { linkAccountInfo.account != null }
 
             _state.update {
                 it.copy(
                     presentedForEmail = email,
-                    linkAccountUpdate = linkAccountInfo,
                     selectedPaymentMethod = selectedPaymentMethod,
                 )
             }
@@ -110,28 +111,26 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onResult(context: Context, result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
+                linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 _state.update {
-                    it.copy(
-                        linkAccountUpdate = result.linkAccountUpdate,
-                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Canceled,
-                    )
+                    it.copy(presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Canceled)
                 }
             }
             is LinkActivityResult.Completed -> {
+                linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 _state.update {
                     it.copy(
                         selectedPaymentMethod = result.selectedPayment,
                         presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Selected(
                             preview = result.selectedPayment!!.toPreview(context)
                         ),
-                        linkAccountUpdate = result.linkAccountUpdate,
                     )
                 }
             }
             is LinkActivityResult.Failed -> {
+                linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 _state.update {
                     it.copy(
-                        linkAccountUpdate = result.linkAccountUpdate,
                         presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Failed(
                             error = result.error,
                         ),
