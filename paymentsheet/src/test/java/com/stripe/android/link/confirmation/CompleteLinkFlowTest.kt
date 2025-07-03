@@ -30,7 +30,7 @@ internal class CompleteLinkFlowTest {
     )
 
     val linkPaymentMethod = LinkPaymentDetails(
-        linkPaymentDetails,
+        linkPaymentDetails.paymentDetails,
         collectedCvc = cvc,
         billingPhone = null
     )

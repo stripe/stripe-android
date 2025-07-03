@@ -273,7 +273,7 @@ internal class WalletViewModel @Inject constructor(
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+            selectedPaymentDetails = LinkPaymentMethod(
                 details = selectedPaymentDetails,
                 collectedCvc = cvc,
                 billingPhone = linkAccount.unredactedPhoneNumber

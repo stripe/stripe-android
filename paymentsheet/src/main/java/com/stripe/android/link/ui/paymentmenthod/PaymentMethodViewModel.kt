@@ -123,7 +123,7 @@ internal class PaymentMethodViewModel @Inject constructor(
         billingPhone: String?
     ) {
         val result = completeLinkFlow(
-            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+            selectedPaymentDetails = LinkPaymentMethod(
                 details = paymentDetails,
                 collectedCvc = cvc,
                 billingPhone = billingPhone
