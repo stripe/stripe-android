@@ -96,7 +96,7 @@ private suspend fun checkout(context: Context): CreateIntentResult {
     )
     val requestBody = Json.encodeToString(ExampleCheckoutRequest.serializer(), request)
     val apiResult = Fuel
-        .post("https://stripe-mobile-payment-sheet.glitch.me/checkout")
+        .post("https://stripe-mobile-payment-sheet.stripedemos.com/checkout")
         .jsonBody(requestBody)
         .suspendable()
         .awaitModel(ExampleCheckoutResponse.serializer())
