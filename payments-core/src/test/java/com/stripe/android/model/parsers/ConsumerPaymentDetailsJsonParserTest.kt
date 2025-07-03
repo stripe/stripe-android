@@ -130,6 +130,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `parse multiple payment details`() {
         assertEquals(
             ConsumerPaymentDetails(

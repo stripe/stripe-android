@@ -80,10 +80,19 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
         else -> billingAddress
     }
 
-    return withBillingDetails(
-        billingAddress = effectiveBillingAddress,
-        billingEmailAddress = effectiveBillingDetails.email ?: billingEmailAddress
-    )
+    val effectiveEmailAddress = effectiveBillingDetails.email ?: billingEmailAddress
+
+    return when (this) {
+        is ConsumerPaymentDetails.Card -> copy(
+            billingAddress = effectiveBillingAddress,
+            billingEmailAddress = effectiveEmailAddress
+        )
+        is ConsumerPaymentDetails.BankAccount -> copy(
+            billingAddress = effectiveBillingAddress,
+            billingEmailAddress = effectiveEmailAddress
+        )
+        is ConsumerPaymentDetails.Passthrough -> this
+    }
 }
 
 private fun PaymentSheet.BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.BillingAddress? {

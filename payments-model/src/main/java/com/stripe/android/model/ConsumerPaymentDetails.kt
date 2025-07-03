@@ -24,11 +24,6 @@ data class ConsumerPaymentDetails(
     ) : Parcelable {
 
         abstract val last4: String
-
-        abstract fun withBillingDetails(
-            billingAddress: BillingAddress?,
-            billingEmailAddress: String?
-        ): PaymentDetails
     }
 
     @Parcelize
@@ -69,16 +64,6 @@ data class ConsumerPaymentDetails(
                 .map { CardBrand.fromCode(it) }
                 .filter { it != CardBrand.Unknown }
 
-        override fun withBillingDetails(
-            billingAddress: BillingAddress?,
-            billingEmailAddress: String?
-        ): PaymentDetails {
-            return copy(
-                billingAddress = billingAddress,
-                billingEmailAddress = billingEmailAddress
-            )
-        }
-
         companion object {
             const val TYPE = "card"
         }
@@ -99,16 +84,6 @@ data class ConsumerPaymentDetails(
         billingAddress = billingAddress,
         billingEmailAddress = billingEmailAddress
     ) {
-
-        override fun withBillingDetails(
-            billingAddress: BillingAddress?,
-            billingEmailAddress: String?
-        ): PaymentDetails {
-            return copy(
-                billingAddress = billingAddress,
-                billingEmailAddress = billingEmailAddress
-            )
-        }
 
         companion object {
             const val TYPE = "card"
@@ -134,16 +109,6 @@ data class ConsumerPaymentDetails(
         billingAddress = billingAddress,
         billingEmailAddress = billingEmailAddress
     ) {
-
-        override fun withBillingDetails(
-            billingAddress: BillingAddress?,
-            billingEmailAddress: String?
-        ): PaymentDetails {
-            return copy(
-                billingAddress = billingAddress,
-                billingEmailAddress = billingEmailAddress
-            )
-        }
 
         companion object {
             const val TYPE = "bank_account"

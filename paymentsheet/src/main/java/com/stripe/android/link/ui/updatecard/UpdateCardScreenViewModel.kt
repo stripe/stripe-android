@@ -104,7 +104,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     )
                     val result = linkAccountManager.updatePaymentDetails(
                         updateParams = updateParams,
-                        phone = cardParams.billingDetails?.phone
+                        phone = paymentUpdateParams.billingDetails?.phone
                     ).getOrThrow()
 
                     if (state.value.isBillingDetailsUpdateFlow) {

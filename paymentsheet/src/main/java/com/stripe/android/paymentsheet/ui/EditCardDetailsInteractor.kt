@@ -154,9 +154,7 @@ internal interface EditCardDetailsInteractor {
         val selectedCardBrand: CardBrandChoice,
         val shouldShowCardBrandDropdown: Boolean,
         val availableNetworks: List<CardBrandChoice>,
-        val expiryDateState: ExpiryDateState,
-        val billingDetailsForm: BillingDetailsForm?,
-        val requireModification: Boolean = true,
+        val expiryDateState: ExpiryDateState
     )
 
     sealed interface ViewAction {
@@ -321,17 +319,13 @@ internal class DefaultEditCardDetailsInteractor(
     }
 
     private fun CardEditConfiguration.defaultCardBrandChoice(): CardBrandChoice {
-        return if (cardEditConfiguration != null) {
-            payload.getPreferredChoice(cardEditConfiguration.cardBrandFilter)
-        } else {
-            CardBrandChoice(Unknown, enabled = false)
-        }
+        return payload.getPreferredChoice(cardBrandFilter)
     }
 
     private fun CardEditConfiguration.defaultExpiryDateState(): ExpiryDateState {
         return ExpiryDateState.create(
             editPayload = payload,
-            enabled = areExpiryDateAndAddressModificationSupported == true
+            enabled = areExpiryDateAndAddressModificationSupported
         )
     }
 
@@ -371,7 +365,7 @@ internal class DefaultEditCardDetailsInteractor(
             } else {
                 null
             },
-            billingDetailsForm = billingDetailsForm,
+            billingDetailsForm = billingDetailsForm
         )
     }
 
