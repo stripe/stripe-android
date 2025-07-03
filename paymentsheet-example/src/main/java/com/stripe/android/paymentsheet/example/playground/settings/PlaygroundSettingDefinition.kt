@@ -3,12 +3,23 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal interface PlaygroundSettingDefinition<T> {
     val defaultValue: T
+
+    fun configure(
+        value: T,
+        configurationBuilder: PaymentSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PaymentSheetConfigurationData,
+        settings: Settings,
+    ) {
+        configure(value, configurationBuilder, playgroundState, configurationData)
+    }
 
     fun configure(
         value: T,

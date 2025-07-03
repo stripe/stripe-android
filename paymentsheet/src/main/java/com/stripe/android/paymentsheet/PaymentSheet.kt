@@ -1099,7 +1099,7 @@ class PaymentSheet internal constructor(
              * Google Places API key to support autocomplete when collecting billing details
              */
             @AddressAutocompletePreview
-            fun googlePlacesApiKey(googlePlacesApiKey: String?) = apply {
+            fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
                 this.googlePlacesApiKey = googlePlacesApiKey
             }
 

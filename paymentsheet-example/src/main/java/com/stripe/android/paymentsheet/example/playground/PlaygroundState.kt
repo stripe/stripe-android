@@ -7,6 +7,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
@@ -96,8 +97,8 @@ internal sealed interface PlaygroundState : Parcelable {
             )
         }
 
-        fun paymentSheetConfiguration(): PaymentSheet.Configuration {
-            return snapshot.paymentSheetConfiguration(this)
+        fun paymentSheetConfiguration(settings: Settings): PaymentSheet.Configuration {
+            return snapshot.paymentSheetConfiguration(playgroundState = this, appSettings = settings)
         }
 
         fun embeddedConfiguration(): EmbeddedPaymentElement.Configuration {

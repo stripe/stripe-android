@@ -65,7 +65,7 @@ internal class PaymentSheetPlaygroundViewModel(
     launchUri: Uri?,
 ) : AndroidViewModel(application) {
 
-    private val settings by lazy {
+    val settings by lazy {
         Settings(application)
     }
 
