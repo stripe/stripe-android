@@ -27,12 +27,8 @@ class Settings(context: Context) {
     private companion object {
         /**
          * Note: only necessary if not configured via `gradle.properties`.
-         *
-         * Set to the base URL of your test backend. If you are using
-         * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
-         * the URL will be something like `https://stripe-example-mobile-backend.glitch.me/`.
          */
-        private const val BASE_URL = "https://stripe-mobile-connections-example.glitch.me/"
+        private const val BASE_URL = "https://android-financial-connections-playground.stripedemos.com/"
 
         private const val METADATA_BACKEND_URL_KEY =
             "com.stripe.financialconnections.example.metadata.backend_url"
