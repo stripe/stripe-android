@@ -129,14 +129,19 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.ForPaymentMethodMode -> {
                 linkStore.markLinkAsUsed()
 
+                // Confirm with Link's payment method create params
                 linkPaymentDetails.toNewOption(saveOption, configuration, extraParams)
             }
             is LinkPaymentDetails.ForPassthroughMode -> {
                 linkStore.markLinkAsUsed()
 
+                // Confirm with the generated PaymentMethod
                 linkPaymentDetails.toSavedOption(saveOption)
             }
-            null -> linkInlineSignupConfirmationOption.toNewOption()
+            null -> {
+                // Confirm without Link
+                linkInlineSignupConfirmationOption.toNewOption()
+            }
         }
     }
 
