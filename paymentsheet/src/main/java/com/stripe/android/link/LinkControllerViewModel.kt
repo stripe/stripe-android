@@ -14,6 +14,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
+import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.Job
@@ -32,6 +33,7 @@ internal class LinkControllerViewModel @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val linkGateFactory: LinkGate.Factory,
     private val linkAccountHolder: LinkAccountHolder,
+    private val linkApiRepository: LinkApiRepository,
     val linkActivityContract: NativeLinkActivityContract,
 ) : AndroidViewModel(application) {
 
@@ -143,6 +145,20 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
+    fun onLookupConsumer(email: String) {
+        viewModelScope.launch {
+            val result =
+                linkApiRepository.lookupConsumer(email).map { it.exists }
+                    .fold(
+                        onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
+                        onFailure = { LinkController.LookupConsumerResult.Failed(email, it) },
+                    )
+            _state.update {
+                it.copy(lookupConsumerResult = result)
+            }
+        }
+    }
+
     private suspend fun updateLinkConfiguration(): Result<LinkConfiguration?> {
         _state.update { it.copy(linkConfigurationResult = null) }
         val result = loadLinkConfiguration()
@@ -177,12 +193,6 @@ internal class LinkControllerViewModel @Inject constructor(
             .map { it.linkConfigurationResult }
             .filterNotNull()
             .first()
-    }
-
-    fun onLookupConsumer(email: String) {
-        _state.update {
-            it.copy(lookupConsumerResult = LinkController.LookupConsumerResult.Success(email, true))
-        }
     }
 
     class Factory : ViewModelProvider.Factory {

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.link
 
 import android.os.Bundle
+import android.util.Patterns
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
@@ -13,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -25,8 +27,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 internal class LinkStandaloneActivity : AppCompatActivity() {
 
@@ -52,52 +58,109 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
 
         val presentPaymentMethodsResultState =
             mutableStateOf<LinkController.PresentPaymentMethodsResult?>(null)
+        val lookupConsumerResultState =
+            mutableStateOf<LinkController.LookupConsumerResult?>(null)
 
         linkController = LinkController.create(
             activity = this,
             presentPaymentMethodsCallback = { presentPaymentMethodsResultState.value = it },
-            lookupConsumerCallback = {},
+            lookupConsumerCallback = { lookupConsumerResultState.value = it },
         )
 
         setContent {
             PaymentSheetExampleTheme {
-                var email by rememberSaveable { mutableStateOf("") }
                 val presentPaymentMethodsResult by presentPaymentMethodsResultState
-                val presentPaymentMethodsError =
-                    (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
-                        ?.error
+                val lookupConsumerResult by lookupConsumerResultState
                 val paymentMethodPreview =
                     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Selected)
                         ?.preview
 
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 20.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Spacer(Modifier.height(16.dp))
-                    presentPaymentMethodsError?.let { error ->
-                        Text(
-                            text = error.message ?: "An error occurred",
-                            color = MaterialTheme.colors.error,
-                        )
+                ExampleScreen(
+                    paymentMethodPreview = paymentMethodPreview,
+                    presentPaymentMethodsResult = presentPaymentMethodsResult,
+                    lookupConsumerResult = lookupConsumerResult,
+                    onEmailChange = { email ->
+                        if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                            linkController.lookupConsumer(email)
+                        }
+                    },
+                    onPaymentMethodButtonClick = { email ->
+                        linkController.presentPaymentMethods(email.takeIf { it.isNotBlank() })
                     }
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = email,
-                        label = { Text(text = "Customer email") },
-                        onValueChange = { email = it }
-                    )
-                    Divider(Modifier.padding(vertical = 20.dp))
-
-                    PaymentMethodButton(
-                        preview = paymentMethodPreview,
-                        onClick = { linkController.presentPaymentMethods(email.takeIf { it.isNotBlank() }) },
-                    )
-                }
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun ExampleScreen(
+    paymentMethodPreview: LinkController.PaymentMethodPreview?,
+    presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult?,
+    lookupConsumerResult: LinkController.LookupConsumerResult?,
+    onEmailChange: (email: String) -> Unit,
+    onPaymentMethodButtonClick: (email: String) -> Unit,
+) {
+    var email by rememberSaveable { mutableStateOf("") }
+    val presentPaymentMethodsError =
+        (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
+            ?.error
+
+    val scope = rememberCoroutineScope()
+    DisposableEffect(email) {
+        val job = scope.launch {
+            delay(1_000L)
+            onEmailChange(email)
+        }
+        onDispose { job.cancel() }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Spacer(Modifier.height(16.dp))
+        presentPaymentMethodsError?.let { error ->
+            Text(
+                text = error.message ?: "An error occurred",
+                color = MaterialTheme.colors.error,
+            )
+        }
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = email,
+            label = { Text(text = "Customer email") },
+            onValueChange = { email = it }
+        )
+        Divider(Modifier.padding(vertical = 20.dp))
+
+        PaymentMethodButton(
+            preview = paymentMethodPreview,
+            onClick = { onPaymentMethodButtonClick(email) },
+        )
+        if (lookupConsumerResult is LinkController.LookupConsumerResult.Success) {
+            val resultText = if (lookupConsumerResult.isConsumer) "exists" else "does not exist"
+            Text(
+                text = "${lookupConsumerResult.email} $resultText",
+                style = MaterialTheme.typography.body1,
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(showBackground = true)
+private fun ExampleScreenPreview() {
+    PaymentSheetExampleTheme {
+        ExampleScreen(
+            paymentMethodPreview = null,
+            presentPaymentMethodsResult = null,
+            lookupConsumerResult = null,
+            onEmailChange = {},
+            onPaymentMethodButtonClick = {},
+        )
     }
 }
 
