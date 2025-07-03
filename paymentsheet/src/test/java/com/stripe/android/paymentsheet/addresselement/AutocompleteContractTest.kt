@@ -30,6 +30,7 @@ class AutocompleteContractTest {
 
         val extras = intent.extras
 
+        @Suppress("DEPRECATION")
         assertThat(extras?.getParcelable<AutocompleteContract.Args>(EXTRA_ARGS))
             .isEqualTo(args)
     }
