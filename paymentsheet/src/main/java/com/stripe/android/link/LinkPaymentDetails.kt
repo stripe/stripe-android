@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import kotlinx.parcelize.Parcelize
@@ -15,18 +16,18 @@ import kotlinx.parcelize.Parcelize
  *                                  the Stripe Intent.
  */
 internal sealed class LinkPaymentDetails(
-    open val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-    open val paymentMethodCreateParams: PaymentMethodCreateParams
+//    open val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+//    open val paymentMethodCreateParams: PaymentMethodCreateParams
 ) : Parcelable {
 
     /**
      * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
      */
     @Parcelize
+    // TODO: Rename to passthrough
     class Saved(
-        override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        override val paymentMethodCreateParams: PaymentMethodCreateParams
-    ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams)
+        val paymentMethod: PaymentMethod,
+    ) : LinkPaymentDetails()
 
     /**
      * A new [ConsumerPaymentDetails.PaymentDetails], whose data was just collected from the user.
@@ -35,10 +36,10 @@ internal sealed class LinkPaymentDetails(
      */
     @Parcelize
     class New(
-        override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        override val paymentMethodCreateParams: PaymentMethodCreateParams,
+        val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+        val paymentMethodCreateParams: PaymentMethodCreateParams,
         val originalParams: PaymentMethodCreateParams
-    ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams) {
+    ) : LinkPaymentDetails() {
 
         /**
          * Build a flat map of the values entered by the user when creating this payment method,

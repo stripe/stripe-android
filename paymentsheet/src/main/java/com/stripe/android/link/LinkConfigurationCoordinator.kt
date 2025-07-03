@@ -103,10 +103,18 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
     override suspend fun attachNewCardToAccount(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
-        getLinkPaymentLauncherComponent(configuration)
-            .linkAccountManager
-            .createCardPaymentDetails(paymentMethodCreateParams)
+    ): Result<LinkPaymentDetails> {
+        val linkAccountManager = getLinkPaymentLauncherComponent(configuration).linkAccountManager
+        val linkPaymentDetails = linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
+
+        return linkPaymentDetails.mapCatching { paymentDetails ->
+            if (configuration.passthroughModeEnabled) {
+                linkAccountManager.shareCardPaymentDetails(paymentDetails).getOrThrow()
+            } else {
+                paymentDetails
+            }
+        }
+    }
 
     override suspend fun logOut(
         configuration: LinkConfiguration,
