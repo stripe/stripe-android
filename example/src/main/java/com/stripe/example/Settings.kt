@@ -41,10 +41,8 @@ class Settings(context: Context) {
          * Note: only necessary if not configured via `gradle.properties`.
          *
          * Set to the base URL of your test backend. If you are using
-         * [example-mobile-backend](https://codesandbox.io/p/devbox/stripe-example-mobile-backend-forked-xvwgtz),
-         * the URL will be something like `https://codesandbox.io/p/devbox/stripe-example-mobile-backend-forked-LETTERSANDBUMBERS/`.
-         *
-         * If you want a pre-deployed version, https://stripe-example-mobile-backend.stripedemos.com
+         * [example-mobile-backend](https://github.com/stripe/example-mobile-backend),
+         * the URL will be something like `https://stripe-example-mobile-backend.glitch.me/`.
          */
         private const val BASE_URL = "put your base url here"
 
