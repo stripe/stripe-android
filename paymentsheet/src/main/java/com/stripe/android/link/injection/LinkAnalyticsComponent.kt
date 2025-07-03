@@ -33,9 +33,5 @@ internal interface LinkAnalyticsComponent {
 internal interface LinkAnalyticsModule {
     @Binds
     @LinkAnalyticsScope
-    fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
-
-    @Binds
-    @LinkAnalyticsScope
     fun bindLinkAnalyticsHelper(linkAnalyticsHelper: DefaultLinkAnalyticsHelper): LinkAnalyticsHelper
 }

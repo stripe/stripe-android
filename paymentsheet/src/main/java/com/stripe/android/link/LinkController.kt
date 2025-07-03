@@ -62,9 +62,9 @@ interface LinkController {
         ): LinkController {
             val viewModelProvider = ViewModelProvider(
                 owner = activity,
-                factory = LinkPaymentMethodLauncherViewModel.Factory()
+                factory = LinkControllerViewModel.Factory()
             )
-            val viewModel = viewModelProvider[LinkPaymentMethodLauncherViewModel::class.java]
+            val viewModel = viewModelProvider[LinkControllerViewModel::class.java]
             return RealLinkController(
                 activity = activity,
                 viewModel = viewModel,
@@ -77,7 +77,7 @@ interface LinkController {
 
 internal class RealLinkController(
     private val activity: ComponentActivity,
-    private val viewModel: LinkPaymentMethodLauncherViewModel,
+    private val viewModel: LinkControllerViewModel,
     private val presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
     private val lookupConsumerCallback: LookupConsumerCallback,
 ) : LinkController {

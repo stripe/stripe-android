@@ -12,7 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.DaggerLinkPaymentMethodLauncherViewModelComponent
+import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.Job
@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal data class LinkPaymentMethodLauncherState(
+internal data class LinkControllerState(
     val linkConfigurationResult: Result<LinkConfiguration?>? = null,
     val linkGate: LinkGate? = null,
     val presentedForEmail: String? = null,
@@ -42,15 +42,15 @@ internal data class LinkPaymentMethodLauncherState(
     val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
 }
 
-internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
+internal class LinkControllerViewModel @Inject constructor(
     application: Application,
     private val paymentElementLoader: PaymentElementLoader,
     private val linkGateFactory: LinkGate.Factory,
     val linkActivityContract: NativeLinkActivityContract,
 ) : AndroidViewModel(application) {
 
-    private val _state = MutableStateFlow(LinkPaymentMethodLauncherState())
-    val state: StateFlow<LinkPaymentMethodLauncherState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(LinkControllerState())
+    val state: StateFlow<LinkControllerState> = _state.asStateFlow()
 
     private var presentJob: Job? = null
 
@@ -205,7 +205,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return DaggerLinkPaymentMethodLauncherViewModelComponent.factory()
+            return DaggerLinkControllerViewModelComponent.factory()
                 .build(
                     application = extras.requireApplication(),
                     savedStateHandle = extras.createSavedStateHandle(),

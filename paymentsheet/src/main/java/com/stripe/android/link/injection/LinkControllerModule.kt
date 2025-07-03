@@ -38,7 +38,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class
     ]
 )
-internal object LinkPaymentMethodLauncherModule {
+internal object LinkControllerModule {
     @Provides
     @Singleton
     fun provideAppContext(application: Application): Context = application.applicationContext
