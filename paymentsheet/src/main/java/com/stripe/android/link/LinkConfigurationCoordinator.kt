@@ -5,6 +5,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
@@ -109,9 +110,24 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
 
         return linkPaymentDetails.mapCatching { paymentDetails ->
             if (configuration.passthroughModeEnabled) {
-                linkAccountManager.shareCardPaymentDetails(paymentDetails).getOrThrow()
+                linkAccountManager.shareCardPaymentDetails(
+                    paymentDetails = paymentDetails,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                ).getOrThrow()
             } else {
-                paymentDetails
+                val account = requireNotNull(linkAccountManager.linkAccountInfo.value.account)
+                val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
+                val createParams = PaymentMethodCreateParams.createLink(
+                    paymentDetailsId = paymentDetails.id,
+                    consumerSessionClientSecret = account.clientSecret,
+                    extraParams = extraParams,
+                    allowRedisplay = paymentMethodCreateParams.allowRedisplay,
+                )
+                LinkPaymentDetails.ForPaymentMethodMode(
+                    paymentDetails = paymentDetails,
+                    paymentMethodCreateParams = createParams,
+                    originalParams = paymentMethodCreateParams,
+                )
             }
         }
     }

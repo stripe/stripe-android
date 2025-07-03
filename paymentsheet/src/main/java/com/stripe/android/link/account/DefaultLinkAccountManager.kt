@@ -17,7 +17,6 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -245,7 +244,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
+    ): Result<ConsumerPaymentDetails.Card> {
         val account = linkAccountHolder.linkAccountInfo.value.account
         return if (account != null) {
             linkRepository.createCardPaymentDetails(
@@ -255,30 +254,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = account.clientSecret,
                 consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                 active = config.passthroughModeEnabled,
-            ).map {
-                if (config.passthroughModeEnabled) {
-                    LinkPaymentDetails.ForPaymentMethodMode(
-                        paymentDetails = it,
-                        paymentMethodCreateParams = paymentMethodCreateParams,
-                        originalParams = paymentMethodCreateParams,
-                    )
-                } else {
-                    val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
-                    val createParams = PaymentMethodCreateParams.createLink(
-                        paymentDetailsId = it.id,
-                        consumerSessionClientSecret = account.clientSecret,
-                        extraParams = extraParams,
-                        allowRedisplay = paymentMethodCreateParams.allowRedisplay
-                    )
-                    LinkPaymentDetails.ForPaymentMethodMode(
-                        paymentDetails = it,
-                        paymentMethodCreateParams = createParams,
-                        originalParams = paymentMethodCreateParams, // TODO: Why original?
-                    )
-                }
-                // TODO: Remove
-//                it.copy(paymentMethodCreateParams = paymentMethodCreateParams)
-            }.onSuccess {
+            ).onSuccess {
                 errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
         } else {
@@ -290,16 +266,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun shareCardPaymentDetails(
-        paymentDetails: LinkPaymentDetails.ForPaymentMethodMode,
-    ): Result<LinkPaymentDetails> {
+        paymentDetails: ConsumerPaymentDetails.Card,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+    ): Result<LinkPaymentDetails.ForPassthroughMode> {
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccountValue != null) {
             linkRepository.shareCardPaymentDetails(
-                id = paymentDetails.paymentDetails.id,
-                last4 = paymentDetails.paymentMethodCreateParams.cardLast4().orEmpty(),
+                id = paymentDetails.id,
+                last4 = paymentDetails.last4,
                 consumerSessionClientSecret = linkAccountValue.clientSecret,
-                paymentMethodCreateParams = paymentDetails.paymentMethodCreateParams,
-                allowRedisplay = paymentDetails.paymentMethodCreateParams.allowRedisplay,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                allowRedisplay = paymentMethodCreateParams.allowRedisplay,
             ).map {
                 LinkPaymentDetails.ForPassthroughMode(it)
             }

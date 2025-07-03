@@ -92,12 +92,12 @@ internal class PaymentMethodViewModel @Inject constructor(
             dismissalCoordinator.withDismissalDisabled {
                 linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                     .fold(
-                        onSuccess = { linkPaymentDetails ->
+                        onSuccess = { paymentDetails ->
                             val params = paymentMethodCreateParams.toParamMap()
                             val cardMap = params["card"] as? Map<*, *>?
                             val billingDetailsMap = params["billing_details"] as? Map<*, *>?
                             performConfirmation(
-                                paymentDetails = linkPaymentDetails.paymentDetails,
+                                paymentDetails = paymentDetails,
                                 cvc = cardMap?.get("cvc") as? String?,
                                 billingPhone = billingDetailsMap?.get("phone") as? String?
                             )
