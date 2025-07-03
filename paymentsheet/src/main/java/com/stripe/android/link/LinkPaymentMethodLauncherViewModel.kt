@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.app.Application
+import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
@@ -31,12 +32,14 @@ internal data class LinkPaymentMethodLauncherState(
     val presentedForEmail: String? = null,
     val linkAccountUpdate: LinkAccountUpdate = LinkAccountUpdate.None,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
-    val presentError: Throwable? = null,
+    val presentPaymentMethodsResult: LinkPaymentMethodLauncher.PresentPaymentMethodsResult? = null,
+    val lookupConsumerResult: LinkPaymentMethodLauncher.LookupConsumerResult? = null,
 ) {
-    val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
+    val paymentMethodPreview: LinkPaymentMethodLauncher.PaymentMethodPreview?
+        get() = (presentPaymentMethodsResult as? LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Selected)
+            ?.preview
 
-    val canPresent: Boolean
-        get() = linkConfigurationResult?.isFailure == true || linkGate?.useNativeLink == true
+    val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
 }
 
 internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
@@ -69,12 +72,19 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
             // Try to obtain a Link configuration before we present.
             if (awaitLinkConfigurationResult().isFailure) {
                 if (updateLinkConfiguration().isFailure) {
+                    val result = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed(
+                        RuntimeException("Failed to configure Link.") // TODO: Better error.
+                    )
+                    _state.update { it.copy(presentPaymentMethodsResult = result) }
                     return@launch
                 }
             }
             val state = _state.value
             if (state.linkGate?.useNativeLink != true) {
-                // TODO: Error
+                val result = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed(
+                    RuntimeException("Attestation error.") // TODO: Better error.
+                )
+                _state.update { it.copy(presentPaymentMethodsResult = result) }
                 return@launch
             }
 
@@ -99,7 +109,6 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                     presentedForEmail = email,
                     linkAccountUpdate = linkAccountInfo,
                     selectedPaymentMethod = selectedPaymentMethod,
-                    presentError = null,
                 )
             }
 
@@ -114,17 +123,23 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
         }
     }
 
-    fun onResult(result: LinkActivityResult) {
+    fun onResult(context: Context, result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
                 _state.update {
-                    it.copy(linkAccountUpdate = result.linkAccountUpdate)
+                    it.copy(
+                        linkAccountUpdate = result.linkAccountUpdate,
+                        presentPaymentMethodsResult = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Canceled,
+                    )
                 }
             }
             is LinkActivityResult.Completed -> {
                 _state.update {
                     it.copy(
                         selectedPaymentMethod = result.selectedPayment,
+                        presentPaymentMethodsResult = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Selected(
+                            preview = result.selectedPayment!!.toPreview(context)
+                        ),
                         linkAccountUpdate = result.linkAccountUpdate,
                     )
                 }
@@ -133,7 +148,9 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         linkAccountUpdate = result.linkAccountUpdate,
-                        presentError = result.error,
+                        presentPaymentMethodsResult = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed(
+                            error = result.error,
+                        ),
                     )
                 }
             }

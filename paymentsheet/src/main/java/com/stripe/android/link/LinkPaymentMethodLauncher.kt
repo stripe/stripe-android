@@ -9,32 +9,42 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.link.LinkPaymentMethodLauncher.LookupConsumerCallback
+import com.stripe.android.link.LinkPaymentMethodLauncher.PresentPaymentMethodsCallback
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.paymentsheet.R
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
 interface LinkPaymentMethodLauncher {
-    val state: State
 
-    var listener: Listener?
+    fun getPaymentMethodPreview(): PaymentMethodPreview?
 
-    fun present(email: String?)
+    fun presentPaymentMethods(email: String?)
 
-    interface Listener {
-        fun onStateChange(state: State)
+    fun lookupConsumer(email: String)
+
+    sealed interface PresentPaymentMethodsResult {
+        class Selected(val preview: PaymentMethodPreview) : PresentPaymentMethodsResult
+        data object Canceled : PresentPaymentMethodsResult
+        class Failed(val error: Throwable) : PresentPaymentMethodsResult
     }
 
-    @Parcelize
-    @Poko
-    class State(
-        val canPresent: Boolean = false,
-        val preview: PaymentMethodPreview? = null,
-        val configurationError: Throwable? = null,
-        val presentError: Throwable? = null,
-    ) : Parcelable
+    sealed interface LookupConsumerResult {
+        class Success(val isConsumer: Boolean) : LookupConsumerResult
+        class Failed(val error: Throwable) : LookupConsumerResult
+    }
+
+    fun interface PresentPaymentMethodsCallback {
+        fun onResult(result: PresentPaymentMethodsResult)
+    }
+
+    fun interface LookupConsumerCallback {
+        fun onResult(result: LookupConsumerResult)
+    }
 
     @Parcelize
     @Poko
@@ -45,29 +55,36 @@ interface LinkPaymentMethodLauncher {
     ) : Parcelable
 
     companion object {
-        fun create(activity: ComponentActivity): LinkPaymentMethodLauncher {
+        fun create(
+            activity: ComponentActivity,
+            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+            lookupConsumerCallback: LookupConsumerCallback,
+        ): LinkPaymentMethodLauncher {
             val viewModelProvider = ViewModelProvider(
                 owner = activity,
                 factory = LinkPaymentMethodLauncherViewModel.Factory()
             )
             val viewModel = viewModelProvider[LinkPaymentMethodLauncherViewModel::class.java]
-            return RealLinkPaymentMethodLauncher(activity, viewModel)
+            return RealLinkPaymentMethodLauncher(
+                activity = activity,
+                viewModel = viewModel,
+                presentPaymentMethodsCallback = presentPaymentMethodsCallback,
+                lookupConsumerCallback = lookupConsumerCallback,
+            )
         }
     }
 }
 
 internal class RealLinkPaymentMethodLauncher(
     private val activity: ComponentActivity,
-    private val viewModel: LinkPaymentMethodLauncherViewModel
+    private val viewModel: LinkPaymentMethodLauncherViewModel,
+    private val presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+    private val lookupConsumerCallback: LookupConsumerCallback,
 ) : LinkPaymentMethodLauncher {
-
-    override val state: LinkPaymentMethodLauncher.State get() = viewModel.state.value.toPublicState(activity)
-
-    override var listener: LinkPaymentMethodLauncher.Listener? = null
 
     private var linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
         activity.registerForActivityResult(viewModel.linkActivityContract) { result ->
-            viewModel.onResult(result)
+            viewModel.onResult(activity, result)
         }
 
     init {
@@ -75,35 +92,43 @@ internal class RealLinkPaymentMethodLauncher(
             activity.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.state
-                        .map { it.toPublicState(activity) }
-                        .collect { listener?.onStateChange(it) }
+                        .map { it.presentPaymentMethodsResult }
+                        .filterNotNull()
+                        .collect(presentPaymentMethodsCallback::onResult)
+                }
+
+                launch {
+                    viewModel.state
+                        .map { it.lookupConsumerResult }
+                        .filterNotNull()
+                        .collect(lookupConsumerCallback::onResult)
                 }
             }
         }
     }
 
-    override fun present(email: String?) {
+    override fun getPaymentMethodPreview(): LinkPaymentMethodLauncher.PaymentMethodPreview? {
+        return viewModel.state.value.paymentMethodPreview
+    }
+
+    override fun presentPaymentMethods(email: String?) {
         viewModel.onPresent(linkActivityResultLauncher, email)
+    }
+
+    override fun lookupConsumer(email: String) {
+        // TODO.
     }
 }
 
-private fun LinkPaymentMethodLauncherState.toPublicState(context: Context): LinkPaymentMethodLauncher.State {
-    val preview = selectedPaymentMethod?.let { pm ->
-        val sublabel = buildString {
-            append(pm.details.displayName.resolve(context))
-            append(" •••• ")
-            append(pm.details.last4)
-        }
-        LinkPaymentMethodLauncher.PaymentMethodPreview(
-            iconRes = R.drawable.stripe_ic_paymentsheet_link_arrow,
-            label = context.getString(com.stripe.android.R.string.stripe_link),
-            sublabel = sublabel
-        )
+internal fun LinkPaymentMethod.toPreview(context: Context): LinkPaymentMethodLauncher.PaymentMethodPreview {
+    val sublabel = buildString {
+        append(details.displayName.resolve(context))
+        append(" •••• ")
+        append(details.last4)
     }
-    return LinkPaymentMethodLauncher.State(
-        canPresent = canPresent,
-        preview = preview,
-        configurationError = linkConfigurationResult?.exceptionOrNull(),
-        presentError = presentError,
+    return LinkPaymentMethodLauncher.PaymentMethodPreview(
+        iconRes = R.drawable.stripe_ic_paymentsheet_link_arrow,
+        label = context.getString(com.stripe.android.R.string.stripe_link),
+        sublabel = sublabel
     )
 }

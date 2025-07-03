@@ -25,15 +25,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -53,21 +50,25 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
 
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        linkPaymentMethodLauncher = LinkPaymentMethodLauncher.create(this)
+        val presentPaymentMethodsResultState =
+            mutableStateOf<LinkPaymentMethodLauncher.PresentPaymentMethodsResult?>(null)
+
+        linkPaymentMethodLauncher = LinkPaymentMethodLauncher.create(
+            activity = this,
+            presentPaymentMethodsCallback = { presentPaymentMethodsResultState.value = it },
+            lookupConsumerCallback = {},
+        )
 
         setContent {
             PaymentSheetExampleTheme {
                 var email by rememberSaveable { mutableStateOf("") }
-                var launcherState by remember { mutableStateOf(linkPaymentMethodLauncher.state) }
-
-                LaunchedEffect(Unit) {
-                    linkPaymentMethodLauncher.listener =
-                        object : LinkPaymentMethodLauncher.Listener {
-                            override fun onStateChange(state: LinkPaymentMethodLauncher.State) {
-                                launcherState = state
-                            }
-                        }
-                }
+                val presentPaymentMethodsResult by presentPaymentMethodsResultState
+                val presentPaymentMethodsError =
+                    (presentPaymentMethodsResult as? LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed)
+                        ?.error
+                val paymentMethodPreview =
+                    (presentPaymentMethodsResult as? LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Selected)
+                        ?.preview
 
                 Column(
                     modifier = Modifier
@@ -76,9 +77,9 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(16.dp))
-                    (launcherState.configurationError ?: launcherState.presentError)?.let { error ->
+                    presentPaymentMethodsError?.let { error ->
                         Text(
-                            text = launcherState.configurationError?.message ?: "An error occurred",
+                            text = error.message ?: "An error occurred",
                             color = MaterialTheme.colors.error,
                         )
                     }
@@ -91,9 +92,8 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                     Divider(Modifier.padding(vertical = 20.dp))
 
                     PaymentMethodButton(
-                        preview = launcherState.preview,
-                        onClick = { linkPaymentMethodLauncher.present(email.takeIf { it.isNotBlank() }) },
-                        isEnabled = launcherState.canPresent,
+                        preview = paymentMethodPreview,
+                        onClick = { linkPaymentMethodLauncher.presentPaymentMethods(email.takeIf { it.isNotBlank() }) },
                     )
                 }
             }
@@ -106,13 +106,11 @@ private fun PaymentMethodButton(
     preview: LinkPaymentMethodLauncher.PaymentMethodPreview?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick, enabled = isEnabled)
-            .alpha(if (isEnabled) 1f else 0.5f)
+            .clickable(onClick = onClick)
             .background(color = Color.Black.copy(alpha = 0.1f))
             .heightIn(min = 80.dp)
             .padding(horizontal = 16.dp, vertical = 16.dp)
