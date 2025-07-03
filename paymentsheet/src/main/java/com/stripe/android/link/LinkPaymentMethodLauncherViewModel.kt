@@ -14,27 +14,29 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkPaymentMethodLauncherViewModelComponent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal data class LinkPaymentMethodLauncherState(
-    val paymentElementLoaderStateResult: Result<PaymentElementLoader.State>? = null,
+    val linkConfigurationResult: Result<LinkConfiguration?>? = null,
     val linkGate: LinkGate? = null,
     val presentedForEmail: String? = null,
     val linkAccountUpdate: LinkAccountUpdate = LinkAccountUpdate.None,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
+    val presentError: Throwable? = null,
 ) {
-    private val paymentElementLoaderState get() = paymentElementLoaderStateResult?.getOrNull()
-
-    val linkConfiguration: LinkConfiguration? =
-        paymentElementLoaderState?.paymentMethodMetadata?.linkState?.configuration
+    val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
 
     val canPresent: Boolean
-        get() = linkConfiguration != null && linkGate?.useNativeLink == true
+        get() = linkConfigurationResult?.isFailure == true || linkGate?.useNativeLink == true
 }
 
 internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
@@ -47,58 +49,77 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
     private val _state = MutableStateFlow(LinkPaymentMethodLauncherState())
     val state: StateFlow<LinkPaymentMethodLauncherState> = _state.asStateFlow()
 
-    init {
-        loadElementsSession()
-    }
+    private var presentJob: Job? = null
 
-    fun onLoadSession() {
-        loadElementsSession()
+    init {
+        viewModelScope.launch {
+            updateLinkConfiguration()
+        }
     }
 
     fun onPresent(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
     ) {
-        val state = _state.value.takeIf { it.canPresent }
-            ?: return
+        if (presentJob?.isActive == true) {
+            // TODO: Log.
+            return
+        }
+        presentJob = viewModelScope.launch {
+            // Try to obtain a Link configuration before we present.
+            if (awaitLinkConfigurationResult().isFailure) {
+                if (updateLinkConfiguration().isFailure) {
+                    return@launch
+                }
+            }
+            val state = _state.value
+            if (state.linkGate?.useNativeLink != true) {
+                // TODO: Error
+                return@launch
+            }
 
-        val configuration = state.linkConfiguration
-            ?.copy(
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    name = null,
-                    email = email,
-                    phone = null,
-                    billingCountryCode = null
+            val configuration = state.linkConfiguration
+                ?.copy(
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = email,
+                        phone = null,
+                        billingCountryCode = null,
+                    )
+                )
+                ?: return@launch
+
+            val linkAccountInfo = (state.linkAccountUpdate as? LinkAccountUpdate.Value)
+                ?.takeIf { email == state.presentedForEmail }
+                ?: LinkAccountUpdate.Value(null)
+            val selectedPaymentMethod = state.selectedPaymentMethod.takeIf { linkAccountInfo.account != null }
+
+            _state.update {
+                it.copy(
+                    presentedForEmail = email,
+                    linkAccountUpdate = linkAccountInfo,
+                    selectedPaymentMethod = selectedPaymentMethod,
+                    presentError = null,
+                )
+            }
+
+            launcher.launch(
+                LinkActivityContract.Args(
+                    configuration = configuration,
+                    startWithVerificationDialog = true,
+                    linkAccountInfo = linkAccountInfo,
+                    launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
                 )
             )
-            ?: return
-
-        val linkAccountInfo = (state.linkAccountUpdate as? LinkAccountUpdate.Value)
-            ?.takeIf { email == state.presentedForEmail }
-            ?: LinkAccountUpdate.Value(null)
-        val selectedPaymentMethod = state.selectedPaymentMethod.takeIf { linkAccountInfo.account != null }
-
-        _state.update {
-            it.copy(
-                presentedForEmail = email,
-                selectedPaymentMethod = selectedPaymentMethod,
-            )
         }
-
-        launcher.launch(
-            LinkActivityContract.Args(
-                configuration = configuration,
-                startWithVerificationDialog = true,
-                linkAccountInfo = linkAccountInfo,
-                launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
-            )
-        )
     }
 
     fun onResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
-                // TODO
+                _state.update {
+                    it.copy(linkAccountUpdate = result.linkAccountUpdate)
+                }
             }
             is LinkActivityResult.Completed -> {
                 _state.update {
@@ -109,7 +130,12 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 }
             }
             is LinkActivityResult.Failed -> {
-                // TODO
+                _state.update {
+                    it.copy(
+                        linkAccountUpdate = result.linkAccountUpdate,
+                        presentError = result.error,
+                    )
+                }
             }
             is LinkActivityResult.PaymentMethodObtained -> {
                 // TODO: Unexpected.
@@ -117,29 +143,40 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
         }
     }
 
-    private fun loadElementsSession() {
-        viewModelScope.launch {
-            _state.update { it.copy(paymentElementLoaderStateResult = null) }
-            val result = paymentElementLoader.load(
-                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                    ),
-                ),
-                configuration = PaymentSheet.Configuration.default(getApplication()).asCommonConfiguration(),
-                metadata = PaymentElementLoader.Metadata(
-                    isReloadingAfterProcessDeath = false, // TODO.
-                    initializedViaCompose = false, // TODO.
-                )
+    private suspend fun updateLinkConfiguration(): Result<LinkConfiguration?> {
+        _state.update { it.copy(linkConfigurationResult = null) }
+        val result = loadLinkConfiguration()
+        _state.update { state ->
+            state.copy(
+                linkConfigurationResult = result,
+                linkGate = result.getOrNull()?.let { linkGateFactory.create(it) }
             )
-            val linkConfiguration = result.getOrNull()?.paymentMethodMetadata?.linkState?.configuration
-            _state.update { state ->
-                state.copy(
-                    paymentElementLoaderStateResult = result,
-                    linkGate = linkConfiguration?.let { linkGateFactory.create(it) }
-                )
-            }
         }
+        return result
+    }
+
+    private suspend fun loadLinkConfiguration(): Result<LinkConfiguration?> {
+        return paymentElementLoader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                ),
+            ),
+            configuration = PaymentSheet.Configuration.default(getApplication()).asCommonConfiguration(),
+            metadata = PaymentElementLoader.Metadata(
+                isReloadingAfterProcessDeath = false, // TODO.
+                initializedViaCompose = false, // TODO.
+            )
+        ).map { state ->
+            state.paymentMethodMetadata.linkState?.configuration
+        }
+    }
+
+    private suspend fun awaitLinkConfigurationResult(): Result<LinkConfiguration?> {
+        return _state
+            .map { it.linkConfigurationResult }
+            .filterNotNull()
+            .first()
     }
 
     class Factory : ViewModelProvider.Factory {

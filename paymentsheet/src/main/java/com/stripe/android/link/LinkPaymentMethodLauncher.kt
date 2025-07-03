@@ -21,8 +21,6 @@ interface LinkPaymentMethodLauncher {
 
     var listener: Listener?
 
-    fun loadSession()
-
     fun present(email: String?)
 
     interface Listener {
@@ -32,10 +30,10 @@ interface LinkPaymentMethodLauncher {
     @Parcelize
     @Poko
     class State(
-        val isLoadingSession: Boolean = true,
-        val sessionError: Throwable? = null,
         val canPresent: Boolean = false,
         val preview: PaymentMethodPreview? = null,
+        val configurationError: Throwable? = null,
+        val presentError: Throwable? = null,
     ) : Parcelable
 
     @Parcelize
@@ -84,10 +82,6 @@ internal class RealLinkPaymentMethodLauncher(
         }
     }
 
-    override fun loadSession() {
-        viewModel.onLoadSession()
-    }
-
     override fun present(email: String?) {
         viewModel.onPresent(linkActivityResultLauncher, email)
     }
@@ -107,9 +101,9 @@ private fun LinkPaymentMethodLauncherState.toPublicState(context: Context): Link
         )
     }
     return LinkPaymentMethodLauncher.State(
-        isLoadingSession = paymentElementLoaderStateResult == null,
-        sessionError = paymentElementLoaderStateResult?.exceptionOrNull(),
         canPresent = canPresent,
         preview = preview,
+        configurationError = linkConfigurationResult?.exceptionOrNull(),
+        presentError = presentError,
     )
 }

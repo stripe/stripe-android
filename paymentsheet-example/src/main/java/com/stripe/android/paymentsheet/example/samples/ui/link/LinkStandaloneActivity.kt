@@ -14,14 +14,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -70,47 +69,32 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                         }
                 }
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    LinearProgressIndicator(
-                        Modifier
-                            .alpha(if (launcherState.isLoadingSession) 1f else 0f)
-                            .fillMaxWidth()
-                    )
-                    Spacer(Modifier.size(20.dp))
-
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 20.dp)
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Button(
-                            onClick = { linkPaymentMethodLauncher.loadSession() },
-                            enabled = !launcherState.isLoadingSession
-                        ) {
-                            Text("Reload session")
-                        }
-                        if (launcherState.sessionError != null) {
-                            Text(
-                                text = launcherState.sessionError?.message ?: "An error occurred",
-                                color = MaterialTheme.colors.error,
-                            )
-                        }
-                        Divider(Modifier.padding(vertical = 20.dp))
-
-                        OutlinedTextField(
-                            value = email,
-                            label = { Text(text = "Email") },
-                            onValueChange = { email = it }
-                        )
-
-                        PaymentMethodButton(
-                            modifier = Modifier.padding(top = 20.dp),
-                            preview = launcherState.preview,
-                            onClick = { linkPaymentMethodLauncher.present(email.takeIf { it.isNotBlank() }) },
-                            isEnabled = launcherState.canPresent,
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Spacer(Modifier.height(16.dp))
+                    (launcherState.configurationError ?: launcherState.presentError)?.let { error ->
+                        Text(
+                            text = launcherState.configurationError?.message ?: "An error occurred",
+                            color = MaterialTheme.colors.error,
                         )
                     }
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = email,
+                        label = { Text(text = "Customer email") },
+                        onValueChange = { email = it }
+                    )
+                    Divider(Modifier.padding(vertical = 20.dp))
+
+                    PaymentMethodButton(
+                        preview = launcherState.preview,
+                        onClick = { linkPaymentMethodLauncher.present(email.takeIf { it.isNotBlank() }) },
+                        isEnabled = launcherState.canPresent,
+                    )
                 }
             }
         }
