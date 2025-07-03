@@ -450,7 +450,7 @@ internal class DefaultLinkConfirmationHandlerTest {
 
     private fun ConfirmationHandler.Args.assertSavedConfirmationArgs(
         configuration: LinkConfiguration,
-        paymentDetails: LinkPaymentDetails.Saved,
+        paymentDetails: LinkPaymentDetails.ForPassthroughMode,
         cvc: String?,
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
