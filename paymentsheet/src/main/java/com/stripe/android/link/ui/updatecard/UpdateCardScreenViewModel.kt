@@ -93,14 +93,14 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             dismissalCoordinator.withDismissalDisabled {
                 runCatching {
                     _state.update { it.copy(processing = true, error = null) }
-                    val cardParams = requireNotNull(state.value.cardUpdateParams)
+                    val paymentUpdateParams = requireNotNull(state.value.cardUpdateParams)
                     val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
                     val updateParams = ConsumerPaymentDetailsUpdateParams(
                         id = paymentDetailsId,
-                        // When updating a card that is not the default and you send isDefault=false to the server,
+                        // When updating a payment that is not the default and you send isDefault=false to the server,
                         // you get "Can't unset payment details when it's not the default", so send nil instead of false
                         isDefault = state.value.isDefault.takeIf { it == true },
-                        cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
+                        cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap()
                     )
                     val result = linkAccountManager.updatePaymentDetails(
                         updateParams = updateParams,
@@ -118,7 +118,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                                 details = updatedPaymentDetails,
                                 collectedCvc = state.value.billingDetailsUpdateFlow?.cvc,
-                                billingPhone = cardParams.billingDetails?.phone,
+                                billingPhone = paymentUpdateParams.billingDetails?.phone,
                             ),
                             linkAccount = account
                         )
@@ -154,16 +154,16 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     )
 
     private fun initializeInteractor(
-        cardPaymentDetails: ConsumerPaymentDetails.PaymentDetails
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails
     ): EditCardDetailsInteractor {
         // If this is a billing details update flow, we need to use the effective billing details
         val paymentDetails = if (state.value.isBillingDetailsUpdateFlow) {
-            cardPaymentDetails.withEffectiveBillingDetails(
+            paymentDetails.withEffectiveBillingDetails(
                 configuration = configuration,
                 linkAccount = linkAccountManager.linkAccountInfo.value.account
             )
         } else {
-            cardPaymentDetails
+            paymentDetails
         }
 
         val cardEditConfiguration = (paymentDetails as? ConsumerPaymentDetails.Card)?.let {

@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.uicore.elements.SectionFieldElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -121,7 +122,32 @@ internal interface EditCardDetailsInteractor {
         val paymentMethodIcon: Int,
         val cardDetailsState: CardDetailsState?,
         val billingDetailsForm: BillingDetailsForm?,
-    )
+    ) {
+        val contactSectionElements: List<SectionFieldElement>
+            get() = buildList {
+                val hasCardSection = cardDetailsState != null
+
+                // Name goes in contact section only if there's NO card section
+                if (!hasCardSection && billingDetailsForm?.nameElement != null) {
+                    add(billingDetailsForm.nameElement)
+                }
+                billingDetailsForm?.emailElement?.let { add(it) }
+                billingDetailsForm?.phoneElement?.let { add(it) }
+            }
+
+        val nameElementForCardSection: SectionFieldElement?
+            get() {
+                // Name goes in card section if there's a card section
+                return if (cardDetailsState != null) {
+                    billingDetailsForm?.nameElement
+                } else {
+                    null
+                }
+            }
+
+        val needsSpacerBeforeBilling: Boolean
+            get() = (contactSectionElements.isNotEmpty() || cardDetailsState != null) && billingDetailsForm != null
+    }
 
     @Immutable
     data class CardDetailsState(
@@ -140,6 +166,18 @@ internal interface EditCardDetailsInteractor {
     }
 
     fun interface Factory {
+        /**
+         * Creates an instance of [EditCardDetailsInteractor].
+         *
+         * @param coroutineScope The [CoroutineScope] in which the interactor will operate.
+         * @param cardEditConfiguration Optional configuration for editing card details.
+         *        If null, card editing is not supported.
+         * @param payload The [EditCardPayload] containing the initial form details.
+         * @param billingDetailsCollectionConfiguration Configuration for billing details collection.
+         *       Depending on this configuration, the interactor may or may not collect billing details.
+         * @param onBrandChoiceChanged Callback invoked when the card brand choice changes.
+         * @param onCardUpdateParamsChanged Callback invoked when the card update parameters change.
+         */
         fun create(
             coroutineScope: CoroutineScope,
             cardEditConfiguration: CardEditConfiguration?,
