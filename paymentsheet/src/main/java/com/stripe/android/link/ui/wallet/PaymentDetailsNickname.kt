@@ -33,9 +33,6 @@ internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
     get() = when (this) {
         is ConsumerPaymentDetails.Card -> makeCardDisplayName(nickname, funding, brand)
         is ConsumerPaymentDetails.BankAccount -> makeBankAccountDisplayName(nickname, bankName)
-        is ConsumerPaymentDetails.Passthrough -> {
-            "•••• $last4".resolvableString
-        }
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: ResolvableString
@@ -46,9 +43,6 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
             }
             is ConsumerPaymentDetails.BankAccount -> {
                 listOf(makeBankAccountDisplayName(nickname, bankName), "•••• $last4".resolvableString)
-            }
-            is ConsumerPaymentDetails.Passthrough -> {
-                listOf("•••• $last4".resolvableString)
             }
         }
         return components.joinToString(separator = " ")

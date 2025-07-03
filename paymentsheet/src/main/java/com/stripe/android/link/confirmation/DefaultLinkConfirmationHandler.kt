@@ -8,11 +8,9 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
@@ -152,23 +150,24 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails,
+        paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             intent = configuration.stripeIntent,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = PaymentMethod.Builder()
-                    .setId(paymentDetails.paymentDetails.id)
-                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
-                    .setCard(
-                        PaymentMethod.Card(
-                            last4 = paymentDetails.paymentDetails.last4,
-                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
-                        )
-                    )
-                    .setType(PaymentMethod.Type.Card)
-                    .build(),
+                paymentMethod = paymentDetails.paymentMethod,
+//                PaymentMethod.Builder()
+//                    .setId(paymentDetails.paymentMethod.id)
+//                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
+//                    .setCard(
+//                        PaymentMethod.Card(
+//                            last4 = paymentDetails.paymentDetails.last4,
+//                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
+//                        )
+//                    )
+//                    .setType(PaymentMethod.Type.Card)
+//                    .build(),
                 optionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
                     cvc = cvc?.takeIf {
@@ -200,7 +199,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         return when (paymentDetails) {
             is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType()
             is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
-            is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
         }
     }
 

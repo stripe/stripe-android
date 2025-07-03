@@ -368,7 +368,6 @@ internal class WalletViewModel @Inject constructor(
                                         is ConsumerPaymentDetails.Card -> {
                                             details.copy(isDefault = item.id == details.id)
                                         }
-                                        is ConsumerPaymentDetails.Passthrough -> details
                                     }
                                 },
                                 cardBeingUpdated = null

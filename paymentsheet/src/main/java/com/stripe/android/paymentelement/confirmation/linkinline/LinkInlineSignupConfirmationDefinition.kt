@@ -10,11 +10,8 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -137,30 +134,17 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.Saved -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toSavedOption(createParams, saveOption)
+                linkPaymentDetails.toSavedOption(saveOption)
             }
             null -> linkInlineSignupConfirmationOption.toNewOption()
         }
     }
 
     private fun LinkPaymentDetails.Saved.toSavedOption(
-        createParams: PaymentMethodCreateParams,
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
     ): PaymentMethodConfirmationOption.Saved {
-        val last4 = paymentDetails.last4
-
         return PaymentMethodConfirmationOption.Saved(
-            paymentMethod = PaymentMethod.Builder()
-                .setId(paymentDetails.id)
-                .setCode(createParams.typeCode)
-                .setCard(
-                    PaymentMethod.Card(
-                        last4 = last4,
-                        wallet = Wallet.LinkWallet(last4),
-                    )
-                )
-                .setType(PaymentMethod.Type.Card)
-                .build(),
+            paymentMethod = paymentMethod,
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
                     saveOption.shouldSave()

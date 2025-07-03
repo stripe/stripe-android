@@ -234,22 +234,6 @@ internal class PaymentDetailsListItemScreenShotTest {
         )
     }
 
-    @Test
-    fun testPassThroughEnabled() {
-        snapshot(
-            state = State(
-                details = ConsumerPaymentDetails.Passthrough(
-                    id = "wAAACGA",
-                    last4 = "6789",
-                ),
-                enabled = true,
-                isSelected = false,
-                isAvailable = true,
-                isUpdating = false
-            )
-        )
-    }
-
     private fun snapshot(state: State) {
         paparazziRule.snapshot {
             DefaultLinkTheme {

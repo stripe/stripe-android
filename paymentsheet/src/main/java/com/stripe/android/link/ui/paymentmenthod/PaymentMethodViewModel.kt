@@ -11,7 +11,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.CompleteLinkFlow
@@ -23,6 +22,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
@@ -97,7 +97,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             val cardMap = params["card"] as? Map<*, *>?
                             val billingDetailsMap = params["billing_details"] as? Map<*, *>?
                             performConfirmation(
-                                paymentDetails = linkPaymentDetails,
+                                paymentDetails = linkPaymentDetails.paymentDetails,
                                 cvc = cardMap?.get("cvc") as? String?,
                                 billingPhone = billingDetailsMap?.get("phone") as? String?
                             )
@@ -121,13 +121,13 @@ internal class PaymentMethodViewModel @Inject constructor(
     }
 
     private suspend fun performConfirmation(
-        paymentDetails: LinkPaymentDetails,
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         cvc: String?,
         billingPhone: String?
     ) {
         val result = completeLinkFlow(
-            selectedPaymentDetails = LinkPaymentMethod.LinkPaymentDetails(
-                linkPaymentDetails = paymentDetails,
+            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+                details = paymentDetails,
                 collectedCvc = cvc,
                 billingPhone = billingPhone
             ),

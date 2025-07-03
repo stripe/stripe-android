@@ -108,8 +108,7 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
         is ConsumerPaymentDetails.BankAccount -> {
             resolvableString(R.string.stripe_wallet_bank_account_terms)
         }
-        is Card,
-        is ConsumerPaymentDetails.Passthrough -> {
+        is Card -> {
             if (isSettingUp) {
                 resolvableString(R.string.stripe_paymentsheet_card_mandate, merchantName)
             } else {

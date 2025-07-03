@@ -242,9 +242,29 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
+    override suspend fun shareCardPaymentDetails(
+        paymentDetails: LinkPaymentDetails.New,
+    ): Result<LinkPaymentDetails> {
+        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
+        return if (linkAccountValue != null) {
+            linkRepository.shareCardPaymentDetails(
+                id = paymentDetails.paymentDetails.id,
+                last4 = paymentDetails.paymentMethodCreateParams.cardLast4().orEmpty(),
+                consumerSessionClientSecret = linkAccountValue.clientSecret,
+                paymentMethodCreateParams = paymentDetails.paymentMethodCreateParams,
+                allowRedisplay = paymentDetails.paymentMethodCreateParams.allowRedisplay,
+            )
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to share payment details")
+            )
+        }
+    }
+
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> {
+    ): Result<LinkPaymentDetails.New> {
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccountValue != null) {
             linkAccountValue.let { account ->
@@ -255,19 +275,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSessionClientSecret = account.clientSecret,
                     consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                     active = config.passthroughModeEnabled,
-                ).mapCatching {
-                    if (config.passthroughModeEnabled) {
-                        linkRepository.shareCardPaymentDetails(
-                            id = it.paymentDetails.id,
-                            last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                            consumerSessionClientSecret = account.clientSecret,
-                            paymentMethodCreateParams = paymentMethodCreateParams,
-                            allowRedisplay = paymentMethodCreateParams.allowRedisplay,
-                        ).getOrThrow()
-                    } else {
-                        it
-                    }
-                }.onSuccess {
+                ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
             }
