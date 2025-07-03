@@ -24,6 +24,7 @@ import javax.inject.Inject
 internal data class LinkPaymentMethodLauncherState(
     val paymentElementLoaderStateResult: Result<PaymentElementLoader.State>? = null,
     val linkGate: LinkGate? = null,
+    val presentedForEmail: String? = null,
     val linkAccountUpdate: LinkAccountUpdate = LinkAccountUpdate.None,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
 ) {
@@ -54,6 +55,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
     ) {
         val state = _state.value.takeIf { it.canPresent }
             ?: return
+
         val configuration = state.paymentElementLoaderState?.paymentMethodMetadata?.linkState?.configuration
             ?.copy(
                 customerInfo = LinkConfiguration.CustomerInfo(
@@ -64,37 +66,27 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 )
             )
             ?: return
+
+        val linkAccountInfo = (state.linkAccountUpdate as? LinkAccountUpdate.Value)
+            ?.takeIf { email == state.presentedForEmail }
+            ?: LinkAccountUpdate.Value(null)
+        val selectedPaymentMethod = state.selectedPaymentMethod.takeIf { linkAccountInfo.account != null }
+
+        _state.update {
+            it.copy(
+                presentedForEmail = email,
+                selectedPaymentMethod = selectedPaymentMethod,
+            )
+        }
+
         launcher.launch(
             LinkActivityContract.Args(
                 configuration = configuration,
                 startWithVerificationDialog = true,
-                linkAccountInfo = (state.linkAccountUpdate as? LinkAccountUpdate.Value)
-                    ?: LinkAccountUpdate.Value(null),
-                launchMode = LinkLaunchMode.PaymentMethodSelection(state.selectedPaymentMethod?.details),
+                linkAccountInfo = linkAccountInfo,
+                launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
             )
         )
-    }
-
-    private suspend fun loadElementsSession() {
-        val result = paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                ),
-            ),
-            configuration = PaymentSheet.Configuration.default(getApplication()).asCommonConfiguration(),
-            metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false, // TODO.
-                initializedViaCompose = false, // TODO.
-            )
-        )
-        val linkConfiguration = result.getOrNull()?.paymentMethodMetadata?.linkState?.configuration
-        _state.update { state ->
-            state.copy(
-                paymentElementLoaderStateResult = result,
-                linkGate = linkConfiguration?.let { linkGateFactory.create(it) }
-            )
-        }
     }
 
     fun onResult(result: LinkActivityResult) {
@@ -116,6 +108,28 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
             is LinkActivityResult.PaymentMethodObtained -> {
                 // TODO: Unexpected.
             }
+        }
+    }
+
+    private suspend fun loadElementsSession() {
+        val result = paymentElementLoader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                ),
+            ),
+            configuration = PaymentSheet.Configuration.default(getApplication()).asCommonConfiguration(),
+            metadata = PaymentElementLoader.Metadata(
+                isReloadingAfterProcessDeath = false, // TODO.
+                initializedViaCompose = false, // TODO.
+            )
+        )
+        val linkConfiguration = result.getOrNull()?.paymentMethodMetadata?.linkState?.configuration
+        _state.update { state ->
+            state.copy(
+                paymentElementLoaderStateResult = result,
+                linkGate = linkConfiguration?.let { linkGateFactory.create(it) }
+            )
         }
     }
 

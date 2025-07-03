@@ -29,14 +29,14 @@ interface LinkPaymentMethodLauncher {
 
     @Parcelize
     @Poko
-    class State internal constructor(
+    class State(
         val preview: PaymentMethodPreview? = null,
     ) : Parcelable
 
     @Parcelize
     @Poko
-    class PaymentMethodPreview internal constructor(
-        @DrawableRes val icon: Int,
+    class PaymentMethodPreview(
+        @DrawableRes val iconRes: Int,
         val label: String,
         val sublabel: String?
     ) : Parcelable
@@ -92,7 +92,7 @@ private fun LinkPaymentMethodLauncherState.toPublicState(context: Context) : Lin
             append(pm.details.last4)
         }
         LinkPaymentMethodLauncher.PaymentMethodPreview(
-            icon = R.drawable.stripe_ic_paymentsheet_link_arrow,
+            iconRes = R.drawable.stripe_ic_paymentsheet_link_arrow,
             label = context.getString(com.stripe.android.R.string.stripe_link),
             sublabel = sublabel
         )

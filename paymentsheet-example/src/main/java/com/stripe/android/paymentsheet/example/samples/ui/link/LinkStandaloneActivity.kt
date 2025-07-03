@@ -3,19 +3,37 @@ package com.stripe.android.paymentsheet.example.samples.ui.link
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkPaymentMethodLauncher
@@ -36,7 +54,7 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
         setContent {
             PaymentSheetExampleTheme {
                 var email by rememberSaveable { mutableStateOf("") }
-                var launcherState by rememberSaveable { mutableStateOf(linkPaymentMethodLauncher.state) }
+                var launcherState by remember { mutableStateOf(linkPaymentMethodLauncher.state) }
 
                 LaunchedEffect(Unit) {
                     linkPaymentMethodLauncher.listener =
@@ -53,21 +71,117 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    TextField(
+                    OutlinedTextField(
                         value = email,
-                        placeholder = { Text(text = "Email") },
+                        label = { Text(text = "Email") },
                         onValueChange = { email = it }
                     )
-                    Button(onClick = { linkPaymentMethodLauncher.present(email) }) {
-                        Text("Launch")
+                    PaymentMethodButton(
+                        modifier = Modifier.padding(top = 20.dp),
+                        preview = launcherState.preview,
+                        onClick = { linkPaymentMethodLauncher.present(email.takeIf { it.isNotBlank() }) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PaymentMethodButton(
+    preview: LinkPaymentMethodLauncher.PaymentMethodPreview?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .background(color = Color.Black.copy(alpha = 0.1f))
+            .heightIn(min = 80.dp)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val iconSize = 24.dp
+        AnimatedContent(
+            targetState = preview,
+            transitionSpec = { fadeIn() togetherWith fadeOut() }
+        ) { preview ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (preview != null) {
+                    Image(
+                        modifier = Modifier.size(iconSize),
+                        painter = painterResource(preview.iconRes),
+                        contentDescription = null,
+                    )
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .weight(1f)
+                    ) {
+                        Text(
+                            modifier = Modifier,
+                            text = preview.label,
+                            style = MaterialTheme.typography.h6,
+                        )
+                        preview.sublabel?.let { sublabel ->
+                            Text(
+                                modifier = Modifier.padding(top = 2.dp),
+                                text = sublabel,
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                            )
+                        }
                     }
-                    launcherState.preview?.let { preview ->
-                        Text(text = "Payment method:")
-                        Text(text = preview.label)
-                        Text(text = preview.sublabel ?: "")
+                } else {
+                    Icon(
+                        modifier = Modifier.size(iconSize),
+                        painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card),
+                        contentDescription = null,
+                    )
+                    Column(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .weight(1f)
+                    ) {
+                        Text(
+                            modifier = Modifier,
+                            text = "Choose payment method",
+                            style = MaterialTheme.typography.h6,
+                        )
                     }
                 }
             }
+        }
+        Icon(
+            modifier = Modifier.size(18.dp),
+            painter = painterResource(com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right),
+            contentDescription = null,
+            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PaymentMethodButtonPreview() {
+    PaymentSheetExampleTheme {
+        Column {
+            PaymentMethodButton(
+                modifier = Modifier.padding(16.dp),
+                preview = null,
+                onClick = {},
+            )
+            PaymentMethodButton(
+                modifier = Modifier.padding(16.dp),
+                preview = LinkPaymentMethodLauncher.PaymentMethodPreview(
+                    label = "Link",
+                    sublabel = "Visa (Personal) •••• 4242",
+                    iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,
+                ),
+                onClick = {},
+            )
         }
     }
 }
