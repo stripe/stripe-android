@@ -465,7 +465,8 @@ internal class CustomerSheetViewModel(
                                 "`CustomerSheet` does not implement `Link` and should not " +
                                     "receive `InlineSignUpViewState` updates"
                             )
-                        }
+                        },
+                        autocompleteAddressInteractorFactory = null,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -810,7 +811,8 @@ internal class CustomerSheetViewModel(
                         "`CustomerSheet` does not implement `Link` and should not " +
                             "receive `InlineSignUpViewState` updates"
                     )
-                }
+                },
+                autocompleteAddressInteractorFactory = null,
             )
         ) ?: emptyList()
 

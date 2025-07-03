@@ -23,6 +23,10 @@ class AutocompleteAddressController(
     val initialValues: Map<IdentifierSpec, String?>,
     private val interactor: AutocompleteAddressInteractor,
     countryCodes: Set<String> = emptySet(),
+    private val countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
+        CountryConfig(countryCodes),
+        initialValues[IdentifierSpec.Country]
+    ),
     private val phoneNumberState: PhoneNumberState,
     private val sameAsShippingElement: SameAsShippingElement?,
     private val shippingValuesMap: Map<IdentifierSpec, String?>?,
@@ -35,11 +39,6 @@ class AutocompleteAddressController(
     private var currentValues = initialValues
     private var expandForm = false
     private val addressInputMode = MutableStateFlow(toAddressInputMode(expandForm, initialValues))
-
-    private val countryDropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes),
-        initialValues[IdentifierSpec.Country]
-    )
 
     override val error: StateFlow<FieldError?> = stateFlowOf(null)
 

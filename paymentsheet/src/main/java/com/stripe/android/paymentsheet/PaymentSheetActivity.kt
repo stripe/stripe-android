@@ -44,7 +44,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             return
         }
 
-        viewModel.registerFromActivity(
+        viewModel.registerForActivityResult(
             activityResultCaller = this,
             lifecycleOwner = this,
         )

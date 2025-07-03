@@ -14,7 +14,6 @@ import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -280,16 +279,4 @@ class AddressFormControllerTest {
         ),
         config = launcherConfig,
     )
-
-    private class TestAutocompleteAddressInteractor(
-        override val interactorScope: CoroutineScope,
-        config: AutocompleteAddressInteractor.Config,
-        override val autocompleteEvent: MutableSharedFlow<AutocompleteAddressInteractor.Event>,
-    ) : AutocompleteAddressInteractor {
-        override val autocompleteConfig: AutocompleteAddressInteractor.Config = config
-
-        override fun onAutocomplete(country: String) {
-            error("Should not be called!")
-        }
-    }
 }

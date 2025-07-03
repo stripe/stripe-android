@@ -111,6 +111,7 @@ internal class CustomerSheetScreenshotTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = {},
+                autocompleteAddressInteractorFactory = null,
             )
         ) ?: listOf(),
         formArguments = FormArguments(

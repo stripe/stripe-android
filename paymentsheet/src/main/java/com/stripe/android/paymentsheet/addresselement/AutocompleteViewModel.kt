@@ -11,6 +11,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
+import com.stripe.android.paymentsheet.injection.DaggerAutocompleteViewModelFactoryComponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
@@ -193,17 +194,59 @@ internal class AutocompleteViewModel @Inject constructor(
         }
     }
 
-    internal class Factory(
-        private val autoCompleteViewModelSubcomponentBuilderProvider:
-        Provider<AutocompleteViewModelSubcomponent.Builder>,
-        private val args: Args,
+    internal class Factory private constructor(
+        private val type: Type,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return autoCompleteViewModelSubcomponentBuilderProvider.get()
-                .application(extras.requireApplication())
-                .configuration(args)
-                .build().autoCompleteViewModel as T
+            return type.create(modelClass, extras)
+        }
+
+        constructor(
+            autoCompleteViewModelSubcomponentBuilderProvider:
+            Provider<AutocompleteViewModelSubcomponent.Builder>,
+            args: Args,
+        ) : this(
+            Type.WithinAddressElement(autoCompleteViewModelSubcomponentBuilderProvider, args)
+        )
+
+        constructor(
+            args: AutocompleteContract.Args,
+        ) : this(
+            Type.Isolated(args)
+        )
+
+        sealed interface Type {
+            fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T
+
+            class WithinAddressElement(
+                private val autoCompleteViewModelSubcomponentBuilderProvider:
+                Provider<AutocompleteViewModelSubcomponent.Builder>,
+                private val args: Args,
+            ) : Type {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                    return autoCompleteViewModelSubcomponentBuilderProvider.get()
+                        .application(extras.requireApplication())
+                        .configuration(args)
+                        .build().autoCompleteViewModel as T
+                }
+            }
+
+            class Isolated(
+                private val args: AutocompleteContract.Args,
+            ) : Type {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+                    return DaggerAutocompleteViewModelFactoryComponent
+                        .factory()
+                        .build(
+                            application = extras.requireApplication(),
+                            args = args,
+                        )
+                        .autocompleteViewModel as T
+                }
+            }
         }
     }
 

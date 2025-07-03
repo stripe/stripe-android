@@ -628,7 +628,8 @@ internal class FormHelperTest {
             selectionUpdater = selectionUpdater,
             setAsDefaultMatchesSaveForFutureUse = false,
             eventReporter = eventReporter,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            autocompleteAddressInteractorFactory = null,
         )
     }
 

@@ -445,7 +445,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * Used to set up any dependencies that require a reference to the current Activity.
      * Must be called from the Activity's `onCreate`.
      */
-    fun registerFromActivity(
+    override fun registerFromActivity(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {

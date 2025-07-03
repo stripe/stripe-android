@@ -21,6 +21,7 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -242,7 +243,7 @@ internal class FormViewModelTest {
             IdentifierSpec.Generic("address"),
             allowedCountryCodes = setOf("US", "JP")
         )
-            .transform(emptyMap(), emptyMap())
+            .transform(emptyMap(), emptyMap(), null)
             .toTypedArray()
 
         val formViewModel = createViewModel(
@@ -327,7 +328,7 @@ internal class FormViewModelTest {
             IdentifierSpec.Generic("address"),
             allowedCountryCodes = setOf("US", "JP")
         )
-            .transform(emptyMap(), emptyMap())
+            .transform(emptyMap(), emptyMap(), null)
             .toTypedArray()
 
         val formViewModel = createViewModel(
@@ -542,7 +543,7 @@ internal class FormViewModelTest {
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<AddressElement>()
+                .filterIsInstance<AddressFieldsElement>()
                 .firstOrNull()
                 ?.countryElement
             val phoneElement = elements
@@ -583,6 +584,7 @@ internal class FormViewModelTest {
                 .transform(
                     initialValues = emptyMap(),
                     shippingValues = emptyMap(),
+                    autocompleteAddressInteractorFactory = null,
                 )
                 .toTypedArray()
             val formViewModel = createViewModel(

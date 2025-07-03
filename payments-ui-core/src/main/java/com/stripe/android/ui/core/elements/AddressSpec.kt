@@ -7,6 +7,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressInputMode
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -57,6 +59,7 @@ data class AddressSpec(
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         shippingValues: Map<IdentifierSpec, String?>?,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     ): List<FormElement> {
         val label = if (showLabel) resolvableString(R.string.stripe_billing_details) else null
         return if (displayFields.size == 1 && displayFields.first() == DisplayField.Country) {
@@ -82,15 +85,28 @@ data class AddressSpec(
                             controller = SameAsShippingController(it)
                         )
                     }
-            val addressElement = AddressElement(
-                _identifier = apiPath,
-                rawValuesMap = initialValues,
-                countryCodes = allowedCountryCodes,
-                addressInputMode = type,
-                sameAsShippingElement = sameAsShippingElement,
-                shippingValuesMap = shippingValues,
-                hideCountry = hideCountry,
-            )
+            val addressElement = autocompleteAddressInteractorFactory?.let {
+                AutocompleteAddressElement(
+                    identifier = apiPath,
+                    initialValues = initialValues,
+                    countryCodes = allowedCountryCodes,
+                    sameAsShippingElement = sameAsShippingElement,
+                    shippingValuesMap = shippingValues,
+                    hideCountry = hideCountry,
+                    interactor = autocompleteAddressInteractorFactory.create()
+                )
+            } ?: run {
+                AddressElement(
+                    _identifier = apiPath,
+                    rawValuesMap = initialValues,
+                    countryCodes = allowedCountryCodes,
+                    addressInputMode = type,
+                    sameAsShippingElement = sameAsShippingElement,
+                    shippingValuesMap = shippingValues,
+                    hideCountry = hideCountry,
+                )
+            }
+
             listOfNotNull(
                 createSectionElement(
                     sectionFieldElement = addressElement,

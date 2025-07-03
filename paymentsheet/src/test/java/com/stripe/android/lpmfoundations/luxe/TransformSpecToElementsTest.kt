@@ -7,11 +7,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.Capitalization
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
@@ -29,6 +32,8 @@ import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -37,8 +42,10 @@ import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -321,6 +328,34 @@ internal class TransformSpecToElementsTest {
         assertThat(formElement).isEmpty()
     }
 
+    @Test
+    fun `AutocompleteAddressElement should be used if a factory is provided`() = runTest {
+        val formElement = TransformSpecToElementsFactory.create(
+            requiresMandate = false,
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor(
+                    interactorScope = backgroundScope,
+                    config = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = null,
+                        autocompleteCountries = emptySet(),
+                    ),
+                    autocompleteEvent = MutableSharedFlow()
+                )
+            }
+        ).transform(
+            PaymentMethodMetadataFactory.create(),
+            listOf(AddressSpec()),
+        )
+
+        assertThat(formElement).hasSize(1)
+        assertThat(formElement.firstOrNull()).isInstanceOf<SectionElement>()
+
+        val sectionElement = formElement.first() as SectionElement
+
+        assertThat(sectionElement.fields.size).isEqualTo(1)
+        assertThat(sectionElement.fields.firstOrNull()).isInstanceOf<AutocompleteAddressElement>()
+    }
+
     companion object {
         val IDEAL_BANK_CONFIG = DropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
@@ -388,6 +423,7 @@ private object TransformSpecToElementsFactory {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         requiresMandate: Boolean = false,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): TransformSpecToElements {
         val context = ContextThemeWrapper(
             ApplicationProvider.getApplicationContext(),
@@ -409,6 +445,7 @@ private object TransformSpecToElementsFactory {
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
                 cardBrandFilter = DefaultCardBrandFilter,
                 setAsDefaultMatchesSaveForFutureUse = false,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             )
         )
     }

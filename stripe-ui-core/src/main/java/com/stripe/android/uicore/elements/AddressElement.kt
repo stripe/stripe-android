@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-open class AddressElement(
+class AddressElement(
     _identifier: IdentifierSpec,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     private val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
@@ -29,13 +29,13 @@ open class AddressElement(
     private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
     private val hideCountry: Boolean = false,
     private val hideName: Boolean = true,
-) : SectionMultiFieldElement(_identifier) {
+) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val countryElement = CountryElement(
+    override val countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController
     )

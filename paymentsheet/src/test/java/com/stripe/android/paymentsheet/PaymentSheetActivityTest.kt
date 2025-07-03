@@ -1292,7 +1292,7 @@ internal class PaymentSheetActivityTest {
             } doReturn mock()
         }
 
-        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+        registerForActivityResult(mockActivityResultCaller, TestLifecycleOwner())
 
         val googlePayListenerCaptor =
             argumentCaptor<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()
