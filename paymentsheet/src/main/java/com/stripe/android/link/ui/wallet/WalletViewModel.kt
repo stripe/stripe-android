@@ -116,7 +116,7 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { paymentDetailsState ->
+            linkAccountManager.consumerState.filterNotNull().collectLatest { paymentDetailsState ->
                 if (paymentDetailsState.paymentDetails.isEmpty()) {
                     navigateAndClearStack(LinkScreen.PaymentMethod)
                 } else {
@@ -273,7 +273,7 @@ internal class WalletViewModel @Inject constructor(
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
         // Use the cached phone for this payment detail if available (ie the user updated it locally)
-        val linkPaymentMethod = linkAccountManager.consumerPaymentDetails.value
+        val linkPaymentMethod = linkAccountManager.consumerState.value
             ?.paymentDetails?.find { it.details.id == selectedPaymentDetails.id }
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(

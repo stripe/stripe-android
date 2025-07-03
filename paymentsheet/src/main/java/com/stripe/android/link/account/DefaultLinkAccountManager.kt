@@ -7,7 +7,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.LinkPaymentDetailsState
+import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -53,10 +53,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
         get() = linkAccountHolder.linkAccountInfo
 
-    private val _consumerPaymentDetails: MutableStateFlow<LinkPaymentDetailsState?> =
+    private val _consumerPaymentDetails: MutableStateFlow<ConsumerState?> =
         MutableStateFlow(null)
 
-    override val consumerPaymentDetails: StateFlow<LinkPaymentDetailsState?> =
+    override val consumerState: StateFlow<ConsumerState?> =
         _consumerPaymentDetails.asStateFlow()
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
@@ -396,7 +396,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 val existingPhones = _consumerPaymentDetails.value?.paymentDetails?.associate {
                     it.details.id to it.billingPhone
                 } ?: emptyMap()
-                _consumerPaymentDetails.value = LinkPaymentDetailsState(
+                _consumerPaymentDetails.value = ConsumerState(
                     paymentDetails = it.paymentDetails.map { paymentDetail ->
                         LinkPaymentMethod.ConsumerPaymentDetails(
                             details = paymentDetail,
@@ -453,7 +453,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         phone: String?
     ) {
         _consumerPaymentDetails.value = _consumerPaymentDetails.value?.let { currentState ->
-            LinkPaymentDetailsState(
+            ConsumerState(
                 paymentDetails = currentState.paymentDetails.map { paymentDetails ->
                     if (paymentDetails.details.id == updatedPayment.id) {
                         paymentDetails.copy(details = updatedPayment, billingPhone = phone)
