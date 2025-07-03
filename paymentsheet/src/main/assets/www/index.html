@@ -173,8 +173,6 @@
               address: event.address
             });
 
-            // console.log(`Bridge Response:\n${hashToString(response)}`);
-
             // Check if merchant rejected the address
             if (response.error) {
               console.log(`Shipping rejected: ${response.error}`);
@@ -207,8 +205,6 @@
 
         try {
             const response = await window.NativeStripeECE.calculateShippingRateChange(event.shippingRate);
-
-            // console.log(`Bridge response:\n${hashToString(response)}`);
 
             // Check if merchant rejected the rate
             if (response.error) {
@@ -268,9 +264,7 @@
               paymentMethodOptions: event._paymentMethodOptions,
             };
 
-            const response = await window.NativeStripeECE.confirmPayment(paymentDetails);
-
-            // console.log(`Native Payment API Response:\n${hashToString(response)}`);
+            await window.NativeStripeECE.confirmPayment(paymentDetails);
         } catch (error) {
           console.log(`Error confirming payment: ${error.message}`);
           console.error("Payment confirmation error:", error);
