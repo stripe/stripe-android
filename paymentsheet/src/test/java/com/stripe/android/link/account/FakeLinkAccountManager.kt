@@ -2,9 +2,9 @@ package com.stripe.android.link.account
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
+import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES

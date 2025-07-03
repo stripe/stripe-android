@@ -1,14 +1,14 @@
 package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
-import com.stripe.android.link.ConsumerState
-import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
@@ -27,7 +27,6 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import kotlinx.coroutines.Dispatchers
@@ -53,11 +52,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override val linkAccountInfo: StateFlow<LinkAccountUpdate.Value>
         get() = linkAccountHolder.linkAccountInfo
 
-    private val _consumerPaymentDetails: MutableStateFlow<ConsumerState?> =
-        MutableStateFlow(null)
-
-    override val consumerState: StateFlow<ConsumerState?> =
-        _consumerPaymentDetails.asStateFlow()
+    private val _consumerState: MutableStateFlow<ConsumerState?> = MutableStateFlow(null)
+    override val consumerState: StateFlow<ConsumerState?> = _consumerState.asStateFlow()
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
@@ -390,22 +386,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = linkAccount.clientSecret,
             consumerPublishableKey = linkAccount.consumerPublishableKey
-        ).map { paymentDetailsList ->
-            paymentDetailsList.also {
-                // Update payment details preserving any existing phone numbers
-                val existingPhones = _consumerPaymentDetails.value?.paymentDetails?.associate {
-                    it.details.id to it.billingPhone
-                } ?: emptyMap()
-                _consumerPaymentDetails.value = ConsumerState(
-                    paymentDetails = it.paymentDetails.map { paymentDetail ->
-                        LinkPaymentMethod.ConsumerPaymentDetails(
-                            details = paymentDetail,
-                            collectedCvc = null,
-                            billingPhone = existingPhones[paymentDetail.id]
-                        )
-                    }
-                )
-            }
+        ).onSuccess { paymentDetailsList ->
+            _consumerState.value = _consumerState.value
+                ?.withPaymentDetailsResponse(paymentDetailsList)
+                ?: ConsumerState.fromResponse(paymentDetailsList)
         }
     }
 
@@ -440,28 +424,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
             consumerPublishableKey = linkAccount.consumerPublishableKey
         ).map { updatedPaymentDetails ->
             updatedPaymentDetails.also {
-                updateCachedPaymentDetails(
+                _consumerState.value = _consumerState.value?.withUpdatedPaymentDetail(
                     updatedPayment = it.paymentDetails.first(),
-                    phone = phone
+                    billingPhone = phone
                 )
             }
-        }
-    }
-
-    private fun updateCachedPaymentDetails(
-        updatedPayment: ConsumerPaymentDetails.PaymentDetails,
-        phone: String?
-    ) {
-        _consumerPaymentDetails.value = _consumerPaymentDetails.value?.let { currentState ->
-            ConsumerState(
-                paymentDetails = currentState.paymentDetails.map { paymentDetails ->
-                    if (paymentDetails.details.id == updatedPayment.id) {
-                        paymentDetails.copy(details = updatedPayment, billingPhone = phone)
-                    } else {
-                        paymentDetails
-                    }
-                }
-            )
         }
     }
 
@@ -475,7 +442,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         } ?: run {
             withContext(Dispatchers.Main.immediate) {
                 linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
-                _consumerPaymentDetails.value = null
+                _consumerState.value = null
             }
             cachedShippingAddresses = null
             null

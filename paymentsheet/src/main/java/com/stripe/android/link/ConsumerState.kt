@@ -1,6 +1,6 @@
 package com.stripe.android.link
 
-import com.stripe.android.link.LinkPaymentMethod.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails
 
 /**
  * State container for Link payment details.
@@ -8,5 +8,67 @@ import com.stripe.android.link.LinkPaymentMethod.ConsumerPaymentDetails
  * When non-null, contains the loaded payment details (which may be an empty list).
  */
 internal data class ConsumerState(
-    val paymentDetails: List<ConsumerPaymentDetails>
-)
+    val paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>
+) {
+
+    /**
+     * Merges the backend payment details response with locally cached data.
+     *
+     * For payment details that exist in cache (matched by ID):
+     * - Updates the [ConsumerPaymentDetails.PaymentDetails] with fresh backend data
+     * - Preserves local fields like [collectedCvc] and [billingPhone]
+     *
+     * For new payment details from the response:
+     * - Creates new [LinkPaymentMethod.ConsumerPaymentDetails] with null local fields
+     */
+    fun withPaymentDetailsResponse(response: ConsumerPaymentDetails): ConsumerState {
+        val existingById = paymentDetails.associateBy { it.details.id }
+        return copy(
+            paymentDetails = response.paymentDetails.map { details ->
+                existingById[details.id]
+                    ?.copy(details = details)
+                    ?: LinkPaymentMethod.ConsumerPaymentDetails(details, null, null)
+            }
+        )
+    }
+
+    /**
+     * Updates a single payment detail in the state while preserving all local data.
+     *
+     * @param updatedPayment The updated payment detail from the backend
+     * @param billingPhone The billing phone to set, or null to preserve existing
+     * @return A new [ConsumerState] with the updated payment detail, or the same state if no match found
+     */
+    fun withUpdatedPaymentDetail(
+        updatedPayment: ConsumerPaymentDetails.PaymentDetails,
+        billingPhone: String?
+    ): ConsumerState {
+        return copy(
+            paymentDetails = paymentDetails.map { paymentDetail ->
+                if (paymentDetail.details.id == updatedPayment.id) {
+                    paymentDetail.copy(
+                        details = updatedPayment,
+                        billingPhone = billingPhone
+                    )
+                } else {
+                    paymentDetail.copy(
+                        billingPhone = billingPhone
+                    )
+                }
+            }
+        )
+    }
+
+    companion object {
+        /**
+         * Creates a [ConsumerState] from a backend response with no cached data.
+         */
+        fun fromResponse(response: ConsumerPaymentDetails): ConsumerState {
+            return ConsumerState(
+                paymentDetails = response.paymentDetails.map { detail ->
+                    LinkPaymentMethod.ConsumerPaymentDetails(detail, null, null)
+                }
+            )
+        }
+    }
+}
