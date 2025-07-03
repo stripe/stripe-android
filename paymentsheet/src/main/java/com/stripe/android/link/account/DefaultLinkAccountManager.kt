@@ -243,28 +243,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun shareCardPaymentDetails(
-        paymentDetails: LinkPaymentDetails.ForPaymentMethodMode,
-    ): Result<LinkPaymentDetails> {
-        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
-        return if (linkAccountValue != null) {
-            linkRepository.shareCardPaymentDetails(
-                id = paymentDetails.paymentDetails.id,
-                last4 = paymentDetails.paymentMethodCreateParams.cardLast4().orEmpty(),
-                consumerSessionClientSecret = linkAccountValue.clientSecret,
-                paymentMethodCreateParams = paymentDetails.paymentMethodCreateParams,
-                allowRedisplay = paymentDetails.paymentMethodCreateParams.allowRedisplay,
-            ).map {
-                LinkPaymentDetails.ForPassthroughMode(it)
-            }
-        } else {
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
-            Result.failure(
-                IllegalStateException("A non-null Link account is needed to share payment details")
-            )
-        }
-    }
-
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.ForPaymentMethodMode> {
@@ -307,6 +285,28 @@ internal class DefaultLinkAccountManager @Inject constructor(
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
+            )
+        }
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        paymentDetails: LinkPaymentDetails.ForPaymentMethodMode,
+    ): Result<LinkPaymentDetails> {
+        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
+        return if (linkAccountValue != null) {
+            linkRepository.shareCardPaymentDetails(
+                id = paymentDetails.paymentDetails.id,
+                last4 = paymentDetails.paymentMethodCreateParams.cardLast4().orEmpty(),
+                consumerSessionClientSecret = linkAccountValue.clientSecret,
+                paymentMethodCreateParams = paymentDetails.paymentMethodCreateParams,
+                allowRedisplay = paymentDetails.paymentMethodCreateParams.allowRedisplay,
+            ).map {
+                LinkPaymentDetails.ForPassthroughMode(it)
+            }
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to share payment details")
             )
         }
     }
