@@ -47,8 +47,18 @@ internal data class LinkAppBarState(
             }
 
             val title = when (route) {
-                LinkScreen.PaymentMethod.route -> R.string.stripe_add_payment_method.resolvableString
-                LinkScreen.UpdateCard.route -> updateCardTitle(currentEntry)
+                LinkScreen.PaymentMethod.route -> {
+                    if (consumerIsSigningUp) {
+                        // Don't show a title if there's no previous screen, which is the case
+                        // if we're in the signup flow
+                        null
+                    } else {
+                        R.string.stripe_add_payment_method.resolvableString
+                    }
+                }
+                LinkScreen.UpdateCard.route -> {
+                    updateCardTitle(currentEntry)
+                }
                 else -> null
             }
 
