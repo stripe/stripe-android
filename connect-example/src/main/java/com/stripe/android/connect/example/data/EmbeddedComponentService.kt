@@ -48,7 +48,7 @@ interface EmbeddedComponentService {
     suspend fun fetchClientSecret(account: String): String
 
     companion object {
-        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
+        const val DEFAULT_SERVER_BASE_URL = "https://connect-test.vercelapp.stripe.dev/api/mobile-example-app/"
     }
 }
 
