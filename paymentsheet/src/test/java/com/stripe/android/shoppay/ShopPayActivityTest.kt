@@ -25,8 +25,8 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEShippingAddressData
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
@@ -369,7 +369,7 @@ internal class ShopPayActivityTest {
     private fun setupActivityController(
         bridgeHandler: ShopPayBridgeHandler,
         stripeRepository: StripeRepository,
-        preparePaymentMethodHandler: PreparePaymentMethodHandler = PreparePaymentMethodHandler { _, _ ->  }
+        preparePaymentMethodHandler: PreparePaymentMethodHandler = PreparePaymentMethodHandler { _, _ -> }
     ): ShopPayActivity {
         val intent = ShopPayActivity.createIntent(context, ShopPayTestFactory.SHOP_PAY_ARGS)
 

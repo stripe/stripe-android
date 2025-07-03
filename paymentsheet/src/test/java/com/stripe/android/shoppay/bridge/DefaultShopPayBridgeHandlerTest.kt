@@ -305,7 +305,8 @@ internal class DefaultShopPayBridgeHandlerTest {
         val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
         val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
         val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}, "shippingAddress":
-            | {"name": "Jane Smith"}}}""".trimMargin()
+            | {"name": "Jane Smith"}}}
+        """.trimMargin()
 
         val result = handler.confirmPayment(message)
 

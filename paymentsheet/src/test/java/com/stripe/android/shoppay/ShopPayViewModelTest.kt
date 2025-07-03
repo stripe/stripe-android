@@ -27,8 +27,8 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEFullAddress
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
