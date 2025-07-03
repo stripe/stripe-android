@@ -17,6 +17,7 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -253,7 +254,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 consumerSessionClientSecret = linkAccountValue.clientSecret,
                 paymentMethodCreateParams = paymentDetails.paymentMethodCreateParams,
                 allowRedisplay = paymentDetails.paymentMethodCreateParams.allowRedisplay,
-            )
+            ).map {
+                LinkPaymentDetails.Saved(it)
+            }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
             Result.failure(
@@ -265,19 +268,40 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> {
-        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
-        return if (linkAccountValue != null) {
-            linkAccountValue.let { account ->
-                linkRepository.createCardPaymentDetails(
-                    paymentMethodCreateParams = paymentMethodCreateParams,
-                    userEmail = account.email,
-                    stripeIntent = config.stripeIntent,
-                    consumerSessionClientSecret = account.clientSecret,
-                    consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
-                    active = config.passthroughModeEnabled,
-                ).onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
+        val account = linkAccountHolder.linkAccountInfo.value.account
+        return if (account != null) {
+            linkRepository.createCardPaymentDetails(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                userEmail = account.email,
+                stripeIntent = config.stripeIntent,
+                consumerSessionClientSecret = account.clientSecret,
+                consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
+                active = config.passthroughModeEnabled,
+            ).map {
+                if (config.passthroughModeEnabled) {
+                    LinkPaymentDetails.New(
+                        paymentDetails = it,
+                        paymentMethodCreateParams = paymentMethodCreateParams,
+                        originalParams = paymentMethodCreateParams,
+                    )
+                } else {
+                    val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
+                    val createParams = PaymentMethodCreateParams.createLink(
+                        paymentDetailsId = it.id,
+                        consumerSessionClientSecret = account.clientSecret,
+                        extraParams = extraParams,
+                        allowRedisplay = paymentMethodCreateParams.allowRedisplay
+                    )
+                    LinkPaymentDetails.New(
+                        paymentDetails = it,
+                        paymentMethodCreateParams = createParams,
+                        originalParams = paymentMethodCreateParams, // TODO: Why original?
+                    )
                 }
+                // TODO: Remove
+//                it.copy(paymentMethodCreateParams = paymentMethodCreateParams)
+            }.onSuccess {
+                errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
