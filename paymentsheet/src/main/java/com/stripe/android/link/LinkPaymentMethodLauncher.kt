@@ -34,8 +34,8 @@ interface LinkPaymentMethodLauncher {
     }
 
     sealed interface LookupConsumerResult {
-        class Success(val isConsumer: Boolean) : LookupConsumerResult
-        class Failed(val error: Throwable) : LookupConsumerResult
+        class Success(val email: String, val isConsumer: Boolean) : LookupConsumerResult
+        class Failed(val email: String, val error: Throwable) : LookupConsumerResult
     }
 
     fun interface PresentPaymentMethodsCallback {
@@ -116,7 +116,7 @@ internal class RealLinkPaymentMethodLauncher(
     }
 
     override fun lookupConsumer(email: String) {
-        // TODO.
+        viewModel.onLookupConsumer(email)
     }
 }
 

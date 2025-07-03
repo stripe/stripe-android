@@ -196,6 +196,12 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
             .first()
     }
 
+    fun onLookupConsumer(email: String) {
+        _state.update {
+            it.copy(lookupConsumerResult = LinkPaymentMethodLauncher.LookupConsumerResult.Success(email, true))
+        }
+    }
+
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
