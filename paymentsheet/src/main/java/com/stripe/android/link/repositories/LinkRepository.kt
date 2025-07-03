@@ -1,6 +1,5 @@
 package com.stripe.android.link.repositories
 
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -81,13 +80,13 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
         active: Boolean,
-    ): Result<ConsumerPaymentDetails.PaymentDetails>
+    ): Result<ConsumerPaymentDetails.Card>
 
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-    ): Result<ConsumerPaymentDetails.PaymentDetails>
+    ): Result<ConsumerPaymentDetails.BankAccount>
 
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,

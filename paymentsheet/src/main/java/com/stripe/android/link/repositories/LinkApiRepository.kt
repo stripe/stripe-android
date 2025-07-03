@@ -170,7 +170,7 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
         active: Boolean,
-    ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
+    ): Result<ConsumerPaymentDetails.Card> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
@@ -180,27 +180,9 @@ internal class LinkApiRepository @Inject constructor(
             ),
             requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(consumerPublishableKey),
-        ).mapCatching { it.paymentDetails.first() }
-//            .mapCatching {
-//            val paymentDetails = it.paymentDetails.first()
-//            val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
-//
-//            // TODO: This is wrong;
-//            //  move this up the call stack and account for PMM vs. PTM
-//            val createParams = PaymentMethodCreateParams.createLink(
-//                paymentDetailsId = paymentDetails.id,
-//                consumerSessionClientSecret = consumerSessionClientSecret,
-//                extraParams = extraParams,
-//                allowRedisplay = paymentMethodCreateParams.allowRedisplay
-//            )
-//
-//            LinkPaymentDetails.New(
-//                paymentDetails = paymentDetails,
-//                paymentMethodCreateParams = createParams,
-//                originalParams = paymentMethodCreateParams,
-//            )
-//        }
-            .onFailure {
+        ).mapCatching {
+            it.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>().first()
+        }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
                 StripeException.create(it)
@@ -212,7 +194,7 @@ internal class LinkApiRepository @Inject constructor(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-    ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
+    ): Result<ConsumerPaymentDetails.BankAccount> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
@@ -223,7 +205,7 @@ internal class LinkApiRepository @Inject constructor(
             requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(),
         ).mapCatching {
-            it.paymentDetails.first()
+            it.paymentDetails.filterIsInstance<ConsumerPaymentDetails.BankAccount>().first()
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
