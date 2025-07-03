@@ -112,19 +112,19 @@ internal class WalletViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            linkAccountManager.consumerPaymentDetails.filterNotNull().collectLatest { consumerPaymentDetails ->
-                if (consumerPaymentDetails.paymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
-                } else {
-                    _uiState.update {
-                        it.updateWithResponse(consumerPaymentDetails)
-                    }
-                }
-            }
+            loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
         }
 
         viewModelScope.launch {
-            loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+            linkAccountManager.consumerState.filterNotNull().collectLatest { paymentDetailsState ->
+                if (paymentDetailsState.paymentDetails.isEmpty()) {
+                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                } else {
+                    _uiState.update {
+                        it.updateWithResponse(paymentDetailsState.paymentDetails)
+                    }
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -272,11 +272,14 @@ internal class WalletViewModel @Inject constructor(
 
         val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
 
+        // Use the cached phone for this payment detail if available (ie the user updated it locally)
+        val linkPaymentMethod = linkAccountManager.consumerState.value
+            ?.paymentDetails?.find { it.details.id == selectedPaymentDetails.id }
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                 details = selectedPaymentDetails,
                 collectedCvc = cvc,
-                billingPhone = linkAccount.unredactedPhoneNumber
+                billingPhone = linkPaymentMethod?.billingPhone ?: linkAccount.unredactedPhoneNumber
             ),
             linkAccount = linkAccount
         )

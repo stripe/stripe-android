@@ -589,10 +589,11 @@ class WalletViewModelTest {
         val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
         val linkAccountManager = object : WalletLinkAccountManager() {
             override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
+                updateParams: ConsumerPaymentDetailsUpdateParams,
+                billingPhone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(CARD_PROCESSING_DELAY)
-                return super.updatePaymentDetails(updateParams)
+                return super.updatePaymentDetails(updateParams, billingPhone)
             }
         }
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -1008,10 +1009,11 @@ private open class WalletLinkAccountManager : FakeLinkAccountManager() {
     }
 
     override suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        phone: String?
     ): Result<ConsumerPaymentDetails> {
         updatePaymentDetailsCalls.add(updateParams)
-        return super.updatePaymentDetails(updateParams)
+        return super.updatePaymentDetails(updateParams, phone)
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
