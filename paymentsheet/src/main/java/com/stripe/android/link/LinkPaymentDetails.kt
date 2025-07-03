@@ -35,7 +35,7 @@ internal sealed class LinkPaymentDetails(
      * fields with the user-entered values.
      */
     @Parcelize
-    class New(
+    data class New(
         val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         val paymentMethodCreateParams: PaymentMethodCreateParams,
         val originalParams: PaymentMethodCreateParams

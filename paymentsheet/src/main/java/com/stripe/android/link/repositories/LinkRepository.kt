@@ -81,7 +81,7 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
         active: Boolean,
-    ): Result<LinkPaymentDetails.New>
+    ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
@@ -95,7 +95,7 @@ internal interface LinkRepository {
         last4: String,
         consumerSessionClientSecret: String,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails>
+    ): Result<PaymentMethod>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
