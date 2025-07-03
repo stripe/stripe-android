@@ -37,12 +37,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.link.LinkPaymentMethodLauncher
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 internal class LinkStandaloneActivity : AppCompatActivity() {
 
-    private lateinit var linkPaymentMethodLauncher: LinkPaymentMethodLauncher
+    private lateinit var linkController: LinkController
 
     @SuppressWarnings("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,9 +51,9 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
         val presentPaymentMethodsResultState =
-            mutableStateOf<LinkPaymentMethodLauncher.PresentPaymentMethodsResult?>(null)
+            mutableStateOf<LinkController.PresentPaymentMethodsResult?>(null)
 
-        linkPaymentMethodLauncher = LinkPaymentMethodLauncher.create(
+        linkController = LinkController.create(
             activity = this,
             presentPaymentMethodsCallback = { presentPaymentMethodsResultState.value = it },
             lookupConsumerCallback = {},
@@ -64,10 +64,10 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                 var email by rememberSaveable { mutableStateOf("") }
                 val presentPaymentMethodsResult by presentPaymentMethodsResultState
                 val presentPaymentMethodsError =
-                    (presentPaymentMethodsResult as? LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed)
+                    (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
                         ?.error
                 val paymentMethodPreview =
-                    (presentPaymentMethodsResult as? LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Selected)
+                    (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Selected)
                         ?.preview
 
                 Column(
@@ -93,7 +93,7 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
 
                     PaymentMethodButton(
                         preview = paymentMethodPreview,
-                        onClick = { linkPaymentMethodLauncher.presentPaymentMethods(email.takeIf { it.isNotBlank() }) },
+                        onClick = { linkController.presentPaymentMethods(email.takeIf { it.isNotBlank() }) },
                     )
                 }
             }
@@ -103,7 +103,7 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
 
 @Composable
 private fun PaymentMethodButton(
-    preview: LinkPaymentMethodLauncher.PaymentMethodPreview?,
+    preview: LinkController.PaymentMethodPreview?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -193,7 +193,7 @@ private fun PaymentMethodButtonPreview() {
             )
             PaymentMethodButton(
                 modifier = Modifier.padding(16.dp),
-                preview = LinkPaymentMethodLauncher.PaymentMethodPreview(
+                preview = LinkController.PaymentMethodPreview(
                     label = "Link",
                     sublabel = "Visa (Personal) •••• 4242",
                     iconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_link_arrow,

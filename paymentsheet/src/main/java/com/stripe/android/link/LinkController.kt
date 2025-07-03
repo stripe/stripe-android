@@ -9,8 +9,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.stripe.android.link.LinkPaymentMethodLauncher.LookupConsumerCallback
-import com.stripe.android.link.LinkPaymentMethodLauncher.PresentPaymentMethodsCallback
+import com.stripe.android.link.LinkController.LookupConsumerCallback
+import com.stripe.android.link.LinkController.PresentPaymentMethodsCallback
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.paymentsheet.R
 import dev.drewhamilton.poko.Poko
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
-interface LinkPaymentMethodLauncher {
+interface LinkController {
 
     fun getPaymentMethodPreview(): PaymentMethodPreview?
 
@@ -59,13 +59,13 @@ interface LinkPaymentMethodLauncher {
             activity: ComponentActivity,
             presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
             lookupConsumerCallback: LookupConsumerCallback,
-        ): LinkPaymentMethodLauncher {
+        ): LinkController {
             val viewModelProvider = ViewModelProvider(
                 owner = activity,
                 factory = LinkPaymentMethodLauncherViewModel.Factory()
             )
             val viewModel = viewModelProvider[LinkPaymentMethodLauncherViewModel::class.java]
-            return RealLinkPaymentMethodLauncher(
+            return RealLinkController(
                 activity = activity,
                 viewModel = viewModel,
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
@@ -75,12 +75,12 @@ interface LinkPaymentMethodLauncher {
     }
 }
 
-internal class RealLinkPaymentMethodLauncher(
+internal class RealLinkController(
     private val activity: ComponentActivity,
     private val viewModel: LinkPaymentMethodLauncherViewModel,
     private val presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
     private val lookupConsumerCallback: LookupConsumerCallback,
-) : LinkPaymentMethodLauncher {
+) : LinkController {
 
     private var linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
         activity.registerForActivityResult(viewModel.linkActivityContract) { result ->
@@ -107,7 +107,7 @@ internal class RealLinkPaymentMethodLauncher(
         }
     }
 
-    override fun getPaymentMethodPreview(): LinkPaymentMethodLauncher.PaymentMethodPreview? {
+    override fun getPaymentMethodPreview(): LinkController.PaymentMethodPreview? {
         return viewModel.state.value.paymentMethodPreview
     }
 
@@ -120,13 +120,13 @@ internal class RealLinkPaymentMethodLauncher(
     }
 }
 
-internal fun LinkPaymentMethod.toPreview(context: Context): LinkPaymentMethodLauncher.PaymentMethodPreview {
+internal fun LinkPaymentMethod.toPreview(context: Context): LinkController.PaymentMethodPreview {
     val sublabel = buildString {
         append(details.displayName.resolve(context))
         append(" •••• ")
         append(details.last4)
     }
-    return LinkPaymentMethodLauncher.PaymentMethodPreview(
+    return LinkController.PaymentMethodPreview(
         iconRes = R.drawable.stripe_ic_paymentsheet_link_arrow,
         label = context.getString(com.stripe.android.R.string.stripe_link),
         sublabel = sublabel

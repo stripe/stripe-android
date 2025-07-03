@@ -7,8 +7,8 @@ import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.link.LinkPaymentMethodLauncher
-import com.stripe.android.link.RealLinkPaymentMethodLauncher
+import com.stripe.android.link.LinkController
+import com.stripe.android.link.RealLinkController
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -54,7 +54,7 @@ internal object LinkPaymentMethodLauncherModule {
     fun provideProductUsageTokens() = setOf("LinkPaymentMethodLauncher")
 
     @Provides
-    fun provideLinkPaymentMethodLauncher(impl: RealLinkPaymentMethodLauncher): LinkPaymentMethodLauncher = impl
+    fun provideLinkPaymentMethodLauncher(impl: RealLinkController): LinkController = impl
 
     @Provides
     @PaymentElementCallbackIdentifier

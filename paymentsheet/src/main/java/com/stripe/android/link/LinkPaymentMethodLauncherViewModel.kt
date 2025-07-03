@@ -32,11 +32,11 @@ internal data class LinkPaymentMethodLauncherState(
     val presentedForEmail: String? = null,
     val linkAccountUpdate: LinkAccountUpdate = LinkAccountUpdate.None,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
-    val presentPaymentMethodsResult: LinkPaymentMethodLauncher.PresentPaymentMethodsResult? = null,
-    val lookupConsumerResult: LinkPaymentMethodLauncher.LookupConsumerResult? = null,
+    val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
+    val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
 ) {
-    val paymentMethodPreview: LinkPaymentMethodLauncher.PaymentMethodPreview?
-        get() = (presentPaymentMethodsResult as? LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Selected)
+    val paymentMethodPreview: LinkController.PaymentMethodPreview?
+        get() = (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Selected)
             ?.preview
 
     val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
@@ -72,7 +72,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
             // Try to obtain a Link configuration before we present.
             if (awaitLinkConfigurationResult().isFailure) {
                 if (updateLinkConfiguration().isFailure) {
-                    val result = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed(
+                    val result = LinkController.PresentPaymentMethodsResult.Failed(
                         RuntimeException("Failed to configure Link.") // TODO: Better error.
                     )
                     _state.update { it.copy(presentPaymentMethodsResult = result) }
@@ -81,7 +81,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
             }
             val state = _state.value
             if (state.linkGate?.useNativeLink != true) {
-                val result = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed(
+                val result = LinkController.PresentPaymentMethodsResult.Failed(
                     RuntimeException("Attestation error.") // TODO: Better error.
                 )
                 _state.update { it.copy(presentPaymentMethodsResult = result) }
@@ -129,7 +129,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         linkAccountUpdate = result.linkAccountUpdate,
-                        presentPaymentMethodsResult = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Canceled,
+                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Canceled,
                     )
                 }
             }
@@ -137,7 +137,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         selectedPaymentMethod = result.selectedPayment,
-                        presentPaymentMethodsResult = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Selected(
+                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Selected(
                             preview = result.selectedPayment!!.toPreview(context)
                         ),
                         linkAccountUpdate = result.linkAccountUpdate,
@@ -148,7 +148,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         linkAccountUpdate = result.linkAccountUpdate,
-                        presentPaymentMethodsResult = LinkPaymentMethodLauncher.PresentPaymentMethodsResult.Failed(
+                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Failed(
                             error = result.error,
                         ),
                     )
@@ -198,7 +198,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
 
     fun onLookupConsumer(email: String) {
         _state.update {
-            it.copy(lookupConsumerResult = LinkPaymentMethodLauncher.LookupConsumerResult.Success(email, true))
+            it.copy(lookupConsumerResult = LinkController.LookupConsumerResult.Success(email, true))
         }
     }
 
