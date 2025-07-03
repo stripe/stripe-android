@@ -15,10 +15,7 @@ import kotlinx.parcelize.Parcelize
  * @param paymentMethodCreateParams The [PaymentMethodCreateParams] to be used to confirm
  *                                  the Stripe Intent.
  */
-internal sealed class LinkPaymentDetails(
-//    open val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-//    open val paymentMethodCreateParams: PaymentMethodCreateParams
-) : Parcelable {
+internal sealed interface LinkPaymentDetails : Parcelable {
 
     /**
      * A [ConsumerPaymentDetails.PaymentDetails] that is already saved to the consumer's account.
@@ -27,7 +24,7 @@ internal sealed class LinkPaymentDetails(
     // TODO: Rename to passthrough
     class Saved(
         val paymentMethod: PaymentMethod,
-    ) : LinkPaymentDetails()
+    ) : LinkPaymentDetails
 
     /**
      * A new [ConsumerPaymentDetails.PaymentDetails], whose data was just collected from the user.
@@ -39,7 +36,7 @@ internal sealed class LinkPaymentDetails(
         val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         val paymentMethodCreateParams: PaymentMethodCreateParams,
         val originalParams: PaymentMethodCreateParams
-    ) : LinkPaymentDetails() {
+    ) : LinkPaymentDetails {
 
         /**
          * Build a flat map of the values entered by the user when creating this payment method,

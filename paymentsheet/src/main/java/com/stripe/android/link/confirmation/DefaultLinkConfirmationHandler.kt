@@ -3,14 +3,11 @@ package com.stripe.android.link.confirmation
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
@@ -31,22 +28,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     ): Result {
         return confirm {
             newConfirmationArgs(
-                paymentDetails = paymentDetails,
-                linkAccount = linkAccount,
-                cvc = cvc,
-                billingPhone = billingPhone
-            )
-        }
-    }
-
-    override suspend fun confirm(
-        paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        billingPhone: String?
-    ): Result {
-        return confirm {
-            confirmationArgs(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
                 cvc = cvc,
@@ -90,30 +71,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         }
     }
 
-    private fun confirmationArgs(
-        paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        billingPhone: String?
-    ): ConfirmationHandler.Args {
-        return when (paymentDetails) {
-            is LinkPaymentDetails.New -> {
-                newConfirmationArgs(
-                    paymentDetails = paymentDetails.paymentDetails,
-                    linkAccount = linkAccount,
-                    cvc = cvc,
-                    billingPhone = billingPhone
-                )
-            }
-            is LinkPaymentDetails.Saved -> {
-                savedConfirmationArgs(
-                    paymentDetails = paymentDetails,
-                    cvc = cvc
-                )
-            }
-        }
-    }
-
     private fun newConfirmationArgs(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
@@ -143,38 +100,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         return ConfirmationHandler.Args(
             intent = configuration.stripeIntent,
             confirmationOption = confirmationOption,
-            appearance = PaymentSheet.Appearance(),
-            initializationMode = configuration.initializationMode,
-            shippingDetails = configuration.shippingDetails
-        )
-    }
-
-    private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails.Saved,
-        cvc: String?
-    ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
-            intent = configuration.stripeIntent,
-            confirmationOption = PaymentMethodConfirmationOption.Saved(
-                paymentMethod = paymentDetails.paymentMethod,
-//                PaymentMethod.Builder()
-//                    .setId(paymentDetails.paymentMethod.id)
-//                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
-//                    .setCard(
-//                        PaymentMethod.Card(
-//                            last4 = paymentDetails.paymentDetails.last4,
-//                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
-//                        )
-//                    )
-//                    .setType(PaymentMethod.Type.Card)
-//                    .build(),
-                optionsParams = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-                    cvc = cvc?.takeIf {
-                        configuration.passthroughModeEnabled.not()
-                    }
-                )
-            ),
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
