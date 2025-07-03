@@ -28,9 +28,13 @@ internal data class LinkPaymentMethodLauncherState(
     val linkAccountUpdate: LinkAccountUpdate = LinkAccountUpdate.None,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
 ) {
-    val paymentElementLoaderState get() = paymentElementLoaderStateResult?.getOrNull()
+    private val paymentElementLoaderState get() = paymentElementLoaderStateResult?.getOrNull()
 
-    val canPresent: Boolean get() = linkGate?.useNativeLink == true
+    val linkConfiguration: LinkConfiguration? =
+        paymentElementLoaderState?.paymentMethodMetadata?.linkState?.configuration
+
+    val canPresent: Boolean
+        get() = linkConfiguration != null && linkGate?.useNativeLink == true
 }
 
 internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
@@ -44,9 +48,11 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
     val state: StateFlow<LinkPaymentMethodLauncherState> = _state.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            loadElementsSession()
-        }
+        loadElementsSession()
+    }
+
+    fun onLoadSession() {
+        loadElementsSession()
     }
 
     fun onPresent(
@@ -56,7 +62,7 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
         val state = _state.value.takeIf { it.canPresent }
             ?: return
 
-        val configuration = state.paymentElementLoaderState?.paymentMethodMetadata?.linkState?.configuration
+        val configuration = state.linkConfiguration
             ?.copy(
                 customerInfo = LinkConfiguration.CustomerInfo(
                     name = null,
@@ -111,25 +117,28 @@ internal class LinkPaymentMethodLauncherViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadElementsSession() {
-        val result = paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+    private fun loadElementsSession() {
+        viewModelScope.launch {
+            _state.update { it.copy(paymentElementLoaderStateResult = null) }
+            val result = paymentElementLoader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                    ),
                 ),
-            ),
-            configuration = PaymentSheet.Configuration.default(getApplication()).asCommonConfiguration(),
-            metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false, // TODO.
-                initializedViaCompose = false, // TODO.
+                configuration = PaymentSheet.Configuration.default(getApplication()).asCommonConfiguration(),
+                metadata = PaymentElementLoader.Metadata(
+                    isReloadingAfterProcessDeath = false, // TODO.
+                    initializedViaCompose = false, // TODO.
+                )
             )
-        )
-        val linkConfiguration = result.getOrNull()?.paymentMethodMetadata?.linkState?.configuration
-        _state.update { state ->
-            state.copy(
-                paymentElementLoaderStateResult = result,
-                linkGate = linkConfiguration?.let { linkGateFactory.create(it) }
-            )
+            val linkConfiguration = result.getOrNull()?.paymentMethodMetadata?.linkState?.configuration
+            _state.update { state ->
+                state.copy(
+                    paymentElementLoaderStateResult = result,
+                    linkGate = linkConfiguration?.let { linkGateFactory.create(it) }
+                )
+            }
         }
     }
 

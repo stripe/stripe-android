@@ -12,12 +12,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -30,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -65,22 +70,47 @@ internal class LinkStandaloneActivity : AppCompatActivity() {
                         }
                 }
 
-                Column(
-                    modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    OutlinedTextField(
-                        value = email,
-                        label = { Text(text = "Email") },
-                        onValueChange = { email = it }
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    LinearProgressIndicator(
+                        Modifier
+                            .alpha(if (launcherState.isLoadingSession) 1f else 0f)
+                            .fillMaxWidth()
                     )
-                    PaymentMethodButton(
-                        modifier = Modifier.padding(top = 20.dp),
-                        preview = launcherState.preview,
-                        onClick = { linkPaymentMethodLauncher.present(email.takeIf { it.isNotBlank() }) },
-                    )
+                    Spacer(Modifier.size(20.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Button(
+                            onClick = { linkPaymentMethodLauncher.loadSession() },
+                            enabled = !launcherState.isLoadingSession
+                        ) {
+                            Text("Reload session")
+                        }
+                        if (launcherState.sessionError != null) {
+                            Text(
+                                text = launcherState.sessionError?.message ?: "An error occurred",
+                                color = MaterialTheme.colors.error,
+                            )
+                        }
+                        Divider(Modifier.padding(vertical = 20.dp))
+
+                        OutlinedTextField(
+                            value = email,
+                            label = { Text(text = "Email") },
+                            onValueChange = { email = it }
+                        )
+
+                        PaymentMethodButton(
+                            modifier = Modifier.padding(top = 20.dp),
+                            preview = launcherState.preview,
+                            onClick = { linkPaymentMethodLauncher.present(email.takeIf { it.isNotBlank() }) },
+                            isEnabled = launcherState.canPresent,
+                        )
+                    }
                 }
             }
         }
@@ -92,11 +122,13 @@ private fun PaymentMethodButton(
     preview: LinkPaymentMethodLauncher.PaymentMethodPreview?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isEnabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick, enabled = isEnabled)
+            .alpha(if (isEnabled) 1f else 0.5f)
             .background(color = Color.Black.copy(alpha = 0.1f))
             .heightIn(min = 80.dp)
             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -105,10 +137,14 @@ private fun PaymentMethodButton(
     ) {
         val iconSize = 24.dp
         AnimatedContent(
+            modifier = Modifier.weight(1f),
             targetState = preview,
             transitionSpec = { fadeIn() togetherWith fadeOut() }
         ) { preview ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 if (preview != null) {
                     Image(
                         modifier = Modifier.size(iconSize),
