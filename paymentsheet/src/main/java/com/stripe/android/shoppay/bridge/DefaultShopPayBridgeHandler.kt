@@ -152,7 +152,8 @@ internal class DefaultShopPayBridgeHandler @Inject constructor(
         _confirmationState.emit(
             value = ShopPayConfirmationState.Success(
                 externalSourceId = externalSourceId,
-                billingDetails = confirmationRequest.paymentDetails.billingDetails
+                billingDetails = confirmationRequest.paymentDetails.billingDetails,
+                shippingAddressData = confirmationRequest.paymentDetails.shippingAddress
             )
         )
         ConfirmationResponse(

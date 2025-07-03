@@ -258,7 +258,7 @@ internal class DefaultShopPayBridgeHandlerTest {
     fun `confirmPayment returns success response when parsing succeeds`() = runTest {
         val confirmationRequest = ConfirmationRequest(
             paymentDetails = ConfirmationRequest.ConfirmEventData(
-                billingDetails = ECEBillingDetails(name = "John Doe", email = null, phone = null, address = null),
+                billingDetails = ShopPayTestFactory.MINIMAL_BILLING_DETAILS,
                 paymentMethodOptions = ECEPaymentMethodOptions(
                     shopPay = ECEPaymentMethodOptions.ShopPay(
                         externalSourceId = "src_123"
@@ -268,7 +268,7 @@ internal class DefaultShopPayBridgeHandlerTest {
         )
         val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
         val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
-        val message = """{"paymentDetails": {"billingDetails": {"name": "John Doe"}}}"""
+        val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}}}"""
 
         val result = handler.confirmPayment(message)
 
@@ -283,7 +283,45 @@ internal class DefaultShopPayBridgeHandlerTest {
         assertThat(confirmationState).isEqualTo(
             ShopPayConfirmationState.Success(
                 externalSourceId = "src_123",
-                billingDetails = confirmationRequest.paymentDetails.billingDetails
+                billingDetails = confirmationRequest.paymentDetails.billingDetails,
+                shippingAddressData = null
+            )
+        )
+    }
+
+    @Test
+    fun `confirmPayment includes shipping address data in confirmation state when provided`() = runTest {
+        val confirmationRequest = ConfirmationRequest(
+            paymentDetails = ConfirmationRequest.ConfirmEventData(
+                billingDetails = ShopPayTestFactory.MINIMAL_BILLING_DETAILS,
+                shippingAddress = ShopPayTestFactory.SHIPPING_ADDRESS_DATA,
+                paymentMethodOptions = ECEPaymentMethodOptions(
+                    shopPay = ECEPaymentMethodOptions.ShopPay(
+                        externalSourceId = "src_123"
+                    )
+                )
+            )
+        )
+        val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
+        val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
+        val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}, "shippingAddress":
+            | {"name": "Jane Smith"}}}""".trimMargin()
+
+        val result = handler.confirmPayment(message)
+
+        val response = JSONObject(result)
+        assertThat(response.getString("type")).isEqualTo("data")
+
+        val data = response.getJSONObject("data")
+        assertThat(data.getString("status")).isEqualTo("success")
+        assertThat(data.getBoolean("requiresAction")).isFalse()
+
+        val confirmationState = handler.confirmationState.first()
+        assertThat(confirmationState).isEqualTo(
+            ShopPayConfirmationState.Success(
+                externalSourceId = "src_123",
+                billingDetails = confirmationRequest.paymentDetails.billingDetails,
+                shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA
             )
         )
     }
@@ -311,13 +349,13 @@ internal class DefaultShopPayBridgeHandlerTest {
     fun `confirmPayment returns error response when externalSourceId is missing`() = runTest {
         val confirmationRequest = ConfirmationRequest(
             paymentDetails = ConfirmationRequest.ConfirmEventData(
-                billingDetails = ECEBillingDetails(name = "John Doe", email = null, phone = null, address = null),
+                billingDetails = ShopPayTestFactory.MINIMAL_BILLING_DETAILS,
                 paymentMethodOptions = null
             )
         )
         val fakeParser = FakeConfirmationRequestParser(returnValue = confirmationRequest)
         val handler = createDefaultBridgeHandler(confirmationRequestJsonParser = fakeParser)
-        val message = """{"paymentDetails": {"billingDetails": {"name": "John Doe"}}}"""
+        val message = """{"paymentDetails": {"billingDetails": {"name": "Test User"}}}"""
 
         val result = handler.confirmPayment(message)
 
