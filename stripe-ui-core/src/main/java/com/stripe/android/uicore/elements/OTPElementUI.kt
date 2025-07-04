@@ -149,10 +149,6 @@ fun OTPElementUI(
 
                 var textFieldModifier = Modifier
                     .height(56.dp)
-                    .autofill(
-                        types = listOf(AutofillType.SmsOtpCode),
-                        onFill = element.controller::onAutofillDigit,
-                    )
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
                             focusedElementIndex = index
@@ -177,7 +173,12 @@ fun OTPElementUI(
                     .semantics { testTagsAsResourceId = true }
 
                 if (index == 0) {
-                    textFieldModifier = textFieldModifier.focusRequester(focusRequester)
+                    textFieldModifier = textFieldModifier
+                        .focusRequester(focusRequester)
+                        .autofill(
+                            types = listOf(AutofillType.SmsOtpCode),
+                            onFill = element.controller::onAutofillDigit,
+                        )
                 }
 
                 OTPInputBox(
