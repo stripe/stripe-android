@@ -207,6 +207,8 @@ private fun PaymentDetailsListItemPreview() {
         bankIconCode = null,
         nickname = null,
         bankName = "Bank of America",
+        billingAddress = null,
+        billingEmailAddress = null
     )
     DefaultLinkTheme {
         Column {

@@ -46,20 +46,21 @@ internal class FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+            cardEditConfiguration = CardEditConfiguration(
+                cardBrandFilter = cardBrandFilter,
+                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+                areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails
+            ),
             requiresModification = true,
-            cardBrandFilter = cardBrandFilter,
             payload = EditCardPayload.create(
                 card = displayableSavedPaymentMethod.paymentMethod.card!!,
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             ),
-            onBrandChoiceChanged = {},
-            onCardUpdateParamsChanged = {},
-            areExpiryDateAndAddressModificationSupported =
-            isModifiable && canUpdateFullPaymentMethodDetails,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode
-            )
+            ),
+            onBrandChoiceChanged = {},
+            onCardUpdateParamsChanged = {},
         )
     }
 

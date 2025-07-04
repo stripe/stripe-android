@@ -121,13 +121,13 @@ object ConsumerFixtures {
                   },
                   "billing_address": {
                     "administrative_area": null,
-                    "country_code": null,
+                    "country_code": "US",
                     "dependent_locality": null,
-                    "line_1": null,
+                    "line_1": "123 Fake St",
                     "line_2": null,
                     "locality": null,
                     "name": null,
-                    "postal_code": null,
+                    "postal_code": "94103",
                     "sorting_code": null
                   },
                   "billing_email_address": "",

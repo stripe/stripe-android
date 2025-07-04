@@ -127,6 +127,8 @@ internal object TestFactory {
         bankName = "Stripe Test Bank",
         bankIconCode = null,
         nickname = null,
+        billingAddress = null,
+        billingEmailAddress = null,
     )
 
     val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(

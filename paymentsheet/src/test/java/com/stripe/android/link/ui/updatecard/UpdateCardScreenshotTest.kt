@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.screenshottesting.FontSize
@@ -40,17 +41,15 @@ internal class UpdateCardScreenshotTest(
                 UpdateCardScreenBody(
                     interactor = DefaultEditCardDetailsInteractor.Factory().create(
                         coroutineScope = rememberCoroutineScope(),
-                        isCbcModifiable = false,
+                        cardEditConfiguration = testCase.cardEditConfiguration,
                         requiresModification = true,
-                        areExpiryDateAndAddressModificationSupported = true,
-                        cardBrandFilter = DefaultCardBrandFilter,
                         payload = EditCardPayload.create(
-                            testCase.card,
+                            testCase.payment,
                             billingPhoneNumber = null
                         ),
+                        billingDetailsCollectionConfiguration = testCase.billingDetailsCollectionConfiguration,
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
-                        billingDetailsCollectionConfiguration = testCase.billingDetailsCollectionConfiguration
                     ),
                     state = testCase.state,
                     onUpdateClicked = {},
@@ -68,59 +67,79 @@ internal class UpdateCardScreenshotTest(
                 TestCase(
                     name = "Canonical",
                     state = state(),
-                    card = card(),
-                    billingDetailsCollectionConfiguration = nothingCollected()
+                    payment = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected(),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "Default",
                     state = state(isDefault = true),
-                    card = card(),
-                    billingDetailsCollectionConfiguration = nothingCollected()
+                    payment = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected(),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "Processing",
                     state = state(processing = true),
-                    card = card(),
-                    billingDetailsCollectionConfiguration = nothingCollected()
+                    payment = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected(),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "Error",
                     state = state(error = Exception("Error")),
-                    card = card(),
-                    billingDetailsCollectionConfiguration = nothingCollected()
+                    payment = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected(),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "Unchanged",
                     state = state(cardUpdateParams = null),
-                    card = card(),
-                    billingDetailsCollectionConfiguration = nothingCollected()
+                    payment = card(),
+                    billingDetailsCollectionConfiguration = nothingCollected(),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "All details collected",
                     state = state(),
-                    card = card(),
+                    payment = card(),
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                         address = AddressCollectionMode.Full,
                         email = CollectionMode.Always,
                         phone = CollectionMode.Always,
                         name = CollectionMode.Always
-                    )
+                    ),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "Contact info collected",
                     state = state(),
-                    card = card(),
+                    payment = card(),
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                         address = AddressCollectionMode.Never,
                         email = CollectionMode.Always,
                         phone = CollectionMode.Always,
                         name = CollectionMode.Always
-                    )
+                    ),
+                    cardEditConfiguration = cardEditConfiguration()
                 ),
                 TestCase(
                     name = "Address collected",
                     state = state(),
-                    card = card(),
+                    payment = card(),
+                    cardEditConfiguration = cardEditConfiguration(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = AddressCollectionMode.Full,
+                        email = CollectionMode.Never,
+                        phone = CollectionMode.Never,
+                        name = CollectionMode.Never
+                    )
+                ),
+                TestCase(
+                    name = "Bank account",
+                    state = state(),
+                    payment = bankAccount(),
+                    cardEditConfiguration = null,
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                         address = AddressCollectionMode.Full,
                         email = CollectionMode.Never,
@@ -177,13 +196,41 @@ internal class UpdateCardScreenshotTest(
                 postalCode = "42424"
             )
         )
+
+        private fun bankAccount(): ConsumerPaymentDetails.BankAccount = ConsumerPaymentDetails.BankAccount(
+            id = "bank_account_id_1234",
+            last4 = "6789",
+            isDefault = false,
+            nickname = "My bank account",
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = null,
+                line1 = null,
+                line2 = null,
+                locality = null,
+                administrativeArea = null,
+                countryCode = CountryCode.US,
+                postalCode = "42424"
+            ),
+            bankName = "My Bank",
+            bankIconCode = "bank_icon_code",
+            billingEmailAddress = null
+        )
+
+        private fun cardEditConfiguration(): CardEditConfiguration {
+            return CardEditConfiguration(
+                cardBrandFilter = DefaultCardBrandFilter,
+                isCbcModifiable = false,
+                areExpiryDateAndAddressModificationSupported = true,
+            )
+        }
     }
 
     internal data class TestCase(
         val name: String,
         val state: UpdateCardScreenState,
-        val card: ConsumerPaymentDetails.Card,
-        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+        val payment: ConsumerPaymentDetails.PaymentDetails,
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+        val cardEditConfiguration: CardEditConfiguration?
     ) {
         override fun toString(): String = name
     }

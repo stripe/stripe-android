@@ -94,6 +94,8 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         bankIconCode = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
                         isDefault = isDefault,
                         nickname = nickname,
+                        billingAddress = parseBillingAddress(json),
+                        billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS)
                     )
                 }
                 else -> null

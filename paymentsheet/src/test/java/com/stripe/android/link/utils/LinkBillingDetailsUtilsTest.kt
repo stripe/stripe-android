@@ -137,17 +137,25 @@ class LinkBillingDetailsUtilsTest {
     }
 
     @Test
-    fun `ConsumerPaymentDetails non-card payment details always supports requirements`() {
-        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+    fun `ConsumerPaymentDetails Bank does not support when address is incomplete`() {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "John Doe",
+                line1 = null, // Missing required field
+                locality = "San Francisco",
+                postalCode = "94105",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = "CA"
+            )
+        )
         val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            address = AddressCollectionMode.Full,
-            phone = CollectionMode.Always,
-            name = CollectionMode.Always
+            address = AddressCollectionMode.Full
         )
 
-        val result = bankAccount.supports(configuration, linkAccount)
+        val result = card.supports(configuration, linkAccount)
 
-        assertThat(result).isTrue()
+        assertThat(result).isFalse()
     }
 
     @Test
