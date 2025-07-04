@@ -5,6 +5,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 
 internal fun PaymentMethodDefinition.formElements(
@@ -15,6 +16,7 @@ internal fun PaymentMethodDefinition.formElements(
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
     setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
 ): List<FormElement> {
     return requireNotNull(
         metadata.formElementsForCode(
@@ -24,6 +26,7 @@ internal fun PaymentMethodDefinition.formElements(
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
                 paymentMethodExtraParams = paymentMethodExtraParams,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
                 initialLinkUserInput = initialLinkUserInput,
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             )

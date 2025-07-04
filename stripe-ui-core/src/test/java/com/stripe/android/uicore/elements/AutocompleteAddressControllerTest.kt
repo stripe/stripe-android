@@ -7,10 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -157,7 +154,6 @@ class AutocompleteAddressControllerTest {
     @Test
     fun `Should expand form if expand form event is provided`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
-            interactorScope = backgroundScope,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = "123",
                 autocompleteCountries = setOf("US")
@@ -166,6 +162,8 @@ class AutocompleteAddressControllerTest {
             val controller = createAutocompleteAddressController(
                 interactor = interactor,
             )
+
+            val registerCall = registerCalls.awaitItem()
 
             controller.addressElementFlow.test {
                 val firstElements = awaitItem().fields.value
@@ -188,7 +186,7 @@ class AutocompleteAddressControllerTest {
                     }
                 ).isTrue()
 
-                autocompleteEvent.emit(
+                registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnExpandForm(
                         values = emptyMap()
                     )
@@ -221,7 +219,6 @@ class AutocompleteAddressControllerTest {
     @Test
     fun `Should updates values on autocomplete values event with values`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
-            interactorScope = backgroundScope,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = "123",
                 autocompleteCountries = setOf("US")
@@ -234,6 +231,8 @@ class AutocompleteAddressControllerTest {
                 )
             )
 
+            val registerCall = registerCalls.awaitItem()
+
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
@@ -244,7 +243,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
 
-                autocompleteEvent.emit(
+                registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
                             IdentifierSpec.Line1 to "123 Main Street",
@@ -273,7 +272,6 @@ class AutocompleteAddressControllerTest {
     @Test
     fun `Should updates values on expand event if it has values`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
-            interactorScope = backgroundScope,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = "123",
                 autocompleteCountries = setOf("US")
@@ -286,6 +284,8 @@ class AutocompleteAddressControllerTest {
                 )
             )
 
+            val registerCall = registerCalls.awaitItem()
+
             controller.formFieldValues.test {
                 assertThat(awaitItem()).containsExactly(
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
@@ -296,7 +296,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
 
-                autocompleteEvent.emit(
+                registerCall.onEvent(
                     AutocompleteAddressInteractor.Event.OnValues(
                         values = mapOf(
                             IdentifierSpec.Line1 to "123 Main Street",
@@ -399,6 +399,22 @@ class AutocompleteAddressControllerTest {
         assertThat(onAutocompleteCalls.awaitItem().country).isEqualTo("US")
     }
 
+    @Test
+    fun `Should register on creation`() = runTest {
+        TestAutocompleteAddressInteractor.test(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = null,
+                autocompleteCountries = emptySet()
+            )
+        ) {
+            createAutocompleteAddressController(
+                interactor = interactor,
+            )
+
+            assertThat(registerCalls.awaitItem()).isNotNull()
+        }
+    }
+
     private fun noAutocompleteTest(
         autocompleteConfig: AutocompleteAddressInteractor.Config,
         isPlacesAvailable: Boolean,
@@ -440,7 +456,6 @@ class AutocompleteAddressControllerTest {
         test: suspend TestAutocompleteAddressInteractor.Scenario.(elements: List<SectionFieldElement>) -> Unit
     ) = runTest {
         TestAutocompleteAddressInteractor.test(
-            interactorScope = backgroundScope,
             autocompleteConfig = autocompleteConfig,
         ) {
             val controller = createAutocompleteAddressController(
@@ -454,8 +469,10 @@ class AutocompleteAddressControllerTest {
                 hideName = hideName,
             )
 
+            val registerCall = registerCalls.awaitItem()
+
             eventToEmit?.let {
-                autocompleteEvent.emit(it)
+                registerCall.onEvent(it)
             }
 
             controller.addressElementFlow.test {
@@ -489,7 +506,7 @@ class AutocompleteAddressControllerTest {
         }
     }
 
-    private fun TestScope.createAutocompleteAddressController(
+    private fun createAutocompleteAddressController(
         values: Map<IdentifierSpec, String?> = emptyMap(),
         phoneNumberState: PhoneNumberState = PhoneNumberState.HIDDEN,
         sameAsShippingElement: SameAsShippingElement? = null,
@@ -503,7 +520,6 @@ class AutocompleteAddressControllerTest {
         hideName: Boolean = true,
         interactor: AutocompleteAddressInteractor =
             TestAutocompleteAddressInteractor.noOp(
-                interactorScope = backgroundScope,
                 autocompleteConfig = autocompleteConfig,
             ),
     ): AutocompleteAddressController {
@@ -516,7 +532,7 @@ class AutocompleteAddressControllerTest {
             hideCountry = hideCountry,
             hideName = hideName,
             isPlacesAvailable = { isPlacesAvailable },
-            interactor = interactor,
+            interactorFactory = { interactor },
         )
     }
 
@@ -528,56 +544,62 @@ class AutocompleteAddressControllerTest {
     }
 
     private class TestAutocompleteAddressInteractor private constructor(
-        override val interactorScope: CoroutineScope,
         override val autocompleteConfig: AutocompleteAddressInteractor.Config,
     ) : AutocompleteAddressInteractor {
-        override val autocompleteEvent = MutableSharedFlow<AutocompleteAddressInteractor.Event>()
+        private val registerCalls = Turbine<Call.Register>()
+        private val onAutocompleteCalls = Turbine<Call.OnAutocomplete>()
 
-        private val onAutocompleteCalls = Turbine<OnAutocomplete>()
-
-        override fun onAutocomplete(country: String) {
-            onAutocompleteCalls.add(OnAutocomplete(country))
+        override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
+            registerCalls.add(Call.Register(onEvent))
         }
 
-        class OnAutocomplete(
-            val country: String
-        )
+        override fun onAutocomplete(country: String) {
+            onAutocompleteCalls.add(Call.OnAutocomplete(country))
+        }
+
+        sealed interface Call {
+            class Register(
+                val onEvent: (AutocompleteAddressInteractor.Event) -> Unit
+            )
+
+            class OnAutocomplete(
+                val country: String
+            )
+        }
 
         class Scenario(
             val interactor: AutocompleteAddressInteractor,
-            val autocompleteEvent: MutableSharedFlow<AutocompleteAddressInteractor.Event>,
-            val onAutocompleteCalls: ReceiveTurbine<OnAutocomplete>
+            val registerCalls: ReceiveTurbine<Call.Register>,
+            val onAutocompleteCalls: ReceiveTurbine<Call.OnAutocomplete>,
         )
 
         companion object {
             suspend fun test(
-                interactorScope: CoroutineScope,
                 autocompleteConfig: AutocompleteAddressInteractor.Config,
                 test: suspend Scenario.() -> Unit,
             ) {
                 val interactor = TestAutocompleteAddressInteractor(
-                    interactorScope = interactorScope,
                     autocompleteConfig = autocompleteConfig,
                 )
 
-                val autocompleteCalls = interactor.onAutocompleteCalls
+                val registerCalls = interactor.registerCalls
+                val onAutocompleteCalls = interactor.onAutocompleteCalls
 
                 test(
                     Scenario(
                         interactor = interactor,
-                        autocompleteEvent = interactor.autocompleteEvent,
-                        onAutocompleteCalls = autocompleteCalls,
+                        registerCalls = registerCalls,
+                        onAutocompleteCalls = onAutocompleteCalls,
                     )
                 )
 
-                autocompleteCalls.ensureAllEventsConsumed()
+                registerCalls.ensureAllEventsConsumed()
+                onAutocompleteCalls.ensureAllEventsConsumed()
             }
 
             fun noOp(
-                interactorScope: CoroutineScope,
                 autocompleteConfig: AutocompleteAddressInteractor.Config,
             ) = TestAutocompleteAddressInteractor(
-                interactorScope = interactorScope,
                 autocompleteConfig = autocompleteConfig,
             )
         }

@@ -2,9 +2,15 @@ package com.stripe.android.ui.core.elements
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.uicore.elements.AddressController
+import com.stripe.android.uicore.elements.AutocompleteAddressController
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,6 +26,7 @@ internal class CardBillingAddressElementTest {
         rawValuesMap = emptyMap(),
         emptySet(),
         dropdownFieldController,
+        null,
         null,
         null
     )
@@ -56,6 +63,29 @@ internal class CardBillingAddressElementTest {
         }
     }
 
+    @Test
+    fun `Verify that AutocompleteAddressElement is used when billing details collection is Full`() =
+        autocompleteTest(
+            collectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+        ) { cardBillingAddressElement ->
+            assertThat(cardBillingAddressElement.sectionFieldErrorController())
+                .isInstanceOf<AutocompleteAddressController>()
+        }
+
+    @Test
+    fun `Verify that AddressElement is used when billing details collection is Never`() = autocompleteTest(
+        collectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+    ) { cardBillingAddressElement ->
+        assertThat(cardBillingAddressElement.sectionFieldErrorController()).isInstanceOf<AddressController>()
+    }
+
+    @Test
+    fun `Verify that AddressElement is used when billing details collection is Automatic`() = autocompleteTest(
+        collectionMode = BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    ) { cardBillingAddressElement ->
+        assertThat(cardBillingAddressElement.sectionFieldErrorController()).isInstanceOf<AddressController>()
+    }
+
     fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
         Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
@@ -72,5 +102,39 @@ internal class CardBillingAddressElementTest {
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
         Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+    }
+
+    private fun autocompleteTest(
+        collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
+        block: (CardBillingAddressElement) -> Unit,
+    ) = runTest {
+        block(
+            CardBillingAddressElement(
+                identifier = IdentifierSpec.Generic("billing_element"),
+                rawValuesMap = emptyMap(),
+                countryCodes = emptySet(),
+                countryDropdownFieldController = dropdownFieldController,
+                autocompleteAddressInteractorFactory = {
+                    object : AutocompleteAddressInteractor {
+                        override val autocompleteConfig: AutocompleteAddressInteractor.Config =
+                            AutocompleteAddressInteractor.Config(
+                                googlePlacesApiKey = null,
+                                autocompleteCountries = emptySet()
+                            )
+
+                        override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
+                            // No-op
+                        }
+
+                        override fun onAutocomplete(country: String) {
+                            error("Should not be called!")
+                        }
+                    }
+                },
+                sameAsShippingElement = null,
+                shippingValuesMap = null,
+                collectionMode = collectionMode,
+            )
+        )
     }
 }

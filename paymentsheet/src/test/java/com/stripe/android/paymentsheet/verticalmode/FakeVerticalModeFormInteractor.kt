@@ -37,6 +37,7 @@ internal class FakeVerticalModeFormInteractor private constructor(
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
+                autocompleteAddressInteractorFactory = null,
             )
 
             return FakeVerticalModeFormInteractor(

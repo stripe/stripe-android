@@ -123,10 +123,7 @@ class AddressLauncher internal constructor(
          * A list of two-letter country codes that support autocomplete. Defaults to a list of
          * countries that Stripe has audited to ensure a good autocomplete experience.
          */
-        val autocompleteCountries: Set<String> = setOf(
-            "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IT", "MX", "NO", "NL",
-            "PL", "RU", "SE", "TR", "US", "ZA"
-        )
+        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.

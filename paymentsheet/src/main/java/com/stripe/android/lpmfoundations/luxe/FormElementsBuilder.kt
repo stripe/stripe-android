@@ -86,6 +86,7 @@ internal class FormElementsBuilder(
                 val elements = AddressSpec(allowedCountryCodes = availableCountries).transform(
                     initialValues = arguments.initialValues,
                     shippingValues = arguments.shippingValues,
+                    autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
                 )
 
                 addAll(elements)

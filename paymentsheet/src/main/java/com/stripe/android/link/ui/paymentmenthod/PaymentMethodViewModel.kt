@@ -180,6 +180,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             ),
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,
+                            autocompleteAddressInteractorFactory = null,
                         ),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,

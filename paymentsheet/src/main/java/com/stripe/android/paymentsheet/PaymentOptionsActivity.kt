@@ -48,9 +48,9 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
             viewModel.analyticsListener.cannotProperlyReturnFromLinkAndOtherLPMs()
         }
 
-        viewModel.linkPaymentLauncher.register(
+        viewModel.registerForActivityResult(
             activityResultCaller = this,
-            callback = viewModel::onLinkAuthenticationResult
+            lifecycleOwner = this,
         )
 
         setContent {

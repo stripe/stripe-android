@@ -25,6 +25,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -788,6 +789,8 @@ class PaymentSheet internal constructor(
         internal val walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons,
 
         internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
+
+        internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
     ) : Parcelable {
 
         @JvmOverloads
@@ -942,6 +945,7 @@ class PaymentSheet internal constructor(
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
+            private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -1091,6 +1095,14 @@ class PaymentSheet internal constructor(
                 this.shopPayConfiguration = shopPayConfiguration
             }
 
+            /**
+             * Google Places API key to support autocomplete when collecting billing details
+             */
+            @AddressAutocompletePreview
+            fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
+                this.googlePlacesApiKey = googlePlacesApiKey
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -1112,7 +1124,8 @@ class PaymentSheet internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
-                shopPayConfiguration = shopPayConfiguration
+                shopPayConfiguration = shopPayConfiguration,
+                googlePlacesApiKey = googlePlacesApiKey,
             )
         }
 

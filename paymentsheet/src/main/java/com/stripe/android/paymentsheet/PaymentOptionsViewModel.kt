@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -154,6 +157,22 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 paymentMethodMetadata = args.state.paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
             )
+        )
+    }
+
+    override fun registerFromActivity(
+        activityResultCaller: ActivityResultCaller,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        linkPaymentLauncher.register(activityResultCaller, ::onLinkAuthenticationResult)
+
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    linkPaymentLauncher.unregister()
+                    super.onDestroy(owner)
+                }
+            }
         )
     }
 

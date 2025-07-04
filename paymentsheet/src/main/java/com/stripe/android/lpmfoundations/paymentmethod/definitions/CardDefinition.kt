@@ -23,6 +23,7 @@ import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -185,6 +186,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             addAll(
                 cardBillingElements(
                     billingDetailsCollectionConfiguration.address.toInternal(),
+                    arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
                 )
@@ -253,6 +255,7 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
 
 private fun cardBillingElements(
     collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
 ): List<FormElement> {
@@ -272,6 +275,7 @@ private fun cardBillingElements(
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = shippingValues,
         collectionMode = collectionMode,
+        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
     )
 
     return listOfNotNull(

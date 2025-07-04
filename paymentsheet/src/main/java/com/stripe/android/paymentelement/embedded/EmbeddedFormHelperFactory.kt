@@ -50,6 +50,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 }

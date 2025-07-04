@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -35,6 +37,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
+import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -52,6 +55,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
@@ -987,6 +991,42 @@ internal class PaymentOptionsViewModelTest {
 
             assertThat(item?.googlePay).isNotNull()
             assertThat(item?.link).isNotNull()
+        }
+    }
+
+    @Test
+    fun `On register for activity result, should register link launcher & autocomplete launcher`() = runTest {
+        DummyActivityResultCaller.test {
+            val lifecycleOwner = TestLifecycleOwner()
+
+            val viewModel = createViewModel(
+                args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                    linkState = LinkState(
+                        configuration = mock(),
+                        signupMode = null,
+                        loginState = LinkState.LoginState.NeedsVerification,
+                    ),
+                    isGooglePayReady = true,
+                ).copy(
+                    walletsToShow = listOf(WalletType.GooglePay, WalletType.Link)
+                )
+            )
+
+            viewModel.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+            )
+
+            assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
+
+            val autocompleteLauncher = awaitNextRegisteredLauncher()
+
+            verify(linkPaymentLauncher).register(eq(activityResultCaller), any())
+
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+            assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
+            verify(linkPaymentLauncher).unregister()
         }
     }
 
