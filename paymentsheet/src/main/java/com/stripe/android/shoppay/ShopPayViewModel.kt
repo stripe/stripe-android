@@ -87,6 +87,7 @@ internal class ShopPayViewModel @Inject constructor(
         confirmationState: ShopPayConfirmationState.Success
     ): ShopPayActivityResult {
         val address = confirmationState.billingDetails.address
+        val shippingAddressData = confirmationState.shippingAddressData
         val paymentMethodCreateParams = PaymentMethodCreateParams.createShopPay(
             externalSourceId = confirmationState.externalSourceId,
             billingDetails = PaymentMethod.BillingDetails(
@@ -101,7 +102,7 @@ internal class ShopPayViewModel @Inject constructor(
                     postalCode = address?.postalCode,
                     state = address?.state,
                 )
-            )
+            ),
         )
         return stripeApiRepository.createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
@@ -113,17 +114,21 @@ internal class ShopPayViewModel @Inject constructor(
                 )
             paymentMethodHandler.onPreparePaymentMethod(
                 paymentMethod = paymentMethod,
-                shippingAddress = AddressDetails(
-                    name = confirmationState.billingDetails.name,
-                    address = PaymentSheet.Address(
-                        city = address?.city,
-                        country = address?.country,
-                        line1 = address?.line1,
-                        line2 = address?.line2,
-                        postalCode = address?.postalCode,
-                        state = address?.state,
+                shippingAddress = shippingAddressData?.let {
+                    AddressDetails(
+                        name = shippingAddressData.name,
+                        address = shippingAddressData.address?.let { address ->
+                            PaymentSheet.Address(
+                                city = address.city,
+                                country = address.country,
+                                line1 = address.line1,
+                                line2 = address.line2,
+                                postalCode = address.postalCode,
+                                state = address.state,
+                            )
+                        }
                     )
-                )
+                }
             )
             ShopPayActivityResult.Completed
         }.getOrElse {
