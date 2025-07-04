@@ -2957,8 +2957,8 @@ class PaymentSheet internal constructor(
             @Poko
             @Parcelize
             class Range(
-                val maximum: DeliveryEstimateUnit,
-                val minimum: DeliveryEstimateUnit
+                val maximum: DeliveryEstimateUnit?,
+                val minimum: DeliveryEstimateUnit?
             ) : DeliveryEstimate
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
