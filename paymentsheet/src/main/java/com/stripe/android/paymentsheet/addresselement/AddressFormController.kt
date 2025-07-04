@@ -10,12 +10,13 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.utils.mapAsStateFlow
 
 internal class AddressFormController(
+    val initialValues: Map<IdentifierSpec, String?>,
     val config: AddressLauncher.Configuration?,
     val interactor: AutocompleteAddressInteractor,
 ) {
     private val autocompleteAddressElement = AutocompleteAddressElement(
         identifier = IdentifierSpec.Generic("address"),
-        initialValues = config?.address?.toIdentifierMap() ?: emptyMap(),
+        initialValues = initialValues,
         countryCodes = config?.allowedCountries ?: CountryUtils.supportedBillingCountries,
         phoneNumberState = parsePhoneNumberConfig(config?.additionalFields?.phone),
         shippingValuesMap = null,
@@ -26,8 +27,12 @@ internal class AddressFormController(
 
     val elements: List<FormElement> = listOf(SectionElement.wrap(autocompleteAddressElement))
 
-    val completeFormValues = autocompleteAddressElement.getFormFieldValueFlow().mapAsStateFlow { entries ->
-        entries.takeIf { it.all { entry -> entry.second.isComplete } }?.toMap()
+    val uncompletedFormValues = autocompleteAddressElement.getFormFieldValueFlow().mapAsStateFlow { entries ->
+        entries.toMap()
+    }
+
+    val completeFormValues = uncompletedFormValues.mapAsStateFlow { entries ->
+        entries.takeIf { it.all { entry -> entry.value.isComplete } }
     }
 
     val lastTextFieldIdentifier = autocompleteAddressElement.getTextFieldIdentifiers()

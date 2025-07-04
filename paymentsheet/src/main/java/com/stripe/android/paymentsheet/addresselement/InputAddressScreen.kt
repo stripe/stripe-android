@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
@@ -24,6 +25,7 @@ import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
 import javax.inject.Provider
@@ -35,8 +37,9 @@ internal fun InputAddressScreen(
     title: String,
     onPrimaryButtonClick: () -> Unit,
     onCloseClick: () -> Unit,
+    topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
-    checkboxContent: @Composable ColumnScope.() -> Unit
+    bottomContent: @Composable ColumnScope.() -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -65,8 +68,9 @@ internal fun InputAddressScreen(
                     style = MaterialTheme.typography.h4,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+                topContent()
                 formContent()
-                checkboxContent()
+                bottomContent()
                 PrimaryButton(
                     isEnabled = primaryButtonEnabled,
                     label = primaryButtonText,
@@ -101,6 +105,7 @@ internal fun InputAddressScreen(
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
+    val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
         primaryButtonEnabled = completeValues != null,
@@ -113,6 +118,23 @@ internal fun InputAddressScreen(
             )
         },
         onCloseClick = { viewModel.navigator.dismiss() },
+        topContent = {
+            val currentState = billingSameAsShippingState
+
+            if (currentState is InputAddressViewModel.ShippingSameAsBillingState.Show) {
+                CheckboxElementUI(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    isChecked = currentState.isChecked,
+                    label = R.string.stripe_paymentsheet_address_element_use_billing_as_shipping
+                        .resolvableString
+                        .resolve(),
+                    isEnabled = formEnabled,
+                    onValueChange = {
+                        viewModel.clickBillingSameAsShipping(it)
+                    }
+                )
+            }
+        },
         formContent = {
             FormUI(
                 hiddenIdentifiersFlow = remember {
@@ -125,7 +147,7 @@ internal fun InputAddressScreen(
                 lastTextFieldIdentifierFlow = formController.lastTextFieldIdentifier,
             )
         },
-        checkboxContent = {
+        bottomContent = {
             viewModel.args.config?.additionalFields?.checkboxLabel?.let { label ->
                 CheckboxElementUI(
                     modifier = Modifier.padding(vertical = 4.dp),

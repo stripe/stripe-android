@@ -60,6 +60,10 @@ class AutocompleteAddressController(
             val newAddressInputMode = toAddressInputMode(expandForm, newValues)
 
             if (currentValues != newValues || newAddressInputMode != addressElementFlow.value.addressInputMode) {
+                newValues[IdentifierSpec.Country]?.let {
+                    countryDropdownFieldController.onRawValueChange(it)
+                }
+
                 addressElementFlow.value =
                     createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
             }
