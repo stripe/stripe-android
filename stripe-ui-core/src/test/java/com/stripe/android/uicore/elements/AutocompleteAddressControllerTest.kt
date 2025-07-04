@@ -127,27 +127,27 @@ class AutocompleteAddressControllerTest {
     fun `Element does not use autocomplete if no google places API key is provided`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
-            autocompleteCountries = setOf("US")
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
         ),
-        isPlacesAvailable = true,
     )
 
     @Test
     fun `Element does not use autocomplete if Places is not available`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
-            autocompleteCountries = setOf("US")
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = false,
         ),
-        isPlacesAvailable = false,
     )
 
     @Test
     fun `Element does not use autocomplete if autocomplete country not supported`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
-            autocompleteCountries = emptySet()
+            autocompleteCountries = emptySet(),
+            isPlacesAvailable = true,
         ),
-        isPlacesAvailable = true,
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -156,7 +156,8 @@ class AutocompleteAddressControllerTest {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = "123",
-                autocompleteCountries = setOf("US")
+                autocompleteCountries = setOf("US"),
+                isPlacesAvailable = true,
             )
         ) {
             val controller = createAutocompleteAddressController(
@@ -323,9 +324,9 @@ class AutocompleteAddressControllerTest {
         ),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
-            autocompleteCountries = setOf("US")
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
         ),
-        isPlacesAvailable = true,
     ) { elements ->
         val containsLineOne = elements.any { element ->
             element.identifier == IdentifierSpec.Line1
@@ -344,9 +345,9 @@ class AutocompleteAddressControllerTest {
         values = emptyMap(),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
-            autocompleteCountries = setOf("US")
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
         ),
-        isPlacesAvailable = true,
     ) { elements ->
         val filteredForAddressTextFieldElement = elements.filterIsInstance<AddressTextFieldElement>()
 
@@ -366,9 +367,9 @@ class AutocompleteAddressControllerTest {
         ),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
-            autocompleteCountries = setOf("US")
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
         ),
-        isPlacesAvailable = true,
     ) { elements ->
         val element = elements.firstOrNull { element ->
             element.identifier == IdentifierSpec.Line1
@@ -417,10 +418,8 @@ class AutocompleteAddressControllerTest {
 
     private fun noAutocompleteTest(
         autocompleteConfig: AutocompleteAddressInteractor.Config,
-        isPlacesAvailable: Boolean,
     ) = elementsTest(
         autocompleteConfig = autocompleteConfig,
-        isPlacesAvailable = isPlacesAvailable,
     ) { fields ->
         assertThat(fields.filterIsInstance<AutocompleteAddressElement>()).isEmpty()
 
@@ -450,7 +449,6 @@ class AutocompleteAddressControllerTest {
             googlePlacesApiKey = null,
         ),
         eventToEmit: AutocompleteAddressInteractor.Event? = null,
-        isPlacesAvailable: Boolean = true,
         hideCountry: Boolean = false,
         hideName: Boolean = true,
         test: suspend TestAutocompleteAddressInteractor.Scenario.(elements: List<SectionFieldElement>) -> Unit
@@ -464,7 +462,6 @@ class AutocompleteAddressControllerTest {
                 sameAsShippingElement = sameAsShippingElement,
                 shippingValuesMap = shippingValuesMap,
                 interactor = interactor,
-                isPlacesAvailable = isPlacesAvailable,
                 hideCountry = hideCountry,
                 hideName = hideName,
             )
@@ -515,7 +512,6 @@ class AutocompleteAddressControllerTest {
             autocompleteCountries = setOf("AT", "BE", "DE", "ES", "IT", "NL"),
             googlePlacesApiKey = null,
         ),
-        isPlacesAvailable: Boolean = true,
         hideCountry: Boolean = false,
         hideName: Boolean = true,
         interactor: AutocompleteAddressInteractor =
@@ -531,7 +527,6 @@ class AutocompleteAddressControllerTest {
             phoneNumberState = phoneNumberState,
             hideCountry = hideCountry,
             hideName = hideName,
-            isPlacesAvailable = { isPlacesAvailable },
             interactorFactory = { interactor },
         )
     }

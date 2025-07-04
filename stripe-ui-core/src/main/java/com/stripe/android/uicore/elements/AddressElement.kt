@@ -26,7 +26,7 @@ class AddressElement(
     ),
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
+    private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
     private val hideName: Boolean = true,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
@@ -241,7 +241,7 @@ internal fun updateLine1WithAutocompleteAffordance(
     field: SectionFieldElement,
     countryCode: String?,
     addressInputMode: AddressInputMode,
-    isPlacesAvailable: IsPlacesAvailable,
+    isPlacesAvailable: Boolean,
 ) {
     if (field.identifier == IdentifierSpec.Line1) {
         val fieldController = (field as? SimpleTextElement)?.controller
@@ -262,7 +262,7 @@ private fun updateLine1ConfigForAutocompleteAffordance(
     textConfig: SimpleTextFieldConfig,
     countryCode: String?,
     addressInputMode: AddressInputMode,
-    isPlacesAvailable: IsPlacesAvailable,
+    isPlacesAvailable: Boolean,
 ) {
     val supportsAutocomplete = (addressInputMode as? AutocompleteCapableInputMode)
         ?.supportsAutoComplete(countryCode, isPlacesAvailable)

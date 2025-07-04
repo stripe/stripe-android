@@ -362,7 +362,7 @@ class AddressElementTest {
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
-            isPlacesAvailable = { false },
+            isPlacesAvailable = false,
         )
         val identifierSpecs = addressElement.fields.first().map {
             it.identifier
@@ -385,7 +385,7 @@ class AddressElementTest {
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null,
-            isPlacesAvailable = { false },
+            isPlacesAvailable = false,
         )
         countryDropdownFieldController.onValueChange(1)
 
@@ -409,7 +409,7 @@ class AddressElementTest {
             ) { onNavigationCounter.getAndIncrement() },
             sameAsShippingElement = null,
             shippingValuesMap = null,
-            isPlacesAvailable = { true },
+            isPlacesAvailable = true,
         )
         countryDropdownFieldController.onValueChange(1)
 

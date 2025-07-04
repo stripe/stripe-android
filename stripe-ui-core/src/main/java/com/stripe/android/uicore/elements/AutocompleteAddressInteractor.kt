@@ -14,6 +14,7 @@ interface AutocompleteAddressInteractor {
     class Config(
         val googlePlacesApiKey: String?,
         val autocompleteCountries: Set<String>,
+        val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke()
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
