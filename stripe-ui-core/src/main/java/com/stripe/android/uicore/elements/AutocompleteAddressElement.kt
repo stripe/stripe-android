@@ -43,9 +43,7 @@ class AutocompleteAddressElement(
 
     override val mandateText: ResolvableString? = null
 
-    override fun sectionFieldErrorController(): SectionFieldErrorController {
-        return controller
-    }
+    override fun sectionFieldErrorController() = controller
 
     override fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>) {
         controller.addressElementFlow.value.setRawValue(rawValuesMap)

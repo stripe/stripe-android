@@ -316,6 +316,55 @@ class AutocompleteAddressControllerTest {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun `On autocomplete event should update country`() = runTest(UnconfinedTestDispatcher()) {
+        TestAutocompleteAddressInteractor.test(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = "123",
+                autocompleteCountries = setOf("US")
+            )
+        ) {
+            val controller = createAutocompleteAddressController(
+                interactor = interactor,
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123",
+                )
+            )
+
+            val registerCall = registerCalls.awaitItem()
+
+            controller.formFieldValues.test {
+                assertThat(awaitItem()).containsExactly(
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                )
+
+                registerCall.onEvent(
+                    AutocompleteAddressInteractor.Event.OnValues(
+                        values = mapOf(
+                            IdentifierSpec.Line1 to "123 Main Street",
+                            IdentifierSpec.Country to "CA"
+                        )
+                    )
+                )
+
+                assertThat(expectMostRecentItem()).containsExactly(
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
+                    IdentifierSpec.State to FormFieldEntry(value = "AB", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
+                )
+            }
+        }
+    }
+
     @Test
     fun `On values has line 1, should be expanded form`() = elementsTest(
         values = mapOf(
