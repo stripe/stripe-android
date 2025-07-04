@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Suppress("TooManyFunctions")
 class CheckoutRequest private constructor(
-    @SerialName("initialization")
-    val initialization: String?,
+//    @SerialName("initialization")
+//    val initialization: String?,
     @SerialName("customer")
     val customer: String?,
     @SerialName("customer_key_type")
@@ -18,20 +18,24 @@ class CheckoutRequest private constructor(
     val currency: String?,
     @SerialName("mode")
     val mode: String?,
-    @SerialName("set_shipping_address")
-    val setShippingAddress: Boolean?,
-    @SerialName("automatic_payment_methods")
-    val automaticPaymentMethods: Boolean?,
-    @SerialName("use_link")
-    val useLink: Boolean?,
+//    @SerialName("set_shipping_address")
+//    val setShippingAddress: Boolean?,
+//    @SerialName("automatic_payment_methods")
+//    val automaticPaymentMethods: Boolean?,
+//    @SerialName("use_link")
+//    val useLink: Boolean?,
     @SerialName("merchant_country_code")
     val merchantCountryCode: String?,
-    @SerialName("supported_payment_methods")
-    val supportedPaymentMethods: List<String>?,
-    @SerialName("payment_method_configuration")
-    val paymentMethodConfigurationId: String?,
-    @SerialName("require_cvc_recollection")
-    val requireCvcRecollection: Boolean?,
+    @SerialName("customer_email")
+    val customerEmail: String?,
+    @SerialName("amount")
+    val amount: String?,
+//    @SerialName("supported_payment_methods")
+//    val supportedPaymentMethods: List<String>?,
+//    @SerialName("payment_method_configuration")
+//    val paymentMethodConfigurationId: String?,
+//    @SerialName("require_cvc_recollection")
+//    val requireCvcRecollection: Boolean?,
     @SerialName("customer_session_component_name")
     val customerSessionComponentName: String,
     @SerialName("customer_session_payment_method_save")
@@ -42,14 +46,14 @@ class CheckoutRequest private constructor(
     val paymentMethodRemoveLastFeature: FeatureState?,
     @SerialName("customer_session_payment_method_redisplay")
     val paymentMethodRedisplayFeature: FeatureState?,
-    @SerialName("customer_session_payment_method_allow_redisplay_filters")
-    val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
-    @SerialName("customer_session_payment_method_save_allow_redisplay_override")
-    val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
-    @SerialName("customer_session_payment_method_set_as_default")
-    val paymentMethodSetAsDefaultFeature: FeatureState?,
-    @SerialName("payment_method_options_setup_future_usage")
-    val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
+//    @SerialName("customer_session_payment_method_allow_redisplay_filters")
+//    val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
+//    @SerialName("customer_session_payment_method_save_allow_redisplay_override")
+//    val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
+//    @SerialName("customer_session_payment_method_set_as_default")
+//    val paymentMethodSetAsDefaultFeature: FeatureState?,
+//    @SerialName("payment_method_options_setup_future_usage")
+//    val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -173,28 +177,30 @@ class CheckoutRequest private constructor(
 
         fun build(): CheckoutRequest {
             return CheckoutRequest(
-                initialization = initialization,
+//                initialization = initialization,
                 customer = customer,
                 customerKeyType = customerKeyType,
                 currency = currency,
                 mode = mode,
-                setShippingAddress = setShippingAddress,
-                automaticPaymentMethods = automaticPaymentMethods,
-                useLink = useLink,
+//                setShippingAddress = setShippingAddress,
+//                automaticPaymentMethods = automaticPaymentMethods,
+//                useLink = useLink,
                 merchantCountryCode = merchantCountryCode,
-                supportedPaymentMethods = supportedPaymentMethods,
-                paymentMethodConfigurationId = paymentMethodConfigurationId,
-                requireCvcRecollection = requireCvcRecollection,
+//                supportedPaymentMethods = supportedPaymentMethods,
+//                paymentMethodConfigurationId = paymentMethodConfigurationId,
+//                requireCvcRecollection = requireCvcRecollection,
                 customerSessionComponentName = "mobile_payment_element",
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
-                paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
+//                paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
                 paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
-                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
-                paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
-                paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
-                    ?: paymentMethodOptionsSetupFutureUsage
+//                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
+//                paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
+//                paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
+//                    ?: paymentMethodOptionsSetupFutureUsage,
+                customerEmail = "",
+                amount = "5000"
             )
         }
     }

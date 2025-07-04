@@ -367,7 +367,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
-        checkout(PaymentSelection.Link(useLinkExpress = false), CheckoutIdentifier.SheetTopWallet)
+        checkout(PaymentSelection.ShopPay, CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkoutWithLinkExpress() {

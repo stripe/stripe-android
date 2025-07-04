@@ -327,6 +327,14 @@ class PaymentSheet internal constructor(
         }
 
         /**
+         * @param callback Called when an analytic event occurs.
+         */
+        @ShopPayPreview
+        fun shopPayHandlers(callback: ShopPayHandlers) = apply {
+            callbacksBuilder.shopPayHandlers(callback)
+        }
+
+        /**
          * @param handler Called when a user calls confirm and their payment method is being handed off
          * to an external provider to handle payment/setup.
          */

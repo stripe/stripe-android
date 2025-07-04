@@ -260,7 +260,9 @@ internal class PlaygroundSettings private constructor(
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }
-            return builder.build()
+            val build = builder.build()
+            Log.d("CheckoutRequest", build.toString())
+            return build
         }
 
         fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
