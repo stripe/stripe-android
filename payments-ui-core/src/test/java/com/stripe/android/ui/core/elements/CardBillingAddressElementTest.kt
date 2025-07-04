@@ -11,9 +11,6 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.isInstanceOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -119,16 +116,15 @@ internal class CardBillingAddressElementTest {
                 countryDropdownFieldController = dropdownFieldController,
                 autocompleteAddressInteractorFactory = {
                     object : AutocompleteAddressInteractor {
-                        override val interactorScope: CoroutineScope = backgroundScope
-
                         override val autocompleteConfig: AutocompleteAddressInteractor.Config =
                             AutocompleteAddressInteractor.Config(
                                 googlePlacesApiKey = null,
                                 autocompleteCountries = emptySet()
                             )
 
-                        override val autocompleteEvent: SharedFlow<AutocompleteAddressInteractor.Event> =
-                            MutableSharedFlow()
+                        override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
+                            // No-op
+                        }
 
                         override fun onAutocomplete(country: String) {
                             error("Should not be called!")

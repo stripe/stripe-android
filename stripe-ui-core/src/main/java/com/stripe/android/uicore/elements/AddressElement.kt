@@ -18,7 +18,7 @@ import com.stripe.android.core.R as CoreR
 class AddressElement(
     _identifier: IdentifierSpec,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    private val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
+    val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),

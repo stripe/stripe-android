@@ -21,7 +21,7 @@ internal class AddressFormController(
         shippingValuesMap = null,
         sameAsShippingElement = null,
         hideName = false,
-        interactor = interactor,
+        interactorFactory = { interactor },
     )
 
     val elements: List<FormElement> = listOf(SectionElement.wrap(autocompleteAddressElement))

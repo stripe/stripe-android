@@ -9,13 +9,13 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteLaun
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
-        onResult: (AutocompleteLauncher.Result) -> Unit
+        resultHandler: AutocompleteLauncherResultHandler,
     ) {
         launchCalls.add(
             LaunchCall(
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
-                onResult = onResult,
+                resultHandler = resultHandler,
             )
         )
     }
@@ -23,7 +23,7 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteLaun
     class LaunchCall(
         val country: String,
         val googlePlacesApiKey: String,
-        val onResult: (AutocompleteLauncher.Result) -> Unit
+        val resultHandler: AutocompleteLauncherResultHandler,
     )
 
     class Scenario(

@@ -42,7 +42,6 @@ import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -333,14 +332,7 @@ internal class TransformSpecToElementsTest {
         val formElement = TransformSpecToElementsFactory.create(
             requiresMandate = false,
             autocompleteAddressInteractorFactory = {
-                TestAutocompleteAddressInteractor(
-                    interactorScope = backgroundScope,
-                    config = AutocompleteAddressInteractor.Config(
-                        googlePlacesApiKey = null,
-                        autocompleteCountries = emptySet(),
-                    ),
-                    autocompleteEvent = MutableSharedFlow()
-                )
+                TestAutocompleteAddressInteractor.noOp()
             }
         ).transform(
             PaymentMethodMetadataFactory.create(),

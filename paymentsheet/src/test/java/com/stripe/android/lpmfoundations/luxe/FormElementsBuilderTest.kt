@@ -15,7 +15,6 @@ import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -140,14 +139,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
             autocompleteAddressInteractorFactory = {
-                TestAutocompleteAddressInteractor(
-                    interactorScope = backgroundScope,
-                    config = AutocompleteAddressInteractor.Config(
-                        googlePlacesApiKey = null,
-                        autocompleteCountries = emptySet(),
-                    ),
-                    autocompleteEvent = MutableSharedFlow()
-                )
+                TestAutocompleteAddressInteractor.noOp()
             }
         )
 

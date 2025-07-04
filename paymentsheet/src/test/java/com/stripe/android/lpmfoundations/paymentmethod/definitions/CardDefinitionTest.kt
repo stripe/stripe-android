@@ -28,8 +28,6 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -298,7 +296,7 @@ class CardDefinitionTest {
                 )
             ),
             autocompleteAddressInteractorFactory = {
-                TestAutocompleteAddressInteractor(CoroutineScope(UnconfinedTestDispatcher()))
+                TestAutocompleteAddressInteractor.noOp()
             }
         )
 

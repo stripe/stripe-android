@@ -1,11 +1,10 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -48,89 +47,101 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `emits 'OnExpandForm' event when launcher result is EnterManually`() = test { scenario ->
         val interactor = createInteractor(launcher = scenario.launcher)
+        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
 
-        interactor.autocompleteEvent.test {
-            interactor.onAutocomplete("US")
-
-            val launchCall = scenario.launchCalls.awaitItem()
-
-            val addressDetails = createTestAddressDetails()
-            val result = AutocompleteLauncher.Result.EnterManually(addressDetails)
-
-            launchCall.onResult(result)
-
-            val event = awaitItem()
-
-            assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
-
-            val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
-
-            assertThat(expandFormEvent.values).isNotNull()
-            assertThat(expandFormEvent.values?.get(IdentifierSpec.Line1)).isEqualTo("123 Main Street")
+        interactor.register {
+            deferredEvent.complete(it)
         }
+
+        interactor.onAutocomplete("US")
+
+        val launchCall = scenario.launchCalls.awaitItem()
+
+        val addressDetails = createTestAddressDetails()
+        val result = AutocompleteLauncher.Result.EnterManually(addressDetails)
+
+        launchCall.resultHandler.onAutocompleteLauncherResult(result)
+
+        val event = deferredEvent.await()
+
+        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
+
+        val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
+
+        assertThat(expandFormEvent.values).isNotNull()
+        assertThat(expandFormEvent.values?.get(IdentifierSpec.Line1)).isEqualTo("123 Main Street")
     }
 
     @Test
     fun `emits OnValues event when launcher result is OnBack with address details`() = test { scenario ->
         val interactor = createInteractor(launcher = scenario.launcher)
+        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
 
-        interactor.autocompleteEvent.test {
-            interactor.onAutocomplete("US")
-
-            val launchCall = scenario.launchCalls.awaitItem()
-
-            val addressDetails = createTestAddressDetails()
-            val result = AutocompleteLauncher.Result.OnBack(addressDetails)
-
-            launchCall.onResult(result)
-
-            val event = awaitItem()
-
-            assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
-
-            val valuesEvent = event as AutocompleteAddressInteractor.Event.OnValues
-
-            assertThat(valuesEvent.values).isNotNull()
-            assertThat(valuesEvent.values[IdentifierSpec.Line1]).isEqualTo("123 Main Street")
+        interactor.register {
+            deferredEvent.complete(it)
         }
+
+        interactor.onAutocomplete("US")
+
+        val launchCall = scenario.launchCalls.awaitItem()
+
+        val addressDetails = createTestAddressDetails()
+        val result = AutocompleteLauncher.Result.OnBack(addressDetails)
+
+        launchCall.resultHandler.onAutocompleteLauncherResult(result)
+
+        val event = deferredEvent.await()
+
+        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
+
+        val valuesEvent = event as AutocompleteAddressInteractor.Event.OnValues
+
+        assertThat(valuesEvent.values).isNotNull()
+        assertThat(valuesEvent.values[IdentifierSpec.Line1]).isEqualTo("123 Main Street")
     }
 
     @Test
     fun `does not emit event when launcher result is OnBack with null address details`() = test { scenario ->
         val interactor = createInteractor(launcher = scenario.launcher)
+        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
 
-        interactor.autocompleteEvent.test {
-            interactor.onAutocomplete("US")
-
-            val launchCall = scenario.launchCalls.awaitItem()
-            val result = AutocompleteLauncher.Result.OnBack(null)
-
-            launchCall.onResult(result)
-
-            expectNoEvents()
+        interactor.register {
+            deferredEvent.complete(it)
         }
+
+        interactor.onAutocomplete("US")
+
+        val launchCall = scenario.launchCalls.awaitItem()
+        val result = AutocompleteLauncher.Result.OnBack(null)
+
+        launchCall.resultHandler.onAutocompleteLauncherResult(result)
+
+        assertThat(deferredEvent.isActive).isTrue()
     }
 
     @Test
     fun `emits OnExpandForm event when launcher result is EnterManually with null address`() = test { scenario ->
         val interactor = createInteractor(launcher = scenario.launcher)
+        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
 
-        interactor.autocompleteEvent.test {
-            interactor.onAutocomplete("US")
-
-            val launchCall = scenario.launchCalls.awaitItem()
-            val result = AutocompleteLauncher.Result.EnterManually(null)
-
-            launchCall.onResult(result)
-
-            val event = awaitItem()
-
-            assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
-
-            val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
-
-            assertThat(expandFormEvent.values).isNull()
+        interactor.register {
+            deferredEvent.complete(it)
         }
+
+        interactor.onAutocomplete("US")
+
+        val launchCall = scenario.launchCalls.awaitItem()
+        val result = AutocompleteLauncher.Result.EnterManually(null)
+
+        launchCall.resultHandler.onAutocompleteLauncherResult(result)
+
+        val event = deferredEvent.await()
+
+        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
+
+        val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
+
+        assertThat(expandFormEvent.values).isNull()
     }
 
     @Test
@@ -155,7 +166,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
-            interactorScope = backgroundScope,
             autocompleteConfig = config
         )
 
@@ -163,7 +173,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
         assertThat(interactor.autocompleteConfig).isEqualTo(config)
-        assertThat(interactor.interactorScope).isEqualTo(backgroundScope)
     }
 
     @Test
@@ -198,16 +207,14 @@ class PaymentElementAutocompleteAddressInteractorTest {
         }
     }
 
-    private fun TestScope.createInteractor(
+    private fun createInteractor(
         launcher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-api-key",
             autocompleteCountries = setOf("US", "CA")
         ),
-        interactorScope: CoroutineScope = backgroundScope
     ) = PaymentElementAutocompleteAddressInteractor(
         launcher = launcher,
-        interactorScope = interactorScope,
         autocompleteConfig = autocompleteConfig
     )
 

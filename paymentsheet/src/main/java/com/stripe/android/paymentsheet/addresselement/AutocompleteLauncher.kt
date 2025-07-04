@@ -7,13 +7,14 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
+import java.lang.ref.WeakReference
 import java.util.UUID
 
 internal interface AutocompleteLauncher {
     fun launch(
         country: String,
         googlePlacesApiKey: String,
-        onResult: (Result) -> Unit
+        resultHandler: AutocompleteLauncherResultHandler
     )
 
     sealed interface Result : Parcelable {
@@ -31,18 +32,23 @@ internal interface AutocompleteActivityLauncher : AutocompleteLauncher {
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 }
 
+internal fun interface AutocompleteLauncherResultHandler {
+    fun onAutocompleteLauncherResult(result: AutocompleteLauncher.Result)
+}
+
 internal class DefaultAutocompleteLauncher(
     private val appearance: PaymentSheet.Appearance,
 ) : AutocompleteActivityLauncher {
     private var activityLauncher: ActivityResultLauncher<AutocompleteContract.Args>? = null
 
-    private val registeredAutocompleteListeners = mutableMapOf<String, (AutocompleteLauncher.Result) -> Unit>()
+    private val registeredAutocompleteListeners =
+        mutableMapOf<String, WeakReference<AutocompleteLauncherResultHandler>>()
 
     override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
         activityLauncher = activityResultCaller.registerForActivityResult(
             AutocompleteContract
         ) { result ->
-            registeredAutocompleteListeners[result.id]?.invoke(
+            registeredAutocompleteListeners[result.id]?.get()?.onAutocompleteLauncherResult(
                 when (result) {
                     is AutocompleteContract.Result.EnterManually -> AutocompleteLauncher.Result.EnterManually(
                         result.addressDetails,
@@ -68,11 +74,11 @@ internal class DefaultAutocompleteLauncher(
     override fun launch(
         country: String,
         googlePlacesApiKey: String,
-        onResult: (AutocompleteLauncher.Result) -> Unit
+        resultHandler: AutocompleteLauncherResultHandler
     ) {
         val id = UUID.randomUUID().toString()
 
-        registeredAutocompleteListeners[id] = onResult
+        registeredAutocompleteListeners[id] = WeakReference(resultHandler)
 
         activityLauncher?.launch(
             AutocompleteContract.Args(

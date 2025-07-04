@@ -45,10 +45,9 @@ class CardBillingAddressElement(
             initialValues = rawValuesMap,
             countryCodes = countryCodes,
             countryDropdownFieldController = countryDropdownFieldController,
-            interactor = factory.create(),
+            interactorFactory = factory,
             shippingValuesMap = shippingValuesMap,
             sameAsShippingElement = sameAsShippingElement,
-
         )
     } ?: run {
         AddressElement(

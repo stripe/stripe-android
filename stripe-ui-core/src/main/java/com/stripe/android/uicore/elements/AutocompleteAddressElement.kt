@@ -16,7 +16,7 @@ class AutocompleteAddressElement(
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
-    interactor: AutocompleteAddressInteractor,
+    interactorFactory: AutocompleteAddressInteractor.Factory,
     hideCountry: Boolean = false,
     hideName: Boolean = true,
 ) : AddressFieldsElement {
@@ -30,7 +30,7 @@ class AutocompleteAddressElement(
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = isPlacesAvailable,
-            interactor = interactor,
+            interactorFactory = interactorFactory,
             hideCountry = hideCountry,
             hideName = hideName,
         )

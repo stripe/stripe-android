@@ -10,10 +10,7 @@ import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcompone
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,6 +21,8 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
 ) : ViewModel(), AutocompleteAddressInteractor {
+    private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
+
     private val _collectedAddress = MutableStateFlow(args.config?.address)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
@@ -31,11 +30,6 @@ internal class InputAddressViewModel @Inject constructor(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
     )
-
-    private val _autocompleteEvent = MutableSharedFlow<AutocompleteAddressInteractor.Event>()
-    override val autocompleteEvent: SharedFlow<AutocompleteAddressInteractor.Event> = _autocompleteEvent
-
-    override val interactorScope: CoroutineScope = viewModelScope
 
     val addressFormController = AddressFormController(
         interactor = this,
@@ -67,10 +61,10 @@ internal class InputAddressViewModel @Inject constructor(
 
                 when (event) {
                     is AddressElementNavigator.AutocompleteEvent.OnEnterManually -> {
-                        _autocompleteEvent.emit(AutocompleteAddressInteractor.Event.OnExpandForm(values))
+                        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnExpandForm(values))
                     }
                     is AddressElementNavigator.AutocompleteEvent.OnBack -> {
-                        _autocompleteEvent.emit(AutocompleteAddressInteractor.Event.OnValues(values))
+                        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnValues(values))
                     }
                     null -> Unit
                 }
@@ -83,6 +77,10 @@ internal class InputAddressViewModel @Inject constructor(
         args.config?.address?.isCheckboxSelected?.let {
             _checkboxChecked.value = it
         }
+    }
+
+    override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
+        eventListener = onEvent
     }
 
     private fun getCurrentAddress(): AddressDetails {

@@ -74,7 +74,6 @@ internal abstract class BaseSheetViewModel(
     val autocompleteAddressInteractorFactory: PaymentElementAutocompleteAddressInteractor.Factory =
         PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = autocompleteLauncher,
-            interactorScope = viewModelScope,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = config.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,

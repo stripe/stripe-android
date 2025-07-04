@@ -5,23 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutocompleteAddressController(
     val identifier: IdentifierSpec,
     val initialValues: Map<IdentifierSpec, String?>,
-    private val interactor: AutocompleteAddressInteractor,
+    interactorFactory: AutocompleteAddressInteractor.Factory,
     countryCodes: Set<String> = emptySet(),
     private val countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
@@ -34,59 +27,41 @@ class AutocompleteAddressController(
     private val hideCountry: Boolean = false,
     private val hideName: Boolean = true,
 ) : SectionFieldErrorController, SectionFieldComposable {
+    private val interactor = interactorFactory.create()
+
     private val config = interactor.autocompleteConfig
 
-    private var currentValues = initialValues
     private var expandForm = false
-    private val addressInputMode = MutableStateFlow(toAddressInputMode(expandForm, initialValues))
 
     override val error: StateFlow<FieldError?> = stateFlowOf(null)
 
-    val addressElementFlow = addressInputMode.map {
-        createAddressElement(currentValues, it)
-    }.stateIn(
-        scope = interactor.interactorScope,
-        started = SharingStarted.Lazily,
-        initialValue = createAddressElement(currentValues, addressInputMode.value),
+    val addressElementFlow = MutableStateFlow(
+        createAddressElement(initialValues, toAddressInputMode(expandForm, initialValues))
     )
 
-    val formFieldValues = addressElementFlow.flatMapLatest { addressElement ->
+    val formFieldValues = addressElementFlow.flatMapLatestAsStateFlow { addressElement ->
         addressElement.getFormFieldValueFlow()
-    }.stateIn(
-        scope = interactor.interactorScope,
-        started = SharingStarted.Lazily,
-        initialValue = addressElementFlow.value.getFormFieldValueFlow().value,
-    )
+    }
 
-    val textFieldIdentifiers = addressElementFlow.flatMapLatest { addressElement ->
+    val textFieldIdentifiers = addressElementFlow.flatMapLatestAsStateFlow { addressElement ->
         addressElement.getTextFieldIdentifiers()
-    }.stateIn(
-        scope = interactor.interactorScope,
-        started = SharingStarted.Lazily,
-        initialValue = addressElementFlow.value.getTextFieldIdentifiers().value,
-    )
+    }
 
     init {
-        interactor.interactorScope.launch {
-            interactor.autocompleteEvent.collectLatest { event ->
-                currentValues = event.values ?: currentValues
+        interactor.register { event ->
+            val currentValues = getCurrentValues()
+            val newValues = event.values ?: currentValues
 
-                when (event) {
-                    is AutocompleteAddressInteractor.Event.OnValues -> Unit
-                    is AutocompleteAddressInteractor.Event.OnExpandForm -> expandForm = true
-                }
-
-                val newAddressInputMode = toAddressInputMode(expandForm, currentValues)
-
-                addressInputMode.value = newAddressInputMode
+            when (event) {
+                is AutocompleteAddressInteractor.Event.OnValues -> Unit
+                is AutocompleteAddressInteractor.Event.OnExpandForm -> expandForm = true
             }
-        }
 
-        interactor.interactorScope.launch {
-            formFieldValues.collectLatest { values ->
-                currentValues = values.toMap().mapValues {
-                    it.value.value
-                }
+            val newAddressInputMode = toAddressInputMode(expandForm, newValues)
+
+            if (currentValues != newValues || newAddressInputMode != addressElementFlow.value.addressInputMode) {
+                addressElementFlow.value =
+                    createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
             }
         }
     }
@@ -139,6 +114,10 @@ class AutocompleteAddressController(
                 },
             )
         }
+    }
+
+    private fun getCurrentValues() = formFieldValues.value.toMap().mapValues {
+        it.value.value
     }
 
     @Composable

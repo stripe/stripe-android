@@ -93,7 +93,7 @@ data class AddressSpec(
                     sameAsShippingElement = sameAsShippingElement,
                     shippingValuesMap = shippingValues,
                     hideCountry = hideCountry,
-                    interactor = autocompleteAddressInteractorFactory.create()
+                    interactorFactory = autocompleteAddressInteractorFactory,
                 )
             } ?: run {
                 AddressElement(
