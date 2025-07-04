@@ -32,7 +32,7 @@
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LargeClass:WalletScreenTest.kt$WalletScreenTest</ID>
     <ID>LargeClass:WalletViewModelTest.kt$WalletViewModelTest</ID>
-    <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI( viewModel: AutocompleteViewModel, attributionDrawable: Int?, isLink: Boolean = false, isRootScreen: Boolean = false, )</ID>
+    <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI( viewModel: AutocompleteViewModel, attributionDrawable: Int?, backgroundColor: Color = MaterialTheme.colors.surface, isRootScreen: Boolean = false, appBar: @Composable (isRootScreen: Boolean, onBack: () -> Unit) -> Unit = { isRoot, onBack -> AddressOptionsAppBar(isRootScreen = isRoot) { onBack() } }, )</ID>
     <ID>LongMethod:AutocompleteViewModelTest.kt$AutocompleteViewModelTest$@Test fun `selectPrediction emits go back event with selected prediction`()</ID>
     <ID>LongMethod:CardDetailsUI.kt$@Composable private fun CardDetailsEditUI( shouldShowCardBrandDropdown: Boolean, selectedBrand: CardBrandChoice, payload: EditCardPayload, expiryDateState: ExpiryDateState, billingDetailsForm: BillingDetailsForm?, availableNetworks: List&lt;CardBrandChoice>, @DrawableRes paymentMethodIcon: Int, onBrandChoiceChanged: (CardBrandChoice) -> Unit, onExpDateChanged: (String) -> Unit, onAddressChanged: (BillingDetailsFormState) -> Unit, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString, modifier: Modifier = Modifier, )</ID>

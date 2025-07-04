@@ -36,9 +36,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
-import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.ui.LinkAppBar
-import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -110,8 +107,13 @@ internal fun AutocompleteScreenUI(
 internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
     attributionDrawable: Int?,
-    isLink: Boolean = false,
+    backgroundColor: Color = MaterialTheme.colors.surface,
     isRootScreen: Boolean = false,
+    appBar: @Composable (isRootScreen: Boolean, onBack: () -> Unit) -> Unit = { isRoot, onBack ->
+        AddressOptionsAppBar(isRootScreen = isRoot) {
+            onBack()
+        }
+    },
 ) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -127,22 +129,7 @@ internal fun AutocompleteScreenUI(
 
     Scaffold(
         topBar = {
-            if (isLink) {
-                LinkAppBar(
-                    state = LinkAppBarState(
-                        showHeader = false,
-                        canNavigateBack = !isRootScreen,
-                        title = null,
-                        isElevated = false
-                    )
-                ) {
-                    viewModel.onBackPressed()
-                }
-            } else {
-                AddressOptionsAppBar(isRootScreen = isRootScreen) {
-                    viewModel.onBackPressed()
-                }
-            }
+            appBar(isRootScreen, viewModel::onBackPressed)
         },
         bottomBar = {
             val background = if (MaterialTheme.stripeColors.materialColors.surface.shouldUseDarkDynamicColor()) {
@@ -165,11 +152,7 @@ internal fun AutocompleteScreenUI(
                 }
             }
         },
-        backgroundColor = if (isLink) {
-            LinkTheme.colors.surfacePrimary
-        } else {
-            MaterialTheme.colors.surface
-        }
+        backgroundColor = backgroundColor,
     ) { paddingValues ->
         ScrollableColumn(
             modifier = Modifier

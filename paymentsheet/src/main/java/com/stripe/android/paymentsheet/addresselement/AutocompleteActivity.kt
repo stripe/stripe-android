@@ -10,16 +10,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
-import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.StripeThemeForLink
-import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.flow.collectLatest
 
@@ -45,9 +40,7 @@ internal class AutocompleteActivity : AppCompatActivity() {
 
         val appearanceContext = starterArgs.appearanceContext
 
-        if (appearanceContext is AutocompleteAppearanceContext.PaymentElement) {
-            appearanceContext.appearance.parseAppearance()
-        }
+        appearanceContext.applyAppearance()
 
         setContent {
             val bottomSheetState = rememberStripeBottomSheetState()
@@ -76,7 +69,7 @@ internal class AutocompleteActivity : AppCompatActivity() {
                 viewModel.onBackPressed()
             }
 
-            Theme(appearanceContext) {
+            appearanceContext.Theme {
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel::onBackPressed,
@@ -85,7 +78,10 @@ internal class AutocompleteActivity : AppCompatActivity() {
                         AutocompleteScreenUI(
                             viewModel = viewModel,
                             isRootScreen = true,
-                            isLink = appearanceContext is AutocompleteAppearanceContext.Link,
+                            appBar = { isRootScreen, onBack ->
+                                appearanceContext.AppBar(isRootScreen, onBack)
+                            },
+                            backgroundColor = appearanceContext.backgroundColor,
                             attributionDrawable =
                             PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme()),
                         )
@@ -106,27 +102,6 @@ internal class AutocompleteActivity : AppCompatActivity() {
                 )
             )
             finish()
-        }
-    }
-
-    @Composable
-    private fun Theme(
-        appearanceContext: AutocompleteAppearanceContext,
-        content: @Composable () -> Unit,
-    ) {
-        when (appearanceContext) {
-            is AutocompleteAppearanceContext.PaymentElement -> {
-                StripeTheme {
-                    content()
-                }
-            }
-            is AutocompleteAppearanceContext.Link -> {
-                DefaultLinkTheme {
-                    StripeThemeForLink {
-                        content()
-                    }
-                }
-            }
         }
     }
 

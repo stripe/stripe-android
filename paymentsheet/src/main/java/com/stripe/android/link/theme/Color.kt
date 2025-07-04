@@ -160,7 +160,8 @@ internal fun StripeThemeForLink(
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
-            cornerRadius = 12f
+            cornerRadius = 12f,
+            bottomSheetCornerRadius = 24f,
         ),
         typography = StripeThemeDefaults.typography,
         sectionSpacing = StripeThemeDefaults.sectionSpacing,
