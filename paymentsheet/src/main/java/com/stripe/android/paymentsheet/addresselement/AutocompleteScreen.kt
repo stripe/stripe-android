@@ -36,6 +36,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.LoadingIndicator
+import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -107,6 +110,8 @@ internal fun AutocompleteScreenUI(
 internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
     attributionDrawable: Int?,
+    isLink: Boolean = false,
+    isRootScreen: Boolean = false,
 ) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -122,8 +127,21 @@ internal fun AutocompleteScreenUI(
 
     Scaffold(
         topBar = {
-            AddressOptionsAppBar(false) {
-                viewModel.onBackPressed()
+            if (isLink) {
+                LinkAppBar(
+                    state = LinkAppBarState(
+                        showHeader = false,
+                        canNavigateBack = !isRootScreen,
+                        title = null,
+                        isElevated = false
+                    )
+                ) {
+                    viewModel.onBackPressed()
+                }
+            } else {
+                AddressOptionsAppBar(isRootScreen = isRootScreen) {
+                    viewModel.onBackPressed()
+                }
             }
         },
         bottomBar = {
@@ -147,7 +165,11 @@ internal fun AutocompleteScreenUI(
                 }
             }
         },
-        backgroundColor = MaterialTheme.colors.surface
+        backgroundColor = if (isLink) {
+            LinkTheme.colors.surfacePrimary
+        } else {
+            MaterialTheme.colors.surface
+        }
     ) { paddingValues ->
         ScrollableColumn(
             modifier = Modifier

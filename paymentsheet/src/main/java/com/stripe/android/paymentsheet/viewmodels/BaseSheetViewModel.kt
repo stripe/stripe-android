@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -58,7 +59,7 @@ internal abstract class BaseSheetViewModel(
     val isCompleteFlow: Boolean,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
-        appearance = config.appearance,
+        AutocompleteAppearanceContext.PaymentElement(config.appearance)
     )
 
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)

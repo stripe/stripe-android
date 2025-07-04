@@ -36,8 +36,18 @@ internal fun interface AutocompleteLauncherResultHandler {
     fun onAutocompleteLauncherResult(result: AutocompleteLauncher.Result)
 }
 
+internal sealed interface AutocompleteAppearanceContext : Parcelable {
+    @Parcelize
+    data object Link : AutocompleteAppearanceContext
+
+    @Parcelize
+    data class PaymentElement(
+        val appearance: PaymentSheet.Appearance
+    ) : AutocompleteAppearanceContext
+}
+
 internal class DefaultAutocompleteLauncher(
-    private val appearance: PaymentSheet.Appearance,
+    private val appearanceContext: AutocompleteAppearanceContext,
 ) : AutocompleteActivityLauncher {
     private var activityLauncher: ActivityResultLauncher<AutocompleteContract.Args>? = null
 
@@ -85,7 +95,7 @@ internal class DefaultAutocompleteLauncher(
                 id = id,
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
-                appearance = appearance,
+                appearanceContext = appearanceContext,
             )
         )
     }

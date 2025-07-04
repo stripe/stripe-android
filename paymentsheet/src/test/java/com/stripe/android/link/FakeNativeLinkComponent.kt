@@ -14,6 +14,8 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeErrorReporter
@@ -41,4 +43,5 @@ internal class FakeNativeLinkComponent(
     override val navigationManager: NavigationManager = TestNavigationManager(),
     override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
     override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
+    override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
 ) : NativeLinkComponent
