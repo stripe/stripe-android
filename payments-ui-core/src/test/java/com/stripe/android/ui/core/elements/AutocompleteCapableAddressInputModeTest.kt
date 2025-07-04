@@ -11,9 +11,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns true when available and supported`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("US"))
         assertThat(
-            subject.supportsAutoComplete("US") {
-                true
-            }
+            subject.supportsAutoComplete("US", true)
         ).isTrue()
     }
 
@@ -21,9 +19,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns false when not available but supported`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("CAN"))
         assertThat(
-            subject.supportsAutoComplete("US") {
-                true
-            }
+            subject.supportsAutoComplete("US", true)
         ).isFalse()
     }
 
@@ -31,9 +27,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns false when available but not supported`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("US"))
         assertThat(
-            subject.supportsAutoComplete("US") {
-                false
-            }
+            subject.supportsAutoComplete("US", false)
         ).isFalse()
     }
 
@@ -41,9 +35,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns false when available and supported but missing api key`() {
         val subject = createSubject(googleApiKey = null, autocompleteCountries = setOf("US"))
         assertThat(
-            subject.supportsAutoComplete("US") {
-                true
-            }
+            subject.supportsAutoComplete("US", true)
         ).isFalse()
     }
 
@@ -51,9 +43,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns true with lowercase autocomplete country`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("us"))
         assertThat(
-            subject.supportsAutoComplete("US") {
-                true
-            }
+            subject.supportsAutoComplete("US", true)
         ).isTrue()
     }
 
@@ -61,9 +51,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns true when available and supported with lowercase country`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("US"))
         assertThat(
-            subject.supportsAutoComplete("us") {
-                true
-            }
+            subject.supportsAutoComplete("us", true)
         ).isTrue()
     }
 
@@ -71,9 +59,7 @@ internal class AutocompleteCapableAddressInputModeTest {
     fun `supportsAutoComplete returns true with lowercase countries`() {
         val subject = createSubject(googleApiKey = "example", autocompleteCountries = setOf("us"))
         assertThat(
-            subject.supportsAutoComplete("us") {
-                true
-            }
+            subject.supportsAutoComplete("us", true)
         ).isTrue()
     }
 

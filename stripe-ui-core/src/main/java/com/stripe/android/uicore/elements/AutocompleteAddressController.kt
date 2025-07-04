@@ -23,7 +23,6 @@ class AutocompleteAddressController(
     private val phoneNumberState: PhoneNumberState,
     private val sameAsShippingElement: SameAsShippingElement?,
     private val shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
     private val hideCountry: Boolean = false,
     private val hideName: Boolean = true,
 ) : SectionFieldErrorController, SectionFieldComposable {
@@ -81,7 +80,7 @@ class AutocompleteAddressController(
             countryDropdownFieldController = countryDropdownFieldController,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
-            isPlacesAvailable = isPlacesAvailable,
+            isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
             hideName = hideName,
         )
