@@ -246,6 +246,6 @@ internal class ServerSideConfirmationCompleteFlowViewModel(
     }
 
     companion object {
-        const val backendUrl = "https://stripe-mobile-payment-sheet-custom-deferred.glitch.me"
+        const val backendUrl = "https://stripe-mobile-payment-sheet-custom-deferred.stripedemos.com"
     }
 }
