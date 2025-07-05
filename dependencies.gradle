@@ -67,7 +67,6 @@ ext.versions = [
         retrofit                    : '2.11.0',
         robolectric                 : '4.14.1',
         sentryGradlePlugin          : '5.4.0',
-        shot                        : '6.1.0',
         showkase                    : '1.0.0-beta18',
         tensorflowLite              : '2.11.0',
         tensorflowLiteSupport       : '0.4.3',
@@ -92,7 +91,6 @@ ext.buildLibs = [
         kotlinSerializationPlugin   : "org.jetbrains.kotlin:kotlin-serialization:${versions.kotlin}",
         paparazzi                   : "app.cash.paparazzi:paparazzi-gradle-plugin:${versions.paparazzi}",
         poko                        : "dev.drewhamilton.poko:poko-compiler-plugin:${versions.poko}",
-        shot                        : "com.karumi:shot:${versions.shot}",
 ]
 
 ext.configs = [
