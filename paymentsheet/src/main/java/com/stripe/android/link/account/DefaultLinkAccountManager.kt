@@ -244,37 +244,46 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> {
-        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
-        return if (linkAccountValue != null) {
-            linkAccountValue.let { account ->
-                linkRepository.createCardPaymentDetails(
-                    paymentMethodCreateParams = paymentMethodCreateParams,
-                    userEmail = account.email,
-                    stripeIntent = config.stripeIntent,
-                    consumerSessionClientSecret = account.clientSecret,
-                    consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
-                    active = config.passthroughModeEnabled,
-                ).mapCatching {
-                    if (config.passthroughModeEnabled) {
-                        linkRepository.shareCardPaymentDetails(
-                            id = it.paymentDetails.id,
-                            last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                            consumerSessionClientSecret = account.clientSecret,
-                            paymentMethodCreateParams = paymentMethodCreateParams,
-                            allowRedisplay = paymentMethodCreateParams.allowRedisplay,
-                        ).getOrThrow()
-                    } else {
-                        it
-                    }
-                }.onSuccess {
-                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
-                }
+    ): Result<ConsumerPaymentDetails.Card> {
+        val account = linkAccountHolder.linkAccountInfo.value.account
+        return if (account != null) {
+            linkRepository.createCardPaymentDetails(
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                userEmail = account.email,
+                stripeIntent = config.stripeIntent,
+                consumerSessionClientSecret = account.clientSecret,
+                consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
+                active = config.passthroughModeEnabled,
+            ).onSuccess {
+                errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }
         } else {
             errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
+            )
+        }
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        paymentDetails: ConsumerPaymentDetails.Card,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+    ): Result<LinkPaymentDetails.ForPassthroughMode> {
+        val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
+        return if (linkAccountValue != null) {
+            linkRepository.shareCardPaymentDetails(
+                id = paymentDetails.id,
+                last4 = paymentDetails.last4,
+                consumerSessionClientSecret = linkAccountValue.clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                allowRedisplay = paymentMethodCreateParams.allowRedisplay,
+            ).map {
+                LinkPaymentDetails.ForPassthroughMode(it)
+            }
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to share payment details")
             )
         }
     }

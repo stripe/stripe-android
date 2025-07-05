@@ -117,7 +117,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         }
 
                         val confirmationResult = completeLinkFlow(
-                            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+                            selectedPaymentDetails = LinkPaymentMethod(
                                 details = updatedPaymentDetails,
                                 collectedCvc = state.value.billingDetailsUpdateFlow?.cvc,
                                 billingPhone = cardParams.billingDetails?.phone,

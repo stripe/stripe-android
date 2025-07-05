@@ -8,7 +8,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -171,7 +170,7 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         consumerPublishableKey: String?,
         active: Boolean,
-    ): Result<LinkPaymentDetails.New> = withContext(workContext) {
+    ): Result<ConsumerPaymentDetails.Card> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
@@ -182,21 +181,7 @@ internal class LinkApiRepository @Inject constructor(
             requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(consumerPublishableKey),
         ).mapCatching {
-            val paymentDetails = it.paymentDetails.first()
-            val extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
-
-            val createParams = PaymentMethodCreateParams.createLink(
-                paymentDetailsId = paymentDetails.id,
-                consumerSessionClientSecret = consumerSessionClientSecret,
-                extraParams = extraParams,
-                allowRedisplay = paymentMethodCreateParams.allowRedisplay
-            )
-
-            LinkPaymentDetails.New(
-                paymentDetails = paymentDetails,
-                paymentMethodCreateParams = createParams,
-                originalParams = paymentMethodCreateParams,
-            )
+            it.paymentDetails.filterIsInstance<ConsumerPaymentDetails.Card>().first()
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
@@ -209,7 +194,7 @@ internal class LinkApiRepository @Inject constructor(
         bankAccountId: String,
         userEmail: String,
         consumerSessionClientSecret: String,
-    ): Result<ConsumerPaymentDetails.PaymentDetails> = withContext(workContext) {
+    ): Result<ConsumerPaymentDetails.BankAccount> = withContext(workContext) {
         consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.BankAccount(
@@ -220,7 +205,7 @@ internal class LinkApiRepository @Inject constructor(
             requestSurface = REQUEST_SURFACE,
             requestOptions = buildRequestOptions(),
         ).mapCatching {
-            it.paymentDetails.first()
+            it.paymentDetails.filterIsInstance<ConsumerPaymentDetails.BankAccount>().first()
         }.onFailure {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.LINK_CREATE_PAYMENT_DETAILS_FAILURE,
@@ -235,7 +220,11 @@ internal class LinkApiRepository @Inject constructor(
         last4: String,
         consumerSessionClientSecret: String,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails> = withContext(workContext) {
+    ): Result<PaymentMethod> = withContext(workContext) {
+        val paymentMethodOptions = mapOf(
+            "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
+        )
+
         val allowRedisplay = allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
@@ -247,25 +236,10 @@ internal class LinkApiRepository @Inject constructor(
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
-            extraParams = mapOf(
-                "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-
-            ) + allowRedisplay + billingPhone,
+            extraParams = paymentMethodOptions + allowRedisplay + billingPhone,
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
-        }.map { passthroughModePaymentMethodId ->
-            LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Passthrough(
-                    id = passthroughModePaymentMethodId,
-                    last4 = last4,
-                ),
-                paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
-                    paymentDetailsId = passthroughModePaymentMethodId,
-                    consumerSessionClientSecret = consumerSessionClientSecret,
-                    extraParams = extraConfirmationParams(paymentMethodCreateParams.toParamMap())
-                ),
-            )
         }
     }
 

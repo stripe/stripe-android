@@ -1120,7 +1120,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         id: String,
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
-    ): Result<String> {
+    ): Result<PaymentMethod> {
+        val expandParams = mapOf(
+            "expand" to listOf("payment_method")
+        )
+
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = sharePaymentDetailsUrl,
@@ -1132,10 +1136,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     ),
                     "id" to id,
                     buildPaymentUserAgentPair(),
-                ).plus(extraParams ?: emptyMap())
+                ).plus(expandParams + extraParams.orEmpty())
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
-        ).map { it.id }
+        ).map { it.paymentMethod }
     }
 
     override suspend fun logOut(

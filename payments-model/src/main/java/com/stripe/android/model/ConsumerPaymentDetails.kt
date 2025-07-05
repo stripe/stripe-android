@@ -67,23 +67,6 @@ data class ConsumerPaymentDetails(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Passthrough(
-        override val id: String,
-        override val last4: String,
-    ) : PaymentDetails(
-        id = id,
-        type = TYPE,
-        isDefault = false,
-        nickname = null,
-    ) {
-
-        companion object {
-            const val TYPE = "card"
-        }
-    }
-
-    @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class BankAccount(
         override val id: String,
         override val last4: String,
