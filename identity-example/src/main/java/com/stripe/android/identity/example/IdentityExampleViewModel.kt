@@ -172,7 +172,9 @@ internal class IdentityExampleViewModel(application: Application) : AndroidViewM
         )
 
     private companion object {
+        // if you want to view and fork the backend code, go to
+        // https://codesandbox.io/p/devbox/compassionate-violet-gshhgf
         const val EXAMPLE_BACKEND_URL =
-            "https://stripe-mobile-identity-verification-playground.glitch.me/create-verification-session"
+            "https://stripe-mobile-identity-verification-playground.stripedemos.com/create-verification-session"
     }
 }
