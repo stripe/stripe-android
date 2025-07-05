@@ -4,7 +4,7 @@ import android.content.Context
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheetContractV2
+import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
 import dagger.Module
 import dagger.Provides
@@ -12,10 +12,10 @@ import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @Module
-internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheetContractV2.Args) {
+internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheetContract.Args) {
 
     @Provides
-    fun provideArgs(): PaymentSheetContractV2.Args {
+    fun provideArgs(): PaymentSheetContract.Args {
         return starterArgs
     }
 
