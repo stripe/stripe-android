@@ -288,14 +288,6 @@ constructor(
             requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = false,
         ),
-        Giropay(
-            "giropay",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = false,
-        ),
         Eps(
             "eps",
             isReusable = false,
