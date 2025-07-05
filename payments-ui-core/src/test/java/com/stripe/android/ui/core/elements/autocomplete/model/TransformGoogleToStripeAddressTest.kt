@@ -399,6 +399,68 @@ class TransformGoogleToStripeAddressTest {
         )
     }
 
+    @Test
+    fun `test 'political' components are ignored`() {
+        val place = parseJson(
+            """
+                {
+                    "address_components": [
+                        {
+                            "long_name" : "123",
+                            "short_name" : "123",
+                            "types" : [ "street_number" ]
+                        },
+                        {
+                            "long_name" : "East Broadway",
+                            "short_name" : "E Broadway",
+                            "types" : [ "route" ]
+                        },
+                        {
+                            "long_name" : "Manhattan",
+                            "short_name" : "Manhattan",
+                            "types" : [ "political", "sublocality_level_1", "sublocality" ]
+                        },
+                        {
+                            "long_name" : "New York",
+                            "short_name" : "New York",
+                            "types" : [  "political", "locality" ]
+                        },
+                        {
+                            "long_name" : "New York County",
+                            "short_name" : "New York County",
+                            "types" : [ "political", "administrative_area_level_2" ]
+                        },
+                        {
+                            "long_name" : "New York",
+                            "short_name" : "NY",
+                            "types" : [  "political", "administrative_area_level_1" ]
+                        },
+                        {
+                            "long_name" : "United States",
+                            "short_name" : "US",
+                            "types" : [ "political", "country" ]
+                        },
+                        {
+                            "long_name" : "10002",
+                            "short_name" : "10002",
+                            "types" : [ "postal_code" ]
+                        }
+                    ]
+                }
+            """.trimIndent()
+        )
+
+        assertThat(place.transformGoogleToStripeAddress(context)).isEqualTo(
+            Address(
+                city = "New York",
+                country = "US",
+                line1 = "123 East Broadway",
+                postalCode = "10002",
+                state = "NY"
+            )
+        )
+    }
+
     private fun parseJson(json: String): Place {
         return Json.decodeFromString(
             Place.serializer(),
