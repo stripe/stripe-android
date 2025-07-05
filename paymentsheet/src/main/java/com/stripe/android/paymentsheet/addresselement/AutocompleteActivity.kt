@@ -14,9 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
-import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.flow.collectLatest
 
@@ -39,7 +37,10 @@ internal class AutocompleteActivity : AppCompatActivity() {
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        starterArgs.appearance.parseAppearance()
+
+        val appearanceContext = starterArgs.appearanceContext
+
+        appearanceContext.applyAppearance()
 
         setContent {
             val bottomSheetState = rememberStripeBottomSheetState()
@@ -68,7 +69,7 @@ internal class AutocompleteActivity : AppCompatActivity() {
                 viewModel.onBackPressed()
             }
 
-            StripeTheme {
+            appearanceContext.Theme {
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel::onBackPressed,
@@ -76,6 +77,11 @@ internal class AutocompleteActivity : AppCompatActivity() {
                     Surface(modifier = Modifier.fillMaxSize()) {
                         AutocompleteScreenUI(
                             viewModel = viewModel,
+                            isRootScreen = true,
+                            appBar = { isRootScreen, onBack ->
+                                appearanceContext.AppBar(isRootScreen, onBack)
+                            },
+                            backgroundColor = appearanceContext.backgroundColor,
                             attributionDrawable =
                             PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme()),
                         )

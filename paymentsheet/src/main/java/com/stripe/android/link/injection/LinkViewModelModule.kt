@@ -9,6 +9,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.Module
@@ -31,6 +32,7 @@ internal object LinkViewModelModule {
         navigationManager: NavigationManager,
         savedStateHandle: SavedStateHandle,
         linkLaunchMode: LinkLaunchMode,
+        autocompleteLauncher: DefaultAutocompleteLauncher,
         @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -45,7 +47,8 @@ internal object LinkViewModelModule {
             navigationManager = navigationManager,
             startWithVerificationDialog = startWithVerificationDialog,
             linkConfirmationHandlerFactory = linkConfirmationHandlerFactory,
-            linkLaunchMode = linkLaunchMode
+            linkLaunchMode = linkLaunchMode,
+            autocompleteLauncher = autocompleteLauncher,
         )
     }
 }

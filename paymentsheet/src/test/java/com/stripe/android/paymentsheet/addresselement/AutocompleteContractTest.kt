@@ -13,27 +13,18 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AutocompleteContractTest {
     @Test
-    fun `on create intent, should have expected extras`() {
-        val args = AutocompleteContract.Args(
-            id = "123",
-            googlePlacesApiKey = "gp_123",
-            country = "US",
-            appearance = PaymentSheet.Appearance.Builder()
+    fun `on create intent with PE context, should have expected extras`() = testCreateIntent(
+        appearanceContext = AutocompleteAppearanceContext.PaymentElement(
+            PaymentSheet.Appearance.Builder()
                 .colorsDark(PaymentSheet.Colors.defaultLight)
                 .build()
-        )
+        ),
+    )
 
-        val intent = AutocompleteContract.createIntent(
-            context = ApplicationProvider.getApplicationContext(),
-            input = args,
-        )
-
-        val extras = intent.extras
-
-        @Suppress("DEPRECATION")
-        assertThat(extras?.getParcelable<AutocompleteContract.Args>(EXTRA_ARGS))
-            .isEqualTo(args)
-    }
+    @Test
+    fun `on create intent with Link context, should have expected extras`() = testCreateIntent(
+        appearanceContext = AutocompleteAppearanceContext.Link,
+    )
 
     @Test
     fun `should parse out address result`() {
@@ -81,5 +72,27 @@ class AutocompleteContractTest {
         )
 
         assertThat(actualResult).isEqualTo(expectedResult)
+    }
+
+    private fun testCreateIntent(
+        appearanceContext: AutocompleteAppearanceContext,
+    ) {
+        val args = AutocompleteContract.Args(
+            id = "123",
+            googlePlacesApiKey = "gp_123",
+            country = "US",
+            appearanceContext = appearanceContext,
+        )
+
+        val intent = AutocompleteContract.createIntent(
+            context = ApplicationProvider.getApplicationContext(),
+            input = args,
+        )
+
+        val extras = intent.extras
+
+        @Suppress("DEPRECATION")
+        assertThat(extras?.getParcelable<AutocompleteContract.Args>(EXTRA_ARGS))
+            .isEqualTo(args)
     }
 }

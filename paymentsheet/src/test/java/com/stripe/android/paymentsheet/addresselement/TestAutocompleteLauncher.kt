@@ -1,10 +1,22 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 
-internal class TestAutocompleteLauncher private constructor() : AutocompleteLauncher {
+internal class TestAutocompleteLauncher private constructor() : AutocompleteActivityLauncher {
     private val launchCalls = Turbine<LaunchCall>()
+    private val registerCalls = Turbine<RegisterCall>()
+
+    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        registerCalls.add(
+            RegisterCall(
+                activityResultCaller,
+                lifecycleOwner,
+            )
+        )
+    }
 
     override fun launch(
         country: String,
@@ -26,9 +38,15 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteLaun
         val resultHandler: AutocompleteLauncherResultHandler,
     )
 
+    class RegisterCall(
+        val activityResultCaller: ActivityResultCaller,
+        val lifecycleOwner: LifecycleOwner,
+    )
+
     class Scenario(
-        val launcher: AutocompleteLauncher,
-        val launchCalls: ReceiveTurbine<LaunchCall>
+        val launcher: AutocompleteActivityLauncher,
+        val launchCalls: ReceiveTurbine<LaunchCall>,
+        val registerCalls: ReceiveTurbine<RegisterCall>,
     )
 
     companion object {
@@ -38,13 +56,15 @@ internal class TestAutocompleteLauncher private constructor() : AutocompleteLaun
             test(
                 Scenario(
                     launcher = launcher,
-                    launchCalls = launcher.launchCalls
+                    launchCalls = launcher.launchCalls,
+                    registerCalls = launcher.registerCalls,
                 )
             )
 
             launcher.launchCalls.ensureAllEventsConsumed()
+            launcher.registerCalls.ensureAllEventsConsumed()
         }
 
-        fun noOp(): AutocompleteLauncher = TestAutocompleteLauncher()
+        fun noOp(): AutocompleteActivityLauncher = TestAutocompleteLauncher()
     }
 }

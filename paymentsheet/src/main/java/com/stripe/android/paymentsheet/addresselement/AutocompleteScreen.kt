@@ -107,6 +107,13 @@ internal fun AutocompleteScreenUI(
 internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
     attributionDrawable: Int?,
+    backgroundColor: Color = MaterialTheme.colors.surface,
+    isRootScreen: Boolean = false,
+    appBar: @Composable (isRootScreen: Boolean, onBack: () -> Unit) -> Unit = { isRoot, onBack ->
+        AddressOptionsAppBar(isRootScreen = isRoot) {
+            onBack()
+        }
+    },
 ) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState()
@@ -122,9 +129,7 @@ internal fun AutocompleteScreenUI(
 
     Scaffold(
         topBar = {
-            AddressOptionsAppBar(false) {
-                viewModel.onBackPressed()
-            }
+            appBar(isRootScreen, viewModel::onBackPressed)
         },
         bottomBar = {
             val background = if (MaterialTheme.stripeColors.materialColors.surface.shouldUseDarkDynamicColor()) {
@@ -147,7 +152,7 @@ internal fun AutocompleteScreenUI(
                 }
             }
         },
-        backgroundColor = MaterialTheme.colors.surface
+        backgroundColor = backgroundColor,
     ) { paddingValues ->
         ScrollableColumn(
             modifier = Modifier

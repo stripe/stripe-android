@@ -24,6 +24,7 @@ import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.Dispatchers
@@ -155,7 +156,8 @@ internal class LinkActivityTest {
                 startWithVerificationDialog = use2faDialog,
                 navigationManager = TestNavigationManager(),
                 linkLaunchMode = LinkLaunchMode.Full,
-                linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() }
+                linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
+                autocompleteLauncher = TestAutocompleteLauncher.noOp(),
             )
         }
     }

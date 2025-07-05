@@ -30,6 +30,7 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -63,6 +64,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val startWithVerificationDialog: Boolean,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
+    private val autocompleteLauncher: AutocompleteActivityLauncher,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
@@ -172,10 +174,11 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    fun registerActivityForConfirmation(
+    fun registerForActivityResult(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
+        autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 

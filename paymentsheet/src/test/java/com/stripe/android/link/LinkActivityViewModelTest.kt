@@ -33,6 +33,8 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -86,25 +88,33 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `test that activity registerActivityForConfirmation registers confirmation handler`() = runTest(dispatcher) {
-        val confirmationHandler = FakeConfirmationHandler()
-        val vm = createViewModel(
-            confirmationHandler = confirmationHandler
-        )
+    fun `test that activity registerForActivityResult registers confirmation handler & autocomplete launcher`() =
+        runTest(dispatcher) {
+            TestAutocompleteLauncher.test {
+                val confirmationHandler = FakeConfirmationHandler()
+                val vm = createViewModel(
+                    autocompleteLauncher = launcher,
+                    confirmationHandler = confirmationHandler
+                )
 
-        vm.registerActivityForConfirmation(
-            activityResultCaller = DummyActivityResultCaller.noOp(),
-            lifecycleOwner = object : LifecycleOwner {
-                override val lifecycle: Lifecycle = mock()
+                val activityResultCaller = DummyActivityResultCaller.noOp()
+
+                vm.registerForActivityResult(
+                    activityResultCaller = activityResultCaller,
+                    lifecycleOwner = object : LifecycleOwner {
+                        override val lifecycle: Lifecycle = mock()
+                    }
+                )
+
+                vm.unregisterActivity()
+
+                val autocompleteRegisterCall = registerCalls.awaitItem()
+                val confirmationHandlerRegisterCall = confirmationHandler.registerTurbine.awaitItem()
+
+                assertThat(autocompleteRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
+                assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
             }
-        )
-
-        vm.unregisterActivity()
-
-        val registerCall = confirmationHandler.registerTurbine.awaitItem()
-
-        assertThat(registerCall).isNotNull()
-    }
+        }
 
     @Test
     fun `initializer throws exception when args are null`() {
@@ -686,7 +696,8 @@ internal class LinkActivityViewModelTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
-        launchWeb: (LinkConfiguration) -> Unit = {}
+        launchWeb: (LinkConfiguration) -> Unit = {},
+        autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
@@ -700,7 +711,8 @@ internal class LinkActivityViewModelTest {
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle,
             linkLaunchMode = linkLaunchMode,
-            linkConfirmationHandlerFactory = { linkConfirmationHandler }
+            linkConfirmationHandlerFactory = { linkConfirmationHandler },
+            autocompleteLauncher = autocompleteLauncher,
         ).apply {
             this.launchWebFlow = launchWeb
         }
