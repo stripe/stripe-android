@@ -13,6 +13,8 @@ import kotlinx.parcelize.Parcelize
 internal class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
+    val nameUsedInSignup: String? = null,
+    val phoneNumberUsedInSignup: String? = null,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -70,4 +72,20 @@ internal class LinkAccount(
         it.type == ConsumerSession.VerificationSession.SessionType.SignUp &&
             it.state == ConsumerSession.VerificationSession.SessionState.Started
     } != null
+
+    /**
+     * Creates a new LinkAccount with the provided signup data.
+     * This is used to store name and phone number collected during signup for later use.
+     */
+    fun withSignupData(
+        name: String?,
+        phoneNumber: String?
+    ): LinkAccount {
+        return LinkAccount(
+            consumerSession = consumerSession,
+            consumerPublishableKey = consumerPublishableKey,
+            nameUsedInSignup = name,
+            phoneNumberUsedInSignup = phoneNumber
+        )
+    }
 }
