@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.TextFieldColors
@@ -42,7 +41,7 @@ internal fun CommonTextField(
 
     CompatTextField(
         modifier = modifier.fillMaxWidth(),
-        value = TextFieldValue(value),
+        value = value,
         enabled = enabled,
         label = {
             Label(
@@ -55,9 +54,7 @@ internal fun CommonTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
-        onValueChange = {
-            onValueChange(it.text)
-        },
+        onValueChange = onValueChange,
         errorMessage = null,
         contentPadding = textFieldInsets.asPaddingValues()
     )
