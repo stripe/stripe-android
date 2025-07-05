@@ -34,9 +34,11 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -53,6 +55,8 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
+
+typealias CollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
 @RunWith(RobolectricTestRunner::class)
 class WalletViewModelTest {
@@ -990,6 +994,171 @@ class WalletViewModelTest {
             )
         )
         return financialConnectionsSession
+    }
+
+    @Test
+    fun `uses signup data for billing details when present and needed`() = runTest(dispatcher) {
+        val linkAccountWithSignupData = LinkAccount(
+            TestFactory.CONSUMER_SESSION,
+            nameUsedInSignup = "Signup Name",
+            phoneNumberUsedInSignup = "+1555000999"
+        )
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(
+                listOf(
+                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                        billingAddress = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.billingAddress?.copy(
+                            name = null // No name in billing address, should use signup data
+                        )
+                    )
+                )
+            )
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails() // No default name
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val navigationManager = TestNavigationManager()
+
+        val viewModel = createViewModel(
+            linkAccount = linkAccountWithSignupData,
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            dismissWithResult = ::dismissWithResult,
+            navigationManager = navigationManager
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        // Should proceed with payment completion using signup data, not navigate to update screen
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult).isNotNull()
+
+        // Should not navigate to update screen since signup data satisfied the requirements
+        val navigatedRoutes = navigationManager.emittedIntents
+            .filterIsInstance<NavigationIntent.NavigateTo>()
+            .map { it.route }
+        assertThat(navigatedRoutes).doesNotContain(LinkScreen.UpdateCard.route)
+    }
+
+    @Test
+    fun `navigates to update screen when billing details are insufficient`() = runTest(dispatcher) {
+        val linkAccountWithIncompleteData = LinkAccount(
+            TestFactory.CONSUMER_SESSION,
+            phoneNumberUsedInSignup = "+1555000999" // Has phone but no name
+        )
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(
+                listOf(
+                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                        billingAddress = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.billingAddress?.copy(
+                            name = null // No name in billing address
+                        )
+                    )
+                )
+            )
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always,
+                phone = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails() // No defaults
+        )
+
+        val navigationManager = TestNavigationManager()
+
+        val viewModel = createViewModel(
+            linkAccount = linkAccountWithIncompleteData,
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            navigationManager = navigationManager
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        // Should navigate to update screen since name is required but not available
+        // Check that navigation occurred to UpdateCard with the correct payment details ID
+        val navigatedRoutes = navigationManager.emittedIntents
+            .filterIsInstance<NavigationIntent.NavigateTo>()
+            .map { it.route }
+
+        val expectedRoute = LinkScreen.UpdateCard(
+            paymentDetailsId = "pm_123", // This is the ID from TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+            billingDetailsUpdateFlow = LinkScreen.UpdateCard.BillingDetailsUpdateFlow(cvc = null)
+        )
+        assertThat(navigatedRoutes).contains(expectedRoute)
+    }
+
+    @Test
+    fun `proceeds with confirmation when effective billing details satisfy requirements`() = runTest(dispatcher) {
+        val linkAccountWithCompleteData = LinkAccount(
+            TestFactory.CONSUMER_SESSION,
+            nameUsedInSignup = "Complete Name",
+            phoneNumberUsedInSignup = "+1555000999"
+        )
+
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(
+                listOf(
+                    TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                        billingAddress = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.billingAddress?.copy(
+                            name = null // No name in billing address, but signup data provides it
+                        )
+                    )
+                )
+            )
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always,
+                phone = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails() // No defaults
+        )
+
+        var linkActivityResult: LinkActivityResult? = null
+        fun dismissWithResult(result: LinkActivityResult) {
+            linkActivityResult = result
+        }
+
+        val navigationManager = TestNavigationManager()
+
+        val viewModel = createViewModel(
+            linkAccount = linkAccountWithCompleteData,
+            linkAccountManager = linkAccountManager,
+            configuration = configuration,
+            dismissWithResult = ::dismissWithResult,
+            navigationManager = navigationManager
+        )
+
+        viewModel.onPrimaryButtonClicked()
+
+        // Should proceed with confirmation since effective billing details satisfy requirements
+        val completedResult = linkActivityResult as? LinkActivityResult.Completed
+        assertThat(completedResult).isNotNull()
+
+        // Should not navigate to update screen
+        val navigatedRoutes = navigationManager.emittedIntents
+            .filterIsInstance<NavigationIntent.NavigateTo>()
+            .map { it.route }
+        assertThat(navigatedRoutes).doesNotContain(LinkScreen.UpdateCard.route)
     }
 
     companion object {

@@ -351,6 +351,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccountNullable(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
+                    nameUsedInSignup = null,
+                    phoneNumberUsedInSignup = null
                 )
             } else {
                 LinkAccount(consumerSession, lookup.publishableKey)
@@ -457,8 +459,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
     internal suspend fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
-        nameUsedInSignup: String? = null,
-        phoneNumberUsedInSignup: String? = null,
+        nameUsedInSignup: String?,
+        phoneNumberUsedInSignup: String?,
     ): LinkAccount? {
         return consumerSession?.let {
             setAccount(

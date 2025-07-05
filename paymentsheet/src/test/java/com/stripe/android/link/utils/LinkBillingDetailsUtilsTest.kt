@@ -31,6 +31,20 @@ class LinkBillingDetailsUtilsTest {
         )
     )
 
+    private val linkAccountWithSignupData = LinkAccount(
+        ConsumerSession(
+            emailAddress = testEmail,
+            clientSecret = "secret",
+            verificationSessions = emptyList(),
+            redactedPhoneNumber = testPhone,
+            redactedFormattedPhoneNumber = testPhone,
+            unredactedPhoneNumber = null, // No session phone available
+            phoneNumberCountry = null
+        ),
+        nameUsedInSignup = "Signup Name",
+        phoneNumberUsedInSignup = "+1555000999"
+    )
+
     private val defaultBillingDetails = PaymentSheet.BillingDetails(
         name = testName,
         email = "merchant@example.com",
@@ -374,5 +388,246 @@ class LinkBillingDetailsUtilsTest {
         assertThat(result.billingAddress?.countryCode).isEqualTo(CountryCode.create("CA"))
         // Should still supplement email from effective billing details
         assertThat(result.billingEmailAddress).isEqualTo("default@example.com")
+    }
+
+    // Tests for signup data functionality
+
+    @Test
+    fun `effectiveBillingDetails uses nameUsedInSignup when name is required and missing`() {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails() // No name provided
+        )
+
+        val result = effectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        assertThat(result.name).isEqualTo("Signup Name")
+    }
+
+    @Test
+    fun `effectiveBillingDetails preserves existing name when present`() {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(name = "Existing Name")
+        )
+
+        val result = effectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        assertThat(result.name).isEqualTo("Existing Name")
+    }
+
+    @Test
+    fun `effectiveBillingDetails uses phoneNumberUsedInSignup when phone is required and session phone unavailable`() {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails() // No phone provided
+        )
+
+        val result = effectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        assertThat(result.phone).isEqualTo("+1555000999")
+    }
+
+    @Test
+    fun `effectiveBillingDetails prefers unredactedPhoneNumber over phoneNumberUsedInSignup`() {
+        val linkAccountWithBothPhones = LinkAccount(
+            ConsumerSession(
+                emailAddress = testEmail,
+                clientSecret = "secret",
+                verificationSessions = emptyList(),
+                redactedPhoneNumber = testPhone,
+                redactedFormattedPhoneNumber = testPhone,
+                unredactedPhoneNumber = testUnredactedPhone,
+                phoneNumberCountry = testUnredactedCountryCode
+            ),
+            phoneNumberUsedInSignup = "+1555000999"
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails() // No phone provided
+        )
+
+        val result = effectiveBillingDetails(configuration, linkAccountWithBothPhones)
+
+        assertThat(result.phone).isEqualTo(testPhone) // Should use session phone, not signup phone
+    }
+
+    @Test
+    fun `effectiveBillingDetails preserves existing phone when present`() {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(phone = "+1999888777")
+        )
+
+        val result = effectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        assertThat(result.phone).isEqualTo("+1999888777")
+    }
+
+    @Test
+    fun `supports considers nameUsedInSignup when checking name requirements`() {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            billingAddress = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.billingAddress?.copy(
+                name = null // No name in billing address
+            )
+        )
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = CollectionMode.Always
+        )
+
+        // Should fail without signup data
+        val linkAccountWithoutSignup = LinkAccount(
+            ConsumerSession(
+                emailAddress = testEmail,
+                clientSecret = "secret",
+                verificationSessions = emptyList(),
+                redactedPhoneNumber = testPhone,
+                redactedFormattedPhoneNumber = testPhone,
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null
+            )
+        )
+        assertThat(card.supports(configuration, linkAccountWithoutSignup)).isFalse()
+
+        // Should pass with signup data
+        assertThat(card.supports(configuration, linkAccountWithSignupData)).isTrue()
+    }
+
+    @Test
+    fun `supports considers phoneNumberUsedInSignup when checking phone requirements`() {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            phone = CollectionMode.Always
+        )
+
+        // Should fail without any phone data
+        val linkAccountWithoutPhone = LinkAccount(
+            ConsumerSession(
+                emailAddress = testEmail,
+                clientSecret = "secret",
+                verificationSessions = emptyList(),
+                redactedPhoneNumber = testPhone,
+                redactedFormattedPhoneNumber = testPhone,
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null
+            )
+        )
+        assertThat(card.supports(configuration, linkAccountWithoutPhone)).isFalse()
+
+        // Should pass with signup phone data
+        assertThat(card.supports(configuration, linkAccountWithSignupData)).isTrue()
+    }
+
+    @Test
+    fun `withEffectiveBillingDetails preserves existing billing address name when present`() {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "Existing Billing Name",
+                line1 = "123 Main St",
+                locality = "San Francisco",
+                postalCode = "94105",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = "CA"
+            )
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(name = "Default Name")
+        )
+
+        val result = card.withEffectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        // Should preserve existing billing address name, not use signup or default name
+        assertThat(result.billingAddress?.name).isEqualTo("Existing Billing Name")
+    }
+
+    @Test
+    fun `withEffectiveBillingDetails preserves all existing billing details when fully populated`() {
+        val completeCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "Complete Name",
+                line1 = "456 Oak St",
+                line2 = "Apt 2B",
+                locality = "Los Angeles",
+                administrativeArea = "CA",
+                postalCode = "90210",
+                countryCode = CountryCode.US
+            ),
+            billingEmailAddress = "complete@example.com"
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always,
+                email = CollectionMode.Always,
+                phone = CollectionMode.Always,
+                address = AddressCollectionMode.Full
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = "Default Name",
+                email = "default@example.com",
+                phone = "+1111222333",
+                address = PaymentSheet.Address(
+                    line1 = "789 Pine St",
+                    city = "Different City",
+                    state = "NY",
+                    postalCode = "10001",
+                    country = "US"
+                )
+            )
+        )
+
+        val result = completeCard.withEffectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        // All existing billing details should be preserved - none replaced
+        assertThat(result.billingAddress?.name).isEqualTo("Complete Name")
+        assertThat(result.billingAddress?.line1).isEqualTo("456 Oak St")
+        assertThat(result.billingAddress?.line2).isEqualTo("Apt 2B")
+        assertThat(result.billingAddress?.locality).isEqualTo("Los Angeles")
+        assertThat(result.billingAddress?.administrativeArea).isEqualTo("CA")
+        assertThat(result.billingAddress?.postalCode).isEqualTo("90210")
+        assertThat(result.billingAddress?.countryCode).isEqualTo(CountryCode.US)
+        assertThat(result.billingEmailAddress).isEqualTo("complete@example.com")
+    }
+
+    @Test
+    fun `withEffectiveBillingDetails works with bank account payment details`() {
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(
+            billingAddress = null,
+            billingEmailAddress = null
+        )
+
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always,
+                email = CollectionMode.Always
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = "Default Name",
+                email = "default@example.com"
+            )
+        )
+
+        val result = bankAccount.withEffectiveBillingDetails(configuration, linkAccountWithSignupData)
+
+        assertThat(result).isInstanceOf(ConsumerPaymentDetails.BankAccount::class.java)
+        val resultBankAccount = result as ConsumerPaymentDetails.BankAccount
+        assertThat(resultBankAccount.billingAddress?.name).isEqualTo("Default Name")
+        assertThat(resultBankAccount.billingEmailAddress).isEqualTo("default@example.com")
     }
 }

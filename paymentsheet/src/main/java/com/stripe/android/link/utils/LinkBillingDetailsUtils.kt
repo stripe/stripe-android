@@ -43,12 +43,12 @@ internal fun PaymentDetails.supports(
         // Check if full address is required but missing or incomplete
         billingDetailsConfig.address == AddressCollectionMode.Full && billingAddress.isIncomplete() -> false
         // Check if phone is required but missing from Link account (including signup data)
-        billingDetailsConfig.collectsPhone && 
-            linkAccount.unredactedPhoneNumber == null && 
+        billingDetailsConfig.collectsPhone &&
+            linkAccount.unredactedPhoneNumber == null &&
             linkAccount.phoneNumberUsedInSignup == null -> false
         // Check if name is required but missing (including signup data)
-        billingDetailsConfig.collectsName && 
-            billingAddress?.name == null && 
+        billingDetailsConfig.collectsName &&
+            billingAddress?.name == null &&
             linkAccount.nameUsedInSignup == null -> false
         // All billing configuration details are supported.
         else -> true
@@ -65,8 +65,9 @@ private fun ConsumerPaymentDetails.BillingAddress?.isIncomplete(): Boolean {
 }
 
 /**
- * Enhances a ConsumerPaymentDetails.Card's billing details with [effectiveBillingDetails].
+ * Merges this payment method's billing details with fallback data from Link account and configuration.
  * This is used for prefilling billing details in update flows.
+ * Uses compatibility logic to determine when to preserve vs replace billing details.
  */
 internal fun PaymentDetails.withEffectiveBillingDetails(
     configuration: LinkConfiguration,
