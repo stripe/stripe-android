@@ -44,13 +44,13 @@ internal data class CardDetailsEntry(
  * @return CardUpdateParams containing the updated card and billing information.
  */
 internal fun toUpdateParams(
-    cardDetailsEntry: CardDetailsEntry,
+    cardDetailsEntry: CardDetailsEntry?,
     billingDetailsEntry: BillingDetailsEntry?,
 ): CardUpdateParams {
     return CardUpdateParams(
-        cardBrand = cardDetailsEntry.cardBrandChoice.brand,
-        expiryMonth = cardDetailsEntry.expiryDateState.expiryMonth,
-        expiryYear = cardDetailsEntry.expiryDateState.expiryYear,
+        cardBrand = cardDetailsEntry?.cardBrandChoice?.brand,
+        expiryMonth = cardDetailsEntry?.expiryDateState?.expiryMonth,
+        expiryYear = cardDetailsEntry?.expiryDateState?.expiryYear,
         billingDetails = createBillingDetails(billingDetailsEntry)
     )
 }

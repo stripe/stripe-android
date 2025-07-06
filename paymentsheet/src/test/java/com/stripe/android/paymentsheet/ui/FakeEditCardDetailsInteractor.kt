@@ -14,16 +14,18 @@ internal class FakeEditCardDetailsInteractor(
     override val state: StateFlow<EditCardDetailsInteractor.State> = stateFlowOf(
         EditCardDetailsInteractor.State(
             payload = payload,
-            selectedCardBrand = payload.getPreferredChoice(DefaultCardBrandFilter),
             paymentMethodIcon = payload.getSavedPaymentMethodIcon(forVerticalMode = true),
-            shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-            availableNetworks = listOf(
-                CardBrandChoice(CardBrand.CartesBancaires, enabled = true),
-                CardBrandChoice(CardBrand.Visa, enabled = true),
-            ),
-            expiryDateState = ExpiryDateState.create(
-                editPayload = payload,
-                enabled = expiryDateEditEnabled,
+            cardDetailsState = EditCardDetailsInteractor.CardDetailsState(
+                selectedCardBrand = payload.getPreferredChoice(DefaultCardBrandFilter),
+                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                availableNetworks = listOf(
+                    CardBrandChoice(CardBrand.CartesBancaires, enabled = true),
+                    CardBrandChoice(CardBrand.Visa, enabled = true),
+                ),
+                expiryDateState = ExpiryDateState.create(
+                    editPayload = payload,
+                    enabled = expiryDateEditEnabled,
+                ),
             ),
             billingDetailsForm = null,
         )

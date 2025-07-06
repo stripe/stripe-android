@@ -561,8 +561,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canUpdateFullPaymentMethodDetails = true
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
-            assertThat(state.shouldShowCardBrandDropdown).isTrue()
-            assertThat(state.expiryDateState.enabled).isTrue()
+            assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isTrue()
+            assertThat(state.cardDetailsState?.expiryDateState?.enabled).isTrue()
             assertThat(state.billingDetailsForm).isNotNull()
         }
     }
@@ -576,8 +576,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canUpdateFullPaymentMethodDetails = false
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
-            assertThat(state.shouldShowCardBrandDropdown).isTrue()
-            assertThat(state.expiryDateState.enabled).isFalse()
+            assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isTrue()
+            assertThat(state.cardDetailsState?.expiryDateState?.enabled).isFalse()
             assertThat(state.billingDetailsForm).isNull()
         }
     }
@@ -588,8 +588,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canUpdateFullPaymentMethodDetails = true
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
-            assertThat(state.shouldShowCardBrandDropdown).isFalse()
-            assertThat(state.expiryDateState.enabled).isTrue()
+            assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
+            assertThat(state.cardDetailsState?.expiryDateState?.enabled).isTrue()
             assertThat(state.billingDetailsForm).isNotNull()
         }
     }
@@ -600,8 +600,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canUpdateFullPaymentMethodDetails = false
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
-            assertThat(state.shouldShowCardBrandDropdown).isFalse()
-            assertThat(state.expiryDateState.enabled).isFalse()
+            assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
+            assertThat(state.cardDetailsState?.expiryDateState?.enabled).isFalse()
             assertThat(state.billingDetailsForm).isNull()
         }
     }

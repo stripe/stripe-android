@@ -21,6 +21,7 @@ data class ConsumerPaymentDetailsUpdateParams(
         cardPaymentMethodCreateParamsMap?.let { map ->
             params.addCardParams(map)
             params.addAddressParams(map)
+            params.addEmailParam(map)
         }
 
         return params
@@ -40,5 +41,11 @@ data class ConsumerPaymentDetailsUpdateParams(
         getConsumerPaymentDetailsAddressFromPaymentMethodCreateParams(map)?.let {
             this[it.first] = it.second
         }
+    }
+
+    private fun MutableMap<String, Any>.addEmailParam(map: Map<String, @RawValue Any>) {
+        val billingDetails = map["billing_details"] as? Map<*, *>
+        val emailAddress = billingDetails?.get("email") as? String
+        emailAddress?.let { this["billing_email_address"] = it }
     }
 }
