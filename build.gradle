@@ -50,7 +50,7 @@ allprojects {
 }
 
 ext {
-    compileSdkVersion = 34
+    compileSdkVersion = 35
 
     group_name = GROUP
     version_name = VERSION_NAME
