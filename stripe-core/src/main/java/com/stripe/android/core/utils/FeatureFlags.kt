@@ -22,11 +22,7 @@ class FeatureFlag(
     private var overrideEnabledValue: Boolean? = null
 
     val isEnabled: Boolean
-        get() = if (BuildConfig.DEBUG) {
-            overrideEnabledValue ?: false
-        } else {
-            false
-        }
+        get() =  overrideEnabledValue ?: false
 
     val value: Flag
         get() {
