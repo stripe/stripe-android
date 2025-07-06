@@ -77,7 +77,9 @@ class DefaultAutocompleteLauncherTest {
 
         assertThat(autocompleteArgs.country).isEqualTo("US")
         assertThat(autocompleteArgs.googlePlacesApiKey).isEqualTo("test-api-key")
-        assertThat(autocompleteArgs.appearance).isEqualTo(appearance)
+        assertThat(autocompleteArgs.appearanceContext).isEqualTo(
+            AutocompleteAppearanceContext.PaymentElement(appearance)
+        )
     }
 
     @Test
@@ -119,13 +121,15 @@ class DefaultAutocompleteLauncherTest {
     }
 
     @Test
-    fun `launch passes custom appearance to contract args`() = test {
+    fun `launch passes PE context with custom appearance to contract args`() = test {
         val customAppearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors.configureDefaultLight(
                 primary = Color.Red
             )
         )
-        val launcher = createLauncher(customAppearance)
+        val launcher = createLauncher(
+            appearanceContext = AutocompleteAppearanceContext.PaymentElement(customAppearance)
+        )
 
         launcher.register(activityResultCaller, TestLifecycleOwner())
 
@@ -142,7 +146,31 @@ class DefaultAutocompleteLauncherTest {
 
         val autocompleteArgs = launchArgs as AutocompleteContract.Args
 
-        assertThat(autocompleteArgs.appearance).isEqualTo(customAppearance)
+        assertThat(autocompleteArgs.appearanceContext)
+            .isEqualTo(AutocompleteAppearanceContext.PaymentElement(customAppearance))
+    }
+
+    @Test
+    fun `launch passes Link context with custom appearance to contract args`() = test {
+        val launcher = createLauncher(AutocompleteAppearanceContext.Link)
+
+        launcher.register(activityResultCaller, TestLifecycleOwner())
+
+        assertThat(awaitRegisterCall()).isNotNull()
+        assertThat(awaitNextRegisteredLauncher()).isNotNull()
+
+        launcher.launch(country = "US", googlePlacesApiKey = "test-api-key") {
+            error("Should not be called!")
+        }
+
+        val launchArgs = awaitLaunchCall()
+
+        assertThat(launchArgs).isInstanceOf<AutocompleteContract.Args>()
+
+        val autocompleteArgs = launchArgs as AutocompleteContract.Args
+
+        assertThat(autocompleteArgs.appearanceContext)
+            .isEqualTo(AutocompleteAppearanceContext.Link)
     }
 
     @Test
@@ -349,6 +377,7 @@ class DefaultAutocompleteLauncherTest {
     }
 
     private fun createLauncher(
-        appearance: PaymentSheet.Appearance = this.appearance
-    ) = DefaultAutocompleteLauncher(appearance)
+        appearanceContext: AutocompleteAppearanceContext =
+            AutocompleteAppearanceContext.PaymentElement(appearance)
+    ) = DefaultAutocompleteLauncher(appearanceContext)
 }

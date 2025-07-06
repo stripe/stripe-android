@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -26,9 +25,8 @@ internal object AutocompleteContract :
         internal val id: String,
         internal val country: String,
         internal val googlePlacesApiKey: String,
-        internal val appearance: PaymentSheet.Appearance,
+        internal val appearanceContext: AutocompleteAppearanceContext,
     ) : ActivityStarter.Args {
-
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {
                 @Suppress("DEPRECATION")

@@ -26,7 +26,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -180,7 +183,14 @@ internal class PaymentMethodViewModel @Inject constructor(
                             ),
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,
-                            autocompleteAddressInteractorFactory = null,
+                            autocompleteAddressInteractorFactory =
+                            PaymentElementAutocompleteAddressInteractor.Factory(
+                                launcher = parentComponent.autocompleteLauncher,
+                                autocompleteConfig = AutocompleteAddressInteractor.Config(
+                                    googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
+                                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                                )
+                            ),
                         ),
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,

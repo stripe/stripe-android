@@ -3,9 +3,20 @@ package com.stripe.android.paymentsheet.addresselement
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.LinkAppBar
+import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
+import com.stripe.android.uicore.StripeTheme
 import kotlinx.parcelize.Parcelize
 import java.lang.ref.WeakReference
 import java.util.UUID
@@ -36,8 +47,91 @@ internal fun interface AutocompleteLauncherResultHandler {
     fun onAutocompleteLauncherResult(result: AutocompleteLauncher.Result)
 }
 
+internal sealed interface AutocompleteAppearanceContext : Parcelable {
+    fun applyAppearance()
+
+    @Composable
+    fun Theme(content: @Composable () -> Unit)
+
+    @Composable
+    fun AppBar(
+        isRootScreen: Boolean,
+        onBack: () -> Unit,
+    )
+
+    @get:Composable
+    val backgroundColor: Color
+
+    @Parcelize
+    data object Link : AutocompleteAppearanceContext {
+        override val backgroundColor: Color
+            @Composable
+            get() = LinkTheme.colors.surfacePrimary
+
+        override fun applyAppearance() {
+            // No-op, Link supplies its own values and does adhere to merchant supplied appearance values
+        }
+
+        @Composable
+        override fun Theme(content: @Composable () -> Unit) {
+            DefaultLinkTheme {
+                StripeThemeForLink {
+                    content()
+                }
+            }
+        }
+
+        @Composable
+        override fun AppBar(
+            isRootScreen: Boolean,
+            onBack: () -> Unit,
+        ) {
+            LinkAppBar(
+                state = LinkAppBarState(
+                    showHeader = false,
+                    canNavigateBack = !isRootScreen,
+                    title = null,
+                    isElevated = false
+                )
+            ) {
+                onBack()
+            }
+        }
+    }
+
+    @Parcelize
+    data class PaymentElement(
+        val appearance: PaymentSheet.Appearance
+    ) : AutocompleteAppearanceContext {
+        override val backgroundColor: Color
+            @Composable
+            get() = MaterialTheme.colors.surface
+
+        override fun applyAppearance() {
+            appearance.parseAppearance()
+        }
+
+        @Composable
+        override fun Theme(content: @Composable () -> Unit) {
+            StripeTheme {
+                content()
+            }
+        }
+
+        @Composable
+        override fun AppBar(
+            isRootScreen: Boolean,
+            onBack: () -> Unit,
+        ) {
+            AddressOptionsAppBar(isRootScreen = isRootScreen) {
+                onBack()
+            }
+        }
+    }
+}
+
 internal class DefaultAutocompleteLauncher(
-    private val appearance: PaymentSheet.Appearance,
+    private val appearanceContext: AutocompleteAppearanceContext,
 ) : AutocompleteActivityLauncher {
     private var activityLauncher: ActivityResultLauncher<AutocompleteContract.Args>? = null
 
@@ -85,7 +179,7 @@ internal class DefaultAutocompleteLauncher(
                 id = id,
                 country = country,
                 googlePlacesApiKey = googlePlacesApiKey,
-                appearance = appearance,
+                appearanceContext = appearanceContext,
             )
         )
     }

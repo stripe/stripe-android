@@ -42,7 +42,7 @@ internal class LinkActivity : ComponentActivity() {
 
         vm.linkLaunchMode.setTheme()
 
-        vm.registerActivityForConfirmation(
+        vm.registerForActivityResult(
             activityResultCaller = this,
             lifecycleOwner = this,
         )
