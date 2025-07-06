@@ -90,7 +90,7 @@ internal data class WalletUiState(
     }
 
     fun updateWithResponse(
-        response: List<LinkPaymentMethod.ConsumerPaymentDetails>,
+        response: List<LinkPaymentMethod>,
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.map { it.details },

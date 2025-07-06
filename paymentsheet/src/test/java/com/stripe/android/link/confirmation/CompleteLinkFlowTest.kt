@@ -6,8 +6,6 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
-import com.stripe.android.link.LinkPaymentMethod.ConsumerPaymentDetails
-import com.stripe.android.link.LinkPaymentMethod.LinkPaymentDetails
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -23,14 +21,8 @@ internal class CompleteLinkFlowTest {
     private val linkPaymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
     private val cvc = "123"
 
-    val consumerPaymentMethod = ConsumerPaymentDetails(
-        consumerPaymentDetails,
-        collectedCvc = cvc,
-        billingPhone = null
-    )
-
-    val linkPaymentMethod = LinkPaymentDetails(
-        linkPaymentDetails.paymentDetails,
+    val linkPaymentMethod = LinkPaymentMethod(
+        details = linkPaymentDetails.paymentDetails,
         collectedCvc = cvc,
         billingPhone = null
     )
@@ -50,7 +42,7 @@ internal class CompleteLinkFlowTest {
         )
 
         val result = completeLinkFlow(
-            selectedPaymentDetails = consumerPaymentMethod,
+            selectedPaymentDetails = linkPaymentMethod,
             linkAccount = linkAccount
         )
 

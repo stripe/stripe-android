@@ -308,7 +308,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         id: String,
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
-    ): Result<String> {
+    ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
 

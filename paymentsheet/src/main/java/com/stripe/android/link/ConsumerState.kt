@@ -8,7 +8,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
  * When non-null, contains the loaded payment details (which may be an empty list).
  */
 internal data class ConsumerState(
-    val paymentDetails: List<LinkPaymentMethod.ConsumerPaymentDetails>
+    val paymentDetails: List<LinkPaymentMethod>
 ) {
 
     /**
@@ -19,7 +19,7 @@ internal data class ConsumerState(
      * - Preserves local fields like [collectedCvc] and [billingPhone]
      *
      * For new payment details from the response:
-     * - Creates new [LinkPaymentMethod.ConsumerPaymentDetails] with null local fields
+     * - Creates new [LinkPaymentMethod] with null local fields
      */
     fun withPaymentDetailsResponse(response: ConsumerPaymentDetails): ConsumerState {
         val existingById = paymentDetails.associateBy { it.details.id }
@@ -27,7 +27,7 @@ internal data class ConsumerState(
             paymentDetails = response.paymentDetails.map { details ->
                 existingById[details.id]
                     ?.copy(details = details)
-                    ?: LinkPaymentMethod.ConsumerPaymentDetails(details, null, null)
+                    ?: LinkPaymentMethod(details, null, null)
             }
         )
     }
@@ -69,7 +69,7 @@ internal data class ConsumerState(
         fun fromResponse(response: ConsumerPaymentDetails): ConsumerState {
             return ConsumerState(
                 paymentDetails = response.paymentDetails.map { detail ->
-                    LinkPaymentMethod.ConsumerPaymentDetails(detail, null, null)
+                    LinkPaymentMethod(detail, null, null)
                 }
             )
         }
