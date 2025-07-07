@@ -34,6 +34,11 @@ class AutocompleteAddressController(
 
     override val error: StateFlow<FieldError?> = stateFlowOf(null)
 
+    val countryElement = CountryElement(
+        IdentifierSpec.Country,
+        countryDropdownFieldController,
+    )
+
     val addressElementFlow = MutableStateFlow(
         createAddressElement(initialValues, toAddressInputMode(expandForm, initialValues))
     )
@@ -77,7 +82,7 @@ class AutocompleteAddressController(
             _identifier = identifier,
             rawValuesMap = values,
             addressInputMode = addressInputMode,
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,

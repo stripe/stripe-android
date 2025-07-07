@@ -20,9 +20,12 @@ class AddressElement(
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
     countryCodes: Set<String> = emptySet(),
-    countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes),
-        rawValuesMap[IdentifierSpec.Country]
+    override val countryElement: CountryElement = CountryElement(
+        IdentifierSpec.Country,
+        DropdownFieldController(
+            CountryConfig(countryCodes),
+            rawValuesMap[IdentifierSpec.Country]
+        )
     ),
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
@@ -33,12 +36,6 @@ class AddressElement(
 
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override val countryElement = CountryElement(
-        IdentifierSpec.Country,
-        countryDropdownFieldController
-    )
 
     private val nameElement = SimpleTextElement(
         IdentifierSpec.Name,
