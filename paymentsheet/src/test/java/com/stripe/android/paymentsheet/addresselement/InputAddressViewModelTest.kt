@@ -341,7 +341,8 @@ class InputAddressViewModelTest {
             val addressFields = autocompleteElement.sectionFieldErrorController()
                 .addressElementFlow
                 .value
-                .controller
+                .addressController
+                .value
                 .fieldsFlowable
                 .value
 

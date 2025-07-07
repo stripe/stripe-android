@@ -46,13 +46,14 @@ class AddressElementUiTest {
         val formValues = element.getFormFieldValueFlow()
 
         composeTestRule.setContent {
+            val controller by element.addressController.collectAsState()
             val formValuesState by formValues.collectAsState()
 
             Text(formValuesState.toString())
 
             AddressElementUI(
                 enabled = true,
-                controller = element.controller,
+                controller = controller,
                 hiddenIdentifiers = setOf(),
                 lastTextFieldIdentifier = null,
             )

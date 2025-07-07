@@ -57,9 +57,9 @@ class AddressElementTest {
             postalCodeController.onValueChange("9999")
             postalCodeController.onFocusChange(false)
 
-            assertThat(addressElement.controller.error.first())
+            assertThat(addressElement.addressController.value.error.first())
                 .isNotNull()
-            assertThat(addressElement.controller.error.first()?.errorMessage)
+            assertThat(addressElement.addressController.value.error.first()?.errorMessage)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
 
             countryElement.controller.onValueChange(1)
@@ -71,7 +71,7 @@ class AddressElementTest {
             postalCodeController.onFocusChange(false)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            assertThat(addressElement.controller.error.first()?.errorMessage)
+            assertThat(addressElement.addressController.value.error.first()?.errorMessage)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_postal_invalid)
         }
     }

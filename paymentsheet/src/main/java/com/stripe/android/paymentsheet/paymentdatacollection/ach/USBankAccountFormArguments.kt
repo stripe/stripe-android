@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.update
 
 /**
@@ -55,6 +56,7 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
+    val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     val onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
@@ -101,6 +103,7 @@ internal class USBankAccountFormArguments(
                 stripeIntentId = stripeIntent.id,
                 clientSecret = stripeIntent.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
+                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
                 onAnalyticsEvent = { viewModel.eventReporter.onUsBankAccountFormEvent(it) },
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
@@ -158,6 +161,7 @@ internal class USBankAccountFormArguments(
                 shippingDetails = paymentMethodMetadata.shippingDetails,
                 draftPaymentSelection = null,
                 onMandateTextChanged = onMandateTextChanged,
+                autocompleteAddressInteractorFactory = null,
                 onAnalyticsEvent = onAnalyticsEvent,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,

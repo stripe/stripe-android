@@ -465,6 +465,42 @@ class AutocompleteAddressControllerTest {
         }
     }
 
+    @Test
+    fun `on condensed to expanded form, should change address controllers`() = runTest {
+        TestAutocompleteAddressInteractor.test(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = "123",
+                autocompleteCountries = setOf("US"),
+                isPlacesAvailable = true,
+            ),
+        ) {
+            val controller = createAutocompleteAddressController(interactor = interactor)
+
+            val registerCall = registerCalls.awaitItem()
+
+            controller.addressController.test {
+                val firstAddressController = awaitItem()
+
+                registerCall.onEvent(
+                    AutocompleteAddressInteractor.Event.OnValues(
+                        values = mapOf(
+                            IdentifierSpec.Line1 to "123 Main Street",
+                            IdentifierSpec.Line2 to "456",
+                            IdentifierSpec.City to "San Francisco",
+                            IdentifierSpec.State to "CA",
+                            IdentifierSpec.Country to "US",
+                            IdentifierSpec.PostalCode to "94111",
+                        )
+                    )
+                )
+
+                val secondAddressController = awaitItem()
+
+                assertThat(firstAddressController).isNotEqualTo(secondAddressController)
+            }
+        }
+    }
+
     private fun noAutocompleteTest(
         autocompleteConfig: AutocompleteAddressInteractor.Config,
     ) = elementsTest(

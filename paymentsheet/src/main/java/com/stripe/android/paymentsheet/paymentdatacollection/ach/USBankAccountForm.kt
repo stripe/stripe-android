@@ -80,7 +80,7 @@ internal fun USBankAccountForm(
     enabled: Boolean
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
-        factory = USBankAccountFormViewModel.Factory {
+        factory = USBankAccountFormViewModel.Factory(usBankAccountFormArgs.autocompleteAddressInteractorFactory) {
             USBankAccountFormViewModel.Args(
                 instantDebits = usBankAccountFormArgs.instantDebits,
                 incentive = usBankAccountFormArgs.incentive,
@@ -104,6 +104,7 @@ internal fun USBankAccountForm(
 
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
+    val addressController by viewModel.addressElement.addressController.collectAsState()
     val isEnabled = !state.isProcessing && enabled
 
     USBankAccountEmitters(
@@ -121,7 +122,7 @@ internal fun USBankAccountForm(
         nameController = viewModel.nameController,
         emailController = viewModel.emailController,
         phoneController = viewModel.phoneController,
-        addressController = viewModel.addressElement.controller,
+        addressController = addressController,
         lastTextFieldIdentifier = lastTextFieldIdentifier,
         sameAsShippingElement = viewModel.sameAsShippingElement,
         saveForFutureUseElement = viewModel.saveForFutureUseElement,

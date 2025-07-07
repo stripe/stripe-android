@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
+import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.AddressInputMode
@@ -63,6 +64,8 @@ class CardBillingAddressElement(
             sameAsShippingElement = sameAsShippingElement,
         )
     }
+
+    override val addressController: StateFlow<AddressController> = addressElement.addressController
 
     override val countryElement: CountryElement = addressElement.countryElement
 
