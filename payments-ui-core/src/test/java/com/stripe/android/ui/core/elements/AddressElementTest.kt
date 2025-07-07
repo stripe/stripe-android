@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberState
@@ -30,8 +31,11 @@ import com.stripe.android.uicore.R as UiCoreR
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
 @RunWith(RobolectricTestRunner::class)
 class AddressElementTest {
-    private val countryDropdownFieldController = DropdownFieldController(
-        CountryConfig(setOf("US", "CA"))
+    private val countryElement = CountryElement(
+        IdentifierSpec.Country,
+        DropdownFieldController(
+            CountryConfig(setOf("US", "CA"))
+        )
     )
 
     @Test
@@ -40,14 +44,14 @@ class AddressElementTest {
             // ZZ does not have state and US does
             val addressElement = AddressElement(
                 IdentifierSpec.Generic("address"),
-                countryDropdownFieldController = countryDropdownFieldController,
+                countryElement = countryElement,
                 sameAsShippingElement = null,
                 shippingValuesMap = null
             )
 
             var postalCodeController = addressElement.fields.postalCodeController()
 
-            countryDropdownFieldController.onValueChange(0)
+            countryElement.controller.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             postalCodeController.onValueChange("9999")
@@ -58,7 +62,7 @@ class AddressElementTest {
             assertThat(addressElement.controller.error.first()?.errorMessage)
                 .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
 
-            countryDropdownFieldController.onValueChange(1)
+            countryElement.controller.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             postalCodeController = addressElement.fields.postalCodeController()
@@ -76,14 +80,14 @@ class AddressElementTest {
     fun `verify flow of form field values`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
         var postalCodeController = addressElement.fields.postalCodeController()
 
-        countryDropdownFieldController.onValueChange(0)
+        countryElement.controller.onValueChange(0)
 
         // Add values to the fields
         postalCodeController.onValueChange("999")
@@ -97,7 +101,7 @@ class AddressElementTest {
                 FormFieldEntry("999", false)
             )
 
-        countryDropdownFieldController.onValueChange(1)
+        countryElement.controller.onValueChange(1)
 
         // Add values to the fields
         postalCodeController = addressElement.fields.postalCodeController()
@@ -116,7 +120,7 @@ class AddressElementTest {
     fun `changing country updates the fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -128,11 +132,11 @@ class AddressElementTest {
                 .first()[0].second.value
         }
 
-        countryDropdownFieldController.onValueChange(0)
+        countryElement.controller.onValueChange(0)
 
         assertThat(country()).isEqualTo("US")
 
-        countryDropdownFieldController.onValueChange(1)
+        countryElement.controller.onValueChange(1)
 
         assertThat(country()).isEqualTo("CA")
     }
@@ -141,7 +145,7 @@ class AddressElementTest {
     fun `condensed address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
@@ -163,7 +167,7 @@ class AddressElementTest {
     fun `hidden phone number field is not shown`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
@@ -183,7 +187,7 @@ class AddressElementTest {
     fun `optional phone number field is shown`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),
@@ -239,7 +243,7 @@ class AddressElementTest {
     fun `expanded address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
@@ -261,7 +265,7 @@ class AddressElementTest {
     fun `expanded shipping address element should hide phone number when state is hidden`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
@@ -281,7 +285,7 @@ class AddressElementTest {
     fun `expanded shipping address element should show phone number when state is optional`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
@@ -301,7 +305,7 @@ class AddressElementTest {
     fun `normal address element should not have name and phone number fields`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -318,7 +322,7 @@ class AddressElementTest {
     fun `normal address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = null,
             shippingValuesMap = null
@@ -334,7 +338,7 @@ class AddressElementTest {
     fun `condensed shipping address element should have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 "some key",
                 setOf("US", "CA"),
@@ -354,7 +358,7 @@ class AddressElementTest {
     fun `AddressElement should not have OneLineAddress when places is unavailable`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 "some key",
                 setOf("US", "CA"),
@@ -377,7 +381,10 @@ class AddressElementTest {
         )
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = countryDropdownFieldController,
+            ),
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 "some key",
                 setOf("US", "CA"),
@@ -401,7 +408,10 @@ class AddressElementTest {
         val onNavigationCounter = AtomicInteger(0)
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = countryDropdownFieldController,
+            ),
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 "some key",
                 setOf("US", "CA"),
@@ -426,7 +436,7 @@ class AddressElementTest {
     fun `when google api key not supplied, condensed shipping address element is not one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 null,
                 setOf(),
@@ -446,7 +456,7 @@ class AddressElementTest {
     fun `expanded shipping address element should not have one line address element`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteExpanded(
                 googleApiKey = null,
                 autocompleteCountries = null,
@@ -473,7 +483,7 @@ class AddressElementTest {
             mapOf(
                 IdentifierSpec.Country to "CA"
             ),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = mapOf(
@@ -488,7 +498,7 @@ class AddressElementTest {
                 .first()[0].second.value
         }
 
-        countryDropdownFieldController.onValueChange(1)
+        countryElement.controller.onValueChange(1)
 
         assertThat(country()).isEqualTo("CA")
 
@@ -504,7 +514,7 @@ class AddressElementTest {
             mapOf(
                 IdentifierSpec.Country to "CA"
             ),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(
                 phoneNumberState = PhoneNumberState.REQUIRED
             ),
@@ -528,7 +538,7 @@ class AddressElementTest {
         return AddressElement(
             IdentifierSpec.Generic("address"),
             rawValuesMap = initialValues,
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = countryElement,
             addressInputMode = AddressInputMode.AutocompleteCondensed(
                 googleApiKey = null,
                 autocompleteCountries = setOf(),

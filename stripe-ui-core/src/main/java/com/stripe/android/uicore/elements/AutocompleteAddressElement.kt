@@ -34,8 +34,7 @@ class AutocompleteAddressElement(
         )
     }
 
-    override val countryElement: CountryElement
-        get() = controller.addressElementFlow.value.countryElement
+    override val countryElement: CountryElement = controller.countryElement
 
     override val allowsUserInteraction: Boolean = true
 

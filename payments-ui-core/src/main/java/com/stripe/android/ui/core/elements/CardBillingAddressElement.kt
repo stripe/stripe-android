@@ -55,7 +55,10 @@ class CardBillingAddressElement(
             rawValuesMap = rawValuesMap,
             countryCodes = countryCodes,
             addressInputMode = AddressInputMode.NoAutocomplete(),
-            countryDropdownFieldController = countryDropdownFieldController,
+            countryElement = CountryElement(
+                identifier = IdentifierSpec.Country,
+                controller = countryDropdownFieldController,
+            ),
             shippingValuesMap = shippingValuesMap,
             sameAsShippingElement = sameAsShippingElement,
         )
