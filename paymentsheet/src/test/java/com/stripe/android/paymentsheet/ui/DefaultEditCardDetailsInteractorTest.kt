@@ -43,7 +43,7 @@ internal class DefaultEditCardDetailsInteractorTest {
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             )
         )
-        assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.CartesBancaires)
+        assertThat(state.cardDetailsState?.selectedCardBrand?.brand).isEqualTo(CardBrand.CartesBancaires)
     }
 
     @Test
@@ -63,7 +63,7 @@ internal class DefaultEditCardDetailsInteractorTest {
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             )
         )
-        assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.Unknown)
+        assertThat(state.cardDetailsState?.selectedCardBrand?.brand).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
@@ -96,7 +96,7 @@ internal class DefaultEditCardDetailsInteractorTest {
 
         val state = handler.uiState
         assertThat(state.billingDetailsForm).isNotNull()
-        assertThat(state.expiryDateState.enabled).isTrue()
+        assertThat(state.cardDetailsState?.expiryDateState?.enabled).isTrue()
     }
 
     @Test
@@ -107,7 +107,7 @@ internal class DefaultEditCardDetailsInteractorTest {
 
         val state = handler.uiState
         assertThat(state.billingDetailsForm).isNull()
-        assertThat(state.expiryDateState.enabled).isFalse()
+        assertThat(state.cardDetailsState?.expiryDateState?.enabled).isFalse()
     }
 
     @Test
@@ -247,7 +247,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         )
 
         val state = handler.uiState
-        assertThat(state.shouldShowCardBrandDropdown).isFalse()
+        assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
     }
 
     @Test
@@ -531,7 +531,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         get() = this.state.value
 
     private val EditCardDetailsInteractor.selectedBrand
-        get() = uiState.selectedCardBrand.brand
+        get() = uiState.cardDetailsState?.selectedCardBrand?.brand ?: CardBrand.Unknown
 
     private fun handler(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
@@ -545,17 +545,19 @@ internal class DefaultEditCardDetailsInteractorTest {
         onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
     ): EditCardDetailsInteractor {
         return DefaultEditCardDetailsInteractor.Factory().create(
-            cardBrandFilter = cardBrandFilter,
-            onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
-            isCbcModifiable = isCbcModifiable,
+            cardEditConfiguration = CardEditConfiguration(
+                cardBrandFilter = cardBrandFilter,
+                isCbcModifiable = isCbcModifiable,
+                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
+            ),
             requiresModification = requiresModification,
             payload = EditCardPayload.create(card, billingDetails),
-            onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-            areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = addressCollectionMode
             ),
+            onBrandChoiceChanged = onBrandChoiceChanged,
+            onCardUpdateParamsChanged = onCardUpdateParamsChanged,
         )
     }
 }

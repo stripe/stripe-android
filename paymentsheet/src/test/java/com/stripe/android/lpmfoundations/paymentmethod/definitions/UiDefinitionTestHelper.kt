@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 
 @Composable
 internal fun PaymentMethodDefinition.CreateFormUi(
@@ -17,6 +18,7 @@ internal fun PaymentMethodDefinition.CreateFormUi(
     paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
+    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null
 ) {
     val formElements = formElements(
         metadata = metadata,
@@ -24,6 +26,7 @@ internal fun PaymentMethodDefinition.CreateFormUi(
         paymentMethodExtraParams = paymentMethodExtraParams,
         initialLinkUserInput = initialLinkUserInput,
         linkConfigurationCoordinator = linkConfigurationCoordinator,
+        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
     )
     FormUI(
         hiddenIdentifiers = emptySet(),

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -123,10 +124,7 @@ class AddressLauncher internal constructor(
          * A list of two-letter country codes that support autocomplete. Defaults to a list of
          * countries that Stripe has audited to ensure a good autocomplete experience.
          */
-        val autocompleteCountries: Set<String> = setOf(
-            "AU", "BE", "BR", "CA", "CH", "DE", "ES", "FR", "GB", "IE", "IT", "MX", "NO", "NL",
-            "PL", "RU", "SE", "TR", "US", "ZA"
-        )
+        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
     ) : Parcelable {
         /**
          * [Configuration] builder for cleaner object creation from Java.
@@ -184,10 +182,28 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration @JvmOverloads constructor(
+    data class AdditionalFieldsConfiguration @AddressElementSameAsBillingPreview constructor(
         val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
-        val checkboxLabel: String? = null
+        val checkboxLabel: String? = null,
+        /**
+         * Shows a "Use billing address" checkbox when `address` is set.
+         * Toggles between populating fields with defaults (checked) and clearing
+         * them (unchecked).
+         * Hidden if the default country is not in `allowedCountries`.
+         */
+        val showUseBillingAddressCheckbox: Boolean = false,
     ) : Parcelable {
+        @OptIn(AddressElementSameAsBillingPreview::class)
+        @JvmOverloads
+        constructor(
+            phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+            checkboxLabel: String? = null
+        ) : this(
+            phone = phone,
+            checkboxLabel = checkboxLabel,
+            showUseBillingAddressCheckbox = false,
+        )
+
         @Parcelize
         enum class FieldConfiguration : Parcelable {
             /**

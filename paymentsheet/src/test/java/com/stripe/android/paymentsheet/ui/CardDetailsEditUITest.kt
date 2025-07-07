@@ -426,15 +426,17 @@ internal class CardDetailsEditUITest {
         val editCardDetailsInteractor = DefaultEditCardDetailsInteractor.Factory()
             .create(
                 coroutineScope = TestScope(testDispatcher),
-                isCbcModifiable = showCardBrandDropdown,
-                areExpiryDateAndAddressModificationSupported = expiryDateEditEnabled,
-                cardBrandFilter = DefaultCardBrandFilter,
+                cardEditConfiguration = CardEditConfiguration(
+                    cardBrandFilter = DefaultCardBrandFilter,
+                    isCbcModifiable = showCardBrandDropdown,
+                    areExpiryDateAndAddressModificationSupported = expiryDateEditEnabled,
+                ),
                 payload = EditCardPayload.create(card, PaymentMethodFixtures.BILLING_DETAILS),
-                onBrandChoiceChanged = {},
-                onCardUpdateParamsChanged = {},
                 billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                     address = addressCollectionMode
                 ),
+                onBrandChoiceChanged = {},
+                onCardUpdateParamsChanged = {},
                 requiresModification = true
             )
         composeRule.setContent {

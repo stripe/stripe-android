@@ -2,8 +2,10 @@ package com.stripe.android.link.account
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
+import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
 import com.stripe.android.link.model.AccountStatus
@@ -34,9 +36,13 @@ internal open class FakeLinkAccountManager(
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
-    private val _consumerPaymentDetails =
-        MutableStateFlow<ConsumerPaymentDetails?>(TestFactory.CONSUMER_PAYMENT_DETAILS)
-    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
+    private val _consumerState =
+        MutableStateFlow<ConsumerState?>(
+            ConsumerState(paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS.toLinkPaymentMethod())
+        )
+
+    override val consumerState: StateFlow<ConsumerState?> =
+        _consumerState.asStateFlow()
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
@@ -64,7 +70,9 @@ internal open class FakeLinkAccountManager(
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
         set(value) {
             field = value
-            _consumerPaymentDetails.value = value.getOrNull()
+            _consumerState.value = value.getOrNull()?.toLinkPaymentMethod()?.let {
+                ConsumerState(paymentDetails = it)
+            }
         }
     var listShippingAddressesResult: Result<ConsumerShippingAddresses> = Result.success(CONSUMER_SHIPPING_ADDRESSES)
         set(value) {
@@ -85,7 +93,9 @@ internal open class FakeLinkAccountManager(
     private val logoutCall = Turbine<Unit>()
 
     fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
-        _consumerPaymentDetails.value = consumerPaymentDetails
+        _consumerState.value = consumerPaymentDetails?.toLinkPaymentMethod()?.let {
+            ConsumerState(paymentDetails = it)
+        }
     }
 
     fun setLinkAccount(account: LinkAccountUpdate.Value) {
@@ -229,8 +239,10 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String) = deletePaymentDetailsResult
+
     override suspend fun updatePaymentDetails(
-        updateParams: ConsumerPaymentDetailsUpdateParams
+        updateParams: ConsumerPaymentDetailsUpdateParams,
+        billingPhone: String?
     ): Result<ConsumerPaymentDetails> {
         updateCardDetailsTurbine.add(
             updateParams
@@ -276,6 +288,15 @@ internal open class FakeLinkAccountManager(
         signupTurbine.ensureAllEventsConsumed()
         mobileSignUpTurbine.ensureAllEventsConsumed()
     }
+
+    private fun ConsumerPaymentDetails.toLinkPaymentMethod(): List<LinkPaymentMethod.ConsumerPaymentDetails> =
+        paymentDetails.map {
+            LinkPaymentMethod.ConsumerPaymentDetails(
+                it,
+                collectedCvc = null,
+                billingPhone = null
+            )
+        }
 
     data class LookupCall(
         val email: String,

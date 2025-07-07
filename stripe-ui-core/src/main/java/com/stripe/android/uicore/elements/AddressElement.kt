@@ -15,30 +15,27 @@ import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-open class AddressElement(
+class AddressElement(
     _identifier: IdentifierSpec,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    private val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
+    val addressInputMode: AddressInputMode = AddressInputMode.NoAutocomplete(),
     countryCodes: Set<String> = emptySet(),
-    countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
-        CountryConfig(countryCodes),
-        rawValuesMap[IdentifierSpec.Country]
+    override val countryElement: CountryElement = CountryElement(
+        IdentifierSpec.Country,
+        DropdownFieldController(
+            CountryConfig(countryCodes),
+            rawValuesMap[IdentifierSpec.Country]
+        )
     ),
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
+    private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
     private val hideName: Boolean = true,
-) : SectionMultiFieldElement(_identifier) {
+) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    val countryElement = CountryElement(
-        IdentifierSpec.Country,
-        countryDropdownFieldController
-    )
 
     private val nameElement = SimpleTextElement(
         IdentifierSpec.Name,
@@ -241,7 +238,7 @@ internal fun updateLine1WithAutocompleteAffordance(
     field: SectionFieldElement,
     countryCode: String?,
     addressInputMode: AddressInputMode,
-    isPlacesAvailable: IsPlacesAvailable,
+    isPlacesAvailable: Boolean,
 ) {
     if (field.identifier == IdentifierSpec.Line1) {
         val fieldController = (field as? SimpleTextElement)?.controller
@@ -262,7 +259,7 @@ private fun updateLine1ConfigForAutocompleteAffordance(
     textConfig: SimpleTextFieldConfig,
     countryCode: String?,
     addressInputMode: AddressInputMode,
-    isPlacesAvailable: IsPlacesAvailable,
+    isPlacesAvailable: Boolean,
 ) {
     val supportsAutocomplete = (addressInputMode as? AutocompleteCapableInputMode)
         ?.supportsAutoComplete(countryCode, isPlacesAvailable)

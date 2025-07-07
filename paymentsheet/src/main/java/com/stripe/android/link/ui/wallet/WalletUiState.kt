@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
@@ -89,10 +90,10 @@ internal data class WalletUiState(
     }
 
     fun updateWithResponse(
-        response: ConsumerPaymentDetails,
+        response: List<LinkPaymentMethod.ConsumerPaymentDetails>,
     ): WalletUiState {
         return copy(
-            paymentDetailsList = response.paymentDetails,
+            paymentDetailsList = response.map { it.details },
             isProcessing = false,
             cardBeingUpdated = null
         )

@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.CardEditConfiguration
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
@@ -70,13 +71,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
     init {
         runCatching {
-            val paymentDetails = linkAccountManager.consumerPaymentDetails.value
-                ?.paymentDetails
-                ?.firstOrNull { it.id == paymentDetailsId }
-            require(
-                value = paymentDetails is ConsumerPaymentDetails.Card,
-                lazyMessage = { "Payment details with id $paymentDetailsId is not a card" }
-            )
+            val paymentDetails = linkAccountManager.consumerState.value
+                ?.paymentDetails?.find { it.details.id == paymentDetailsId }
+                ?.details
+            requireNotNull(paymentDetails) { "Payment details with id $paymentDetailsId not found" }
             _state.update {
                 it.copy(
                     paymentDetailsId = paymentDetailsId,
@@ -95,17 +93,18 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             dismissalCoordinator.withDismissalDisabled {
                 runCatching {
                     _state.update { it.copy(processing = true, error = null) }
-                    val cardParams = requireNotNull(state.value.cardUpdateParams)
+                    val paymentUpdateParams = requireNotNull(state.value.cardUpdateParams)
                     val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
                     val updateParams = ConsumerPaymentDetailsUpdateParams(
                         id = paymentDetailsId,
-                        // When updating a card that is not the default and you send isDefault=false to the server,
+                        // When updating a payment that is not the default and you send isDefault=false to the server,
                         // you get "Can't unset payment details when it's not the default", so send nil instead of false
                         isDefault = state.value.isDefault.takeIf { it == true },
-                        cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
+                        cardPaymentMethodCreateParamsMap = paymentUpdateParams.toApiParams().toParamMap()
                     )
                     val result = linkAccountManager.updatePaymentDetails(
-                        updateParams = updateParams
+                        updateParams = updateParams,
+                        phone = paymentUpdateParams.billingDetails?.phone
                     ).getOrThrow()
 
                     if (state.value.isBillingDetailsUpdateFlow) {
@@ -119,7 +118,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
                                 details = updatedPaymentDetails,
                                 collectedCvc = state.value.billingDetailsUpdateFlow?.cvc,
-                                billingPhone = cardParams.billingDetails?.phone,
+                                billingPhone = paymentUpdateParams.billingDetails?.phone,
                             ),
                             linkAccount = account
                         )
@@ -155,29 +154,35 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     )
 
     private fun initializeInteractor(
-        cardPaymentDetails: ConsumerPaymentDetails.Card
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails
     ): EditCardDetailsInteractor {
         // If this is a billing details update flow, we need to use the effective billing details
         val paymentDetails = if (state.value.isBillingDetailsUpdateFlow) {
-            cardPaymentDetails.withEffectiveBillingDetails(
+            paymentDetails.withEffectiveBillingDetails(
                 configuration = configuration,
                 linkAccount = linkAccountManager.linkAccountInfo.value.account
             )
         } else {
-            cardPaymentDetails
+            paymentDetails
+        }
+
+        val cardEditConfiguration = (paymentDetails as? ConsumerPaymentDetails.Card)?.let {
+            CardEditConfiguration(
+                cardBrandFilter = DefaultCardBrandFilter,
+                isCbcModifiable = it.availableNetworks.size > 1,
+                areExpiryDateAndAddressModificationSupported = true,
+            )
         }
 
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
-            areExpiryDateAndAddressModificationSupported = true,
-            cardBrandFilter = DefaultCardBrandFilter,
+            cardEditConfiguration = cardEditConfiguration,
             payload = EditCardPayload.create(
-                card = paymentDetails,
+                details = paymentDetails,
                 billingPhoneNumber = linkAccountManager.linkAccountInfo.value.account?.unredactedPhoneNumber
             ),
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-            isCbcModifiable = paymentDetails.availableNetworks.size > 1,
             onBrandChoiceChanged = ::onBrandChoiceChanged,
             // We prefill in the billing details update flow, so the form might
             // already be complete on first render. The user can submit without modifying.

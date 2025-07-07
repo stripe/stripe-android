@@ -27,6 +27,8 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEFullAddress
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
@@ -66,11 +68,11 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
-    fun `setWebView loads correct URL`() {
+    fun `loadUrl loads correct URL`() {
         val viewModel = createViewModel()
         val mockWebView = mock<WebView>()
 
-        viewModel.setWebView(mockWebView)
+        viewModel.loadUrl(mockWebView)
 
         verify(mockWebView).loadUrl("https://pay.stripe.com/assets/www/index.html")
     }
@@ -136,7 +138,8 @@ internal class ShopPayViewModelTest {
             val billingDetails = createTestBillingDetails()
             val confirmationState = ShopPayConfirmationState.Success(
                 externalSourceId = "test_external_id",
-                billingDetails = billingDetails
+                billingDetails = billingDetails,
+                shippingAddressData = null
             )
             val bridgeHandler = FakeShopPayBridgeHandler()
             val stripeRepository = FakeStripeRepository(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
@@ -184,6 +187,68 @@ internal class ShopPayViewModelTest {
     }
 
     @Test
+    fun `ECE click callback is set up correctly when ViewModel is created`() = runTest(dispatcher) {
+        val mockEventReporter = mock<EventReporter>()
+        val bridgeHandler = FakeShopPayBridgeHandler()
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            eventReporter = mockEventReporter
+        )
+
+        bridgeHandler.handleECEClick("{}")
+
+        viewModel.closePopup()
+
+        verify(mockEventReporter).onShopPayWebViewCancelled(true)
+    }
+
+    @Test
+    fun `analytics tracks cancellation without ECE click when closePopup is called`() {
+        val mockEventReporter = mock<EventReporter>()
+        val viewModel = createViewModel(eventReporter = mockEventReporter)
+
+        viewModel.closePopup()
+
+        verify(mockEventReporter).onShopPayWebViewCancelled(false)
+    }
+
+    @Test
+    fun `analytics tracks cancellation with ECE click when closePopup is called after ECE click`() =
+        runTest(dispatcher) {
+            val mockEventReporter = mock<EventReporter>()
+            val bridgeHandler = FakeShopPayBridgeHandler()
+            val viewModel = createViewModel(
+                bridgeHandler = bridgeHandler,
+                eventReporter = mockEventReporter
+            )
+
+            bridgeHandler.handleECEClick("{}")
+
+            viewModel.closePopup()
+
+            verify(mockEventReporter).onShopPayWebViewCancelled(true)
+        }
+
+    @Test
+    fun `analytics tracks confirm success when payment completes successfully`() = runTest(dispatcher) {
+        val mockEventReporter = mock<EventReporter>()
+        val bridgeHandler = FakeShopPayBridgeHandler()
+        val confirmationState = createSuccessConfirmationState()
+
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            eventReporter = mockEventReporter
+        )
+
+        viewModel.paymentResult.test {
+            bridgeHandler.confirmationState.value = confirmationState
+            awaitItem()
+
+            verify(mockEventReporter).onShopPayWebViewConfirmSuccess()
+        }
+    }
+
+    @Test
     fun `handleSuccessfulPayment creates correct PaymentMethodCreateParams`() = runTest(dispatcher) {
         val address = ECEFullAddress(
             line1 = "123 Test St",
@@ -201,7 +266,8 @@ internal class ShopPayViewModelTest {
         )
         val confirmationState = ShopPayConfirmationState.Success(
             externalSourceId = "test_external_id",
-            billingDetails = billingDetails
+            billingDetails = billingDetails,
+            shippingAddressData = null
         )
         val bridgeHandler = FakeShopPayBridgeHandler()
 
@@ -237,6 +303,100 @@ internal class ShopPayViewModelTest {
             assertThat(capturedParams?.billingDetails?.address?.state).isEqualTo("NY")
             assertThat(capturedParams?.billingDetails?.address?.postalCode).isEqualTo("10001")
             assertThat(capturedParams?.billingDetails?.address?.country).isEqualTo("US")
+        }
+    }
+
+    @Test
+    fun `handleSuccessfulPayment uses shipping address data when available`() = runTest(dispatcher) {
+        val confirmationState = ShopPayConfirmationState.Success(
+            externalSourceId = "test_external_id",
+            billingDetails = ShopPayTestFactory.BILLING_DETAILS,
+            shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA
+        )
+        val bridgeHandler = FakeShopPayBridgeHandler()
+
+        var capturedShippingAddress: AddressDetails? = null
+        val mockHandler = PreparePaymentMethodHandler { _, shippingAddress ->
+            capturedShippingAddress = shippingAddress
+        }
+
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            preparePaymentMethodHandler = mockHandler
+        )
+
+        viewModel.paymentResult.test {
+            bridgeHandler.confirmationState.value = confirmationState
+
+            awaitItem()
+
+            assertThat(capturedShippingAddress).isNotNull()
+            assertThat(capturedShippingAddress?.name).isEqualTo("Jane Smith")
+            assertThat(capturedShippingAddress?.address?.line1).isEqualTo("456 Shipping Ave")
+            assertThat(capturedShippingAddress?.address?.line2).isEqualTo("Unit 2B")
+            assertThat(capturedShippingAddress?.address?.city).isEqualTo("Shipping City")
+            assertThat(capturedShippingAddress?.address?.state).isEqualTo("NY")
+            assertThat(capturedShippingAddress?.address?.postalCode).isEqualTo("10002")
+            assertThat(capturedShippingAddress?.address?.country).isEqualTo("US")
+        }
+    }
+
+    @Test
+    fun `handleSuccessfulPayment passes null shipping address when shippingAddressData is null`() =
+        runTest(dispatcher) {
+            val confirmationState = ShopPayConfirmationState.Success(
+                externalSourceId = "test_external_id",
+                billingDetails = createTestBillingDetails(),
+                shippingAddressData = null
+            )
+            val bridgeHandler = FakeShopPayBridgeHandler()
+
+            var capturedShippingAddress: AddressDetails? = null
+            val mockHandler = PreparePaymentMethodHandler { _, shippingAddress ->
+                capturedShippingAddress = shippingAddress
+            }
+
+            val viewModel = createViewModel(
+                bridgeHandler = bridgeHandler,
+                preparePaymentMethodHandler = mockHandler
+            )
+
+            viewModel.paymentResult.test {
+                bridgeHandler.confirmationState.value = confirmationState
+
+                awaitItem()
+
+                assertThat(capturedShippingAddress).isNull()
+            }
+        }
+
+    @Test
+    fun `handleSuccessfulPayment handles shipping address data with null address`() = runTest(dispatcher) {
+        val confirmationState = ShopPayConfirmationState.Success(
+            externalSourceId = "test_external_id",
+            billingDetails = ShopPayTestFactory.BILLING_DETAILS,
+            shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA_WITH_NULL_ADDRESS
+        )
+        val bridgeHandler = FakeShopPayBridgeHandler()
+
+        var capturedShippingAddress: AddressDetails? = null
+        val mockHandler = PreparePaymentMethodHandler { _, shippingAddress ->
+            capturedShippingAddress = shippingAddress
+        }
+
+        val viewModel = createViewModel(
+            bridgeHandler = bridgeHandler,
+            preparePaymentMethodHandler = mockHandler
+        )
+
+        viewModel.paymentResult.test {
+            bridgeHandler.confirmationState.value = confirmationState
+
+            awaitItem()
+
+            assertThat(capturedShippingAddress).isNotNull()
+            assertThat(capturedShippingAddress?.name).isEqualTo("Jane Smith")
+            assertThat(capturedShippingAddress?.address).isNull()
         }
     }
 
@@ -294,13 +454,15 @@ internal class ShopPayViewModelTest {
     private fun createViewModel(
         bridgeHandler: ShopPayBridgeHandler = createFakeBridgeHandler(),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = PreparePaymentMethodHandler { _, _ -> },
-        stripeApiRepository: StripeRepository = FakeStripeRepository()
+        stripeApiRepository: StripeRepository = FakeStripeRepository(),
+        eventReporter: EventReporter = mock()
     ): ShopPayViewModel {
         return ShopPayViewModel(
             bridgeHandler,
             stripeApiRepository = stripeApiRepository,
             requestOptions = ApiRequest.Options("pk_123"),
             preparePaymentMethodHandlerProvider = { preparePaymentMethodHandler },
+            eventReporter = eventReporter,
             workContext = dispatcher
         )
     }
@@ -311,7 +473,8 @@ internal class ShopPayViewModelTest {
 
     private fun createSuccessConfirmationState() = ShopPayConfirmationState.Success(
         externalSourceId = "test_external_id",
-        billingDetails = createTestBillingDetails()
+        billingDetails = createTestBillingDetails(),
+        shippingAddressData = null
     )
 
     private suspend fun testPaymentResultWithConfirmationState(
@@ -337,9 +500,19 @@ internal class ShopPayViewModelTest {
     private class FakeShopPayBridgeHandler(
         override val confirmationState: MutableStateFlow<ShopPayConfirmationState> = MutableStateFlow(Pending)
     ) : ShopPayBridgeHandler {
+        private var onECEClickCallback: (() -> Unit)? = null
+
+        override fun setOnECEClickCallback(callback: () -> Unit) {
+            onECEClickCallback = callback
+        }
+
         override fun consoleLog(level: String, message: String, origin: String, url: String) = Unit
         override fun getStripePublishableKey(): String = "pk_test_fake_key"
-        override fun handleECEClick(message: String): String = ""
+        override fun handleECEClick(message: String): String {
+            onECEClickCallback?.invoke()
+            return ""
+        }
+
         override fun getShopPayInitParams(): String = ""
         override fun calculateShipping(message: String) = null
         override fun calculateShippingRateChange(message: String) = null
@@ -359,18 +532,6 @@ internal class ShopPayViewModelTest {
     }
 
     private fun createTestBillingDetails(): ECEBillingDetails {
-        return ECEBillingDetails(
-            name = "Test User",
-            email = "test@example.com",
-            phone = "+1234567890",
-            address = ECEFullAddress(
-                line1 = "123 Main St",
-                line2 = null,
-                city = "Anytown",
-                state = "CA",
-                postalCode = "12345",
-                country = "US"
-            )
-        )
+        return ShopPayTestFactory.BILLING_DETAILS
     }
 }

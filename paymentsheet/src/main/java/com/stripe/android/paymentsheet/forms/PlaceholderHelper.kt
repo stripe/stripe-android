@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec.PlaceholderField
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
-import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -190,7 +190,7 @@ internal object PlaceholderHelper {
             countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<AddressElement>()
+                .filterIsInstance<AddressFieldsElement>()
                 .firstOrNull()
                 ?.countryElement
         }

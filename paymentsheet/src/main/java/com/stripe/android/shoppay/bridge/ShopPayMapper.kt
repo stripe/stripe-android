@@ -30,8 +30,8 @@ internal fun DeliveryEstimate.toJSON(): Any {
         }
         is DeliveryEstimate.Range -> {
             JSONObject().apply {
-                put("minimum", minimum.toJSON())
-                put("maximum", maximum.toJSON())
+                putOpt("minimum", minimum?.toJSON())
+                putOpt("maximum", maximum?.toJSON())
             }
         }
     }
@@ -70,8 +70,8 @@ internal fun DeliveryEstimate.toECEDeliveryEstimate(): ECEDeliveryEstimate {
         is DeliveryEstimate.Range -> {
             ECEDeliveryEstimate.Range(
                 value = ECEStructuredDeliveryEstimate(
-                    maximum = maximum.toECEDeliveryEstimateUnit(),
-                    minimum = minimum.toECEDeliveryEstimateUnit()
+                    maximum = maximum?.toECEDeliveryEstimateUnit(),
+                    minimum = minimum?.toECEDeliveryEstimateUnit()
                 )
             )
         }

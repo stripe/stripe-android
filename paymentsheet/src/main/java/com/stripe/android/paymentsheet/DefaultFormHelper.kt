@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -39,6 +40,7 @@ internal class DefaultFormHelper(
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
     private val eventReporter: EventReporter,
     private val savedStateHandle: SavedStateHandle,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -62,12 +64,14 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
                 eventReporter = viewModel.eventReporter,
                 savedStateHandle = viewModel.savedStateHandle,
+                autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
             )
         }
 
         fun create(
             coroutineScope: CoroutineScope,
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
             savedStateHandle: SavedStateHandle,
@@ -83,6 +87,7 @@ internal class DefaultFormHelper(
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 eventReporter = eventReporter,
                 savedStateHandle = savedStateHandle,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             )
         }
     }
@@ -154,6 +159,7 @@ internal class DefaultFormHelper(
                     else -> null
                 },
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             ),
         ) ?: emptyList()
     }

@@ -49,6 +49,10 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
+import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
+import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -123,6 +127,14 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsDismissalCoordinator(impl: RealLinkDismissalCoordinator): LinkDismissalCoordinator
+
+    @Binds
+    @NativeLinkScope
+    fun bindsAutocompleteActivityLauncher(impl: DefaultAutocompleteLauncher): AutocompleteActivityLauncher
+
+    @Binds
+    @NativeLinkScope
+    fun bindsAutocompleteLauncher(impl: DefaultAutocompleteLauncher): AutocompleteLauncher
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -226,5 +238,11 @@ internal interface NativeLinkModule {
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }
+
+        @Provides
+        @NativeLinkScope
+        fun provideAutocompleteLauncher() = DefaultAutocompleteLauncher(
+            appearanceContext = AutocompleteAppearanceContext.Link,
+        )
     }
 }

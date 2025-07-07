@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
@@ -14,6 +16,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -21,8 +25,10 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
-import com.stripe.android.shoppay.bridge.ECEFullAddress
+import com.stripe.android.shoppay.bridge.ECEShippingAddressData
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -121,7 +127,8 @@ internal class ShopPayActivityTest {
 
         confirmationState.value = ShopPayConfirmationState.Success(
             externalSourceId = "test_id",
-            billingDetails = createTestBillingDetails()
+            billingDetails = createTestBillingDetails(),
+            shippingAddressData = null
         )
 
         advanceUntilIdle()
@@ -144,7 +151,8 @@ internal class ShopPayActivityTest {
 
         confirmationState.value = ShopPayConfirmationState.Success(
             externalSourceId = "test_id",
-            billingDetails = createTestBillingDetails()
+            billingDetails = createTestBillingDetails(),
+            shippingAddressData = null
         )
 
         advanceUntilIdle()
@@ -178,11 +186,134 @@ internal class ShopPayActivityTest {
         assertNoUnverifiedIntents()
     }
 
+    @Test
+    fun `finishes with Completed result when payment succeeds with shipping address data`() = runTest(dispatcher) {
+        val (fakeHandler, activity) = testShopPayConfirmation(
+            shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA,
+            billingDetails = ShopPayTestFactory.BILLING_DETAILS,
+            stripeRepositoryResult = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        advanceUntilIdle()
+
+        assertShopPayResult(
+            activity = activity,
+            fakeHandler = fakeHandler,
+            expectedResult = ShopPayActivityResult.Completed::class.java
+        ) { capturedAddress ->
+            assertThat(capturedAddress).isNotNull()
+            assertThat(capturedAddress?.name).isEqualTo("Jane Smith")
+            assertThat(capturedAddress?.address?.line1).isEqualTo("456 Shipping Ave")
+            assertThat(capturedAddress?.address?.line2).isEqualTo("Unit 2B")
+            assertThat(capturedAddress?.address?.city).isEqualTo("Shipping City")
+            assertThat(capturedAddress?.address?.state).isEqualTo("NY")
+            assertThat(capturedAddress?.address?.postalCode).isEqualTo("10002")
+            assertThat(capturedAddress?.address?.country).isEqualTo("US")
+        }
+    }
+
+    @Test
+    fun `finishes with Completed result when payment succeeds with null shipping address data`() = runTest(dispatcher) {
+        val (fakeHandler, activity) = testShopPayConfirmation(
+            shippingAddressData = null,
+            billingDetails = ShopPayTestFactory.BILLING_DETAILS,
+            stripeRepositoryResult = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        advanceUntilIdle()
+
+        assertShopPayResult(
+            activity = activity,
+            fakeHandler = fakeHandler,
+            expectedResult = ShopPayActivityResult.Completed::class.java
+        ) { capturedAddress ->
+            assertThat(capturedAddress).isNull()
+        }
+    }
+
+    @Test
+    fun `finishes with Completed result when shipping address data has null address`() = runTest(dispatcher) {
+        val (fakeHandler, activity) = testShopPayConfirmation(
+            shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA_WITH_NULL_ADDRESS,
+            billingDetails = ShopPayTestFactory.BILLING_DETAILS,
+            stripeRepositoryResult = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+
+        advanceUntilIdle()
+
+        assertShopPayResult(
+            activity = activity,
+            fakeHandler = fakeHandler,
+            expectedResult = ShopPayActivityResult.Completed::class.java
+        ) { capturedAddress ->
+            assertThat(capturedAddress).isNotNull()
+            assertThat(capturedAddress?.name).isEqualTo("Jane Smith")
+            assertThat(capturedAddress?.address).isNull()
+        }
+    }
+
+    @Test
+    fun `finishes with Completed result when payment succeeds with international shipping address`() =
+        runTest(dispatcher) {
+            val internationalShippingData = ECEShippingAddressData(
+                name = "John Smith",
+                address = ShopPayTestFactory.INTERNATIONAL_ADDRESS
+            )
+
+            val (fakeHandler, activity) = testShopPayConfirmation(
+                shippingAddressData = internationalShippingData,
+                billingDetails = ShopPayTestFactory.INTERNATIONAL_BILLING_DETAILS,
+                stripeRepositoryResult = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+
+            advanceUntilIdle()
+
+            assertShopPayResult(
+                activity = activity,
+                fakeHandler = fakeHandler,
+                expectedResult = ShopPayActivityResult.Completed::class.java
+            ) { capturedAddress ->
+                assertThat(capturedAddress).isNotNull()
+                assertThat(capturedAddress?.name).isEqualTo("John Smith")
+                assertThat(capturedAddress?.address?.line1).isEqualTo("10 Downing Street")
+                assertThat(capturedAddress?.address?.line2).isNull()
+                assertThat(capturedAddress?.address?.city).isEqualTo("London")
+                assertThat(capturedAddress?.address?.state).isNull()
+                assertThat(capturedAddress?.address?.postalCode).isEqualTo("SW1A 2AA")
+                assertThat(capturedAddress?.address?.country).isEqualTo("GB")
+            }
+        }
+
+    @Test
+    fun `finishes with Failed result when payment fails with shipping address data`() = runTest(dispatcher) {
+        val exception = RuntimeException("Payment failed with shipping")
+
+        val (fakeHandler, activity) = testShopPayConfirmation(
+            shippingAddressData = ShopPayTestFactory.SHIPPING_ADDRESS_DATA,
+            billingDetails = ShopPayTestFactory.BILLING_DETAILS,
+            stripeRepositoryResult = Result.failure(exception),
+        )
+
+        advanceUntilIdle()
+
+        assertShopPayResult(
+            activity = activity,
+            fakeHandler = fakeHandler,
+            expectedResult = ShopPayActivityResult.Failed::class.java,
+            expectedError = exception
+        ) { capturedAddress ->
+            // When payment method creation fails, the PreparePaymentMethodHandler is not called
+            // so shipping address is not captured
+            assertThat(capturedAddress).isNull()
+        }
+    }
+
     private fun createTestBridgeHandler(
         confirmationState: MutableStateFlow<ShopPayConfirmationState>
     ): ShopPayBridgeHandler {
         return object : ShopPayBridgeHandler {
             override val confirmationState = confirmationState
+            override fun setOnECEClickCallback(callback: () -> Unit) = Unit
             override fun consoleLog(level: String, message: String, origin: String, url: String) = Unit
             override fun getStripePublishableKey(): String = "pk_test_fake_key"
             override fun handleECEClick(message: String): String = ""
@@ -194,49 +325,39 @@ internal class ShopPayActivityTest {
         }
     }
 
-    private fun createTestStripeRepository(result: Result<com.stripe.android.model.PaymentMethod>): StripeRepository {
+    private fun createTestStripeRepository(result: Result<PaymentMethod>): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
-                paymentMethodCreateParams: com.stripe.android.model.PaymentMethodCreateParams,
+                paymentMethodCreateParams: PaymentMethodCreateParams,
                 options: ApiRequest.Options
-            ): Result<com.stripe.android.model.PaymentMethod> = result
+            ): Result<PaymentMethod> = result
         }
     }
 
     private fun createTestViewModelFactory(
         bridgeHandler: ShopPayBridgeHandler,
-        stripeRepository: StripeRepository
-    ): androidx.lifecycle.ViewModelProvider.Factory {
-        return object : androidx.lifecycle.ViewModelProvider.Factory {
+        stripeRepository: StripeRepository,
+        preparePaymentMethodHandler: PreparePaymentMethodHandler
+    ): ViewModelProvider.Factory {
+        return object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return ShopPayViewModel(
                     bridgeHandler = bridgeHandler,
                     stripeApiRepository = stripeRepository,
                     requestOptions = ApiRequest.Options("pk_test"),
                     preparePaymentMethodHandlerProvider = {
-                        PreparePaymentMethodHandler { _, _ -> }
+                        preparePaymentMethodHandler
                     },
                     workContext = dispatcher,
+                    eventReporter = FakeEventReporter(),
                 ) as T
             }
         }
     }
 
     private fun createTestBillingDetails(): ECEBillingDetails {
-        return ECEBillingDetails(
-            name = "Test User",
-            email = "test@example.com",
-            phone = "+1234567890",
-            address = ECEFullAddress(
-                line1 = "123 Main St",
-                line2 = null,
-                city = "Test City",
-                state = "TS",
-                postalCode = "12345",
-                country = "US"
-            )
-        )
+        return ShopPayTestFactory.BILLING_DETAILS
     }
 
     private fun getResultFromIntent(intent: Intent?): ShopPayActivityResult? {
@@ -247,14 +368,78 @@ internal class ShopPayActivityTest {
 
     private fun setupActivityController(
         bridgeHandler: ShopPayBridgeHandler,
-        stripeRepository: StripeRepository
+        stripeRepository: StripeRepository,
+        preparePaymentMethodHandler: PreparePaymentMethodHandler = PreparePaymentMethodHandler { _, _ -> }
     ): ShopPayActivity {
         val intent = ShopPayActivity.createIntent(context, ShopPayTestFactory.SHOP_PAY_ARGS)
 
         val activityController = Robolectric.buildActivity(ShopPayActivity::class.java, intent)
 
-        activityController.get().viewModelFactory = createTestViewModelFactory(bridgeHandler, stripeRepository)
+        activityController.get().viewModelFactory = createTestViewModelFactory(
+            bridgeHandler,
+            stripeRepository,
+            preparePaymentMethodHandler
+        )
         return activityController.setup().get()
+    }
+
+    private class FakePreparePaymentMethodHandler : PreparePaymentMethodHandler {
+        var capturedShippingAddress: AddressDetails? = null
+        var capturedPaymentMethod: PaymentMethod? = null
+
+        override suspend fun onPreparePaymentMethod(
+            paymentMethod: PaymentMethod,
+            shippingAddress: AddressDetails?
+        ) {
+            capturedPaymentMethod = paymentMethod
+            capturedShippingAddress = shippingAddress
+        }
+    }
+
+    private fun testShopPayConfirmation(
+        shippingAddressData: ECEShippingAddressData?,
+        billingDetails: ECEBillingDetails,
+        stripeRepositoryResult: Result<PaymentMethod>,
+    ): Pair<FakePreparePaymentMethodHandler, ShopPayActivity> {
+        val confirmationState = MutableStateFlow<ShopPayConfirmationState>(ShopPayConfirmationState.Pending)
+        val bridgeHandler = createTestBridgeHandler(confirmationState)
+        val stripeRepository = createTestStripeRepository(stripeRepositoryResult)
+
+        val fakeHandler = FakePreparePaymentMethodHandler()
+        val activity = setupActivityController(
+            bridgeHandler = bridgeHandler,
+            stripeRepository = stripeRepository,
+            preparePaymentMethodHandler = fakeHandler
+        )
+
+        confirmationState.value = ShopPayConfirmationState.Success(
+            externalSourceId = "test_id",
+            billingDetails = billingDetails,
+            shippingAddressData = shippingAddressData
+        )
+
+        return fakeHandler to activity
+    }
+
+    private fun assertShopPayResult(
+        activity: ShopPayActivity,
+        fakeHandler: FakePreparePaymentMethodHandler,
+        expectedResult: Class<out ShopPayActivityResult>,
+        expectedError: Throwable? = null,
+        shippingAddressAssertion: (AddressDetails?) -> Unit
+    ) {
+        val shadowActivity = shadowOf(activity)
+        assertThat(shadowActivity.resultCode).isEqualTo(63636)
+        val result = getResultFromIntent(shadowActivity.resultIntent)
+        assertThat(result).isInstanceOf(expectedResult)
+
+        if (expectedError != null && result is ShopPayActivityResult.Failed) {
+            assertThat(result.error).isEqualTo(expectedError)
+        }
+
+        shippingAddressAssertion(fakeHandler.capturedShippingAddress)
+
+        assertNoUnverifiedIntents()
     }
 
     private fun setupPaymentElementCallbackReferences() {

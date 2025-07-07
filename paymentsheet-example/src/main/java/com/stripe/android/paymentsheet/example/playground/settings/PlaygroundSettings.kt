@@ -10,6 +10,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -134,7 +135,8 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun paymentSheetConfiguration(
-            playgroundState: PlaygroundState.Payment
+            playgroundState: PlaygroundState.Payment,
+            appSettings: Settings,
         ): PaymentSheet.Configuration {
             val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
             val paymentSheetConfigurationData =
@@ -142,7 +144,8 @@ internal class PlaygroundSettings private constructor(
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData)
             }.onEach { (settingDefinition, value) ->
-                settingDefinition.configure(value, builder, playgroundState, paymentSheetConfigurationData)
+                settingDefinition
+                    .configure(value, builder, playgroundState, paymentSheetConfigurationData, appSettings)
             }
             return builder.build()
         }
@@ -193,6 +196,7 @@ internal class PlaygroundSettings private constructor(
             configurationBuilder: PaymentSheet.Configuration.Builder,
             playgroundState: PlaygroundState.Payment,
             configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+            settings: Settings,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(
@@ -200,6 +204,7 @@ internal class PlaygroundSettings private constructor(
                 configurationBuilder = configurationBuilder,
                 playgroundState = playgroundState,
                 configurationData = configurationData,
+                settings = settings,
             )
         }
 
@@ -462,6 +467,7 @@ internal class PlaygroundSettings private constructor(
             CollectEmailSettingsDefinition,
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
+            AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,

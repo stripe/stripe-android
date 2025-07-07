@@ -5,7 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.AutocompleteAddressController
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -14,10 +14,6 @@ import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -99,23 +95,22 @@ class AddressFormControllerTest {
     )
 
     @Test
-    fun `Complete form values are set when element flows are complete`() = runTest(UnconfinedTestDispatcher()) {
-        val autocompleteEvent = MutableSharedFlow<AutocompleteAddressInteractor.Event>()
-
-        val addressFormController = createAddressFormController(
-            autocompleteEvent = autocompleteEvent,
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                autocompleteCountries = setOf("US"),
-                googlePlacesApiKey = "123",
-            ),
+    fun `Complete form values are set when element flows are complete`() = test(
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            autocompleteCountries = setOf("US"),
+            googlePlacesApiKey = "123",
         )
+    ) {
+        val addressFormController = createAddressFormController()
+
+        val registerCall = registerCalls.awaitItem()
 
         addressFormController.completeFormValues.test {
             val formValues = awaitItem()
 
             assertThat(formValues).isNull()
 
-            autocompleteEvent.emit(
+            registerCall.onEvent(
                 AutocompleteAddressInteractor.Event.OnValues(
                     values = mapOf(
                         IdentifierSpec.Name to "John Doe",
@@ -146,18 +141,17 @@ class AddressFormControllerTest {
     }
 
     @Test
-    fun `Complete form values is empty when element flows are not complete`() = runTest(UnconfinedTestDispatcher()) {
-        val autocompleteEvent = MutableSharedFlow<AutocompleteAddressInteractor.Event>()
+    fun `Complete form values is empty when element flows are not complete`() = test(
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            autocompleteCountries = setOf("US"),
+            googlePlacesApiKey = "123",
+        ),
+    ) {
+        val addressFormController = createAddressFormController()
 
-        val addressFormController = createAddressFormController(
-            autocompleteEvent = autocompleteEvent,
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                autocompleteCountries = setOf("US"),
-                googlePlacesApiKey = "123",
-            ),
-        )
+        val registerCall = registerCalls.awaitItem()
 
-        autocompleteEvent.emit(
+        registerCall.onEvent(
             AutocompleteAddressInteractor.Event.OnValues(
                 values = mapOf(
                     IdentifierSpec.Name to "John Doe",
@@ -177,18 +171,17 @@ class AddressFormControllerTest {
     }
 
     @Test
-    fun `Last text field identifier points to last element`() = runTest(UnconfinedTestDispatcher()) {
-        val autocompleteEvent = MutableSharedFlow<AutocompleteAddressInteractor.Event>()
+    fun `Last text field identifier points to last element`() = test(
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            autocompleteCountries = setOf("US"),
+            googlePlacesApiKey = "123",
+        ),
+    ) {
+        val addressFormController = createAddressFormController()
 
-        val addressFormController = createAddressFormController(
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                autocompleteCountries = setOf("US"),
-                googlePlacesApiKey = "123",
-            ),
-            autocompleteEvent = autocompleteEvent,
-        )
+        val registerCall = registerCalls.awaitItem()
 
-        autocompleteEvent.emit(
+        registerCall.onEvent(
             AutocompleteAddressInteractor.Event.OnExpandForm(
                 values = emptyMap(),
             )
@@ -196,6 +189,40 @@ class AddressFormControllerTest {
 
         addressFormController.lastTextFieldIdentifier.test {
             assertThat(awaitItem()).isEqualTo(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Initial provided values are pushed to address element`() = addressElementTest(
+        initialValues = mapOf(
+            IdentifierSpec.Name to "John Doe",
+            IdentifierSpec.Line1 to "123 Apple Street",
+            IdentifierSpec.City to "San Francisco",
+            IdentifierSpec.State to "CA",
+            IdentifierSpec.Country to "US",
+            IdentifierSpec.PostalCode to "94111",
+            IdentifierSpec.Phone to "+17893424625"
+        ),
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            autocompleteCountries = setOf("US"),
+            googlePlacesApiKey = null,
+        ),
+    ) {
+        val element = awaitItem()
+
+        element.getFormFieldValueFlow().test {
+            assertThat(awaitItem()).containsExactlyElementsIn(
+                listOf(
+                    IdentifierSpec.Name to FormFieldEntry(value = "John Doe", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry(value = "123 Apple Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry(value = "San Francisco", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = "CA", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry(value = "94111", isComplete = true),
+                    IdentifierSpec.Phone to FormFieldEntry(value = "+17893424625", isComplete = true)
+                )
+            )
         }
     }
 
@@ -219,19 +246,40 @@ class AddressFormControllerTest {
     }
 
     private fun fieldsTest(
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = null,
         ),
-        autocompleteEvent: MutableSharedFlow<AutocompleteAddressInteractor.Event> = MutableSharedFlow(),
         launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(),
         test: suspend TurbineTestContext<List<SectionFieldElement>>.() -> Unit
-    ) = runTest(UnconfinedTestDispatcher()) {
+    ) = addressElementTest(
+        initialValues = initialValues,
+        autocompleteConfig = autocompleteConfig,
+        launcherConfig = launcherConfig,
+    ) {
+        val element = awaitItem()
+
+        element.fields.test {
+            test()
+        }
+    }
+
+    private fun addressElementTest(
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
+        autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
+            autocompleteCountries = setOf("US"),
+            googlePlacesApiKey = null,
+        ),
+        launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(),
+        test: suspend TurbineTestContext<AddressElement>.() -> Unit
+    ) = test(autocompleteConfig) {
         val addressFormController = createAddressFormController(
-            autocompleteConfig = autocompleteConfig,
+            initialValues = initialValues,
             launcherConfig = launcherConfig,
-            autocompleteEvent = autocompleteEvent,
         )
+
+        assertThat(registerCalls.awaitItem()).isNotNull()
 
         val elements = addressFormController.elements
 
@@ -246,50 +294,35 @@ class AddressFormControllerTest {
 
         val autocompleteAddressElement = sectionElementFields[0] as AutocompleteAddressElement
 
-        val controller = autocompleteAddressElement.sectionFieldErrorController()
-
-        assertThat(controller).isInstanceOf<AutocompleteAddressController>()
-
-        val autocompleteAddressController = controller as AutocompleteAddressController
-
-        autocompleteAddressController.addressElementFlow.test {
-            val element = awaitItem()
-
-            element.fields.test {
-                test()
-            }
+        autocompleteAddressElement.sectionFieldErrorController().addressElementFlow.test {
+            test()
         }
     }
 
-    private fun TestScope.createAddressFormController(
+    private fun test(
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = "123",
         ),
-        autocompleteEvent: MutableSharedFlow<AutocompleteAddressInteractor.Event> = MutableSharedFlow(),
+        block: suspend TestAutocompleteAddressInteractor.Scenario.() -> Unit
+    ) = runTest {
+        TestAutocompleteAddressInteractor.test(
+            autocompleteConfig = autocompleteConfig,
+        ) {
+            block()
+        }
+    }
+
+    private fun TestAutocompleteAddressInteractor.Scenario.createAddressFormController(
+        initialValues: Map<IdentifierSpec, String?> = emptyMap(),
         launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(
             additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
                 phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN,
             )
         )
     ) = AddressFormController(
-        interactor = TestAutocompleteAddressInteractor(
-            interactorScope = backgroundScope,
-            config = autocompleteConfig,
-            autocompleteEvent = autocompleteEvent,
-        ),
+        interactor = interactor,
         config = launcherConfig,
+        initialValues = initialValues,
     )
-
-    private class TestAutocompleteAddressInteractor(
-        override val interactorScope: CoroutineScope,
-        config: AutocompleteAddressInteractor.Config,
-        override val autocompleteEvent: MutableSharedFlow<AutocompleteAddressInteractor.Event>,
-    ) : AutocompleteAddressInteractor {
-        override val autocompleteConfig: AutocompleteAddressInteractor.Config = config
-
-        override fun onAutocomplete(country: String) {
-            error("Should not be called!")
-        }
-    }
 }

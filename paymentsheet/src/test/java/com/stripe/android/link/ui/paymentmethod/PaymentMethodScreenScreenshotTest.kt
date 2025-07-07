@@ -86,6 +86,7 @@ internal class PaymentMethodScreenScreenshotTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not expected") },
+            autocompleteAddressInteractorFactory = null,
         )
         val formElements = metadata.formElementsForCode(
             code = PaymentMethod.Type.Card.code,

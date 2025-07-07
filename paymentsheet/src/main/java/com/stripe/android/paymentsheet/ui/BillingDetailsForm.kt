@@ -61,7 +61,8 @@ internal class BillingDetailsForm(
         sameAsShippingElement = null,
         shippingValuesMap = null,
         collectionMode = addressCollectionMode.toInternal(),
-        rawValuesMap = rawAddressValues(billingDetails)
+        rawValuesMap = rawAddressValues(billingDetails),
+        autocompleteAddressInteractorFactory = null,
     )
 
     val addressSectionElement = SectionElement.wrap(

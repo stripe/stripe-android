@@ -186,64 +186,66 @@ fun Place.transformGoogleToStripeAddress(
     val addressLine1 = AddressLine1()
 
     addressComponents?.forEach { field ->
-        when (field.types[0]) {
-            Place.Type.STREET_NUMBER.value -> {
+        val types = field.types
+
+        when {
+            types.contains(Place.Type.STREET_NUMBER.value) -> {
                 addressLine1.streetNumber = field.longName
             }
-            Place.Type.ROUTE.value -> {
+            types.contains(Place.Type.ROUTE.value) -> {
                 addressLine1.route = field.longName
             }
-            Place.Type.PREMISE.value -> {
+            types.contains(Place.Type.PREMISE.value) -> {
                 address.addressLine2 = field.longName
             }
-            Place.Type.LOCALITY.value,
-            Place.Type.SUBLOCALITY.value,
-            Place.Type.POSTAL_TOWN.value -> {
+            types.contains(Place.Type.SUBLOCALITY_LEVEL_1.value) -> {
+                if (address.locality == null) {
+                    address.dependentLocality = field.longName
+                } else {
+                    address.locality = field.longName
+                }
+            }
+            types.contains(Place.Type.SUBLOCALITY_LEVEL_2.value) -> {
+                addressLine1.subLocalityLevel2 = field.longName
+            }
+            types.contains(Place.Type.SUBLOCALITY_LEVEL_3.value) -> {
+                addressLine1.subLocalityLevel3 = field.longName
+            }
+            types.contains(Place.Type.SUBLOCALITY_LEVEL_4.value) -> {
+                addressLine1.subLocalityLevel4 = field.longName
+            }
+            types.contains(Place.Type.LOCALITY.value) ||
+                types.contains(Place.Type.SUBLOCALITY.value) ||
+                types.contains(Place.Type.POSTAL_TOWN.value) -> {
                 address.locality = field.longName
             }
-            Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value -> {
+            types.contains(Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value) -> {
                 address.administrativeArea = field.shortName
             }
-            Place.Type.ADMINISTRATIVE_AREA_LEVEL_3.value -> {
+            types.contains(Place.Type.ADMINISTRATIVE_AREA_LEVEL_3.value) -> {
                 if (address.locality == null) {
                     address.locality = field.longName
                 }
             }
-            Place.Type.ADMINISTRATIVE_AREA_LEVEL_2.value -> {
+            types.contains(Place.Type.ADMINISTRATIVE_AREA_LEVEL_2.value) -> {
                 if (address.administrativeArea == null && address.dependentLocality == null) {
                     address.dependentLocality = field.longName
                 } else {
                     address.administrativeArea = field.shortName
                 }
             }
-            Place.Type.NEIGHBORHOOD.value -> {
+            types.contains(Place.Type.NEIGHBORHOOD.value) -> {
                 if (address.locality == null) {
                     address.locality = field.longName
                 } else {
                     address.dependentLocality = field.longName
                 }
             }
-            Place.Type.POSTAL_CODE.value -> {
+            types.contains(Place.Type.POSTAL_CODE.value) -> {
                 address.postalCode = field.longName
             }
-            Place.Type.COUNTRY.value -> {
+            types.contains(Place.Type.COUNTRY.value) -> {
                 address.country = field.shortName
-            }
-            Place.Type.SUBLOCALITY_LEVEL_1.value -> {
-                if (address.locality == null) {
-                    address.dependentLocality = field.longName
-                } else {
-                    address.locality = field.longName
-                }
-            }
-            Place.Type.SUBLOCALITY_LEVEL_2.value -> {
-                addressLine1.subLocalityLevel2 = field.longName
-            }
-            Place.Type.SUBLOCALITY_LEVEL_3.value -> {
-                addressLine1.subLocalityLevel3 = field.longName
-            }
-            Place.Type.SUBLOCALITY_LEVEL_4.value -> {
-                addressLine1.subLocalityLevel4 = field.longName
             }
         }
     }

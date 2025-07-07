@@ -74,7 +74,11 @@ internal class TransformSpecToElements(
                 is KlarnaHeaderStaticTextSpec -> listOf(spec.transform())
                 is DropdownSpec -> listOf(spec.transform(arguments.initialValues))
                 is CountrySpec -> listOf(spec.transform(arguments.initialValues))
-                is AddressSpec -> spec.transform(arguments.initialValues, arguments.shippingValues)
+                is AddressSpec -> spec.transform(
+                    arguments.initialValues,
+                    arguments.shippingValues,
+                    arguments.autocompleteAddressInteractorFactory,
+                )
                 is SepaMandateTextSpec -> listOf(spec.transform(arguments.merchantName))
                 is PlaceholderSpec -> listOf() // Placeholders should be processed before calling transform.
                 is CashAppPayMandateTextSpec -> listOf(spec.transform(arguments.merchantName))

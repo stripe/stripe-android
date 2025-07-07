@@ -626,10 +626,11 @@ internal class WalletScreenTest {
     fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
         val linkAccountManager = object : FakeLinkAccountManager() {
             override suspend fun updatePaymentDetails(
-                updateParams: ConsumerPaymentDetailsUpdateParams
+                updateParams: ConsumerPaymentDetailsUpdateParams,
+                phone: String?
             ): Result<ConsumerPaymentDetails> {
                 delay(1.seconds)
-                return super.updatePaymentDetails(updateParams)
+                return super.updatePaymentDetails(updateParams, phone)
             }
         }
         val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)

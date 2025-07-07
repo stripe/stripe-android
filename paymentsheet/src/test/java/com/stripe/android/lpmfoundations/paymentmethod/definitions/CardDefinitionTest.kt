@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -16,10 +17,13 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -281,6 +285,28 @@ class CardDefinitionTest {
         assertThat(formElements[2].identifier.v1).isEqualTo("link_form")
 
         testMandateElement(metadata, formElements[3])
+    }
+
+    @Test
+    fun `createFormElements should have autocomplete element if factory is used`() {
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                )
+            ),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp()
+            }
+        )
+
+        val cardBillingAddressElements = formElements.filterIsInstance<SectionElement>().map {
+            it.fields.filterIsInstance<CardBillingAddressElement>().firstOrNull()
+        }
+
+        assertThat(cardBillingAddressElements).hasSize(1)
+        assertThat(cardBillingAddressElements.firstOrNull()?.sectionFieldErrorController())
+            .isInstanceOf<AutocompleteAddressController>()
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {

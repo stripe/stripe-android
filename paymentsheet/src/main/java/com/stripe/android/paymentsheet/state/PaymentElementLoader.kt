@@ -531,8 +531,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration? {
-        val collectsPhone = configuration.billingDetailsCollectionConfiguration.collectsPhone
-        if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled || collectsPhone) {
+        if (!configuration.link.shouldDisplay || !elementsSession.isLinkEnabled) {
             return null
         }
 
@@ -594,6 +593,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             defaultBillingDetails = configuration.defaultBillingDetails,
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
+            googlePlacesApiKey = configuration.googlePlacesApiKey,
         )
 
         // CBF isn't currently supported in the web flow.

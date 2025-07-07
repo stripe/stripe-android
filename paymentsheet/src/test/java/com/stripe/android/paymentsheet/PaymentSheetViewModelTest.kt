@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
@@ -85,6 +86,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -2108,7 +2110,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Confirms intent if intent confirmation interceptor returns an unconfirmed intent`() = runTest {
         val viewModel = createViewModelForDeferredIntent().apply {
-            registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
+            registerForActivityResult(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
         }
 
         val paymentMethod = CARD_PAYMENT_METHOD
@@ -2132,7 +2134,7 @@ internal class PaymentSheetViewModelTest {
     fun `Handles next action if intent confirmation interceptor returns an intent with an outstanding action`() =
         runTest {
             val viewModel = createViewModelForDeferredIntent().apply {
-                registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
+                registerForActivityResult(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
             }
 
             val paymentMethod = CARD_PAYMENT_METHOD
@@ -2502,7 +2504,7 @@ internal class PaymentSheetViewModelTest {
             bacsMandateConfirmationLauncherFactory = launcherFactory,
             shouldRegister = false,
         ).apply {
-            registerFromActivity(activityResultCaller, TestLifecycleOwner())
+            registerForActivityResult(activityResultCaller, TestLifecycleOwner())
         }
 
         verify(activityResultCaller).registerForActivityResult(
@@ -3426,6 +3428,38 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `On register for activity result, should register confirmation handler & autocomplete launcher`() = runTest {
+        DummyActivityResultCaller.test {
+            val confirmationHandler = FakeConfirmationHandler()
+            val lifecycleOwner = TestLifecycleOwner()
+            val viewModel = createViewModel(
+                confirmationHandlerFactory = { confirmationHandler },
+                shouldRegister = false,
+            )
+
+            viewModel.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+            )
+
+            assertThat(awaitRegisterCall().contract).isEqualTo(AutocompleteContract)
+
+            val autocompleteLauncher = awaitNextRegisteredLauncher()
+
+            val confirmationRegisterCall = confirmationHandler.registerTurbine.awaitItem()
+
+            assertThat(confirmationRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
+            assertThat(confirmationRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+
+            lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+            assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
+
+            confirmationHandler.validate()
+        }
+    }
+
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
         val option = PaymentMethodConfirmationOption.Saved(
@@ -3642,7 +3676,7 @@ internal class PaymentSheetViewModelTest {
                         } doReturn mock()
                     }
 
-                    registerFromActivity(activityResultCaller, TestLifecycleOwner())
+                    registerForActivityResult(activityResultCaller, TestLifecycleOwner())
                 }
             }
         }
@@ -3750,7 +3784,7 @@ internal class PaymentSheetViewModelTest {
             } doReturn mock()
         }
 
-        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+        registerForActivityResult(mockActivityResultCaller, TestLifecycleOwner())
 
         val paymentResultListenerCaptor = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
 
@@ -3773,7 +3807,7 @@ internal class PaymentSheetViewModelTest {
             } doReturn mock()
         }
 
-        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+        registerForActivityResult(mockActivityResultCaller, TestLifecycleOwner())
 
         val googlePayListenerCaptor =
             argumentCaptor<ActivityResultCallback<GooglePayPaymentMethodLauncher.Result>>()
