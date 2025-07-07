@@ -55,7 +55,7 @@
   <!-- Caption for Email field on address form -->
   <string name="stripe_email">E-mail</string>
   <!-- Error message when email is invalid -->
-  <string name="stripe_email_is_invalid">E-mailul dvs. nu este valid.</string>
+  <string name="stripe_email_is_invalid">E-mailul nu este valid.</string>
   <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
   <string name="stripe_expiration_date_content_description" formatted="false">Data de expirare. %s%s</string>
   <!-- String to describe an empty expiration date text field. -->
@@ -71,11 +71,11 @@
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_form_label_optional">%s (opțional)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->
-  <string name="stripe_incomplete_expiry_date">Data de expirare a cardului dvs. nu este completă.</string>
+  <string name="stripe_incomplete_expiry_date">Data de expirare a cardului nu este completă.</string>
   <!-- Error description for incomplete phone number -->
   <string name="stripe_incomplete_phone_number">Număr de telefon incomplet</string>
   <!-- String to describe an invalid month in expiry date. -->
-  <string name="stripe_invalid_expiry_month">Luna de expirare a cardului dvs. nu este validă.</string>
+  <string name="stripe_invalid_expiry_month">Luna de expirare a cardului nu este validă.</string>
   <!-- String to describe an invalid year in expiry date. -->
-  <string name="stripe_invalid_expiry_year">Anul de expirare al cardului dvs. nu este valid.</string>
+  <string name="stripe_invalid_expiry_year">Anul de expirare al cardului nu este valid.</string>
 </resources>
