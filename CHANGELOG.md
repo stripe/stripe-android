@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.20.1 - 2025-07-07
+
+### PaymentSheet
+* [ADDED][10987](https://github.com/stripe/stripe-android/pull/10987) Added support for satispay with `setup_future_usage`.
+
 ## 21.20.0 - 2025-06-30
 
 ### PaymentSheet
