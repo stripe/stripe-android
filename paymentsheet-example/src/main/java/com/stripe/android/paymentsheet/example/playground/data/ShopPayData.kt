@@ -8,6 +8,14 @@ import com.stripe.android.paymentsheet.ShopPayHandlers.ShippingRateUpdate
 
 @OptIn(ShopPayPreview::class)
 internal object ShopPayData {
+    var billingAddressRequired: Boolean = true
+    var emailRequired: Boolean = true
+    var shippingAddressRequired: Boolean = true
+    var rejectShippingAddressChange: Boolean = false
+    var rejectShippingRateChange: Boolean = false
+    var allowedShippingCountries: String = "US"
+    var shopId: String = "92917334038"
+    var sheetRatio: Float = 1f
 
     private val singleBusinessDay = PaymentSheet.ShopPayConfiguration.DeliveryEstimate.DeliveryEstimateUnit(
         value = 1,
@@ -45,10 +53,10 @@ internal object ShopPayData {
 
     internal fun shopPayConfiguration(): PaymentSheet.ShopPayConfiguration {
         return PaymentSheet.ShopPayConfiguration(
-            shopId = "92917334038",
-            billingAddressRequired = true,
-            emailRequired = true,
-            shippingAddressRequired = true,
+            shopId = shopId,
+            billingAddressRequired = billingAddressRequired,
+            emailRequired = emailRequired,
+            shippingAddressRequired = shippingAddressRequired,
             lineItems = listOf(
                 PaymentSheet.ShopPayConfiguration.LineItem(
                     name = "Golden Potato",
@@ -68,16 +76,20 @@ internal object ShopPayData {
                 ),
             ),
             shippingRates = shippingRates,
-            allowedShippingCountries = listOf("US", "CA")
+            allowedShippingCountries = this.allowedShippingCountries.split(",")
+                .map { it.trim() },
+            sheetRatio = sheetRatio
         )
     }
 
     internal fun shopPayHandlers(): ShopPayHandlers {
         return ShopPayHandlers(
             shippingMethodUpdateHandler = {
+                if (rejectShippingRateChange) return@ShopPayHandlers null
                 shippingMethodUpdateHandler(it)
             },
             shippingContactHandler = {
+                if (rejectShippingAddressChange) return@ShopPayHandlers null
                 shippingContactHandler()
             }
         )

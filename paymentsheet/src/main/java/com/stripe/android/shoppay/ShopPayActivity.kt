@@ -10,7 +10,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
@@ -28,6 +30,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
+import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
@@ -121,7 +124,12 @@ internal class ShopPayActivity : ComponentActivity() {
                     dismiss(ShopPayActivityResult.Canceled)
                 }
             ) {
-                ShopPayWebView()
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight(viewModel.sheetHeightRatio),
+                ) {
+                    ShopPayWebView()
+                }
             }
         }
     }

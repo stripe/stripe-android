@@ -503,6 +503,13 @@ internal class PlaygroundSettings private constructor(
                 allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList() +
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
+            ShopPayBillingSettings,
+            ShopPayShippingAddressSettings,
+            ShopPayShippingAddressChangeSettings,
+            ShopPayShippingRateChangeSettings,
+            ShopPayAllowedCountriesSettingsDefinition,
+            ShopPayShopIdSettingsDefinition,
+            ShopPaySheetRatioSettingsDefinition,
             ShopPaySettingsDefinition,
         )
 

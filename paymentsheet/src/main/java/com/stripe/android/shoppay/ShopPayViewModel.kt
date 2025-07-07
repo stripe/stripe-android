@@ -42,6 +42,7 @@ import kotlin.coroutines.CoroutineContext
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class ShopPayViewModel @Inject constructor(
+    private val shopPayArgs: ShopPayArgs,
     val bridgeHandler: ShopPayBridgeHandler,
     private val stripeApiRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -54,6 +55,8 @@ internal class ShopPayViewModel @Inject constructor(
     val paymentResult: Flow<ShopPayActivityResult> = _paymentResult
 
     private var didReceiveECEClick: Boolean = false
+
+    val sheetHeightRatio = shopPayArgs.shopPayConfiguration.sheetRatio
 
     init {
         bridgeHandler.setOnECEClickCallback {

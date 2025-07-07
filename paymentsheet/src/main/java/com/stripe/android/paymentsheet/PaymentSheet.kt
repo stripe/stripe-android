@@ -1907,6 +1907,7 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
                 error = StripeThemeDefaults.colorsLight.materialColors.error
             )
+
             val defaultLight = configureDefaultLight()
 
             internal fun configureDefaultDark(
@@ -1925,6 +1926,7 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
                 error = StripeThemeDefaults.colorsDark.materialColors.error
             )
+
             val defaultDark = configureDefaultDark()
         }
     }
@@ -2911,18 +2913,39 @@ class PaymentSheet internal constructor(
      * @param shippingRates A list of [ShippingRate] objects. The first shipping rate listed
      * appears in the payment interface as the default option.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
     @Poko
     @Parcelize
-    class ShopPayConfiguration(
+    class ShopPayConfiguration @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
         val shopId: String,
         val billingAddressRequired: Boolean = true,
         val emailRequired: Boolean = true,
         val shippingAddressRequired: Boolean,
         val allowedShippingCountries: List<String>,
         val lineItems: List<LineItem>,
-        val shippingRates: List<ShippingRate>
+        val shippingRates: List<ShippingRate>,
+        internal val sheetRatio: Float = 1f
     ) : Parcelable {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            shopId: String,
+            billingAddressRequired: Boolean = true,
+            emailRequired: Boolean = true,
+            shippingAddressRequired: Boolean,
+            allowedShippingCountries: List<String>,
+            lineItems: List<LineItem>,
+            shippingRates: List<ShippingRate>,
+        ) : this(
+            shopId = shopId,
+            billingAddressRequired = billingAddressRequired,
+            emailRequired = emailRequired,
+            shippingAddressRequired = shippingAddressRequired,
+            allowedShippingCountries = allowedShippingCountries,
+            lineItems = lineItems,
+            shippingRates = shippingRates,
+            sheetRatio = 1f
+        )
+
         /**
          * A type used to describe a single item for in the Shop Pay wallet UI.
          */
