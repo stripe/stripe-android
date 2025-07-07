@@ -48,7 +48,8 @@ interface EmbeddedComponentService {
     suspend fun fetchClientSecret(account: String): String
 
     companion object {
-        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
+        // View and fork the backend code here: https://codesandbox.io/p/devbox/dvmfpc
+        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.stripedemos.com/"
     }
 }
 
