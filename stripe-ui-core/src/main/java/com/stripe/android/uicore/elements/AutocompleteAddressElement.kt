@@ -2,6 +2,9 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutocompleteAddressElement(
@@ -34,8 +37,10 @@ class AutocompleteAddressElement(
         )
     }
 
-    override val countryElement: CountryElement
-        get() = controller.addressElementFlow.value.countryElement
+    override val countryElement: StateFlow<CountryElement> =
+        controller.addressElementFlow.flatMapLatestAsStateFlow {
+            it.countryElement
+        }
 
     override val allowsUserInteraction: Boolean = true
 

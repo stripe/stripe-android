@@ -56,6 +56,7 @@ import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -278,9 +279,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     init {
         viewModelScope.launch {
-            addressElement.countryElement.controller.rawFieldValue.collect {
-                it?.let {
-                    phoneController.countryDropdownController.onRawValueChange(it)
+            addressElement.countryElement.collect { it ->
+                it.controller.rawFieldValue.collect {
+                    it?.let {
+                        phoneController.countryDropdownController.onRawValueChange(it)
+                    }
                 }
             }
         }

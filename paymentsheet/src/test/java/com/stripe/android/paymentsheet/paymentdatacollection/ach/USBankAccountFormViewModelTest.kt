@@ -582,7 +582,7 @@ class USBankAccountFormViewModelTest {
             )
         )
 
-        viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
+        viewModel.addressElement.countryElement.value.controller.onRawValueChange("CA")
         assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo("CA")
     }
 

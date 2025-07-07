@@ -34,11 +34,13 @@ class AddressElement(
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override val countryElement = CountryElement(
+    private val _countryElement = CountryElement(
         IdentifierSpec.Country,
         countryDropdownFieldController
     )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override val countryElement = stateFlowOf(_countryElement)
 
     private val nameElement = SimpleTextElement(
         IdentifierSpec.Name,
@@ -70,7 +72,7 @@ class AddressElement(
 
     private val elementsRegistry = AddressElementUiRegistry(AddressSchemaRegistry)
 
-    private val otherFields = countryElement.controller.rawFieldValue
+    private val otherFields = _countryElement.controller.rawFieldValue
         .mapAsStateFlow { countryCode ->
             countryCode?.let {
                 phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
@@ -105,7 +107,7 @@ class AddressElement(
         }
 
         val allFields = listOfNotNull(
-            countryElement.takeUnless { hideCountry }
+            _countryElement.takeUnless { hideCountry }
         ).plus(fields)
 
         sameAsShipping?.let { same ->
@@ -128,7 +130,7 @@ class AddressElement(
 
     private val fieldsUpdatedFlow =
         combineAsStateFlow(
-            countryElement.controller.rawFieldValue,
+            _countryElement.controller.rawFieldValue,
             otherFields.flatMapLatestAsStateFlow { fieldElements ->
                 combineAsStateFlow(
                     fieldElements
@@ -158,19 +160,19 @@ class AddressElement(
         }
 
     val fields = combineAsStateFlow(
-        countryElement.controller.rawFieldValue,
+        _countryElement.controller.rawFieldValue,
         otherFields,
         sameAsShippingUpdatedFlow,
         fieldsUpdatedFlow
     ) { country, otherFields, _, _ ->
         val condensed = listOfNotNull(
             nameElement.takeUnless { hideName },
-            countryElement.takeUnless { hideCountry },
+            _countryElement.takeUnless { hideCountry },
             addressAutoCompleteElement,
         )
         val expanded = listOfNotNull(
             nameElement.takeUnless { hideName },
-            countryElement.takeUnless { hideCountry },
+            _countryElement.takeUnless { hideCountry },
         ).plus(otherFields)
         val baseElements = when (addressInputMode) {
             is AddressInputMode.AutocompleteCondensed -> {
@@ -188,7 +190,7 @@ class AddressElement(
             else -> {
                 listOfNotNull(
                     nameElement.takeUnless { hideName },
-                    countryElement.takeUnless { hideCountry }
+                    _countryElement.takeUnless { hideCountry }
                 ).plus(otherFields)
             }
         }

@@ -20,6 +20,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.filterNotNull
 
 internal object PlaceholderHelper {
@@ -184,6 +185,9 @@ internal object PlaceholderHelper {
             .flatMap { it.fields }
             .filterIsInstance<CountryElement>()
             .firstOrNull()
+            ?.let {
+                stateFlowOf(it)
+            }
 
         // If not found, look for one inside an AddressElement.
         if (countryElement == null) {
@@ -195,9 +199,11 @@ internal object PlaceholderHelper {
                 ?.countryElement
         }
 
-        countryElement?.controller?.rawFieldValue?.filterNotNull()?.collect {
-            if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
-                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+        countryElement?.collect {
+            it.controller.rawFieldValue.filterNotNull().collect {
+                if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
+                    phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
+                }
             }
         }
     }

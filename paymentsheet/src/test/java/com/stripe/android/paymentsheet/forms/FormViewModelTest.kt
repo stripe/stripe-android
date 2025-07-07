@@ -554,11 +554,11 @@ internal class FormViewModelTest {
 
             assertThat(countryElement).isNotNull()
             assertThat(phoneElement).isNotNull()
-            countryElement?.controller?.onRawValueChange("CA")
+            countryElement?.value?.controller?.onRawValueChange("CA")
             assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
                 .isEqualTo("CA")
             phoneElement?.controller?.onValueChange("+13105551234")
-            countryElement?.controller?.onRawValueChange("US")
+            countryElement?.value?.controller?.onRawValueChange("US")
             // Phone number shouldn't change because it is already filled.
             assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
                 .isEqualTo("CA")

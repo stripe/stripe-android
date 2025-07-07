@@ -61,7 +61,7 @@ class CardBillingAddressElement(
         )
     }
 
-    override val countryElement: CountryElement = addressElement.countryElement
+    override val countryElement: StateFlow<CountryElement> = addressElement.countryElement
 
     // Save for future use puts this in the controller rather than element
     // card and achv2 uses save for future use
