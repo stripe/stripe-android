@@ -41,13 +41,6 @@ require_relative 'common'
             execute("add-password -n \"$USER\" bindings/gh-tokens/$USER")
         }
     },
-    {
-        "password_key" => "secret-acl-stripe-android-sonatype",
-        "error_actions" => -> {
-            rputs "Follow the prompts:"
-            execute("fetch-password secret-acl-stripe-android-sonatype")
-        }
-    },
 ]
 
 private def request_membership_at_link(link)
