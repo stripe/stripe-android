@@ -54,6 +54,8 @@ constructor(
      * Indicates that this should be the default payment method going forward.
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
+
+    internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -137,7 +139,8 @@ constructor(
                 clientSecret = clientSecret,
                 // infers default [MandateDataParams] based on the attached [paymentMethodType]
                 mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                    .takeIf { paymentMethodType.requiresMandate }
+                    .takeIf { paymentMethodType.requiresMandate },
+                paymentMethodCode = paymentMethodType.code,
             )
         }
 
@@ -227,7 +230,8 @@ constructor(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 mandateId = mandateId,
                 mandateData = mandateData,
-                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCreateParams.code,
             )
         }
 
@@ -237,13 +241,15 @@ constructor(
             mandateData: MandateDataParams? = null,
             mandateId: String? = null,
             setAsDefaultPaymentMethod: Boolean?,
+            paymentMethodCode: PaymentMethodCode,
         ): ConfirmSetupIntentParams {
             return ConfirmSetupIntentParams(
                 paymentMethodId = paymentMethodId,
                 clientSecret = clientSecret,
                 mandateId = mandateId,
                 mandateData = mandateData,
-                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCode,
             )
         }
     }

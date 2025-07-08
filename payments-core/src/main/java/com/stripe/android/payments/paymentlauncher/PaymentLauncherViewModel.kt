@@ -22,7 +22,7 @@ import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.createParams
+import com.stripe.android.model.paymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -163,7 +163,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
     private fun logConfirmStarted(confirmStripeIntentParams: ConfirmStripeIntentParams): Map<String, String> {
         val analyticsParams: Map<String, String> = mapOf(
-            "payment_method_type" to confirmStripeIntentParams.createParams()?.code,
+            "payment_method_type" to confirmStripeIntentParams.paymentMethodCode,
             "intent_id" to confirmStripeIntentParams.clientSecret.toStripeId(),
         ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(

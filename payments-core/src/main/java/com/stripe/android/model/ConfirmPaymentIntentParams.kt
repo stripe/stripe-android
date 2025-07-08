@@ -2,7 +2,8 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
@@ -125,6 +126,7 @@ constructor(
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
 
+    internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -359,7 +361,8 @@ constructor(
                 clientSecret = clientSecret,
                 // infers default [MandateDataParams] based on the attached [paymentMethodType]
                 mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                    .takeIf { paymentMethodType.requiresMandate }
+                    .takeIf { paymentMethodType.requiresMandate },
+                paymentMethodCode = paymentMethodType.code,
             )
         }
 
@@ -546,7 +549,8 @@ constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createAlipay(),
                 // return_url is no longer used by is still required by the backend
                 // TODO(smaskell): remove this when no longer required
-                returnUrl = "stripe://return_url"
+                returnUrl = "stripe://return_url",
+                paymentMethodCode = PaymentMethod.Type.Alipay.code,
             )
         }
 
@@ -571,6 +575,7 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCreateParams.code,
             )
         }
 
@@ -584,6 +589,7 @@ constructor(
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
             setAsDefaultPaymentMethod: Boolean? = null,
+            paymentMethodCode: PaymentMethodCode,
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 paymentMethodId = paymentMethodId,
@@ -595,6 +601,7 @@ constructor(
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                paymentMethodCode = paymentMethodCode,
             )
         }
 
@@ -613,7 +620,8 @@ constructor(
                     (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
                 ),
                 savePaymentMethod = false,
-                useStripeSdk = true
+                useStripeSdk = true,
+                paymentMethodCode = PaymentMethod.Type.Card.code,
             )
         }
     }

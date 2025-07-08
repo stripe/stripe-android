@@ -129,12 +129,14 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
             query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
             query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
@@ -200,12 +202,14 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
             query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.finished",
             query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
         )
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 

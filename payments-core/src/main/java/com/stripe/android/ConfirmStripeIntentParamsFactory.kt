@@ -22,7 +22,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
     abstract fun create(
         paymentMethodId: String,
-        paymentMethodType: PaymentMethod.Type?,
+        paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
     ): T
@@ -40,7 +40,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
-            paymentMethodType = paymentMethod.type,
+            paymentMethodType = requireNotNull(paymentMethod.type),
             optionsParams = optionsParams,
             extraParams = extraParams,
         )
@@ -73,7 +73,7 @@ internal class ConfirmPaymentIntentParamsFactory(
 
     override fun create(
         paymentMethodId: String,
-        paymentMethodType: PaymentMethod.Type?,
+        paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?
     ): ConfirmPaymentIntentParams {
@@ -84,6 +84,7 @@ internal class ConfirmPaymentIntentParamsFactory(
             mandateData = mandateData(intent, paymentMethodType),
             shipping = shipping,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
+            paymentMethodCode = paymentMethodType.code,
         )
     }
 
@@ -109,7 +110,7 @@ internal class ConfirmSetupIntentParamsFactory(
 
     override fun create(
         paymentMethodId: String,
-        paymentMethodType: PaymentMethod.Type?,
+        paymentMethodType: PaymentMethod.Type,
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
     ): ConfirmSetupIntentParams {
@@ -118,6 +119,7 @@ internal class ConfirmSetupIntentParamsFactory(
             clientSecret = clientSecret,
             mandateData = mandateData(intent, paymentMethodType),
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
+            paymentMethodCode = paymentMethodType.code,
         )
     }
 

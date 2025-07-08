@@ -80,11 +80,13 @@ class PaymentLauncherViewModelTest {
 
     private val confirmPaymentIntentParams = ConfirmPaymentIntentParams(
         clientSecret = CLIENT_SECRET,
-        paymentMethodId = PM_ID
+        paymentMethodId = PM_ID,
+        paymentMethodCode = "card",
     )
     private val confirmSetupIntentParams = ConfirmSetupIntentParams(
         clientSecret = CLIENT_SECRET,
-        paymentMethodId = PM_ID
+        paymentMethodId = PM_ID,
+        paymentMethodCode = "card",
     )
     private val paymentIntent = mock<PaymentIntent>()
     private val piAuthenticator = mock<PaymentNextActionHandler<PaymentIntent>>()
