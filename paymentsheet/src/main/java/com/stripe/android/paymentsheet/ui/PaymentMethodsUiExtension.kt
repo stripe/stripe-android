@@ -23,8 +23,8 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
 ): Int {
     return when (type) {
         PaymentMethod.Type.Card -> {
-            if (isLinkPaymentMethod) {
-                // Link card brand
+            if (isLinkPaymentMethod || isLinkPassthroughMode) {
+                // Link card brand or passthrough mode
                 getLinkIcon(
                     showNightIcon = showNightIcon,
                     iconOnly = forVerticalMode
@@ -37,7 +37,17 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
             }
         }
         PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
-        PaymentMethod.Type.USBankAccount -> TransformToBankIcon(usBankAccount?.bankName)
+        PaymentMethod.Type.USBankAccount -> {
+            if (isLinkPassthroughMode) {
+                // Link passthrough mode for US bank account
+                getLinkIcon(
+                    showNightIcon = showNightIcon,
+                    iconOnly = forVerticalMode
+                )
+            } else {
+                TransformToBankIcon(usBankAccount?.bankName)
+            }
+        }
         PaymentMethod.Type.Link -> getLinkIcon(showNightIcon = showNightIcon, iconOnly = forVerticalMode)
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
@@ -264,7 +274,7 @@ internal fun PaymentMethod.getLabelIcon(): Int? {
 }
 
 internal val PaymentMethod.shouldTintLabelIcon: Boolean
-    get() = type != PaymentMethod.Type.Link
+    get() = type != PaymentMethod.Type.Link && !isLinkPassthroughMode
 
 internal fun createCardLabel(last4: String?): ResolvableString? {
     return last4?.let {
