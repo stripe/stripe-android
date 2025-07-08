@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1153,86 +1152,6 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
 
-    @OptIn(ShopPayPreview::class)
-    @Test
-    fun `should order Link properly when Link State is provided and in ordered wallet and PM types`() {
-        val elementsSession = createElementsSession(
-            orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay", "google_pay", "link")
-        )
-
-        val metadata = PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = elementsSession,
-            configuration = PaymentSheet.Configuration.Builder(
-                merchantDisplayName = "Example, Inc."
-            )
-                .shopPayConfiguration(
-                    PaymentSheet.ShopPayConfiguration(
-                        shopId = "shop_id",
-                        shippingRates = emptyList(),
-                        allowedShippingCountries = emptyList(),
-                        lineItems = emptyList(),
-                        emailRequired = true,
-                        shippingAddressRequired = true,
-                    )
-                )
-                .build()
-                .asCommonConfiguration(),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-            externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = true,
-            linkState = LinkState(
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                configuration = createLinkConfiguration(),
-                loginState = LinkState.LoginState.LoggedOut,
-            ),
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
-        )
-
-        assertThat(metadata.availableWallets)
-            .containsExactlyElementsIn(listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay))
-            .inOrder()
-    }
-
-    @OptIn(ShopPayPreview::class)
-    @Test
-    fun `should order Link properly when Link State is provided and NOT in ordered wallet and PM types`() {
-        val elementsSession = createElementsSession(
-            orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay", "google_pay")
-        )
-
-        val metadata = PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = elementsSession,
-            configuration = PaymentSheet.Configuration.Builder(
-                merchantDisplayName = "Example, Inc."
-            )
-                .shopPayConfiguration(
-                    PaymentSheet.ShopPayConfiguration(
-                        shopId = "shop_id",
-                        shippingRates = emptyList(),
-                        allowedShippingCountries = emptyList(),
-                        lineItems = emptyList(),
-                        emailRequired = true,
-                        shippingAddressRequired = true,
-                    )
-                )
-                .build()
-                .asCommonConfiguration(),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-            externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = true,
-            linkState = LinkState(
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-                configuration = createLinkConfiguration(),
-                loginState = LinkState.LoginState.LoggedOut,
-            ),
-            customerMetadata = DEFAULT_CUSTOMER_METADATA
-        )
-
-        assertThat(metadata.availableWallets)
-            .containsExactlyElementsIn(listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay))
-            .inOrder()
-    }
-
     @Suppress("LongMethod")
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
@@ -1834,16 +1753,16 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link, WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
     )
 
     @Test
-    fun `availableWallets contains all wallet types in order`() = availableWalletsTest(
+    fun `availableWallets contains all wallet types in order with Link first`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("shop_pay", "link", "card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.ShopPay, WalletType.Link, WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay),
     )
 
     @Test
@@ -1910,21 +1829,21 @@ internal class PaymentMethodMetadataTest {
     )
 
     @Test
-    fun `availableWallets order respected if Link available but not in types`() = availableWalletsTest(
+    fun `availableWallets puts Link first if available but not in types`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
-    fun `availableWallets respects order with ShopPay and Link not in types`() = availableWalletsTest(
+    fun `availableWallets does not include Shop Pay if not in types`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
@@ -1933,7 +1852,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.ShopPay, WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay),
     )
 
     @Test
@@ -1994,7 +1913,9 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
-        assertThat(metadata.availableWallets).containsExactlyElementsIn(expectedWalletTypes)
+        assertThat(metadata.availableWallets)
+            .containsExactlyElementsIn(expectedWalletTypes)
+            .inOrder()
     }
 
     fun `Passes CBF along to Link`() {
