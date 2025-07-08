@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
@@ -38,8 +39,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -2844,9 +2843,15 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    class LinkConfiguration @JvmOverloads constructor(
+    class LinkConfiguration @CollectMissingLinkBillingDetailsPreview constructor(
         internal val display: Display = Display.Automatic,
+        internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
     ) : Parcelable {
+
+        @JvmOverloads
+        constructor(
+            display: Display = Display.Automatic
+        ) : this(display, true)
 
         internal val shouldDisplay: Boolean
             get() = when (display) {

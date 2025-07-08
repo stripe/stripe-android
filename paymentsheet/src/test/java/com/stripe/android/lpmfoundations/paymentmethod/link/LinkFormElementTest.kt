@@ -152,7 +152,8 @@ class LinkFormElementTest {
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
             defaultBillingDetails = null,
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration()
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            collectMissingBillingDetailsForExistingPaymentMethods = true
         )
     }
 

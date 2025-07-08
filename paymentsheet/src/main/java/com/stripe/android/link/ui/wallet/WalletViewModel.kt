@@ -78,6 +78,8 @@ internal class WalletViewModel @Inject constructor(
             merchantName = configuration.merchantName,
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
+            collectMissingBillingDetailsForExistingPaymentMethods =
+            configuration.collectMissingBillingDetailsForExistingPaymentMethods,
             isProcessing = false,
             hasCompleted = false,
             // initially expand the wallet if a payment method is preselected.
@@ -256,7 +258,11 @@ internal class WalletViewModel @Inject constructor(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
     ) {
         // Check if billing details are missing before proceeding with payment
-        if (!selectedPaymentDetails.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)) {
+        val shouldCollectMissingBillingDetails = selectedPaymentDetails.supports(
+            configuration.billingDetailsCollectionConfiguration, linkAccount
+        ).not() && _uiState.value.collectMissingBillingDetailsForExistingPaymentMethods
+
+        if (shouldCollectMissingBillingDetails) {
             setProcessingState(false)
             val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
             val billingDetailsUpdateFlow = BillingDetailsUpdateFlow(cvc = cvc)

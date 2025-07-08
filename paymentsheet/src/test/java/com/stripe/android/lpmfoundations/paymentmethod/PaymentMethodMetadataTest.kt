@@ -1957,7 +1957,8 @@ internal class PaymentMethodMetadataTest {
             allowDefaultOptIn = false,
             disableRuxInFlowController = false,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-            defaultBillingDetails = null
+            defaultBillingDetails = null,
+            collectMissingBillingDetailsForExistingPaymentMethods = true
         )
     }
 

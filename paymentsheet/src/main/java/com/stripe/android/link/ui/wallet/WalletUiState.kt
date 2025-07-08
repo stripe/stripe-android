@@ -24,13 +24,14 @@ internal data class WalletUiState(
     val secondaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
     val addPaymentMethodOptions: List<AddPaymentMethodOption>,
+    val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val userSetIsExpanded: Boolean? = null,
     val cardBeingUpdated: String? = null,
     val errorMessage: ResolvableString? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val addBankAccountState: AddBankAccountState = AddBankAccountState.Idle,
-    val alertMessage: ResolvableString? = null,
+    val alertMessage: ResolvableString? = null
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -94,8 +95,7 @@ internal data class WalletUiState(
     ): WalletUiState {
         return copy(
             paymentDetailsList = response.map { it.details },
-            isProcessing = false,
-            cardBeingUpdated = null
+            isProcessing = false
         )
     }
 }
