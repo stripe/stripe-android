@@ -47,8 +47,6 @@ internal fun PaymentDetails.supports(
         // All billing configuration details are supported.
         else -> true
     }
-    // Other payment details don't have billing details requirements
-    else -> true
 }
 
 /**
@@ -91,7 +89,6 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
             billingAddress = effectiveBillingAddress,
             billingEmailAddress = effectiveEmailAddress
         )
-        is ConsumerPaymentDetails.Passthrough -> this
     }
 }
 
