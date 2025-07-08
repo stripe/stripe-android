@@ -24,7 +24,10 @@ internal class SharedPaymentTokenPlaygroundRequester(
     private val playgroundSnapshot: PlaygroundSettings.Snapshot,
     private val applicationContext: Context,
 ) {
-    private val json = Json { explicitNulls = false }
+    private val json = Json {
+        explicitNulls = false
+        ignoreUnknownKeys = true
+    }
 
     suspend fun session(): Result<PlaygroundState> {
         val customerId = playgroundSnapshot[CustomerSettingsDefinition].run {
@@ -115,7 +118,7 @@ internal class SharedPaymentTokenPlaygroundRequester(
     }
 
     companion object {
-        private const val BASE_URL = "https://rough-lying-carriage.glitch.me/"
+        private const val BASE_URL = "https://2f6qwl-3000.csb.app/api/"
 
         private const val CREATE_INTENT_PATH = "create-intent"
         private const val CUSTOMER_PATH = "customer"
