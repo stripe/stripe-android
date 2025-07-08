@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
-import com.stripe.android.R as StripeR
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.label
@@ -13,6 +12,7 @@ import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
+import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
