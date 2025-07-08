@@ -12,10 +12,10 @@ import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
-import com.stripe.android.R as StripeR
-import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
+import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(
@@ -218,24 +218,22 @@ private fun getOverridableIcon(
 }
 
 internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
-    PaymentMethod.Type.Card -> {
-        if (isLinkPassthroughMode) {
-            if (canShowSublabel) {
-                // For Link passthrough mode, show "Link" as main label
-                StripeR.string.stripe_link.resolvableString
-            } else {
-                // Show original card label as sublabel
-                createCardLabel(card?.last4)
-            }
-        } else if (isLinkPaymentMethod) {
-            if (canShowSublabel) {
-                linkPaymentDetails?.label
-            } else {
-                linkPaymentDetails?.sublabel
-            }
+    PaymentMethod.Type.Card -> if (isLinkPassthroughMode) {
+        if (canShowSublabel) {
+            // For Link passthrough mode, show "Link" as main label
+            StripeR.string.stripe_link.resolvableString
         } else {
+            // Show original card label as sublabel
             createCardLabel(card?.last4)
         }
+    } else if (isLinkPaymentMethod) {
+        if (canShowSublabel) {
+            linkPaymentDetails?.label
+        } else {
+            linkPaymentDetails?.sublabel
+        }
+    } else {
+        createCardLabel(card?.last4)
     }
     PaymentMethod.Type.SepaDebit -> resolvableString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
