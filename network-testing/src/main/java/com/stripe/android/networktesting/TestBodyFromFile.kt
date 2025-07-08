@@ -5,13 +5,27 @@ import okio.Buffer
 import org.json.JSONException
 import org.json.JSONObject
 
+/**
+ * Validates that the specified file exists in the classpath resources and returns the input stream.
+ *
+ * @param filename The filename to check for existence
+ * @return The input stream for the file
+ * @throws AssertionError If the file doesn't exist, with a clear error message
+ */
+private fun getFileInputStream(filename: String): java.io.InputStream {
+    val inputStream = MockResponse::class.java.classLoader!!.getResourceAsStream(filename)
+        ?: // MockWebServer catches the exception so we need an error to fail the test
+        throw AssertionError("Test file not found: $filename\n")
+    return inputStream
+}
+
 fun MockResponse.testBodyFromFile(
     filename: String,
     replacements: List<ResponseReplacement>,
 ): MockResponse {
     addHeader("request-id", filename)
 
-    val inputStream = MockResponse::class.java.classLoader!!.getResourceAsStream(filename)
+    val inputStream = getFileInputStream(filename)
     val textBuilder = StringBuilder()
 
     val reader = inputStream.reader().buffered()
@@ -33,7 +47,7 @@ fun MockResponse.testBodyFromFile(
 fun MockResponse.testBodyFromFile(filename: String): MockResponse {
     addHeader("request-id", filename)
 
-    val inputStream = MockResponse::class.java.classLoader!!.getResourceAsStream(filename)
+    val inputStream = getFileInputStream(filename)
     val buffer = Buffer()
     buffer.readFrom(inputStream)
     assertIsValidJsonString(buffer.clone().readUtf8(), filename)
