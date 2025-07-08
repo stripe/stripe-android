@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1150,6 +1151,86 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
+    }
+
+    @OptIn(ShopPayPreview::class)
+    @Test
+    fun `should order Link properly when Link State is provided and in ordered wallet and PM types`() {
+        val elementsSession = createElementsSession(
+            orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay", "google_pay", "link")
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .shopPayConfiguration(
+                    PaymentSheet.ShopPayConfiguration(
+                        shopId = "shop_id",
+                        shippingRates = emptyList(),
+                        allowedShippingCountries = emptyList(),
+                        lineItems = emptyList(),
+                        emailRequired = true,
+                        shippingAddressRequired = true,
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = true,
+            linkState = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
+        )
+
+        assertThat(metadata.availableWallets)
+            .containsExactlyElementsIn(listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay))
+            .inOrder()
+    }
+
+    @OptIn(ShopPayPreview::class)
+    @Test
+    fun `should order Link properly when Link State is provided and NOT in ordered wallet and PM types`() {
+        val elementsSession = createElementsSession(
+            orderedPaymentMethodTypesAndWallets = listOf("card", "shop_pay", "google_pay")
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = elementsSession,
+            configuration = PaymentSheet.Configuration.Builder(
+                merchantDisplayName = "Example, Inc."
+            )
+                .shopPayConfiguration(
+                    PaymentSheet.ShopPayConfiguration(
+                        shopId = "shop_id",
+                        shippingRates = emptyList(),
+                        allowedShippingCountries = emptyList(),
+                        lineItems = emptyList(),
+                        emailRequired = true,
+                        shippingAddressRequired = true,
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = true,
+            linkState = LinkState(
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                configuration = createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
+        )
+
+        assertThat(metadata.availableWallets)
+            .containsExactlyElementsIn(listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay))
+            .inOrder()
     }
 
     @Suppress("LongMethod")
