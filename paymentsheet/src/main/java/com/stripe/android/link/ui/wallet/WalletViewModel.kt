@@ -259,7 +259,8 @@ internal class WalletViewModel @Inject constructor(
     ) {
         // Check if billing details are missing before proceeding with payment
         val shouldCollectMissingBillingDetails = selectedPaymentDetails.supports(
-            configuration.billingDetailsCollectionConfiguration, linkAccount
+            configuration.billingDetailsCollectionConfiguration,
+            linkAccount
         ).not() && _uiState.value.collectMissingBillingDetailsForExistingPaymentMethods
 
         if (shouldCollectMissingBillingDetails) {
