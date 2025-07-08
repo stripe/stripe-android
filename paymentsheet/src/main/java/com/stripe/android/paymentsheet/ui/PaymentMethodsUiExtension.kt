@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
+import com.stripe.android.R as StripeR
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.label
@@ -218,7 +219,15 @@ private fun getOverridableIcon(
 
 internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> {
-        if (isLinkPaymentMethod) {
+        if (isLinkPassthroughMode) {
+            if (canShowSublabel) {
+                // For Link passthrough mode, show "Link" as main label
+                StripeR.string.stripe_link.resolvableString
+            } else {
+                // Show original card label as sublabel
+                createCardLabel(card?.last4)
+            }
+        } else if (isLinkPaymentMethod) {
             if (canShowSublabel) {
                 linkPaymentDetails?.label
             } else {
@@ -232,10 +241,16 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
     )
-    PaymentMethod.Type.USBankAccount -> resolvableString(
-        R.string.stripe_paymentsheet_payment_method_item_card_number,
-        usBankAccount?.last4
-    )
+    PaymentMethod.Type.USBankAccount -> if (isLinkPassthroughMode && canShowSublabel) {
+        // For Link passthrough mode, show "Link" as main label
+        StripeR.string.stripe_link.resolvableString
+    } else {
+        // Show original bank account label
+        resolvableString(
+            R.string.stripe_paymentsheet_payment_method_item_card_number,
+            usBankAccount?.last4
+        )
+    }
     PaymentMethod.Type.Link -> {
         if (canShowSublabel) {
             linkPaymentDetails?.label
@@ -275,6 +290,42 @@ internal fun PaymentMethod.getLabelIcon(): Int? {
 
 internal val PaymentMethod.shouldTintLabelIcon: Boolean
     get() = type != PaymentMethod.Type.Link && !isLinkPassthroughMode
+
+internal fun PaymentMethod.getSublabel(): ResolvableString? {
+    return when {
+        linkPaymentDetails != null -> linkPaymentDetails?.sublabel
+        isLinkPassthroughMode -> {
+            // For Link passthrough mode, use the original payment method label as sublabel
+            when (type) {
+                PaymentMethod.Type.Card -> createCardLabel(card?.last4)
+                PaymentMethod.Type.USBankAccount -> resolvableString(
+                    R.string.stripe_paymentsheet_payment_method_item_card_number,
+                    usBankAccount?.last4
+                )
+                else -> null
+            }
+        }
+        else -> null
+    }
+}
+
+internal fun PaymentMethod.getLinkSpecificSublabel(): ResolvableString? {
+    return when {
+        linkPaymentDetails != null -> linkPaymentDetails?.sublabel
+        isLinkPassthroughMode -> {
+            // For Link passthrough mode, use the original payment method label as sublabel (Label is "Link")
+            when (type) {
+                PaymentMethod.Type.Card -> createCardLabel(card?.last4)
+                PaymentMethod.Type.USBankAccount -> resolvableString(
+                    R.string.stripe_paymentsheet_payment_method_item_card_number,
+                    usBankAccount?.last4
+                )
+                else -> null
+            }
+        }
+        else -> null
+    }
+}
 
 internal fun createCardLabel(last4: String?): ResolvableString? {
     return last4?.let {
