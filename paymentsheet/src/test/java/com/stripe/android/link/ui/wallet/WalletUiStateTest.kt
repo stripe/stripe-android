@@ -273,7 +273,8 @@ class WalletUiStateTest {
             cardBeingUpdated = cardBeingUpdated,
             isSettingUp = isSettingUp,
             merchantName = merchantName,
-            collectMissingBillingDetailsForExistingPaymentMethods = collectMissingBillingDetailsForExistingPaymentMethods
+            collectMissingBillingDetailsForExistingPaymentMethods =
+            collectMissingBillingDetailsForExistingPaymentMethods
         )
     }
 }

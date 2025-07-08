@@ -965,7 +965,12 @@ internal class PaymentSheetViewModelTest {
                         PaymentMethod.Type.Card.code
                     )
                 },
-                customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
+                customerInfo = LinkConfiguration.CustomerInfo(
+                    name = null,
+                    email = null,
+                    phone = null,
+                    billingCountryCode = null
+                ),
                 flags = mapOf(),
                 merchantName = "Test merchant inc.",
                 merchantCountryCode = "US",
