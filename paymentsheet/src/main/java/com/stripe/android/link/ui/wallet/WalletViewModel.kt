@@ -27,6 +27,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.utils.supports
+import com.stripe.android.link.utils.withEffectiveBillingDetails
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -255,8 +256,22 @@ internal class WalletViewModel @Inject constructor(
     private suspend fun performPaymentConfirmation(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
     ) {
-        // Check if billing details are missing before proceeding with payment
-        if (!selectedPaymentDetails.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)) {
+        val effectivePaymentDetails = selectedPaymentDetails.withEffectiveBillingDetails(configuration, linkAccount)
+        // Check if effective billing details satisfy requirements
+        if (effectivePaymentDetails.supports(configuration.billingDetailsCollectionConfiguration, linkAccount)) {
+            // Use the cached phone for this payment detail if available (ie the user updated it locally)
+            val effectivePhone = linkAccountManager.consumerState.value
+                ?.paymentDetails?.find { it.details.id == effectivePaymentDetails.id }
+                ?.billingPhone ?: linkAccount.unredactedPhoneNumber
+
+            val linkPaymentMethodDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+                details = effectivePaymentDetails,
+                collectedCvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value,
+                billingPhone = effectivePhone
+            )
+            performPaymentConfirmationWithDetails(linkPaymentMethodDetails)
+        } else {
+            // Effective billing details still don't satisfy requirements, proceed with update flow
             setProcessingState(false)
             val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
             val billingDetailsUpdateFlow = BillingDetailsUpdateFlow(cvc = cvc)
@@ -267,20 +282,14 @@ internal class WalletViewModel @Inject constructor(
                     billingDetailsUpdateFlow = billingDetailsUpdateFlow
                 ),
             )
-            return
         }
+    }
 
-        val cvc = cvcController.formFieldValue.value.takeIf { it.isComplete }?.value
-
-        // Use the cached phone for this payment detail if available (ie the user updated it locally)
-        val linkPaymentMethod = linkAccountManager.consumerState.value
-            ?.paymentDetails?.find { it.details.id == selectedPaymentDetails.id }
+    private suspend fun performPaymentConfirmationWithDetails(
+        linkPaymentMethodDetails: LinkPaymentMethod.ConsumerPaymentDetails,
+    ) {
         val result = completeLinkFlow(
-            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
-                details = selectedPaymentDetails,
-                collectedCvc = cvc,
-                billingPhone = linkPaymentMethod?.billingPhone ?: linkAccount.unredactedPhoneNumber
-            ),
+            selectedPaymentDetails = linkPaymentMethodDetails,
             linkAccount = linkAccount
         )
 

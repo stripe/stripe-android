@@ -211,6 +211,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccount(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
+                    nameUsedInSignup = name,
+                    phoneNumberUsedInSignup = phone
                 )
             }
 
@@ -238,6 +240,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setAccount(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
+                nameUsedInSignup = name,
+                phoneNumberUsedInSignup = phone
             )
         }
     }
@@ -319,12 +323,19 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private suspend fun setAccount(
         consumerSession: ConsumerSession,
         publishableKey: String?,
+        nameUsedInSignup: String?,
+        phoneNumberUsedInSignup: String?,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
         val newConsumerPublishableKey = publishableKey
             ?: currentAccount?.consumerPublishableKey
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
-        val newAccount = LinkAccount(consumerSession, newConsumerPublishableKey)
+        val newAccount = LinkAccount(
+            consumerSession = consumerSession,
+            consumerPublishableKey = newConsumerPublishableKey,
+            nameUsedInSignup = nameUsedInSignup,
+            phoneNumberUsedInSignup = phoneNumberUsedInSignup
+        )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
         }
@@ -340,6 +351,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccountNullable(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
+                    nameUsedInSignup = null,
+                    phoneNumberUsedInSignup = null
                 )
             } else {
                 LinkAccount(consumerSession, lookup.publishableKey)
@@ -358,7 +371,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
-                setAccount(consumerSession, null)
+                setAccount(
+                    consumerSession = consumerSession,
+                    publishableKey = null,
+                    nameUsedInSignup = null,
+                    phoneNumberUsedInSignup = null
+                )
             }
     }
 
@@ -375,7 +393,12 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }.onFailure {
                 linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
-                setAccount(consumerSession, null)
+                setAccount(
+                    consumerSession = consumerSession,
+                    publishableKey = null,
+                    nameUsedInSignup = null,
+                    phoneNumberUsedInSignup = null
+                )
             }
     }
 
@@ -436,9 +459,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
     internal suspend fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
+        nameUsedInSignup: String?,
+        phoneNumberUsedInSignup: String?,
     ): LinkAccount? {
         return consumerSession?.let {
-            setAccount(consumerSession = it, publishableKey = publishableKey)
+            setAccount(
+                consumerSession = it,
+                publishableKey = publishableKey,
+                nameUsedInSignup = nameUsedInSignup,
+                phoneNumberUsedInSignup = phoneNumberUsedInSignup
+            )
         } ?: run {
             withContext(Dispatchers.Main.immediate) {
                 linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
