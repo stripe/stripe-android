@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AutocompleteAddressElement(
@@ -33,6 +34,8 @@ class AutocompleteAddressElement(
             hideName = hideName,
         )
     }
+
+    override val addressController: StateFlow<AddressController> = controller.addressController
 
     override val countryElement: CountryElement = controller.countryElement
 

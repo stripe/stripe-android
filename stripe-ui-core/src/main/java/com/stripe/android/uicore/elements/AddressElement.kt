@@ -199,7 +199,9 @@ class AddressElement(
         fields
     }
 
-    val controller = AddressController(fields)
+    private val controller = AddressController(fields)
+
+    override val addressController = stateFlowOf(controller)
 
     /**
      * This will return a controller that abides by the SectionFieldErrorController interface.

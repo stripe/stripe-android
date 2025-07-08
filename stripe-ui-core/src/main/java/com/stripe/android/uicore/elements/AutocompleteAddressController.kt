@@ -51,6 +51,10 @@ class AutocompleteAddressController(
         addressElement.getTextFieldIdentifiers()
     }
 
+    val addressController = addressElementFlow.flatMapLatestAsStateFlow {
+        it.addressController
+    }
+
     init {
         interactor.register { event ->
             val currentValues = getCurrentValues()
@@ -136,11 +140,11 @@ class AutocompleteAddressController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        val element by addressElementFlow.collectAsState()
+        val controller by addressController.collectAsState()
 
         AddressElementUI(
             enabled = enabled,
-            controller = element.controller,
+            controller = controller,
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             modifier = modifier,

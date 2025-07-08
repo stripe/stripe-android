@@ -20,6 +20,7 @@ import com.stripe.android.uicore.StripeTheme
 import kotlinx.parcelize.Parcelize
 import java.lang.ref.WeakReference
 import java.util.UUID
+import javax.inject.Inject
 
 internal interface AutocompleteLauncher {
     fun launch(
@@ -41,6 +42,10 @@ internal interface AutocompleteLauncher {
 
 internal interface AutocompleteActivityLauncher : AutocompleteLauncher {
     fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
+
+    fun interface Factory {
+        fun create(appearanceContext: AutocompleteAppearanceContext): AutocompleteActivityLauncher
+    }
 }
 
 internal fun interface AutocompleteLauncherResultHandler {
@@ -182,5 +187,11 @@ internal class DefaultAutocompleteLauncher(
                 appearanceContext = appearanceContext,
             )
         )
+    }
+
+    class Factory @Inject constructor() : AutocompleteActivityLauncher.Factory {
+        override fun create(appearanceContext: AutocompleteAppearanceContext): AutocompleteActivityLauncher {
+            return DefaultAutocompleteLauncher(appearanceContext)
+        }
     }
 }

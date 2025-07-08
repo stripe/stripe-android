@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
@@ -28,6 +29,7 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -36,6 +38,8 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1534,6 +1538,23 @@ class USBankAccountFormViewModelTest {
         }
     }
 
+    @Test
+    fun `If autocomplete address interactor factory provided, should use autocomplete element`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(showCheckbox = true),
+            autocompleteAddressInteractorFactory = {
+                TestAutocompleteAddressInteractor.noOp(
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = "gi_123",
+                        autocompleteCountries = setOf("US")
+                    )
+                )
+            }
+        )
+
+        assertThat(viewModel.addressElement).isInstanceOf<AutocompleteAddressElement>()
+    }
+
     private fun testElementsSessionContextGeneration(
         viewModelArgs: USBankAccountFormViewModel.Args,
     ): ElementsSessionContext? {
@@ -1684,7 +1705,8 @@ class USBankAccountFormViewModelTest {
     }
 
     private fun createViewModel(
-        args: USBankAccountFormViewModel.Args = defaultArgs
+        args: USBankAccountFormViewModel.Args = defaultArgs,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): USBankAccountFormViewModel {
         val paymentConfiguration = PaymentConfiguration(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
@@ -1695,6 +1717,7 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
 

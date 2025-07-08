@@ -48,6 +48,8 @@ import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPay
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
@@ -73,6 +75,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val application: Application,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
+    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : ViewModel() {
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
@@ -168,7 +171,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             )
         }
 
-    val addressElement = AddressElement(
+    private val autocompleteAddressElement = autocompleteAddressInteractorFactory?.let {
+        AutocompleteAddressElement(
+            identifier = IdentifierSpec.Generic("billing_details[address]"),
+            initialValues = defaultAddress?.asFormFieldValues() ?: emptyMap(),
+            sameAsShippingElement = sameAsShippingElement,
+            interactorFactory = it,
+            shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),
+        )
+    }
+
+    val addressElement = autocompleteAddressElement ?: AddressElement(
         _identifier = IdentifierSpec.Generic("billing_details[address]"),
         rawValuesMap = defaultAddress?.asFormFieldValues() ?: emptyMap(),
         sameAsShippingElement = sameAsShippingElement,
@@ -767,6 +780,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     internal class Factory(
+        private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         private val argsSupplier: () -> Args,
     ) : ViewModelProvider.Factory {
 
@@ -779,6 +793,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 .subComponentBuilderProvider.get()
                 .configuration(argsSupplier())
                 .savedStateHandle(extras.createSavedStateHandle())
+                .autocompleteAddressInteractorFactory(autocompleteAddressInteractorFactory)
                 .build().viewModel as T
         }
     }
