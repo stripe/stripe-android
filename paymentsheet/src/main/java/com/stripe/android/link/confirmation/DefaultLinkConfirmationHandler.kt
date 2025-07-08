@@ -125,7 +125,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         val confirmationOption = if (configuration.passthroughModeEnabled) {
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
-                expectedPaymentMethodType = computeExpectedPaymentMethodType(paymentDetails),
+                expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentDetails),
                 cvc = cvc,
                 billingPhone = billingPhone
             )
@@ -133,7 +133,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             PaymentMethodConfirmationOption.New(
                 createParams = createPaymentMethodCreateParams(
                     selectedPaymentDetails = paymentDetails,
-                    linkAccount = linkAccount,
+                    consumerSessionClientSecret = linkAccount.clientSecret,
                     cvc = cvc
                 ),
                 extraParams = null,
@@ -182,39 +182,6 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         )
     }
 
-    private fun createPaymentMethodCreateParams(
-        selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?
-    ): PaymentMethodCreateParams {
-        return PaymentMethodCreateParams.createLink(
-            paymentDetailsId = selectedPaymentDetails.id,
-            consumerSessionClientSecret = linkAccount.clientSecret,
-            extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
-        )
-    }
-
-    private fun computeExpectedPaymentMethodType(
-        paymentDetails: ConsumerPaymentDetails.PaymentDetails
-    ): String {
-        return when (paymentDetails) {
-            is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType()
-            is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
-            is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
-        }
-    }
-
-    private fun computeBankAccountExpectedPaymentMethodType(): String {
-        val canAcceptACH = USBankAccount.code in configuration.stripeIntent.paymentMethodTypes
-        val isLinkCardBrand = configuration.linkMode == LinkMode.LinkCardBrand
-
-        return if (isLinkCardBrand && !canAcceptACH) {
-            ConsumerPaymentDetails.Card.TYPE
-        } else {
-            ConsumerPaymentDetails.BankAccount.TYPE
-        }
-    }
-
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
         private val logger: Logger,
@@ -226,5 +193,39 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 configuration = configuration,
             )
         }
+    }
+}
+
+internal fun createPaymentMethodCreateParams(
+    selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    consumerSessionClientSecret: String,
+    cvc: String?
+): PaymentMethodCreateParams {
+    return PaymentMethodCreateParams.createLink(
+        paymentDetailsId = selectedPaymentDetails.id,
+        consumerSessionClientSecret = consumerSessionClientSecret,
+        extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
+    )
+}
+
+internal fun computeExpectedPaymentMethodType(
+    configuration: LinkConfiguration,
+    paymentDetails: ConsumerPaymentDetails.PaymentDetails
+): String {
+    return when (paymentDetails) {
+        is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
+        is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
+    }
+}
+
+private fun computeBankAccountExpectedPaymentMethodType(configuration: LinkConfiguration): String {
+    val canAcceptACH = USBankAccount.code in configuration.stripeIntent.paymentMethodTypes
+    val isLinkCardBrand = configuration.linkMode == LinkMode.LinkCardBrand
+
+    return if (isLinkCardBrand && !canAcceptACH) {
+        ConsumerPaymentDetails.Card.TYPE
+    } else {
+        ConsumerPaymentDetails.BankAccount.TYPE
     }
 }

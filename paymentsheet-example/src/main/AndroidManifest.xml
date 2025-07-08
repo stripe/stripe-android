@@ -54,7 +54,6 @@
         <activity android:name="com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentTokenPlaygroundActivity" />
-        <activity android:name="com.stripe.android.paymentsheet.example.samples.ui.link.LinkStandaloneActivity" />
         <activity
             android:name="com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity"
             android:theme="@style/AppTheme.NoActionBar"

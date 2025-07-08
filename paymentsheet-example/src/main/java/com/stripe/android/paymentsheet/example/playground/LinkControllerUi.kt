@@ -1,9 +1,6 @@
-package com.stripe.android.paymentsheet.example.samples.ui.link
+package com.stripe.android.paymentsheet.example.playground
 
-import android.os.Bundle
 import android.util.Patterns
-import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,12 +11,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -28,6 +25,8 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,73 +37,60 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import com.stripe.android.ui.core.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-internal class LinkStandaloneActivity : AppCompatActivity() {
-
-    private lateinit var linkController: LinkController
-
-    @SuppressWarnings("LongMethod")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        FeatureFlags.nativeLinkEnabled.setEnabled(true)
-
-        val presentPaymentMethodsResultState =
-            mutableStateOf<LinkController.PresentPaymentMethodsResult?>(null)
-        val lookupConsumerResultState =
-            mutableStateOf<LinkController.LookupConsumerResult?>(null)
-
-        linkController = LinkController.create(
-            activity = this,
-            presentPaymentMethodsCallback = { presentPaymentMethodsResultState.value = it },
-            lookupConsumerCallback = { lookupConsumerResultState.value = it },
-        )
-
-        setContent {
-            PaymentSheetExampleTheme {
-                val presentPaymentMethodsResult by presentPaymentMethodsResultState
-                val lookupConsumerResult by lookupConsumerResultState
-                val paymentMethodPreview =
-                    (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Selected)
-                        ?.preview
-
-                ExampleScreen(
-                    paymentMethodPreview = paymentMethodPreview,
-                    presentPaymentMethodsResult = presentPaymentMethodsResult,
-                    lookupConsumerResult = lookupConsumerResult,
-                    onEmailChange = { email ->
-                        if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                            linkController.lookupConsumer(email)
-                        }
-                    },
-                    onPaymentMethodButtonClick = { email ->
-                        linkController.presentPaymentMethods(email.takeIf { it.isNotBlank() })
-                    }
-                )
-            }
-        }
+@Composable
+internal fun LinkControllerUi(
+    viewModel: PaymentSheetPlaygroundViewModel,
+    linkController: LinkController,
+    playgroundState: PlaygroundState.Payment,
+) {
+    LaunchedEffect(playgroundState) {
+        val configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
+        linkController.setConfiguration(configuration)
     }
+
+    val linkControllerState by viewModel.linkControllerState.collectAsState()
+
+    LinkControllerUi(
+        linkControllerState = linkControllerState,
+        onEmailChange = { email ->
+            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                linkController.lookupConsumer(email)
+            }
+        },
+        onPaymentMethodButtonClick = { email ->
+            linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
+        },
+        onCreatePaymentMethodClick = linkController::createPaymentMethod,
+    )
 }
 
 @Composable
-private fun ExampleScreen(
-    paymentMethodPreview: LinkController.PaymentMethodPreview?,
-    presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult?,
-    lookupConsumerResult: LinkController.LookupConsumerResult?,
+internal fun LinkControllerUi(
+    linkControllerState: LinkControllerState,
     onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
+    onCreatePaymentMethodClick: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     val presentPaymentMethodsError =
-        (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
+        (linkControllerState.presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
             ?.error
+    val lookupConsumerError =
+        (linkControllerState.lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)
+            ?.error
+    val createPaymentMethodError =
+        (linkControllerState.createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)
+            ?.error
+    val errorToPresent = presentPaymentMethodsError ?: lookupConsumerError ?: createPaymentMethodError
 
     val scope = rememberCoroutineScope()
     DisposableEffect(email) {
@@ -117,12 +103,11 @@ private fun ExampleScreen(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.height(16.dp))
-        presentPaymentMethodsError?.let { error ->
+        errorToPresent?.let { error ->
             Text(
                 text = error.message ?: "An error occurred",
                 color = MaterialTheme.colors.error,
@@ -131,37 +116,80 @@ private fun ExampleScreen(
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = email,
-            label = { Text(text = "Customer email") },
+            label = { Text(text = "Customer email (optional)") },
             onValueChange = { email = it }
         )
         Divider(Modifier.padding(vertical = 20.dp))
 
+        when (linkControllerState.lookupConsumerResult) {
+            is LinkController.LookupConsumerResult.Success -> {
+                val exists = if (linkControllerState.lookupConsumerResult.isConsumer) "exists" else "does not exist"
+                Text(
+                    text = "${linkControllerState.lookupConsumerResult.email} $exists",
+                    style = MaterialTheme.typography.body1,
+                )
+            }
+            is LinkController.LookupConsumerResult.Failed, null -> {
+                // No-op.
+            }
+        }
+
         PaymentMethodButton(
-            preview = paymentMethodPreview,
+            preview = linkControllerState.paymentMethodPreview,
             onClick = { onPaymentMethodButtonClick(email) },
         )
-        if (lookupConsumerResult is LinkController.LookupConsumerResult.Success) {
-            val resultText = if (lookupConsumerResult.isConsumer) "exists" else "does not exist"
-            Text(
-                text = "${lookupConsumerResult.email} $resultText",
-                style = MaterialTheme.typography.body1,
-            )
+        Spacer(Modifier.height(16.dp))
+        ConfirmButton(
+            onClick = onCreatePaymentMethodClick,
+            enabled = linkControllerState.paymentMethodPreview != null,
+        )
+
+        val createPaymentMethodResultText = when (linkControllerState.createPaymentMethodResult) {
+            is LinkController.CreatePaymentMethodResult.Success ->
+                linkControllerState.createPaymentMethodResult.paymentMethod.id ?: "Payment method created (no id)"
+            is LinkController.CreatePaymentMethodResult.Failed ->
+                "Failed"
+            null ->
+                ""
         }
+        Text(
+            text = createPaymentMethodResultText,
+            style = MaterialTheme.typography.body1,
+        )
     }
 }
 
 @Composable
 @Preview(showBackground = true)
-private fun ExampleScreenPreview() {
+private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
-        ExampleScreen(
-            paymentMethodPreview = null,
-            presentPaymentMethodsResult = null,
-            lookupConsumerResult = null,
+        LinkControllerUi(
+            linkControllerState = LinkControllerState(),
             onEmailChange = {},
             onPaymentMethodButtonClick = {},
+            onCreatePaymentMethodClick = {}
         )
     }
+}
+
+@Composable
+private fun ConfirmButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        modifier = modifier
+            .clip(CircleShape)
+            .clickable(onClick = onClick, enabled = enabled)
+            .background(color = Color.Black)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .fillMaxWidth(),
+        style = MaterialTheme.typography.h6,
+        color = Color.White,
+        textAlign = TextAlign.Center,
+        text = "Confirm",
+    )
 }
 
 @Composable
@@ -211,14 +239,16 @@ private fun PaymentMethodButton(
                                 modifier = Modifier.padding(top = 2.dp),
                                 text = sublabel,
                                 style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                                color = MaterialTheme.colors.onSurface.copy(
+                                    alpha = 0.6f
+                                ),
                             )
                         }
                     }
                 } else {
                     Icon(
                         modifier = Modifier.size(iconSize),
-                        painter = painterResource(com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_card),
+                        painter = painterResource(R.drawable.stripe_ic_paymentsheet_pm_card),
                         contentDescription = null,
                     )
                     Column(

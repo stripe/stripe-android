@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -104,6 +105,11 @@ internal interface LinkRepository {
         billingPhone: String?,
         cvc: String?,
     ): Result<SharePaymentDetails>
+
+    suspend fun createPaymentMethod(
+        consumerSessionClientSecret: String,
+        paymentMethod: LinkPaymentMethod
+    ): Result<PaymentMethod>
 
     suspend fun logOut(
         consumerSessionClientSecret: String,

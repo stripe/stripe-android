@@ -38,7 +38,6 @@ import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExamp
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
-import com.stripe.android.paymentsheet.example.samples.ui.link.LinkStandaloneActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
@@ -92,12 +91,6 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.Embedded,
             ),
             MenuItem(
-                titleResId = R.string.paymentsheet_link_standalone,
-                subtitleResId = R.string.paymentsheet_link_standalone,
-                klass = LinkStandaloneActivity::class.java,
-                section = MenuItem.Section.Link,
-            ),
-            MenuItem(
                 titleResId = R.string.customersheet_example_title,
                 subtitleResId = R.string.customer_subtitle,
                 klass = CustomerSheetExampleActivity::class.java,
@@ -145,7 +138,6 @@ private data class MenuItem(
         CompleteFlow,
         CustomFlow,
         CustomerSheet,
-        Link,
         Embedded,
         AddressElement,
     }
@@ -176,11 +168,6 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Embedded Payment Element",
             items = groupedItems.getOrElse(MenuItem.Section.Embedded) { emptyList() }
-        )
-
-        Section(
-            title = "Link",
-            items = groupedItems.getOrElse(MenuItem.Section.Link) { emptyList() }
         )
 
         Section(

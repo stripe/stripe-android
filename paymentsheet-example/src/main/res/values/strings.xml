@@ -6,7 +6,6 @@
     <string name="paymentsheet_custom_subtitle">A more advanced integration with greater flexibility</string>
     <string name="paymentsheet_serverside_confirmation_title">PaymentSheet with server-side confirmation</string>
     <string name="paymentsheet_custom_serverside_confirmation_title">FlowController with server-side confirmation</string>
-    <string name="paymentsheet_link_standalone">Link standalone</string>
     <string name="paymentsheet_serverside_confirmation_subtitle">Create and confirm the payment or setup intent on your own backend</string>
     <string name="customersheet_example_title">CustomerSheet Example</string>
     <string name="customersheet_playground_title">CustomerSheet Playground</string>
