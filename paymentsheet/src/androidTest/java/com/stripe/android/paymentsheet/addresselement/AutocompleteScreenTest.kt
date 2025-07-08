@@ -75,6 +75,7 @@ class AutocompleteScreenTest {
                         eventReporter,
                         application
                     ),
+                    navigator = NavHostAddressElementNavigator(),
                     attributionDrawable = null,
                 )
             }

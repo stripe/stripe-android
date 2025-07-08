@@ -78,10 +78,7 @@ internal class AutocompleteActivity : AppCompatActivity() {
                         AutocompleteScreenUI(
                             viewModel = viewModel,
                             isRootScreen = true,
-                            appBar = { isRootScreen, onBack ->
-                                appearanceContext.AppBar(isRootScreen, onBack)
-                            },
-                            backgroundColor = appearanceContext.backgroundColor,
+                            appearanceContext = appearanceContext,
                             attributionDrawable =
                             PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme()),
                         )
