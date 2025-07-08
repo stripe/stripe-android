@@ -70,7 +70,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banca Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Plătiți %s</string>
+  <string name="stripe_pay_button_amount">Adaugă %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bancă</string>
   <!-- Label shown in the payment type picker describing a card payment -->
@@ -100,15 +100,15 @@
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Prin confirmarea plății cu RevolutPay, permiteți %s să vă taxeze contul RevolutPay pentru plățile viitoare în conformitate cu termenii acesteia.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
-  <string name="stripe_save_for_future_payments_with_merchant_name">Salvați pentru plăți viitoare %s</string>
+  <string name="stripe_save_for_future_payments_with_merchant_name">Salvează pentru plăți viitoare %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Salvați detaliile de plată în %s pentru achiziții viitoare</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Salvează detaliile de plată în %s pentru achiziții viitoare</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scanare card</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Prin furnizarea informațiilor dvs. privind plata și confirmarea acestei plăți, autorizați (A) %s și Stripe, furnizorul nostru de servicii de plată, să trimită instrucțiuni băncii dvs. pentru a vă debita contul și pentru ca (B) banca dvs. să facă acest lucru în conformitate cu instrucțiunile respective. Conform drepturilor dvs., aveți dreptul la o rambursare din partea băncii dvs. în conformitate cu termenii și condițiile acordului dvs. cu aceasta. O rambursare trebuie revendicată în termen de opt săptămâni de la data debitării contului. Drepturile dvs. sunt explicate într-o declarație pe care o puteți obține de la bancă. Sunteți de acord să primiți notificări pentru debitări viitoare cu până la două zile înainte de efectuarea acestora.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
-  <string name="stripe_set_as_default_payment_method">Setați ca metodă de plată implicită</string>
+  <string name="stripe_set_as_default_payment_method">Setează ca metodă de plată implicită</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurare</string>
   <!-- Label for UPI ID number field on form -->
