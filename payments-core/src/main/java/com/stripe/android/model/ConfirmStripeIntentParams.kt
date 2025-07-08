@@ -29,13 +29,12 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
     }
 }
 
-internal fun ConfirmStripeIntentParams.createParams(): PaymentMethodCreateParams? {
-    return when (this) {
+internal val ConfirmStripeIntentParams.paymentMethodCode: PaymentMethodCode?
+    get() = when (this) {
         is ConfirmPaymentIntentParams -> {
-            paymentMethodCreateParams
+            paymentMethodCode
         }
         is ConfirmSetupIntentParams -> {
-            paymentMethodCreateParams
+            paymentMethodCode
         }
     }
-}
