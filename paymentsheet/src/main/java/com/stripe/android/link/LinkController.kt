@@ -42,7 +42,7 @@ interface LinkController {
     sealed interface PresentPaymentMethodsResult {
         val preview: PaymentMethodPreview?
 
-        class Updated(override val preview: PaymentMethodPreview?) : PresentPaymentMethodsResult
+        class SelectionChanged(override val preview: PaymentMethodPreview?) : PresentPaymentMethodsResult
 
         class Failed(
             val error: Throwable,

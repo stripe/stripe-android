@@ -47,7 +47,7 @@ internal class LinkControllerViewModel @Inject constructor(
             field = value
             _state.update {
                 LinkControllerState(
-                    presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Updated(null),
+                    presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.SelectionChanged(null),
                 )
             }
             viewModelScope.launch {
@@ -143,7 +143,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         selectedPaymentMethod = result.selectedPayment,
-                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Updated(
+                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.SelectionChanged(
                             preview = result.selectedPayment!!.toPreview(context)
                         ),
                     )
