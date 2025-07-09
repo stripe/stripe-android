@@ -664,6 +664,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
             linkHandler.logOut()
+            // Clear the Link account state after logout to prevent stale credentials
+            linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
         }
 
         if (paymentResult is PaymentResult.Completed) {
