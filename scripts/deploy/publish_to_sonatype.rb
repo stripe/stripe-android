@@ -8,8 +8,8 @@ require_relative 'gnupg_utils'
 def publish_to_sonatype
     # Must be run on the deploy branch, because it depends on changes made in
     # create_version_bump_pr (updating the VERSION file)
-#     execute_or_fail("git checkout #{@deploy_branch}")
-#     execute_or_fail("git pull")
+    execute_or_fail("git checkout #{@deploy_branch}")
+    execute_or_fail("git pull")
 
     set_gpg_location()
 
