@@ -75,7 +75,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
-    val linkControllerState = MutableStateFlow(LinkControllerState())
+    val linkControllerState = MutableStateFlow(LinkControllerPlaygroundState())
 
     private val baseUrl: String
         get() {
@@ -689,10 +689,10 @@ internal class PaymentSheetPlaygroundViewModel(
         savedStateHandle[PLAYGROUND_STATE_KEY] = state
     }
 
-    fun onLinkControllerPresentPaymentMethodsResult(result: LinkController.SelectedPaymentMethodState) {
+    fun onLinkControllerPresentPaymentMethodsResult(result: LinkController.PresentPaymentMethodsResult) {
         linkControllerState.update {
             it.copy(
-                selectedPaymentMethodState = result
+                presentPaymentMethodsResult = result
             )
         }
     }

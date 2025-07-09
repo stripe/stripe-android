@@ -75,20 +75,22 @@ internal fun LinkControllerUi(
 
 @Composable
 internal fun LinkControllerUi(
-    linkControllerState: LinkControllerState,
+    linkControllerState: LinkControllerPlaygroundState,
     onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
-    val selectedPaymentMethodStateError = linkControllerState.selectedPaymentMethodState?.error
+    val presentPaymentMethodsResultError =
+        (linkControllerState.presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
+            ?.error
     val lookupConsumerError =
         (linkControllerState.lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)
             ?.error
     val createPaymentMethodError =
         (linkControllerState.createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)
             ?.error
-    val errorToPresent = selectedPaymentMethodStateError ?: lookupConsumerError ?: createPaymentMethodError
+    val errorToPresent = presentPaymentMethodsResultError ?: lookupConsumerError ?: createPaymentMethodError
 
     val scope = rememberCoroutineScope()
     DisposableEffect(email) {
@@ -133,23 +135,18 @@ internal fun LinkControllerUi(
         }
 
         PaymentMethodButton(
-            preview = linkControllerState.paymentMethodPreview,
+            preview = linkControllerState.state?.selectedPaymentMethodPreview,
             onClick = { onPaymentMethodButtonClick(email) },
         )
         Spacer(Modifier.height(16.dp))
         ConfirmButton(
             onClick = onCreatePaymentMethodClick,
-            enabled = linkControllerState.paymentMethodPreview != null,
+            enabled = linkControllerState.state?.selectedPaymentMethodPreview != null,
         )
 
-        val createPaymentMethodResultText = when (linkControllerState.createPaymentMethodResult) {
-            is LinkController.CreatePaymentMethodResult.Success ->
-                linkControllerState.createPaymentMethodResult.paymentMethod.id ?: "Payment method created (no id)"
-            is LinkController.CreatePaymentMethodResult.Failed ->
-                "Failed"
-            null ->
-                ""
-        }
+        val createPaymentMethodResultText = linkControllerState.state?.createdPaymentMethod
+            ?.let { it.id ?: "Payment method created (no id)" }
+            ?: ""
         Text(
             text = createPaymentMethodResultText,
             style = MaterialTheme.typography.body1,
@@ -162,7 +159,7 @@ internal fun LinkControllerUi(
 private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
         LinkControllerUi(
-            linkControllerState = LinkControllerState(),
+            linkControllerState = LinkControllerPlaygroundState(),
             onEmailChange = {},
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {}

@@ -2,15 +2,11 @@ package com.stripe.android.link.injection
 
 import android.app.Application
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.link.LinkController
-import com.stripe.android.link.RealLinkController
-import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -54,9 +50,6 @@ internal object LinkControllerModule {
     @Singleton
     @Named(PRODUCT_USAGE)
     fun provideProductUsageTokens() = setOf("LinkPaymentMethodLauncher")
-
-    @Provides
-    fun provideLinkController(impl: RealLinkController): LinkController = impl
 
     @Provides
     @PaymentElementCallbackIdentifier

@@ -2,11 +2,9 @@ package com.stripe.android.paymentsheet.example.playground
 
 import com.stripe.android.link.LinkController
 
-internal data class LinkControllerState(
-    val selectedPaymentMethodState: LinkController.SelectedPaymentMethodState? = null,
+internal data class LinkControllerPlaygroundState(
+    val state: LinkController.State? = null,
+    val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
     val createPaymentMethodResult: LinkController.CreatePaymentMethodResult? = null,
-) {
-    val paymentMethodPreview: LinkController.PaymentMethodPreview?
-        get() = selectedPaymentMethodState?.preview
-}
+)

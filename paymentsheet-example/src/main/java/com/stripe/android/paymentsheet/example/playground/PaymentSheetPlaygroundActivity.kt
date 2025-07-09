@@ -35,7 +35,6 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -70,7 +69,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class, WalletButtonsPreview::class)
+@OptIn(
+    ExperimentalCustomPaymentMethodsApi::class,
+    WalletButtonsPreview::class,
+)
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
@@ -117,7 +119,10 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class, ShopPayPreview::class)
+    @OptIn(
+        ExperimentalCustomerSessionApi::class,
+        ExperimentalAnalyticEventCallbackApi::class,
+    )
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()

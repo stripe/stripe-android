@@ -13,58 +13,105 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.stripe.android.link.LinkController.CreatePaymentMethodCallback
-import com.stripe.android.link.LinkController.LookupConsumerCallback
-import com.stripe.android.link.LinkController.SelectedPaymentMethodStateCallback
-import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
-interface LinkController {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class LinkController internal constructor(
+    private val context: Context,
+    private val lifecycleOwner: LifecycleOwner,
+    activityResultRegistryOwner: ActivityResultRegistryOwner,
+    private val viewModel: LinkControllerViewModel,
+    private val selectedPaymentMethodCallback: PresentPaymentMethodsCallback,
+    private val lookupConsumerCallback: LookupConsumerCallback,
+    private val createPaymentMethodCallback: CreatePaymentMethodCallback,
+) {
 
-    fun getPaymentMethodPreview(): PaymentMethodPreview?
+    val state: StateFlow<State> = viewModel.state(context)
 
-    fun presentPaymentMethods(email: String?)
+    private val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
+        activityResultRegistryOwner.activityResultRegistry.register(
+            key = "LinkController_LinkActivityResultLauncher",
+            contract = viewModel.linkActivityContract,
+        ) { result ->
+            viewModel.onPresentPaymentMethodsActivityResult(result)
+        }
 
-    fun lookupConsumer(email: String)
+    init {
+        lifecycleOwner.lifecycleScope.launch {
+            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.presentPaymentMethodsResultFlow
+                        .collect(selectedPaymentMethodCallback::onPresentPaymentMethodsResult)
+                }
+                launch {
+                    viewModel.lookupConsumerResultFlow
+                    .collect(lookupConsumerCallback::onLookupConsumerResult)
+                }
 
-    fun createPaymentMethod()
+                launch {
+                    viewModel.createPaymentMethodResultFlow
+                        .collect(createPaymentMethodCallback::onCreatePaymentMethodResult)
+                }
+            }
+        }
 
+        lifecycleOwner.lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onDestroy(owner: LifecycleOwner) {
+                    linkActivityResultLauncher.unregister()
+                }
+            }
+        )
+    }
+
+    fun presentPaymentMethods(email: String?) {
+        viewModel.onPresent(linkActivityResultLauncher, email)
+    }
+
+    fun createPaymentMethod() {
+        viewModel.onCreatePaymentMethod()
+    }
+
+    fun lookupConsumer(email: String) {
+        viewModel.onLookupConsumer(email)
+    }
+
+    // TODO
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun setConfiguration(configuration: PaymentSheet.Configuration)
+    fun setConfiguration(configuration: PaymentSheet.Configuration) {
+        viewModel.configuration = configuration
+    }
 
     @Parcelize
     @Poko
-    class SelectedPaymentMethodState internal constructor(
-        val preview: PaymentMethodPreview? = null,
-        val error: Throwable? = null,
-    ) : Parcelable {
-        internal fun copy(
-            preview: PaymentMethodPreview? = this.preview,
-            error: Throwable? = this.error,
-        ): SelectedPaymentMethodState {
-            return SelectedPaymentMethodState(preview, error)
-        }
+    class State internal constructor(
+        val email: String? = null,
+        val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
+        val createdPaymentMethod: PaymentMethod? = null,
+    ) : Parcelable
+
+    sealed interface PresentPaymentMethodsResult {
+        data object Success : PresentPaymentMethodsResult
+        class Failed internal constructor(val error: Throwable) : PresentPaymentMethodsResult
     }
 
     sealed interface LookupConsumerResult {
-        class Success(val email: String, val isConsumer: Boolean) : LookupConsumerResult
-        class Failed(val email: String, val error: Throwable) : LookupConsumerResult
+        class Success internal constructor(val email: String, val isConsumer: Boolean) : LookupConsumerResult
+        class Failed internal constructor(val email: String, val error: Throwable) : LookupConsumerResult
     }
 
     sealed interface CreatePaymentMethodResult {
-        class Success(val paymentMethod: PaymentMethod) : CreatePaymentMethodResult
-        class Failed(val error: Throwable) : CreatePaymentMethodResult
+        data object Success : CreatePaymentMethodResult
+        class Failed internal constructor(val error: Throwable) : CreatePaymentMethodResult
     }
 
-    fun interface SelectedPaymentMethodStateCallback {
-        fun onSelectedPaymentMethodState(state: SelectedPaymentMethodState)
+    fun interface PresentPaymentMethodsCallback {
+        fun onPresentPaymentMethodsResult(state: PresentPaymentMethodsResult)
     }
 
     fun interface LookupConsumerCallback {
@@ -86,7 +133,7 @@ interface LinkController {
     companion object {
         fun create(
             activity: ComponentActivity,
-            selectedPaymentMethodCallback: SelectedPaymentMethodStateCallback,
+            selectedPaymentMethodCallback: PresentPaymentMethodsCallback,
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
         ): LinkController {
@@ -95,7 +142,7 @@ interface LinkController {
                 factory = LinkControllerViewModel.Factory()
             )
             val viewModel = viewModelProvider[LinkControllerViewModel::class.java]
-            return RealLinkController(
+            return LinkController(
                 context = activity,
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
@@ -106,91 +153,4 @@ interface LinkController {
             )
         }
     }
-}
-
-internal class RealLinkController(
-    private val context: Context,
-    private val lifecycleOwner: LifecycleOwner,
-    activityResultRegistryOwner: ActivityResultRegistryOwner,
-    private val viewModel: LinkControllerViewModel,
-    private val selectedPaymentMethodCallback: SelectedPaymentMethodStateCallback,
-    private val lookupConsumerCallback: LookupConsumerCallback,
-    private val createPaymentMethodCallback: CreatePaymentMethodCallback,
-) : LinkController {
-
-    private val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
-        activityResultRegistryOwner.activityResultRegistry.register(
-            key = "LinkController_LinkActivityResultLauncher",
-            contract = viewModel.linkActivityContract,
-        ) { result ->
-            viewModel.onLinkActivityResult(context, result)
-        }
-
-    init {
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.state
-                        .map { it.selectedPaymentMethodState }
-                        .filterNotNull()
-                        .collect(selectedPaymentMethodCallback::onSelectedPaymentMethodState)
-                }
-
-                launch {
-                    viewModel.state
-                        .map { it.lookupConsumerResult }
-                        .filterNotNull()
-                        .collect(lookupConsumerCallback::onLookupConsumerResult)
-                }
-
-                launch {
-                    viewModel.state
-                        .map { it.createPaymentMethodResult }
-                        .filterNotNull()
-                        .collect(createPaymentMethodCallback::onCreatePaymentMethodResult)
-                }
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    linkActivityResultLauncher.unregister()
-                }
-            }
-        )
-    }
-
-    override fun getPaymentMethodPreview(): LinkController.PaymentMethodPreview? {
-        return viewModel.state.value.selectedPaymentMethodState.preview
-    }
-
-    override fun presentPaymentMethods(email: String?) {
-        viewModel.onPresent(linkActivityResultLauncher, email)
-    }
-
-    override fun lookupConsumer(email: String) {
-        viewModel.onLookupConsumer(email)
-    }
-
-    override fun createPaymentMethod() {
-        viewModel.onCreatePaymentMethod()
-    }
-
-    override fun setConfiguration(configuration: PaymentSheet.Configuration) {
-        viewModel.configuration = configuration
-    }
-}
-
-internal fun LinkPaymentMethod.toPreview(context: Context): LinkController.PaymentMethodPreview {
-    val sublabel = buildString {
-        append(details.displayName.resolve(context))
-        append(" •••• ")
-        append(details.last4)
-    }
-    return LinkController.PaymentMethodPreview(
-        iconRes = R.drawable.stripe_ic_paymentsheet_link_arrow,
-        label = context.getString(com.stripe.android.R.string.stripe_link),
-        sublabel = sublabel
-    )
 }
