@@ -17,7 +17,6 @@ import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.repositories.LinkApiRepository
-import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -44,6 +43,17 @@ internal class LinkControllerViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     var configuration: PaymentSheet.Configuration = PaymentSheet.Configuration.default(application)
+        set(value) {
+            field = value
+            _state.update {
+                LinkControllerState(
+                    presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Updated(null),
+                )
+            }
+            viewModelScope.launch {
+                updateLinkConfiguration()
+            }
+        }
 
     private val tag = "LinkControllerViewModel"
 
@@ -128,11 +138,12 @@ internal class LinkControllerViewModel @Inject constructor(
                 linkAccountHolder.set(result.linkAccountUpdate.asValue())
             }
             is LinkActivityResult.Completed -> {
+                logger.debug("$tag: details=${result.selectedPayment?.details}")
                 linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 _state.update {
                     it.copy(
                         selectedPaymentMethod = result.selectedPayment,
-                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Selected(
+                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Updated(
                             preview = result.selectedPayment!!.toPreview(context)
                         ),
                     )
@@ -178,25 +189,22 @@ internal class LinkControllerViewModel @Inject constructor(
         val account = linkAccountHolder.linkAccountInfo.value.account
             ?: return
         viewModelScope.launch {
-            val apiResult = when (val details = paymentMethod.details) {
-                is ConsumerPaymentDetails.Passthrough -> {
-                    linkApiRepository.sharePaymentDetails(
-                        consumerSessionClientSecret = account.clientSecret,
-                        paymentDetailsId = details.id,
-                        expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, details),
-                        cvc = paymentMethod.collectedCvc,
-                        billingPhone = null,
-                    ).map { shareDetails ->
-                        val json = JSONObject(shareDetails.encodedPaymentMethod)
-                        PaymentMethodJsonParser().parse(json)
-                    }
+            val apiResult = if (configuration.passthroughModeEnabled) {
+                linkApiRepository.sharePaymentDetails(
+                    consumerSessionClientSecret = account.clientSecret,
+                    paymentDetailsId = paymentMethod.details.id,
+                    expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
+                    cvc = paymentMethod.collectedCvc,
+                    billingPhone = null,
+                ).map { shareDetails ->
+                    val json = JSONObject(shareDetails.encodedPaymentMethod)
+                    PaymentMethodJsonParser().parse(json)
                 }
-                else -> {
-                    linkApiRepository.createPaymentMethod(
-                        consumerSessionClientSecret = account.clientSecret,
-                        paymentMethod = paymentMethod,
-                    )
-                }
+            } else {
+                linkApiRepository.createPaymentMethod(
+                    consumerSessionClientSecret = account.clientSecret,
+                    paymentMethod = paymentMethod,
+                )
             }
             val result = apiResult.fold(
                 onSuccess = { LinkController.CreatePaymentMethodResult.Success(it) },

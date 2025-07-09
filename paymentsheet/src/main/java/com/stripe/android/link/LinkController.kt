@@ -40,8 +40,14 @@ interface LinkController {
     fun setConfiguration(configuration: PaymentSheet.Configuration)
 
     sealed interface PresentPaymentMethodsResult {
-        class Selected(val preview: PaymentMethodPreview) : PresentPaymentMethodsResult
-        class Failed(val error: Throwable) : PresentPaymentMethodsResult
+        val preview: PaymentMethodPreview?
+
+        class Updated(override val preview: PaymentMethodPreview?) : PresentPaymentMethodsResult
+
+        class Failed(
+            val error: Throwable,
+            override val preview: PaymentMethodPreview? = null
+        ) : PresentPaymentMethodsResult
     }
 
     sealed interface LookupConsumerResult {

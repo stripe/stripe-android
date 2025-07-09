@@ -11,9 +11,8 @@ internal data class LinkControllerState(
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
     val createPaymentMethodResult: LinkController.CreatePaymentMethodResult? = null,
 ) {
-    val paymentMethodPreview: LinkController.PaymentMethodPreview?
-        get() = (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Selected)
-            ?.preview
-
     val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
+
+    val paymentMethodPreview: LinkController.PaymentMethodPreview?
+        get() = presentPaymentMethodsResult?.preview
 }
