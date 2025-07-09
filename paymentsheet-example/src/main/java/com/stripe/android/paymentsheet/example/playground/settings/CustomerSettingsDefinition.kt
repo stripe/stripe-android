@@ -77,10 +77,9 @@ internal object CustomerSettingsDefinition :
     }
 
     override val key: String = "customer"
-    override val defaultValue: CustomerType = CustomerType.Existing("cus_Se02qVo0KTh289")
+    override val defaultValue: CustomerType = CustomerType.GUEST
 
     override fun convertToValue(value: String): CustomerType {
-        return defaultValue
         val hardcodedCustomerTypes = mapOf(
             CustomerType.GUEST.value to CustomerType.GUEST,
             CustomerType.NEW.value to CustomerType.NEW,
