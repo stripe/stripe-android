@@ -45,8 +45,12 @@ import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 internal class PaymentSheetPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+    fun waitForCardForm() {
         waitForText("Card number")
+    }
+
+    fun fillOutCardDetails(fillOutZipCode: Boolean = true) {
+        waitForCardForm()
 
         replaceText("Card number", "4242424242424242")
         fillExpirationDate("12/34")
@@ -108,7 +112,7 @@ internal class PaymentSheetPage(
 
     fun clickSavedCard(last4: String) {
         val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
-                .and(hasText(last4, substring = true))
+            .and(hasText(last4, substring = true))
         composeTestRule.waitUntilExactlyOneExists(savedCardTagMatcher)
         composeTestRule.onNode(savedCardTagMatcher).performClick()
     }
@@ -429,5 +433,11 @@ internal class PaymentSheetPage(
 
     fun assertGooglePayIsDisplayed() {
         composeTestRule.onNode(hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG)).assertIsDisplayed()
+    }
+
+    fun assertHasMandate(mandateText: String) {
+        composeTestRule
+            .onNode(hasText(mandateText))
+            .assertExists()
     }
 }

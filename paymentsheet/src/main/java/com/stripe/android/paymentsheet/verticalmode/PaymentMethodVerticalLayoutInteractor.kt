@@ -32,6 +32,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -118,6 +119,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             bankFormInteractor: BankFormInteractor,
         ): PaymentMethodVerticalLayoutInteractor {
             val formHelper = DefaultFormHelper.create(viewModel, paymentMethodMetadata)
+            val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
+                it is PaymentSheetScreen.VerticalMode
+            }
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
@@ -160,9 +164,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 canShowWalletButtons = true,
                 canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder.canUpdateFullPaymentMethodDetails,
                 updateSelection = viewModel::updateSelection,
-                isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
-                    it is PaymentSheetScreen.VerticalMode
-                },
+                isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
                 shouldUpdateVerticalModeSelection = { paymentMethodCode ->
@@ -173,16 +175,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
-                        val newSelection = state.selection as? PaymentMethodVerticalLayoutInteractor.Selection.New
-                        newSelection?.code?.let { code ->
-                            val formType = formHelper.formTypeForCode(code)
-                            if (formType is FormType.MandateOnly) {
-                                viewModel.mandateHandler.updateMandateText(
-                                    mandateText = formType.mandate,
-                                    showAbove = true,
-                                )
-                            }
-                        }
+                        viewModel.mandateHandler.updateMandateText(
+                            mandateText = state.mandate,
+                            showAbove = true,
+                        )
+                    }
+                }
+
+                viewModel.viewModelScope.launch {
+                    isCurrentScreen.filter { it }.collect {
+                        viewModel.mandateHandler.updateMandateText(
+                            mandateText = interactor.state.value.mandate,
+                            showAbove = true,
+                        )
                     }
                 }
             }

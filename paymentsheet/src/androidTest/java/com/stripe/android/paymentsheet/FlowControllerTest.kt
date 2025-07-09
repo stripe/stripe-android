@@ -11,6 +11,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.espresso.Espresso
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
@@ -247,6 +248,59 @@ internal class FlowControllerTest {
             val paymentOption2 = testContext.configureCallbackTurbine.awaitItem()
             assertThat(paymentOption2?.label).endsWith("Cash App Pay")
             assertThat(paymentOption2?.paymentMethodType).isEqualTo("cashapp")
+
+            testContext.markTestSucceeded()
+        }
+    }
+
+    @Test
+    fun testCorrectMandatesDisplayedAfterNavigation(
+        @TestParameter integrationType: IntegrationType,
+    ) {
+        runFlowControllerTest(
+            networkRule = networkRule,
+            integrationType = integrationType,
+            callConfirmOnPaymentOptionCallback = false,
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+            }
+
+            testContext.configureFlowController {
+                configureWithIntentConfiguration(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 5099,
+                            currency = "usd",
+                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        )
+                    ),
+                    configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                        .build(),
+                    callback = { success, error ->
+                        assertThat(success).isTrue()
+                        assertThat(error).isNull()
+                        presentPaymentOptions()
+                    }
+                )
+            }
+
+            page.clickOnLpm("cashapp", forVerticalMode = true)
+            page.assertLpmSelected("cashapp")
+            page.assertHasMandate("By continuing, you authorize Example, Inc. to debit your Cash App account for this payment and future payments in accordance with Example, Inc.'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.")
+
+            page.clickOnLpm("card", forVerticalMode = true)
+            page.waitForCardForm()
+            page.assertHasMandate("By providing your card information, you allow Example, Inc. to charge your card for future payments in accordance with their terms.")
+
+            Espresso.pressBack()
+
+            page.assertLpmSelected("cashapp")
+            page.assertHasMandate("By continuing, you authorize Example, Inc. to debit your Cash App account for this payment and future payments in accordance with Example, Inc.'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.")
 
             testContext.markTestSucceeded()
         }
