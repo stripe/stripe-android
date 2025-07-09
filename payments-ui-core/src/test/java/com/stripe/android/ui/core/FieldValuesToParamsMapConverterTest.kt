@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.addPath
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter.Companion.getKeys
@@ -406,6 +407,71 @@ class FieldValuesToParamsMapConverterTest {
             )
 
         assertThat(paymentMethodParams).isNull()
+    }
+
+    @Test
+    fun `transformToPaymentMethodOptionsParams returns correct params for SepaDebit with setupFutureUsage`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodOptionsParams(
+                fieldValuePairs = emptyMap(),
+                code = PaymentMethod.Type.SepaDebit.code,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            )
+
+        assertThat(paymentMethodParams).isNotNull()
+        assertThat(
+            paymentMethodParams?.toParamMap().toString()
+        ).isEqualTo(
+            "{sepa_debit={setup_future_usage=off_session}}"
+        )
+    }
+
+    @Test
+    fun `transformToPaymentMethodOptionsParams returns correct params for SepaDebit without setupFutureUsage`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodOptionsParams(
+                fieldValuePairs = emptyMap(),
+                code = PaymentMethod.Type.SepaDebit.code,
+                setupFutureUsage = null
+            )
+
+        assertThat(paymentMethodParams).isNotNull()
+        assertThat(paymentMethodParams?.toParamMap().toString()).isEqualTo("{}")
+    }
+
+    @Test
+    fun `transformToPaymentMethodExtraParams returns correct params for SepaDebit with setAsDefault`() {
+        val paymentMethodExtraParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                mapOf(
+                    IdentifierSpec.SetAsDefaultPaymentMethod to FormFieldEntry(
+                        "true",
+                        true
+                    ),
+                ),
+                PaymentMethod.Type.SepaDebit.code,
+            )
+
+        assertThat(paymentMethodExtraParams).isNotNull()
+        assertThat(paymentMethodExtraParams?.toParamMap()).isEqualTo(
+            mapOf(
+                "sepa_debit" to mapOf(
+                    "set_as_default_payment_method" to "true"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `transformToPaymentMethodExtraParams returns correct params for SepaDebit without setAsDefault`() {
+        val paymentMethodExtraParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                emptyMap(),
+                PaymentMethod.Type.SepaDebit.code,
+            )
+
+        assertThat(paymentMethodExtraParams).isNotNull()
+        assertThat(paymentMethodExtraParams?.toParamMap().toString()).isEqualTo("{}")
     }
 
     @Test
