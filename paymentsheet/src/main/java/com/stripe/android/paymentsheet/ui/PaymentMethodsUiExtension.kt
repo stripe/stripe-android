@@ -307,24 +307,6 @@ internal fun PaymentMethod.getSublabel(): ResolvableString? {
     }
 }
 
-internal fun PaymentMethod.getLinkSpecificSublabel(): ResolvableString? {
-    return when {
-        linkPaymentDetails != null -> linkPaymentDetails?.sublabel
-        isLinkPassthroughMode -> {
-            // For Link passthrough mode, use the original payment method label as sublabel (Label is "Link")
-            when (type) {
-                PaymentMethod.Type.Card -> createCardLabel(card?.last4)
-                PaymentMethod.Type.USBankAccount -> resolvableString(
-                    R.string.stripe_paymentsheet_payment_method_item_card_number,
-                    usBankAccount?.last4
-                )
-                else -> null
-            }
-        }
-        else -> null
-    }
-}
-
 internal fun createCardLabel(last4: String?): ResolvableString? {
     return last4?.let {
         resolvableString(
