@@ -1070,6 +1070,68 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
+    fun `Handles intentConfiguration with negative amount correctly`() {
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = -1000L,
+                        currency = "usd",
+                    )
+                )
+            ),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+            ),
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+    }
+
+    @Test
+    fun `Handles intentConfiguration with zero amount correctly`() {
+        val args = PaymentSheetContractV2.Args(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 0,
+                        currency = "usd",
+                    )
+                )
+            ),
+            config = PaymentSheet.Configuration(
+                merchantDisplayName = "Some name",
+            ),
+            statusBarColor = null,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+        )
+
+        val intent = contract.createIntent(context, args)
+
+        val scenario = ActivityScenario.launchActivityForResult<PaymentSheetActivity>(intent)
+
+        val result = contract.parseResult(
+            scenario.result.resultCode,
+            scenario.result.resultData,
+        )
+
+        assertThat(scenario.state).isEqualTo(Lifecycle.State.DESTROYED)
+        assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+    }
+
+    @Test
     fun `processing should enable after checkout`() {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)

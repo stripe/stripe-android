@@ -278,6 +278,56 @@ class FlowControllerConfigurationHandlerTest {
     }
 
     @Test
+    fun `configure() fails with negative amount`() = runTest {
+        val configureErrors = Turbine<Throwable?>()
+        val configurationHandler = createConfigurationHandler()
+
+        configurationHandler.configure(
+            scope = this,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = -1000L,
+                        currency = "usd",
+                    )
+                )
+            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            initializedViaCompose = false,
+        ) { _, error ->
+            configureErrors.add(error)
+        }
+
+        assertThat(configureErrors.awaitItem()?.message)
+            .isEqualTo("Payment IntentConfiguration requires a positive amount.")
+    }
+
+    @Test
+    fun `configure() fails with zero amount`() = runTest {
+        val configureErrors = Turbine<Throwable?>()
+        val configurationHandler = createConfigurationHandler()
+
+        configurationHandler.configure(
+            scope = this,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 0,
+                        currency = "usd",
+                    )
+                )
+            ),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            initializedViaCompose = false,
+        ) { _, error ->
+            configureErrors.add(error)
+        }
+
+        assertThat(configureErrors.awaitItem()?.message)
+            .isEqualTo("Payment IntentConfiguration requires a positive amount.")
+    }
+
+    @Test
     fun `configure() with invalid merchant`() = runTest {
         val configureErrors = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()

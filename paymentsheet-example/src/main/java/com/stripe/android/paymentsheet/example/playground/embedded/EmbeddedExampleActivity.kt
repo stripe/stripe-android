@@ -57,7 +57,7 @@ fun CheckoutScreen() {
     val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
     LaunchedEffect(embeddedPaymentElement) {
-        embeddedPaymentElement.configure(
+        val configureResult = embeddedPaymentElement.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099,
@@ -67,6 +67,9 @@ fun CheckoutScreen() {
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Powdur").build()
         )
+        if (configureResult is EmbeddedPaymentElement.ConfigureResult.Failed) {
+            Toast.makeText(context, configureResult.error.message, Toast.LENGTH_LONG).show()
+        }
     }
 
     val scrollState = rememberScrollState()
