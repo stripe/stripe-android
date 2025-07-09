@@ -1753,16 +1753,16 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link, WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
     )
 
     @Test
-    fun `availableWallets contains all wallet types in order`() = availableWalletsTest(
+    fun `availableWallets contains all wallet types in order with Link first`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("shop_pay", "link", "card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.ShopPay, WalletType.Link, WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay),
     )
 
     @Test
@@ -1829,21 +1829,21 @@ internal class PaymentMethodMetadataTest {
     )
 
     @Test
-    fun `availableWallets order respected if Link available but not in types`() = availableWalletsTest(
+    fun `availableWallets puts Link first if available but not in types`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
-    fun `availableWallets respects order with ShopPay and Link not in types`() = availableWalletsTest(
+    fun `availableWallets does not include Shop Pay if not in types`() = availableWalletsTest(
         orderedPaymentMethodTypesAndWallets = listOf("card", "google_pay"),
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
     )
 
     @Test
@@ -1852,7 +1852,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.ShopPay, WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay),
     )
 
     @Test
@@ -1913,7 +1913,9 @@ internal class PaymentMethodMetadataTest {
             customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
-        assertThat(metadata.availableWallets).containsExactlyElementsIn(expectedWalletTypes)
+        assertThat(metadata.availableWallets)
+            .containsExactlyElementsIn(expectedWalletTypes)
+            .inOrder()
     }
 
     fun `Passes CBF along to Link`() {

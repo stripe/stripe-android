@@ -31,7 +31,9 @@ internal enum class WalletType(val code: String) {
             val walletByIndex = availableWallets.associateWith { wallet ->
                 val position = elementsSession.orderedPaymentMethodTypesAndWallets.indexOf(wallet.code)
 
-                if (position == -1) {
+                if (wallet == Link) {
+                    -1
+                } else if (position == -1) {
                     null
                 } else {
                     position
