@@ -134,7 +134,7 @@ private fun DetailsCannotBeChangedText(
     )?.let {
         Text(
             text = it.resolve(context),
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.subtitle2,
             color = MaterialTheme.stripeColors.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
