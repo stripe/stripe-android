@@ -1905,6 +1905,7 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsLight.appBarIcon,
                 error = StripeThemeDefaults.colorsLight.materialColors.error
             )
+
             val defaultLight = configureDefaultLight()
 
             internal fun configureDefaultDark(
@@ -1923,6 +1924,7 @@ class PaymentSheet internal constructor(
                 appBarIcon = StripeThemeDefaults.colorsDark.appBarIcon,
                 error = StripeThemeDefaults.colorsDark.materialColors.error
             )
+
             val defaultDark = configureDefaultDark()
         }
     }
@@ -2843,9 +2845,9 @@ class PaymentSheet internal constructor(
      */
     @Poko
     @Parcelize
-    class LinkConfiguration @CollectMissingLinkBillingDetailsPreview constructor(
-        internal val display: Display = Display.Automatic,
-        internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+    class LinkConfiguration internal constructor(
+        internal val display: Display,
+        internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean
     ) : Parcelable {
 
         @JvmOverloads
@@ -2858,6 +2860,29 @@ class PaymentSheet internal constructor(
                 Display.Automatic -> true
                 Display.Never -> false
             }
+
+        class Builder {
+            private var display: Display = Display.Automatic
+            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
+
+            fun display(display: Display) = apply {
+                this.display = display
+            }
+
+            @CollectMissingLinkBillingDetailsPreview
+            fun collectMissingBillingDetailsForExistingPaymentMethods(
+                collectMissingBillingDetailsForExistingPaymentMethods: Boolean
+            ) = apply {
+                this.collectMissingBillingDetailsForExistingPaymentMethods =
+                    collectMissingBillingDetailsForExistingPaymentMethods
+            }
+
+            fun build() = LinkConfiguration(
+                display = display,
+                collectMissingBillingDetailsForExistingPaymentMethods =
+                collectMissingBillingDetailsForExistingPaymentMethods
+            )
+        }
 
         /**
          * Display configuration for Link
