@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
@@ -437,6 +438,124 @@ internal class AddPaymentMethodTest {
         )
 
         assertThat(params.toParamMap()).containsEntry("allow_redisplay", "always")
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms SepaDebit with PMO setupFutureUsage correctly for RequestReuse`() {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val metadataWithSepaDebit = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            )
+        )
+        val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
+        val sepaDebitPaymentSelection = formFieldValues.transformToPaymentSelection(
+            sepaDebitPaymentMethod,
+            metadataWithSepaDebit
+        ) as PaymentSelection.New.GenericPaymentMethod
+
+        val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
+        assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+        assertThat(options?.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms SepaDebit with PMO setupFutureUsage correctly for RequestNoReuse`() {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Generic("sepa_debit[iban]") to
+                    FormFieldEntry("DE89370400440532013000", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val metadataWithSepaDebit = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            )
+        )
+        val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
+        val sepaDebitPaymentSelection = formFieldValues.transformToPaymentSelection(
+            sepaDebitPaymentMethod,
+            metadataWithSepaDebit
+        ) as PaymentSelection.New.GenericPaymentMethod
+
+        val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
+        assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+        assertThat(options?.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms SepaDebit with PMO setupFutureUsage correctly for NoRequest`() {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val metadataWithSepaDebit = metadata.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit")
+            )
+        )
+        val sepaDebitPaymentMethod = metadataWithSepaDebit.supportedPaymentMethodForCode("sepa_debit")!!
+        val sepaDebitPaymentSelection = formFieldValues.transformToPaymentSelection(
+            sepaDebitPaymentMethod,
+            metadataWithSepaDebit
+        ) as PaymentSelection.New.GenericPaymentMethod
+
+        val options = sepaDebitPaymentSelection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.SepaDebit
+        assertThat(sepaDebitPaymentSelection.customerRequestedSave).isEqualTo(customerRequestedSave)
+        assertThat(options?.setupFutureUsage).isNull()
+    }
+
+    @Test
+    fun `transformToExtraParams returns correct params for SepaDebit with setAsDefault`() {
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+                IdentifierSpec.SetAsDefaultPaymentMethod to FormFieldEntry("true", true),
+            ),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+        )
+
+        val extraParams = formFieldValues.transformToExtraParams(PaymentMethod.Type.SepaDebit.code)
+
+        assertThat(extraParams).isNotNull()
+        assertThat(extraParams).isInstanceOf<PaymentMethodExtraParams.SepaDebit>()
+
+        val sepaExtraParams = extraParams as PaymentMethodExtraParams.SepaDebit
+
+        assertThat(sepaExtraParams.setAsDefault).isTrue()
+    }
+
+    @Test
+    fun `transformToExtraParams returns correct params for SepaDebit without setAsDefault`() {
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Generic("sepa_debit[iban]") to FormFieldEntry("DE89370400440532013000", true),
+            ),
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+        )
+
+        val extraParams = formFieldValues.transformToExtraParams(PaymentMethod.Type.SepaDebit.code)
+
+        assertThat(extraParams).isNotNull()
+        assertThat(extraParams).isInstanceOf<PaymentMethodExtraParams.SepaDebit>()
+
+        val sepaExtraParams = extraParams as PaymentMethodExtraParams.SepaDebit
+
+        assertThat(sepaExtraParams.setAsDefault).isNull()
     }
 
     private fun runScenario(
