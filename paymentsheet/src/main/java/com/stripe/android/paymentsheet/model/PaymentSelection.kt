@@ -330,8 +330,8 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.Link -> true
         is PaymentSelection.New.LinkInline -> true
         is PaymentSelection.New -> false
-        is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link ||
-            paymentMethod.isLinkPassthroughMode
+        is PaymentSelection.Saved ->
+            walletType == PaymentSelection.Saved.WalletType.Link || paymentMethod.isLinkPassthroughMode
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod -> false
         is PaymentSelection.ShopPay -> false
