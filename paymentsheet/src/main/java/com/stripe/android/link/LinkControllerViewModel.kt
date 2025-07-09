@@ -16,6 +16,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
+import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.model.PaymentMethod
@@ -44,7 +45,7 @@ internal class LinkControllerViewModel @Inject constructor(
     private val linkGateFactory: LinkGate.Factory,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkApiRepository: LinkApiRepository,
-    val linkActivityContract: NativeLinkActivityContract,
+    val controllerComponentFactory: LinkControllerComponent.Factory,
 ) : AndroidViewModel(application) {
 
     var configuration: PaymentSheet.Configuration = PaymentSheet.Configuration.default(application)

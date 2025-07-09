@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
-import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -164,15 +163,6 @@ internal class PaymentSheetPlaygroundActivity :
                 callback = viewModel::onAddressLauncherResult
             )
 
-            val linkController = remember {
-                LinkController.create(
-                    activity = this,
-                    selectedPaymentMethodCallback = viewModel::onLinkControllerPresentPaymentMethodsResult,
-                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumerResult,
-                    createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethodResult,
-                )
-            }
-
             val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
@@ -253,7 +243,6 @@ internal class PaymentSheetPlaygroundActivity :
                                 paymentSheet = paymentSheet,
                                 flowController = flowController,
                                 customerSheet = customerSheet,
-                                linkController = linkController,
                                 addressLauncher = addressLauncher,
                             )
                         }
@@ -339,7 +328,6 @@ internal class PaymentSheetPlaygroundActivity :
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
         customerSheet: CustomerSheet,
-        linkController: LinkController,
         addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
@@ -381,7 +369,6 @@ internal class PaymentSheetPlaygroundActivity :
                     PlaygroundConfigurationData.IntegrationType.LinkController -> {
                         LinkControllerUi(
                             viewModel = viewModel,
-                            linkController = linkController,
                             playgroundState = playgroundState,
                         )
                     }

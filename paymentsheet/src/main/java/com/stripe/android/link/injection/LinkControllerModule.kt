@@ -34,6 +34,9 @@ import javax.inject.Singleton
         MobileSessionIdModule::class,
         CardScanModule::class,
         LinkHoldbackExposureModule::class
+    ],
+    subcomponents = [
+        LinkControllerComponent::class
     ]
 )
 internal object LinkControllerModule {

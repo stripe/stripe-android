@@ -1,6 +1,6 @@
 package com.stripe.android.link
 
-import android.content.Context
+import android.app.Activity
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -19,24 +19,26 @@ import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkController internal constructor(
-    private val context: Context,
+class LinkController @Inject internal constructor(
+    activity: Activity,
     private val lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val viewModel: LinkControllerViewModel,
     private val selectedPaymentMethodCallback: PresentPaymentMethodsCallback,
     private val lookupConsumerCallback: LookupConsumerCallback,
     private val createPaymentMethodCallback: CreatePaymentMethodCallback,
+    linkActivityContract: NativeLinkActivityContract,
 ) {
 
-    val state: StateFlow<State> = viewModel.state(context)
+    val state: StateFlow<State> = viewModel.state(activity)
 
     private val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args> =
         activityResultRegistryOwner.activityResultRegistry.register(
             key = "LinkController_LinkActivityResultLauncher",
-            contract = viewModel.linkActivityContract,
+            contract = linkActivityContract,
         ) { result ->
             viewModel.onPresentPaymentMethodsActivityResult(result)
         }
@@ -50,7 +52,7 @@ class LinkController internal constructor(
                 }
                 launch {
                     viewModel.lookupConsumerResultFlow
-                    .collect(lookupConsumerCallback::onLookupConsumerResult)
+                        .collect(lookupConsumerCallback::onLookupConsumerResult)
                 }
 
                 launch {
@@ -89,7 +91,7 @@ class LinkController internal constructor(
 
     @Parcelize
     @Poko
-    class State internal constructor(
+    class State @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
         val email: String? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
@@ -133,7 +135,7 @@ class LinkController internal constructor(
     companion object {
         fun create(
             activity: ComponentActivity,
-            selectedPaymentMethodCallback: PresentPaymentMethodsCallback,
+            presentPaymentMethodCallback: PresentPaymentMethodsCallback,
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
         ): LinkController {
@@ -142,15 +144,16 @@ class LinkController internal constructor(
                 factory = LinkControllerViewModel.Factory()
             )
             val viewModel = viewModelProvider[LinkControllerViewModel::class.java]
-            return LinkController(
-                context = activity,
-                lifecycleOwner = activity,
-                activityResultRegistryOwner = activity,
-                viewModel = viewModel,
-                selectedPaymentMethodCallback = selectedPaymentMethodCallback,
-                lookupConsumerCallback = lookupConsumerCallback,
-                createPaymentMethodCallback = createPaymentMethodCallback,
-            )
+            return viewModel
+                .controllerComponentFactory.build(
+                    activity = activity,
+                    lifecycleOwner = activity,
+                    activityResultRegistryOwner = activity,
+                    presentPaymentMethodCallback = presentPaymentMethodCallback,
+                    lookupConsumerCallback = lookupConsumerCallback,
+                    createPaymentMethodCallback = createPaymentMethodCallback,
+                )
+                .controller
         }
     }
 }
