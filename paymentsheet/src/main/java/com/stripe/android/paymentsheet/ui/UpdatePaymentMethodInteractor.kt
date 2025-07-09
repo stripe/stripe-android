@@ -108,7 +108,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val addressCollectionMode: AddressCollectionMode,
     override val canUpdateFullPaymentMethodDetails: Boolean,
     val isDefaultPaymentMethod: Boolean,
-    shouldShowSetAsDefaultCheckbox: Boolean,
+    override val shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
@@ -123,12 +123,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
     private val setAsDefaultCheckboxChecked = MutableStateFlow(initialSetAsDefaultCheckedValue)
     private val cardUpdateParams = MutableStateFlow<CardUpdateParams?>(null)
-
-    // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
-    override val shouldShowSetAsDefaultCheckbox = (
-        shouldShowSetAsDefaultCheckbox &&
-            displayableSavedPaymentMethod.savedPaymentMethod !is SavedPaymentMethod.SepaDebit
-        )
 
     override val hasValidBrandChoices = hasValidBrandChoices()
     override val isExpiredCard = paymentMethodIsExpiredCard()

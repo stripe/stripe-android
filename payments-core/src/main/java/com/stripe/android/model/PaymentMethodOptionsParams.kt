@@ -95,6 +95,22 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class SepaDebit(
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.SepaDebit) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Konbini(
         private val confirmationNumber: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Konbini) {
@@ -155,6 +171,7 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
     return when (this) {
         is PaymentMethodOptionsParams.Blik -> null
         is PaymentMethodOptionsParams.Card -> setupFutureUsage
+        is PaymentMethodOptionsParams.SepaDebit -> setupFutureUsage
         is PaymentMethodOptionsParams.Konbini -> null
         is PaymentMethodOptionsParams.Link -> setupFutureUsage
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage

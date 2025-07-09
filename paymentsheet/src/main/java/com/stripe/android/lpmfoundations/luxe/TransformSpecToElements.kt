@@ -41,7 +41,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  *
  */
 internal class TransformSpecToElements(
-    private val arguments: UiDefinitionFactory.Arguments,
+    val arguments: UiDefinitionFactory.Arguments,
 ) {
     fun transform(
         metadata: PaymentMethodMetadata?,
