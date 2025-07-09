@@ -108,9 +108,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
     val extras = transformToExtraParams(paymentMethod.code)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = setupFutureUsage,
-            ),
+            paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
