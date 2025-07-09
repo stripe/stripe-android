@@ -32,11 +32,18 @@ internal data class EmbeddedContent(
          *
          * Having validation here ensures that we only validate when the embedded content is shown.
          */
-        LaunchedEffect(rowStyle, isImmediateAction) {
+        LaunchedEffect(rowStyle, isImmediateAction, embeddedViewDisplaysMandateText) {
             if (rowStyle is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
                 throw IllegalArgumentException(
                     "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
                         "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+                )
+            }
+            if (embeddedViewDisplaysMandateText && isImmediateAction) {
+                throw IllegalArgumentException(
+                    "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
+                        "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button " +
+                        "and/or before confirmation when `rowSelectionBehavior = .immediateAction`"
                 )
             }
         }
