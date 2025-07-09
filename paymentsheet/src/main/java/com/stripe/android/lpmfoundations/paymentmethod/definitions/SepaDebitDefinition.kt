@@ -34,7 +34,8 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements
+        transformSpecToElements: TransformSpecToElements,
+        arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
         val canSave = isSaveForFutureUseValueChangeable(
             code = SepaDebitDefinition.type.code,
@@ -56,7 +57,7 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
 
                     addSavePaymentOptionElements(
                         metadata = metadata,
-                        arguments = transformSpecToElements.arguments,
+                        arguments = arguments,
                     )
 
                     mandate?.let { add(it) }

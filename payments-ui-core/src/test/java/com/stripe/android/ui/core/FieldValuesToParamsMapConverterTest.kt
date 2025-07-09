@@ -275,6 +275,36 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
+    fun `transformToPaymentMethodOptionsParams returns correct params for Card with setupFutureUsage`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodOptionsParams(
+                fieldValuePairs = emptyMap(),
+                code = PaymentMethod.Type.Card.code,
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+            )
+
+        assertThat(paymentMethodParams).isNotNull()
+        assertThat(
+            paymentMethodParams?.toParamMap().toString()
+        ).isEqualTo(
+            "{card={setup_future_usage=off_session}}"
+        )
+    }
+
+    @Test
+    fun `transformToPaymentMethodOptionsParams returns correct params for Card without setupFutureUsage`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodOptionsParams(
+                fieldValuePairs = emptyMap(),
+                code = PaymentMethod.Type.Card.code,
+                setupFutureUsage = null
+            )
+
+        assertThat(paymentMethodParams).isNotNull()
+        assertThat(paymentMethodParams?.toParamMap().toString()).isEqualTo("{}")
+    }
+
+    @Test
     fun `transformToPaymentMethodOptionsParams returns correct params for Blik`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodOptionsParams(
@@ -375,38 +405,6 @@ class FieldValuesToParamsMapConverterTest {
         assertThat(
             paymentMethodParams?.toParamMap().toString()
         ).isEqualTo("{konbini={confirmation_number=example_confirmation_number}}")
-    }
-
-    @Test
-    fun `transformToPaymentMethodOptionsParams returns null for card`() {
-        val paymentMethodParams = FieldValuesToParamsMapConverter
-            .transformToPaymentMethodOptionsParams(
-                mapOf(
-                    IdentifierSpec.Name to FormFieldEntry(
-                        "joe",
-                        true
-                    ),
-                    IdentifierSpec.Email to FormFieldEntry(
-                        "joe@gmail.com",
-                        true
-                    ),
-                    IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
-                        "US",
-                        true
-                    ),
-                    IdentifierSpec.Line1 to FormFieldEntry(
-                        "123 Main Street",
-                        true
-                    ),
-                    IdentifierSpec.BlikCode to FormFieldEntry(
-                        "example_blik_code",
-                        true,
-                    )
-                ),
-                PaymentMethod.Type.Card.code,
-            )
-
-        assertThat(paymentMethodParams).isNull()
     }
 
     @Test

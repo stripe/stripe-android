@@ -98,6 +98,11 @@ class FieldValuesToParamsMapConverter {
                 entry.key.destination == ParameterDestination.Api.Options
             }
             return when (code) {
+                PaymentMethod.Type.Card.code -> {
+                    PaymentMethodOptionsParams.Card(
+                        setupFutureUsage = setupFutureUsage,
+                    )
+                }
                 PaymentMethod.Type.Blik.code -> {
                     val blikCode = fieldValuePairsForOptions[IdentifierSpec.BlikCode]?.value
                     blikCode?.let {
