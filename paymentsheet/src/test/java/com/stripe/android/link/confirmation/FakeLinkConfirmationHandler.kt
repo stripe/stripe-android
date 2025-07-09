@@ -26,22 +26,6 @@ internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
         return confirmResult
     }
 
-    override suspend fun confirm(
-        paymentDetails: LinkPaymentDetails,
-        linkAccount: LinkAccount,
-        cvc: String?,
-        billingPhone: String?
-    ): Result {
-        confirmWithLinkPaymentDetailsCall.add(
-            element = ConfirmWithLinkPaymentDetailsCall(
-                paymentDetails = paymentDetails,
-                linkAccount = linkAccount,
-                cvc = cvc
-            )
-        )
-        return confirmWithLinkPaymentDetailsResult
-    }
-
     data class Call(
         val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         val linkAccount: LinkAccount,

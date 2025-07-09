@@ -64,20 +64,12 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
         return completeLinkFlow(
             linkLaunchMode = linkLaunchMode,
             confirmPayment = {
-                when (selectedPaymentDetails) {
-                    is LinkPaymentMethod.ConsumerPaymentDetails -> linkConfirmationHandler.confirm(
-                        paymentDetails = selectedPaymentDetails.details,
-                        linkAccount = linkAccount,
-                        cvc = selectedPaymentDetails.collectedCvc,
-                        billingPhone = selectedPaymentDetails.billingPhone
-                    )
-                    is LinkPaymentMethod.LinkPaymentDetails -> linkConfirmationHandler.confirm(
-                        paymentDetails = selectedPaymentDetails.linkPaymentDetails,
-                        linkAccount = linkAccount,
-                        cvc = selectedPaymentDetails.collectedCvc,
-                        billingPhone = selectedPaymentDetails.billingPhone
-                    )
-                }
+                linkConfirmationHandler.confirm(
+                    paymentDetails = selectedPaymentDetails.details,
+                    linkAccount = linkAccount,
+                    cvc = selectedPaymentDetails.collectedCvc,
+                    billingPhone = selectedPaymentDetails.billingPhone
+                )
             },
             paymentMethodSelection = selectedPaymentDetails
         )

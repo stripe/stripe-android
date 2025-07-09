@@ -100,11 +100,16 @@ internal interface LinkAccountManager {
 
     suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails>
+    ): Result<ConsumerPaymentDetails.Card>
 
     suspend fun createBankAccountPaymentDetails(
         bankAccountId: String,
     ): Result<ConsumerPaymentDetails.PaymentDetails>
+
+    suspend fun shareCardPaymentDetails(
+        paymentDetails: ConsumerPaymentDetails.Card,
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+    ): Result<LinkPaymentDetails.ForPassthroughMode>
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,

@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
@@ -131,17 +132,12 @@ internal object TestFactory {
         billingEmailAddress = null,
     )
 
-    val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
-        id = "pm_125",
-        last4 = "4242",
-    )
-
     val LINK_ACCOUNT_SESSION = LinkAccountSession(
         id = "fcsess_123",
         clientSecret = CLIENT_SECRET,
     )
 
-    val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
+    val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.ForPaymentMethodMode(
         paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
         originalParams = mock()
@@ -152,9 +148,8 @@ internal object TestFactory {
         encodedPaymentMethod = "{\"id\": \"pm_123\"}",
     )
 
-    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
-        paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
-        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.ForPassthroughMode(
+        paymentMethod = PaymentMethodFactory.card(),
     )
 
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
@@ -165,7 +160,6 @@ internal object TestFactory {
         paymentDetails = listOf(
             CONSUMER_PAYMENT_DETAILS_CARD,
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
-            CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         )
     )
 
