@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.20.2 - 2025-07-09
+
+### PaymentSheet
+* [ADDED][11083](https://github.com/stripe/stripe-android/pull/11083) Updated translations.
+
 ## 21.20.1 - 2025-07-07
 
 ### PaymentSheet
