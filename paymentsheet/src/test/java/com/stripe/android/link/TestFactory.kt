@@ -213,7 +213,8 @@ internal object TestFactory {
         elementsSessionId = "session_1234",
         linkMode = LinkMode.LinkPaymentMethod,
         allowDefaultOptIn = false,
-        disableRuxInFlowController = false
+        disableRuxInFlowController = false,
+        collectMissingBillingDetailsForExistingPaymentMethods = true
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

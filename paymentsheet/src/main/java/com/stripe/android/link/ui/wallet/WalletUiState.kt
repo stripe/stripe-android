@@ -24,6 +24,7 @@ internal data class WalletUiState(
     val secondaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
     val addPaymentMethodOptions: List<AddPaymentMethodOption>,
+    val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val userSetIsExpanded: Boolean? = null,
     val cardBeingUpdated: String? = null,
     val errorMessage: ResolvableString? = null,

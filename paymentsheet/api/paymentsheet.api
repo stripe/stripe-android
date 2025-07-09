@@ -2324,6 +2324,14 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguratio
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;
+	public final fun collectMissingBillingDetailsForExistingPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
+	public final fun display (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;

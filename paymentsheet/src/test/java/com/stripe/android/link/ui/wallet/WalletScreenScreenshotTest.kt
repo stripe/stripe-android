@@ -199,19 +199,20 @@ internal class WalletScreenScreenshotTest {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
             email = "email@email.com",
-            selectedItemId = selectedItem?.id,
             cardBrandFilter = cardBrandFilter,
-            hasCompleted = hasCompleted,
+            selectedItemId = selectedItem?.id,
             isProcessing = isProcessing,
+            isSettingUp = false,
+            merchantName = "Example Inc.",
             primaryButtonLabel = primaryButtonLabel,
             secondaryButtonLabel = secondaryButtonLabel,
+            hasCompleted = hasCompleted,
+            addPaymentMethodOptions = addPaymentMethodOptions,
+            userSetIsExpanded = userSetIsExpanded,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            addPaymentMethodOptions = addPaymentMethodOptions,
-            userSetIsExpanded = userSetIsExpanded,
-            isSettingUp = false,
-            merchantName = "Example Inc.",
+            collectMissingBillingDetailsForExistingPaymentMethods = true
         )
     }
 
