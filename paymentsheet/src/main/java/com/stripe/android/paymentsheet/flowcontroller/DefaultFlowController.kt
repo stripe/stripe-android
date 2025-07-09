@@ -294,10 +294,12 @@ internal class DefaultFlowController @Inject internal constructor(
         linkAccountInfo: LinkAccountUpdate.Value,
         linkConfiguration: LinkConfiguration
     ): Boolean {
+        val shouldPresentLink = paymentSelection?.isLink == true ||
+            (paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.isLinkPassthroughMode == true
         // If the user has declined to use Link in the past, do not show it again.
         return viewModel.state?.declinedLink2FA != true &&
             // The current payment selection is Link
-            paymentSelection?.isLink == true &&
+            shouldPresentLink &&
             // The current user has a Link account (not necessarily logged in)
             linkAccountInfo.account != null &&
             // feature flag and other conditions are met
@@ -664,8 +666,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
             linkHandler.logOut()
-            // Clear the Link account state after logout to prevent stale credentials
-            linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
         }
 
         if (paymentResult is PaymentResult.Completed) {
