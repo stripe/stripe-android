@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.link.LinkController.CreatePaymentMethodCallback
 import com.stripe.android.link.LinkController.LookupConsumerCallback
-import com.stripe.android.link.LinkController.PresentPaymentMethodsCallback
+import com.stripe.android.link.LinkController.SelectedPaymentMethodStateCallback
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -39,15 +39,18 @@ interface LinkController {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun setConfiguration(configuration: PaymentSheet.Configuration)
 
-    sealed interface PresentPaymentMethodsResult {
-        val preview: PaymentMethodPreview?
-
-        class SelectionChanged(override val preview: PaymentMethodPreview?) : PresentPaymentMethodsResult
-
-        class Failed(
-            val error: Throwable,
-            override val preview: PaymentMethodPreview? = null
-        ) : PresentPaymentMethodsResult
+    @Parcelize
+    @Poko
+    class SelectedPaymentMethodState internal constructor(
+        val preview: PaymentMethodPreview? = null,
+        val error: Throwable? = null,
+    ) : Parcelable {
+        internal fun copy(
+            preview: PaymentMethodPreview? = this.preview,
+            error: Throwable? = this.error,
+        ): SelectedPaymentMethodState {
+            return SelectedPaymentMethodState(preview, error)
+        }
     }
 
     sealed interface LookupConsumerResult {
@@ -60,8 +63,8 @@ interface LinkController {
         class Failed(val error: Throwable) : CreatePaymentMethodResult
     }
 
-    fun interface PresentPaymentMethodsCallback {
-        fun onPresentPaymentMethodsResult(result: PresentPaymentMethodsResult)
+    fun interface SelectedPaymentMethodStateCallback {
+        fun onSelectedPaymentMethodState(state: SelectedPaymentMethodState)
     }
 
     fun interface LookupConsumerCallback {
@@ -83,7 +86,7 @@ interface LinkController {
     companion object {
         fun create(
             activity: ComponentActivity,
-            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+            selectedPaymentMethodCallback: SelectedPaymentMethodStateCallback,
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
         ): LinkController {
@@ -97,7 +100,7 @@ interface LinkController {
                 lifecycleOwner = activity,
                 activityResultRegistryOwner = activity,
                 viewModel = viewModel,
-                presentPaymentMethodsCallback = presentPaymentMethodsCallback,
+                selectedPaymentMethodCallback = selectedPaymentMethodCallback,
                 lookupConsumerCallback = lookupConsumerCallback,
                 createPaymentMethodCallback = createPaymentMethodCallback,
             )
@@ -110,7 +113,7 @@ internal class RealLinkController(
     private val lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val viewModel: LinkControllerViewModel,
-    private val presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
+    private val selectedPaymentMethodCallback: SelectedPaymentMethodStateCallback,
     private val lookupConsumerCallback: LookupConsumerCallback,
     private val createPaymentMethodCallback: CreatePaymentMethodCallback,
 ) : LinkController {
@@ -128,9 +131,9 @@ internal class RealLinkController(
             lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.state
-                        .map { it.presentPaymentMethodsResult }
+                        .map { it.selectedPaymentMethodState }
                         .filterNotNull()
-                        .collect(presentPaymentMethodsCallback::onPresentPaymentMethodsResult)
+                        .collect(selectedPaymentMethodCallback::onSelectedPaymentMethodState)
                 }
 
                 launch {
@@ -159,7 +162,7 @@ internal class RealLinkController(
     }
 
     override fun getPaymentMethodPreview(): LinkController.PaymentMethodPreview? {
-        return viewModel.state.value.paymentMethodPreview
+        return viewModel.state.value.selectedPaymentMethodState.preview
     }
 
     override fun presentPaymentMethods(email: String?) {

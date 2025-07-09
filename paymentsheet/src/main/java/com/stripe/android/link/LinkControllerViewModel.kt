@@ -45,11 +45,7 @@ internal class LinkControllerViewModel @Inject constructor(
     var configuration: PaymentSheet.Configuration = PaymentSheet.Configuration.default(application)
         set(value) {
             field = value
-            _state.update {
-                LinkControllerState(
-                    presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.SelectionChanged(null),
-                )
-            }
+            _state.update { LinkControllerState() }
             viewModelScope.launch {
                 updateLinkConfiguration()
             }
@@ -80,19 +76,19 @@ internal class LinkControllerViewModel @Inject constructor(
             // Try to obtain a Link configuration before we present.
             if (awaitLinkConfigurationResult().isFailure) {
                 if (updateLinkConfiguration().isFailure) {
-                    val result = LinkController.PresentPaymentMethodsResult.Failed(
-                        RuntimeException("Failed to configure Link.") // TODO: Better error.
+                    val result = LinkController.SelectedPaymentMethodState(
+                        error = RuntimeException("Failed to configure Link.") // TODO: Better error.
                     )
-                    _state.update { it.copy(presentPaymentMethodsResult = result) }
+                    _state.update { it.copy(selectedPaymentMethodState = result) }
                     return@launch
                 }
             }
             val state = _state.value
             if (state.linkGate?.useNativeLink != true) {
-                val result = LinkController.PresentPaymentMethodsResult.Failed(
-                    RuntimeException("Attestation error.") // TODO: Better error.
+                val result = LinkController.SelectedPaymentMethodState(
+                    error = RuntimeException("Attestation error.") // TODO: Better error.
                 )
-                _state.update { it.copy(presentPaymentMethodsResult = result) }
+                _state.update { it.copy(selectedPaymentMethodState = result) }
                 return@launch
             }
 
@@ -112,12 +108,17 @@ internal class LinkControllerViewModel @Inject constructor(
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
                 .takeIf { email == state.presentedForEmail && email == it.account?.email }
                 ?: LinkAccountUpdate.Value(null)
-            val selectedPaymentMethod = state.selectedPaymentMethod.takeIf { linkAccountInfo.account != null }
+            val selectedPaymentMethod = state.selectedPaymentMethod
+                .takeIf { linkAccountInfo.account != null }
+            val selectedPaymentMethodState = state.selectedPaymentMethodState
+                .takeIf { linkAccountInfo.account != null }
+                ?: LinkController.SelectedPaymentMethodState()
 
             _state.update {
                 it.copy(
                     presentedForEmail = email,
                     selectedPaymentMethod = selectedPaymentMethod,
+                    selectedPaymentMethodState = selectedPaymentMethodState,
                 )
             }
 
@@ -143,7 +144,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         selectedPaymentMethod = result.selectedPayment,
-                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.SelectionChanged(
+                        selectedPaymentMethodState = LinkController.SelectedPaymentMethodState(
                             preview = result.selectedPayment!!.toPreview(context)
                         ),
                     )
@@ -153,9 +154,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 _state.update {
                     it.copy(
-                        presentPaymentMethodsResult = LinkController.PresentPaymentMethodsResult.Failed(
-                            error = result.error,
-                        ),
+                        selectedPaymentMethodState = it.selectedPaymentMethodState.copy(error = result.error)
                     )
                 }
             }

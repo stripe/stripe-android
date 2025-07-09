@@ -7,12 +7,10 @@ internal data class LinkControllerState(
     val linkGate: LinkGate? = null,
     val presentedForEmail: String? = null,
     val selectedPaymentMethod: LinkPaymentMethod? = null,
-    val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
+    val selectedPaymentMethodState: LinkController.SelectedPaymentMethodState =
+        LinkController.SelectedPaymentMethodState(),
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
     val createPaymentMethodResult: LinkController.CreatePaymentMethodResult? = null,
 ) {
     val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
-
-    val paymentMethodPreview: LinkController.PaymentMethodPreview?
-        get() = presentPaymentMethodsResult?.preview
 }

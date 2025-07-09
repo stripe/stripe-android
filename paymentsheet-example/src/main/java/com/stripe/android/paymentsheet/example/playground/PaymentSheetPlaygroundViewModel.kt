@@ -689,10 +689,10 @@ internal class PaymentSheetPlaygroundViewModel(
         savedStateHandle[PLAYGROUND_STATE_KEY] = state
     }
 
-    fun onLinkControllerPresentPaymentMethodsResult(result: LinkController.PresentPaymentMethodsResult) {
+    fun onLinkControllerPresentPaymentMethodsResult(result: LinkController.SelectedPaymentMethodState) {
         linkControllerState.update {
             it.copy(
-                presentPaymentMethodsResult = result
+                selectedPaymentMethodState = result
             )
         }
     }

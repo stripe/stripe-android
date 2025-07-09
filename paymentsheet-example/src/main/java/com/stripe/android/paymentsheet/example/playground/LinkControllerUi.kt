@@ -81,16 +81,14 @@ internal fun LinkControllerUi(
     onCreatePaymentMethodClick: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
-    val presentPaymentMethodsError =
-        (linkControllerState.presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
-            ?.error
+    val selectedPaymentMethodStateError = linkControllerState.selectedPaymentMethodState?.error
     val lookupConsumerError =
         (linkControllerState.lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)
             ?.error
     val createPaymentMethodError =
         (linkControllerState.createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)
             ?.error
-    val errorToPresent = presentPaymentMethodsError ?: lookupConsumerError ?: createPaymentMethodError
+    val errorToPresent = selectedPaymentMethodStateError ?: lookupConsumerError ?: createPaymentMethodError
 
     val scope = rememberCoroutineScope()
     DisposableEffect(email) {

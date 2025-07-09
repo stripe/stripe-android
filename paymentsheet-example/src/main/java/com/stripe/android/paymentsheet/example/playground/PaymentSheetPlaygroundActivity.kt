@@ -162,7 +162,7 @@ internal class PaymentSheetPlaygroundActivity :
             val linkController = remember {
                 LinkController.create(
                     activity = this,
-                    presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethodsResult,
+                    selectedPaymentMethodCallback = viewModel::onLinkControllerPresentPaymentMethodsResult,
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumerResult,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethodResult,
                 )
