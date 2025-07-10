@@ -7,7 +7,6 @@ import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -53,8 +52,4 @@ internal object LinkControllerModule {
     @Singleton
     @Named(PRODUCT_USAGE)
     fun provideProductUsageTokens() = setOf("LinkPaymentMethodLauncher")
-
-    @Provides
-    @PaymentElementCallbackIdentifier
-    fun providePaymentElementCallbackIdentifier(): String = "LinkPaymentMethodLauncher"
 }

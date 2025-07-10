@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkControllerViewModel
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -21,6 +22,8 @@ internal interface LinkControllerViewModelComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
         ): LinkControllerViewModelComponent
     }
 }

@@ -72,7 +72,7 @@ class LinkController @Inject internal constructor(
                 this.link = link
             }
 
-            fun build() = Configuration(
+            fun build(): Configuration = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 cardBrandAcceptance = cardBrandAcceptance,
                 link = link,
@@ -89,7 +89,9 @@ class LinkController @Inject internal constructor(
 
     @Parcelize
     @Poko
-    class State @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constructor(
+    class State
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val email: String? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
@@ -111,7 +113,7 @@ class LinkController @Inject internal constructor(
     }
 
     fun interface PresentPaymentMethodsCallback {
-        fun onPresentPaymentMethodsResult(state: PresentPaymentMethodsResult)
+        fun onPresentPaymentMethodsResult(result: PresentPaymentMethodsResult)
     }
 
     fun interface LookupConsumerCallback {
@@ -131,6 +133,7 @@ class LinkController @Inject internal constructor(
     ) : Parcelable
 
     companion object {
+        @JvmStatic
         fun create(
             activity: ComponentActivity,
             presentPaymentMethodCallback: PresentPaymentMethodsCallback,

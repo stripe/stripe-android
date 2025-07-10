@@ -93,7 +93,6 @@ internal class LinkControllerViewModel @Inject constructor(
         email: String?
     ) {
         if (presentJob?.isActive == true) {
-            // TODO: Log.
             return
         }
         presentJob = viewModelScope.launch {
@@ -185,7 +184,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 }
             }
             is LinkActivityResult.PaymentMethodObtained -> {
-                // TODO: Unexpected.
+                logger.warning("$tag: Unexpected result: $result")
             }
         }
     }
@@ -315,6 +314,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 .build(
                     application = extras.requireApplication(),
                     savedStateHandle = extras.createSavedStateHandle(),
+                    paymentElementCallbackIdentifier = "LinkController"
                 )
                 .viewModel as T
         }

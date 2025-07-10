@@ -1,3 +1,5 @@
+@file:Suppress("LongMethod", "MagicNumber")
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.util.Patterns
@@ -97,7 +99,7 @@ internal fun LinkControllerUi(
     val scope = rememberCoroutineScope()
     DisposableEffect(email) {
         val job = scope.launch {
-            delay(1_000L)
+            delay(500L)
             onEmailChange(email)
         }
         onDispose { job.cancel() }

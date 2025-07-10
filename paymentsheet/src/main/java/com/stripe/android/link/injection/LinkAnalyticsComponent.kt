@@ -1,9 +1,7 @@
 package com.stripe.android.link.injection
 
 import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
-import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
-import com.stripe.android.link.analytics.LinkEventsReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Subcomponent
