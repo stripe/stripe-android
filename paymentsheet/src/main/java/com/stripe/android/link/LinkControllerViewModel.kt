@@ -258,6 +258,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 initializedViaCompose = false,
             )
         ).mapCatching { state ->
+            @Suppress("TooGenericExceptionCaught")
             try {
                 checkNotNull(state.paymentMethodMetadata.linkState?.configuration).also {
                     val linkGate = linkGateFactory.create(it)
