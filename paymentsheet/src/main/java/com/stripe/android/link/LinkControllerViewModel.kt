@@ -85,9 +85,6 @@ internal class LinkControllerViewModel @Inject constructor(
     }
 
     fun configure(configuration: LinkController.Configuration) {
-        if (this.configuration == configuration) {
-            return
-        }
         logger.debug("$tag: updating configuration")
         this.configuration = configuration
         reloadSession()

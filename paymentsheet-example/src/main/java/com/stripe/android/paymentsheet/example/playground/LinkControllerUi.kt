@@ -27,7 +27,6 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,14 +51,9 @@ import kotlinx.coroutines.launch
 internal fun LinkControllerUi(
     viewModel: PaymentSheetPlaygroundViewModel,
     linkController: LinkController,
-    playgroundState: PlaygroundState.Payment,
 ) {
     val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
     val linkControllerState by linkController.state.collectAsState()
-
-    LaunchedEffect(playgroundState) {
-        linkController.configure(playgroundState.linkControllerConfiguration())
-    }
 
     LinkControllerUi(
         controllerState = linkControllerState,

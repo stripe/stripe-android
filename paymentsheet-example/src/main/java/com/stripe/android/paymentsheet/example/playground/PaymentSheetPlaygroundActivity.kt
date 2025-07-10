@@ -19,10 +19,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -272,14 +270,18 @@ internal class PaymentSheetPlaygroundActivity :
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
 
-            val prepareCount by viewModel.prepareCount.collectAsState()
-            var lastPrepareCount by rememberSaveable { mutableIntStateOf(prepareCount) }
-            LaunchedEffect(playgroundState?.integrationType, prepareCount) {
-                if (playgroundState?.integrationType == PlaygroundConfigurationData.IntegrationType.LinkController) {
-                    if (lastPrepareCount != prepareCount && prepareCount > 1) {
-                        linkController.reloadSession()
+            var lastPlaygroundState by remember { mutableStateOf(playgroundState) }
+            LaunchedEffect(playgroundState) {
+                if (
+                    playgroundState?.integrationType == PlaygroundConfigurationData.IntegrationType.LinkController &&
+                    playgroundState != lastPlaygroundState
+                ) {
+                    playgroundState?.asPaymentState()?.linkControllerConfiguration()?.let { configuration ->
+                        linkController.configure(configuration)
                     }
-                    lastPrepareCount = prepareCount
+                }
+                if (lastPlaygroundState != null) {
+                    lastPlaygroundState = playgroundState
                 }
             }
         }
@@ -395,7 +397,6 @@ internal class PaymentSheetPlaygroundActivity :
                         LinkControllerUi(
                             viewModel = viewModel,
                             linkController = linkController,
-                            playgroundState = playgroundState,
                         )
                     }
 

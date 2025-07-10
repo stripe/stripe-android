@@ -31,8 +31,7 @@ class LinkController @Inject internal constructor(
     /**
      * Configure the controller with a [Configuration].
      *
-     * If the configuration changes from the previous one, the [state] will reset and the
-     * Link session will be reloaded to reflect the new configuration.
+     * The [state] will reset and the Link session will be reloaded to reflect the new configuration.
      *
      * @param configuration The [Configuration] to use for Link operations.
      */
@@ -86,19 +85,6 @@ class LinkController @Inject internal constructor(
      */
     fun lookupConsumer(email: String) {
         viewModel.onLookupConsumer(email)
-    }
-
-    /**
-     * Reload the Link session and reset the controller state.
-     *
-     * This clears the current state and attempts to load a fresh Link configuration. This can be
-     * useful when you need to refresh Link's availability or reset after an error state.
-     *
-     * **Note**: This will clear any selected payment methods and created payment methods from the state.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun reloadSession() {
-        viewModel.reloadSession()
     }
 
     /**

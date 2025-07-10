@@ -70,7 +70,6 @@ internal class PaymentSheetPlaygroundViewModel(
         Settings(application)
     }
 
-    val prepareCount = MutableStateFlow(0)
     val playgroundSettingsFlow = MutableStateFlow<PlaygroundSettings?>(null)
     val status = MutableStateFlow<StatusMessage?>(null)
     val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
@@ -111,8 +110,6 @@ internal class PaymentSheetPlaygroundViewModel(
         } else {
             prepareCustomer(playgroundSettings)
         }
-
-        prepareCount.update { it + 1 }
     }
 
     /**
