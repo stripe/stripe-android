@@ -50,7 +50,8 @@ internal class WalletButtonsContent(
                         LinkInline2FASection(
                             verificationState = it.viewState,
                             otpElement = it.otpElement,
-                            onResend = { interactor.handleViewAction(OnResendCode) }
+                            onResend = { interactor.handleViewAction(OnResendCode) },
+                            appearance = state.appearance
                         )
                         if (state.walletButtons.size > 1) {
                             WalletsDivider(stringResource(R.string.stripe_paymentsheet_or_use))
