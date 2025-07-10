@@ -87,7 +87,10 @@ internal class LinkControllerViewModel @Inject constructor(
     fun configure(configuration: LinkController.Configuration) {
         logger.debug("$tag: updating configuration")
         this.configuration = configuration
-        reloadSession()
+        _state.update { State() }
+        viewModelScope.launch {
+            updateLinkConfiguration()
+        }
     }
 
     fun onPresentPaymentMethods(
@@ -222,14 +225,6 @@ internal class LinkControllerViewModel @Inject constructor(
                     onFailure = { LinkController.CreatePaymentMethodResult.Failed(it) },
                 )
             )
-        }
-    }
-
-    fun reloadSession() {
-        logger.debug("$tag: loading session")
-        _state.update { State() }
-        viewModelScope.launch {
-            updateLinkConfiguration()
         }
     }
 
