@@ -16,7 +16,7 @@ import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
-import com.stripe.android.link.repositories.LinkApiRepository
+import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -40,7 +40,7 @@ internal class LinkControllerViewModel @Inject constructor(
     private val logger: Logger,
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
-    private val linkApiRepository: LinkApiRepository,
+    private val linkApiRepository: LinkRepository,
     val controllerComponentFactory: LinkControllerComponent.Factory,
 ) : AndroidViewModel(application) {
 
