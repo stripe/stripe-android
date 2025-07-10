@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
@@ -36,6 +37,11 @@ data class PaymentOption internal constructor(
      * - If this is Google Pay, the value is "google_pay".
      */
     val paymentMethodType: String,
+
+    /**
+     * The billing details associated with the customer's desired payment method.
+     */
+    val billingDetails: PaymentSheet.BillingDetails?,
     private val _shippingDetails: AddressDetails?,
     private val _labels: Labels,
 
@@ -81,6 +87,7 @@ data class PaymentOption internal constructor(
         label = label,
         paymentMethodType = "unsupportedInitializationType",
         _shippingDetails = null,
+        billingDetails = null,
         _labels = Labels(label = label),
         imageLoader = errorImageLoader,
     )
