@@ -74,6 +74,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
@@ -1131,6 +1132,34 @@ internal class DefaultPaymentElementLoaderTest {
                 requested = "gold, silver, bronze",
             )
         )
+    }
+
+    @Test
+    fun `Returns failure if configuring deferred intent with negative amounts`() = runTest {
+        assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
+            PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = -1099,
+                        currency = "USD"
+                    ),
+                ),
+            ).validate()
+        }
+    }
+
+    @Test
+    fun `Returns failure if configuring deferred intent with zero amounts`() = runTest {
+        assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
+            PaymentElementLoader.InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 0,
+                        currency = "USD"
+                    ),
+                ),
+            ).validate()
+        }
     }
 
     @Test

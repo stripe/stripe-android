@@ -54,38 +54,6 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     @Test
-    fun `intentConfiguration fails when amount is negative`() = runScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = -1099,
-                    currency = "USD"
-                ),
-            ),
-            configuration = configuration,
-        )
-        assertThat(result.exceptionOrNull()?.message)
-            .isEqualTo("Payment IntentConfiguration requires a positive amount.")
-    }
-
-    @Test
-    fun `intentConfiguration fails when amount is zero`() = runScenario {
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                    amount = 0,
-                    currency = "USD"
-                ),
-            ),
-            configuration = configuration,
-        )
-        assertThat(result.exceptionOrNull()?.message)
-            .isEqualTo("Payment IntentConfiguration requires a positive amount.")
-    }
-
-    @Test
     fun `result is used from saved state handle when configurations are the same and sheetIsOpen`() = runScenario {
         sheetStateHolder.sheetIsOpen = true
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
