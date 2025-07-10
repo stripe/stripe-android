@@ -88,7 +88,7 @@ internal class LinkControllerViewModel @Inject constructor(
         reloadSession()
     }
 
-    fun onPresent(
+    fun onPresentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
     ) {
