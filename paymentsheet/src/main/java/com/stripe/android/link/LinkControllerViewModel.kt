@@ -14,6 +14,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
+import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
@@ -87,6 +88,7 @@ internal class LinkControllerViewModel @Inject constructor(
         if (this.configuration == configuration) {
             return
         }
+        logger.debug("$tag: updating configuration")
         this.configuration = configuration
         reloadSession()
     }
@@ -96,32 +98,23 @@ internal class LinkControllerViewModel @Inject constructor(
         email: String?
     ) {
         if (presentJob?.isActive == true) {
+            logger.debug("$tag: already presenting")
             return
         }
         presentJob = viewModelScope.launch {
+            logger.debug("$tag: presenting payment methods")
+
             // Try to obtain a Link configuration before we present.
-            if (awaitLinkConfigurationResult().isFailure) {
-                if (updateLinkConfiguration().isFailure) {
+            val configuration = awaitLinkConfigurationResult()
+                .mapCatching { updateLinkConfiguration().getOrThrow() }
+                .onFailure { error ->
                     _presentPaymentMethodsResultFlow.emit(
                         LinkController.PresentPaymentMethodsResult.Failed(
-                            error = RuntimeException("Failed to configure Link.") // TODO: Better error.
+                            LinkUnavailableException(error)
                         )
                     )
-                    return@launch
                 }
-            }
-            val state = _state.value
-            if (state.linkGate?.useNativeLink != true) {
-                _presentPaymentMethodsResultFlow.emit(
-                    LinkController.PresentPaymentMethodsResult.Failed(
-                        error = RuntimeException("Attestation error.") // TODO: Better error.
-                    )
-                )
-                return@launch
-            }
-
-            // TODO: Error.
-            val configuration = state.linkConfiguration
+                .getOrNull()
                 ?.copy(
                     customerInfo = LinkConfiguration.CustomerInfo(
                         name = null,
@@ -131,12 +124,12 @@ internal class LinkControllerViewModel @Inject constructor(
                     )
                 )
                 ?: return@launch
-
-            logger.debug("$tag: configuration=$configuration")
-
+            val state = _state.value
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
                 .takeIf { email == state.presentedForEmail && email == it.account?.email }
                 ?: LinkAccountUpdate.Value(null)
+
+            // If the account changed, clear account-related state.
             val selectedPaymentMethod = state.selectedPaymentMethod
                 .takeIf { linkAccountInfo.account != null }
             val createdPaymentMethod = state.createdPaymentMethod
@@ -164,6 +157,7 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onPresentPaymentMethodsActivityResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
+                logger.debug("$tag: presentPaymentMethods canceled")
                 viewModelScope.launch {
                     _presentPaymentMethodsResultFlow.emit(
                         LinkController.PresentPaymentMethodsResult.Canceled
@@ -171,7 +165,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 }
             }
             is LinkActivityResult.Completed -> {
-                logger.debug("$tag: details=${result.selectedPayment?.details}")
+                logger.debug("$tag: presentPaymentMethods completed: details=${result.selectedPayment?.details}")
                 _state.update {
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
@@ -182,6 +176,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 }
             }
             is LinkActivityResult.Failed -> {
+                logger.debug("$tag: presentPaymentMethods failed")
                 viewModelScope.launch {
                     _presentPaymentMethodsResultFlow.emit(
                         LinkController.PresentPaymentMethodsResult.Failed(result.error)
@@ -189,9 +184,11 @@ internal class LinkControllerViewModel @Inject constructor(
                 }
             }
             is LinkActivityResult.PaymentMethodObtained -> {
-                logger.warning("$tag: Unexpected result: $result")
+                logger.warning("$tag: presentPaymentMethods unexpected result: $result")
             }
         }
+
+        // Update account, clearing state if null.
         result.linkAccountUpdate?.let { update ->
             val value = update.asValue()
             linkAccountHolder.set(value)
@@ -219,41 +216,15 @@ internal class LinkControllerViewModel @Inject constructor(
     }
 
     fun onCreatePaymentMethod() {
-        val state = _state.value
-        // TODO: Error handling.
-        val paymentMethod = state.selectedPaymentMethod
-            ?: return
-        val configuration = state.linkConfiguration
-            ?: return
-        val account = _account.value
-            ?: return
         viewModelScope.launch {
-            val apiResult = if (configuration.passthroughModeEnabled) {
-                linkApiRepository.sharePaymentDetails(
-                    consumerSessionClientSecret = account.clientSecret,
-                    paymentDetailsId = paymentMethod.details.id,
-                    expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
-                    cvc = paymentMethod.collectedCvc,
-                    billingPhone = null,
-                ).map { shareDetails ->
-                    val json = JSONObject(shareDetails.encodedPaymentMethod)
-                    PaymentMethodJsonParser().parse(json)
-                }
-            } else {
-                linkApiRepository.createPaymentMethod(
-                    consumerSessionClientSecret = account.clientSecret,
-                    paymentMethod = paymentMethod,
+            val paymentMethodResult = createPaymentMethod()
+            _state.update { it.copy(createdPaymentMethod = paymentMethodResult.getOrNull()) }
+            _createPaymentMethodResultFlow.emit(
+                paymentMethodResult.fold(
+                    onSuccess = { LinkController.CreatePaymentMethodResult.Success },
+                    onFailure = { LinkController.CreatePaymentMethodResult.Failed(it) },
                 )
-            }
-            _state.update { it.copy(createdPaymentMethod = apiResult.getOrNull()) }
-            viewModelScope.launch {
-                _createPaymentMethodResultFlow.emit(
-                    apiResult.fold(
-                        onSuccess = { LinkController.CreatePaymentMethodResult.Success },
-                        onFailure = { LinkController.CreatePaymentMethodResult.Failed(it) },
-                    )
-                )
-            }
+            )
         }
     }
 
@@ -265,19 +236,16 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateLinkConfiguration(): Result<LinkConfiguration?> {
+    private suspend fun updateLinkConfiguration(): Result<LinkConfiguration> {
         _state.update { it.copy(linkConfigurationResult = null) }
         val result = loadLinkConfiguration()
         _state.update { state ->
-            state.copy(
-                linkConfigurationResult = result,
-                linkGate = result.getOrNull()?.let { linkGateFactory.create(it) }
-            )
+            state.copy(linkConfigurationResult = result)
         }
         return result
     }
 
-    private suspend fun loadLinkConfiguration(): Result<LinkConfiguration?> {
+    private suspend fun loadLinkConfiguration(): Result<LinkConfiguration> {
         return paymentElementLoader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 PaymentSheet.IntentConfiguration(
@@ -286,19 +254,57 @@ internal class LinkControllerViewModel @Inject constructor(
             ),
             configuration = configuration.asCommonConfiguration(),
             metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false, // TODO.
-                initializedViaCompose = false, // TODO.
+                isReloadingAfterProcessDeath = false,
+                initializedViaCompose = false,
             )
-        ).map { state ->
-            state.paymentMethodMetadata.linkState?.configuration
+        ).mapCatching { state ->
+            try {
+                checkNotNull(state.paymentMethodMetadata.linkState?.configuration).also {
+                    val linkGate = linkGateFactory.create(it)
+                    check(linkGate.useNativeLink) { "Native Link is not available" }
+                }
+            } catch (e: Throwable) {
+                throw LinkUnavailableException(e)
+            }
+        }.onFailure { error ->
+            logger.error("$tag: Failed to load LinkConfiguration", error)
         }
     }
 
-    private suspend fun awaitLinkConfigurationResult(): Result<LinkConfiguration?> {
+    private suspend fun awaitLinkConfigurationResult(): Result<LinkConfiguration> {
         return _state
             .map { it.linkConfigurationResult }
             .filterNotNull()
             .first()
+    }
+
+    private suspend fun createPaymentMethod(): Result<PaymentMethod> {
+        val state = _state.value
+        val paymentMethod = state.selectedPaymentMethod
+        val configuration = state.linkConfiguration
+        val account = _account.value
+
+        if (paymentMethod == null || configuration == null || account == null) {
+            return Result.failure(IllegalStateException("Invalid state"))
+        }
+
+        return if (configuration.passthroughModeEnabled) {
+            linkApiRepository.sharePaymentDetails(
+                consumerSessionClientSecret = account.clientSecret,
+                paymentDetailsId = paymentMethod.details.id,
+                expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
+                cvc = paymentMethod.collectedCvc,
+                billingPhone = null,
+            ).map { shareDetails ->
+                val json = JSONObject(shareDetails.encodedPaymentMethod)
+                PaymentMethodJsonParser().parse(json)
+            }
+        } else {
+            linkApiRepository.createPaymentMethod(
+                consumerSessionClientSecret = account.clientSecret,
+                paymentMethod = paymentMethod,
+            )
+        }
     }
 
     private fun LinkPaymentMethod.toPreview(context: Context): LinkController.PaymentMethodPreview {
@@ -315,8 +321,7 @@ internal class LinkControllerViewModel @Inject constructor(
     }
 
     internal data class State(
-        val linkConfigurationResult: Result<LinkConfiguration?>? = null,
-        val linkGate: LinkGate? = null,
+        val linkConfigurationResult: Result<LinkConfiguration>? = null,
         val presentedForEmail: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,

@@ -49,6 +49,7 @@ class LinkController @Inject internal constructor(
         viewModel.reloadSession()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     @Poko
     class Configuration internal constructor(
@@ -57,6 +58,7 @@ class LinkController @Inject internal constructor(
         internal val link: PaymentSheet.LinkConfiguration,
     ) : Parcelable {
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder(private val merchantDisplayName: String) {
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
@@ -87,6 +89,7 @@ class LinkController @Inject internal constructor(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     @Poko
     class State
@@ -97,34 +100,55 @@ class LinkController @Inject internal constructor(
         val createdPaymentMethod: PaymentMethod? = null,
     ) : Parcelable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface PresentPaymentMethodsResult {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Success : PresentPaymentMethodsResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Canceled : PresentPaymentMethodsResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(val error: Throwable) : PresentPaymentMethodsResult
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface LookupConsumerResult {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Success internal constructor(val email: String, val isConsumer: Boolean) : LookupConsumerResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(val email: String, val error: Throwable) : LookupConsumerResult
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface CreatePaymentMethodResult {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Success : CreatePaymentMethodResult
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(val error: Throwable) : CreatePaymentMethodResult
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface PresentPaymentMethodsCallback {
         fun onPresentPaymentMethodsResult(result: PresentPaymentMethodsResult)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface LookupConsumerCallback {
         fun onLookupConsumerResult(result: LookupConsumerResult)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface CreatePaymentMethodCallback {
         fun onCreatePaymentMethodResult(result: CreatePaymentMethodResult)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     @Poko
     class PaymentMethodPreview(
@@ -133,6 +157,7 @@ class LinkController @Inject internal constructor(
         val sublabel: String?
     ) : Parcelable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @JvmStatic
         fun create(
