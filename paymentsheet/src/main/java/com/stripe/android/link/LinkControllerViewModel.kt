@@ -164,11 +164,14 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onPresentPaymentMethodsActivityResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
-                linkAccountHolder.set(result.linkAccountUpdate.asValue())
+                viewModelScope.launch {
+                    _presentPaymentMethodsResultFlow.emit(
+                        LinkController.PresentPaymentMethodsResult.Canceled
+                    )
+                }
             }
             is LinkActivityResult.Completed -> {
                 logger.debug("$tag: details=${result.selectedPayment?.details}")
-                linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 _state.update {
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
@@ -179,7 +182,6 @@ internal class LinkControllerViewModel @Inject constructor(
                 }
             }
             is LinkActivityResult.Failed -> {
-                linkAccountHolder.set(result.linkAccountUpdate.asValue())
                 viewModelScope.launch {
                     _presentPaymentMethodsResultFlow.emit(
                         LinkController.PresentPaymentMethodsResult.Failed(result.error)
@@ -188,6 +190,18 @@ internal class LinkControllerViewModel @Inject constructor(
             }
             is LinkActivityResult.PaymentMethodObtained -> {
                 logger.warning("$tag: Unexpected result: $result")
+            }
+        }
+        result.linkAccountUpdate?.let { update ->
+            val value = update.asValue()
+            linkAccountHolder.set(value)
+            if (value.account == null) {
+                _state.update {
+                    it.copy(
+                        selectedPaymentMethod = null,
+                        createdPaymentMethod = null,
+                    )
+                }
             }
         }
     }

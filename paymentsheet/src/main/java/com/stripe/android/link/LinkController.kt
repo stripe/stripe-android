@@ -99,6 +99,7 @@ class LinkController @Inject internal constructor(
 
     sealed interface PresentPaymentMethodsResult {
         data object Success : PresentPaymentMethodsResult
+        data object Canceled : PresentPaymentMethodsResult
         class Failed internal constructor(val error: Throwable) : PresentPaymentMethodsResult
     }
 
