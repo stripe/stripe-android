@@ -29,6 +29,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -52,7 +53,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler.Scenario
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -417,9 +417,6 @@ internal class PaymentSheetViewModelTest {
         val stripeIntent = PAYMENT_INTENT
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
-            confirmationHandlerFactory = {
-                handler
-            }
         )
 
         val optionsParams = PaymentMethodOptionsParams.Card(
@@ -493,9 +490,6 @@ internal class PaymentSheetViewModelTest {
         val stripeIntent = PAYMENT_INTENT
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
-            confirmationHandlerFactory = {
-                handler
-            }
         )
 
         val optionsParams = PaymentMethodOptionsParams.USBankAccount(
@@ -531,9 +525,6 @@ internal class PaymentSheetViewModelTest {
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
                     initializationMode = InitializationMode.SetupIntent(stripeIntent.clientSecret!!),
                 ),
-                confirmationHandlerFactory = {
-                    handler
-                }
             )
 
             val paymentSelection = PaymentSelection.Saved(SEPA_DEBIT_PAYMENT_METHOD)
@@ -557,9 +548,6 @@ internal class PaymentSheetViewModelTest {
         val stripeIntent = PAYMENT_INTENT
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
-            confirmationHandlerFactory = {
-                handler
-            }
         )
 
         val paymentSelection = PaymentSelection.New.Card(
@@ -605,9 +593,6 @@ internal class PaymentSheetViewModelTest {
                     .shippingDetails(shippingAddress)
                     .build()
             ),
-            confirmationHandlerFactory = {
-                handler
-            }
         )
 
         val optionsParams = PaymentMethodOptionsParams.Card(
@@ -661,70 +646,47 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Link Express is launched when viewmodel is started with logged in link account`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        confirmationHandler.awaitResultTurbine.add(null)
-        confirmationHandler.awaitResultTurbine.add(null)
-
+    fun `Link Express is launched when viewmodel is started with logged in link account`() = confirmationTest {
         createViewModel(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedIn,
                 signupMode = null,
             ),
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
-        val confirmationArgs = confirmationHandler.startTurbine.awaitItem()
+        val confirmationArgs = startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption
         assertThat(confirmationOption?.useLinkExpress).isTrue()
     }
 
     @Test
-    fun `Link Express is not launched when viewmodel is started with logged out link account`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        confirmationHandler.awaitResultTurbine.add(null)
-        confirmationHandler.awaitResultTurbine.add(null)
-
+    fun `Link Express is not launched when viewmodel is started with logged out link account`() = confirmationTest {
         createViewModel(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
-
-        confirmationHandler.startTurbine.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `checkout with Link starts confirmation with correct arguments`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        confirmationHandler.awaitResultTurbine.add(null)
-        confirmationHandler.awaitResultTurbine.add(null)
-
+    fun `checkout with Link starts confirmation with correct arguments`() = confirmationTest {
         val viewModel = createViewModel(
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
-        confirmationHandler.startTurbine.ensureAllEventsConsumed()
+        startTurbine.ensureAllEventsConsumed()
 
         viewModel.checkoutWithLink()
 
-        val confirmationArgs = confirmationHandler.startTurbine.awaitItem()
+        val confirmationArgs = startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         val confirmationOption = confirmationArgs.confirmationOption as? LinkConfirmationOption
         assertThat(confirmationOption?.useLinkExpress).isFalse()
@@ -732,11 +694,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Google Pay checkout cancelled returns to Idle state`() = confirmationTest {
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = {
-                handler
-            }
-        )
+        val viewModel = createViewModel()
 
         viewModel.checkoutWithGooglePay()
 
@@ -775,9 +733,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On checkout clear the previous view state error`() = confirmationTest {
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = { handler }
-        )
+        val viewModel = createViewModel()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
         turbineScope {
@@ -807,11 +763,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Google Pay checkout failed returns to Idle state and shows error`() = confirmationTest {
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = {
-                handler
-            }
-        )
+        val viewModel = createViewModel()
 
         viewModel.checkoutWithGooglePay()
 
@@ -861,9 +813,6 @@ internal class PaymentSheetViewModelTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = signupMode,
             ),
-            confirmationHandlerFactory = {
-                handler
-            }
         )
 
         turbineScope {
@@ -934,7 +883,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `On inline link payment with save requested, should set 'paymentMethodOptionsParams' SFU to off_session`() =
         confirmationTest {
-            val viewModel = createLinkViewModel(handler)
+            val viewModel = createLinkViewModel()
 
             viewModel.updateSelection(
                 createLinkInlinePaymentSelection(
@@ -965,7 +914,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `On inline link payment with save not requested, should set 'paymentMethodOptionsParams' SFU to blank`() =
         confirmationTest {
-            val viewModel = createLinkViewModel(handler)
+            val viewModel = createLinkViewModel()
 
             viewModel.updateSelection(
                 createLinkInlinePaymentSelection(
@@ -1001,7 +950,6 @@ internal class PaymentSheetViewModelTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             ),
-            confirmationHandlerFactory = { handler }
         )
 
         turbineScope {
@@ -1044,148 +992,152 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On confirmation result, should update ViewState and save preferences`() =
-        runTest {
-            val confirmationHandler = FakeConfirmationHandler().apply {
-                awaitResultTurbine.add(null)
-                awaitResultTurbine.add(null)
-            }
-            val viewModel = createViewModel(
-                confirmationHandlerFactory = {
-                    confirmationHandler
-                }
+    fun `On confirmation result, should update ViewState and save preferences`() = confirmationTest {
+        val viewModel = createViewModel()
+
+        val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        viewModel.updateSelection(selection)
+        viewModel.checkout()
+
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            PaymentMethodConfirmationOption.Saved(
+                paymentMethod = CARD_PAYMENT_METHOD,
+                optionsParams = null,
             )
-
-            val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
-            viewModel.updateSelection(selection)
-            viewModel.checkout()
-
-            turbineScope {
-                val resultTurbine = viewModel.paymentSheetResult.testIn(this)
-                val viewStateTurbine = viewModel.viewState.testIn(this)
-
-                confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                    result = ConfirmationHandler.Result.Succeeded(
-                        intent = PAYMENT_INTENT,
-                        deferredIntentConfirmationType = null,
-                    )
-                )
-
-                assertThat(viewStateTurbine.awaitItem())
-                    .isEqualTo(PaymentSheetViewState.Reset(null))
-
-                val finishedProcessingState = viewStateTurbine.awaitItem()
-                assertThat(finishedProcessingState)
-                    .isInstanceOf<PaymentSheetViewState.FinishProcessing>()
-
-                (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
-
-                assertThat(resultTurbine.awaitItem())
-                    .isEqualTo(PaymentSheetResult.Completed)
-
-                verify(eventReporter)
-                    .onPaymentSuccess(
-                        paymentSelection = selection,
-                        deferredIntentConfirmationType = null,
-                    )
-                assertThat(prefsRepository.paymentSelectionArgs)
-                    .containsExactly(selection)
-                assertThat(
-                    prefsRepository.getSavedSelection(
-                        isGooglePayAvailable = true,
-                        isLinkAvailable = true
-                    )
-                ).isEqualTo(
-                    SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
-                )
-
-                resultTurbine.cancel()
-                viewStateTurbine.cancel()
-            }
-        }
-
-    @Test
-    fun `On confirmation result, should update ViewState and not save new payment method`() =
-        runTest {
-            val confirmationHandler = FakeConfirmationHandler().apply {
-                awaitResultTurbine.add(null)
-                awaitResultTurbine.add(null)
-            }
-            val viewModel = createViewModel(
-                stripeIntent = PAYMENT_INTENT,
-                confirmationHandlerFactory = {
-                    confirmationHandler
-                }
-            )
-
-            val selection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
-            )
-            viewModel.updateSelection(selection)
-            viewModel.checkout()
-
-            turbineScope {
-                val resultTurbine = viewModel.paymentSheetResult.testIn(this)
-                val viewStateTurbine = viewModel.viewState.testIn(this)
-
-                confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                    result = ConfirmationHandler.Result.Succeeded(
-                        intent = PAYMENT_INTENT,
-                        deferredIntentConfirmationType = null,
-                    )
-                )
-
-                assertThat(viewStateTurbine.awaitItem())
-                    .isEqualTo(PaymentSheetViewState.Reset(null))
-
-                val finishedProcessingState = viewStateTurbine.awaitItem()
-                assertThat(finishedProcessingState)
-                    .isInstanceOf<PaymentSheetViewState.FinishProcessing>()
-
-                (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
-
-                assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed)
-
-                verify(eventReporter)
-                    .onPaymentSuccess(
-                        paymentSelection = selection,
-                        deferredIntentConfirmationType = null,
-                    )
-
-                assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
-                assertThat(
-                    prefsRepository.getSavedSelection(
-                        isGooglePayAvailable = true,
-                        isLinkAvailable = true
-                    )
-                ).isEqualTo(SavedSelection.None)
-
-                resultTurbine.cancel()
-                viewStateTurbine.cancel()
-            }
-        }
-
-    @Test
-    fun `On confirmation result, with non-success outcome should report failure event`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
+
+        turbineScope {
+            val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
+
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Succeeded(
+                    intent = PAYMENT_INTENT,
+                    deferredIntentConfirmationType = null,
+                )
+            )
+
+            assertThat(viewStateTurbine.awaitItem())
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val finishedProcessingState = viewStateTurbine.awaitItem()
+            assertThat(finishedProcessingState)
+                .isInstanceOf<PaymentSheetViewState.FinishProcessing>()
+
+            (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+            assertThat(resultTurbine.awaitItem())
+                .isEqualTo(PaymentSheetResult.Completed)
+
+            verify(eventReporter)
+                .onPaymentSuccess(
+                    paymentSelection = selection,
+                    deferredIntentConfirmationType = null,
+                )
+            assertThat(prefsRepository.paymentSelectionArgs)
+                .containsExactly(selection)
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(
+                SavedSelection.PaymentMethod(selection.paymentMethod.id.orEmpty())
+            )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
+        }
+    }
+
+    @Test
+    fun `On confirmation result, should update ViewState and not save new payment method`() = confirmationTest {
+        val viewModel = createViewModel(
+            stripeIntent = PAYMENT_INTENT,
+        )
+
+        val selection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+        )
+        viewModel.updateSelection(selection)
+        viewModel.checkout()
+
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            PaymentMethodConfirmationOption.New(
+                createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                optionsParams = null,
+                extraParams = null,
+                shouldSave = true,
+            )
+        )
+
+        turbineScope {
+            val resultTurbine = viewModel.paymentSheetResult.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
+
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Succeeded(
+                    intent = PAYMENT_INTENT,
+                    deferredIntentConfirmationType = null,
+                )
+            )
+
+            assertThat(viewStateTurbine.awaitItem())
+                .isEqualTo(PaymentSheetViewState.Reset(null))
+
+            val finishedProcessingState = viewStateTurbine.awaitItem()
+            assertThat(finishedProcessingState)
+                .isInstanceOf<PaymentSheetViewState.FinishProcessing>()
+
+            (finishedProcessingState as PaymentSheetViewState.FinishProcessing).onComplete()
+
+            assertThat(resultTurbine.awaitItem()).isEqualTo(PaymentSheetResult.Completed)
+
+            verify(eventReporter)
+                .onPaymentSuccess(
+                    paymentSelection = selection,
+                    deferredIntentConfirmationType = null,
+                )
+
+            assertThat(prefsRepository.paymentSelectionArgs).isEmpty()
+            assertThat(
+                prefsRepository.getSavedSelection(
+                    isGooglePayAvailable = true,
+                    isLinkAvailable = true
+                )
+            ).isEqualTo(SavedSelection.None)
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
+        }
+    }
+
+    @Test
+    fun `On confirmation result, with non-success outcome should report failure event`() = confirmationTest {
+        val viewModel = createViewModel()
         val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val error = APIException()
 
         viewModel.updateSelection(selection)
         viewModel.checkout()
 
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            PaymentMethodConfirmationOption.Saved(
+                paymentMethod = CARD_PAYMENT_METHOD,
+                optionsParams = null,
+            )
+        )
+
         viewModel.paymentMethodMetadata.test {
-            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            confirmationState.value = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Failed(
                     cause = error,
                     message = error.errorMessage,
@@ -1208,9 +1160,6 @@ internal class PaymentSheetViewModelTest {
         confirmationTest {
             val eventReporter = FakeEventReporter()
             val viewModel = createViewModel(
-                confirmationHandlerFactory = {
-                    handler
-                },
                 eventReporter = eventReporter,
             )
 
@@ -1234,79 +1183,61 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `on confirmation result, should update emit generic error on IOExceptions`() =
-        runTest {
-            val confirmationHandler = FakeConfirmationHandler().apply {
-                awaitResultTurbine.add(null)
-                awaitResultTurbine.add(null)
-            }
-            val viewModel = createViewModel(
-                confirmationHandlerFactory = {
-                    confirmationHandler
-                }
+    fun `on confirmation result, should update emit generic error on IOExceptions`() = confirmationTest {
+        val viewModel = createViewModel()
+
+        viewModel.viewState.test {
+            val error = IOException("very helpful error message")
+
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Failed(
+                    cause = error,
+                    message = R.string.stripe_something_went_wrong.resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
             )
 
-            viewModel.viewState.test {
-                val error = IOException("very helpful error message")
-
-                confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                    result = ConfirmationHandler.Result.Failed(
-                        cause = error,
-                        message = R.string.stripe_something_went_wrong.resolvableString,
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            assertThat(awaitItem())
+                .isEqualTo(
+                    PaymentSheetViewState.Reset(null)
+                )
+            assertThat(awaitItem())
+                .isEqualTo(
+                    PaymentSheetViewState.Reset(
+                        UserErrorMessage(R.string.stripe_something_went_wrong.resolvableString)
                     )
                 )
-
-                assertThat(awaitItem())
-                    .isEqualTo(
-                        PaymentSheetViewState.Reset(null)
-                    )
-                assertThat(awaitItem())
-                    .isEqualTo(
-                        PaymentSheetViewState.Reset(
-                            UserErrorMessage(R.string.stripe_something_went_wrong.resolvableString)
-                        )
-                    )
-            }
         }
+    }
 
     @Test
-    fun `On confirmation result, should update emit Stripe API errors`() =
-        runTest {
-            val confirmationHandler = FakeConfirmationHandler().apply {
-                awaitResultTurbine.add(null)
-                awaitResultTurbine.add(null)
-            }
-            val viewModel = createViewModel(
-                confirmationHandlerFactory = {
-                    confirmationHandler
-                }
+    fun `On confirmation result, should update emit Stripe API errors`() = confirmationTest {
+        val viewModel = createViewModel()
+
+        viewModel.viewState.test {
+            val errorMessage = "very helpful error message"
+            val error = APIException(StripeError(message = errorMessage))
+
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Failed(
+                    cause = error,
+                    message = errorMessage.resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
             )
 
-            viewModel.viewState.test {
-                val errorMessage = "very helpful error message"
-                val error = APIException(StripeError(message = errorMessage))
-
-                confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                    result = ConfirmationHandler.Result.Failed(
-                        cause = error,
-                        message = errorMessage.resolvableString,
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            assertThat(awaitItem())
+                .isEqualTo(
+                    PaymentSheetViewState.Reset(null)
+                )
+            assertThat(awaitItem())
+                .isEqualTo(
+                    PaymentSheetViewState.Reset(
+                        UserErrorMessage(errorMessage.resolvableString)
                     )
                 )
-
-                assertThat(awaitItem())
-                    .isEqualTo(
-                        PaymentSheetViewState.Reset(null)
-                    )
-                assertThat(awaitItem())
-                    .isEqualTo(
-                        PaymentSheetViewState.Reset(
-                            UserErrorMessage(errorMessage.resolvableString)
-                        )
-                    )
-            }
         }
+    }
 
     @Test
     fun `fetchPaymentIntent() should update ViewState LiveData`() = runTest {
@@ -1509,7 +1440,6 @@ internal class PaymentSheetViewModelTest {
     fun `Resets selection correctly after cancelling Google Pay`() = confirmationTest {
         val viewModel = createViewModel(
             initialPaymentSelection = null,
-            confirmationHandlerFactory = { handler }
         )
 
         val initialSelection = PaymentSelection.New.Card(
@@ -1619,11 +1549,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Content should be hidden when Google Pay is visible`() = confirmationTest {
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = {
-                handler
-            }
-        )
+        val viewModel = createViewModel()
 
         viewModel.contentVisible.test {
             assertThat(awaitItem()).isTrue()
@@ -1648,7 +1574,6 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Content should be hidden when Link is visible`() = confirmationTest {
         val viewModel = createViewModel(
-            confirmationHandlerFactory = { handler },
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedOut,
@@ -1677,7 +1602,6 @@ internal class PaymentSheetViewModelTest {
                 loginState = LinkState.LoginState.NeedsVerification,
                 signupMode = null,
             ),
-            confirmationHandlerFactory = { handler }
         )
 
         viewModel.walletsProcessingState.test {
@@ -2177,9 +2101,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Completes if confirmation handler returns a successful result`() = confirmationTest {
-        val viewModel = createViewModelForDeferredIntent(
-            confirmationHandlerFactory = { handler }
-        )
+        val viewModel = createViewModelForDeferredIntent()
 
         viewModel.paymentSheetResult.test {
             val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
@@ -2212,9 +2134,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Displays failure if confirmation handler returns a failure`() = confirmationTest {
-        val viewModel = createViewModelForDeferredIntent(
-            confirmationHandlerFactory = { handler }
-        )
+        val viewModel = createViewModelForDeferredIntent()
 
         val paymentMethod = CARD_PAYMENT_METHOD
         val error = "oh boy this didn't work"
@@ -2316,16 +2236,8 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends no deferred_intent_confirmation_type for non-deferred intent confirmation`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
-        )
+    fun `Sends no deferred_intent_confirmation_type for non-deferred intent confirmation`() = confirmationTest {
+        val viewModel = createViewModel()
 
         val paymentMethod = CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2333,7 +2245,16 @@ internal class PaymentSheetViewModelTest {
         viewModel.updateSelection(savedSelection)
         viewModel.checkout()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            PaymentMethodConfirmationOption.Saved(
+                paymentMethod = paymentMethod,
+                optionsParams = null,
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             result = ConfirmationHandler.Result.Succeeded(
                 intent = PAYMENT_INTENT,
                 deferredIntentConfirmationType = null,
@@ -2349,9 +2270,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for none confirmation type of deferred intent`() =
         confirmationTest {
-            val viewModel = createViewModelForDeferredIntent(
-                confirmationHandlerFactory = { handler }
-            )
+            val viewModel = createViewModelForDeferredIntent()
 
             val paymentMethod = CARD_PAYMENT_METHOD
             val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2385,9 +2304,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for client-side confirmation of deferred intent`() =
         confirmationTest {
-            val viewModel = createViewModelForDeferredIntent(
-                confirmationHandlerFactory = { handler }
-            )
+            val viewModel = createViewModelForDeferredIntent()
 
             val paymentMethod = CARD_PAYMENT_METHOD
             val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2421,9 +2338,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Sends correct deferred_intent_confirmation_type for server-side confirmation of deferred intent`() =
         confirmationTest {
-            val viewModel = createViewModelForDeferredIntent(
-                confirmationHandlerFactory = { handler }
-            )
+            val viewModel = createViewModelForDeferredIntent()
 
             val paymentMethod = CARD_PAYMENT_METHOD
             val savedSelection = PaymentSelection.Saved(paymentMethod)
@@ -2526,7 +2441,6 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = args,
             isGooglePayReady = true,
-            confirmationHandlerFactory = { handler },
         )
 
         viewModel.checkoutWithGooglePay()
@@ -2564,7 +2478,6 @@ internal class PaymentSheetViewModelTest {
             args = args,
             isGooglePayReady = true,
             stripeIntent = SETUP_INTENT,
-            confirmationHandlerFactory = { handler },
         )
 
         viewModel.checkoutWithGooglePay()
@@ -2581,9 +2494,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Start confirmation with Bacs debit selected and filled`() = confirmationTest {
-        val viewModel = createViewModel(
-            confirmationHandlerFactory = { handler },
-        )
+        val viewModel = createViewModel()
         val bacsPaymentSelection = createBacsPaymentSelection()
 
         viewModel.updateSelection(bacsPaymentSelection)
@@ -2738,24 +2649,37 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout with Google Pay, should report success as expected`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
+    fun `On checkout with Google Pay, should report success as expected`() = confirmationTest {
         val eventReporter = FakeEventReporter()
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
             isGooglePayReady = true,
             eventReporter = eventReporter,
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
         viewModel.checkoutWithGooglePay()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
+        val googlePayConfig = ARGS_CUSTOMER_WITH_GOOGLEPAY.googlePayConfig!!
+
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            GooglePayConfirmationOption(
+                config = GooglePayConfirmationOption.Config(
+                    environment = googlePayConfig.environment,
+                    customLabel = googlePayConfig.label,
+                    customAmount = googlePayConfig.amount,
+                    merchantName = config.merchantDisplayName,
+                    merchantCountryCode = googlePayConfig.countryCode,
+                    merchantCurrencyCode = googlePayConfig.currencyCode,
+                    billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                )
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
@@ -2768,24 +2692,37 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout with Google Pay, should report failure as expected`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
+    fun `On checkout with Google Pay, should report failure as expected`() = confirmationTest {
         val eventReporter = FakeEventReporter()
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
             isGooglePayReady = true,
             eventReporter = eventReporter,
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
         viewModel.checkoutWithGooglePay()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
+        val googlePayConfig = ARGS_CUSTOMER_WITH_GOOGLEPAY.googlePayConfig!!
+
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            GooglePayConfirmationOption(
+                config = GooglePayConfirmationOption.Config(
+                    environment = googlePayConfig.environment,
+                    customLabel = googlePayConfig.label,
+                    customAmount = googlePayConfig.amount,
+                    merchantName = config.merchantDisplayName,
+                    merchantCountryCode = googlePayConfig.countryCode,
+                    merchantCurrencyCode = googlePayConfig.currencyCode,
+                    billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(config.cardBrandAcceptance),
+                )
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
@@ -2799,11 +2736,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout with Link, should report success as expected`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
+    fun `On checkout with Link, should report success as expected`() = confirmationTest {
         val eventReporter = FakeEventReporter()
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -2813,14 +2746,20 @@ internal class PaymentSheetViewModelTest {
                 signupMode = null
             ),
             eventReporter = eventReporter,
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
         viewModel.checkoutWithLink()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            LinkConfirmationOption(
+                useLinkExpress = false,
+                configuration = LINK_CONFIG,
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
@@ -2833,11 +2772,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout with Link, should report failure as expected`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
+    fun `On checkout with Link, should report failure as expected`() = confirmationTest {
         val eventReporter = FakeEventReporter()
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
@@ -2847,14 +2782,20 @@ internal class PaymentSheetViewModelTest {
                 signupMode = null
             ),
             eventReporter = eventReporter,
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
         viewModel.checkoutWithLink()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            LinkConfirmationOption(
+                useLinkExpress = false,
+                configuration = LINK_CONFIG,
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
@@ -2868,11 +2809,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout with Link Express, should report success as expected`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
+    fun `On checkout with Link Express, should report success as expected`() = confirmationTest {
         val eventReporter = FakeEventReporter()
 
         createViewModel(
@@ -2884,12 +2821,18 @@ internal class PaymentSheetViewModelTest {
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             eventReporter = eventReporter,
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            LinkConfirmationOption(
+                useLinkExpress = true,
+                configuration = LINK_CONFIG,
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
@@ -2902,11 +2845,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout with Link Express, should report failure as expected`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler().apply {
-            awaitResultTurbine.add(null)
-            awaitResultTurbine.add(null)
-        }
+    fun `On checkout with Link Express, should report failure as expected`() = confirmationTest {
         val eventReporter = FakeEventReporter()
 
         createViewModel(
@@ -2918,12 +2857,18 @@ internal class PaymentSheetViewModelTest {
             ),
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             eventReporter = eventReporter,
-            confirmationHandlerFactory = {
-                confirmationHandler
-            }
         )
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        val arguments = startTurbine.awaitItem()
+
+        assertThat(arguments.confirmationOption).isEqualTo(
+            LinkConfirmationOption(
+                useLinkExpress = true,
+                configuration = LINK_CONFIG,
+            )
+        )
+
+        confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
@@ -2946,7 +2891,6 @@ internal class PaymentSheetViewModelTest {
                     paymentMethodTypes = listOf("card", "link", "bancontact")
                 ),
                 linkState = LinkState(LINK_CONFIG, LinkState.LoginState.LoggedOut, signupMode),
-                confirmationHandlerFactory = { handler },
             )
 
             viewModel.primaryButtonUiState.test {
@@ -3241,7 +3185,6 @@ internal class PaymentSheetViewModelTest {
                 initializationMode = initializationMode,
             ),
             stripeIntent = intent,
-            confirmationHandlerFactory = { handler }
         )
 
         val paymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
@@ -3477,9 +3420,7 @@ internal class PaymentSheetViewModelTest {
         confirmationTest {
             DummyActivityResultCaller.test {
                 val lifecycleOwner = TestLifecycleOwner()
-                val viewModel = createViewModel(
-                    confirmationHandlerFactory = { handler },
-                )
+                val viewModel = createViewModel()
 
                 viewModel.registerForActivityResult(
                     activityResultCaller = activityResultCaller,
@@ -3514,7 +3455,6 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             stripeIntent = stripeIntent,
             paymentElementLoader = paymentSheetLoader,
-            confirmationHandlerFactory = { handler }
         )
 
         fun loadState() {
@@ -3567,9 +3507,6 @@ internal class PaymentSheetViewModelTest {
                 initializationMode = initializationMode
             ),
             stripeIntent = PAYMENT_INTENT,
-            confirmationHandlerFactory = {
-                handler
-            }
         )
 
         val createParams = PaymentMethodCreateParams.create(
@@ -3625,6 +3562,59 @@ internal class PaymentSheetViewModelTest {
                 )
             ).isEqualTo(SavedSelection.None)
         }
+    }
+
+    private fun FakeConfirmationHandler.Scenario.createViewModel(
+        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        stripeIntent: StripeIntent = PAYMENT_INTENT,
+        customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = PAYMENT_METHODS),
+        linkConfigurationCoordinator: LinkConfigurationCoordinator =
+            this@PaymentSheetViewModelTest.linkConfigurationCoordinator,
+        customerRepository: CustomerRepository =
+            FakeCustomerRepository(customer?.paymentMethods ?: emptyList()),
+        shouldFailLoad: Boolean = false,
+        linkState: LinkState? = null,
+        isGooglePayReady: Boolean = false,
+        delay: Duration = Duration.ZERO,
+        initialPaymentSelection: PaymentSelection? =
+            customer?.paymentMethods?.firstOrNull()?.let { PaymentSelection.Saved(it) },
+        validationError: PaymentSheetLoadingException? = null,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader(
+            stripeIntent = stripeIntent,
+            shouldFail = shouldFailLoad,
+            linkState = linkState,
+            customer = customer,
+            delay = delay,
+            isGooglePayAvailable = isGooglePayReady,
+            paymentSelection = initialPaymentSelection,
+            validationError = validationError,
+        ),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: EventReporter = this@PaymentSheetViewModelTest.eventReporter,
+        cvcRecollectionHandler: CvcRecollectionHandler = this@PaymentSheetViewModelTest.cvcRecollectionHandler,
+        cvcRecollectionInteractor: FakeCvcRecollectionInteractor = FakeCvcRecollectionInteractor(),
+    ): PaymentSheetViewModel {
+        return createViewModel(
+            args = args,
+            stripeIntent = stripeIntent,
+            customer = customer,
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            customerRepository = customerRepository,
+            shouldFailLoad = shouldFailLoad,
+            linkState = linkState,
+            isGooglePayReady = isGooglePayReady,
+            delay = delay,
+            initialPaymentSelection = initialPaymentSelection,
+            validationError = validationError,
+            savedStateHandle = savedStateHandle,
+            paymentElementLoader = paymentElementLoader,
+            errorReporter = errorReporter,
+            eventReporter = eventReporter,
+            cvcRecollectionHandler = cvcRecollectionHandler,
+            cvcRecollectionInteractor = cvcRecollectionInteractor,
+            confirmationHandlerFactory = { handler }
+        )
     }
 
     private fun createViewModel(
@@ -3693,9 +3683,7 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
-    private fun createLinkViewModel(
-        confirmationHandler: ConfirmationHandler,
-    ): PaymentSheetViewModel {
+    private fun FakeConfirmationHandler.Scenario.createLinkViewModel(): PaymentSheetViewModel {
         val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
             attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
             accountStatus = AccountStatus.Verified,
@@ -3704,13 +3692,24 @@ internal class PaymentSheetViewModelTest {
         return createViewModel(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             confirmationHandlerFactory = {
-                confirmationHandler
+                handler
             },
             linkState = LinkState(
                 configuration = LinkTestUtils.createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             )
+        )
+    }
+
+    private fun FakeConfirmationHandler.Scenario.createViewModelForDeferredIntent(
+        args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+        paymentIntent: PaymentIntent = PAYMENT_INTENT,
+    ): PaymentSheetViewModel {
+        return createViewModelForDeferredIntent(
+            args = args,
+            paymentIntent = paymentIntent,
+            confirmationHandlerFactory = { handler },
         )
     }
 
@@ -3795,7 +3794,7 @@ internal class PaymentSheetViewModelTest {
     private fun confirmationTest(
         hasReloadedFromProcessDeath: Boolean = false,
         emitNullResults: Boolean = true,
-        block: suspend Scenario.(scope: TestScope) -> Unit,
+        block: suspend FakeConfirmationHandler.Scenario.(scope: TestScope) -> Unit,
     ) = runTest {
         FakeConfirmationHandler.test(
             hasReloadedFromProcessDeath = hasReloadedFromProcessDeath,
