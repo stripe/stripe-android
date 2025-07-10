@@ -101,35 +101,53 @@ class LinkController @Inject internal constructor(
         viewModel.reloadSession()
     }
 
+    /**
+     * Configuration for [LinkController].
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     @Poko
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
-        internal val link: PaymentSheet.LinkConfiguration,
     ) : Parcelable {
 
+        /**
+         * [Configuration] builder.
+         *
+         * @param merchantDisplayName Your customer-facing business name.
+         */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Builder(private val merchantDisplayName: String) {
+        class Builder(
+            /**
+             * Your customer-facing business name.
+             */
+            private val merchantDisplayName: String
+        ) {
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
 
-            private var link: PaymentSheet.LinkConfiguration =
-                ConfigurationDefaults.link
-
+            /**
+             * Configuration for which card brands should be accepted or blocked.
+             *
+             * By default, Link will accept all card brands supported by Stripe. You can use this
+             * to restrict which card brands are available for Link payment methods.
+             *
+             * @param cardBrandAcceptance Configuration for which card brands should be accepted.
+             * @return This builder instance for method chaining.
+             */
             fun cardBrandAcceptance(cardBrandAcceptance: PaymentSheet.CardBrandAcceptance) = apply {
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
-            fun link(link: PaymentSheet.LinkConfiguration) = apply {
-                this.link = link
-            }
-
+            /**
+             * Build the [Configuration] instance.
+             *
+             * @return A new [Configuration] with the specified settings.
+             */
             fun build(): Configuration = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 cardBrandAcceptance = cardBrandAcceptance,
-                link = link,
             )
         }
 
