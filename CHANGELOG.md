@@ -2,9 +2,6 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-### PaymentSheet
-* [CHANGED][11112](https://github.com/stripe/stripe-android/pull/11112) Restrict negative initialization amounts during configuration of `PaymentSheet`, `PaymentSheet.FlowController`, and `EmbeddedPaymentElement` when using `PaymentSheet.IntentConfiguration`.
-
 ## 21.20.2 - 2025-07-09
 
 ### PaymentSheet
