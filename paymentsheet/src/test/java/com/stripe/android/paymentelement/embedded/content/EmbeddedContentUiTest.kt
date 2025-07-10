@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -15,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -23,6 +25,8 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -171,7 +175,9 @@ internal class EmbeddedContentUiTest {
                 ),
                 rowSelectionImmediateActionHandler = immediateActionHandler,
                 errorReporter = errorReporter,
-                internalRowSelectionCallback = { internalRowSelectionCallback }
+                internalRowSelectionCallback = { internalRowSelectionCallback },
+                linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle())
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
