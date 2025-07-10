@@ -101,9 +101,10 @@ internal object FlowControllerModule {
     @Singleton
     fun providesWalletButtonsContent(
         viewModel: FlowControllerViewModel,
+        @Named(WALLETS_BUTTON_LINK_LAUNCHER) walletsButtonLinkLauncher: LinkPaymentLauncher,
     ): WalletButtonsContent {
         return WalletButtonsContent(
-            interactor = DefaultWalletButtonsInteractor.create(viewModel)
+            interactor = DefaultWalletButtonsInteractor.create(viewModel, walletsButtonLinkLauncher)
         )
     }
 

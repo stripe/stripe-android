@@ -7,6 +7,9 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.verification.LinkInlineInteractor
 import com.stripe.android.link.verification.VerificationState
@@ -118,6 +121,8 @@ internal class DefaultWalletButtonsInteractor(
     private val coroutineScope: CoroutineScope,
     private val errorReporter: ErrorReporter,
     private val linkInlineInteractor: LinkInlineInteractor,
+    private val linkPaymentLauncher: LinkPaymentLauncher,
+    private val linkAccountHolder: LinkAccountHolder,
     private val onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit
 ) : WalletButtonsInteractor {
 
@@ -191,14 +196,9 @@ internal class DefaultWalletButtonsInteractor(
         when (action) {
             is OnButtonPressed -> {
                 arguments.value?.let { arguments ->
-                    confirmationArgs(action.button.createSelection(), arguments)?.let {
-                        coroutineScope.launch {
-                            confirmationHandler.start(it)
-                        }
-                    } ?: run {
-                        errorReporter.report(
-                            ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM
-                        )
+                    when (action.button) {
+                        is WalletButton.Link -> handleLinkButtonPressed(arguments)
+                        else -> handleButtonPressed(action.button, arguments)
                     }
                 } ?: run {
                     errorReporter.report(
@@ -210,6 +210,33 @@ internal class DefaultWalletButtonsInteractor(
             is OnHidden -> onWalletButtonsRenderStateChanged(false)
             is OnResendCode -> linkInlineInteractor.resendCode()
             is OnResendCodeNotificationSent -> linkInlineInteractor.didShowCodeSentNotification()
+        }
+    }
+
+    private fun handleLinkButtonPressed(arguments: Arguments) {
+        val linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration
+        if (linkConfiguration != null) {
+            // Launch Link payment selection instead of starting confirmation
+            linkPaymentLauncher.present(
+                configuration = linkConfiguration,
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                useLinkExpress = true
+            )
+        } else {
+            handleButtonPressed(WalletButton.Link(email = null), arguments)
+        }
+    }
+
+    private fun handleButtonPressed(button: WalletButton, arguments: Arguments) {
+        confirmationArgs(button.createSelection(), arguments)?.let {
+            coroutineScope.launch {
+                confirmationHandler.start(it)
+            }
+        } ?: run {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+            )
         }
     }
 
@@ -242,7 +269,8 @@ internal class DefaultWalletButtonsInteractor(
 
     companion object {
         fun create(
-            flowControllerViewModel: FlowControllerViewModel
+            flowControllerViewModel: FlowControllerViewModel,
+            walletsButtonLinkLauncher: LinkPaymentLauncher
         ): WalletButtonsInteractor {
             val linkHandler = flowControllerViewModel.flowControllerStateComponent.linkHandler
 
@@ -263,7 +291,7 @@ internal class DefaultWalletButtonsInteractor(
                             walletsAllowedByMerchant = configureRequest
                                 .configuration
                                 .walletButtons
-                                .allowedWalletTypes,
+                                .allowedWalletTypes
                         )
                     } else {
                         null
@@ -272,6 +300,8 @@ internal class DefaultWalletButtonsInteractor(
                 confirmationHandler = flowControllerViewModel.flowControllerStateComponent.confirmationHandler,
                 coroutineScope = flowControllerViewModel.viewModelScope,
                 linkInlineInteractor = flowControllerViewModel.flowControllerStateComponent.linkInlineInteractor,
+                linkPaymentLauncher = walletsButtonLinkLauncher,
+                linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }
@@ -285,6 +315,8 @@ internal class DefaultWalletButtonsInteractor(
             confirmationHandler: ConfirmationHandler,
             coroutineScope: CoroutineScope,
             errorReporter: ErrorReporter,
+            linkPaymentLauncher: LinkPaymentLauncher,
+            linkAccountHolder: LinkAccountHolder,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
                 errorReporter = errorReporter,
@@ -299,16 +331,18 @@ internal class DefaultWalletButtonsInteractor(
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
                             initializationMode = state.initializationMode,
-                            walletsAllowedByMerchant = WalletType.entries,
+                            walletsAllowedByMerchant = WalletType.entries
                         )
                     }
                 },
                 confirmationHandler = confirmationHandler,
                 coroutineScope = coroutineScope,
+                linkInlineInteractor = linkInlineInteractor,
+                linkPaymentLauncher = linkPaymentLauncher,
+                linkAccountHolder = linkAccountHolder,
                 onWalletButtonsRenderStateChanged = {
                     // No-op, not supported for Embedded
-                },
-                linkInlineInteractor = linkInlineInteractor
+                }
             )
         }
     }

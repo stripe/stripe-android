@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -7,6 +8,8 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -22,6 +25,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -294,39 +298,35 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
-    fun `on Link button pressed, should call confirmation handler with expected selection`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
-        val linkConfiguration = mock<LinkConfiguration>()
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.Link),
-                linkState = LinkState(
-                    configuration = linkConfiguration,
-                    loginState = LinkState.LoginState.LoggedOut,
-                    signupMode = null,
-                )
-            ),
-            confirmationHandler = confirmationHandler,
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
-
-            interactor.handleViewAction(
-                WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first())
+    fun `on Link button pressed with valid configuration, should call linkPaymentLauncher`() = runTest {
+        RecordingLinkPaymentLauncher.test {
+            val linkConfiguration = mock<LinkConfiguration>()
+            val interactor = createInteractor(
+                arguments = createArguments(
+                    availableWallets = listOf(WalletType.Link),
+                    linkState = LinkState(
+                        configuration = linkConfiguration,
+                        loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
+                    )
+                ),
+                linkPaymentLauncher = launcher,
             )
 
-            val arguments = confirmationHandler.startTurbine.awaitItem()
+            interactor.state.test {
+                val state = awaitItem()
 
-            assertThat(arguments.confirmationOption).isEqualTo(
-                LinkConfirmationOption(
-                    useLinkExpress = false,
-                    configuration = linkConfiguration,
+                assertThat(state.walletButtons).hasSize(1)
+                assertThat(state.walletButtons.firstOrNull()).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
+
+                interactor.handleViewAction(
+                    WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first())
                 )
-            )
+            }
+
+            val call = presentCalls.awaitItem()
+            assertThat(call.configuration).isEqualTo(linkConfiguration)
+            assertThat(call.useLinkExpress).isTrue()
         }
     }
 
@@ -736,6 +736,7 @@ class DefaultWalletButtonsInteractorTest {
         arguments: DefaultWalletButtonsInteractor.Arguments? = null,
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
             error("Should not be called!")
         },
@@ -746,8 +747,9 @@ class DefaultWalletButtonsInteractorTest {
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
             errorReporter = errorReporter,
             linkInlineInteractor = NoOpLinkInlineInteractor(),
+            linkPaymentLauncher = linkPaymentLauncher,
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             onWalletButtonsRenderStateChanged = onWalletButtonsRenderStateChanged,
-
         )
     }
 

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -20,6 +21,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -178,7 +180,9 @@ internal class DefaultEmbeddedContentHelperTest {
             ),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,
-            internalRowSelectionCallback = { null }
+            internalRowSelectionCallback = { null },
+            linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
