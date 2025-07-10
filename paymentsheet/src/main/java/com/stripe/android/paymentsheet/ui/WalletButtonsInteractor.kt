@@ -223,6 +223,8 @@ internal class DefaultWalletButtonsInteractor(
                 launchMode = LinkLaunchMode.PaymentMethodSelection(null),
                 useLinkExpress = true
             )
+        } else {
+            handleButtonPressed(WalletButton.Link(email = null), arguments)
         }
     }
 
