@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optBoolean
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -12,6 +13,7 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
     override fun parse(json: JSONObject): PaymentMethod? {
         val paymentMethod = PaymentMethodJsonParser().parse(json.getJSONObject("payment_method"))
         val linkPaymentDetailsJson = json.optJSONObject("link_payment_details")
+        val isLinkOrigin = optBoolean(json, "is_link_origin")
 
         if (isUnsupportedLinkPaymentDetailsType(linkPaymentDetailsJson)) {
             // This is a Link payment method, but we don't support the type yet. We can't render them, so hide them.
@@ -49,6 +51,8 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
         //  contains payment method and Link information, but we can't easily do that right now.
         return paymentMethod.copy(
             linkPaymentDetails = linkPaymentDetails,
+            // A payment method is in passthrough mode if it has Link origin but no link details
+            isLinkPassthroughMode = isLinkOrigin && linkPaymentDetails == null,
         )
     }
 

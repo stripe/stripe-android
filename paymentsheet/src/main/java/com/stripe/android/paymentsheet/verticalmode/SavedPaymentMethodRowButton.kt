@@ -14,7 +14,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -22,6 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.paymentsheet.ui.getSublabel
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -64,7 +64,7 @@ internal fun SavedPaymentMethodRowButton(
             )
         },
         title = paymentMethodTitle.resolve(),
-        subtitle = displayableSavedPaymentMethod.paymentMethod.linkPaymentDetails?.sublabel?.resolve(),
+        subtitle = displayableSavedPaymentMethod.paymentMethod.getSublabel()?.resolve(),
         promoText = null,
         onClick = onClick,
         modifier = modifier
