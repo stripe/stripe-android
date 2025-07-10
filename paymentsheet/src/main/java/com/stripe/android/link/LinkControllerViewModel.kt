@@ -37,7 +37,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 internal class LinkControllerViewModel @Inject constructor(
     application: Application,
     private val logger: Logger,
@@ -48,16 +50,9 @@ internal class LinkControllerViewModel @Inject constructor(
     val controllerComponentFactory: LinkControllerComponent.Factory,
 ) : AndroidViewModel(application) {
 
-    var configuration: PaymentSheet.Configuration = PaymentSheet.Configuration.default(application)
-        set(value) {
-            field = value
-            _state.update { State() }
-            viewModelScope.launch {
-                updateLinkConfiguration()
-            }
-        }
-
     private val tag = "LinkControllerViewModel"
+
+    private var configuration: LinkController.Configuration = LinkController.Configuration.default(application)
 
     private val _state = MutableStateFlow(State())
 
@@ -75,12 +70,6 @@ internal class LinkControllerViewModel @Inject constructor(
 
     private var presentJob: Job? = null
 
-    init {
-        viewModelScope.launch {
-            updateLinkConfiguration()
-        }
-    }
-
     fun state(context: Context): StateFlow<LinkController.State> {
         return _state.mapAsStateFlow { state ->
             LinkController.State(
@@ -89,6 +78,14 @@ internal class LinkControllerViewModel @Inject constructor(
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
+    }
+
+    fun configure(configuration: LinkController.Configuration) {
+        if (this.configuration == configuration) {
+            return
+        }
+        this.configuration = configuration
+        reloadSession()
     }
 
     fun onPresent(
@@ -121,6 +118,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 return@launch
             }
 
+            // TODO: Error.
             val configuration = state.linkConfiguration
                 ?.copy(
                     customerInfo = LinkConfiguration.CustomerInfo(
@@ -240,6 +238,14 @@ internal class LinkControllerViewModel @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    fun reloadSession() {
+        logger.debug("$tag: loading session")
+        _state.update { State() }
+        viewModelScope.launch {
+            updateLinkConfiguration()
         }
     }
 

@@ -19,8 +19,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -159,6 +162,15 @@ internal class PaymentSheetPlaygroundActivity :
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
+            val linkController = remember {
+                LinkController.create(
+                    activity = this,
+                    presentPaymentMethodCallback = viewModel::onLinkControllerPresentPaymentMethod,
+                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
+                    createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
+                )
+            }
+
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
@@ -242,6 +254,7 @@ internal class PaymentSheetPlaygroundActivity :
                                 playgroundState = playgroundState,
                                 paymentSheet = paymentSheet,
                                 flowController = flowController,
+                                linkController = linkController,
                                 customerSheet = customerSheet,
                                 addressLauncher = addressLauncher,
                             )
@@ -257,6 +270,17 @@ internal class PaymentSheetPlaygroundActivity :
                     Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
+            }
+
+            val prepareCount by viewModel.prepareCount.collectAsState()
+            var lastPrepareCount by rememberSaveable { mutableIntStateOf(prepareCount) }
+            LaunchedEffect(playgroundState?.integrationType, prepareCount) {
+                if (playgroundState?.integrationType == PlaygroundConfigurationData.IntegrationType.LinkController) {
+                    if (lastPrepareCount != prepareCount && prepareCount > 1) {
+                        linkController.reloadSession()
+                    }
+                    lastPrepareCount = prepareCount
+                }
             }
         }
     }
@@ -327,6 +351,7 @@ internal class PaymentSheetPlaygroundActivity :
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
+        linkController: LinkController,
         customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
@@ -369,6 +394,7 @@ internal class PaymentSheetPlaygroundActivity :
                     PlaygroundConfigurationData.IntegrationType.LinkController -> {
                         LinkControllerUi(
                             viewModel = viewModel,
+                            linkController = linkController,
                             playgroundState = playgroundState,
                         )
                     }

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.util.Patterns
-import androidx.activity.ComponentActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -38,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,34 +49,19 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun LinkControllerUi(
     viewModel: PaymentSheetPlaygroundViewModel,
+    linkController: LinkController,
     playgroundState: PlaygroundState.Payment,
 ) {
-    val activity = LocalContext.current as ComponentActivity
-    var presentPaymentMethodsResult by remember { mutableStateOf<LinkController.PresentPaymentMethodsResult?>(null) }
-    var lookupConsumerResult by remember { mutableStateOf<LinkController.LookupConsumerResult?>(null) }
-    var createPaymentMethodResult by remember { mutableStateOf<LinkController.CreatePaymentMethodResult?>(null) }
-
-    val linkController = remember {
-        LinkController.create(
-            activity = activity,
-            presentPaymentMethodCallback = { presentPaymentMethodsResult = it },
-            lookupConsumerCallback = { lookupConsumerResult = it },
-            createPaymentMethodCallback = { createPaymentMethodResult = it }
-        )
-    }
-
-    LaunchedEffect(playgroundState) {
-        val configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
-        linkController.setConfiguration(configuration)
-    }
-
+    val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
     val linkControllerState by linkController.state.collectAsState()
 
+    LaunchedEffect(playgroundState) {
+        linkController.configure(playgroundState.linkControllerConfiguration())
+    }
+
     LinkControllerUi(
-        linkControllerState = linkControllerState,
-        presentPaymentMethodsResult = presentPaymentMethodsResult,
-        lookupConsumerResult = lookupConsumerResult,
-        createPaymentMethodResult = createPaymentMethodResult,
+        controllerState = linkControllerState,
+        playgroundState = linkControllerPlaygroundState,
         onEmailChange = { email ->
             if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 linkController.lookupConsumer(email)
@@ -94,23 +76,21 @@ internal fun LinkControllerUi(
 
 @Composable
 internal fun LinkControllerUi(
-    linkControllerState: LinkController.State,
-    presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult?,
-    lookupConsumerResult: LinkController.LookupConsumerResult?,
-    createPaymentMethodResult: LinkController.CreatePaymentMethodResult?,
+    controllerState: LinkController.State,
+    playgroundState: LinkControllerPlaygroundState,
     onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     val presentPaymentMethodsResultError =
-        (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
+        (playgroundState.presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
             ?.error
     val lookupConsumerError =
-        (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)
+        (playgroundState.lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)
             ?.error
     val createPaymentMethodError =
-        (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)
+        (playgroundState.createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)
             ?.error
     val errorToPresent = presentPaymentMethodsResultError ?: lookupConsumerError ?: createPaymentMethodError
 
@@ -143,11 +123,11 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(vertical = 20.dp))
 
-        when (lookupConsumerResult) {
+        when (playgroundState.lookupConsumerResult) {
             is LinkController.LookupConsumerResult.Success -> {
-                val exists = if (lookupConsumerResult.isConsumer) "exists" else "does not exist"
+                val exists = if (playgroundState.lookupConsumerResult.isConsumer) "exists" else "does not exist"
                 Text(
-                    text = "${lookupConsumerResult.email} $exists",
+                    text = "${playgroundState.lookupConsumerResult.email} $exists",
                     style = MaterialTheme.typography.body1,
                 )
             }
@@ -157,16 +137,16 @@ internal fun LinkControllerUi(
         }
 
         PaymentMethodButton(
-            preview = linkControllerState.selectedPaymentMethodPreview,
+            preview = controllerState.selectedPaymentMethodPreview,
             onClick = { onPaymentMethodButtonClick(email) },
         )
         Spacer(Modifier.height(16.dp))
         ConfirmButton(
             onClick = onCreatePaymentMethodClick,
-            enabled = linkControllerState.selectedPaymentMethodPreview != null,
+            enabled = controllerState.selectedPaymentMethodPreview != null,
         )
 
-        val createPaymentMethodResultText = linkControllerState.createdPaymentMethod
+        val createPaymentMethodResultText = controllerState.createdPaymentMethod
             ?.let { it.id ?: "Payment method created (no id)" }
             ?: ""
         Text(
@@ -181,10 +161,8 @@ internal fun LinkControllerUi(
 private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
         LinkControllerUi(
-            linkControllerState = LinkController.State(),
-            presentPaymentMethodsResult = null,
-            lookupConsumerResult = null,
-            createPaymentMethodResult = null,
+            controllerState = LinkController.State(),
+            playgroundState = LinkControllerPlaygroundState(),
             onEmailChange = {},
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {}

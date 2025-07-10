@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.app.Activity
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -13,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
@@ -71,6 +73,10 @@ class LinkController @Inject internal constructor(
         )
     }
 
+    fun configure(configuration: Configuration) {
+        viewModel.configure(configuration)
+    }
+
     fun presentPaymentMethods(email: String?) {
         viewModel.onPresent(linkActivityResultLauncher, email)
     }
@@ -83,10 +89,47 @@ class LinkController @Inject internal constructor(
         viewModel.onLookupConsumer(email)
     }
 
-    // TODO
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun setConfiguration(configuration: PaymentSheet.Configuration) {
-        viewModel.configuration = configuration
+    fun reloadSession() {
+        viewModel.reloadSession()
+    }
+
+    @Parcelize
+    @Poko
+    class Configuration internal constructor(
+        internal val merchantDisplayName: String,
+        internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val link: PaymentSheet.LinkConfiguration,
+    ) : Parcelable {
+
+        class Builder(private val merchantDisplayName: String) {
+            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
+                ConfigurationDefaults.cardBrandAcceptance
+
+            private var link: PaymentSheet.LinkConfiguration =
+                ConfigurationDefaults.link
+
+            fun cardBrandAcceptance(cardBrandAcceptance: PaymentSheet.CardBrandAcceptance) = apply {
+                this.cardBrandAcceptance = cardBrandAcceptance
+            }
+
+            fun link(link: PaymentSheet.LinkConfiguration) = apply {
+                this.link = link
+            }
+
+            fun build() = Configuration(
+                merchantDisplayName = merchantDisplayName,
+                cardBrandAcceptance = cardBrandAcceptance,
+                link = link,
+            )
+        }
+
+        internal companion object {
+            fun default(context: Context): Configuration {
+                val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
+                return Builder(appName).build()
+            }
+        }
     }
 
     @Parcelize
