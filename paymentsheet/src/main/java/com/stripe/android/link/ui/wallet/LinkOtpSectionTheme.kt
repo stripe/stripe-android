@@ -79,23 +79,25 @@ internal fun createLinkOtpSectionTheme(
     isDark: Boolean = isSystemInDarkTheme()
 ): LinkOtpSectionTheme {
     val colors = appearance?.getColors(isDark)
+    val cornerShape = appearance?.shapes?.cornerRadiusDp?.let { RoundedCornerShape(it.dp) }
+    val titleStyle = LinkTheme.typography.body
     return LinkOtpSectionTheme(
-        focusedBackground = colors?.component?.let { Color(it) } ?: LinkTheme.colors.surfacePrimary,
-        borderColor = colors?.componentBorder?.let { Color(it) } ?: LinkTheme.colors.borderDefault,
-        textColor = colors?.onComponent?.let { Color(it) } ?: LinkTheme.colors.textPrimary,
-        selectedBorderColor = colors?.primary?.let { Color(it) } ?: LinkTheme.colors.borderSelected,
-        disabledBackground = (colors?.component?.let { Color(it) } ?: LinkTheme.colors.surfaceSecondary)
+        focusedBackground = extractColor(colors?.component, LinkTheme.colors.surfacePrimary),
+        borderColor = extractColor(colors?.componentBorder, LinkTheme.colors.borderDefault),
+        textColor = extractColor(colors?.onComponent, LinkTheme.colors.textPrimary),
+        selectedBorderColor = extractColor(colors?.primary, LinkTheme.colors.borderSelected),
+        disabledBackground = extractColor(colors?.component, LinkTheme.colors.surfaceSecondary)
             .copy(alpha = 0.6f),
-        cornerShape = appearance?.shapes?.cornerRadiusDp?.let { RoundedCornerShape(it.dp) }
-            ?: LinkTheme.shapes.default,
-        titleTextStyle = run {
-            val baseStyle = LinkTheme.typography.body
-            if (appearance != null) {
-                baseStyle.copy(fontSize = baseStyle.fontSize * appearance.typography.sizeScaleFactor)
-            } else {
-                baseStyle
-            }
+        cornerShape = cornerShape ?: LinkTheme.shapes.default,
+        titleTextStyle = if (appearance != null) {
+            titleStyle.copy(fontSize = titleStyle.fontSize * appearance.typography.sizeScaleFactor)
+        } else {
+            titleStyle
         },
         normalBackground = LinkTheme.colors.surfaceSecondary
     )
-} 
+}
+
+private fun extractColor(colorValue: Int?, fallback: Color): Color {
+    return colorValue?.let { Color(it) } ?: fallback
+}

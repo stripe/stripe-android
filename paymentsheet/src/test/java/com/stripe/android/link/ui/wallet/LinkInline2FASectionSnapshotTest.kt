@@ -68,4 +68,4 @@ internal class LinkInline2FASectionSnapshotTest {
             )
         }
     }
-} 
+}

@@ -77,11 +77,7 @@ internal class WalletButtonsContent(
                             is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
                                 email = button.email,
                                 enabled = state.buttonsEnabled,
-                                onClick = {
-                                    interactor.handleViewAction(
-                                        OnButtonPressed(button)
-                                    )
-                                },
+                                onClick = { interactor.handleViewAction(OnButtonPressed(button)) },
                             )
                             is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
                                 interactor.handleViewAction(
