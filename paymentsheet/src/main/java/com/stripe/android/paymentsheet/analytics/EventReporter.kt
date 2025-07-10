@@ -130,14 +130,14 @@ internal interface EventReporter {
      * The customer has pressed the confirm button.
      */
     fun onPressConfirmButton(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
     )
 
     /**
      * Payment or setup have succeeded.
      */
     fun onPaymentSuccess(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     )
 
@@ -145,7 +145,7 @@ internal interface EventReporter {
      * Payment or setup have failed.
      */
     fun onPaymentFailure(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         error: PaymentSheetConfirmationError,
     )
 

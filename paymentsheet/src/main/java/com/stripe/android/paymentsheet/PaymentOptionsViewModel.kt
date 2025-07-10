@@ -85,7 +85,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
-            eventReporter.onPressConfirmButton(selection.value)
+            selection.value?.let { paymentSelection ->
+                eventReporter.onPressConfirmButton(paymentSelection)
+            }
             onUserSelection()
         },
     )

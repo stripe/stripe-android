@@ -49,7 +49,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
         } else {
-            eventReporter.onPressConfirmButton(selectionHolder.selection.value)
+            selectionHolder.selection.value?.let { paymentSelection ->
+                eventReporter.onPressConfirmButton(paymentSelection)
+            }
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {

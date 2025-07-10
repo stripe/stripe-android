@@ -65,10 +65,11 @@ class DefaultFormActivityConfirmationHelperTest {
     }
 
     @Test
-    fun `confirm invokes eventReporter but does not start confirmation with null selection`() = testScenario {
+    fun `confirm does not invoke eventReporter when selection is null`() = testScenario {
         assertThat(confirmationHelper.confirm()).isNull()
 
-        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem()).isNull()
+        // Should not report button press when there's no selection
+        eventReporter.pressConfirmButtonCalls.ensureAllEventsConsumed()
     }
 
     @Test
