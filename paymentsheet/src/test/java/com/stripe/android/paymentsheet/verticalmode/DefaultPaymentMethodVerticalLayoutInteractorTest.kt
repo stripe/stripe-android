@@ -561,10 +561,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "link" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.Link())
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -582,7 +582,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             displayablePaymentMethods.first { it.code == "link" }.onClick()
 
             assertThat(rowSelectionCallbackInvoked).isTrue()
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -600,7 +600,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
 
             assertThat(rowSelectionCallbackInvoked).isTrue()
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -952,7 +952,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             assertThat((selection.value as PaymentSelection.Saved).paymentMethod)
                 .isEqualTo(savedPaymentMethod.paymentMethod)
             assertThat(reportedSelectedPaymentMethodType).isEqualTo("saved")
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isTrue()
         }
     }
 
@@ -968,7 +968,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
             assertThat(rowSelectionCallbackInvoked).isTrue()
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isTrue()
         }
     }
 
@@ -1005,7 +1005,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isNull()
                 }
             }
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -1307,7 +1307,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             isCurrentScreenSource.value = true
 
             assertThat(selection.value).isEqualTo(verticalModeSelection)
-            assertThat(updateSelectionTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
         }
     }
 
@@ -1537,7 +1537,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val isCurrentScreen: MutableStateFlow<Boolean> = MutableStateFlow(initialIsCurrentScreen)
         val paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(incentive)
 
-        val updateSelectionTurbine = Turbine<Unit>()
+        val updateSelectionTurbine = Turbine<Boolean>()
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -1559,7 +1559,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             canUpdateFullPaymentMethodDetails = stateFlowOf(canUpdateFullPaymentMethodDetails),
             updateSelection = { paymentSelection, isFormScreen ->
                 selection.value = paymentSelection
-                updateSelectionTurbine.add(Unit)
+                updateSelectionTurbine.add(isFormScreen)
             },
             isCurrentScreen = isCurrentScreen,
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
@@ -1594,7 +1594,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     private class TestParams(
         val selection: MutableStateFlow<PaymentSelection?>,
-        val updateSelectionTurbine: Turbine<Unit>,
+        val updateSelectionTurbine: Turbine<Boolean>,
         val processingSource: MutableStateFlow<Boolean>,
         val temporarySelectionSource: MutableStateFlow<PaymentMethodCode?>,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
