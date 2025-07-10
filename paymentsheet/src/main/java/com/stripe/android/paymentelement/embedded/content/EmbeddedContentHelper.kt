@@ -228,11 +228,10 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
             canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
-            onSelectSavedPaymentMethod = ::setSelection,
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,
-            updateSelection = { updatedSelection ->
+            updateSelection = { updatedSelection, requiresConfirmation ->
                 setSelection(updatedSelection)
             },
             isCurrentScreen = stateFlowOf(true),
