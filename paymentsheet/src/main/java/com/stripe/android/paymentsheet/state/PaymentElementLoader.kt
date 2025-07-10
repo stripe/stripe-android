@@ -102,7 +102,13 @@ internal interface PaymentElementLoader {
         ) : InitializationMode() {
 
             override fun validate() {
-                // Nothing to do here
+                (intentConfiguration.mode as? IntentConfiguration.Mode.Payment)?.let {
+                    if (it.amount <= 0) {
+                        throw IllegalArgumentException(
+                            "Payment IntentConfiguration requires a positive amount."
+                        )
+                    }
+                }
             }
         }
     }

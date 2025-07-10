@@ -126,7 +126,7 @@ internal class EmbeddedPlaygroundActivity :
         setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
-            var loadingState by remember {
+            var loadingState: LoadingState by remember {
                 mutableStateOf(LoadingState.Loading)
             }
 
@@ -139,7 +139,9 @@ internal class EmbeddedPlaygroundActivity :
                     configuration = playgroundState.embeddedConfiguration(),
                 )
                 loadingState = when (result) {
-                    is EmbeddedPaymentElement.ConfigureResult.Failed -> LoadingState.Failed
+                    is EmbeddedPaymentElement.ConfigureResult.Failed -> {
+                        LoadingState.Failed(result.error.message ?: "Unknown error")
+                    }
                     is EmbeddedPaymentElement.ConfigureResult.Succeeded -> LoadingState.Complete
                 }
             }
@@ -331,8 +333,8 @@ internal class EmbeddedPlaygroundActivity :
         return this
     }
 
-    private enum class LoadingState {
-        Loading {
+    private sealed class LoadingState {
+        data object Loading : LoadingState() {
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
@@ -348,8 +350,8 @@ internal class EmbeddedPlaygroundActivity :
                     )
                 }
             }
-        },
-        Complete {
+        }
+        data object Complete : LoadingState() {
             @OptIn(WalletButtonsPreview::class)
             @Composable
             override fun Content(
@@ -365,19 +367,20 @@ internal class EmbeddedPlaygroundActivity :
 
                 embeddedPaymentElement.Content()
             }
-        },
-        Failed {
+        }
+        data class Failed(val message: String) : LoadingState() {
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
                 showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
+                Text(message)
                 Button(onClick = retry, Modifier.fillMaxWidth()) {
                     Text("Retry")
                 }
             }
-        };
+        }
 
         @Composable
         abstract fun Content(
