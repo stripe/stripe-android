@@ -1,12 +1,16 @@
 package com.stripe.android.customersheet.state
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.coroutines.Single
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
@@ -28,6 +32,7 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSd
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -37,10 +42,12 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
@@ -49,11 +56,15 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
-class DefaultCustomerSheetLoaderTest {
+internal class DefaultCustomerSheetLoaderTest {
+    private val dispatcher = StandardTestDispatcher()
     private val lpmRepository = LpmRepository()
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Before
     fun setup() {
@@ -411,6 +422,7 @@ class DefaultCustomerSheetLoaderTest {
             initializationDataSourceProvider = initDataSource,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            eventReporter = FakeCustomerSheetEventReporter(),
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
         )
@@ -450,6 +462,7 @@ class DefaultCustomerSheetLoaderTest {
             googlePayRepositoryFactory = { readyGooglePayRepository },
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            eventReporter = FakeCustomerSheetEventReporter(),
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
         )
@@ -514,6 +527,50 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `test load success fires success event`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(eventReporter = eventReporter)
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true
+            )
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(eventReporter.onLoadSucceededCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `test load failure fires failure event`() = runTest {
+        val eventReporter = FakeCustomerSheetEventReporter()
+
+        val loader = createCustomerSheetLoader(
+            eventReporter = eventReporter,
+            initializationDataSource = FakeCustomerSheetInitializationDataSource(
+                onLoadCustomerSheetSession = {
+                    CustomerSheetDataResult.failure(
+                        cause = Throwable("oops"),
+                        displayMessage = null
+                    )
+                }
+            )
+        )
+
+        val result = loader.load(
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true
+            )
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(eventReporter.onLoadFailedCalls.awaitItem().message).isEqualTo("oops")
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
@@ -549,6 +606,7 @@ class DefaultCustomerSheetLoaderTest {
         ),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
     ): CustomerSheetLoader {
         return createCustomerSheetLoader(
             initializationDataSourceProvider = CompletableSingle(initializationDataSource),
@@ -557,6 +615,7 @@ class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
+            eventReporter = eventReporter,
         )
     }
 
@@ -608,6 +667,7 @@ class DefaultCustomerSheetLoaderTest {
             IsFinancialConnectionsSdkAvailable { false },
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
@@ -618,6 +678,7 @@ class DefaultCustomerSheetLoaderTest {
             initializationDataSourceProvider = initializationDataSourceProvider,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = workContext,
         )
@@ -637,4 +698,77 @@ class DefaultCustomerSheetLoaderTest {
             paymentMethodTypes = listOf("card", "us_bank_account")
         )
     }
+}
+
+private class FakeCustomerSheetEventReporter : CustomerSheetEventReporter {
+    val onLoadSucceededCalls = Turbine<CustomerSheetSession>()
+    val onLoadFailedCalls = Turbine<Throwable>()
+
+    override fun onInit(
+        configuration: CustomerSheet.Configuration,
+        integrationType: CustomerSheetIntegration.Type,
+    ) = Unit
+
+    override fun onLoadSucceeded(customerSheetSession: CustomerSheetSession) {
+        onLoadSucceededCalls.add(customerSheetSession)
+    }
+
+    override fun onLoadFailed(error: Throwable) {
+        onLoadFailedCalls.add(error)
+    }
+
+    override fun onScreenPresented(screen: CustomerSheetEventReporter.Screen) = Unit
+
+    override fun onScreenHidden(screen: CustomerSheetEventReporter.Screen) = Unit
+
+    override fun onPaymentMethodSelected(code: String) = Unit
+
+    override fun onConfirmPaymentMethodSucceeded(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    ) = Unit
+
+    override fun onConfirmPaymentMethodFailed(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    ) = Unit
+
+    override fun onEditTapped() = Unit
+
+    override fun onEditCompleted() = Unit
+
+    override fun onRemovePaymentMethodSucceeded() = Unit
+
+    override fun onRemovePaymentMethodFailed() = Unit
+
+    override fun onAttachPaymentMethodSucceeded(style: CustomerSheetEventReporter.AddPaymentMethodStyle) = Unit
+
+    override fun onAttachPaymentMethodCanceled(style: CustomerSheetEventReporter.AddPaymentMethodStyle) = Unit
+
+    override fun onAttachPaymentMethodFailed(style: CustomerSheetEventReporter.AddPaymentMethodStyle) = Unit
+
+    override fun onShowPaymentOptionBrands(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand,
+    ) = Unit
+
+    override fun onHidePaymentOptionBrands(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand?,
+    ) = Unit
+
+    override fun onBrandChoiceSelected(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand,
+    ) = Unit
+
+    override fun onUpdatePaymentMethodSucceeded(selectedBrand: CardBrand?) = Unit
+
+    override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand?, error: Throwable) = Unit
+
+    override fun onCardNumberCompleted() = Unit
+
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) = Unit
+
+    override fun onAnalyticsEvent(event: AnalyticsEvent) = Unit
 }

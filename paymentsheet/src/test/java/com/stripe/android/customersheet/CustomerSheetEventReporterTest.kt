@@ -17,6 +17,8 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_PAYMENT_OPTION_BRANDS
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT_WITH_CUSTOMER_ADAPTER
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT_WITH_CUSTOMER_SESSION
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_LOAD_FAILED
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_LOAD_SUCCEEDED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_PAYMENT_METHOD_SELECTED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
@@ -29,6 +31,8 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SHOW_PAYMENT_OPTION_BRANDS
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD_FAILED
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_ERROR_MESSAGE
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_HAS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_PAYMENT_METHOD_TYPE
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_SELECTED_LPM
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_SYNC_DEFAULT_ENABLED
@@ -89,6 +93,58 @@ class CustomerSheetEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_INIT_WITH_CUSTOMER_SESSION
+            }
+        )
+    }
+
+    @Test
+    fun `onLoadSucceeded should fire analytics request with expected event value`() {
+        val customerSheetSession = CustomerSheetFixtures.createCustomerSheetSession(
+            hasCustomerSession = true,
+            isPaymentMethodSyncDefaultEnabled = true,
+            hasDefaultPaymentMethod = true
+        )
+
+        eventReporter.onLoadSucceeded(customerSheetSession)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_LOAD_SUCCEEDED &&
+                    req.params[FIELD_SYNC_DEFAULT_ENABLED] == true &&
+                    req.params[FIELD_HAS_DEFAULT_PAYMENT_METHOD] == true
+            }
+        )
+    }
+
+    @Test
+    fun `onLoadSucceeded with sync disabled should not include has_default_payment_method`() {
+        val customerSheetSession = CustomerSheetFixtures.createCustomerSheetSession(
+            hasCustomerSession = true,
+            isPaymentMethodSyncDefaultEnabled = false,
+            hasDefaultPaymentMethod = true
+        )
+
+        eventReporter.onLoadSucceeded(customerSheetSession)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_LOAD_SUCCEEDED &&
+                    req.params[FIELD_SYNC_DEFAULT_ENABLED] == false &&
+                    !req.params.containsKey(FIELD_HAS_DEFAULT_PAYMENT_METHOD)
+            }
+        )
+    }
+
+    @Test
+    fun `onLoadFailed should fire analytics request with expected event value`() {
+        val error = RuntimeException("Test error message")
+
+        eventReporter.onLoadFailed(error)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_LOAD_FAILED &&
+                    req.params[FIELD_ERROR_MESSAGE] == "Test error message"
             }
         )
     }

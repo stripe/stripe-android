@@ -5,6 +5,8 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
+import com.stripe.android.customersheet.data.CustomerSheetSession
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.CardBrand
 
 internal sealed class CustomerSheetEvent : AnalyticsEvent {
@@ -237,9 +239,42 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf()
     }
 
+    class LoadSucceeded(
+        private val customerSheetSession: CustomerSheetSession,
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_LOAD_SUCCEEDED
+
+        override val additionalParams: Map<String, Any?>
+            get() {
+                val isPaymentMethodSyncDefaultEnabled = getDefaultPaymentMethodsEnabledForCustomerSheet(
+                    customerSheetSession.elementsSession
+                )
+                val params = mutableMapOf<String, Any?>()
+                if (customerSheetSession.elementsSession.customer?.session != null) {
+                    params[FIELD_SYNC_DEFAULT_ENABLED] = isPaymentMethodSyncDefaultEnabled
+                    if (isPaymentMethodSyncDefaultEnabled) {
+                        params[FIELD_HAS_DEFAULT_PAYMENT_METHOD] =
+                            customerSheetSession.elementsSession.customer?.defaultPaymentMethod != null
+                    }
+                }
+                return params
+            }
+    }
+
+    class LoadFailed(
+        error: Throwable,
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_LOAD_FAILED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_ERROR_MESSAGE to error.message
+        )
+    }
+
     internal companion object {
         const val CS_INIT_WITH_CUSTOMER_ADAPTER = "cs_init_with_customer_adapter"
         const val CS_INIT_WITH_CUSTOMER_SESSION = "cs_init_with_customer_session"
+        const val CS_LOAD_SUCCEEDED = "cs_load_succeeded"
+        const val CS_LOAD_FAILED = "cs_load_failed"
 
         const val CS_ADD_PAYMENT_METHOD_SCREEN_PRESENTED =
             "cs_add_payment_method_screen_presented"
@@ -306,6 +341,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"
+        const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
