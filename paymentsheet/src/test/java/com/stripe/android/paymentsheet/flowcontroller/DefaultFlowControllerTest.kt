@@ -1135,7 +1135,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
         flowController.onPaymentResult(PaymentResult.Completed)
 
-        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(any<PaymentSheetResult.Completed>())
     }
 
     @Test
@@ -1170,7 +1170,7 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentLauncher, never()).confirm(any<ConfirmPaymentIntentParams>())
 
-        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Canceled)
+        verify(paymentResultCallback).onPaymentSheetResult(any<PaymentSheetResult.Canceled>())
     }
 
     @Test
@@ -1209,7 +1209,7 @@ internal class DefaultFlowControllerTest {
 
         verify(paymentLauncher).confirm(any<ConfirmPaymentIntentParams>())
         flowController.onPaymentResult(PaymentResult.Completed)
-        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed())
     }
 
     private fun verifyPaymentSelection(
@@ -1268,9 +1268,7 @@ internal class DefaultFlowControllerTest {
             GooglePayPaymentMethodLauncher.Result.Canceled
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(
-            PaymentSheetResult.Canceled
-        )
+        verify(paymentResultCallback).onPaymentSheetResult(any<PaymentSheetResult.Canceled>())
     }
 
     @Test
@@ -1618,7 +1616,7 @@ internal class DefaultFlowControllerTest {
 
         flowController.confirm()
 
-        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed)
+        verify(paymentResultCallback).onPaymentSheetResult(PaymentSheetResult.Completed())
     }
 
     @Test
@@ -2010,7 +2008,7 @@ internal class DefaultFlowControllerTest {
             eq(PaymentSheet.Appearance())
         )
 
-        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed()))
     }
 
     @Test
@@ -2580,7 +2578,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentResult(PaymentResult.Completed)
-        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed))
+        verify(paymentResultCallback).onPaymentSheetResult(eq(PaymentSheetResult.Completed()))
     }
 
     private fun enqueueConfirmAndVerifyPaymentSelection(
