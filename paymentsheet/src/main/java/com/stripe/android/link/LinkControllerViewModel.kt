@@ -24,6 +24,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,6 +55,8 @@ internal class LinkControllerViewModel @Inject constructor(
 
     private var configuration: LinkController.Configuration = LinkController.Configuration.default(application)
 
+    private val _account = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account }
+
     private val _state = MutableStateFlow(State())
 
     private val _presentPaymentMethodsResultFlow =
@@ -71,9 +74,9 @@ internal class LinkControllerViewModel @Inject constructor(
     private var presentJob: Job? = null
 
     fun state(context: Context): StateFlow<LinkController.State> {
-        return _state.mapAsStateFlow { state ->
+        return combineAsStateFlow(_account, _state) { account, state ->
             LinkController.State(
-                email = state.presentedForEmail,
+                isConsumerVerified = account?.isVerified,
                 selectedPaymentMethodPreview = state.selectedPaymentMethod?.toPreview(context),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
@@ -208,7 +211,7 @@ internal class LinkControllerViewModel @Inject constructor(
             ?: return
         val configuration = state.linkConfiguration
             ?: return
-        val account = linkAccountHolder.linkAccountInfo.value.account
+        val account = _account.value
             ?: return
         viewModelScope.launch {
             val apiResult = if (configuration.passthroughModeEnabled) {

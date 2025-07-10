@@ -92,7 +92,7 @@ class LinkController @Inject internal constructor(
     class State
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        val email: String? = null,
+        val isConsumerVerified: Boolean? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
     ) : Parcelable

@@ -130,12 +130,19 @@ internal fun LinkControllerUi(
                 val exists = if (playgroundState.lookupConsumerResult.isConsumer) "exists" else "does not exist"
                 Text(
                     text = "${playgroundState.lookupConsumerResult.email} $exists",
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.body2,
                 )
             }
             is LinkController.LookupConsumerResult.Failed, null -> {
                 // No-op.
             }
+        }
+
+        controllerState.isConsumerVerified?.let { isConsumerVerified ->
+            Text(
+                text = "Consumer verified: $isConsumerVerified",
+                style = MaterialTheme.typography.body2,
+            )
         }
 
         PaymentMethodButton(
