@@ -12,6 +12,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkControllerComponent
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -59,12 +60,32 @@ class LinkControllerViewModelTest {
 
         viewModel.state(application).test {
             assertThat(awaitItem()).isEqualTo(
-                LinkController.State(
-                    isConsumerVerified = null,
-                    selectedPaymentMethodPreview = null,
-                    createdPaymentMethod = null
-                )
+                LinkController.State()
             )
+        }
+    }
+
+    @Test
+    fun `state is updated when account changes`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().isConsumerVerified).isNull()
+
+            linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+
+            assertThat(awaitItem().isConsumerVerified).isTrue()
+
+            val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
+                verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+            )
+            linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(unverifiedSession)))
+
+            assertThat(awaitItem().isConsumerVerified).isFalse()
+
+            linkAccountHolder.set(LinkAccountUpdate.Value(null))
+
+            assertThat(awaitItem().isConsumerVerified).isNull()
         }
     }
 
