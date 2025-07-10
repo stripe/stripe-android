@@ -77,6 +77,24 @@ internal sealed class PaymentSelection : Parcelable {
         override val requiresConfirmation: Boolean
             get() = false
 
+        val billingDetails: PaymentMethod.BillingDetails?
+            get() = selectedPayment?.let {
+                val billingAddress = it.details.billingAddress
+                PaymentMethod.BillingDetails(
+                    address = Address(
+                        city = billingAddress?.locality,
+                        country = billingAddress?.countryCode?.value,
+                        line1 = billingAddress?.line1,
+                        line2 = billingAddress?.line2,
+                        postalCode = billingAddress?.postalCode,
+                        state = billingAddress?.administrativeArea,
+                    ),
+                    email = it.details.billingEmailAddress,
+                    phone = it.billingPhone,
+                    name = billingAddress?.name,
+                )
+            }
+
         override fun mandateText(
             merchantName: String,
             isSetupFlow: Boolean,
@@ -441,7 +459,7 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.ExternalPaymentMethod -> billingDetails
         is PaymentSelection.CustomPaymentMethod -> billingDetails
         PaymentSelection.GooglePay -> null
-        is PaymentSelection.Link -> null
+        is PaymentSelection.Link -> billingDetails
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
         is PaymentSelection.Saved -> paymentMethod.billingDetails
         is PaymentSelection.ShopPay -> null
