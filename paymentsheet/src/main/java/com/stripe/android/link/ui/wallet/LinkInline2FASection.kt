@@ -101,7 +101,7 @@ internal fun LinkInline2FASection(
 private fun OTPSection(
     state: VerificationViewState,
     otpElement: OTPElement,
-    theme: LinkOtpSectionTheme
+    theme: LinkInlineOTPTheme
 ) {
     Box(
         contentAlignment = Alignment.Center
@@ -137,7 +137,7 @@ private fun OTPSection(
 @Composable
 private fun Title(
     verificationState: VerificationViewState,
-    theme: LinkOtpSectionTheme
+    theme: LinkInlineOTPTheme
 ) {
     Text(
         text = stringResource(
@@ -237,57 +237,5 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         otpElement = otpElement,
         onResend = { },
         appearance = null
-    )
-}
-
-@Preview(name = "Custom appearance", showBackground = true)
-@Composable
-private fun LinkEmbeddedOtpSectionCustomAppearancePreview() {
-    val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
-        controller = OTPController()
-    )
-
-    val verificationState = VerificationViewState(
-        isProcessing = false,
-        requestFocus = true,
-        errorMessage = null,
-        isSendingNewCode = false,
-        didSendNewCode = false,
-        redactedPhoneNumber = "***-***-1234",
-        email = "user@example.com",
-        isDialog = false
-    )
-
-    // Custom appearance demonstrating comprehensive iOS asElementsTheme equivalent mapping
-    val customAppearance = PaymentSheet.Appearance(
-        typography = PaymentSheet.Typography(
-            sizeScaleFactor = 1.2f,
-            fontResId = null
-        ),
-        shapes = PaymentSheet.Shapes(
-            cornerRadiusDp = 16f,
-            borderStrokeWidthDp = 2f
-        ),
-        colorsLight = PaymentSheet.Colors(
-            primary = androidx.compose.ui.graphics.Color.Blue,
-            surface = androidx.compose.ui.graphics.Color.White,
-            component = androidx.compose.ui.graphics.Color.Cyan,
-            componentBorder = androidx.compose.ui.graphics.Color.Green,
-            componentDivider = androidx.compose.ui.graphics.Color.Gray,
-            onComponent = androidx.compose.ui.graphics.Color.Red,
-            onSurface = androidx.compose.ui.graphics.Color.Black,
-            subtitle = androidx.compose.ui.graphics.Color.DarkGray,
-            placeholderText = androidx.compose.ui.graphics.Color.Gray,
-            appBarIcon = androidx.compose.ui.graphics.Color.Black,
-            error = androidx.compose.ui.graphics.Color.Red
-        )
-    )
-
-    LinkInline2FASection(
-        verificationState = verificationState,
-        otpElement = otpElement,
-        onResend = { },
-        appearance = customAppearance
     )
 }

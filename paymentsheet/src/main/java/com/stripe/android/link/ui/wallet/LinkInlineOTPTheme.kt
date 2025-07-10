@@ -11,7 +11,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.OTPElementColors
 
-internal data class LinkOtpSectionTheme(
+internal data class LinkInlineOTPTheme(
     /**
      * Background color for focused digit input boxes
      */
@@ -68,20 +68,17 @@ internal data class LinkOtpSectionTheme(
 
 /**
  * Creates a LinkOtpSectionTheme from PaymentSheet.Appearance configuration.
- *
- * @param appearance The PaymentSheet appearance configuration, or null for defaults
- * @param isDark Whether the current system is in dark mode
- * @return Configured theme with all computed values
  */
 @Composable
 internal fun createLinkOtpSectionTheme(
     appearance: PaymentSheet.Appearance?,
     isDark: Boolean = isSystemInDarkTheme()
-): LinkOtpSectionTheme {
+): LinkInlineOTPTheme {
     val colors = appearance?.getColors(isDark)
     val cornerShape = appearance?.shapes?.cornerRadiusDp?.let { RoundedCornerShape(it.dp) }
     val titleStyle = LinkTheme.typography.body
-    return LinkOtpSectionTheme(
+    val sizeScaleFactor = appearance?.typography?.sizeScaleFactor ?: 1f
+    return LinkInlineOTPTheme(
         focusedBackground = extractColor(colors?.component, LinkTheme.colors.surfacePrimary),
         borderColor = extractColor(colors?.componentBorder, LinkTheme.colors.borderDefault),
         textColor = extractColor(colors?.onComponent, LinkTheme.colors.textPrimary),
@@ -89,11 +86,7 @@ internal fun createLinkOtpSectionTheme(
         disabledBackground = extractColor(colors?.component, LinkTheme.colors.surfaceSecondary)
             .copy(alpha = 0.6f),
         cornerShape = cornerShape ?: LinkTheme.shapes.default,
-        titleTextStyle = if (appearance != null) {
-            titleStyle.copy(fontSize = titleStyle.fontSize * appearance.typography.sizeScaleFactor)
-        } else {
-            titleStyle
-        },
+        titleTextStyle = titleStyle.copy(fontSize = titleStyle.fontSize * sizeScaleFactor),
         normalBackground = LinkTheme.colors.surfaceSecondary
     )
 }
