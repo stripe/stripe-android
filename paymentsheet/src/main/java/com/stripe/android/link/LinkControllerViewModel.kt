@@ -9,22 +9,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.LinkUnavailableException
-import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Job
@@ -45,8 +41,7 @@ import javax.inject.Singleton
 internal class LinkControllerViewModel @Inject constructor(
     application: Application,
     private val logger: Logger,
-    private val paymentElementLoader: PaymentElementLoader,
-    private val linkGateFactory: LinkGate.Factory,
+    private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkApiRepository: LinkApiRepository,
     val controllerComponentFactory: LinkControllerComponent.Factory,
@@ -230,38 +225,11 @@ internal class LinkControllerViewModel @Inject constructor(
 
     private suspend fun updateLinkConfiguration(): Result<LinkConfiguration> {
         _state.update { it.copy(linkConfigurationResult = null) }
-        val result = loadLinkConfiguration()
+        val result = linkConfigurationLoader.load(configuration)
         _state.update { state ->
             state.copy(linkConfigurationResult = result)
         }
         return result
-    }
-
-    private suspend fun loadLinkConfiguration(): Result<LinkConfiguration> {
-        return paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                ),
-            ),
-            configuration = configuration.asCommonConfiguration(),
-            metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false,
-                initializedViaCompose = false,
-            )
-        ).mapCatching { state ->
-            @Suppress("TooGenericExceptionCaught")
-            try {
-                checkNotNull(state.paymentMethodMetadata.linkState?.configuration).also {
-                    val linkGate = linkGateFactory.create(it)
-                    check(linkGate.useNativeLink) { "Native Link is not available" }
-                }
-            } catch (e: Throwable) {
-                throw LinkUnavailableException(e)
-            }
-        }.onFailure { error ->
-            logger.error("$tag: Failed to load LinkConfiguration", error)
-        }
     }
 
     private suspend fun awaitLinkConfigurationResult(): Result<LinkConfiguration> {
