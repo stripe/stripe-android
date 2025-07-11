@@ -80,7 +80,8 @@ internal class LinkActivity : ComponentActivity() {
     private fun LinkLaunchMode.setTheme() {
         when (this) {
             is LinkLaunchMode.Full,
-            is LinkLaunchMode.PaymentMethodSelection -> setTheme(R.style.StripePaymentSheetDefaultTheme)
+            is LinkLaunchMode.PaymentMethodSelection,
+            is LinkLaunchMode.Authentication -> setTheme(R.style.StripePaymentSheetDefaultTheme)
             is LinkLaunchMode.Confirmation -> setTheme(R.style.StripeTransparentTheme)
         }
         renderEdgeToEdge()

@@ -16,6 +16,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -29,7 +30,8 @@ internal fun VerificationDialog(
     modifier: Modifier,
     linkAccount: LinkAccount,
     onVerificationSucceeded: () -> Unit,
-    onDismissClicked: () -> Unit
+    onDismissClicked: () -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel = linkViewModel<VerificationViewModel> { parentComponent ->
         VerificationViewModel.factory(
@@ -37,7 +39,8 @@ internal fun VerificationDialog(
             linkAccount = linkAccount,
             isDialog = true,
             onVerificationSucceeded = onVerificationSucceeded,
-            onDismissClicked = onDismissClicked
+            onDismissClicked = onDismissClicked,
+            dismissWithResult = dismissWithResult
         )
     }
 

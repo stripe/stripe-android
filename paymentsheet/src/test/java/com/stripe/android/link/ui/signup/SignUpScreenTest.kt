@@ -16,6 +16,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAuth
@@ -256,7 +257,9 @@ internal class SignUpScreenTest {
             savedStateHandle = SavedStateHandle(),
             navigateAndClearStack = {},
             dismissalCoordinator = dismissalCoordinator,
-            moveToWeb = moveToWeb
+            moveToWeb = moveToWeb,
+            linkLaunchMode = LinkLaunchMode.Full,
+            dismissWithResult = {}
         )
     }
 
