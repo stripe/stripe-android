@@ -1,7 +1,9 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -158,6 +160,26 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
+    shopPayConfiguration = null,
+    googlePlacesApiKey = null,
+)
+
+internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+    merchantDisplayName = merchantDisplayName,
+    customer = null,
+    googlePay = null,
+    defaultBillingDetails = null,
+    shippingDetails = null,
+    allowsDelayedPaymentMethods = ConfigurationDefaults.allowsDelayedPaymentMethods,
+    allowsPaymentMethodsRequiringShippingAddress = ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
+    billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+    preferredNetworks = ConfigurationDefaults.preferredNetworks,
+    allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+    paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
+    externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
+    cardBrandAcceptance = cardBrandAcceptance,
+    customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
+    link = PaymentSheet.LinkConfiguration(PaymentSheet.LinkConfiguration.Display.Automatic),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
 )

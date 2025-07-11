@@ -1,6 +1,7 @@
 package com.stripe.android.link.repositories
 
 import app.cash.turbine.Turbine
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -14,6 +15,7 @@ import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 
 internal open class FakeLinkRepository : LinkRepository {
@@ -27,6 +29,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var createBankAccountPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
     var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
     var sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
+    var createPaymentMethod = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
@@ -144,6 +147,11 @@ internal open class FakeLinkRepository : LinkRepository {
         cvc: String?,
         billingPhone: String?
     ) = sharePaymentDetails
+
+    override suspend fun createPaymentMethod(
+        consumerSessionClientSecret: String,
+        paymentMethod: LinkPaymentMethod
+    ) = createPaymentMethod
 
     override suspend fun logOut(
         consumerSessionClientSecret: String,

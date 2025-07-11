@@ -8,6 +8,7 @@ import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
@@ -177,6 +178,18 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        fun linkControllerConfiguration(
+            playgroundState: PlaygroundState.Payment
+        ): LinkController.Configuration {
+            val builder = LinkController.Configuration.Builder("Example, Inc.")
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(value, builder, playgroundState)
+            }
+            return builder.build()
+        }
+
         fun customerSheetConfiguration(
             playgroundState: PlaygroundState.Customer
         ): CustomerSheet.Configuration {
@@ -220,6 +233,19 @@ internal class PlaygroundSettings private constructor(
                 configurationBuilder = configurationBuilder,
                 playgroundState = playgroundState,
                 configurationData = configurationData,
+            )
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: LinkController.Configuration.Builder,
+            playgroundState: PlaygroundState.Payment,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
             )
         }
 

@@ -29,12 +29,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -69,7 +69,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCustomPaymentMethodsApi::class, WalletButtonsPreview::class)
+@OptIn(
+    ExperimentalCustomPaymentMethodsApi::class,
+    WalletButtonsPreview::class,
+)
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
@@ -116,7 +119,10 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class, ShopPayPreview::class)
+    @OptIn(
+        ExperimentalCustomerSessionApi::class,
+        ExperimentalAnalyticEventCallbackApi::class,
+    )
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -153,6 +159,15 @@ internal class PaymentSheetPlaygroundActivity :
                 )
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
+
+            val linkController = remember {
+                LinkController.create(
+                    activity = this,
+                    presentPaymentMethodCallback = viewModel::onLinkControllerPresentPaymentMethod,
+                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
+                    createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
+                )
+            }
 
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
@@ -237,6 +252,7 @@ internal class PaymentSheetPlaygroundActivity :
                                 playgroundState = playgroundState,
                                 paymentSheet = paymentSheet,
                                 flowController = flowController,
+                                linkController = linkController,
                                 customerSheet = customerSheet,
                                 addressLauncher = addressLauncher,
                             )
@@ -252,6 +268,21 @@ internal class PaymentSheetPlaygroundActivity :
                     Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
+            }
+
+            var lastPlaygroundState by remember { mutableStateOf(playgroundState) }
+            LaunchedEffect(playgroundState) {
+                if (
+                    playgroundState?.integrationType == PlaygroundConfigurationData.IntegrationType.LinkController &&
+                    playgroundState != lastPlaygroundState
+                ) {
+                    playgroundState?.asPaymentState()?.linkControllerConfiguration()?.let { configuration ->
+                        linkController.configure(configuration)
+                    }
+                }
+                if (lastPlaygroundState != null) {
+                    lastPlaygroundState = playgroundState
+                }
             }
         }
     }
@@ -322,6 +353,7 @@ internal class PaymentSheetPlaygroundActivity :
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
+        linkController: LinkController,
         customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
@@ -358,6 +390,13 @@ internal class PaymentSheetPlaygroundActivity :
                     PlaygroundConfigurationData.IntegrationType.Embedded -> {
                         EmbeddedUi(
                             playgroundState = playgroundState,
+                        )
+                    }
+
+                    PlaygroundConfigurationData.IntegrationType.LinkController -> {
+                        LinkControllerUi(
+                            viewModel = viewModel,
+                            linkController = linkController,
                         )
                     }
 

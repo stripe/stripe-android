@@ -25,6 +25,8 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.networking.StripeApiRepository
@@ -183,5 +185,9 @@ internal interface PaymentElementConfirmationTestModule {
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
         }
+
+        @Provides
+        @Singleton
+        fun providesLinkEventsReporter(): LinkEventsReporter = FakeLinkEventsReporter()
     }
 }

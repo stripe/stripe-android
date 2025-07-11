@@ -129,6 +129,10 @@ private fun IntegrationTypeConfigurableSetting(
                 name = "Customer Sheet",
                 value = PlaygroundConfigurationData.IntegrationType.CustomerSheet
             ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Link Controller",
+                value = PlaygroundConfigurationData.IntegrationType.LinkController
+            ),
         ),
         value = configurationData.integrationType
     ) { integrationType ->

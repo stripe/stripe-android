@@ -9,6 +9,8 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -249,7 +251,6 @@ internal class LinkApiRepository @Inject constructor(
             id = id,
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-
             ) + allowRedisplay + billingPhone,
             requestOptions = buildRequestOptions(),
         ).onFailure {
@@ -290,6 +291,24 @@ internal class LinkApiRepository @Inject constructor(
             requestSurface = REQUEST_SURFACE,
             extraParams = paymentMethodParams + fraudParams + optionsParams,
             billingPhone = billingPhone,
+        )
+    }
+
+    override suspend fun createPaymentMethod(
+        consumerSessionClientSecret: String,
+        paymentMethod: LinkPaymentMethod,
+    ): Result<PaymentMethod> = withContext(workContext) {
+        val params = createPaymentMethodCreateParams(
+            selectedPaymentDetails = paymentMethod.details,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            cvc = paymentMethod.collectedCvc,
+        )
+        stripeRepository.createPaymentMethod(
+            paymentMethodCreateParams = params,
+            options = ApiRequest.Options(
+                publishableKeyProvider,
+                stripeAccountIdProvider,
+            )
         )
     }
 
