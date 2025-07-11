@@ -38,9 +38,7 @@ internal fun VerificationDialog(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
             isDialog = true,
-            onVerificationSucceeded = { linkAccountUpdate ->
-                onVerificationSucceeded()
-            },
+            onVerificationSucceeded = onVerificationSucceeded,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
         )
