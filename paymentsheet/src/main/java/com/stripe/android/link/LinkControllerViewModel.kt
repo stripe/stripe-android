@@ -3,6 +3,7 @@ package com.stripe.android.link
 import android.app.Application
 import android.content.Context
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -76,11 +77,11 @@ internal class LinkControllerViewModel @Inject constructor(
 
     suspend fun configure(configuration: LinkController.Configuration): LinkController.ConfigureResult {
         logger.debug("$tag: updating configuration")
-        _state.update { State() }
+        updateState { State() }
         return linkConfigurationLoader.load(configuration)
             .fold(
                 onSuccess = { config ->
-                    _state.update { it.copy(linkConfiguration = config) }
+                    updateState { it.copy(linkConfiguration = config) }
                     LinkController.ConfigureResult.Success
                 },
                 onFailure = { error ->
@@ -125,7 +126,7 @@ internal class LinkControllerViewModel @Inject constructor(
             val createdPaymentMethod = state.createdPaymentMethod
                 .takeIf { linkAccountInfo.account != null }
 
-            _state.update {
+            updateState {
                 it.copy(
                     presentedForEmail = email,
                     selectedPaymentMethod = selectedPaymentMethod,
@@ -156,7 +157,7 @@ internal class LinkControllerViewModel @Inject constructor(
             }
             is LinkActivityResult.Completed -> {
                 logger.debug("$tag: presentPaymentMethods completed: details=${result.selectedPayment?.details}")
-                _state.update {
+                updateState {
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
                 viewModelScope.launch {
@@ -183,7 +184,7 @@ internal class LinkControllerViewModel @Inject constructor(
             val value = update.asValue()
             linkAccountHolder.set(value)
             if (value.account == null) {
-                _state.update {
+                updateState {
                     it.copy(
                         selectedPaymentMethod = null,
                         createdPaymentMethod = null,
@@ -208,7 +209,7 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onCreatePaymentMethod() {
         viewModelScope.launch {
             val paymentMethodResult = createPaymentMethod()
-            _state.update { it.copy(createdPaymentMethod = paymentMethodResult.getOrNull()) }
+            updateState { it.copy(createdPaymentMethod = paymentMethodResult.getOrNull()) }
             _createPaymentMethodResultFlow.emit(
                 paymentMethodResult.fold(
                     onSuccess = { LinkController.CreatePaymentMethodResult.Success },
@@ -265,6 +266,11 @@ internal class LinkControllerViewModel @Inject constructor(
             label = context.getString(com.stripe.android.R.string.stripe_link),
             sublabel = sublabel
         )
+    }
+
+    @VisibleForTesting
+    internal fun updateState(block: (State) -> State) {
+        _state.update(block)
     }
 
     internal data class State(
