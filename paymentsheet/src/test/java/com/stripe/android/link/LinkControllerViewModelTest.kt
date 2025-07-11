@@ -251,7 +251,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onCreatePaymentMethod() succeeds when in passthrough mode`() = runTest {
+    fun `onCreatePaymentMethod() in passthrough mode on success stores payment method`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel, passthroughModeEnabled = true)
         signIn()
@@ -315,7 +315,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onLookupConsumer() emits success result when repository returns success`() = runTest {
+    fun `onLookupConsumer() on success emits success result`() = runTest {
         val viewModel = createViewModel()
 
         val consumerSessionLookup = ConsumerSessionLookup(exists = true, consumerSession = null)
@@ -331,7 +331,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onLookupConsumer() emits failure result when repository returns failure`() = runTest {
+    fun `onLookupConsumer() on failure emits failure result`() = runTest {
         val viewModel = createViewModel()
 
         val error = Exception("Error")
@@ -347,7 +347,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethods() launches LinkActivity`() = runTest {
+    fun `onPresentPaymentMethods() launches Link with correct arguments`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
@@ -367,7 +367,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethods() passes existing account if email matches`() = runTest(dispatcher) {
+    fun `onPresentPaymentMethods() on matching email passes existing account`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         configure(viewModel)
         signIn()
@@ -383,7 +383,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethods() clears account if email does not match`() = runTest {
+    fun `onPresentPaymentMethods() on non-matching email clears account state`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
         signIn()
@@ -453,7 +453,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() with Completed result`() = runTest {
+    fun `onPresentPaymentMethodsActivityResult() on Completed result emits Success and updates preview`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
@@ -499,24 +499,6 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() updates account`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
-        signIn()
-
-        viewModel.onPresentPaymentMethodsActivityResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.Value(null)
-            )
-        )
-
-        viewModel.state(application).test {
-            assertThat(awaitItem().isConsumerVerified).isNull()
-        }
-    }
-
-    @Test
     fun `onPresentPaymentMethodsActivityResult() updates to different account without clearing state`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
@@ -547,6 +529,24 @@ class LinkControllerViewModelTest {
             assertThat(finalState.selectedPaymentMethodPreview).isNotNull()
         }
         assertThat(linkAccountHolder.linkAccountInfo.first().account).isEqualTo(anotherAccount)
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() on account cleared clears verification state`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        viewModel.onPresentPaymentMethodsActivityResult(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
+            )
+        )
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().isConsumerVerified).isNull()
+        }
     }
 
     private fun createViewModel(
