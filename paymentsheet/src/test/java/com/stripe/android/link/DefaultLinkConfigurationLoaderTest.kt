@@ -17,6 +17,18 @@ internal class DefaultLinkConfigurationLoaderTest {
     private val configuration = LinkController.Configuration.Builder("Test Merchant").build()
     private val linkConfiguration = TestFactory.LINK_CONFIGURATION
 
+    private fun createLoader(
+        paymentElementLoader: FakePaymentElementLoader,
+        useNativeLink: Boolean? = null
+    ): DefaultLinkConfigurationLoader {
+        useNativeLink?.let { linkGate.setUseNativeLink(it) }
+        return DefaultLinkConfigurationLoader(
+            logger = logger,
+            paymentElementLoader = paymentElementLoader,
+            linkGateFactory = linkGateFactory,
+        )
+    }
+
     @Test
     fun `load() returns success when LinkConfiguration is available and useNativeLink is true`() = runTest {
         val linkState = LinkState(
@@ -24,15 +36,10 @@ internal class DefaultLinkConfigurationLoaderTest {
             loginState = LinkState.LoginState.LoggedIn,
             signupMode = null
         )
-        val paymentElementLoader = FakePaymentElementLoader(
-            linkState = linkState
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
+            useNativeLink = true
         )
-        val loader = DefaultLinkConfigurationLoader(
-            logger = logger,
-            paymentElementLoader = paymentElementLoader,
-            linkGateFactory = linkGateFactory,
-        )
-        linkGate.setUseNativeLink(true)
 
         val result = loader.load(configuration)
         assertThat(result.isSuccess).isTrue()
@@ -41,13 +48,8 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     @Test
     fun `load() returns failure when linkState configuration is null`() = runTest {
-        val paymentElementLoader = FakePaymentElementLoader(
-            linkState = null
-        )
-        val loader = DefaultLinkConfigurationLoader(
-            logger = logger,
-            paymentElementLoader = paymentElementLoader,
-            linkGateFactory = linkGateFactory,
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(linkState = null)
         )
 
         val result = loader.load(configuration)
@@ -62,15 +64,10 @@ internal class DefaultLinkConfigurationLoaderTest {
             loginState = LinkState.LoginState.LoggedIn,
             signupMode = null
         )
-        val paymentElementLoader = FakePaymentElementLoader(
-            linkState = linkState
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
+            useNativeLink = false
         )
-        val loader = DefaultLinkConfigurationLoader(
-            logger = logger,
-            paymentElementLoader = paymentElementLoader,
-            linkGateFactory = linkGateFactory,
-        )
-        linkGate.setUseNativeLink(false)
 
         val result = loader.load(configuration)
         assertThat(result.isFailure).isTrue()
@@ -79,13 +76,8 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     @Test
     fun `load() returns failure when paymentElementLoader returns failure`() = runTest {
-        val paymentElementLoader = FakePaymentElementLoader(
-            shouldFail = true
-        )
-        val loader = DefaultLinkConfigurationLoader(
-            logger = logger,
-            paymentElementLoader = paymentElementLoader,
-            linkGateFactory = linkGateFactory,
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(shouldFail = true)
         )
 
         val result = loader.load(configuration)
@@ -100,15 +92,10 @@ internal class DefaultLinkConfigurationLoaderTest {
             loginState = LinkState.LoginState.LoggedIn,
             signupMode = null
         )
-        val paymentElementLoader = FakePaymentElementLoader(
-            linkState = linkState
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
+            useNativeLink = true
         )
-        val loader = DefaultLinkConfigurationLoader(
-            logger = logger,
-            paymentElementLoader = paymentElementLoader,
-            linkGateFactory = linkGateFactory,
-        )
-        linkGate.setUseNativeLink(true)
 
         val result = loader.load(configuration)
         assertThat(result.isSuccess).isTrue()
