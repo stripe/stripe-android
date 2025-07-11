@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountManager
@@ -35,7 +34,7 @@ internal class VerificationViewModel @Inject constructor(
     private val logger: Logger,
     private val linkLaunchMode: LinkLaunchMode,
     private val isDialog: Boolean,
-    private val onVerificationSucceeded: (LinkAccountUpdate.Value) -> Unit,
+    private val onVerificationSucceeded: () -> Unit,
     private val onChangeEmailRequested: () -> Unit,
     private val onDismissClicked: () -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit,
@@ -96,7 +95,7 @@ internal class VerificationViewModel @Inject constructor(
                         )
                     )
                 } else {
-                    onVerificationSucceeded(LinkAccountUpdate.Value(account))
+                    onVerificationSucceeded()
                 }
             },
             onFailure = {
@@ -182,7 +181,7 @@ internal class VerificationViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
             isDialog: Boolean,
-            onVerificationSucceeded: (LinkAccountUpdate.Value) -> Unit,
+            onVerificationSucceeded: () -> Unit,
             onChangeEmailClicked: () -> Unit = {},
             onDismissClicked: () -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit,
