@@ -84,20 +84,7 @@ internal fun LinkControllerUi(
     onPresentForAuthenticationClick: (email: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
-    val errorToPresent = listOf(
-        playgroundState.presentPaymentMethodsResult,
-        playgroundState.lookupConsumerResult,
-        playgroundState.createPaymentMethodResult,
-        playgroundState.presentForAuthenticationResult
-    ).firstNotNullOfOrNull { result ->
-        when (result) {
-            is LinkController.PresentPaymentMethodsResult.Failed -> result.error
-            is LinkController.LookupConsumerResult.Failed -> result.error
-            is LinkController.CreatePaymentMethodResult.Failed -> result.error
-            is LinkController.PresentForAuthenticationResult.Failed -> result.error
-            else -> null
-        }
-    }
+    val errorToPresent = playgroundState.linkControllerError()
 
     val scope = rememberCoroutineScope()
     DisposableEffect(email) {
@@ -153,7 +140,7 @@ internal fun LinkControllerUi(
             onClick = { onPaymentMethodButtonClick(email) },
         )
         Spacer(Modifier.height(16.dp))
-        
+
         // Authentication Test Button
         Button(
             onClick = { onPresentForAuthenticationClick(email) },
@@ -162,7 +149,7 @@ internal fun LinkControllerUi(
             Text("Test Authentication Flow")
         }
         Spacer(Modifier.height(16.dp))
-        
+
         ConfirmButton(
             onClick = onCreatePaymentMethodClick,
             enabled = controllerState.selectedPaymentMethodPreview != null,
@@ -184,6 +171,14 @@ internal fun LinkControllerUi(
         }
     }
 }
+
+@Composable
+private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = listOf(
+    (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
+    (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
+    (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
+    (presentForAuthenticationResult as? LinkController.PresentForAuthenticationResult.Failed)?.error,
+).firstOrNull { it != null }
 
 @Composable
 @Preview(showBackground = true)
