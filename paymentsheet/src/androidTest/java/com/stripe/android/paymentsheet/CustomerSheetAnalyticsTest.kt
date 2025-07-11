@@ -50,6 +50,7 @@ internal class CustomerSheetAnalyticsTest {
 
         CustomerSheetUtils.enqueueFetchRequests(networkRule = networkRule, withCards = false)
 
+        validateAnalyticsRequest(eventName = "cs_load_succeeded")
         validateAnalyticsRequest(eventName = "cs_init_with_customer_adapter")
 
         // These are all fired twice, once for cards & once for US bank account
