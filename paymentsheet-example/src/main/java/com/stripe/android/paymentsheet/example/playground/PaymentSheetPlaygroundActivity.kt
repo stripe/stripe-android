@@ -166,6 +166,7 @@ internal class PaymentSheetPlaygroundActivity :
                     presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
+                    presentForAuthenticationCallback = { },
                 )
             }
 
