@@ -13,6 +13,7 @@ import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -93,11 +94,6 @@ class LinkControllerViewModelTest {
         linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
 
         assertThat(viewModel.configure(mock())).isEqualTo(LinkController.ConfigureResult.Success)
-
-        viewModel.state(application).test {
-            // Initial state is reset
-            assertThat(awaitItem()).isEqualTo(LinkController.State())
-        }
     }
 
     @Test
@@ -109,8 +105,22 @@ class LinkControllerViewModelTest {
         linkConfigurationLoader.linkConfigurationResult = Result.failure(error)
 
         assertThat(viewModel.configure(mock())).isEqualTo(LinkController.ConfigureResult.Failed(error))
+    }
+
+    @Test
+    fun `configure() resets state`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.updateState {
+            it.copy(createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
+
+        val loadedConfiguration = mock<LinkConfiguration>()
+        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
 
         viewModel.state(application).test {
+            assertThat(awaitItem()).isNotEqualTo(LinkController.State())
+            assertThat(viewModel.configure(mock())).isEqualTo(LinkController.ConfigureResult.Success)
             assertThat(awaitItem()).isEqualTo(LinkController.State())
         }
     }
