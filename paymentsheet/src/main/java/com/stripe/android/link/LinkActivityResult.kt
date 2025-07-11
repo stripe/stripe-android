@@ -79,9 +79,4 @@ internal sealed interface LinkAccountUpdate : Parcelable {
 
     @Parcelize
     data object None : LinkAccountUpdate
-
-    fun asValue(): Value = when (this) {
-        None -> Value(null)
-        is Value -> this
-    }
 }

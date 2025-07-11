@@ -163,7 +163,7 @@ internal class PaymentSheetPlaygroundActivity :
             val linkController = remember {
                 LinkController.create(
                     activity = this,
-                    presentPaymentMethodCallback = viewModel::onLinkControllerPresentPaymentMethod,
+                    presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
                 )

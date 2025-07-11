@@ -34,9 +34,10 @@ class LinkController @Inject internal constructor(
      * The [state] will reset and the Link session will be reloaded to reflect the new configuration.
      *
      * @param configuration The [Configuration] to use for Link operations.
+     * @return The result of the configuration.
      */
-    fun configure(configuration: Configuration) {
-        viewModel.configure(configuration)
+    suspend fun configure(configuration: Configuration): ConfigureResult {
+        return viewModel.configure(configuration)
     }
 
     /**
@@ -167,6 +168,27 @@ class LinkController @Inject internal constructor(
      * Result of presenting Link payment methods to the user.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface ConfigureResult {
+        /**
+         * Configuration was successful.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : ConfigureResult
+
+        /**
+         * Configuration failed.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : ConfigureResult
+    }
+
+    /**
+     * Result of presenting Link payment methods to the user.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface PresentPaymentMethodsResult {
 
         /**
@@ -187,6 +209,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val error: Throwable) : PresentPaymentMethodsResult
     }
 
@@ -203,6 +226,7 @@ class LinkController @Inject internal constructor(
          * @param isConsumer Whether the email is associated with an existing Link consumer account.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Success internal constructor(val email: String, val isConsumer: Boolean) : LookupConsumerResult
 
         /**
@@ -212,6 +236,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val email: String, val error: Throwable) : LookupConsumerResult
     }
 
@@ -233,6 +258,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val error: Throwable) : CreatePaymentMethodResult
     }
 
@@ -282,7 +308,7 @@ class LinkController @Inject internal constructor(
          * Create a [LinkController] instance.
          *
          * @param activity The Activity that will present Link-related UI.
-         * @param presentPaymentMethodCallback Called with the result when [presentPaymentMethods] completes.
+         * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
          * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
          * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
          *
@@ -291,7 +317,7 @@ class LinkController @Inject internal constructor(
         @JvmStatic
         fun create(
             activity: ComponentActivity,
-            presentPaymentMethodCallback: PresentPaymentMethodsCallback,
+            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
         ): LinkController {
@@ -305,7 +331,7 @@ class LinkController @Inject internal constructor(
                     activity = activity,
                     lifecycleOwner = activity,
                     activityResultRegistryOwner = activity,
-                    presentPaymentMethodCallback = presentPaymentMethodCallback,
+                    presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                     lookupConsumerCallback = lookupConsumerCallback,
                     createPaymentMethodCallback = createPaymentMethodCallback,
                 )
