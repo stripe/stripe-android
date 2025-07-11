@@ -388,6 +388,17 @@ class LinkControllerViewModelTest {
         configure(viewModel)
         signIn()
 
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = "123",
+                    billingPhone = null
+                ),
+                createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        }
+
         val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
         viewModel.onPresentPaymentMethods(launcher, "another@email.com")
 
@@ -396,6 +407,12 @@ class LinkControllerViewModelTest {
 
         val args = argsCaptor.firstValue
         assertThat(args.linkAccountInfo.account).isNull()
+
+        viewModel.state(application).test {
+            val state = awaitItem()
+            assertThat(state.selectedPaymentMethodPreview).isNull()
+            assertThat(state.createdPaymentMethod).isNull()
+        }
     }
 
     @Test
