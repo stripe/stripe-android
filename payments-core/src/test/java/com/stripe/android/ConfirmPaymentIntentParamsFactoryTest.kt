@@ -140,6 +140,54 @@ class ConfirmPaymentIntentParamsFactoryTest {
     }
 
     @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is true`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = true
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is false`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = false
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is true and using paymentMethod`() {
+        val paymentIntentParams = factory.create(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = true
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() with new sepa debit when setAsDefaultPaymentMethod is false and using paymentMethod`() {
+        val paymentIntentParams = factory.create(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = false
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
     fun `create() with saved card and shippingDetails sets shipping field`() {
         val shippingDetails = ConfirmPaymentIntentParams.Shipping(
             name = "Test",

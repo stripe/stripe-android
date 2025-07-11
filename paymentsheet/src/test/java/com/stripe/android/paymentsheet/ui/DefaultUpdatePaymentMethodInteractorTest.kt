@@ -248,12 +248,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun setAsDefaultCheckbox_hiddenForSepaPm() = runScenario(
+    fun setAsDefaultCheckbox_shownForSepaPm() = runScenario(
         displayableSavedPaymentMethod =
         PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
         shouldShowSetAsDefaultCheckbox = true,
     ) {
-        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isFalse()
+        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
     }
 
     @Test

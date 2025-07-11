@@ -6,9 +6,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
-import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -21,8 +21,6 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -100,13 +98,17 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             )
 
-            val canChangeSaveForFutureUsage = saveForFutureUsageIsChangeable(metadata)
-
-            addSavePaymentOptionElements(
-                canChangeSaveForFutureUsage = canChangeSaveForFutureUsage,
-                metadata = metadata,
-                arguments = arguments,
+            val canChangeSaveForFutureUsage = isSaveForFutureUseValueChangeable(
+                code = PaymentMethod.Type.Card.code,
+                metadata = metadata
             )
+
+            if (canChangeSaveForFutureUsage) {
+                addSavePaymentOptionElements(
+                    metadata = metadata,
+                    arguments = arguments,
+                )
+            }
 
             val signupMode = if (
                 metadata.linkState?.signupMode != null && arguments.linkConfigurationCoordinator != null
@@ -150,15 +152,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         )
     }
 
-    private fun saveForFutureUsageIsChangeable(metadata: PaymentMethodMetadata): Boolean {
-        return isSaveForFutureUseValueChangeable(
-            code = PaymentMethod.Type.Card.code,
-            intent = metadata.stripeIntent,
-            paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
-            hasCustomerConfiguration = metadata.customerMetadata?.hasCustomerConfiguration ?: false,
-        )
-    }
-
     private fun MutableList<FormElement>.addContactInformationElement(
         arguments: UiDefinitionFactory.Arguments,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -194,46 +187,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         } else {
             false
         }
-    }
-
-    private fun MutableList<FormElement>.addSavePaymentOptionElements(
-        canChangeSaveForFutureUsage: Boolean,
-        metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
-    ): Boolean {
-        val saveForFutureUseElement =
-            SaveForFutureUseElement(
-                initialValue = arguments.saveForFutureUseInitialValue,
-                merchantName = arguments.merchantName
-            )
-
-        val isSaveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
-        val isSetAsDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
-
-        if (canChangeSaveForFutureUsage) {
-            add(saveForFutureUseElement)
-        }
-
-        if (canChangeSaveForFutureUsage && isSetAsDefaultPaymentMethodEnabled) {
-            add(
-                SetAsDefaultPaymentMethodElement(
-                    initialValue = getSetAsDefaultInitialValueFromArguments(arguments),
-                    saveForFutureUseCheckedFlow = isSaveForFutureUseCheckedFlow,
-                    setAsDefaultMatchesSaveForFutureUse = arguments.setAsDefaultMatchesSaveForFutureUse,
-                )
-            )
-        }
-
-        return true
-    }
-
-    private fun getSetAsDefaultInitialValueFromArguments(
-        arguments: UiDefinitionFactory.Arguments
-    ): Boolean {
-        return arguments.initialValues.entries.firstOrNull {
-            it.key.v1.contains(IdentifierSpec.SetAsDefaultPaymentMethod.v1)
-        }?.value?.toBoolean() ?: false
     }
 }
 
