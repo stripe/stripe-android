@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.analytics
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheetFixtures
+import com.stripe.android.customersheet.CustomerSheetFixtures.createCustomerSheetSession
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import kotlin.test.Test
 
@@ -173,5 +174,57 @@ class CustomerSheetEventTest {
                     "selected_lpm" to "card",
                 )
             )
+    }
+
+    @Test
+    fun `LoadSucceeded event should have correct event name`() {
+        val event = CustomerSheetEvent.LoadSucceeded(createCustomerSheetSession())
+        assertThat(event.eventName).isEqualTo("cs_load_succeeded")
+    }
+
+    @Test
+    fun `LoadSucceeded event should include sync_default_enabled when customer session exists`() {
+        val customerSheetSession = createCustomerSheetSession(
+            hasCustomerSession = true,
+            isPaymentMethodSyncDefaultEnabled = true
+        )
+        val event = CustomerSheetEvent.LoadSucceeded(customerSheetSession)
+
+        assertThat(event.additionalParams["sync_default_enabled"]).isEqualTo(true)
+    }
+
+    @Test
+    fun `LoadSucceeded event should include has_default_payment_method when sync is enabled and default PM exists`() {
+        val customerSheetSession = createCustomerSheetSession(
+            hasCustomerSession = true,
+            isPaymentMethodSyncDefaultEnabled = true,
+            hasDefaultPaymentMethod = true
+        )
+        val event = CustomerSheetEvent.LoadSucceeded(customerSheetSession)
+
+        assertThat(event.additionalParams["sync_default_enabled"]).isEqualTo(true)
+        assertThat(event.additionalParams["has_default_payment_method"]).isEqualTo(true)
+    }
+
+    @Test
+    fun `LoadSucceeded event should not include has_default_payment_method when sync is disabled`() {
+        val customerSheetSession = createCustomerSheetSession(
+            hasCustomerSession = true,
+            isPaymentMethodSyncDefaultEnabled = false,
+            hasDefaultPaymentMethod = true
+        )
+        val event = CustomerSheetEvent.LoadSucceeded(customerSheetSession)
+
+        assertThat(event.additionalParams["sync_default_enabled"]).isEqualTo(false)
+        assertThat(event.additionalParams).doesNotContainKey("has_default_payment_method")
+    }
+
+    @Test
+    fun `LoadFailed event should have correct event name and error message`() {
+        val error = RuntimeException("Test error")
+        val event = CustomerSheetEvent.LoadFailed(error)
+
+        assertThat(event.eventName).isEqualTo("cs_load_failed")
+        assertThat(event.additionalParams["error_message"]).isEqualTo("Test error")
     }
 }

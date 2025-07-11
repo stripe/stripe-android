@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.analytics
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
+import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.CardBrand
 
 internal interface CustomerSheetEventReporter {
@@ -14,6 +15,16 @@ internal interface CustomerSheetEventReporter {
         configuration: CustomerSheet.Configuration,
         integrationType: CustomerSheetIntegration.Type,
     )
+
+    /**
+     * CustomerSheet load succeeded
+     */
+    fun onLoadSucceeded(customerSheetSession: CustomerSheetSession)
+
+    /**
+     * CustomerSheet load failed
+     */
+    fun onLoadFailed(error: Throwable)
 
     /**
      * [Screen] was presented to user
