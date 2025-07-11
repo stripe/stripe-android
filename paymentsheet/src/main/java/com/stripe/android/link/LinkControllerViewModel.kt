@@ -41,7 +41,7 @@ internal class LinkControllerViewModel @Inject constructor(
     private val logger: Logger,
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
-    private val linkApiRepository: LinkRepository,
+    private val linkRepository: LinkRepository,
     val controllerComponentFactory: LinkControllerComponent.Factory,
 ) : AndroidViewModel(application) {
 
@@ -196,7 +196,7 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onLookupConsumer(email: String) {
         viewModelScope.launch {
-            val result = linkApiRepository.lookupConsumer(email)
+            val result = linkRepository.lookupConsumer(email)
                 .map { it.exists }
                 .fold(
                     onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
@@ -237,7 +237,7 @@ internal class LinkControllerViewModel @Inject constructor(
         }
 
         return if (configuration.passthroughModeEnabled) {
-            linkApiRepository.sharePaymentDetails(
+            linkRepository.sharePaymentDetails(
                 consumerSessionClientSecret = account.clientSecret,
                 paymentDetailsId = paymentMethod.details.id,
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
@@ -248,7 +248,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 PaymentMethodJsonParser().parse(json)
             }
         } else {
-            linkApiRepository.createPaymentMethod(
+            linkRepository.createPaymentMethod(
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethod = paymentMethod,
             )

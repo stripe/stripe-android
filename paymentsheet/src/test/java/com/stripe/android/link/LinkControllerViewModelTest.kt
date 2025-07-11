@@ -179,7 +179,7 @@ class LinkControllerViewModelTest {
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
-            linkApiRepository = linkRepository,
+            linkRepository = linkRepository,
             controllerComponentFactory = controllerComponentFactory
         )
     }
