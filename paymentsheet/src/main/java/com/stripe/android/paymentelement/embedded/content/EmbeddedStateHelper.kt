@@ -71,7 +71,6 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                     "when Google Pay or a customer configuration is provided. " +
                     "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
             )
-
         }
         if (configuration.embeddedViewDisplaysMandateText && isRowSelectionImmediateAction) {
             throw IllegalArgumentException(

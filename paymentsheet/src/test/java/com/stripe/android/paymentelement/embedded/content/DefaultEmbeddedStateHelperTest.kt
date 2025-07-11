@@ -106,6 +106,7 @@ internal class DefaultEmbeddedStateHelperTest {
         setState {
             googlePay(null)
             customer(null)
+            embeddedViewDisplaysMandateText(false)
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
@@ -143,6 +144,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            embeddedViewDisplaysMandateText(false)
         }
 
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
