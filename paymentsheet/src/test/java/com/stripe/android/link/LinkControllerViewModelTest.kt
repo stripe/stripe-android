@@ -9,16 +9,12 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.utils.FakePaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -36,8 +32,7 @@ class LinkControllerViewModelTest {
 
     private val application: Application = ApplicationProvider.getApplicationContext()
     private val logger = FakeLogger()
-    private val paymentElementLoader: PaymentElementLoader = FakePaymentElementLoader()
-    private val linkGateFactory: LinkGate.Factory = LinkGate.Factory { FakeLinkGate() }
+    private val linkConfigurationLoader = FakeLinkConfigurationLoader()
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val linkApiRepository: LinkRepository = FakeLinkRepository()
     private val controllerComponentFactory: LinkControllerComponent.Factory =
@@ -46,7 +41,7 @@ class LinkControllerViewModelTest {
                 activity: Activity,
                 lifecycleOwner: LifecycleOwner,
                 activityResultRegistryOwner: ActivityResultRegistryOwner,
-                presentPaymentMethodCallback: LinkController.PresentPaymentMethodsCallback,
+                presentPaymentMethodsCallback: LinkController.PresentPaymentMethodsCallback,
                 lookupConsumerCallback: LinkController.LookupConsumerCallback,
                 createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback
             ): LinkControllerComponent {
@@ -93,8 +88,7 @@ class LinkControllerViewModelTest {
         return LinkControllerViewModel(
             application = application,
             logger = logger,
-            paymentElementLoader = paymentElementLoader,
-            linkGateFactory = linkGateFactory,
+            linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
             linkApiRepository = linkApiRepository,
             controllerComponentFactory = controllerComponentFactory
