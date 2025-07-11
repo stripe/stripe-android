@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
@@ -122,6 +123,34 @@ class LinkControllerViewModelTest {
             assertThat(awaitItem()).isNotEqualTo(LinkController.State())
             assertThat(viewModel.configure(mock())).isEqualTo(LinkController.ConfigureResult.Success)
             assertThat(awaitItem()).isEqualTo(LinkController.State())
+        }
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() fails when configuration is not set`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.presentPaymentMethodsResultFlow.test {
+            viewModel.onPresentPaymentMethods(mock(), "test@example.com")
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
+            val error = (result as LinkController.PresentPaymentMethodsResult.Failed).error
+            assertThat(error).isInstanceOf(MissingConfigurationException::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreatePaymentMethod() fails when configuration is not set`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+            val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
+            assertThat(error).isInstanceOf(MissingConfigurationException::class.java)
         }
     }
 
