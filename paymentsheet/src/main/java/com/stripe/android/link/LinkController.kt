@@ -181,6 +181,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val error: Throwable) : ConfigureResult
     }
 
@@ -208,6 +209,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val error: Throwable) : PresentPaymentMethodsResult
     }
 
@@ -224,6 +226,7 @@ class LinkController @Inject internal constructor(
          * @param isConsumer Whether the email is associated with an existing Link consumer account.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Success internal constructor(val email: String, val isConsumer: Boolean) : LookupConsumerResult
 
         /**
@@ -233,6 +236,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val email: String, val error: Throwable) : LookupConsumerResult
     }
 
@@ -254,6 +258,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val error: Throwable) : CreatePaymentMethodResult
     }
 

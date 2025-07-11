@@ -84,7 +84,40 @@ class LinkControllerViewModelTest {
         }
     }
 
-    private fun createViewModel(): LinkControllerViewModel {
+    @Test
+    fun `configure() sets new configuration and loads it`() = runTest {
+        val linkConfigurationLoader = FakeLinkConfigurationLoader()
+        val viewModel = createViewModel(linkConfigurationLoader = linkConfigurationLoader)
+
+        val loadedConfiguration = mock<LinkConfiguration>()
+        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+
+        assertThat(viewModel.configure(mock())).isEqualTo(LinkController.ConfigureResult.Success)
+
+        viewModel.state(application).test {
+            // Initial state is reset
+            assertThat(awaitItem()).isEqualTo(LinkController.State())
+        }
+    }
+
+    @Test
+    fun `configure() fails when loader fails`() = runTest {
+        val error = Exception("Failed to load")
+        val linkConfigurationLoader = FakeLinkConfigurationLoader()
+        val viewModel = createViewModel(linkConfigurationLoader = linkConfigurationLoader)
+
+        linkConfigurationLoader.linkConfigurationResult = Result.failure(error)
+
+        assertThat(viewModel.configure(mock())).isEqualTo(LinkController.ConfigureResult.Failed(error))
+
+        viewModel.state(application).test {
+            assertThat(awaitItem()).isEqualTo(LinkController.State())
+        }
+    }
+
+    private fun createViewModel(
+        linkConfigurationLoader: LinkConfigurationLoader = this.linkConfigurationLoader
+    ): LinkControllerViewModel {
         return LinkControllerViewModel(
             application = application,
             logger = logger,
