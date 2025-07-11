@@ -13,7 +13,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
-import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -28,9 +28,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -48,8 +45,6 @@ internal class LinkControllerViewModel @Inject constructor(
 ) : AndroidViewModel(application) {
 
     private val tag = "LinkControllerViewModel"
-
-    private var configuration: LinkController.Configuration = LinkController.Configuration.default(application)
 
     private val _account = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account }
 
@@ -79,13 +74,19 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    fun configure(configuration: LinkController.Configuration) {
+    suspend fun configure(configuration: LinkController.Configuration): LinkController.ConfigureResult {
         logger.debug("$tag: updating configuration")
-        this.configuration = configuration
         _state.update { State() }
-        viewModelScope.launch {
-            updateLinkConfiguration()
-        }
+        return linkConfigurationLoader.load(configuration)
+            .fold(
+                onSuccess = { config ->
+                    _state.update { it.copy(linkConfiguration = config) }
+                    LinkController.ConfigureResult.Success
+                },
+                onFailure = { error ->
+                    LinkController.ConfigureResult.Failed(error)
+                }
+            )
     }
 
     fun onPresentPaymentMethods(
@@ -98,27 +99,21 @@ internal class LinkControllerViewModel @Inject constructor(
         }
         presentJob = viewModelScope.launch {
             logger.debug("$tag: presenting payment methods")
-
-            // Try to obtain a Link configuration before we present.
-            val configuration = awaitLinkConfigurationResult()
-                .mapCatching { updateLinkConfiguration().getOrThrow() }
-                .onFailure { error ->
-                    _presentPaymentMethodsResultFlow.emit(
-                        LinkController.PresentPaymentMethodsResult.Failed(
-                            LinkUnavailableException(error)
+            val configuration = requireConfiguration()
+                .map {
+                    it.copy(
+                        customerInfo = LinkConfiguration.CustomerInfo(
+                            name = null,
+                            email = email,
+                            phone = null,
+                            billingCountryCode = null,
                         )
                     )
                 }
-                .getOrNull()
-                ?.copy(
-                    customerInfo = LinkConfiguration.CustomerInfo(
-                        name = null,
-                        email = email,
-                        phone = null,
-                        billingCountryCode = null,
-                    )
-                )
-                ?: return@launch
+                .getOrElse {
+                    _presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Failed(it))
+                    return@launch
+                }
             val state = _state.value
             val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
                 .takeIf { email == state.presentedForEmail && email == it.account?.email }
@@ -223,29 +218,20 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateLinkConfiguration(): Result<LinkConfiguration> {
-        _state.update { it.copy(linkConfigurationResult = null) }
-        val result = linkConfigurationLoader.load(configuration)
-        _state.update { state ->
-            state.copy(linkConfigurationResult = result)
-        }
-        return result
-    }
-
-    private suspend fun awaitLinkConfigurationResult(): Result<LinkConfiguration> {
-        return _state
-            .map { it.linkConfigurationResult }
-            .filterNotNull()
-            .first()
+    private fun requireConfiguration(state: State = _state.value): Result<LinkConfiguration> {
+        return state.linkConfiguration
+            ?.let { Result.success(it) }
+            ?: Result.failure(MissingConfigurationException())
     }
 
     private suspend fun createPaymentMethod(): Result<PaymentMethod> {
         val state = _state.value
+        val configuration = requireConfiguration(state)
+            .getOrElse { return Result.failure(it) }
         val paymentMethod = state.selectedPaymentMethod
-        val configuration = state.linkConfiguration
         val account = _account.value
 
-        if (paymentMethod == null || configuration == null || account == null) {
+        if (paymentMethod == null || account == null) {
             return Result.failure(IllegalStateException("Invalid state"))
         }
 
@@ -282,13 +268,11 @@ internal class LinkControllerViewModel @Inject constructor(
     }
 
     internal data class State(
-        val linkConfigurationResult: Result<LinkConfiguration>? = null,
+        val linkConfiguration: LinkConfiguration? = null,
         val presentedForEmail: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
-    ) {
-        val linkConfiguration: LinkConfiguration? = linkConfigurationResult?.getOrNull()
-    }
+    )
 
     class Factory : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

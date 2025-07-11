@@ -34,9 +34,10 @@ class LinkController @Inject internal constructor(
      * The [state] will reset and the Link session will be reloaded to reflect the new configuration.
      *
      * @param configuration The [Configuration] to use for Link operations.
+     * @return The result of the configuration.
      */
-    fun configure(configuration: Configuration) {
-        viewModel.configure(configuration)
+    suspend fun configure(configuration: Configuration): ConfigureResult {
+        return viewModel.configure(configuration)
     }
 
     /**
@@ -162,6 +163,26 @@ class LinkController @Inject internal constructor(
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
     ) : Parcelable
+
+    /**
+     * Result of presenting Link payment methods to the user.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface ConfigureResult {
+        /**
+         * Configuration was successful.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : ConfigureResult
+
+        /**
+         * Configuration failed.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class Failed internal constructor(val error: Throwable) : ConfigureResult
+    }
 
     /**
      * Result of presenting Link payment methods to the user.
