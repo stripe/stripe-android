@@ -1,9 +1,6 @@
 package com.stripe.android.link
 
-import android.app.Activity
 import android.app.Application
-import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -13,7 +10,7 @@ import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
-import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -36,20 +33,8 @@ class LinkControllerViewModelTest {
     private val logger = FakeLogger()
     private val linkConfigurationLoader = FakeLinkConfigurationLoader()
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-    private val linkApiRepository: LinkRepository = FakeLinkRepository()
-    private val controllerComponentFactory: LinkControllerComponent.Factory =
-        object : LinkControllerComponent.Factory {
-            override fun build(
-                activity: Activity,
-                lifecycleOwner: LifecycleOwner,
-                activityResultRegistryOwner: ActivityResultRegistryOwner,
-                presentPaymentMethodsCallback: LinkController.PresentPaymentMethodsCallback,
-                lookupConsumerCallback: LinkController.LookupConsumerCallback,
-                createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback
-            ): LinkControllerComponent {
-                return mock()
-            }
-        }
+    private val linkRepository = FakeLinkRepository()
+    private val controllerComponentFactory: LinkControllerComponent.Factory = mock()
 
     @Test
     fun `Initial state is correct`() = runTest {
@@ -154,6 +139,38 @@ class LinkControllerViewModelTest {
         }
     }
 
+    @Test
+    fun `onLookupConsumer() emits success result when repository returns success`() = runTest {
+        val viewModel = createViewModel()
+
+        val consumerSessionLookup = ConsumerSessionLookup(exists = true, consumerSession = null)
+        linkRepository.lookupConsumerResult = Result.success(consumerSessionLookup)
+
+        viewModel.lookupConsumerResultFlow.test {
+            viewModel.onLookupConsumer("test@example.com")
+            val result = awaitItem()
+            assertThat(result).isEqualTo(
+                LinkController.LookupConsumerResult.Success("test@example.com", true)
+            )
+        }
+    }
+
+    @Test
+    fun `onLookupConsumer() emits failure result when repository returns failure`() = runTest {
+        val viewModel = createViewModel()
+
+        val error = Exception("Error")
+        linkRepository.lookupConsumerResult = Result.failure(error)
+
+        viewModel.lookupConsumerResultFlow.test {
+            viewModel.onLookupConsumer("test@example.com")
+            val result = awaitItem()
+            assertThat(result).isEqualTo(
+                LinkController.LookupConsumerResult.Failed("test@example.com", error)
+            )
+        }
+    }
+
     private fun createViewModel(
         linkConfigurationLoader: LinkConfigurationLoader = this.linkConfigurationLoader
     ): LinkControllerViewModel {
@@ -162,7 +179,7 @@ class LinkControllerViewModelTest {
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
-            linkApiRepository = linkApiRepository,
+            linkApiRepository = linkRepository,
             controllerComponentFactory = controllerComponentFactory
         )
     }
