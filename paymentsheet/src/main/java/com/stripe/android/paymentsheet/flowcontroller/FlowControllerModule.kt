@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkStore
@@ -23,6 +25,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
@@ -118,4 +121,11 @@ internal object FlowControllerModule {
     @Singleton
     @Named(ALLOWS_MANUAL_CONFIRMATION)
     fun provideAllowsManualConfirmation() = true
+
+    @Provides
+    @Singleton
+    @Named(IS_LIVE_MODE)
+    fun provideIsLiveMode(paymentConfiguration: Provider<PaymentConfiguration>): () -> Boolean {
+        return { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
+    }
 }

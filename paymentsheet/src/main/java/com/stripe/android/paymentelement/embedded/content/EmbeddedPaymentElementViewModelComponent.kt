@@ -4,11 +4,13 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -49,6 +51,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -150,11 +153,18 @@ internal interface EmbeddedPaymentElementViewModelModule {
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler
 
+    @Suppress("TooManyFunctions")
     companion object {
         @Provides
         fun providesContext(application: Application): Context {
             return application
         }
+
+        @Provides
+        @Named(IS_LIVE_MODE)
+        fun providesIsLiveMode(
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
 
         @Provides
         @Singleton

@@ -1276,7 +1276,8 @@ internal class PaymentSheetActivityTest {
                     ): CvcRecollectionInteractor {
                         return FakeCvcRecollectionInteractor()
                     }
-                }
+                },
+                isLiveModeProvider = { false }
             )
         }
     }
