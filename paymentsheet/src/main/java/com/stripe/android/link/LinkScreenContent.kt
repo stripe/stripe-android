@@ -107,7 +107,8 @@ internal fun LinkScreenContentBody(
                     .testTag(VERIFICATION_DIALOG_CONTENT_TAG),
                 linkAccount = screenState.linkAccount,
                 onVerificationSucceeded = onVerificationSucceeded,
-                onDismissClicked = onDismissClicked
+                onDismissClicked = onDismissClicked,
+                dismissWithResult = dismissWithResult
             )
         }
     }

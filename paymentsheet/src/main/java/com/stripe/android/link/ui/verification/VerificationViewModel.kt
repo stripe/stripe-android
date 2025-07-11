@@ -6,7 +6,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -29,10 +33,12 @@ internal class VerificationViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
+    private val linkLaunchMode: LinkLaunchMode,
     private val isDialog: Boolean,
-    private val onVerificationSucceeded: () -> Unit,
+    private val onVerificationSucceeded: (LinkAccountUpdate.Value) -> Unit,
     private val onChangeEmailRequested: () -> Unit,
     private val onDismissClicked: () -> Unit,
+    private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
@@ -79,11 +85,19 @@ internal class VerificationViewModel @Inject constructor(
         }
 
         linkAccountManager.confirmVerification(code).fold(
-            onSuccess = {
-                updateViewState {
-                    it.copy(isProcessing = false)
+            onSuccess = { account ->
+                updateViewState { it.copy(isProcessing = false) }
+                // Handle Authentication mode logic in ViewModel
+                if (linkLaunchMode is LinkLaunchMode.Authentication) {
+                    dismissWithResult(
+                        LinkActivityResult.Completed(
+                            linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                            selectedPayment = null,
+                        )
+                    )
+                } else {
+                    onVerificationSucceeded(LinkAccountUpdate.Value(account))
                 }
-                onVerificationSucceeded()
             },
             onFailure = {
                 otpElement.controller.reset()
@@ -168,9 +182,10 @@ internal class VerificationViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
             isDialog: Boolean,
-            onVerificationSucceeded: () -> Unit,
+            onVerificationSucceeded: (LinkAccountUpdate.Value) -> Unit,
             onChangeEmailClicked: () -> Unit = {},
             onDismissClicked: () -> Unit,
+            dismissWithResult: (LinkActivityResult) -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -179,10 +194,12 @@ internal class VerificationViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
+                        linkLaunchMode = parentComponent.linkLaunchMode,
                         onVerificationSucceeded = onVerificationSucceeded,
                         onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,
-                        isDialog = isDialog
+                        isDialog = isDialog,
+                        dismissWithResult = dismissWithResult
                     )
                 }
             }

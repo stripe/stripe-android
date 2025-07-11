@@ -12,8 +12,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.LinkController.PresentForAuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
+import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
@@ -24,6 +26,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,6 +65,12 @@ internal class LinkControllerViewModel @Inject constructor(
         MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1)
     val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
 
+    private val _presentForAuthenticationResultFlow =
+        MutableSharedFlow<PresentForAuthenticationResult>(extraBufferCapacity = 1)
+    val presentForAuthenticationResultFlow = _presentForAuthenticationResultFlow.asSharedFlow()
+
+    private var presentJob: Job? = null
+
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_account, _state) { account, state ->
             LinkController.State(
@@ -91,7 +100,121 @@ internal class LinkControllerViewModel @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
     ) {
-        logger.debug("$tag: presenting payment methods")
+        if (presentJob?.isActive == true) {
+            logger.debug("$tag: already presenting")
+            return
+        }
+        presentJob = viewModelScope.launch {
+            logger.debug("$tag: presenting payment methods")
+
+            withConfiguration(
+                email = email,
+                onError = { error ->
+                    _presentPaymentMethodsResultFlow.emit(
+                        LinkController.PresentPaymentMethodsResult.Failed(
+                            LinkUnavailableException(error)
+                        )
+                    )
+                },
+                onSuccess = { configuration ->
+                    val state = _state.value
+                    val linkAccountInfo = getLinkAccountInfo(email)
+
+                    // If the account changed, clear account-related state.
+                    val selectedPaymentMethod = state.selectedPaymentMethod
+                        .takeIf { linkAccountInfo.account != null }
+                    val createdPaymentMethod = state.createdPaymentMethod
+                        .takeIf { linkAccountInfo.account != null }
+
+                    val launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details)
+
+                    _state.update {
+                        it.copy(
+                            presentedForEmail = email,
+                            selectedPaymentMethod = selectedPaymentMethod,
+                            createdPaymentMethod = createdPaymentMethod,
+                            currentLaunchMode = launchMode,
+                        )
+                    }
+
+                    launcher.launch(
+                        LinkActivityContract.Args(
+                            configuration = configuration,
+                            startWithVerificationDialog = true,
+                            linkAccountInfo = linkAccountInfo,
+                            launchMode = launchMode,
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    internal fun onPresentForAuthentication(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String?
+    ) {
+        if (presentJob?.isActive == true) {
+            logger.debug("$tag: already presenting")
+            return
+        }
+
+        presentJob = viewModelScope.launch {
+            logger.debug("$tag: presenting for authentication")
+
+            withConfiguration(
+                email = email,
+                onError = { error ->
+                    _presentForAuthenticationResultFlow.emit(
+                        PresentForAuthenticationResult.Failed(
+                            LinkUnavailableException(error)
+                        )
+                    )
+                },
+                onSuccess = { configuration ->
+                    val linkAccountInfo = getLinkAccountInfo(email)
+                    val launchMode = LinkLaunchMode.Authentication
+
+                    _state.update {
+                        it.copy(
+                            presentedForEmail = email,
+                            currentLaunchMode = launchMode,
+                        )
+                    }
+
+                    launcher.launch(
+                        LinkActivityContract.Args(
+                            configuration = configuration,
+                            startWithVerificationDialog = true,
+                            linkAccountInfo = linkAccountInfo,
+                            launchMode = launchMode,
+                        )
+                    )
+                }
+            )
+        }
+    }
+
+    private fun getLinkAccountInfo(email: String?): LinkAccountUpdate.Value {
+        val currentAccountInfo = linkAccountHolder.linkAccountInfo.value
+        
+        // If we already have an authenticated account, preserve it
+        if (currentAccountInfo.account != null) {
+            return currentAccountInfo
+        }
+        
+        // Otherwise, check if the email matches the previously presented email
+        val state = _state.value
+        return currentAccountInfo
+            .takeIf { email == state.presentedForEmail && email == it.account?.email }
+            ?: LinkAccountUpdate.Value(null)
+    }
+
+    private suspend fun withConfiguration(
+        email: String?,
+        onError: suspend (Throwable) -> Unit,
+        onSuccess: suspend (LinkConfiguration) -> Unit
+    ) {
         val configuration = requireConfiguration()
             .map {
                 it.copy(
@@ -103,40 +226,51 @@ internal class LinkControllerViewModel @Inject constructor(
                     )
                 )
             }
-            .getOrElse {
-                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Failed(it))
-                return
+            .onFailure { error ->
+                onError(error)
             }
-        val state = _state.value
-        val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
-            .takeIf { email == state.presentedForEmail || email == it.account?.email }
-            ?: LinkAccountUpdate.Value(null)
+            .getOrNull()
+            ?: return
 
-        // If the account changed, clear account-related state.
-        val selectedPaymentMethod = state.selectedPaymentMethod
-            .takeIf { linkAccountInfo.account != null }
-        val createdPaymentMethod = state.createdPaymentMethod
-            .takeIf { linkAccountInfo.account != null }
-
-        updateState {
-            it.copy(
-                presentedForEmail = email,
-                selectedPaymentMethod = selectedPaymentMethod,
-                createdPaymentMethod = createdPaymentMethod,
-            )
-        }
-
-        launcher.launch(
-            LinkActivityContract.Args(
-                configuration = configuration,
-                startWithVerificationDialog = true,
-                linkAccountInfo = linkAccountInfo,
-                launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
-            )
-        )
+        onSuccess(configuration)
     }
 
-    fun onPresentPaymentMethodsActivityResult(result: LinkActivityResult) {
+    fun onLinkActivityResult(result: LinkActivityResult) {
+        val currentLaunchMode = _state.value.currentLaunchMode
+
+        when (currentLaunchMode) {
+            is LinkLaunchMode.PaymentMethodSelection -> handlePaymentMethodSelectionResult(result)
+            is LinkLaunchMode.Authentication -> handleAuthenticationResult(result)
+            else -> logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
+        }
+
+        // Update account, clearing state if null.
+        result.linkAccountUpdate?.let { update ->
+            val value = update.asValue()
+            linkAccountHolder.set(value)
+            if (value.account == null) {
+                _state.update {
+                    it.copy(
+                        selectedPaymentMethod = null,
+                        createdPaymentMethod = null,
+                        currentLaunchMode = null,
+                    )
+                }
+            } else {
+                // Reset launch mode
+                _state.update {
+                    it.copy(currentLaunchMode = null)
+                }
+            }
+        } ?: run {
+            // Reset launch mode even if no account update
+            _state.update {
+                it.copy(currentLaunchMode = null)
+            }
+        }
+    }
+
+    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
                 logger.debug("$tag: presentPaymentMethods canceled")
@@ -152,9 +286,7 @@ internal class LinkControllerViewModel @Inject constructor(
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
                 viewModelScope.launch {
-                    _presentPaymentMethodsResultFlow.emit(
-                        LinkController.PresentPaymentMethodsResult.Success
-                    )
+                    _presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
                 }
             }
             is LinkActivityResult.Failed -> {
@@ -169,24 +301,32 @@ internal class LinkControllerViewModel @Inject constructor(
                 logger.warning("$tag: presentPaymentMethods unexpected result: $result")
             }
         }
+    }
 
-        // Update account, clearing state if null.
-        result.linkAccountUpdate?.let { update ->
-            when (update) {
-                is LinkAccountUpdate.Value -> {
-                    linkAccountHolder.set(update)
-                    if (update.account == null) {
-                        updateState {
-                            it.copy(
-                                selectedPaymentMethod = null,
-                                createdPaymentMethod = null,
-                            )
-                        }
-                    }
+    private fun handleAuthenticationResult(result: LinkActivityResult) {
+        when (result) {
+            is LinkActivityResult.Canceled -> {
+                logger.debug("$tag: presentForAuthentication canceled")
+                viewModelScope.launch {
+                    _presentForAuthenticationResultFlow.emit(PresentForAuthenticationResult.Canceled)
                 }
-                LinkAccountUpdate.None -> {
-                    // Do nothing.
+            }
+            is LinkActivityResult.Completed -> {
+                logger.debug("$tag: presentForAuthentication completed")
+                viewModelScope.launch {
+                    _presentForAuthenticationResultFlow.emit(PresentForAuthenticationResult.Success)
                 }
+            }
+            is LinkActivityResult.Failed -> {
+                logger.debug("$tag: presentForAuthentication failed")
+                viewModelScope.launch {
+                    _presentForAuthenticationResultFlow.emit(
+                        PresentForAuthenticationResult.Failed(result.error)
+                    )
+                }
+            }
+            is LinkActivityResult.PaymentMethodObtained -> {
+                logger.warning("$tag: presentForAuthentication unexpected result: $result")
             }
         }
     }
@@ -275,6 +415,7 @@ internal class LinkControllerViewModel @Inject constructor(
         val presentedForEmail: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
+        val currentLaunchMode: LinkLaunchMode? = null,
     )
 
     class Factory : ViewModelProvider.Factory {

@@ -4,6 +4,9 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -59,9 +62,9 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification succeeds then it navigates to Wallet`() =
         runTest(dispatcher) {
-            val onVerificationSucceededCalls = arrayListOf<Unit>()
-            fun onVerificationSucceeded() {
-                onVerificationSucceededCalls.add(Unit)
+            val onVerificationSucceededCalls = arrayListOf<LinkAccountUpdate.Value>()
+            fun onVerificationSucceeded(linkAccountUpdate: LinkAccountUpdate.Value) {
+                onVerificationSucceededCalls.add(linkAccountUpdate)
             }
 
             val viewModel = createViewModel(
@@ -69,7 +72,8 @@ internal class VerificationViewModelTest {
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(onVerificationSucceededCalls).containsExactly(Unit)
+            assertThat(onVerificationSucceededCalls).hasSize(1)
+            assertThat(onVerificationSucceededCalls.first().account).isEqualTo(TestFactory.LINK_ACCOUNT)
         }
 
     @Test
@@ -202,19 +206,23 @@ internal class VerificationViewModelTest {
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
-        onVerificationSucceeded: () -> Unit = {},
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        onVerificationSucceeded: (LinkAccountUpdate.Value) -> Unit = { },
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
+        dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
+            linkLaunchMode = linkLaunchMode,
             linkAccount = TestFactory.LINK_ACCOUNT,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
-            isDialog = false
+            isDialog = false,
+            dismissWithResult = dismissWithResult
         )
     }
 }

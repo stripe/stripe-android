@@ -211,7 +211,8 @@ internal class LinkActivityViewModel @Inject constructor(
         viewModelScope.launch {
             when (linkLaunchMode) {
                 is LinkLaunchMode.Full,
-                is LinkLaunchMode.PaymentMethodSelection -> loadLink()
+                is LinkLaunchMode.PaymentMethodSelection,
+                is LinkLaunchMode.Authentication -> loadLink()
                 is LinkLaunchMode.Confirmation -> confirmLinkPayment(linkLaunchMode.selectedPayment)
             }
         }

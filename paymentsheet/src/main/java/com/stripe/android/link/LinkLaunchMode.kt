@@ -33,4 +33,11 @@ internal sealed interface LinkLaunchMode : Parcelable {
          */
         val selectedPayment: LinkPaymentMethod
     ) : LinkLaunchMode
+
+    /**
+     * Link is launched with the intent to authenticate the user only.
+     * The flow will close after successful authentication instead of continuing to payment selection.
+     */
+    @Parcelize
+    data object Authentication : LinkLaunchMode
 }

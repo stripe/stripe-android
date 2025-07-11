@@ -20,6 +20,7 @@ internal class LinkControllerCoordinator @Inject constructor(
     private val selectedPaymentMethodCallback: LinkController.PresentPaymentMethodsCallback,
     private val lookupConsumerCallback: LinkController.LookupConsumerCallback,
     private val createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
+    private val presentForAuthenticationCallback: LinkController.PresentForAuthenticationCallback,
 ) {
     val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
 
@@ -30,7 +31,7 @@ internal class LinkControllerCoordinator @Inject constructor(
             key = "LinkController_LinkActivityResultLauncher",
             contract = linkActivityContract,
         ) { result ->
-            viewModel.onPresentPaymentMethodsActivityResult(result)
+            viewModel.onLinkActivityResult(result)
         }
 
         lifecycleOwner.lifecycleScope.launch {
@@ -43,10 +44,13 @@ internal class LinkControllerCoordinator @Inject constructor(
                     viewModel.lookupConsumerResultFlow
                         .collect(lookupConsumerCallback::onLookupConsumerResult)
                 }
-
                 launch {
                     viewModel.createPaymentMethodResultFlow
                         .collect(createPaymentMethodCallback::onCreatePaymentMethodResult)
+                }
+                launch {
+                    viewModel.presentForAuthenticationResultFlow
+                        .collect(presentForAuthenticationCallback::onPresentForAuthenticationResult)
                 }
             }
         }
