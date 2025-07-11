@@ -37,7 +37,7 @@ class PaymentSelectionTest {
     @Test
     fun `Link billingDetails returns null when selectedPayment is null`() {
         val link = PaymentSelection.Link(selectedPayment = null)
-        
+
         assertThat(link.billingDetails).isNull()
     }
 
@@ -52,7 +52,7 @@ class PaymentSelectionTest {
             postalCode = "94111",
             countryCode = CountryCode.US,
         )
-        
+
         val paymentDetails = ConsumerPaymentDetails.Card(
             id = "pm_123",
             last4 = "4242",
@@ -67,15 +67,15 @@ class PaymentSelectionTest {
             cvcCheck = CvcCheck.Pass,
             funding = "credit"
         )
-        
+
         val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
             details = paymentDetails,
             collectedCvc = null,
             billingPhone = "+1-555-123-4567"
         )
-        
+
         val link = PaymentSelection.Link(selectedPayment = selectedPayment)
-        
+
         assertThat(link.billingDetails).isEqualTo(
             PaymentMethod.BillingDetails(
                 address = Address(

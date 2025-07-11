@@ -317,16 +317,8 @@ internal class DefaultFlowController @Inject internal constructor(
             productUsage = productUsage,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             walletsToShow = if (viewModel.walletButtonsRendered) {
-                // Always include Link in payment options, even when wallet buttons are rendered
-                val filteredWallets = WalletType.entries.filterNot {
+                WalletType.entries.filterNot {
                     state.config.walletButtons.allowedWalletTypes.contains(it)
-                }
-                // Add Link back to the list if it's allowed but was filtered out
-                if (state.config.walletButtons.allowedWalletTypes.contains(WalletType.Link) && 
-                    !filteredWallets.contains(WalletType.Link)) {
-                    filteredWallets + WalletType.Link
-                } else {
-                    filteredWallets
                 }
             } else {
                 state.config.walletButtons.allowedWalletTypes
