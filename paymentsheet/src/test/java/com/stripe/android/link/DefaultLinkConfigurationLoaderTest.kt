@@ -17,6 +17,12 @@ internal class DefaultLinkConfigurationLoaderTest {
     private val configuration = LinkController.Configuration.Builder("Test Merchant").build()
     private val linkConfiguration = TestFactory.LINK_CONFIGURATION
 
+    private val linkState = LinkState(
+        configuration = linkConfiguration,
+        loginState = LinkState.LoginState.LoggedIn,
+        signupMode = null,
+    )
+
     private fun createLoader(
         paymentElementLoader: FakePaymentElementLoader,
         useNativeLink: Boolean? = null
@@ -31,11 +37,6 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     @Test
     fun `load() returns success when LinkConfiguration is available and useNativeLink is true`() = runTest {
-        val linkState = LinkState(
-            configuration = linkConfiguration,
-            loginState = LinkState.LoginState.LoggedIn,
-            signupMode = null
-        )
         val loader = createLoader(
             paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
             useNativeLink = true
@@ -59,11 +60,6 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     @Test
     fun `load() returns failure when useNativeLink is false`() = runTest {
-        val linkState = LinkState(
-            configuration = linkConfiguration,
-            loginState = LinkState.LoginState.LoggedIn,
-            signupMode = null
-        )
         val loader = createLoader(
             paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
             useNativeLink = false
@@ -87,11 +83,6 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     @Test
     fun `load() calls paymentElementLoader with expected parameters`() = runTest {
-        val linkState = LinkState(
-            configuration = linkConfiguration,
-            loginState = LinkState.LoginState.LoggedIn,
-            signupMode = null
-        )
         val loader = createLoader(
             paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
             useNativeLink = true
