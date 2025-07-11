@@ -109,7 +109,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
-            eventReporter.onPressConfirmButton(selection.value)
+            selection.value?.let { paymentSelection ->
+                eventReporter.onPressConfirmButton(paymentSelection)
+            }
             checkout()
         },
     )
@@ -527,10 +529,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         error: PaymentSheetConfirmationError,
         message: ResolvableString
     ) {
-        eventReporter.onPaymentFailure(
-            paymentSelection = inProgressSelection,
-            error = error,
-        )
+        inProgressSelection?.let { paymentSelection ->
+            eventReporter.onPaymentFailure(
+                paymentSelection = paymentSelection,
+                error = error,
+            )
+        }
 
         resetViewState(
             userErrorMessage = message
@@ -543,10 +547,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         finishImmediately: Boolean
     ) {
         val currentSelection = inProgressSelection
-        eventReporter.onPaymentSuccess(
-            paymentSelection = currentSelection,
-            deferredIntentConfirmationType = deferredIntentConfirmationType,
-        )
+        currentSelection?.let { paymentSelection ->
+            eventReporter.onPaymentSuccess(
+                paymentSelection = paymentSelection,
+                deferredIntentConfirmationType = deferredIntentConfirmationType,
+            )
+        }
 
         // Log out of Link to invalidate the token
         if (currentSelection != null && currentSelection.isLink) {

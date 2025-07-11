@@ -326,12 +326,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
+    override fun onPressConfirmButton(paymentSelection: PaymentSelection) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
-        paymentSelection.code()?.let {
-            fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(it))
-        }
+        fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(paymentSelection.code()))
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
@@ -347,7 +345,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentSuccess(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) {
         // Wallets are treated as a saved payment method after confirmation, so we need
@@ -373,7 +371,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentFailure(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         error: PaymentSheetConfirmationError,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Checkout)

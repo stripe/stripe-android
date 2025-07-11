@@ -403,7 +403,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         mode: EventReporter.Mode,
         private val result: Result,
         duration: Duration?,
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         currency: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -430,13 +430,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     put(FIELD_ERROR_CODE, errorCode)
                 }
             }
-            paymentSelection.code()?.let { code ->
-                put(FIELD_SELECTED_LPM, code)
-            }
+            put(FIELD_SELECTED_LPM, paymentSelection.code())
             paymentSelection.linkContext()?.let { linkContext ->
                 put(FIELD_LINK_CONTEXT, linkContext)
             }
-            paymentSelection?.getSetAsDefaultPaymentMethodFromPaymentSelection()?.let { setAsDefault ->
+            paymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection()?.let { setAsDefault ->
                 put(FIELD_SET_AS_DEFAULT, setAsDefault)
             }
         }
@@ -771,20 +769,19 @@ private fun FinancialConnectionsAvailability?.toAnalyticsParam(): String = when 
 private val Duration.asSeconds: Float
     get() = toDouble(DurationUnit.SECONDS).toFloat()
 
-internal fun PaymentSelection?.code(): String? {
+internal fun PaymentSelection.code(): String {
     return when (this) {
         is PaymentSelection.GooglePay -> "google_pay"
         is PaymentSelection.Link -> "link"
         is PaymentSelection.ShopPay -> "shop_pay"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.Saved -> paymentMethod.type?.code
+        is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
         is PaymentSelection.ExternalPaymentMethod -> type
         is PaymentSelection.CustomPaymentMethod -> id
-        null -> null
     }
 }
 
-internal fun PaymentSelection?.linkContext(): String? {
+internal fun PaymentSelection.linkContext(): String? {
     return when (this) {
         is PaymentSelection.Link -> "wallet"
         is PaymentSelection.New.USBankAccount -> {
@@ -801,8 +798,7 @@ internal fun PaymentSelection?.linkContext(): String? {
         is PaymentSelection.Saved,
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,
-        is PaymentSelection.ShopPay,
-        null -> null
+        is PaymentSelection.ShopPay -> null
     }
 }
 

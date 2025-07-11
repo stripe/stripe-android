@@ -250,7 +250,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
         temporarySelectionCode ->
         val temporarySelection = if (temporarySelectionCode != null) {
-            val changeDetails = if (temporarySelectionCode == mostRecentSelection.code()) {
+            val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
             } else {
                 null
@@ -258,7 +258,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             PaymentMethodVerticalLayoutInteractor.Selection.New(
                 code = temporarySelectionCode,
                 changeDetails = changeDetails,
-                canBeChanged = temporarySelectionCode == (mostRecentSelection as? PaymentSelection.New?).code(),
+                canBeChanged = temporarySelectionCode == (mostRecentSelection as? PaymentSelection.New?)?.code(),
             )
         } else {
             null
@@ -471,7 +471,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun getMandate(temporarySelectionCode: String?, selection: PaymentSelection?): ResolvableString? {
-        val selectionCode = temporarySelectionCode ?: (selection as? PaymentSelection.New).code()
+        val selectionCode = temporarySelectionCode ?: (selection as? PaymentSelection.New)?.code()
         return if (selectionCode != null) {
             (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
         } else {

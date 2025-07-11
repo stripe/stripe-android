@@ -32,6 +32,7 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -577,39 +578,14 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun onIntentResult(result: ConfirmationHandler.Result) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> {
-                val stripeIntent = result.intent
-                val currentSelection = viewModel.paymentSelection
-                val currentInitializationMode = initializationMode
+                savePaymentSelectionIfEligible(result.intent)
 
-                /*
-                 * Sets current selection as default payment method in future payment sheet usage. New payment
-                 * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
-                 * for usage, or the customer has requested the payment method be saved.
-                 */
-                when (currentSelection) {
-                    is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
-                        currentInitializationMode != null && currentSelection.canSave(
-                            initializationMode = currentInitializationMode
-                        )
-                    }?.let { method ->
-                        PaymentSelection.Saved(method)
-                    }
-                    is PaymentSelection.Saved -> {
-                        when (currentSelection.walletType) {
-                            PaymentSelection.Saved.WalletType.GooglePay -> PaymentSelection.GooglePay
-                            PaymentSelection.Saved.WalletType.Link -> Link()
-                            else -> currentSelection
-                        }
-                    }
-                    else -> currentSelection
-                }?.let {
-                    prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
+                viewModel.paymentSelection?.let { paymentSelection ->
+                    eventReporter.onPaymentSuccess(
+                        paymentSelection = paymentSelection,
+                        deferredIntentConfirmationType = result.deferredIntentConfirmationType,
+                    )
                 }
-
-                eventReporter.onPaymentSuccess(
-                    paymentSelection = viewModel.paymentSelection,
-                    deferredIntentConfirmationType = result.deferredIntentConfirmationType,
-                )
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Completed,
@@ -620,11 +596,13 @@ internal class DefaultFlowController @Inject internal constructor(
             is ConfirmationHandler.Result.Failed -> {
                 val error = result.toConfirmationError()
 
-                error?.let {
-                    eventReporter.onPaymentFailure(
-                        paymentSelection = viewModel.paymentSelection,
-                        error = it
-                    )
+                error?.let { confirmationError ->
+                    viewModel.paymentSelection?.let { paymentSelection ->
+                        eventReporter.onPaymentFailure(
+                            paymentSelection = paymentSelection,
+                            error = confirmationError
+                        )
+                    }
                 }
 
                 onPaymentResult(
@@ -636,6 +614,38 @@ internal class DefaultFlowController @Inject internal constructor(
             is ConfirmationHandler.Result.Canceled -> {
                 handleCancellation(result)
             }
+        }
+    }
+
+    private fun savePaymentSelectionIfEligible(stripeIntent: StripeIntent) {
+        val currentSelection = viewModel.paymentSelection
+        val currentInitializationMode = initializationMode
+
+        /*
+         * Sets current selection as default payment method in future payment sheet usage. New payment
+         * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
+         * for usage, or the customer has requested the payment method be saved.
+         */
+        val selectionToSave = when (currentSelection) {
+            is PaymentSelection.New -> stripeIntent.paymentMethod.takeIf {
+                currentInitializationMode != null && currentSelection.canSave(
+                    initializationMode = currentInitializationMode
+                )
+            }?.let { method ->
+                PaymentSelection.Saved(method)
+            }
+            is PaymentSelection.Saved -> {
+                when (currentSelection.walletType) {
+                    PaymentSelection.Saved.WalletType.GooglePay -> PaymentSelection.GooglePay
+                    PaymentSelection.Saved.WalletType.Link -> Link()
+                    else -> currentSelection
+                }
+            }
+            else -> currentSelection
+        }
+
+        selectionToSave?.let {
+            prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)
         }
     }
 
@@ -698,16 +708,20 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         when (paymentResult) {
             is PaymentResult.Completed -> {
-                eventReporter.onPaymentSuccess(
-                    paymentSelection = viewModel.paymentSelection,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType,
-                )
+                viewModel.paymentSelection?.let { paymentSelection ->
+                    eventReporter.onPaymentSuccess(
+                        paymentSelection = paymentSelection,
+                        deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    )
+                }
             }
             is PaymentResult.Failed -> {
-                eventReporter.onPaymentFailure(
-                    paymentSelection = viewModel.paymentSelection,
-                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
-                )
+                viewModel.paymentSelection?.let { paymentSelection ->
+                    eventReporter.onPaymentFailure(
+                        paymentSelection = paymentSelection,
+                        error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
+                    )
+                }
             }
             else -> {
                 // Nothing to do here

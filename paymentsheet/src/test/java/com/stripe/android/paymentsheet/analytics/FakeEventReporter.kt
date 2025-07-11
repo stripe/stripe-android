@@ -65,8 +65,8 @@ internal class FakeEventReporter : EventReporter {
     private val _formCompletedCalls = Turbine<FormCompletedCall>()
     val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
 
-    private val _pressConfirmButtonCalls = Turbine<PaymentSelection?>()
-    val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection?> = _pressConfirmButtonCalls
+    private val _pressConfirmButtonCalls = Turbine<PaymentSelection>()
+    val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection> = _pressConfirmButtonCalls
 
     private val _usBankAccountFormEventCalls = Turbine<USBankAccountFormViewModel.AnalyticsEvent>()
     val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
@@ -168,12 +168,12 @@ internal class FakeEventReporter : EventReporter {
     override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
     }
 
-    override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
+    override fun onPressConfirmButton(paymentSelection: PaymentSelection) {
         _pressConfirmButtonCalls.add(paymentSelection)
     }
 
     override fun onPaymentSuccess(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?
     ) {
         _paymentSuccessCalls.add(
@@ -185,7 +185,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPaymentFailure(
-        paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection,
         error: PaymentSheetConfirmationError
     ) {
         _paymentFailureCalls.add(
@@ -276,12 +276,12 @@ internal class FakeEventReporter : EventReporter {
     }
 
     data class PaymentFailureCall(
-        val paymentSelection: PaymentSelection?,
+        val paymentSelection: PaymentSelection,
         val error: PaymentSheetConfirmationError
     )
 
     data class PaymentSuccessCall(
-        val paymentSelection: PaymentSelection?,
+        val paymentSelection: PaymentSelection,
         val deferredIntentConfirmationType: DeferredIntentConfirmationType?
     )
 
