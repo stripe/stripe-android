@@ -11,6 +11,7 @@ import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -140,6 +141,170 @@ class LinkControllerViewModelTest {
     }
 
     @Test
+    fun `onCreatePaymentMethod() fails when selectedPaymentMethod is not set`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+            val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreatePaymentMethod() fails when account is not set`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = "123",
+                    billingPhone = null
+                )
+            )
+        }
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+            val error = (result as LinkController.CreatePaymentMethodResult.Failed).error
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        }
+    }
+
+    @Test
+    fun `onCreatePaymentMethod() succeeds when not in passthrough mode`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = "123",
+                    billingPhone = null
+                )
+            )
+        }
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        linkRepository.createPaymentMethod = Result.success(paymentMethod)
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            assertThat(awaitItem()).isEqualTo(LinkController.CreatePaymentMethodResult.Success)
+        }
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
+        }
+    }
+
+    @Test
+    fun `onCreatePaymentMethod() fails when not in passthrough mode`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = "123",
+                    billingPhone = null
+                )
+            )
+        }
+
+        val error = Exception("Error")
+        linkRepository.createPaymentMethod = Result.failure(error)
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+            assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isEqualTo(error)
+        }
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().createdPaymentMethod).isNull()
+        }
+    }
+
+    @Test
+    fun `onCreatePaymentMethod() succeeds when in passthrough mode`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel, passthroughModeEnabled = true)
+        signIn()
+
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = "123",
+                    billingPhone = null
+                )
+            )
+        }
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        linkRepository.sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            assertThat(awaitItem()).isEqualTo(LinkController.CreatePaymentMethodResult.Success)
+        }
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().createdPaymentMethod).isEqualTo(paymentMethod)
+        }
+    }
+
+    @Test
+    fun `onCreatePaymentMethod() fails when in passthrough mode`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel, passthroughModeEnabled = true)
+        signIn()
+
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                    collectedCvc = "123",
+                    billingPhone = null
+                )
+            )
+        }
+
+        val error = Exception("Error")
+        linkRepository.sharePaymentDetails = Result.failure(error)
+
+        viewModel.createPaymentMethodResultFlow.test {
+            viewModel.onCreatePaymentMethod()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+            assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isEqualTo(error)
+        }
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().createdPaymentMethod).isNull()
+        }
+    }
+
+    @Test
     fun `onLookupConsumer() emits success result when repository returns success`() = runTest {
         val viewModel = createViewModel()
 
@@ -182,5 +347,22 @@ class LinkControllerViewModelTest {
             linkRepository = linkRepository,
             controllerComponentFactory = controllerComponentFactory
         )
+    }
+
+    private suspend fun configure(
+        viewModel: LinkControllerViewModel,
+        passthroughModeEnabled: Boolean = false
+    ) {
+        val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+            merchantName = "Test",
+            passthroughModeEnabled = passthroughModeEnabled
+        )
+        linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
+        viewModel.configure(mock())
+    }
+
+    private fun signIn() {
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
     }
 }
