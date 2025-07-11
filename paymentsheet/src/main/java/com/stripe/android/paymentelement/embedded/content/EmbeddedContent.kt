@@ -43,7 +43,7 @@ internal data class EmbeddedContent(
                 throw IllegalArgumentException(
                     "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
                         "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button " +
-                        "and/or before confirmation when `rowSelectionBehavior = .immediateAction`"
+                        "and/or before confirmation when `RowSelectionBehavior = ImmediateAction`"
                 )
             }
         }
