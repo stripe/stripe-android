@@ -119,6 +119,8 @@ class LinkController @Inject internal constructor(
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
+        internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ) : Parcelable {
 
         /**
@@ -135,6 +137,10 @@ class LinkController @Inject internal constructor(
         ) {
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
+            private var defaultBillingDetails: PaymentSheet.BillingDetails? =
+                ConfigurationDefaults.billingDetails
+            private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+                ConfigurationDefaults.billingDetailsCollectionConfiguration
 
             /**
              * Configuration for which card brands should be accepted or blocked.
@@ -150,6 +156,29 @@ class LinkController @Inject internal constructor(
             }
 
             /**
+             * The billing information for the customer.
+             *
+             * If set, PaymentSheet will pre-populate the form fields with the values provided.
+             * If `billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod` is `true`,
+             * these values will be attached to the payment method even if they are not collected by
+             * the PaymentSheet UI.
+             */
+            fun defaultBillingDetails(defaultBillingDetails: PaymentSheet.BillingDetails?) =
+                apply { this.defaultBillingDetails = defaultBillingDetails }
+
+            /**
+             * Describes how billing details should be collected.
+             * All values default to `automatic`.
+             * If `never` is used for a required field for the Payment Method used during checkout,
+             * you **must** provide an appropriate value as part of [defaultBillingDetails].
+             */
+            fun billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+            ) = apply {
+                this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+            }
+
+            /**
              * Build the [Configuration] instance.
              *
              * @return A new [Configuration] with the specified settings.
@@ -157,6 +186,8 @@ class LinkController @Inject internal constructor(
             fun build(): Configuration = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 cardBrandAcceptance = cardBrandAcceptance,
+                defaultBillingDetails = defaultBillingDetails,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             )
         }
 
