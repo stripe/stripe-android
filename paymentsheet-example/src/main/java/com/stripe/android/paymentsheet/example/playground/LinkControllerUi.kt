@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -67,6 +68,9 @@ internal fun LinkControllerUi(
             linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
         },
         onCreatePaymentMethodClick = linkController::createPaymentMethod,
+        onPresentForAuthenticationClick = { email ->
+            linkController.presentForAuthentication(email = email.takeIf { it.isNotBlank() })
+        },
     )
 }
 
@@ -77,18 +81,23 @@ internal fun LinkControllerUi(
     onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
+    onPresentForAuthenticationClick: (email: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
-    val presentPaymentMethodsResultError =
-        (playgroundState.presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)
-            ?.error
-    val lookupConsumerError =
-        (playgroundState.lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)
-            ?.error
-    val createPaymentMethodError =
-        (playgroundState.createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)
-            ?.error
-    val errorToPresent = presentPaymentMethodsResultError ?: lookupConsumerError ?: createPaymentMethodError
+    val errorToPresent = listOf(
+        playgroundState.presentPaymentMethodsResult,
+        playgroundState.lookupConsumerResult,
+        playgroundState.createPaymentMethodResult,
+        playgroundState.presentForAuthenticationResult
+    ).firstNotNullOfOrNull { result ->
+        when (result) {
+            is LinkController.PresentPaymentMethodsResult.Failed -> result.error
+            is LinkController.LookupConsumerResult.Failed -> result.error
+            is LinkController.CreatePaymentMethodResult.Failed -> result.error
+            is LinkController.PresentForAuthenticationResult.Failed -> result.error
+            else -> null
+        }
+    }
 
     val scope = rememberCoroutineScope()
     DisposableEffect(email) {
@@ -144,6 +153,16 @@ internal fun LinkControllerUi(
             onClick = { onPaymentMethodButtonClick(email) },
         )
         Spacer(Modifier.height(16.dp))
+        
+        // Authentication Test Button
+        Button(
+            onClick = { onPresentForAuthenticationClick(email) },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Test Authentication Flow")
+        }
+        Spacer(Modifier.height(16.dp))
+        
         ConfirmButton(
             onClick = onCreatePaymentMethodClick,
             enabled = controllerState.selectedPaymentMethodPreview != null,
@@ -156,6 +175,13 @@ internal fun LinkControllerUi(
             text = createPaymentMethodResultText,
             style = MaterialTheme.typography.body1,
         )
+
+        if (playgroundState.presentForAuthenticationResult != null) {
+            Text(
+                text = playgroundState.presentForAuthenticationResult.toString(),
+                style = MaterialTheme.typography.body1
+            )
+        }
     }
 }
 
@@ -168,7 +194,8 @@ private fun LinkControllerUiPreview() {
             playgroundState = LinkControllerPlaygroundState(),
             onEmailChange = {},
             onPaymentMethodButtonClick = {},
-            onCreatePaymentMethodClick = {}
+            onCreatePaymentMethodClick = {},
+            onPresentForAuthenticationClick = {},
         )
     }
 }

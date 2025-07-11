@@ -702,6 +702,10 @@ internal class PaymentSheetPlaygroundViewModel(
         linkControllerState.update { it.copy(createPaymentMethodResult = result) }
     }
 
+    fun onLinkControllerPresentForAuthentication(result: LinkController.PresentForAuthenticationResult) {
+        linkControllerState.update { it.copy(presentForAuthenticationResult = result) }
+    }
+
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val uriSupplier: () -> Uri?,
