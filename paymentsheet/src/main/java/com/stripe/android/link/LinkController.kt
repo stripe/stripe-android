@@ -74,7 +74,7 @@ class LinkController @Inject internal constructor(
      * matches an existing Link account, the user will be able to authenticate with that account.
      * If null, the user will need to sign in or create a Link account.
      */
-    internal fun presentForAuthentication(email: String?) {
+    fun presentForAuthentication(email: String?) {
         viewModel.onPresentForAuthentication(
             launcher = linkControllerCoordinator.linkActivityResultLauncher,
             email = email
