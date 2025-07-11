@@ -282,7 +282,7 @@ class LinkController @Inject internal constructor(
          * Create a [LinkController] instance.
          *
          * @param activity The Activity that will present Link-related UI.
-         * @param presentPaymentMethodCallback Called with the result when [presentPaymentMethods] completes.
+         * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
          * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
          * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
          *
@@ -291,7 +291,7 @@ class LinkController @Inject internal constructor(
         @JvmStatic
         fun create(
             activity: ComponentActivity,
-            presentPaymentMethodCallback: PresentPaymentMethodsCallback,
+            presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
         ): LinkController {
@@ -305,7 +305,7 @@ class LinkController @Inject internal constructor(
                     activity = activity,
                     lifecycleOwner = activity,
                     activityResultRegistryOwner = activity,
-                    presentPaymentMethodCallback = presentPaymentMethodCallback,
+                    presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                     lookupConsumerCallback = lookupConsumerCallback,
                     createPaymentMethodCallback = createPaymentMethodCallback,
                 )
