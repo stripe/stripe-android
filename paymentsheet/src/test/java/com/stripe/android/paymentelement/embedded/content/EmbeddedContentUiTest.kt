@@ -117,30 +117,6 @@ internal class EmbeddedContentUiTest {
         }
     }
 
-    @Test
-    fun `dataLoaded emits embeddedContent event that fails validation when rowSelectionBehavior is immediateAction and embeddedViewDisplaysMandateText is true`() = runScenario(
-        internalRowSelectionCallback = { /* no-op */ }
-    ) {
-        embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithChevron.default,
-                embeddedViewDisplaysMandateText = true,
-            )
-            val content = awaitItem()
-            assertThat(content).isNotNull()
-            assertFailsWith<IllegalArgumentException>(
-                message = "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate (`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button and/or before confirmation when `rowSelectionBehavior = .immediateAction`"
-            ) {
-                composeRule.setContent {
-                    content?.Content()
-                }
-            }
-        }
-    }
-
-
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
     )

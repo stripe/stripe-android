@@ -39,13 +39,6 @@ internal data class EmbeddedContent(
                         "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
                 )
             }
-            if (embeddedViewDisplaysMandateText && isImmediateAction) {
-                throw IllegalArgumentException(
-                    "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
-                        "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button " +
-                        "and/or before confirmation when `RowSelectionBehavior = ImmediateAction`"
-                )
-            }
         }
 
         StripeTheme {
