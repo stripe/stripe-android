@@ -416,7 +416,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
+    fun `onLinkActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
@@ -424,7 +424,7 @@ class LinkControllerViewModelTest {
         val initialAccount = linkAccountHolder.linkAccountInfo.first()
 
         viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onPresentPaymentMethodsActivityResult(
+            viewModel.onLinkActivityResult(
                 LinkActivityResult.PaymentMethodObtained(
                     paymentMethod = mock()
                 )
@@ -437,12 +437,12 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() with Canceled result`() = runTest {
+    fun `onLinkActivityResult() with Canceled result`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
         viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onPresentPaymentMethodsActivityResult(
+            viewModel.onLinkActivityResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -453,7 +453,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() on Completed result emits Success and updates preview`() = runTest {
+    fun `onLinkActivityResult() on Completed result emits Success and updates preview`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
@@ -463,7 +463,7 @@ class LinkControllerViewModelTest {
             billingPhone = null
         )
         viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onPresentPaymentMethodsActivityResult(
+            viewModel.onLinkActivityResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = linkPaymentMethod,
@@ -480,13 +480,13 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() with Failed result`() = runTest {
+    fun `onLinkActivityResult() with Failed result`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
         val error = Exception("Error")
         viewModel.presentPaymentMethodsResultFlow.test {
-            viewModel.onPresentPaymentMethodsActivityResult(
+            viewModel.onLinkActivityResult(
                 LinkActivityResult.Failed(
                     error = error,
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
@@ -499,7 +499,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() updates to different account without clearing state`() = runTest {
+    fun `onLinkActivityResult() updates to different account without clearing state`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
         signIn()
@@ -516,7 +516,7 @@ class LinkControllerViewModelTest {
         val anotherAccount = LinkAccount(
             TestFactory.CONSUMER_SESSION.copy(emailAddress = "another@stripe.com")
         )
-        viewModel.onPresentPaymentMethodsActivityResult(
+        viewModel.onLinkActivityResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.Value(anotherAccount)
@@ -532,12 +532,12 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentPaymentMethodsActivityResult() on account cleared clears verification state`() = runTest {
+    fun `onLinkActivityResult() on account cleared clears verification state`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
         signIn()
 
-        viewModel.onPresentPaymentMethodsActivityResult(
+        viewModel.onLinkActivityResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.Value(null)
