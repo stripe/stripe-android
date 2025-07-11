@@ -63,8 +63,6 @@ internal class LinkControllerViewModel @Inject constructor(
         MutableSharedFlow<LinkController.CreatePaymentMethodResult>(extraBufferCapacity = 1)
     val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
 
-    private var presentJob: Job? = null
-
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_account, _state) { account, state ->
             LinkController.State(
@@ -94,55 +92,49 @@ internal class LinkControllerViewModel @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
     ) {
-        if (presentJob?.isActive == true) {
-            logger.debug("$tag: already presenting")
-            return
-        }
-        presentJob = viewModelScope.launch {
-            logger.debug("$tag: presenting payment methods")
-            val configuration = requireConfiguration()
-                .map {
-                    it.copy(
-                        customerInfo = LinkConfiguration.CustomerInfo(
-                            name = null,
-                            email = email,
-                            phone = null,
-                            billingCountryCode = null,
-                        )
-                    )
-                }
-                .getOrElse {
-                    _presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Failed(it))
-                    return@launch
-                }
-            val state = _state.value
-            val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
-                .takeIf { email == state.presentedForEmail && email == it.account?.email }
-                ?: LinkAccountUpdate.Value(null)
-
-            // If the account changed, clear account-related state.
-            val selectedPaymentMethod = state.selectedPaymentMethod
-                .takeIf { linkAccountInfo.account != null }
-            val createdPaymentMethod = state.createdPaymentMethod
-                .takeIf { linkAccountInfo.account != null }
-
-            updateState {
+        logger.debug("$tag: presenting payment methods")
+        val configuration = requireConfiguration()
+            .map {
                 it.copy(
-                    presentedForEmail = email,
-                    selectedPaymentMethod = selectedPaymentMethod,
-                    createdPaymentMethod = createdPaymentMethod,
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        name = null,
+                        email = email,
+                        phone = null,
+                        billingCountryCode = null,
+                    )
                 )
             }
+            .getOrElse {
+                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Failed(it))
+                return
+            }
+        val state = _state.value
+        val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
+            .takeIf { email == state.presentedForEmail || email == it.account?.email }
+            ?: LinkAccountUpdate.Value(null)
 
-            launcher.launch(
-                LinkActivityContract.Args(
-                    configuration = configuration,
-                    startWithVerificationDialog = true,
-                    linkAccountInfo = linkAccountInfo,
-                    launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
-                )
+        // If the account changed, clear account-related state.
+        val selectedPaymentMethod = state.selectedPaymentMethod
+            .takeIf { linkAccountInfo.account != null }
+        val createdPaymentMethod = state.createdPaymentMethod
+            .takeIf { linkAccountInfo.account != null }
+
+        updateState {
+            it.copy(
+                presentedForEmail = email,
+                selectedPaymentMethod = selectedPaymentMethod,
+                createdPaymentMethod = createdPaymentMethod,
             )
         }
+
+        launcher.launch(
+            LinkActivityContract.Args(
+                configuration = configuration,
+                startWithVerificationDialog = true,
+                linkAccountInfo = linkAccountInfo,
+                launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
+            )
+        )
     }
 
     fun onPresentPaymentMethodsActivityResult(result: LinkActivityResult) {

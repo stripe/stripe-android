@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.app.Application
+import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -13,16 +14,23 @@ import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class LinkControllerViewModelTest {
     private val dispatcher = UnconfinedTestDispatcher()
@@ -258,8 +266,10 @@ class LinkControllerViewModelTest {
             )
         }
 
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         linkRepository.sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
+        val paymentMethod = PaymentMethodJsonParser().parse(
+            JSONObject(TestFactory.LINK_SHARE_PAYMENT_DETAILS.encodedPaymentMethod)
+        )
 
         viewModel.createPaymentMethodResultFlow.test {
             viewModel.onCreatePaymentMethod()
@@ -336,6 +346,192 @@ class LinkControllerViewModelTest {
         }
     }
 
+    @Test
+    fun `onPresentPaymentMethods() launches LinkActivity`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        viewModel.onPresentPaymentMethods(launcher, "test@example.com")
+
+        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
+        verify(launcher).launch(argsCaptor.capture())
+
+        val args = argsCaptor.firstValue
+        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkAccountInfo.account).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.PaymentMethodSelection(null))
+
+        val state = viewModel.state(application).first()
+        assertThat(state.isConsumerVerified).isNull()
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() passes existing account if email matches`() = runTest(dispatcher) {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        viewModel.onPresentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email)
+
+        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
+        verify(launcher).launch(argsCaptor.capture())
+
+        val args = argsCaptor.firstValue
+        assertThat(args.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() clears account if email does not match`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        viewModel.onPresentPaymentMethods(launcher, "another@email.com")
+
+        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
+        verify(launcher).launch(argsCaptor.capture())
+
+        val args = argsCaptor.firstValue
+        assertThat(args.linkAccountInfo.account).isNull()
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val initialState = viewModel.state(application).first()
+        val initialAccount = linkAccountHolder.linkAccountInfo.first()
+
+        viewModel.presentPaymentMethodsResultFlow.test {
+            viewModel.onPresentPaymentMethodsActivityResult(
+                LinkActivityResult.PaymentMethodObtained(
+                    paymentMethod = mock()
+                )
+            )
+            expectNoEvents()
+        }
+
+        assertThat(viewModel.state(application).first()).isEqualTo(initialState)
+        assertThat(linkAccountHolder.linkAccountInfo.first()).isEqualTo(initialAccount)
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() with Canceled result`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        viewModel.presentPaymentMethodsResultFlow.test {
+            viewModel.onPresentPaymentMethodsActivityResult(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Canceled)
+        }
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() with Completed result`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val linkPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = "123",
+            billingPhone = null
+        )
+        viewModel.presentPaymentMethodsResultFlow.test {
+            viewModel.onPresentPaymentMethodsActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = linkPaymentMethod,
+                    shippingAddress = null,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Success)
+        }
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().selectedPaymentMethodPreview?.sublabel)
+                .isEqualTo("Visa Credit •••• 4242")
+        }
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() with Failed result`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val error = Exception("Error")
+        viewModel.presentPaymentMethodsResultFlow.test {
+            viewModel.onPresentPaymentMethodsActivityResult(
+                LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
+            assertThat((result as LinkController.PresentPaymentMethodsResult.Failed).error).isEqualTo(error)
+        }
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() updates account`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        viewModel.onPresentPaymentMethodsActivityResult(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
+            )
+        )
+
+        viewModel.state(application).test {
+            assertThat(awaitItem().isConsumerVerified).isNull()
+        }
+    }
+
+    @Test
+    fun `onPresentPaymentMethodsActivityResult() updates to different account without clearing state`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        val selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = "123",
+            billingPhone = null
+        )
+        viewModel.updateState {
+            it.copy(selectedPaymentMethod = selectedPaymentMethod)
+        }
+
+        val anotherAccount = LinkAccount(
+            TestFactory.CONSUMER_SESSION.copy(emailAddress = "another@stripe.com")
+        )
+        viewModel.onPresentPaymentMethodsActivityResult(
+            LinkActivityResult.Canceled(
+                reason = LinkActivityResult.Canceled.Reason.BackPressed,
+                linkAccountUpdate = LinkAccountUpdate.Value(anotherAccount)
+            )
+        )
+
+        viewModel.state(application).test {
+            val finalState = awaitItem()
+            assertThat(finalState.isConsumerVerified).isTrue()
+            assertThat(finalState.selectedPaymentMethodPreview).isNotNull()
+        }
+        assertThat(linkAccountHolder.linkAccountInfo.first().account).isEqualTo(anotherAccount)
+    }
+
     private fun createViewModel(
         linkConfigurationLoader: LinkConfigurationLoader = this.linkConfigurationLoader
     ): LinkControllerViewModel {
@@ -359,7 +555,9 @@ class LinkControllerViewModelTest {
             passthroughModeEnabled = passthroughModeEnabled
         )
         linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
-        viewModel.configure(mock())
+        viewModel.configure(
+            LinkController.Configuration.Builder("Test").build()
+        )
     }
 
     private fun signIn() {
