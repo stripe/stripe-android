@@ -100,12 +100,13 @@ internal fun PaymentMethodRowButton(
                 title = title,
                 subtitle = subtitle,
                 contentDescription = contentDescription,
-                style = style
+                style = style,
+                modifier = if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
+                    Modifier.weight(1f, fill = true)
+                } else {
+                    Modifier
+                }
             )
-
-            if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
-                Spacer(modifier = Modifier.weight(1f))
-            }
 
             if (promoText != null) {
                 PromoBadge(promoText)
@@ -347,11 +348,13 @@ private fun RowButtonInnerContent(
     title: String,
     subtitle: String?,
     contentDescription: String? = null,
-    style: RowStyle
+    style: RowStyle,
+    modifier: Modifier = Modifier
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
         verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
     ) {
         iconContent()
 
