@@ -197,12 +197,12 @@ internal class LinkControllerViewModel @Inject constructor(
 
     private fun getLinkAccountInfo(email: String?): LinkAccountUpdate.Value {
         val currentAccountInfo = linkAccountHolder.linkAccountInfo.value
-        
+
         // If we already have an authenticated account, preserve it
         if (currentAccountInfo.account != null) {
             return currentAccountInfo
         }
-        
+
         // Otherwise, check if the email matches the previously presented email
         val state = _state.value
         return currentAccountInfo
@@ -237,6 +237,7 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
+        _state.update { it.copy(currentLaunchMode = null) }
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection -> handlePaymentMethodSelectionResult(result)
@@ -250,31 +251,17 @@ internal class LinkControllerViewModel @Inject constructor(
                 is LinkAccountUpdate.Value -> {
                     linkAccountHolder.set(update)
                     if (update.account == null) {
-                        _state.update {
+                        updateState {
                             it.copy(
                                 selectedPaymentMethod = null,
                                 createdPaymentMethod = null,
-                                currentLaunchMode = null,
                             )
-                        }
-                    } else {
-                        // Reset launch mode
-                        _state.update {
-                            it.copy(currentLaunchMode = null)
                         }
                     }
                 }
                 LinkAccountUpdate.None -> {
-                    // Reset launch mode
-                    _state.update {
-                        it.copy(currentLaunchMode = null)
-                    }
+                    // Do nothing.
                 }
-            }
-        } ?: run {
-            // Reset launch mode even if no account update
-            _state.update {
-                it.copy(currentLaunchMode = null)
             }
         }
     }
