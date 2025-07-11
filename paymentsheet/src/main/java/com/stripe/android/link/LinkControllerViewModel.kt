@@ -51,15 +51,15 @@ internal class LinkControllerViewModel @Inject constructor(
     private val _state = MutableStateFlow(State())
 
     private val _presentPaymentMethodsResultFlow =
-        MutableSharedFlow<LinkController.PresentPaymentMethodsResult>(replay = 1, extraBufferCapacity = 1)
+        MutableSharedFlow<LinkController.PresentPaymentMethodsResult>(replay = 1)
     val presentPaymentMethodsResultFlow = _presentPaymentMethodsResultFlow.asSharedFlow()
 
     private val _lookupConsumerResultFlow =
-        MutableSharedFlow<LinkController.LookupConsumerResult>(replay = 1, extraBufferCapacity = 1)
+        MutableSharedFlow<LinkController.LookupConsumerResult>(replay = 1)
     val lookupConsumerResultFlow = _lookupConsumerResultFlow.asSharedFlow()
 
     private val _createPaymentMethodResultFlow =
-        MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1, extraBufferCapacity = 1)
+        MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1)
     val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
 
     fun state(context: Context): StateFlow<LinkController.State> {
