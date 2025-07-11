@@ -246,20 +246,29 @@ internal class LinkControllerViewModel @Inject constructor(
 
         // Update account, clearing state if null.
         result.linkAccountUpdate?.let { update ->
-            val value = update.asValue()
-            linkAccountHolder.set(value)
-            if (value.account == null) {
-                _state.update {
-                    it.copy(
-                        selectedPaymentMethod = null,
-                        createdPaymentMethod = null,
-                        currentLaunchMode = null,
-                    )
+            when (update) {
+                is LinkAccountUpdate.Value -> {
+                    linkAccountHolder.set(update)
+                    if (update.account == null) {
+                        _state.update {
+                            it.copy(
+                                selectedPaymentMethod = null,
+                                createdPaymentMethod = null,
+                                currentLaunchMode = null,
+                            )
+                        }
+                    } else {
+                        // Reset launch mode
+                        _state.update {
+                            it.copy(currentLaunchMode = null)
+                        }
+                    }
                 }
-            } else {
-                // Reset launch mode
-                _state.update {
-                    it.copy(currentLaunchMode = null)
+                LinkAccountUpdate.None -> {
+                    // Reset launch mode
+                    _state.update {
+                        it.copy(currentLaunchMode = null)
+                    }
                 }
             }
         } ?: run {
