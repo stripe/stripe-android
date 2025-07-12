@@ -29,6 +29,8 @@ data class ExampleCheckoutRequest(
     val saladCount: Int,
     @SerialName("is_subscribing")
     val isSubscribing: Boolean,
+    @SerialName("customer_email")
+    val customerEmail: String? = null,
 )
 
 fun CartState.toCheckoutRequest(): ExampleCheckoutRequest {

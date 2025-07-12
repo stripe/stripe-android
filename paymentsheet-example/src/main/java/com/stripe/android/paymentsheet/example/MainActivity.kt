@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.addresselement.Address
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.merchant_checkout.MerchantCheckoutActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
@@ -71,6 +72,12 @@ class MainActivity : AppCompatActivity() {
                 titleResId = R.string.paymentsheet_custom_title,
                 subtitleResId = R.string.paymentsheet_custom_subtitle,
                 klass = CustomFlowActivity::class.java,
+                section = MenuItem.Section.CustomFlow,
+            ),
+            MenuItem(
+                titleResId = R.string.merchant_checkout_title,
+                subtitleResId = R.string.merchant_checkout_subtitle,
+                klass = MerchantCheckoutActivity::class.java,
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(

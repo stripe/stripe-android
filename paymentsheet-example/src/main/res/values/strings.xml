@@ -4,6 +4,8 @@
     <string name="paymentsheet_subtitle">Our simplest integration</string>
     <string name="paymentsheet_custom_title">FlowController</string>
     <string name="paymentsheet_custom_subtitle">A more advanced integration with greater flexibility</string>
+    <string name="merchant_checkout_title">Merchant Checkout</string>
+    <string name="merchant_checkout_subtitle">FlowController with wallet buttons demo</string>
     <string name="paymentsheet_serverside_confirmation_title">PaymentSheet with server-side confirmation</string>
     <string name="paymentsheet_custom_serverside_confirmation_title">FlowController with server-side confirmation</string>
     <string name="paymentsheet_serverside_confirmation_subtitle">Create and confirm the payment or setup intent on your own backend</string>
