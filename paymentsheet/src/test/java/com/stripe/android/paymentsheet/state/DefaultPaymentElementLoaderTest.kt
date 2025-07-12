@@ -1381,6 +1381,65 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Returns correct Link signup mode if has used Link before`() = runTest {
+        val linkStore = mock<LinkStore> {
+            on { hasUsedLink() } doReturn true
+        }
+
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkStore = linkStore,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
+    }
+
+    @Test
+    fun `Returns correct Link signup mode if signup is disabled`() = runTest {
+        val linkStore = mock<LinkStore> {
+            on { hasUsedLink() } doReturn false
+        }
+
+        val loader = createPaymentElementLoader(
+            linkAccountState = AccountStatus.SignedOut,
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = listOf("CARD"),
+                linkPassthroughModeEnabled = true,
+                linkFlags = emptyMap(),
+                linkMode = LinkMode.Passthrough,
+                disableLinkSignup = true,
+                linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
+                disableLinkRuxInFlowController = false,
+            ),
+            linkStore = linkStore,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
+    }
+
+    @Test
     fun `Returns correct Link signup mode if not saving for future use`() = runTest {
         val loader = createPaymentElementLoader(
             linkAccountState = AccountStatus.SignedOut,
