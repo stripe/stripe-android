@@ -70,7 +70,8 @@ class WalletButtonsContentTest {
                     WalletButtonsInteractor.State(
                         walletButtons = emptyList(),
                         link2FAState = null,
-                        buttonsEnabled = false
+                        buttonsEnabled = false,
+                        appearance = null
                     )
                 ),
                 test: suspend Scenario.() -> Unit
