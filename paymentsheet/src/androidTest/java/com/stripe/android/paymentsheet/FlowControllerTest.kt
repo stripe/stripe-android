@@ -877,6 +877,7 @@ internal class FlowControllerTest {
                         ephemeralKeySecret = "ek_123",
                     ),
                     paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    allowsDelayedPaymentMethods = false,
                 ),
                 callback = { success, error ->
                     assertThat(success).isTrue()
@@ -946,6 +947,7 @@ internal class FlowControllerTest {
                         )
                     )
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .allowsDelayedPaymentMethods(false)
                     .build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
