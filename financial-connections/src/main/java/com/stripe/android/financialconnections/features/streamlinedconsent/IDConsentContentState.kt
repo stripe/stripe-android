@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.features.streamlinedconsent
 import com.stripe.android.financialconnections.features.generic.GenericScreenState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.IDConsentContentPane
-import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.uicore.presentation.Async
 
 internal data class IDConsentContentState(
     val payload: Async<Payload> = Async.Uninitialized,
