@@ -11,7 +11,6 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.exception.CardException
 import com.stripe.android.hcaptcha.performPassiveHCaptcha
@@ -870,7 +869,7 @@ suspend fun Stripe.getAuthenticateSourceResult(
  *
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-internal inline fun <reified ApiObject : StripeModel> runApiRequest(
+internal inline fun <reified ApiObject : Any> runApiRequest(
     isValidParam: Boolean,
     block: () -> Result<ApiObject>,
 ): ApiObject {

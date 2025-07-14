@@ -1,8 +1,10 @@
 package com.stripe.android
 
+import android.os.Parcelable
 import androidx.annotation.IntDef
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.StripeIntent
+import dev.drewhamilton.poko.Poko
 
 /**
  * A model representing the result of a [StripeIntent] confirmation or authentication attempt
@@ -10,9 +12,10 @@ import com.stripe.android.model.StripeIntent
  *
  * [intent] is a [StripeIntent] retrieved after confirmation/authentication succeeded or failed.
  */
+@Poko
 abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     @Outcome private val outcomeFromFlow: Int
-) : StripeModel {
+) : Parcelable {
     abstract val intent: T
     abstract val failureMessage: String?
 

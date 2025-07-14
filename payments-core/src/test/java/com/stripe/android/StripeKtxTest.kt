@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Intent
+import android.os.Parcelable
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -732,7 +733,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : StripeModel>
+    private inline fun <reified ApiObject : Parcelable>
     `Given controller returns non-empty value when calling getAPI then returns correct result`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline controllerInvocationBlock: suspend (Intent) -> Result<ApiObject>,
@@ -756,7 +757,7 @@ internal class StripeKtxTest {
         assertSame(expectedApiObj, actualObj)
     }
 
-    private inline fun <ApiObject : StripeModel>
+    private inline fun <ApiObject : Parcelable>
     `Given controller returns exception when calling getAPI then throws same exception`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline controllerInvocationBlock: suspend (Intent) -> Result<ApiObject>,
@@ -778,7 +779,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : StripeModel>
+    private inline fun <reified ApiObject : Parcelable>
     `Given controller check fails when calling getAPI then throws InvalidRequestException`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject

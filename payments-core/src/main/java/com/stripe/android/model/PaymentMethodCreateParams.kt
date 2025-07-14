@@ -3,6 +3,7 @@ package com.stripe.android.model
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.Stripe
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.RawValue
 import org.json.JSONException
@@ -19,7 +20,8 @@ import java.util.Objects
  * See [PaymentMethod] for API object.
  */
 @Parcelize
-data class PaymentMethodCreateParams
+@Poko
+class PaymentMethodCreateParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     internal val code: PaymentMethodCode,
@@ -55,6 +57,55 @@ constructor(
      */
     private val overrideParamMap: Map<String, @RawValue Any>? = null
 ) : StripeParamsModel, Parcelable {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        code: PaymentMethodCode = this.code,
+        requiresMandate: Boolean = this.requiresMandate,
+        card: Card? = this.card,
+        ideal: Ideal? = this.ideal,
+        fpx: Fpx? = this.fpx,
+        sepaDebit: SepaDebit? = this.sepaDebit,
+        auBecsDebit: AuBecsDebit? = this.auBecsDebit,
+        bacsDebit: BacsDebit? = this.bacsDebit,
+        sofort: Sofort? = this.sofort,
+        upi: Upi? = this.upi,
+        netbanking: Netbanking? = this.netbanking,
+        usBankAccount: USBankAccount? = this.usBankAccount,
+        link: Link? = this.link,
+        cashAppPay: CashAppPay? = this.cashAppPay,
+        swish: Swish? = this.swish,
+        shopPay: ShopPay? = this.shopPay,
+        billingDetails: PaymentMethod.BillingDetails? = this.billingDetails,
+        allowRedisplay: PaymentMethod.AllowRedisplay? = this.allowRedisplay,
+        metadata: Map<String, String>? = this.metadata,
+        productUsage: Set<String> = this.productUsage,
+        overrideParamMap: Map<String, @RawValue Any>? = this.overrideParamMap
+    ): PaymentMethodCreateParams {
+        return PaymentMethodCreateParams(
+            code = code,
+            requiresMandate = requiresMandate,
+            card = card,
+            ideal = ideal,
+            fpx = fpx,
+            sepaDebit = sepaDebit,
+            auBecsDebit = auBecsDebit,
+            bacsDebit = bacsDebit,
+            sofort = sofort,
+            upi = upi,
+            netbanking = netbanking,
+            usBankAccount = usBankAccount,
+            link = link,
+            cashAppPay = cashAppPay,
+            swish = swish,
+            shopPay = shopPay,
+            billingDetails = billingDetails,
+            allowRedisplay = allowRedisplay,
+            metadata = metadata,
+            productUsage = productUsage,
+            overrideParamMap = overrideParamMap
+        )
+    }
 
     internal constructor(
         type: PaymentMethod.Type,
