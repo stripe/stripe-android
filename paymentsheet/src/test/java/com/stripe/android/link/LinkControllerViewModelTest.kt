@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -423,6 +424,9 @@ class LinkControllerViewModelTest {
         val initialState = viewModel.state(application).first()
         val initialAccount = linkAccountHolder.linkAccountInfo.first()
 
+        // First call onPresentPaymentMethods to set up the launch mode
+        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+
         viewModel.presentPaymentMethodsResultFlow.test {
             viewModel.onLinkActivityResult(
                 LinkActivityResult.PaymentMethodObtained(
@@ -441,6 +445,9 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
+        // First call onPresentPaymentMethods to set up the launch mode
+        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
+
         viewModel.presentPaymentMethodsResultFlow.test {
             viewModel.onLinkActivityResult(
                 LinkActivityResult.Canceled(
@@ -456,6 +463,9 @@ class LinkControllerViewModelTest {
     fun `onLinkActivityResult() on Completed result emits Success and updates preview`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
+
+        // First call onPresentPaymentMethods to set up the launch mode
+        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
         val linkPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
             details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
@@ -483,6 +493,9 @@ class LinkControllerViewModelTest {
     fun `onLinkActivityResult() with Failed result`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
+
+        // First call onPresentPaymentMethods to set up the launch mode
+        viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
         val error = Exception("Error")
         viewModel.presentPaymentMethodsResultFlow.test {

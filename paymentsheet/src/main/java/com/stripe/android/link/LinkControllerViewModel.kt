@@ -15,7 +15,6 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkController.PresentForAuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
-import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
@@ -111,14 +110,12 @@ internal class LinkControllerViewModel @Inject constructor(
                 email = email,
                 onError = { error ->
                     _presentPaymentMethodsResultFlow.emit(
-                        LinkController.PresentPaymentMethodsResult.Failed(
-                            LinkUnavailableException(error)
-                        )
+                        LinkController.PresentPaymentMethodsResult.Failed(error)
                     )
                 },
                 onSuccess = { configuration ->
                     val state = _state.value
-                    val linkAccountInfo = getLinkAccountInfo(email)
+                    val linkAccountInfo = getLinkAccountInfo(email, state)
 
                     // If the account changed, clear account-related state.
                     val selectedPaymentMethod = state.selectedPaymentMethod
@@ -166,13 +163,13 @@ internal class LinkControllerViewModel @Inject constructor(
                 email = email,
                 onError = { error ->
                     _presentForAuthenticationResultFlow.emit(
-                        PresentForAuthenticationResult.Failed(
-                            LinkUnavailableException(error)
-                        )
+                        PresentForAuthenticationResult.Failed(error)
                     )
                 },
                 onSuccess = { configuration ->
-                    val linkAccountInfo = getLinkAccountInfo(email)
+                    val state = _state.value
+                    val linkAccountInfo = getLinkAccountInfo(email, state)
+
                     val launchMode = LinkLaunchMode.Authentication
 
                     _state.update {
@@ -195,19 +192,17 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    private fun getLinkAccountInfo(email: String?): LinkAccountUpdate.Value {
-        val currentAccountInfo = linkAccountHolder.linkAccountInfo.value
-
-        // If we already have an authenticated account, preserve it
-        if (currentAccountInfo.account != null) {
-            return currentAccountInfo
-        }
-
-        // Otherwise, check if the email matches the previously presented email
-        val state = _state.value
-        return currentAccountInfo
-            .takeIf { email == state.presentedForEmail && email == it.account?.email }
+    private fun getLinkAccountInfo(
+        email: String?,
+        state: State
+    ): LinkAccountUpdate.Value {
+        val accountUpdate = linkAccountHolder.linkAccountInfo.value
+            .takeIf { email == state.presentedForEmail || email == it.account?.email }
             ?: LinkAccountUpdate.Value(null)
+        if (accountUpdate.account == null) {
+            linkAccountHolder.set(accountUpdate)
+        }
+        return accountUpdate
     }
 
     private suspend fun withConfiguration(
@@ -226,13 +221,11 @@ internal class LinkControllerViewModel @Inject constructor(
                     )
                 )
             }
-            .onFailure { error ->
-                onError(error)
-            }
-            .getOrNull()
-            ?: return
 
-        onSuccess(configuration)
+        configuration.fold(
+            onSuccess = { onSuccess(it) },
+            onFailure = { error -> onError(error) }
+        )
     }
 
     fun onLinkActivityResult(result: LinkActivityResult) {
