@@ -31,8 +31,9 @@ internal data class CommonConfiguration(
     val googlePlacesApiKey: String?,
 ) : Parcelable {
 
-    fun validate() {
+    fun validate(isLiveMode: Boolean) {
         customerAndMerchantValidate()
+        externalPaymentMethodsValidate(isLiveMode)
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
@@ -53,6 +54,21 @@ internal data class CommonConfiguration(
                 throw IllegalArgumentException(
                     "When a CustomerConfiguration is passed to PaymentSheet," +
                         " the Customer ID cannot be an empty string."
+                )
+            }
+        }
+    }
+
+    // These exception messages are not localized as they are not intended to be displayed to a user.
+    @Suppress("ThrowsCount")
+    private fun externalPaymentMethodsValidate(isLiveMode: Boolean) {
+        externalPaymentMethods.forEach { externalPaymentMethod ->
+            if (!externalPaymentMethod.startsWith("external_") && isLiveMode.not()) {
+                throw IllegalArgumentException(
+                    "External payment method '$externalPaymentMethod' does not start with 'external_'. " +
+                        "All external payment methods must use the 'external_' prefix. " +
+                        "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-" +
+                        "external-payment-methods"
                 )
             }
         }

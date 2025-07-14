@@ -26,7 +26,7 @@ class PaymentSheetConfigurationKtxTest {
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the ephemeralKeySecret cannot be an empty string."
         ) {
-            configWithBlankEphemeralKeySecret.validate()
+            configWithBlankEphemeralKeySecret.validate(isLiveMode = false)
         }
     }
 
@@ -42,8 +42,8 @@ class PaymentSheetConfigurationKtxTest {
 
     @Test
     fun `'validate' should succeed when ephemeral key secret is of correct format`() {
-        getConfig("ek_askljdlkasfhgasdfjls").validate()
-        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate()
+        getConfig("ek_askljdlkasfhgasdfjls").validate(isLiveMode = false)
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate(isLiveMode = false)
     }
 
     @Test
@@ -53,7 +53,7 @@ class PaymentSheetConfigurationKtxTest {
                 IllegalArgumentException::class,
                 message = "`ephemeralKeySecret` format does not match expected client secret formatting"
             ) {
-                getConfig(ephemeralKeySecret).validate()
+                getConfig(ephemeralKeySecret).validate(isLiveMode = false)
             }
         }
 
@@ -81,7 +81,7 @@ class PaymentSheetConfigurationKtxTest {
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the customerSessionClientSecret cannot be an empty string."
         ) {
-            configWithBlankCustomerSessionClientSecret.validate()
+            configWithBlankCustomerSessionClientSecret.validate(isLiveMode = false)
         }
     }
 
@@ -101,7 +101,7 @@ class PaymentSheetConfigurationKtxTest {
             message = "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
                 "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate()
+            configWithEphemeralKeySecretAsCustomerSessionClientSecret.validate(isLiveMode = false)
         }
     }
 
@@ -121,8 +121,77 @@ class PaymentSheetConfigurationKtxTest {
             message = "Argument does not look like a CustomerSession client secret. " +
                 "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
         ) {
-            configWithInvalidCustomerSessionClientSecret.validate()
+            configWithInvalidCustomerSessionClientSecret.validate(isLiveMode = false)
         }
+    }
+
+    @Test
+    fun `'validate' should succeed when external payment methods have correct prefix`() {
+        val configWithValidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw
+        configWithValidExternalPaymentMethods.validate(isLiveMode = false)
+    }
+
+    @Test
+    fun `'validate' should fail when external payment method does not have external_ prefix`() {
+        val configWithInvalidExternalPaymentMethod = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "external_fawry"))
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "External payment method 'paypal' does not start with 'external_'. " +
+                "All external payment methods must use the 'external_' prefix. " +
+                "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-" +
+                "payment-methods"
+        ) {
+            configWithInvalidExternalPaymentMethod.validate(isLiveMode = false)
+        }
+    }
+
+    @Test
+    fun `'validate' should succeed when external payment methods list is empty`() {
+        val configWithEmptyExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(emptyList())
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw
+        configWithEmptyExternalPaymentMethods.validate(isLiveMode = false)
+    }
+
+    @Test
+    fun `'validate' should fail when multiple external payment methods have incorrect prefix`() {
+        val configWithMultipleInvalidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "venmo", "external_fawry"))
+            .build()
+            .asCommonConfiguration()
+
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "External payment method 'paypal' does not start with 'external_'. " +
+                "All external payment methods must use the 'external_' prefix. " +
+                "See https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external" +
+                "-payment-methods"
+        ) {
+            configWithMultipleInvalidExternalPaymentMethods.validate(isLiveMode = false)
+        }
+    }
+
+    @Test
+    fun `'validate' should succeed when in live mode with invalid external payment methods`() {
+        val configWithInvalidExternalPaymentMethods = configuration.newBuilder()
+            .externalPaymentMethods(listOf("paypal", "venmo"))
+            .build()
+            .asCommonConfiguration()
+
+        // Should not throw when in live mode
+        configWithInvalidExternalPaymentMethods.validate(isLiveMode = true)
     }
 
     private companion object {

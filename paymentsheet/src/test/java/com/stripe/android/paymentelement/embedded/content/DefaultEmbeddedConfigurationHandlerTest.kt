@@ -311,8 +311,10 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 loader,
                 savedStateHandle,
                 sheetStateHolder,
-                eventReporter
-            ) { null }
+                eventReporter,
+                internalRowSelectionCallback = { null },
+                isLiveModeProvider = { false }
+            )
             Scenario(
                 loader = loader,
                 savedStateHandle = savedStateHandle,

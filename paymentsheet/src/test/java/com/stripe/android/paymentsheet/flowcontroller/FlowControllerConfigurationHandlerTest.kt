@@ -608,6 +608,7 @@ class FlowControllerConfigurationHandlerTest {
             eventReporter = eventReporter,
             viewModel = viewModel,
             paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
+            isLiveModeProvider = { false },
         )
     }
 }
