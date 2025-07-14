@@ -211,15 +211,10 @@ internal class LinkControllerViewModel @Inject constructor(
         onSuccess: suspend (LinkConfiguration) -> Unit
     ) {
         val configuration = requireConfiguration()
-            .map {
-                it.copy(
-                    customerInfo = LinkConfiguration.CustomerInfo(
-                        name = null,
-                        email = email,
-                        phone = null,
-                        billingCountryCode = null,
-                    )
-                )
+            .map { config ->
+                email
+                    ?.let { config.copy(customerInfo = config.customerInfo.copy(email = email)) }
+                    ?: config
             }
 
         configuration.fold(
