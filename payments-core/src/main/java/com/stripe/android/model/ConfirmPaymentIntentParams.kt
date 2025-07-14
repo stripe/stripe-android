@@ -305,7 +305,8 @@ constructor(
      * [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping)
      */
     @Parcelize
-    data class Shipping @JvmOverloads constructor(
+    @Poko
+    class Shipping @JvmOverloads constructor(
         /**
          * [shipping.address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-address)
          *

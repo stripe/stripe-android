@@ -302,7 +302,8 @@ class GooglePayLauncher internal constructor(
         data object Completed : Result()
 
         @Parcelize
-        data class Failed(
+        @Poko
+        class Failed(
             val error: Throwable
         ) : Result()
 

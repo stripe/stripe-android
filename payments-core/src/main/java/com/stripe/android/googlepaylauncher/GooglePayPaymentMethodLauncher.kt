@@ -311,7 +311,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * @param paymentMethod The resulting payment method.
          */
         @Parcelize
-        data class Completed(
+        @Poko
+        class Completed(
             val paymentMethod: PaymentMethod
         ) : Result()
 
@@ -322,7 +323,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * @param errorCode The failure [ErrorCode].
          */
         @Parcelize
-        data class Failed(
+        @Poko
+        class Failed(
             val error: Throwable,
             @ErrorCode val errorCode: Int
         ) : Result()

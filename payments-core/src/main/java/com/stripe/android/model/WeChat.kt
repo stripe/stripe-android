@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
-import com.stripe.android.core.model.StripeModel
+import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -9,7 +10,8 @@ import kotlinx.parcelize.Parcelize
  * [WeChat Pay Payments with PaymentIntents](https://stripe.com/docs/payments/wechat-pay/accept-a-payment?platform=android)
  */
 @Parcelize
-data class WeChat constructor(
+@Poko
+class WeChat constructor(
     val statementDescriptor: String? = null,
     val appId: String?,
     val nonce: String?,
@@ -19,4 +21,4 @@ data class WeChat constructor(
     val sign: String?,
     val timestamp: String?,
     val qrCodeUrl: String? = null
-) : StripeModel
+) : Parcelable

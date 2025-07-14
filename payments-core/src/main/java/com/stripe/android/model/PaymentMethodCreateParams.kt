@@ -385,7 +385,8 @@ constructor(
     }
 
     @Parcelize
-    data class Card
+    @Poko
+    class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         internal val number: String? = null,

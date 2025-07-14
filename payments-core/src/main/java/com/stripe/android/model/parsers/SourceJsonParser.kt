@@ -253,7 +253,7 @@ internal class SourceJsonParser : ModelJsonParser<Source> {
                 return null
             }
 
-            val model: StripeModel? = when (key) {
+            val model: Any? = when (key) {
                 FIELD_CODE_VERIFICATION -> {
                     jsonObject.optJSONObject(FIELD_CODE_VERIFICATION)?.let {
                         CodeVerificationJsonParser().parse(it)

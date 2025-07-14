@@ -2,8 +2,8 @@ package com.stripe.android.model.wallets
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Address
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -14,28 +14,31 @@ import kotlinx.parcelize.Parcelize
 sealed class Wallet(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val walletType: Type
-) : StripeModel {
+) : Parcelable {
 
     @Parcelize
-    data class AmexExpressCheckoutWallet
+    @Poko
+    class AmexExpressCheckoutWallet
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.AmexExpressCheckout)
 
     @Parcelize
-    data class ApplePayWallet
+    @Poko
+    class ApplePayWallet
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.ApplePay)
 
     @Parcelize
-    data class GooglePayWallet
+    @Poko
+    class GooglePayWallet
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         val dynamicLast4: String?
-    ) : Wallet(Type.GooglePay), Parcelable
+    ) : Wallet(Type.GooglePay)
 
     @Parcelize
     data class MasterpassWallet internal constructor(
@@ -46,7 +49,8 @@ sealed class Wallet(
     ) : Wallet(Type.Masterpass)
 
     @Parcelize
-    data class SamsungPayWallet
+    @Poko
+    class SamsungPayWallet
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         val dynamicLast4: String?
@@ -62,7 +66,8 @@ sealed class Wallet(
     ) : Wallet(Type.VisaCheckout)
 
     @Parcelize
-    data class LinkWallet
+    @Poko
+    class LinkWallet
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         val dynamicLast4: String?
