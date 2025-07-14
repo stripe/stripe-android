@@ -11,6 +11,9 @@
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@OptIn(AppearanceAPIAdditionsPreview::class) @Composable private fun Typography( currentAppearance: AppearanceStore.State, updateAppearance: (AppearanceStore.State) -> Unit, )</ID>
     <ID>LongMethod:SharedPaymentTokenPlaygroundActivity.kt$SharedPaymentTokenPlaygroundActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:TwoStepCheckoutActivity.kt$@OptIn(ExtendedLabelsInPaymentOptionPreview::class) @Composable private fun FinalCheckoutScreen( uiState: TwoStepCheckoutViewState, flowController: PaymentSheet.FlowController, addressLauncher: AddressLauncher, onBuyClick: () -> Unit )</ID>
+    <ID>LongMethod:TwoStepCheckoutActivity.kt$TwoStepCheckoutActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
+    <ID>LongMethod:TwoStepCheckoutViewState.kt$TwoStepCheckoutViewState.PaymentInfo$@OptIn(WalletButtonsPreview::class) fun paymentSheetConfig(shippingAddress: AddressDetails?): PaymentSheet.Configuration</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
     <ID>MagicNumber:AppearanceStore.kt$AppearanceStore.State.Embedded$0x33787880</ID>
     <ID>MagicNumber:AppearanceStore.kt$AppearanceStore.State.Embedded$0x40FFFFFF</ID>

@@ -41,9 +41,9 @@ import com.stripe.android.paymentsheet.example.samples.ui.addresselement.Address
 import com.stripe.android.paymentsheet.example.samples.ui.customersheet.CustomerSheetExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete_flow.CompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow.CustomFlowActivity
-import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.merchant_checkout.MerchantCheckoutActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.complete_flow.ServerSideConfirmationCompleteFlowActivity
 import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.server_side_confirm.custom_flow.ServerSideConfirmationCustomFlowActivity
+import com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.twostepcheckout.TwoStepCheckoutActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 private const val SurfaceOverlayOpacity = 0.12f
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             MenuItem(
                 titleResId = R.string.merchant_checkout_title,
                 subtitleResId = R.string.merchant_checkout_subtitle,
-                klass = MerchantCheckoutActivity::class.java,
+                klass = TwoStepCheckoutActivity::class.java,
                 section = MenuItem.Section.CustomFlow,
             ),
             MenuItem(

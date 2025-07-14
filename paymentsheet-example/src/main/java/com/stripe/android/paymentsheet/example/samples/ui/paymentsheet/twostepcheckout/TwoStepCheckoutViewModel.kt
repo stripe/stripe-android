@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.merchant_checkout
+package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.twostepcheckout
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -27,11 +27,11 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.github.kittinunf.result.Result as ApiResult
 
-internal class MerchantCheckoutViewModel(
+internal class TwoStepCheckoutViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
-    private val customCartState = CartState(
+    private val hotDogCartState = CartState(
         products = listOf(CartProduct.hotDog),
         isSubscription = false,
         subtotal = 99,
@@ -40,9 +40,9 @@ internal class MerchantCheckoutViewModel(
     )
 
     private val _state = MutableStateFlow(
-        value = MerchantCheckoutViewState(cartState = customCartState),
+        value = TwoStepCheckoutViewState(cartState = hotDogCartState),
     )
-    val state: StateFlow<MerchantCheckoutViewState> = _state
+    val state: StateFlow<TwoStepCheckoutViewState> = _state
 
     init {
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
@@ -66,6 +66,7 @@ internal class MerchantCheckoutViewModel(
         _state.update {
             it.copy(
                 isProcessing = false,
+                isFlowControllerConfigured = success,
                 status = error?.let { e -> "Failed to configure\n$e" },
             )
         }
@@ -74,37 +75,15 @@ internal class MerchantCheckoutViewModel(
     fun handlePaymentOptionChanged(paymentOption: PaymentOption?) {
         viewModelScope.launch {
             _state.update { currentState ->
-                val newShippingAddress = currentState.shippingAddress 
+                val newShippingAddress = currentState.shippingAddress
                     ?: paymentOption?.let { convertBillingDetailsToAddressDetails(it.billingDetails) }
-                
+
                 currentState.copy(
                     paymentOption = paymentOption,
                     showFinalCheckout = paymentOption != null,
                     shippingAddress = newShippingAddress
                 )
             }
-        }
-    }
-
-    fun goBackToPaymentMethods() {
-        _state.update {
-            it.copy(
-                paymentOption = null,
-                showFinalCheckout = false,
-                isLinkSelected = false
-            )
-        }
-    }
-
-    fun goBackToConfiguration() {
-        _state.update {
-            it.copy(
-                showConfiguration = true,
-                showFinalCheckout = false,
-                isLinkSelected = false,
-                paymentOption = null,
-                paymentInfo = null
-            )
         }
     }
 
@@ -135,8 +114,7 @@ internal class MerchantCheckoutViewModel(
         val request = ExampleCheckoutRequest(
             hotDogCount = currentState.cartState.countOf(CartProduct.Id.HotDog),
             saladCount = currentState.cartState.countOf(CartProduct.Id.Salad),
-            isSubscribing = currentState.cartState.isSubscription,
-            customerEmail = currentState.customerEmail.takeIf { it.isNotBlank() }
+            isSubscribing = currentState.cartState.isSubscription
         )
         val requestBody = Json.encodeToString(ExampleCheckoutRequest.serializer(), request)
 
@@ -153,10 +131,10 @@ internal class MerchantCheckoutViewModel(
                     publishableKey = apiResult.value.publishableKey,
                 )
 
-                val paymentInfo = MerchantCheckoutViewState.PaymentInfo(
+                val paymentInfo = TwoStepCheckoutViewState.PaymentInfo(
                     clientSecret = apiResult.value.paymentIntent,
                     customerConfiguration = apiResult.value.makeCustomerConfig(),
-                    merchantDisplayName = currentState.merchantName,
+                    merchantDisplayName = "Hot Dog Stand",
                     customerEmail = currentState.customerEmail.takeIf { it.isNotBlank() },
                 )
 
@@ -197,12 +175,6 @@ internal class MerchantCheckoutViewModel(
         }
     }
 
-    fun updateMerchantName(name: String) {
-        _state.update {
-            it.copy(merchantName = name)
-        }
-    }
-    
     fun updateInlineOtpEnabled(enabled: Boolean) {
         _state.update {
             it.copy(enableInlineOtp = enabled)
@@ -211,21 +183,19 @@ internal class MerchantCheckoutViewModel(
 
     fun completeConfiguration() {
         val currentState = _state.value
-        
+
         // Set feature flag based on toggle state
         FeatureFlags.showInlineOtpInWalletButtons.setEnabled(currentState.enableInlineOtp)
-        
+
         _state.update {
             it.copy(showConfiguration = false)
         }
-        
+
         // Now prepare checkout with the configured settings
         viewModelScope.launch(Dispatchers.IO) {
             prepareCheckout()
         }
     }
-
-
 
     private fun convertBillingDetailsToAddressDetails(billingDetails: PaymentSheet.BillingDetails?): AddressDetails? {
         return billingDetails?.let { billing ->
@@ -241,4 +211,4 @@ internal class MerchantCheckoutViewModel(
     companion object {
         const val backendUrl = "https://stripe-mobile-payment-sheet.stripedemos.com"
     }
-} 
+}
