@@ -29,7 +29,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
@@ -1665,7 +1664,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
-    private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
+    private suspend fun <ModelType> fetchStripeModelResult(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
         onResponse: (result: Result<StripeResponse<String>>) -> Unit = {},

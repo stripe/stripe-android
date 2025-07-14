@@ -10,6 +10,7 @@ import androidx.annotation.WorkerThread
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.Stripe.Companion.advancedFraudSignalsEnabled
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -21,7 +22,6 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
@@ -1831,7 +1831,7 @@ class Stripe internal constructor(
         }
     }
 
-    private fun <T : StripeModel> executeAsyncForResult(
+    private fun <T> executeAsyncForResult(
         callback: ApiResultCallback<T>,
         apiMethod: suspend () -> Result<T>,
     ) {
@@ -1841,7 +1841,7 @@ class Stripe internal constructor(
         }
     }
 
-    private suspend fun <T : StripeModel> dispatchResult(
+    private suspend fun <T> dispatchResult(
         result: Result<T>,
         callback: ApiResultCallback<T>
     ) = withContext(Dispatchers.Main) {

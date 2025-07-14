@@ -764,7 +764,7 @@ suspend fun Stripe.confirmPaymentIntent(
  *
  * @return the result if the API result and JSON parsing are successful; otherwise, throw an exception.
  */
-private inline fun <reified ApiObject : StripeModel> runApiRequest(
+private inline fun <reified ApiObject> runApiRequest(
     block: () -> Result<ApiObject>,
 ): ApiObject {
     return block().getOrElse { throw StripeException.create(it) }

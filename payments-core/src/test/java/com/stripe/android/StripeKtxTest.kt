@@ -621,7 +621,7 @@ internal class StripeKtxTest {
         assertThat(error.message).isEqualTo("cardNumber cannot be less than 6 characters")
     }
 
-    private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : Any, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
@@ -643,8 +643,8 @@ internal class StripeKtxTest {
 
     private inline fun <reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository throws exception when calling createAPI then throws same exception`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<StripeModel>,
-        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> StripeModel
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<Any>,
+        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> Any
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
@@ -697,7 +697,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : StripeModel>
+    private inline fun <reified ApiObject : Any>
     `Given repository returns non-empty value when calling retrieveAPI with String param then return correct result`(
         crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<ApiObject>,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
@@ -717,8 +717,8 @@ internal class StripeKtxTest {
     }
 
     private fun `Given repository throws exception when calling retrieveAPI with String param then returns a failure`(
-        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<StripeModel>,
-        retrieveApiInvocationBlock: suspend (String, String?) -> StripeModel
+        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<Any>,
+        retrieveApiInvocationBlock: suspend (String, String?) -> Any
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any(), any())
