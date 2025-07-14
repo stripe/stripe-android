@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.example.R
 fun CompletedPaymentAlertDialog(
     title: String? = null,
     confirmButtonText: String? = null,
+    additionalInfo: String? = null,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -40,6 +41,14 @@ fun CompletedPaymentAlertDialog(
                     id = R.string.success
                 )
             )
+        },
+        text = additionalInfo?.let {
+            {
+                Text(
+                    text = it,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
     )
 }

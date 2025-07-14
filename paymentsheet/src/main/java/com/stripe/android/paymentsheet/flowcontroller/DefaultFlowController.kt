@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Activity
 import android.content.Context
 import android.os.Parcelable
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
@@ -29,6 +30,8 @@ import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
@@ -51,6 +54,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -182,6 +186,11 @@ internal class DefaultFlowController @Inject internal constructor(
         viewModel.flowControllerStateComponent.walletButtonsContent.Content()
     }
 
+    @Composable
+    override fun SignupToLinkToggle() {
+        viewModel.flowControllerStateComponent.signupToLinkToggleContent.Content()
+    }
+
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?,
@@ -236,6 +245,10 @@ internal class DefaultFlowController @Inject internal constructor(
         return viewModel.paymentSelection?.let {
             paymentOptionFactory.create(it)
         }
+    }
+
+    private fun getSignupToLinkValue(): Boolean {
+        return viewModel.flowControllerStateComponent.signupToLinkToggleContent.interactor.getSignupToLinkValue()
     }
 
     private fun withCurrentState(block: (State) -> Unit) {
@@ -471,6 +484,40 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
+    private suspend fun createLinkAccountIfNeeded() {
+        try {
+            val state = viewModel.state?.paymentSheetState ?: return
+            val paymentSelection = viewModel.paymentSelection
+
+            // Check if we should sign up to Link
+            if (!getSignupToLinkValue()) return
+            if (linkAccountHolder.linkAccountInfo.value.account != null) return
+            if (state.linkConfiguration == null) return
+
+            val billing = paymentSelection?.billingDetails
+            val email = billing?.email
+            val phone = billing?.phone
+            if (email == null || phone == null) return
+
+            // Attempt Link signup
+            val linkConfiguration = state.linkConfiguration ?: return
+            val linkAccountManager = linkHandler.linkConfigurationCoordinator
+                .getComponent(linkConfiguration).linkAccountManager
+
+            val userInput = UserInput.SignUp(
+                email = email,
+                country = billing.address?.country ?: "US",
+                phone = phone,
+                name = billing.name,
+                consentAction = SignUpConsentAction.Implied
+            )
+            Log.d("DefaultFlowController", "Creating Link account with user input: $userInput")
+            linkAccountManager.signInWithUserInput(userInput)
+        } catch (e: Exception) {
+            Log.d("DefaultFlowController", "Failed to create Link account: ${e.message}", e)
+        }
+    }
+
     private fun confirmSavedPaymentMethod(
         paymentSelection: PaymentSelection.Saved,
         state: PaymentSheetState.Full,
@@ -501,6 +548,8 @@ internal class DefaultFlowController @Inject internal constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
+            createLinkAccountIfNeeded()
+
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,

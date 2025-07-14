@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.merchant_checkout
 
+import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -16,18 +17,17 @@ data class MerchantCheckoutViewState(
     val didComplete: Boolean = false,
     val showFinalCheckout: Boolean = false,
     val shippingAddress: AddressDetails? = null,
-    val isLinkSelected: Boolean = false,
     val showConfiguration: Boolean = true,
     val customerEmail: String = "email@email.com",
-    val merchantName: String = "Merchant Store",
     val enableInlineOtp: Boolean = false,
+    val isFlowControllerConfigured: Boolean = false,
 ) {
 
     val isPaymentMethodButtonEnabled: Boolean
         get() = !isProcessing && !didComplete
 
     val isBuyButtonEnabled: Boolean
-        get() = !isProcessing && !didComplete && (paymentOption != null || isLinkSelected) && showFinalCheckout
+        get() = !isProcessing && !didComplete && paymentOption != null && showFinalCheckout
 
     val shippingAddressLabel: String
         get() = shippingAddress?.address?.let { address ->
@@ -47,8 +47,8 @@ data class MerchantCheckoutViewState(
     ) {
 
         @OptIn(WalletButtonsPreview::class)
-        val paymentSheetConfig: PaymentSheet.Configuration
-            get() = PaymentSheet.Configuration.Builder(merchantDisplayName = merchantDisplayName)
+        fun paymentSheetConfig(shippingAddress: AddressDetails?): PaymentSheet.Configuration = 
+            PaymentSheet.Configuration.Builder(merchantDisplayName = merchantDisplayName)
                 .customer(customerConfiguration)
                 .defaultBillingDetails(
                     customerEmail?.let { email ->
@@ -57,6 +57,7 @@ data class MerchantCheckoutViewState(
                         )
                     }
                 )
+                .shippingDetails(shippingAddress)
                 .googlePay(
                     PaymentSheet.GooglePayConfiguration(
                         environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
@@ -72,6 +73,42 @@ data class MerchantCheckoutViewState(
                 .link(
                     PaymentSheet.LinkConfiguration(
                         display = PaymentSheet.LinkConfiguration.Display.Automatic
+                    )
+                )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    )
+                )
+                .appearance(
+                    PaymentSheet.Appearance(
+                        colorsLight = PaymentSheet.Colors(
+                            primary = androidx.compose.ui.graphics.Color.Black.toArgb(),
+                            surface = PaymentSheet.Colors.defaultLight.surface,
+                            component = PaymentSheet.Colors.defaultLight.component,
+                            componentBorder = PaymentSheet.Colors.defaultLight.componentBorder,
+                            componentDivider = PaymentSheet.Colors.defaultLight.componentDivider,
+                            onComponent = PaymentSheet.Colors.defaultLight.onComponent,
+                            onSurface = PaymentSheet.Colors.defaultLight.onSurface,
+                            subtitle = PaymentSheet.Colors.defaultLight.subtitle,
+                            placeholderText = PaymentSheet.Colors.defaultLight.placeholderText,
+                            appBarIcon = PaymentSheet.Colors.defaultLight.appBarIcon,
+                            error = PaymentSheet.Colors.defaultLight.error
+                        ),
+                        colorsDark = PaymentSheet.Colors(
+                            primary = androidx.compose.ui.graphics.Color.Black.toArgb(),
+                            surface = PaymentSheet.Colors.defaultDark.surface,
+                            component = PaymentSheet.Colors.defaultDark.component,
+                            componentBorder = PaymentSheet.Colors.defaultDark.componentBorder,
+                            componentDivider = PaymentSheet.Colors.defaultDark.componentDivider,
+                            onComponent = PaymentSheet.Colors.defaultDark.onComponent,
+                            onSurface = PaymentSheet.Colors.defaultDark.onSurface,
+                            subtitle = PaymentSheet.Colors.defaultDark.subtitle,
+                            placeholderText = PaymentSheet.Colors.defaultDark.placeholderText,
+                            appBarIcon = PaymentSheet.Colors.defaultDark.appBarIcon,
+                            error = PaymentSheet.Colors.defaultDark.error
+                        )
                     )
                 )
                 // Set `allowsDelayedPaymentMethods` to true if your business can handle payment

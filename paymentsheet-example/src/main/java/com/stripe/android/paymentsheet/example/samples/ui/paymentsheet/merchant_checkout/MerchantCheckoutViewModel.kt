@@ -31,7 +31,7 @@ internal class MerchantCheckoutViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
 
-    private val customCartState = CartState(
+    private val hotDogCartState = CartState(
         products = listOf(CartProduct.hotDog),
         isSubscription = false,
         subtotal = 99,
@@ -40,7 +40,7 @@ internal class MerchantCheckoutViewModel(
     )
 
     private val _state = MutableStateFlow(
-        value = MerchantCheckoutViewState(cartState = customCartState),
+        value = MerchantCheckoutViewState(cartState = hotDogCartState),
     )
     val state: StateFlow<MerchantCheckoutViewState> = _state
 
@@ -66,6 +66,7 @@ internal class MerchantCheckoutViewModel(
         _state.update {
             it.copy(
                 isProcessing = false,
+                isFlowControllerConfigured = success,
                 status = error?.let { e -> "Failed to configure\n$e" },
             )
         }
@@ -83,28 +84,6 @@ internal class MerchantCheckoutViewModel(
                     shippingAddress = newShippingAddress
                 )
             }
-        }
-    }
-
-    fun goBackToPaymentMethods() {
-        _state.update {
-            it.copy(
-                paymentOption = null,
-                showFinalCheckout = false,
-                isLinkSelected = false
-            )
-        }
-    }
-
-    fun goBackToConfiguration() {
-        _state.update {
-            it.copy(
-                showConfiguration = true,
-                showFinalCheckout = false,
-                isLinkSelected = false,
-                paymentOption = null,
-                paymentInfo = null
-            )
         }
     }
 
@@ -156,7 +135,7 @@ internal class MerchantCheckoutViewModel(
                 val paymentInfo = MerchantCheckoutViewState.PaymentInfo(
                     clientSecret = apiResult.value.paymentIntent,
                     customerConfiguration = apiResult.value.makeCustomerConfig(),
-                    merchantDisplayName = currentState.merchantName,
+                    merchantDisplayName = "Hot Dog Stand",
                     customerEmail = currentState.customerEmail.takeIf { it.isNotBlank() },
                 )
 
@@ -197,11 +176,7 @@ internal class MerchantCheckoutViewModel(
         }
     }
 
-    fun updateMerchantName(name: String) {
-        _state.update {
-            it.copy(merchantName = name)
-        }
-    }
+
     
     fun updateInlineOtpEnabled(enabled: Boolean) {
         _state.update {

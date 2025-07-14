@@ -3024,6 +3024,12 @@ class PaymentSheet internal constructor(
         fun WalletButtons()
 
         /**
+         * Displays a toggle for customers to opt-in to saving their info for faster checkout with Link
+         */
+        @Composable
+        fun SignupToLinkToggle()
+
+        /**
          * Configure the FlowController to process a [PaymentIntent].
          *
          * @param paymentIntentClientSecret the client secret for the [PaymentIntent].
@@ -3067,6 +3073,8 @@ class PaymentSheet internal constructor(
          * You can use this to e.g. display the payment option in your UI.
          */
         fun getPaymentOption(): PaymentOption?
+
+
 
         /**
          * Present a sheet where the customer chooses how to pay, either by selecting an existing

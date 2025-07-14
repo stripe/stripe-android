@@ -2,14 +2,13 @@
 
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.merchant_checkout
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,57 +17,53 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.draw.alpha
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
-import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -77,18 +72,14 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.example.samples.ui.MAIN_FONT_SIZE
 import com.stripe.android.paymentsheet.example.samples.ui.SUB_FONT_SIZE
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.ErrorScreen
-import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
-import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
-import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
-import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.model.PaymentOption
-import androidx.core.graphics.drawable.toDrawable
+import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 
 @OptIn(WalletButtonsPreview::class)
 internal class MerchantCheckoutActivity : AppCompatActivity() {
@@ -129,14 +120,20 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
                 val paymentMethodLabel = determinePaymentMethodLabel(uiState)
 
                 uiState.paymentInfo?.let { paymentInfo ->
-                    LaunchedEffect(paymentInfo) {
-                        configureFlowController(flowController, paymentInfo)
+                    LaunchedEffect(paymentInfo, uiState.shippingAddress) {
+                        configureFlowController(flowController, paymentInfo, uiState.shippingAddress)
                     }
+                }
+
+                // Update FlowController shipping details when address changes
+                LaunchedEffect(uiState.shippingAddress) {
+                    flowController.shippingDetails = uiState.shippingAddress
                 }
 
                 uiState.status?.let { status ->
                     if (uiState.didComplete) {
                         CompletedPaymentAlertDialog(
+                            additionalInfo = "Payment completed successfully",
                             onDismiss = ::finish
                         )
                     } else {
@@ -147,7 +144,7 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
                     }
                 }
 
-                Box(
+                Column(
                     modifier = Modifier
                         .padding(
                             paddingValues = WindowInsets.systemBars.only(
@@ -160,7 +157,6 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
                             ConfigurationScreen(
                                 uiState = uiState,
                                 onEmailChanged = viewModel::updateCustomerEmail,
-                                onMerchantNameChanged = viewModel::updateMerchantName,
                                 onInlineOtpToggled = viewModel::updateInlineOtpEnabled,
                                 onCompleteConfiguration = viewModel::completeConfiguration
                             )
@@ -171,12 +167,14 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
                         uiState.isProcessing && uiState.paymentInfo == null -> {
                             LoadingScreen()
                         }
+                        uiState.paymentInfo != null && !uiState.isFlowControllerConfigured -> {
+                            LoadingScreen()
+                        }
                         uiState.showFinalCheckout -> {
                             FinalCheckoutScreen(
                                 uiState = uiState,
                                 flowController = flowController,
                                 addressLauncher = addressLauncher,
-                                onBackClick = viewModel::goBackToPaymentMethods,
                                 onBuyClick = {
                                     viewModel.handleBuyButtonPressed()
                                     flowController.confirm()
@@ -187,8 +185,7 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
                             PaymentMethodSelectionScreen(
                                 uiState = uiState,
                                 flowController = flowController,
-                                paymentMethodLabel = paymentMethodLabel,
-                                onSettingsClick = viewModel::goBackToConfiguration
+                                paymentMethodLabel = paymentMethodLabel
                             )
                         }
                     }
@@ -200,12 +197,15 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
     private fun configureFlowController(
         flowController: PaymentSheet.FlowController,
         paymentInfo: MerchantCheckoutViewState.PaymentInfo,
+        shippingAddress: AddressDetails?
     ) {
         flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = paymentInfo.clientSecret,
-            configuration = paymentInfo.paymentSheetConfig,
+            configuration = paymentInfo.paymentSheetConfig(shippingAddress),
             callback = viewModel::handleFlowControllerConfigured,
         )
+        // Set FlowController shipping details
+        flowController.shippingDetails = shippingAddress
     }
 }
 
@@ -213,7 +213,6 @@ internal class MerchantCheckoutActivity : AppCompatActivity() {
 private fun ConfigurationScreen(
     uiState: MerchantCheckoutViewState,
     onEmailChanged: (String) -> Unit,
-    onMerchantNameChanged: (String) -> Unit,
     onInlineOtpToggled: (Boolean) -> Unit,
     onCompleteConfiguration: () -> Unit
 ) {
@@ -250,28 +249,6 @@ private fun ConfigurationScreen(
             onValueChange = onEmailChanged,
             label = { Text("Customer Email (optional)") },
             placeholder = { Text("customer@example.com") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp),
-            singleLine = true
-        )
-        
-        // Merchant Settings Section
-        Text(
-            text = "Merchant Settings", 
-            fontSize = 20.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colors.onSurface,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp)
-        )
-        
-        OutlinedTextField(
-            value = uiState.merchantName,
-            onValueChange = onMerchantNameChanged,
-            label = { Text("Merchant Display Name") },
-            placeholder = { Text("Your Store Name") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp),
@@ -356,15 +333,14 @@ private fun ConfigurationScreen(
 private fun PaymentMethodSelectionScreen(
     uiState: MerchantCheckoutViewState,
     flowController: PaymentSheet.FlowController,
-    paymentMethodLabel: String,
-    onSettingsClick: () -> Unit = {}
+    paymentMethodLabel: String
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Header with settings button
+        // Header
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -378,14 +354,6 @@ private fun PaymentMethodSelectionScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f)
             )
-            
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    painter = rememberVectorPainter(Icons.Default.Settings),
-                    contentDescription = "Settings",
-                    tint = MaterialTheme.colors.onSurface
-                )
-            }
         }
         
         // Product Section
@@ -394,23 +362,30 @@ private fun PaymentMethodSelectionScreen(
             isLoading = uiState.isProcessing
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Signup to Link Toggle
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            flowController.SignupToLinkToggle()
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Total Section
         TotalSection(cartState = uiState.cartState)
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Wallet Buttons (Apple Pay/Google Pay/Link)
-        if (uiState.paymentInfo != null && !uiState.isProcessing) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                flowController.WalletButtons()
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            flowController.WalletButtons()
         }
         
         // Other payments button (light gray)
@@ -441,7 +416,6 @@ private fun FinalCheckoutScreen(
     uiState: MerchantCheckoutViewState,
     flowController: PaymentSheet.FlowController,
     addressLauncher: AddressLauncher,
-    onBackClick: () -> Unit,
     onBuyClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -450,20 +424,13 @@ private fun FinalCheckoutScreen(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        // Header with back button
+        // Header (no back button)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         ) {
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Review and Pay",
                 fontSize = 24.sp,
@@ -478,16 +445,24 @@ private fun FinalCheckoutScreen(
             isLoading = uiState.isProcessing
         )
         
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Signup to Link Toggle
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            flowController.SignupToLinkToggle()
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Payment Method Row
         PaymentMethodRow(
             paymentOption = uiState.paymentOption,
-            isLinkSelected = uiState.isLinkSelected,
             onClick = flowController::presentPaymentOptions
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Shipping Address Row
         ShippingAddressRow(
@@ -499,15 +474,46 @@ private fun FinalCheckoutScreen(
                 addressLauncher.present(
                     publishableKey = publishableKey,
                     configuration = AddressLauncher.Configuration(
+                        appearance = PaymentSheet.Appearance(
+                            colorsLight = PaymentSheet.Colors(
+                                primary = androidx.compose.ui.graphics.Color.Black.toArgb(),
+                                surface = PaymentSheet.Colors.defaultLight.surface,
+                                component = PaymentSheet.Colors.defaultLight.component,
+                                componentBorder = PaymentSheet.Colors.defaultLight.componentBorder,
+                                componentDivider = PaymentSheet.Colors.defaultLight.componentDivider,
+                                onComponent = PaymentSheet.Colors.defaultLight.onComponent,
+                                onSurface = PaymentSheet.Colors.defaultLight.onSurface,
+                                subtitle = PaymentSheet.Colors.defaultLight.subtitle,
+                                placeholderText = PaymentSheet.Colors.defaultLight.placeholderText,
+                                appBarIcon = PaymentSheet.Colors.defaultLight.appBarIcon,
+                                error = PaymentSheet.Colors.defaultLight.error
+                            ),
+                            colorsDark = PaymentSheet.Colors(
+                                primary = androidx.compose.ui.graphics.Color.Black.toArgb(),
+                                surface = PaymentSheet.Colors.defaultDark.surface,
+                                component = PaymentSheet.Colors.defaultDark.component,
+                                componentBorder = PaymentSheet.Colors.defaultDark.componentBorder,
+                                componentDivider = PaymentSheet.Colors.defaultDark.componentDivider,
+                                onComponent = PaymentSheet.Colors.defaultDark.onComponent,
+                                onSurface = PaymentSheet.Colors.defaultDark.onSurface,
+                                subtitle = PaymentSheet.Colors.defaultDark.subtitle,
+                                placeholderText = PaymentSheet.Colors.defaultDark.placeholderText,
+                                appBarIcon = PaymentSheet.Colors.defaultDark.appBarIcon,
+                                error = PaymentSheet.Colors.defaultDark.error
+                            )
+                        ),
                         address = uiState.shippingAddress,
                         buttonTitle = "Save address",
-                        title = "Shipping address"
+                        title = "Shipping address",
+                        additionalFields = AddressLauncher.AdditionalFieldsConfiguration(
+                            phone = AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.REQUIRED
+                        )
                     )
                 )
             }
         )
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Shipping Method Row
         ShippingMethodRow()
@@ -517,7 +523,7 @@ private fun FinalCheckoutScreen(
         // Total Section
         TotalSection(cartState = uiState.cartState)
         
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         
         // Buy Button
         BuyButton(
@@ -570,14 +576,14 @@ private fun ProductSection(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "Men's Wool Runner Mizzles",
+                        text = "Classic Hot Dog",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colors.onSurface
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Black • Size 13",
+                        text = "With mustard and relish",
                         fontSize = 16.sp,
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
                     )
@@ -595,7 +601,8 @@ private fun ProductSection(
                 ) {
                     Icon(
                         painter = rememberVectorPainter(Icons.Default.Remove),
-                        contentDescription = "Decrease quantity"
+                        contentDescription = "Decrease quantity",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 
@@ -612,7 +619,8 @@ private fun ProductSection(
                 ) {
                     Icon(
                         painter = rememberVectorPainter(Icons.Default.Add),
-                        contentDescription = "Increase quantity"
+                        contentDescription = "Increase quantity",
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
@@ -624,7 +632,6 @@ private fun ProductSection(
 @Composable
 private fun PaymentMethodRow(
     paymentOption: PaymentOption?,
-    isLinkSelected: Boolean,
     onClick: () -> Unit
 ) {
     Row(
@@ -635,32 +642,32 @@ private fun PaymentMethodRow(
             .padding(vertical = 8.dp)
     ) {
         // Payment method icon
-        paymentOption?.iconPainter?.let { painter ->
-            Image(
-                painter = painter,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(24.dp)
-            )
-        } ?: run {
-            // Fallback icon if no payment method selected
-            Icon(
-                painter = rememberVectorPainter(Icons.Default.Check),
-                contentDescription = null,
-                tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .size(24.dp)
-            )
+        Box(
+            modifier = Modifier.size(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            paymentOption?.iconPainter?.let { painter ->
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    contentScale = ContentScale.Inside
+                )
+            } ?: run {
+                // Fallback icon if no payment method selected
+                Icon(
+                    painter = rememberVectorPainter(Icons.Default.Check),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
         
         Spacer(modifier = Modifier.width(12.dp))
         
         Text(
-            text = when {
-                isLinkSelected -> "Link"
-                paymentOption?.labels?.label != null -> paymentOption.labels.label
-                else -> "Link"
-            },
+            text = paymentOption?.labels?.label ?: "Payment method",
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colors.onSurface
@@ -671,16 +678,13 @@ private fun PaymentMethodRow(
         Icon(
             painter = rememberVectorPainter(Icons.AutoMirrored.Filled.KeyboardArrowRight),
             contentDescription = "Change payment method",
-            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.size(24.dp)
         )
     }
     
     // Payment method subtitle
-    val sublabel = when {
-        isLinkSelected -> paymentOption?.labels?.sublabel
-        paymentOption?.labels?.sublabel != null -> paymentOption.labels.sublabel
-        else -> null
-    }
+    val sublabel = paymentOption?.labels?.sublabel
     
     sublabel?.let { subtitle ->
         Text(
@@ -708,8 +712,10 @@ private fun ShippingAddressRow(
             painter = rememberVectorPainter(Icons.Default.LocationOn),
             contentDescription = null,
             tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(end = 12.dp)
+            modifier = Modifier.size(24.dp)
         )
+        
+        Spacer(modifier = Modifier.width(12.dp))
         
         Column(
             modifier = Modifier.weight(1f)
@@ -743,7 +749,8 @@ private fun ShippingAddressRow(
         Icon(
             painter = rememberVectorPainter(Icons.AutoMirrored.Filled.KeyboardArrowRight),
             contentDescription = "Change shipping address",
-            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.size(24.dp)
         )
     }
 }
@@ -769,8 +776,10 @@ private fun ShippingMethodRow() {
             painter = rememberVectorPainter(Icons.Default.LocalShipping),
             contentDescription = null,
             tint = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(end = 12.dp)
+            modifier = Modifier.size(24.dp)
         )
+        
+        Spacer(modifier = Modifier.width(12.dp))
         
         Column(
             modifier = Modifier.weight(1f)
@@ -791,7 +800,8 @@ private fun ShippingMethodRow() {
         Icon(
             painter = rememberVectorPainter(Icons.AutoMirrored.Filled.KeyboardArrowRight),
             contentDescription = "Change shipping method",
-            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
+            tint = MaterialTheme.colors.onSurface.copy(alpha = 0.4f),
+            modifier = Modifier.size(24.dp)
         )
     }
     
@@ -982,7 +992,7 @@ private fun LoadingScreen() {
                 color = MaterialTheme.colors.primary
             )
             Text(
-                text = "Setting up checkout...",
+                text = "Loading checkout...",
                 fontSize = 16.sp,
                 color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.padding(top = 16.dp)
