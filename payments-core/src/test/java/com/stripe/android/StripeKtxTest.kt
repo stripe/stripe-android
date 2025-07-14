@@ -6,7 +6,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.PaymentIntent
@@ -660,7 +659,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : StripeModel, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : Parcelable, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI with String param then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
@@ -682,8 +681,8 @@ internal class StripeKtxTest {
 
     private inline fun <reified RepositoryParam : StripeParamsModel>
     `Given repository throws exception when calling createAPI with String param then throws same exception`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<StripeModel>,
-        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> StripeModel
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<Parcelable>,
+        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> Parcelable
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())

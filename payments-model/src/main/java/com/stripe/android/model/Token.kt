@@ -1,9 +1,9 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Token.Type
 import com.stripe.android.model.parsers.TokenJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.Date
@@ -14,7 +14,8 @@ import java.util.Date
  * secure manner. A Token representing this information is returned to you to use.
  */
 @Parcelize
-data class Token
+@Poko
+class Token
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
 
@@ -52,7 +53,7 @@ constructor(
      * If applicable, the [Card] for this token
      */
     val card: Card? = null
-) : StripeModel, StripePaymentSource {
+) : Parcelable, StripePaymentSource {
     enum class Type(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val code: String
     ) {

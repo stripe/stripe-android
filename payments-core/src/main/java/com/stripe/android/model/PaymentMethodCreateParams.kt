@@ -503,7 +503,8 @@ constructor(
     }
 
     @Parcelize
-    data class Ideal(
+    @Poko
+    class Ideal(
         var bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -516,7 +517,8 @@ constructor(
     }
 
     @Parcelize
-    data class Fpx(
+    @Poko
+    class Fpx(
         var bank: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -531,7 +533,8 @@ constructor(
     }
 
     @Parcelize
-    data class Upi(
+    @Poko
+    class Upi(
         private val vpa: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -546,7 +549,8 @@ constructor(
     }
 
     @Parcelize
-    data class SepaDebit(
+    @Poko
+    class SepaDebit(
         var iban: String?
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -561,7 +565,8 @@ constructor(
     }
 
     @Parcelize
-    data class AuBecsDebit(
+    @Poko
+    class AuBecsDebit(
         var bsbNumber: String,
         var accountNumber: String
     ) : StripeParamsModel, Parcelable {
@@ -585,7 +590,8 @@ constructor(
      * See [https://stripe.com/docs/api/payment_methods/create#create_payment_method-bacs_debit](https://stripe.com/docs/api/payment_methods/create#create_payment_method-bacs_debit)
      */
     @Parcelize
-    data class BacsDebit(
+    @Poko
+    class BacsDebit(
         /**
          * The bank account number (e.g. 00012345)
          */
@@ -632,7 +638,8 @@ constructor(
     }
 
     @Parcelize
-    data class Sofort(
+    @Poko
+    class Sofort(
         internal var country: String
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -647,7 +654,8 @@ constructor(
     }
 
     @Parcelize
-    data class Netbanking(
+    @Poko
+    class Netbanking(
         internal var bank: String
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
@@ -679,7 +687,8 @@ constructor(
 
     @Parcelize
     @Suppress("DataClassPrivateConstructor")
-    data class USBankAccount private constructor(
+    @Poko
+    class USBankAccount private constructor(
         internal var linkAccountSessionId: String? = null,
         internal var accountNumber: String? = null,
         internal var routingNumber: String? = null,
@@ -734,7 +743,8 @@ constructor(
     }
 
     @Parcelize
-    data class Link(
+    @Poko
+    class Link(
         internal var paymentDetailsId: String,
         internal var consumerSessionClientSecret: String,
         internal var extraParams: Map<String, @RawValue Any>? = null
@@ -759,7 +769,8 @@ constructor(
     }
 
     @Parcelize
-    data class ShopPay(
+    @Poko
+    class ShopPay(
         internal var externalSourceId: String
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {

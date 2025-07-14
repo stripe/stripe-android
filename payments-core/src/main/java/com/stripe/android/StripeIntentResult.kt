@@ -2,7 +2,6 @@ package com.stripe.android
 
 import android.os.Parcelable
 import androidx.annotation.IntDef
-import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.StripeIntent
 import dev.drewhamilton.poko.Poko
 

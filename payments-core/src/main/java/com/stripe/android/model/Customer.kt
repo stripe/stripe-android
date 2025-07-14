@@ -1,13 +1,15 @@
 package com.stripe.android.model
 
-import com.stripe.android.core.model.StripeModel
+import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model for a Stripe Customer object
  */
 @Parcelize
-data class Customer internal constructor(
+@Poko
+class Customer internal constructor(
     val id: String?,
     val defaultSource: String?,
     val shippingInformation: ShippingInformation?,
@@ -18,7 +20,7 @@ data class Customer internal constructor(
     val description: String?,
     val email: String?,
     val liveMode: Boolean
-) : StripeModel {
+) : Parcelable {
     fun getSourceById(sourceId: String): CustomerPaymentSource? {
         return sources.firstOrNull { it.id == sourceId }
     }

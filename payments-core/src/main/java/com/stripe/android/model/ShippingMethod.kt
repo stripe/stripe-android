@@ -1,7 +1,8 @@
 package com.stripe.android.model
 
+import android.os.Parcelable
 import androidx.annotation.Size
-import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import java.util.Currency
 
@@ -9,7 +10,8 @@ import java.util.Currency
  * Model representing a shipping method in the Android SDK.
  */
 @Parcelize
-data class ShippingMethod @JvmOverloads constructor(
+@Poko
+class ShippingMethod @JvmOverloads constructor(
     /**
      * Human friendly label specifying the shipping method that can be shown in the UI.
      */
@@ -35,7 +37,7 @@ data class ShippingMethod @JvmOverloads constructor(
      * the UI
      */
     val detail: String? = null
-) : StripeModel {
+) : Parcelable {
 
     @JvmOverloads
     constructor(
