@@ -1322,12 +1322,6 @@ public final class com/stripe/android/paymentsheet/ExternalPaymentMethodResultHa
 	public static final fun onExternalPaymentMethodResult (Landroid/content/Context;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodResult;)V
 }
 
-public final class com/stripe/android/paymentsheet/FlowControllerComposeKt {
-	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
-	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
-	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
-}
-
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
@@ -2827,12 +2821,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$WalletButtonsCon
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheetComposeKt {
-	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;II)Lcom/stripe/android/paymentsheet/PaymentSheet;
-	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
-	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheetContract : androidx/activity/result/contract/ActivityResultContract {
