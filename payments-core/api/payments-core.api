@@ -170,8 +170,6 @@ public final class com/stripe/android/GooglePayJsonFactory$BillingAddressParamet
 	public fun <init> (ZLcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters$Format;)V
 	public fun <init> (ZLcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters$Format;Z)V
 	public synthetic fun <init> (ZLcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters$Format;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (ZLcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters$Format;Z)Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;
-	public static synthetic fun copy$default (Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;ZLcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters$Format;ZILjava/lang/Object;)Lcom/stripe/android/GooglePayJsonFactory$BillingAddressParameters;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -201,8 +199,6 @@ public final class com/stripe/android/GooglePayJsonFactory$MerchantInfo : androi
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/GooglePayJsonFactory$MerchantInfo;
-	public static synthetic fun copy$default (Lcom/stripe/android/GooglePayJsonFactory$MerchantInfo;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/GooglePayJsonFactory$MerchantInfo;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -226,8 +222,6 @@ public final class com/stripe/android/GooglePayJsonFactory$ShippingAddressParame
 	public fun <init> (ZLjava/util/Set;)V
 	public fun <init> (ZLjava/util/Set;Z)V
 	public synthetic fun <init> (ZLjava/util/Set;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (ZLjava/util/Set;Z)Lcom/stripe/android/GooglePayJsonFactory$ShippingAddressParameters;
-	public static synthetic fun copy$default (Lcom/stripe/android/GooglePayJsonFactory$ShippingAddressParameters;ZLjava/util/Set;ZILjava/lang/Object;)Lcom/stripe/android/GooglePayJsonFactory$ShippingAddressParameters;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -253,8 +247,6 @@ public final class com/stripe/android/GooglePayJsonFactory$TransactionInfo : and
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;)V
 	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;
-	public static synthetic fun copy$default (Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$TotalPriceStatus;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo$CheckoutOption;ILjava/lang/Object;)Lcom/stripe/android/GooglePayJsonFactory$TransactionInfo;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -946,8 +938,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Billin
 	public fun <init> (ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;)V
 	public fun <init> (ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;Z)V
 	public synthetic fun <init> (ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun copy (ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;Z)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig$Format;ZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -984,15 +974,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Config
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZ)V
 	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Z
-	public final fun component5 ()Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;
-	public final fun component6 ()Z
-	public final fun component7 ()Z
-	public final fun copy (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZ)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayLauncher$BillingAddressConfig;ZZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Config;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
@@ -1170,11 +1151,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public fun <init> (ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;)V
 	public fun <init> (ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;Z)V
 	public synthetic fun <init> (ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Z
-	public final fun component2 ()Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;
-	public final fun component3 ()Z
-	public final fun copy (ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;Z)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;ZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFormat ()Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig$Format;
@@ -1214,15 +1190,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;Z)V
 	public fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZ)V
 	public synthetic fun <init> (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Z
-	public final fun component5 ()Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;
-	public final fun component6 ()Z
-	public final fun component7 ()Z
-	public final fun copy (Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZ)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;
-	public static synthetic fun copy$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayEnvironment;Ljava/lang/String;Ljava/lang/String;ZLcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig;ZZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAllowCreditCards ()Z
@@ -1863,16 +1830,6 @@ public final class com/stripe/android/model/CardParams : com/stripe/android/mode
 	public fun <init> (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;IILjava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/model/CardBrand;
-	public final fun component10 ()Lcom/stripe/android/model/Networks;
-	public final fun component11 ()Ljava/util/Map;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()I
-	public final fun component5 ()I
-	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Lcom/stripe/android/model/Address;
-	public final fun component9 ()Ljava/lang/String;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddress ()Lcom/stripe/android/model/Address;
@@ -2439,12 +2396,6 @@ public final class com/stripe/android/model/GooglePayResult : android/os/Parcela
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/GooglePayResult$Companion;
 	public fun <init> ()V
-	public final fun component1 ()Lcom/stripe/android/model/Token;
-	public final fun component2 ()Lcom/stripe/android/model/Address;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Lcom/stripe/android/model/ShippingInformation;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public static final fun fromJson (Lorg/json/JSONObject;)Lcom/stripe/android/model/GooglePayResult;
@@ -5177,14 +5128,9 @@ public final class com/stripe/android/model/SourceOrder$Shipping$Creator : andro
 public final class com/stripe/android/model/SourceOrderParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
 	public fun <init> (Ljava/util/List;)V
 	public fun <init> (Ljava/util/List;Lcom/stripe/android/model/SourceOrderParams$Shipping;)V
 	public synthetic fun <init> (Ljava/util/List;Lcom/stripe/android/model/SourceOrderParams$Shipping;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Lcom/stripe/android/model/SourceOrderParams$Shipping;
-	public final fun copy (Ljava/util/List;Lcom/stripe/android/model/SourceOrderParams$Shipping;)Lcom/stripe/android/model/SourceOrderParams;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/SourceOrderParams;Ljava/util/List;Lcom/stripe/android/model/SourceOrderParams$Shipping;ILjava/lang/Object;)Lcom/stripe/android/model/SourceOrderParams;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getItems ()Ljava/util/List;
@@ -5209,14 +5155,6 @@ public final class com/stripe/android/model/SourceOrderParams$Item : android/os/
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/model/SourceOrderParams$Item$Type;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Lcom/stripe/android/model/SourceOrderParams$Item$Type;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/model/SourceOrderParams$Item$Type;
-	public final fun component2 ()Ljava/lang/Integer;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Ljava/lang/Integer;
-	public final fun copy (Lcom/stripe/android/model/SourceOrderParams$Item$Type;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)Lcom/stripe/android/model/SourceOrderParams$Item;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/SourceOrderParams$Item;Lcom/stripe/android/model/SourceOrderParams$Item$Type;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Lcom/stripe/android/model/SourceOrderParams$Item;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAmount ()Ljava/lang/Integer;
@@ -5253,13 +5191,6 @@ public final class com/stripe/android/model/SourceOrderParams$Shipping : android
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/model/Address;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceOrderParams$Shipping;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/SourceOrderParams$Shipping;Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceOrderParams$Shipping;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddress ()Lcom/stripe/android/model/Address;
