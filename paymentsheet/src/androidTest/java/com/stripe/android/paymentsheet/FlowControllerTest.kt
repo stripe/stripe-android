@@ -419,7 +419,8 @@ internal class FlowControllerTest {
                     paymentOptionCallback = { paymentOption ->
                         assertThat(paymentOption?.label).endsWith("4242")
                         paymentOptionCallbackCountDownLatch.countDown()
-                    }).build(activity = it)
+                    }
+                ).build(activity = it)
 
                 flowController = unsynchronizedController
             }
@@ -482,7 +483,8 @@ internal class FlowControllerTest {
                 },
                 paymentOptionCallback = {
                     throw AssertionError("Not expected")
-                }).build(activity = it)
+                }
+            ).build(activity = it)
         }
         scenario.moveToState(Lifecycle.State.RESUMED)
 
