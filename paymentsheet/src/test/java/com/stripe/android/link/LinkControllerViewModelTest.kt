@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
 import android.app.Application
-import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -27,8 +26,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.any
-import org.mockito.kotlin.never
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
