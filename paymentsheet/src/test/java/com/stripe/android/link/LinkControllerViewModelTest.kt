@@ -26,9 +26,9 @@ import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.never
 import org.robolectric.RobolectricTestRunner
 
 @ExperimentalCoroutinesApi
@@ -352,13 +352,11 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
-        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
         viewModel.onPresentPaymentMethods(launcher, "test@example.com")
 
-        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
-        verify(launcher).launch(argsCaptor.capture())
-
-        val args = argsCaptor.firstValue
+        val call = launcher.calls.awaitItem()
+        val args = call.input
         assertThat(args.startWithVerificationDialog).isTrue()
         assertThat(args.linkAccountInfo.account).isNull()
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.PaymentMethodSelection(null))
@@ -373,13 +371,11 @@ class LinkControllerViewModelTest {
         configure(viewModel)
         signIn()
 
-        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
         viewModel.onPresentPaymentMethods(launcher, TestFactory.LINK_ACCOUNT.email)
 
-        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
-        verify(launcher).launch(argsCaptor.capture())
-
-        val args = argsCaptor.firstValue
+        val call = launcher.calls.awaitItem()
+        val args = call.input
         assertThat(args.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
     }
 
@@ -400,13 +396,11 @@ class LinkControllerViewModelTest {
             )
         }
 
-        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
         viewModel.onPresentPaymentMethods(launcher, "another@email.com")
 
-        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
-        verify(launcher).launch(argsCaptor.capture())
-
-        val args = argsCaptor.firstValue
+        val call = launcher.calls.awaitItem()
+        val args = call.input
         assertThat(args.linkAccountInfo.account).isNull()
 
         viewModel.state(application).test {
@@ -560,6 +554,186 @@ class LinkControllerViewModelTest {
         viewModel.state(application).test {
             assertThat(awaitItem().isConsumerVerified).isNull()
         }
+    }
+
+    @Test
+    fun `onPresentForAuthentication() fails when configuration is not set`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.presentForAuthenticationResultFlow.test {
+            viewModel.onPresentForAuthentication(mock(), "test@example.com")
+            val result = awaitItem() as LinkController.PresentForAuthenticationResult.Failed
+            assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
+        }
+    }
+
+    @Test
+    fun `onPresentForAuthentication() launches Link with correct arguments`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, "test@example.com")
+
+        val args = launcher.calls.awaitItem().input
+        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkAccountInfo.account).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+
+        val state = viewModel.state(application).first()
+        assertThat(state.isConsumerVerified).isNull()
+    }
+
+    @Test
+    fun `onPresentForAuthentication() on matching email passes existing account`() = runTest(dispatcher) {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, TestFactory.LINK_ACCOUNT.email)
+
+        val args = launcher.calls.awaitItem().input
+        assertThat(args.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+    }
+
+    @Test
+    fun `onPresentForAuthentication() on non-matching email clears account state`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, "another@email.com")
+
+        val call = launcher.calls.awaitItem()
+        val args = call.input
+        assertThat(args.linkAccountInfo.account).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+    }
+
+    @Test
+    fun `onPresentForAuthentication() updates state with presentedForEmail and currentLaunchMode`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val email = "test@example.com"
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, email)
+
+        val call = launcher.calls.awaitItem()
+        val args = call.input
+        assertThat(args.configuration.customerInfo.email).isEqualTo(email)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+    }
+
+    @Test
+    fun `onPresentForAuthentication() handles configuration loading failure`() = runTest {
+        val viewModel = createViewModel()
+        // Don't configure the viewModel, so it will fail with MissingConfigurationException
+
+        viewModel.presentForAuthenticationResultFlow.test {
+            viewModel.onPresentForAuthentication(mock(), "test@example.com")
+
+            val result = awaitItem() as LinkController.PresentForAuthenticationResult.Failed
+            assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
+        }
+    }
+
+    @Test
+    fun `onPresentForAuthentication() with null email passes null to configuration`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, null)
+
+        val call = launcher.calls.awaitItem()
+        val args = call.input
+        assertThat(args.configuration.customerInfo.email).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+    }
+
+    @Test
+    fun `onPresentForAuthentication() sets correct customer info in configuration`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val email = "test@example.com"
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, email)
+
+        val call = launcher.calls.awaitItem()
+        val args = call.input
+        val customerInfo = args.configuration.customerInfo
+        assertThat(customerInfo.email).isEqualTo(email)
+        assertThat(customerInfo.name).isNull()
+        assertThat(customerInfo.phone).isNull()
+        assertThat(customerInfo.billingCountryCode).isNull()
+    }
+
+    @Test
+    fun `getLinkAccountInfo() clears account holder when account is null`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        // Set up an existing account
+        signIn()
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+
+        // Call onPresentForAuthentication with a non-matching email
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, "different@email.com")
+
+        // Verify that the account holder was cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+
+        // Verify that the launcher was called with null account
+        val call = launcher.calls.awaitItem()
+        assertThat(call.input.linkAccountInfo.account).isNull()
+    }
+
+    @Test
+    fun `getLinkAccountInfo() does not clear account holder when account is not null`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        // Set up an existing account
+        signIn()
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+
+        // Call onPresentForAuthentication with a matching email
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentForAuthentication(launcher, TestFactory.LINK_ACCOUNT.email)
+
+        // Verify that the account holder was NOT cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+
+        // Verify that the launcher was called with the existing account
+        val call = launcher.calls.awaitItem()
+        assertThat(call.input.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() clears account holder when email doesn't match`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        // Set up an existing account
+        signIn()
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+
+        // Call onPresentPaymentMethods with a non-matching email
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onPresentPaymentMethods(launcher, "different@email.com")
+
+        // Verify that the account holder was cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+
+        // Verify that the launcher was called with null account
+        val call = launcher.calls.awaitItem()
+        assertThat(call.input.linkAccountInfo.account).isNull()
     }
 
     private fun createViewModel(
