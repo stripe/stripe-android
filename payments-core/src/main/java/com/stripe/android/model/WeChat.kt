@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
+import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -21,4 +21,4 @@ class WeChat constructor(
     val sign: String?,
     val timestamp: String?,
     val qrCodeUrl: String? = null
-) : Parcelable
+) : StripeModel

@@ -1,11 +1,11 @@
 package com.stripe.android
 
 import android.content.Intent
-import android.os.Parcelable
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.model.StripeFile
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.PaymentIntent
@@ -621,7 +621,7 @@ internal class StripeKtxTest {
         assertThat(error.message).isEqualTo("cardNumber cannot be less than 6 characters")
     }
 
-    private inline fun <reified ApiObject : Any, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : StripeModel, reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> ApiObject
@@ -643,8 +643,8 @@ internal class StripeKtxTest {
 
     private inline fun <reified CreateAPIParam : StripeParamsModel, reified RepositoryParam : StripeParamsModel>
     `Given repository throws exception when calling createAPI then throws same exception`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<Any>,
-        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> Any
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<StripeModel>,
+        crossinline createApiInvocationBlock: suspend (CreateAPIParam, String?, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
@@ -659,7 +659,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : Parcelable, reified RepositoryParam : StripeParamsModel>
+    private inline fun <reified ApiObject : StripeModel, reified RepositoryParam : StripeParamsModel>
     `Given repository returns non-empty value when calling createAPI with String param then returns correct result`(
         crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<ApiObject>,
         crossinline createApiInvocationBlock: suspend (String, String?, String?) -> ApiObject
@@ -681,8 +681,8 @@ internal class StripeKtxTest {
 
     private inline fun <reified RepositoryParam : StripeParamsModel>
     `Given repository throws exception when calling createAPI with String param then throws same exception`(
-        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<Parcelable>,
-        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> Parcelable
+        crossinline repositoryBlock: suspend (RepositoryParam, ApiRequest.Options) -> Result<StripeModel>,
+        crossinline createApiInvocationBlock: suspend (String, String?, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any())
@@ -697,7 +697,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : Any>
+    private inline fun <reified ApiObject : StripeModel>
     `Given repository returns non-empty value when calling retrieveAPI with String param then return correct result`(
         crossinline repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<ApiObject>,
         crossinline retrieveApiInvocationBlock: suspend (String, String?) -> ApiObject
@@ -717,8 +717,8 @@ internal class StripeKtxTest {
     }
 
     private fun `Given repository throws exception when calling retrieveAPI with String param then returns a failure`(
-        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<Any>,
-        retrieveApiInvocationBlock: suspend (String, String?) -> Any
+        repositoryBlock: suspend (String, ApiRequest.Options, List<String>) -> Result<StripeModel>,
+        retrieveApiInvocationBlock: suspend (String, String?) -> StripeModel
     ): Unit = runTest {
         whenever(
             repositoryBlock(any(), any(), any())
@@ -732,7 +732,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : Parcelable>
+    private inline fun <reified ApiObject : StripeModel>
     `Given controller returns non-empty value when calling getAPI then returns correct result`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline controllerInvocationBlock: suspend (Intent) -> Result<ApiObject>,
@@ -756,7 +756,7 @@ internal class StripeKtxTest {
         assertSame(expectedApiObj, actualObj)
     }
 
-    private inline fun <ApiObject : Parcelable>
+    private inline fun <ApiObject : StripeModel>
     `Given controller returns exception when calling getAPI then throws same exception`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline controllerInvocationBlock: suspend (Intent) -> Result<ApiObject>,
@@ -778,7 +778,7 @@ internal class StripeKtxTest {
         }
     }
 
-    private inline fun <reified ApiObject : Parcelable>
+    private inline fun <reified ApiObject : StripeModel>
     `Given controller check fails when calling getAPI then throws InvalidRequestException`(
         crossinline controllerCheckBlock: (Int, Intent?) -> Boolean,
         crossinline getAPIInvocationBlock: suspend (Int, Intent) -> ApiObject

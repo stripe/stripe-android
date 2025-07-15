@@ -16,7 +16,7 @@ class StripeModelTest {
 
     @BeforeTest
     fun setup() {
-        assertThat(StripeModel::class.java.isAssignableFrom(AccountRange::class.java))
+        assertThat(StripeModel::class.java.isAssignableFrom(Card::class.java))
             .isTrue()
     }
 

@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.TokenJsonParser
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -53,7 +53,7 @@ constructor(
      * If applicable, the [Card] for this token
      */
     val card: Card? = null
-) : Parcelable, StripePaymentSource {
+) : StripeModel, StripePaymentSource {
     enum class Type(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val code: String
     ) {

@@ -4,7 +4,7 @@ public abstract interface class com/stripe/android/AlipayAuthenticator {
 
 public abstract interface class com/stripe/android/ApiResultCallback {
 	public abstract fun onError (Ljava/lang/Exception;)V
-	public abstract fun onSuccess (Ljava/lang/Object;)V
+	public abstract fun onSuccess (Lcom/stripe/android/core/model/StripeModel;)V
 }
 
 public final class com/stripe/android/BuildConfig {
@@ -25,7 +25,7 @@ public final class com/stripe/android/DefaultCardBrandFilter$Creator : android/o
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/EphemeralKey : android/os/Parcelable {
+public final class com/stripe/android/EphemeralKey : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun describeContents ()I
@@ -794,7 +794,7 @@ public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
 	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
 }
 
-public abstract class com/stripe/android/StripeIntentResult : android/os/Parcelable {
+public abstract class com/stripe/android/StripeIntentResult : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public fun equals (Ljava/lang/Object;)Z
 	public abstract fun getFailureMessage ()Ljava/lang/String;
@@ -1652,7 +1652,7 @@ public final class com/stripe/android/model/AccountRange$Creator : android/os/Pa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/Address : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+public final class com/stripe/android/model/Address : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/Address$Companion;
@@ -2058,7 +2058,7 @@ public final class com/stripe/android/model/ConsumerPaymentDetailsShare$Creator 
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/Customer : android/os/Parcelable {
+public final class com/stripe/android/model/Customer : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun describeContents ()I
@@ -2131,7 +2131,7 @@ public final class com/stripe/android/model/CustomerCard$Creator : android/os/Pa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract class com/stripe/android/model/CustomerPaymentSource : android/os/Parcelable {
+public abstract class com/stripe/android/model/CustomerPaymentSource : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public abstract fun getId ()Ljava/lang/String;
 	public abstract fun getTokenizationMethod ()Lcom/stripe/android/model/TokenizationMethod;
@@ -2410,7 +2410,7 @@ public final class com/stripe/android/model/GooglePayResult$Creator : android/os
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/IssuingCardPin : android/os/Parcelable {
+public final class com/stripe/android/model/IssuingCardPin : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;)V
@@ -2740,7 +2740,7 @@ public final class com/stripe/android/model/PaymentIntent$Creator : android/os/P
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentIntent$Error : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentIntent$Error : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun describeContents ()I
@@ -2780,7 +2780,7 @@ public final class com/stripe/android/model/PaymentIntent$Error$Type : java/lang
 	public static fun values ()[Lcom/stripe/android/model/PaymentIntent$Error$Type;
 }
 
-public final class com/stripe/android/model/PaymentIntent$Shipping : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentIntent$Shipping : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/model/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -2805,7 +2805,7 @@ public final class com/stripe/android/model/PaymentIntent$Shipping$Creator : and
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentMethod : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/PaymentMethod$Companion;
@@ -2923,7 +2923,7 @@ public final class com/stripe/android/model/PaymentMethod$BacsDebit$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$BillingDetails : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+public final class com/stripe/android/model/PaymentMethod$BillingDetails : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field address Lcom/stripe/android/model/Address;
@@ -3011,7 +3011,7 @@ public final class com/stripe/android/model/PaymentMethod$Card : com/stripe/andr
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/model/PaymentMethod$Card$Checks : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentMethod$Card$Checks : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field addressLine1Check Ljava/lang/String;
@@ -3040,7 +3040,7 @@ public final class com/stripe/android/model/PaymentMethod$Card$Creator : android
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Card$Networks : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentMethod$Card$Networks : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
@@ -3064,7 +3064,7 @@ public final class com/stripe/android/model/PaymentMethod$Card$Networks$Creator 
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentMethod$Card$ThreeDSecureUsage : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field isSupported Z
@@ -3288,7 +3288,7 @@ public final class com/stripe/android/model/PaymentMethod$Type$Creator : android
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract class com/stripe/android/model/PaymentMethod$TypeData : android/os/Parcelable {
+public abstract class com/stripe/android/model/PaymentMethod$TypeData : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public abstract fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
 }
@@ -3362,7 +3362,7 @@ public final class com/stripe/android/model/PaymentMethod$USBankAccount$USBankAc
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentMethod$USBankAccount$USBankNetworks : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
@@ -4237,7 +4237,7 @@ public final class com/stripe/android/model/PaymentMethodOptionsParams$WeChatPay
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethodPreference : android/os/Parcelable {
+public final class com/stripe/android/model/PaymentMethodPreference : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/model/StripeIntent;Ljava/lang/String;)V
@@ -4498,7 +4498,7 @@ public final class com/stripe/android/model/PiiTokenParams$Creator : android/os/
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PossibleBrands : android/os/Parcelable {
+public final class com/stripe/android/model/PossibleBrands : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/util/List;)V
@@ -4518,7 +4518,7 @@ public final class com/stripe/android/model/PossibleBrands$Creator : android/os/
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/RadarSession : android/os/Parcelable {
+public final class com/stripe/android/model/RadarSession : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;)V
@@ -4599,7 +4599,7 @@ public final class com/stripe/android/model/SetupIntent$Creator : android/os/Par
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/SetupIntent$Error : android/os/Parcelable {
+public final class com/stripe/android/model/SetupIntent$Error : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun describeContents ()I
@@ -4638,7 +4638,7 @@ public final class com/stripe/android/model/SetupIntent$Error$Type : java/lang/E
 	public static fun values ()[Lcom/stripe/android/model/SetupIntent$Error$Type;
 }
 
-public final class com/stripe/android/model/ShippingInformation : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
+public final class com/stripe/android/model/ShippingInformation : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/ShippingInformation$Companion;
@@ -4667,7 +4667,7 @@ public final class com/stripe/android/model/ShippingInformation$Creator : androi
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/ShippingMethod : android/os/Parcelable {
+public final class com/stripe/android/model/ShippingMethod : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;)V
@@ -4805,7 +4805,7 @@ public final class com/stripe/android/model/Source$Flow : java/lang/Enum {
 	public static fun values ()[Lcom/stripe/android/model/Source$Flow;
 }
 
-public final class com/stripe/android/model/Source$Klarna : android/os/Parcelable {
+public final class com/stripe/android/model/Source$Klarna : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Ljava/util/Set;)V
@@ -4902,7 +4902,7 @@ public final class com/stripe/android/model/Source$Receiver$Creator : android/os
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/Source$Redirect : android/os/Parcelable {
+public final class com/stripe/android/model/Source$Redirect : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/model/Source$Redirect$Status;Ljava/lang/String;)V
@@ -5545,7 +5545,7 @@ public final class com/stripe/android/model/Stripe3ds2Fingerprint$DirectoryServe
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract interface class com/stripe/android/model/StripeIntent : android/os/Parcelable {
+public abstract interface class com/stripe/android/model/StripeIntent : com/stripe/android/core/model/StripeModel {
 	public abstract fun getClientSecret ()Ljava/lang/String;
 	public abstract fun getCreated ()J
 	public abstract fun getDescription ()Ljava/lang/String;
@@ -5565,7 +5565,7 @@ public abstract interface class com/stripe/android/model/StripeIntent : android/
 	public abstract fun requiresConfirmation ()Z
 }
 
-public abstract class com/stripe/android/model/StripeIntent$NextActionData : android/os/Parcelable {
+public abstract class com/stripe/android/model/StripeIntent$NextActionData : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 }
 
@@ -5861,7 +5861,7 @@ public final class com/stripe/android/model/StripeIntentKtxKt {
 	public static final fun getRequestCode (Lcom/stripe/android/model/StripeIntent;)I
 }
 
-public final class com/stripe/android/model/WeChat : android/os/Parcelable {
+public final class com/stripe/android/model/WeChat : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -5915,11 +5915,11 @@ public final class com/stripe/android/model/WeChatPayNextAction$Creator : androi
 public final class com/stripe/android/model/parsers/CustomerPaymentSourceJsonParser : com/stripe/android/core/model/parsers/ModelJsonParser {
 	public static final field $stable I
 	public fun <init> ()V
+	public synthetic fun parse (Lorg/json/JSONObject;)Lcom/stripe/android/core/model/StripeModel;
 	public fun parse (Lorg/json/JSONObject;)Lcom/stripe/android/model/CustomerPaymentSource;
-	public synthetic fun parse (Lorg/json/JSONObject;)Ljava/lang/Object;
 }
 
-public abstract class com/stripe/android/model/wallets/Wallet : android/os/Parcelable {
+public abstract class com/stripe/android/model/wallets/Wallet : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public synthetic fun <init> (Lcom/stripe/android/model/wallets/Wallet$Type;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
@@ -6224,7 +6224,7 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : android/os/Parcelable {
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/model/StripeIntent;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)V

@@ -2,6 +2,7 @@ package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.StripeIntent
 import dev.drewhamilton.poko.Poko
@@ -33,7 +34,7 @@ sealed class CollectBankAccountResult : Parcelable {
 class CollectBankAccountResponse(
     val intent: StripeIntent,
     val financialConnectionsSession: FinancialConnectionsSession
-) : Parcelable
+) : StripeModel
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun CollectBankAccountResultInternal.toUSBankAccountResult(): CollectBankAccountResult {

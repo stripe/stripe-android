@@ -163,7 +163,7 @@ constructor(
      * [allow_redisplay](https://docs.stripe.com/api/payment_methods/object#payment_method_object-allow_redisplay)
      */
     @JvmField val allowRedisplay: AllowRedisplay? = null,
-) : Parcelable {
+) : StripeModel {
 
     val isLinkPaymentMethod: Boolean
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -749,7 +749,7 @@ constructor(
          * [billing_details.phone](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-phone)
          */
         @JvmField val phone: String? = null
-    ) : Parcelable, StripeParamsModel {
+    ) : StripeModel, StripeParamsModel {
 
         fun toBuilder(): Builder {
             return Builder()
@@ -848,7 +848,7 @@ constructor(
         ALWAYS("always"),
     }
 
-    sealed class TypeData : Parcelable {
+    sealed class TypeData : StripeModel {
         abstract val type: Type
     }
 
@@ -1003,7 +1003,7 @@ constructor(
              * [payment_method.card.checks.cvc_check](https://stripe.com/docs/api/errors#errors-payment_method-card-checks-cvc_check)
              */
             @JvmField val cvcCheck: String?
-        ) : Parcelable
+        ) : StripeModel
 
         /**
          * Contains details on how this Card maybe be used for 3D Secure authentication.
@@ -1021,7 +1021,7 @@ constructor(
              * [payment_method.card.three_d_secure_usage.supported](https://stripe.com/docs/api/errors#errors-payment_method-card-three_d_secure_usage-supported)
              */
             @JvmField val isSupported: Boolean
-        ) : Parcelable
+        ) : StripeModel
 
         @Parcelize
         @Poko
@@ -1030,7 +1030,7 @@ constructor(
             @Deprecated("This field is deprecated and will be removed in a future release.")
             val selectionMandatory: Boolean = false,
             val preferred: String? = null
-        ) : Parcelable {
+        ) : StripeModel {
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun copy(
@@ -1365,7 +1365,7 @@ constructor(
         class USBankNetworks(
             val preferred: String?,
             val supported: List<String>
-        ) : Parcelable
+        ) : StripeModel
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

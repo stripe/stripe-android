@@ -1,11 +1,8 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.annotation.StringDef
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.Source.Flow
-import com.stripe.android.model.Source.SourceType
 import com.stripe.android.model.parsers.SourceJsonParser
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -259,7 +256,7 @@ data class Source internal constructor(
          * authentication flow.
          */
         val url: String?
-    ) : Parcelable {
+    ) : StripeModel {
 
         enum class Status(private val code: String) {
             Pending("pending"),
@@ -421,7 +418,7 @@ data class Source internal constructor(
         val payOverTimeRedirectUrl: String?,
         val paymentMethodCategories: Set<String>,
         val customPaymentMethods: Set<String>
-    ) : Parcelable
+    ) : StripeModel
 
     companion object {
         internal const val EURO: String = "eur"

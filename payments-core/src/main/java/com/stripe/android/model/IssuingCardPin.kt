@@ -1,6 +1,6 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
+import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -8,4 +8,4 @@ import kotlinx.parcelize.Parcelize
 @Poko
 class IssuingCardPin(
     val pin: String
-) : Parcelable
+) : StripeModel

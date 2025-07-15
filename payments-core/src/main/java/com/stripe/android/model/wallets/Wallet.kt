@@ -1,7 +1,7 @@
 package com.stripe.android.model.wallets
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Address
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -14,7 +14,7 @@ import kotlinx.parcelize.Parcelize
 sealed class Wallet(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val walletType: Type
-) : Parcelable {
+) : StripeModel {
 
     @Parcelize
     @Poko

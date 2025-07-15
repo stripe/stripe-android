@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -220,7 +220,7 @@ constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) : Parcelable {
+    ) : StripeModel {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),

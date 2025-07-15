@@ -22,6 +22,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
@@ -1831,7 +1832,7 @@ class Stripe internal constructor(
         }
     }
 
-    private fun <T> executeAsyncForResult(
+    private fun <T : StripeModel> executeAsyncForResult(
         callback: ApiResultCallback<T>,
         apiMethod: suspend () -> Result<T>,
     ) {
@@ -1841,7 +1842,7 @@ class Stripe internal constructor(
         }
     }
 
-    private suspend fun <T> dispatchResult(
+    private suspend fun <T : StripeModel> dispatchResult(
         result: Result<T>,
         callback: ApiResultCallback<T>
     ) = withContext(Dispatchers.Main) {

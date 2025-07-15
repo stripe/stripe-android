@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.AddressJsonParser
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -21,7 +21,7 @@ class Address(
     val line2: String? = null,
     val postalCode: String? = null,
     val state: String? = null
-) : Parcelable, StripeParamsModel {
+) : StripeModel, StripeParamsModel {
     internal val countryCode: CountryCode?
         get() = country?.takeUnless { it.isBlank() }?.let { CountryCode.create(it) }
 

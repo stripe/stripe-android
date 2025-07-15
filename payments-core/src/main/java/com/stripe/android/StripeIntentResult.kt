@@ -1,7 +1,7 @@
 package com.stripe.android
 
-import android.os.Parcelable
 import androidx.annotation.IntDef
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.StripeIntent
 import dev.drewhamilton.poko.Poko
 
@@ -14,7 +14,7 @@ import dev.drewhamilton.poko.Poko
 @Poko
 abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     @Outcome private val outcomeFromFlow: Int
-) : Parcelable {
+) : StripeModel {
     abstract val intent: T
     abstract val failureMessage: String?
 

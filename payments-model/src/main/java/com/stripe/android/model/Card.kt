@@ -1,9 +1,9 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.IntRange
 import androidx.annotation.RestrictTo
 import androidx.annotation.Size
+import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -172,7 +172,7 @@ constructor(
      * See [API Reference](https://stripe.com/docs/api/cards/object#card_object-tokenization_method).
      */
     val tokenizationMethod: TokenizationMethod? = null
-) : Parcelable, StripePaymentSource {
+) : StripeModel, StripePaymentSource {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun copy(

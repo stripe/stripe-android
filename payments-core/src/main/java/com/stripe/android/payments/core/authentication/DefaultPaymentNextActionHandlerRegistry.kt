@@ -9,6 +9,7 @@ import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -43,7 +44,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
     }
 
     @VisibleForTesting
-    internal val allNextActionHandlers: Set<PaymentNextActionHandler<*>>
+    internal val allNextActionHandlers: Set<PaymentNextActionHandler<out StripeModel>>
         get() = buildSet {
             add(noOpIntentNextActionHandler)
             add(sourceNextActionHandler)

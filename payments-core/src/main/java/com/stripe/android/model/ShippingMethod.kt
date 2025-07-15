@@ -1,7 +1,7 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.Size
+import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import java.util.Currency
@@ -37,7 +37,7 @@ class ShippingMethod @JvmOverloads constructor(
      * the UI
      */
     val detail: String? = null
-) : Parcelable {
+) : StripeModel {
 
     @JvmOverloads
     constructor(

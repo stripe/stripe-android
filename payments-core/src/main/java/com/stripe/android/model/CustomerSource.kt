@@ -1,13 +1,13 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
+import com.stripe.android.core.model.StripeModel
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model of the "data" object inside a [Customer] "source" object.
  */
-sealed class CustomerPaymentSource : Parcelable {
+sealed class CustomerPaymentSource : StripeModel {
     abstract val id: String?
     abstract val tokenizationMethod: TokenizationMethod?
 }

@@ -1,8 +1,8 @@
 package com.stripe.android.model
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -346,7 +346,7 @@ constructor(
          * The type of error returned.
          */
         val type: Type?
-    ) : Parcelable {
+    ) : StripeModel {
         enum class Type(val code: String) {
             ApiConnectionError("api_connection_error"),
             ApiError("api_error"),
@@ -432,7 +432,7 @@ constructor(
          * See [shipping.tracking_number](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping-tracking_number)
          */
         val trackingNumber: String? = null
-    ) : Parcelable
+    ) : StripeModel
 
     internal data class ClientSecret(internal val value: String) {
         internal val paymentIntentId: String =

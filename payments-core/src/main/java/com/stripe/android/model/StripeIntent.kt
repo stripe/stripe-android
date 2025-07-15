@@ -4,6 +4,7 @@ import android.net.Uri
 import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -11,7 +12,7 @@ import kotlinx.parcelize.Parcelize
 /**
  * An interface for methods available in [PaymentIntent] and [SetupIntent]
  */
-sealed interface StripeIntent : Parcelable {
+sealed interface StripeIntent : StripeModel {
     /**
      * Unique identifier for the object.
      */
@@ -171,7 +172,7 @@ sealed interface StripeIntent : Parcelable {
         }
     }
 
-    sealed class NextActionData : Parcelable {
+    sealed class NextActionData : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         interface DisplayVoucherDetails {
             val hostedVoucherUrl: String?

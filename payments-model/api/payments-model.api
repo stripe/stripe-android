@@ -96,7 +96,7 @@ public final class com/stripe/android/model/BankAccount$Type : java/lang/Enum {
 	public static fun values ()[Lcom/stripe/android/model/BankAccount$Type;
 }
 
-public final class com/stripe/android/model/Card : android/os/Parcelable, com/stripe/android/model/StripePaymentSource {
+public final class com/stripe/android/model/Card : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
@@ -440,7 +440,7 @@ public abstract interface class com/stripe/android/model/StripePaymentSource : a
 	public abstract fun getId ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/model/Token : android/os/Parcelable, com/stripe/android/model/StripePaymentSource {
+public final class com/stripe/android/model/Token : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/Token$Companion;
 	public final fun describeContents ()I
