@@ -415,14 +415,11 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
-        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
         val newEmail = "new@email.com"
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
         viewModel.onPresentPaymentMethods(launcher = launcher, email = newEmail)
 
-        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
-        verify(launcher).launch(argsCaptor.capture())
-
-        val customerInfo = argsCaptor.firstValue.configuration.customerInfo
+        val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(newEmail)
     }
 
@@ -437,13 +434,10 @@ class LinkControllerViewModelTest {
         )
         configure(viewModel, defaultBillingDetails = Optional.of(billingDetails))
 
-        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
         viewModel.onPresentPaymentMethods(launcher = launcher, email = null)
 
-        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
-        verify(launcher).launch(argsCaptor.capture())
-
-        val customerInfo = argsCaptor.firstValue.configuration.customerInfo
+        val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
         assertThat(customerInfo.name).isEqualTo(TestFactory.CUSTOMER_NAME)
         assertThat(customerInfo.phone).isEqualTo(TestFactory.CUSTOMER_PHONE)

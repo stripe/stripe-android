@@ -1,14 +1,21 @@
 package com.stripe.android.link
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakePaymentElementLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 internal class DefaultLinkConfigurationLoaderTest {
     private val logger = FakeLogger()
@@ -24,7 +31,7 @@ internal class DefaultLinkConfigurationLoaderTest {
     )
 
     private fun createLoader(
-        paymentElementLoader: FakePaymentElementLoader,
+        paymentElementLoader: PaymentElementLoader,
         useNativeLink: Boolean? = null
     ): DefaultLinkConfigurationLoader {
         useNativeLink?.let { linkGate.setUseNativeLink(it) }
@@ -82,13 +89,34 @@ internal class DefaultLinkConfigurationLoaderTest {
     }
 
     @Test
-    fun `load() calls paymentElementLoader with expected parameters`() = runTest {
+    fun `load() calls paymentElementLoader with expected configuration`() = runTest {
+        val paymentElementLoader = mock<PaymentElementLoader>()
         val loader = createLoader(
-            paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
+            paymentElementLoader = paymentElementLoader,
             useNativeLink = true
         )
 
-        val result = loader.load(configuration)
-        assertThat(result.isSuccess).isTrue()
+        val defaultBillingDetails =
+            PaymentSheet.BillingDetails(email = "foo@bar.com")
+        val billingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            )
+        val controllerConfig = LinkController.Configuration.Builder(TestFactory.MERCHANT_NAME)
+            .defaultBillingDetails(defaultBillingDetails)
+            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .build()
+        loader.load(controllerConfig)
+
+        val commonConfigCaptor = argumentCaptor<CommonConfiguration>()
+        verify(paymentElementLoader).load(
+            initializationMode = any(),
+            configuration = commonConfigCaptor.capture(),
+            metadata = any(),
+        )
+        val commonConfig = commonConfigCaptor.firstValue
+        assertThat(commonConfig.merchantDisplayName).isEqualTo(TestFactory.MERCHANT_NAME)
+        assertThat(commonConfig.defaultBillingDetails).isEqualTo(defaultBillingDetails)
+        assertThat(commonConfig.billingDetailsCollectionConfiguration).isEqualTo(billingDetailsCollectionConfiguration)
     }
 }
