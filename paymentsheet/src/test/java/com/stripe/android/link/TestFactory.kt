@@ -194,6 +194,13 @@ internal object TestFactory {
         billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
     )
 
+    val LINK_EMPTY_CUSTOMER_INFO = LinkConfiguration.CustomerInfo(
+        name = null,
+        email = null,
+        phone = null,
+        billingCountryCode = null
+    )
+
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,

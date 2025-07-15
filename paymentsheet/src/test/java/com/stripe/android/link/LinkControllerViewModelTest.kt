@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -27,6 +28,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 
 @ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
@@ -408,6 +411,45 @@ class LinkControllerViewModelTest {
     }
 
     @Test
+    fun `onPresentPaymentMethods() with email includes the email in the launch config`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        val newEmail = "new@email.com"
+        viewModel.onPresentPaymentMethods(launcher = launcher, email = newEmail)
+
+        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
+        verify(launcher).launch(argsCaptor.capture())
+
+        val customerInfo = argsCaptor.firstValue.configuration.customerInfo
+        assertThat(customerInfo.email).isEqualTo(newEmail)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() with null email uses existing customer info`() = runTest {
+        val viewModel = createViewModel()
+        val billingDetails = PaymentSheet.BillingDetails(
+            address = null,
+            email = TestFactory.CUSTOMER_EMAIL,
+            name = TestFactory.CUSTOMER_NAME,
+            phone = TestFactory.CUSTOMER_PHONE,
+        )
+        configure(viewModel, defaultBillingDetails = Optional.of(billingDetails))
+
+        val launcher = mock<ActivityResultLauncher<LinkActivityContract.Args>>()
+        viewModel.onPresentPaymentMethods(launcher = launcher, email = null)
+
+        val argsCaptor = argumentCaptor<LinkActivityContract.Args>()
+        verify(launcher).launch(argsCaptor.capture())
+
+        val customerInfo = argsCaptor.firstValue.configuration.customerInfo
+        assertThat(customerInfo.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
+        assertThat(customerInfo.name).isEqualTo(TestFactory.CUSTOMER_NAME)
+        assertThat(customerInfo.phone).isEqualTo(TestFactory.CUSTOMER_PHONE)
+    }
+
+    @Test
     fun `onLinkActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
@@ -748,7 +790,9 @@ class LinkControllerViewModelTest {
 
     private suspend fun configure(
         viewModel: LinkControllerViewModel,
-        passthroughModeEnabled: Boolean = false
+        passthroughModeEnabled: Boolean = false,
+        defaultBillingDetails: Optional<PaymentSheet.BillingDetails>? = null,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
     ) {
         val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
@@ -757,7 +801,10 @@ class LinkControllerViewModelTest {
         )
         linkConfigurationLoader.linkConfigurationResult = Result.success(linkConfiguration)
         viewModel.configure(
-            LinkController.Configuration.Builder("Test").build()
+            LinkController.Configuration.Builder("Test")
+                .apply { defaultBillingDetails?.let { defaultBillingDetails(it.getOrNull()) } }
+                .apply { billingDetailsCollectionConfiguration?.let { billingDetailsCollectionConfiguration(it) } }
+                .build()
         )
     }
 
