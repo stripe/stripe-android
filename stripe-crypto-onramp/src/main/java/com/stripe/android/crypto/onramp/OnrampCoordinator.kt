@@ -60,7 +60,7 @@ interface OnrampCoordinator {
  * @param activityResultRegistryOwner Host providing ActivityResultRegistry for LinkController.
  * @param isLinkUserCallback Callback invoked with the result of determining if a provided email is associated with a Link user.
  */
-class DefaultOnrampCoordinator @Inject internal constructor(
+class DefaultOnrampCoordinator @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val isLinkUserCallback: (Boolean) -> Unit
@@ -79,7 +79,7 @@ class DefaultOnrampCoordinator @Inject internal constructor(
             presentPaymentMethodsCallback = { /* No-op for now */ },
             lookupConsumerCallback = { result ->
                 when (result) {
-                    is LinkController.LookupConsumerResult.Success -> isLinkUserCallback(true)
+                    is LinkController.LookupConsumerResult.Success -> isLinkUserCallback(result.isConsumer)
                     is LinkController.LookupConsumerResult.Failed  -> isLinkUserCallback(false)
                 }
             },
