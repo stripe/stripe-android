@@ -687,7 +687,6 @@ internal class PaymentSheetPlaygroundViewModel(
         savedStateHandle[PLAYGROUND_STATE_KEY] = state
     }
 
-
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val uriSupplier: () -> Uri?,

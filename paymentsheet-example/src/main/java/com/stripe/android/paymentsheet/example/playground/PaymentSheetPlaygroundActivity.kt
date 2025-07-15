@@ -159,7 +159,6 @@ internal class PaymentSheetPlaygroundActivity :
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
-
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
@@ -259,7 +258,6 @@ internal class PaymentSheetPlaygroundActivity :
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
             }
-
         }
     }
 

@@ -69,6 +69,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         onPresentForAuthenticationClick = { email ->
                             linkController.presentForAuthentication(email = email.takeIf { it.isNotBlank() })
                         },
+                        onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
                 }
             }

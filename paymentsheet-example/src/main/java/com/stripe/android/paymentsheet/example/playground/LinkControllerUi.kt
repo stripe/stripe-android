@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +19,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -28,6 +31,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -56,6 +60,7 @@ internal fun LinkControllerUi(
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
     onPresentForAuthenticationClick: (email: String) -> Unit,
+    onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     val errorToPresent = playgroundState.linkControllerError()
@@ -69,18 +74,19 @@ internal fun LinkControllerUi(
         onDispose { job.cancel() }
     }
 
+    LaunchedEffect(errorToPresent) {
+        if (errorToPresent != null) {
+            onErrorMessage(errorToPresent.message ?: "An error occurred")
+        }
+    }
+
     Column(
         modifier = modifier
+            .verticalScroll(rememberScrollState())
             .fillMaxSize()
-            .padding(horizontal = 20.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        errorToPresent?.let { error ->
-            Text(
-                text = error.message ?: "An error occurred",
-                color = MaterialTheme.colors.error,
-            )
-        }
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = email,
@@ -89,27 +95,11 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(vertical = 20.dp))
 
-        when (playgroundState.lookupConsumerResult) {
-            is LinkController.LookupConsumerResult.Success -> {
-                val exists = if (playgroundState.lookupConsumerResult.isConsumer) "exists" else "does not exist"
-                Text(
-                    text = "${playgroundState.lookupConsumerResult.email} $exists",
-                    style = MaterialTheme.typography.body2,
-                )
-            }
-            is LinkController.LookupConsumerResult.Failed, null -> {
-                // No-op.
-            }
-        }
+        StatusBox(
+            controllerState = controllerState,
+            playgroundState = playgroundState,
+        )
 
-        controllerState.isConsumerVerified?.let { isConsumerVerified ->
-            Text(
-                text = "Consumer verified: $isConsumerVerified",
-                style = MaterialTheme.typography.body2,
-            )
-        }
-
-        // Authentication Test Button
         Button(
             onClick = { onPresentForAuthenticationClick(email) },
             modifier = Modifier.fillMaxWidth(),
@@ -128,21 +118,67 @@ internal fun LinkControllerUi(
             onClick = onCreatePaymentMethodClick,
             enabled = controllerState.selectedPaymentMethodPreview != null,
         )
+    }
+}
 
-        val createPaymentMethodResultText = controllerState.createdPaymentMethod
-            ?.let { it.id ?: "Payment method created (no id)" }
-            ?: ""
-        Text(
-            text = createPaymentMethodResultText,
-            style = MaterialTheme.typography.body1,
-        )
+@Composable
+private fun StatusBox(
+    controllerState: LinkController.State,
+    playgroundState: LinkControllerPlaygroundState,
+) {
+    val statusItems = buildList {
+        val lookupText =
+            when (playgroundState.lookupConsumerResult) {
+                is LinkController.LookupConsumerResult.Success -> {
+                    val exists = if (playgroundState.lookupConsumerResult.isConsumer) "exists" else "does not exist"
+                    "${playgroundState.lookupConsumerResult.email} $exists"
+                }
+                is LinkController.LookupConsumerResult.Failed -> {
+                    "Failed: ${playgroundState.lookupConsumerResult.error.message}"
+                }
+                null -> {
+                    ""
+                }
+            }
 
-        if (playgroundState.presentForAuthenticationResult != null) {
-            Text(
-                text = playgroundState.presentForAuthenticationResult.toString(),
-                style = MaterialTheme.typography.body1
-            )
+        add("Consumer Lookup" to lookupText)
+        add("Consumer Verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
+        add("Payment Method Created" to (controllerState.createdPaymentMethod?.id ?: ""))
+        add("Authentication Result" to (playgroundState.presentForAuthenticationResult?.toString() ?: ""))
+    }
+
+    if (statusItems.isNotEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.05f),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            statusItems.forEach { (label, value) ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        modifier = Modifier.padding(end = 8.dp),
+                        text = "$label:",
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp),
+                        text = value,
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                }
+            }
         }
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -166,6 +202,7 @@ private fun LinkControllerUiPreview() {
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {},
             onPresentForAuthenticationClick = {},
+            onErrorMessage = {},
         )
     }
 }
