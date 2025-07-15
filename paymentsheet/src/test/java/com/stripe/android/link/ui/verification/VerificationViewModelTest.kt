@@ -4,6 +4,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -69,7 +71,7 @@ internal class VerificationViewModelTest {
             )
             viewModel.onVerificationCodeEntered("code")
 
-            assertThat(onVerificationSucceededCalls).containsExactly(Unit)
+            assertThat(onVerificationSucceededCalls).hasSize(1)
         }
 
     @Test
@@ -202,19 +204,23 @@ internal class VerificationViewModelTest {
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
-        onVerificationSucceeded: () -> Unit = {},
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        onVerificationSucceeded: () -> Unit = { },
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
+        dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
+            linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountManager = linkAccountManager,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
-            linkAccount = TestFactory.LINK_ACCOUNT,
+            linkLaunchMode = linkLaunchMode,
+            isDialog = false,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
-            isDialog = false
+            dismissWithResult = dismissWithResult
         )
     }
 }

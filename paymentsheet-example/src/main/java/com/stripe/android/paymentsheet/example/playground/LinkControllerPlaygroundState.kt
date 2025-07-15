@@ -6,4 +6,5 @@ data class LinkControllerPlaygroundState(
     val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,
     val createPaymentMethodResult: LinkController.CreatePaymentMethodResult? = null,
+    val presentForAuthenticationResult: LinkController.PresentForAuthenticationResult? = null,
 )

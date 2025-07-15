@@ -129,7 +129,8 @@ private fun Screens(
             MinScreenHeightBox(screenHeightPercentage = 1f) {
                 SignUpRoute(
                     navigateAndClearStack = navigateAndClearStack,
-                    moveToWeb = moveToWeb
+                    moveToWeb = moveToWeb,
+                    dismissWithResult = dismissWithResult
                 )
             }
         }
@@ -154,7 +155,8 @@ private fun Screens(
                     linkAccount = linkAccount,
                     changeEmail = changeEmail,
                     navigateAndClearStack = navigateAndClearStack,
-                    goBack = goBack
+                    goBack = goBack,
+                    dismissWithResult = dismissWithResult
                 )
             }
         }
@@ -184,13 +186,15 @@ private fun Screens(
 @Composable
 private fun SignUpRoute(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
-    moveToWeb: () -> Unit
+    moveToWeb: () -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
             navigateAndClearStack = navigateAndClearStack,
-            moveToWeb = moveToWeb
+            moveToWeb = moveToWeb,
+            dismissWithResult = dismissWithResult
         )
     }
     SignUpScreen(
@@ -203,7 +207,8 @@ private fun VerificationRoute(
     linkAccount: LinkAccount,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     changeEmail: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
         VerificationViewModel.factory(
@@ -214,7 +219,8 @@ private fun VerificationRoute(
             onVerificationSucceeded = {
                 navigateAndClearStack(LinkScreen.Wallet)
             },
-            onChangeEmailClicked = changeEmail
+            onChangeEmailClicked = changeEmail,
+            dismissWithResult = dismissWithResult
         )
     }
     VerificationScreen(viewModel)
