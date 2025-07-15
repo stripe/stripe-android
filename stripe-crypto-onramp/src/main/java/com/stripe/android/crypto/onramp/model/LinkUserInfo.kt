@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
  * @property fullName Optional full name of the user.
  */
 @Parcelize
-data class LinkUserInfo(
+internal data class LinkUserInfo(
     val email: String,
     val phone: String,
     val country: String,

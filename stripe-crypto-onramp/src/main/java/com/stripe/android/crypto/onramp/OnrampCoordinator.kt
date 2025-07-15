@@ -11,7 +11,7 @@ import javax.inject.Inject
  * Coordinator interface for managing the Onramp lifecycle, Link user checks,
  * and authentication flows.
  */
-interface OnrampCoordinator {
+internal interface OnrampCoordinator {
 
     /**
      * Initialize the coordinator with the provided configuration.
@@ -58,9 +58,10 @@ interface OnrampCoordinator {
  *
  * @param viewModel The ViewModel that persists configuration state across process restarts.
  * @param activityResultRegistryOwner Host providing ActivityResultRegistry for LinkController.
- * @param isLinkUserCallback Callback invoked with the result of determining if a provided email is associated with a Link user.
+ * @param isLinkUserCallback Callback invoked with the result of determining if a
+ *                           provided email is associated with a Link user.
  */
-class DefaultOnrampCoordinator @Inject constructor(
+internal class DefaultOnrampCoordinator @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val isLinkUserCallback: (Boolean) -> Unit
@@ -80,7 +81,7 @@ class DefaultOnrampCoordinator @Inject constructor(
             lookupConsumerCallback = { result ->
                 when (result) {
                     is LinkController.LookupConsumerResult.Success -> isLinkUserCallback(result.isConsumer)
-                    is LinkController.LookupConsumerResult.Failed  -> isLinkUserCallback(false)
+                    is LinkController.LookupConsumerResult.Failed -> isLinkUserCallback(false)
                 }
             },
             createPaymentMethodCallback = { /* No-op for now */ },
@@ -120,7 +121,7 @@ class DefaultOnrampCoordinator @Inject constructor(
  *
  * @property handle SavedStateHandle backing persistent state.
  */
-class OnrampCoordinatorViewModel(
+internal class OnrampCoordinatorViewModel(
     private val handle: SavedStateHandle
 ) : ViewModel() {
 

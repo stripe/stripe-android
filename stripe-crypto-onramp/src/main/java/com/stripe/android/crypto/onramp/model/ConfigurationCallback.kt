@@ -3,7 +3,7 @@ package com.stripe.android.crypto.onramp
 /**
  * Callback invoked after attempting to configure the Onramp flow.
  */
-fun interface ConfigurationCallback {
+internal fun interface ConfigurationCallback {
     /**
      * Called when Onramp configuration is completed.
      *

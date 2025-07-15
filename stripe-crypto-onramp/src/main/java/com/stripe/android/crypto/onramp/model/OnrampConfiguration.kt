@@ -11,7 +11,7 @@ import kotlinx.parcelize.Parcelize
  * @property paymentSheetAppearance Appearance settings for the PaymentSheet UI.
  */
 @Parcelize
-data class OnrampConfiguration(
+internal data class OnrampConfiguration(
     val publishableKey: String,
     val paymentSheetAppearance: PaymentSheet.Appearance
 ) : Parcelable
