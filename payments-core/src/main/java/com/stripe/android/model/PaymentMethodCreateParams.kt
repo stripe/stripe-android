@@ -38,6 +38,7 @@ constructor(
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
     private val shopPay: ShopPay? = null,
+    private val payByBank: PayByBank? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     private val metadata: Map<String, String>? = null,
@@ -72,6 +73,7 @@ constructor(
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
         shopPay: ShopPay? = null,
+        payByBank: PayByBank? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         metadata: Map<String, String>? = null,
@@ -94,6 +96,7 @@ constructor(
         cashAppPay,
         swish,
         shopPay,
+        payByBank,
         billingDetails,
         allowRedisplay,
         metadata,
@@ -135,6 +138,19 @@ constructor(
     ) : this(
         type = PaymentMethod.Type.Ideal,
         ideal = ideal,
+        allowRedisplay = allowRedisplay,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
+    private constructor(
+        payByBank: PayByBank,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = PaymentMethod.Type.PayByBank,
+        payByBank = payByBank,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
@@ -322,6 +338,7 @@ constructor(
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
                 PaymentMethod.Type.Link.code -> link?.toParamMap()
                 PaymentMethod.Type.ShopPay.code -> shopPay?.toParamMap()
+                PaymentMethod.Type.PayByBank.code -> payByBank?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(code to it)
@@ -722,6 +739,19 @@ constructor(
         }
     }
 
+    @Parcelize
+    data class PayByBank(
+        var bank: String?
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return bank?.let { mapOf(PARAM_BANK to it) }.orEmpty()
+        }
+
+        private companion object {
+            private const val PARAM_BANK: String = "bank"
+        }
+    }
+
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -889,6 +919,20 @@ constructor(
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(netbanking, allowRedisplay, billingDetails, metadata)
+        }
+
+        /**
+         * @return params for creating a [PaymentMethod.Type.PayByBank] payment method
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            payByBank: PayByBank,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(payByBank, allowRedisplay, billingDetails, metadata)
         }
 
         /**

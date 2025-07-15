@@ -85,6 +85,7 @@
         <activity android:name=".activity.SatispayActivity"/>
         <activity android:name=".activity.CryptoActivity"/>
         <activity android:name=".activity.CardInputWidgetComposeExampleActivity"/>
+        <activity android:name=".activity.PayByBankActivity"/>
     </application>
 
 </manifest>

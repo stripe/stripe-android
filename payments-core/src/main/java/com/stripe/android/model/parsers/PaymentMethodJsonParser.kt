@@ -48,6 +48,12 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                         IdealJsonParser().parse(it)
                     }
                 )
+            PaymentMethod.Type.PayByBank ->
+                builder.setPayByBank(
+                    json.optJSONObject(type.code)?.let {
+                        PayByBankJsonParser().parse(it)
+                    }
+                )
             PaymentMethod.Type.Fpx ->
                 builder.setFpx(
                     json.optJSONObject(type.code)?.let {
@@ -232,6 +238,18 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         private companion object {
             private const val FIELD_BANK = "bank"
             private const val FIELD_BIC = "bic"
+        }
+    }
+
+    internal class PayByBankJsonParser : ModelJsonParser<PaymentMethod.PayByBank> {
+        override fun parse(json: JSONObject): PaymentMethod.PayByBank {
+            return PaymentMethod.PayByBank(
+                bank = StripeJsonUtils.optString(json, FIELD_BANK),
+            )
+        }
+
+        private companion object {
+            private const val FIELD_BANK = "bank"
         }
     }
 

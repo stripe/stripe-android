@@ -47,4 +47,6 @@ internal object ApiKeyFixtures {
         "pk_test_51PSnETIFbdis1OxTALF4Z8ugUQpVS06UQDVahMSmwrbEYphjNYitXtOSqMPVKfzl3jukg6gLLrtZNnPlDrRbDpMd00U0tId6iv"
     const val CRYPTO_PUBLISHABLE_KEY =
         "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"
+    const val PAY_BY_BANK_PUBLISHABLE_KEY =
+        "pk_test_51OltiuKa0SdVCxLnGaqzqhfecG5NEKTbTgMgWf54qxjwnihKeyW9F7EZ4wAI8EK31LLdmVgxcfXrqqiN4FUwkfD800kdZmBG0c"
 }

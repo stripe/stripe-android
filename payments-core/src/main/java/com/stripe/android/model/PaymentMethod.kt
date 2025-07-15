@@ -107,6 +107,13 @@ constructor(
     @JvmField val ideal: Ideal? = null,
 
     /**
+     * If this is a `pay_by_bank` PaymentMethod, this hash contains details about the PayByBank payment method.
+     *
+     * [pay_by_bank](https://stripe.com/docs/api/payment_methods/object#payment_method_object-pay_by_bank)
+     */
+    @JvmField val payByBank: PayByBank? = null,
+
+    /**
      * If this is a `sepa_debit` PaymentMethod, this hash contains details about the SEPA debit bank account.
      *
      * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
@@ -179,6 +186,7 @@ constructor(
             Type.BacsDebit -> bacsDebit != null
             Type.Sofort -> sofort != null
             Type.USBankAccount -> usBankAccount != null
+            Type.PayByBank -> payByBank != null
             else -> true
         }
 
@@ -539,7 +547,15 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
-        );
+        ),
+        PayByBank(
+            code = "pay_by_bank",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),;
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun hasDelayedSettlement(): Boolean = hasDelayedSettlement
@@ -597,6 +613,7 @@ constructor(
         private var card: Card? = null
         private var cardPresent: CardPresent? = null
         private var ideal: Ideal? = null
+        private var payByBank: PayByBank? = null
         private var fpx: Fpx? = null
         private var sepaDebit: SepaDebit? = null
         private var auBecsDebit: AuBecsDebit? = null
@@ -648,6 +665,10 @@ constructor(
 
         fun setIdeal(ideal: Ideal?): Builder = apply {
             this.ideal = ideal
+        }
+
+        fun setPayByBank(payByBank: PayByBank?): Builder = apply {
+            this.payByBank = payByBank
         }
 
         fun setFpx(fpx: Fpx?): Builder = apply {
@@ -1034,6 +1055,21 @@ constructor(
         @JvmField val bankIdentifierCode: String?
     ) : TypeData() {
         override val type: Type get() = Type.Ideal
+    }
+
+    /**
+     * If this is a `pay_by_bank` PaymentMethod, this hash contains details about the Pay By Bank payment method.
+     *
+     * [pay_by_bank](https://docs.stripe.com/api/payment_methods/object#payment_method_object-pay_by_bank)
+     */
+    @Parcelize
+    data class PayByBank internal constructor(
+        /**
+         * The customer’s bank, if provided.
+         */
+        @JvmField val bank: String?,
+    ) : TypeData() {
+        override val type: Type get() = Type.PayByBank
     }
 
     /**

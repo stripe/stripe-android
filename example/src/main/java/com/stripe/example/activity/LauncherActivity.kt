@@ -197,6 +197,10 @@ class LauncherActivity : AppCompatActivity() {
                 activity.getString(R.string.crypto_example),
                 CryptoActivity::class.java
             ),
+            Item(
+                activity.getString(R.string.pay_by_bank_example),
+                PayByBankActivity::class.java
+            ),
             // This is for internal use so as not to confuse the user.
             Item(
                 "StripeImage Example",

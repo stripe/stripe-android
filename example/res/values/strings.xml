@@ -48,6 +48,7 @@
     <string name="retrieve_possible_card_brands">Get Possible Card Brands</string>
     <string name="blik_example">BLIK</string>
     <string name="pay_with_blik">Pay with BLIK</string>
+    <string name="pay_by_bank_example">Pay By Bank</string>
 
     <string name="select_add_card">Select or add card</string>
     <string name="selected_card">Selected card:</string>
