@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -117,10 +118,11 @@ class LinkFormElementTest {
         initialLinkUserInput: UserInput?,
     ): LinkFormElement {
         return LinkFormElement(
-            signupMode = signupMode,
-            configuration = createConfiguration(),
+            identifier = IdentifierSpec.Generic("test_link_form"),
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
+            configuration = createConfiguration(),
+            signupMode = signupMode,
             onLinkInlineSignupStateChanged = {},
         )
     }

@@ -36,6 +36,23 @@ constructor(
         get() = fields.first() == LinkSignupField.Email
 
     /**
+     * Determines if the Link form should be considered valid for form submission.
+     */
+    val isFormValidForSubmission: Boolean
+        get() = when {
+            // If Link signup is not active (checkbox is off), don't block form submission
+            useLink.not() -> true
+
+            // If both email and phone fields are required but user input is not complete
+            fields.contains(LinkSignupField.Email) &&
+                fields.contains(LinkSignupField.Phone) &&
+                userInput == null -> false
+
+            // In all other cases, don't block submission
+            else -> true
+        }
+
+    /**
      * Whether the view is active and the payment should be processed through Link.
      */
     val useLink: Boolean

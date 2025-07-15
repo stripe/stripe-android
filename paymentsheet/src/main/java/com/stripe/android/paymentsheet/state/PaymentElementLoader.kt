@@ -509,7 +509,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
         val hasUsedLink = linkStore.hasUsedLink()
 
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
+        val linkSignupMode = if (linkSignUpDisabled) {
             null
         } else if (isSaveForFutureUseValueChangeable) {
             LinkSignupMode.AlongsideSaveForFutureUse

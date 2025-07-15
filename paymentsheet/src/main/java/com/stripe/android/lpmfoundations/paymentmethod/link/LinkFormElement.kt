@@ -14,7 +14,8 @@ import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.LocalSectionSpacing
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class LinkFormElement(
@@ -27,9 +28,14 @@ internal class LinkFormElement(
     allowsUserInteraction = true,
     identifier = IdentifierSpec.Generic("link_form")
 ) {
-    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return stateFlowOf(listOf())
-    }
+
+    private val _viewState = MutableStateFlow<InlineSignupViewState?>(null)
+
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+        _viewState.mapAsStateFlow { viewState ->
+            val isComplete = viewState?.isFormValidForSubmission ?: true
+            listOf(identifier to FormFieldEntry(value = null, isComplete = isComplete))
+        }
 
     @Composable
     override fun ComposeUI(enabled: Boolean) {
@@ -47,7 +53,10 @@ internal class LinkFormElement(
             linkSignupMode = signupMode,
             configuration = configuration,
             enabled = enabled,
-            onLinkSignupStateChanged = onLinkInlineSignupStateChanged,
+            onLinkSignupStateChanged = { viewState ->
+                _viewState.value = viewState
+                onLinkInlineSignupStateChanged(viewState)
+            },
             modifier = modifier,
         )
     }
