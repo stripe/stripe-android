@@ -5,7 +5,6 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
 /**
