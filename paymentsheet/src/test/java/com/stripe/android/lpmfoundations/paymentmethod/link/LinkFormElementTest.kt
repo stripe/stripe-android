@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfiguration
@@ -33,8 +34,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -113,12 +114,42 @@ class LinkFormElementTest {
         }
     }
 
+    @Test
+    fun `getFormFieldValueFlow returns isComplete true when view state is null`() {
+        val element = createLinkFormElement(
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            initialLinkUserInput = null,
+        )
+
+        val formFields = element.getFormFieldValueFlow().value
+
+        assertThat(formFields).hasSize(1)
+        assertThat(formFields[0].first).isEqualTo(IdentifierSpec.Generic("link_form"))
+        assertThat(formFields[0].second.isComplete).isTrue()
+        assertThat(formFields[0].second.value).isNull()
+    }
+
+    @Test
+    fun `getFormFieldValueFlow validates form completion based on view state`() {
+        val element = createLinkFormElement(
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            initialLinkUserInput = null,
+        )
+
+        val formFields = element.getFormFieldValueFlow().value
+
+        assertThat(formFields).hasSize(1)
+        assertThat(formFields[0].first).isEqualTo(IdentifierSpec.Generic("link_form"))
+        // When viewState is null, isFormValidForSubmission defaults to true
+        assertThat(formFields[0].second.isComplete).isTrue()
+        assertThat(formFields[0].second.value).isNull()
+    }
+
     private fun createLinkFormElement(
         signupMode: LinkSignupMode,
         initialLinkUserInput: UserInput?,
     ): LinkFormElement {
         return LinkFormElement(
-            identifier = IdentifierSpec.Generic("test_link_form"),
             initialLinkUserInput = initialLinkUserInput,
             linkConfigurationCoordinator = createLinkConfigurationCoordinator(),
             configuration = createConfiguration(),

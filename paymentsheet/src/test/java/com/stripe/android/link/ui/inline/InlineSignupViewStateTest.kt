@@ -177,6 +177,94 @@ class InlineSignupViewStateTest {
         assertThat(viewState.allowsDefaultOptIn).isEqualTo(expectedResult)
     }
 
+    @Test
+    fun `isFormValidForSubmission returns true when Link checkbox is off`() {
+        // For AlongsideSaveForFutureUse mode with userInput=null, useLink will be false
+        val viewState = InlineSignupViewState(
+            userInput = null,
+            merchantName = "Test Merchant",
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            fields = listOf(LinkSignupField.Email, LinkSignupField.Phone),
+            prefillEligibleFields = emptySet(),
+            allowsDefaultOptIn = false,
+            isExpanded = false
+        )
+
+        assertThat(viewState.isFormValidForSubmission).isTrue()
+    }
+
+    @Test
+    fun `isFormValidForSubmission returns true when only phone field is shown`() {
+        // For InsteadOfSaveForFutureUse mode with isExpanded=true, useLink will be true
+        val viewState = InlineSignupViewState(
+            userInput = null,
+            merchantName = "Test Merchant",
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            fields = listOf(LinkSignupField.Phone),
+            prefillEligibleFields = emptySet(),
+            allowsDefaultOptIn = false,
+            isExpanded = true
+        )
+
+        assertThat(viewState.isFormValidForSubmission).isTrue()
+    }
+
+    @Test
+    fun `isFormValidForSubmission returns true when both fields shown and user input is complete`() {
+        val userInput = UserInput.SignUp(
+            name = "John",
+            email = "john@example.com",
+            phone = "+11234567890",
+            country = "US",
+            consentAction = SignUpConsentAction.Checkbox
+        )
+
+        // For InsteadOfSaveForFutureUse mode with userInput, useLink will be true based on userInput
+        val viewState = InlineSignupViewState(
+            userInput = userInput,
+            merchantName = "Test Merchant",
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            fields = listOf(LinkSignupField.Email, LinkSignupField.Phone),
+            prefillEligibleFields = emptySet(),
+            allowsDefaultOptIn = false,
+            isExpanded = true
+        )
+
+        assertThat(viewState.isFormValidForSubmission).isTrue()
+    }
+
+    @Test
+    fun `isFormValidForSubmission returns false when both fields shown but user input is null and Link is enabled`() {
+        // For InsteadOfSaveForFutureUse mode with isExpanded=true, useLink will be true
+        val viewState = InlineSignupViewState(
+            userInput = null,
+            merchantName = "Test Merchant",
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            fields = listOf(LinkSignupField.Email, LinkSignupField.Phone),
+            prefillEligibleFields = emptySet(),
+            allowsDefaultOptIn = false,
+            isExpanded = true // This makes useLink = true for InsteadOfSaveForFutureUse mode
+        )
+
+        assertThat(viewState.isFormValidForSubmission).isFalse()
+    }
+
+    @Test
+    fun `isFormValidForSubmission returns true when both fields shown but user input is null and Link is disabled`() {
+        // For AlongsideSaveForFutureUse mode with userInput=null, useLink will be false
+        val viewState = InlineSignupViewState(
+            userInput = null,
+            merchantName = "Test Merchant",
+            signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            fields = listOf(LinkSignupField.Email, LinkSignupField.Phone),
+            prefillEligibleFields = emptySet(),
+            allowsDefaultOptIn = false,
+            isExpanded = false
+        )
+
+        assertThat(viewState.isFormValidForSubmission).isTrue()
+    }
+
     private fun createLinkConfig(
         countryCode: String,
         email: String? = "john@doe.ca",
