@@ -1,11 +1,19 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+
 dependencies {
     implementation project(':stripe-core')
+    implementation project(":paymentsheet")
+    implementation project(":stripe-ui-core")
+    implementation project(":payments-ui-core")
 
     implementation libs.androidx.coreKtx
     implementation libs.androidx.appCompat
     implementation libs.material
+    implementation libs.kotlin.serialization
+
+    implementation libs.dagger
 
     testImplementation testLibs.androidx.junit
 
