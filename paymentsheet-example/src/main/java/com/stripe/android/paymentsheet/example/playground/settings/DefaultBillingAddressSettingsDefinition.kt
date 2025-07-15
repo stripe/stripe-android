@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -64,6 +65,16 @@ internal object DefaultBillingAddressSettingsDefinition :
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState.SharedPaymentToken,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
+    ) {
+        createBillingDetails(value)?.let { billingDetails ->
+            configurationBuilder.defaultBillingDetails(billingDetails)
+        }
+    }
+
+    override fun configure(
+        value: DefaultBillingAddress,
+        configurationBuilder: LinkController.Configuration.Builder,
+        playgroundState: PlaygroundState.Payment
     ) {
         createBillingDetails(value)?.let { billingDetails ->
             configurationBuilder.defaultBillingDetails(billingDetails)
