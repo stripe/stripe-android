@@ -2,7 +2,6 @@
 
 package com.stripe.android.paymentsheet.example.playground
 
-import android.util.Patterns
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -13,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -28,7 +28,6 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,32 +49,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun LinkControllerUi(
-    viewModel: PaymentSheetPlaygroundViewModel,
-    linkController: LinkController,
-) {
-    val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
-    val linkControllerState by linkController.state.collectAsState()
-
-    LinkControllerUi(
-        controllerState = linkControllerState,
-        playgroundState = linkControllerPlaygroundState,
-        onEmailChange = { email ->
-            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                linkController.lookupConsumer(email)
-            }
-        },
-        onPaymentMethodButtonClick = { email ->
-            linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
-        },
-        onCreatePaymentMethodClick = linkController::createPaymentMethod,
-        onPresentForAuthenticationClick = { email ->
-            linkController.presentForAuthentication(email = email.takeIf { it.isNotBlank() })
-        },
-    )
-}
-
-@Composable
-internal fun LinkControllerUi(
+    modifier: Modifier,
     controllerState: LinkController.State,
     playgroundState: LinkControllerPlaygroundState,
     onEmailChange: (email: String) -> Unit,
@@ -96,8 +70,8 @@ internal fun LinkControllerUi(
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
+            .fillMaxSize()
             .padding(horizontal = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -135,12 +109,6 @@ internal fun LinkControllerUi(
             )
         }
 
-        PaymentMethodButton(
-            preview = controllerState.selectedPaymentMethodPreview,
-            onClick = { onPaymentMethodButtonClick(email) },
-        )
-        Spacer(Modifier.height(16.dp))
-
         // Authentication Test Button
         Button(
             onClick = { onPresentForAuthenticationClick(email) },
@@ -148,6 +116,12 @@ internal fun LinkControllerUi(
         ) {
             Text("Test Authentication Flow")
         }
+        Spacer(Modifier.height(16.dp))
+
+        PaymentMethodButton(
+            preview = controllerState.selectedPaymentMethodPreview,
+            onClick = { onPaymentMethodButtonClick(email) },
+        )
         Spacer(Modifier.height(16.dp))
 
         ConfirmButton(
@@ -185,6 +159,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
 private fun LinkControllerUiPreview() {
     PaymentSheetExampleTheme {
         LinkControllerUi(
+            modifier = Modifier,
             controllerState = LinkController.State(),
             playgroundState = LinkControllerPlaygroundState(),
             onEmailChange = {},

@@ -19,7 +19,6 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -75,7 +74,6 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
-    val linkControllerState = MutableStateFlow(LinkControllerPlaygroundState())
 
     private val baseUrl: String
         get() {
@@ -99,7 +97,6 @@ internal class PaymentSheetPlaygroundViewModel(
         setPlaygroundState(null)
         flowControllerState.value = null
         customerSheetState.value = null
-        linkControllerState.value = LinkControllerPlaygroundState()
 
         if (
             playgroundSettings.configurationData.value.integrationType.isPaymentFlow()
@@ -690,21 +687,6 @@ internal class PaymentSheetPlaygroundViewModel(
         savedStateHandle[PLAYGROUND_STATE_KEY] = state
     }
 
-    fun onLinkControllerPresentPaymentMethod(result: LinkController.PresentPaymentMethodsResult) {
-        linkControllerState.update { it.copy(presentPaymentMethodsResult = result) }
-    }
-
-    fun onLinkControllerLookupConsumer(result: LinkController.LookupConsumerResult) {
-        linkControllerState.update { it.copy(lookupConsumerResult = result) }
-    }
-
-    fun onLinkControllerCreatePaymentMethod(result: LinkController.CreatePaymentMethodResult) {
-        linkControllerState.update { it.copy(createPaymentMethodResult = result) }
-    }
-
-    fun onLinkControllerPresentForAuthentication(result: LinkController.PresentForAuthenticationResult) {
-        linkControllerState.update { it.copy(presentForAuthenticationResult = result) }
-    }
 
     internal class Factory(
         private val applicationSupplier: () -> Application,
