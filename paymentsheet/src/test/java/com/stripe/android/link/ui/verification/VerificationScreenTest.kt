@@ -13,6 +13,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
@@ -255,7 +257,9 @@ internal class VerificationScreenTest {
         linkEventsReporter: LinkEventsReporter = VerificationLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         isDialog: Boolean = false,
-        onDismissClicked: () -> Unit = {}
+        onDismissClicked: () -> Unit = {},
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
@@ -265,7 +269,9 @@ internal class VerificationScreenTest {
             onVerificationSucceeded = {},
             onChangeEmailRequested = {},
             linkAccount = TestFactory.LINK_ACCOUNT,
-            isDialog = isDialog
+            isDialog = isDialog,
+            linkLaunchMode = linkLaunchMode,
+            dismissWithResult = dismissWithResult
         )
     }
 
