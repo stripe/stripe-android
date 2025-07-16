@@ -188,8 +188,7 @@ internal class DefaultEmbeddedStateHelperTest {
     }
 
     @Test
-    fun `setState fails when rowSelectionBehavior is immediateAction and embeddedViewDisplaysMandateText is true`() =
-    testScenario(
+    fun `setState fails rowSelectionBehavior = immediate, embeddedViewDisplaysMandateText = true`() = testScenario(
         rowSelectionCallback = { /* no-op */ }
     ) {
         assertFailsWith<IllegalArgumentException>(
