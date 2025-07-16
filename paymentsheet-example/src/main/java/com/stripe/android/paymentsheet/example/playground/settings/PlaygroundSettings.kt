@@ -533,6 +533,7 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
             ShopPaySettingsDefinition,
+            LinkControllerAllowUserEmailEditsSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

@@ -33,6 +33,7 @@ internal data class LinkConfiguration(
     val allowDefaultOptIn: Boolean,
     val googlePlacesApiKey: String? = null,
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+    val allowUserEmailEdits: Boolean,
 ) : Parcelable {
     @Parcelize
     data class CustomerInfo(

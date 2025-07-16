@@ -117,11 +117,19 @@ internal class SignUpBodyTest {
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
 
+    @Test
+    fun `email field is disabled when canEditEmail is false`() {
+        setContent(SignUpState.InputtingPrimaryField, canEditEmail = false)
+        onEmailField().assertExists()
+        onEmailField().assertIsNotEnabled()
+    }
+
     private fun setContent(
         signUpState: SignUpState,
         isReadyToSignUp: Boolean = true,
         requiresNameCollection: Boolean = false,
-        errorMessage: ResolvableString? = null
+        errorMessage: ResolvableString? = null,
+        canEditEmail: Boolean = true
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             SignUpBody(
@@ -134,6 +142,7 @@ internal class SignUpBodyTest {
                     merchantName = "Example, Inc.",
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
+                    canEditEmail = canEditEmail,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),

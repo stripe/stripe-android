@@ -99,7 +99,8 @@ class SignUpScreenStateTest {
             disableRuxInFlowController = false,
             defaultBillingDetails = null,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true
         )
     }
 
