@@ -15,6 +15,7 @@ import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.ConfigurationCallback
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import javax.inject.Inject
 
@@ -109,9 +110,19 @@ internal class OnrampCoordinator @Inject internal constructor(
         TODO("Not yet implemented")
     }
 
+    /**
+     * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
+     *
+     * @param isLinkUserCallback A callback for handling if a given user has a link account.
+     */
     class Builder(
         private val isLinkUserCallback: (Boolean) -> Unit
     ) {
+        /**
+         * Constructs an [OnrampCoordinator] for the given parameters.
+         *
+         * @param activity The Activity that is using the [OnrampCoordinator].
+         */
         fun build(activity: ComponentActivity): OnrampCoordinator {
             return create(
                 viewModelStoreOwner = activity,
@@ -120,6 +131,11 @@ internal class OnrampCoordinator @Inject internal constructor(
             )
         }
 
+        /**
+         * Constructs an [OnrampCoordinator] for the given parameters.
+         *
+         * @param fragment The Fragment that is using the [OnrampCoordinator].
+         */
         fun build(fragment: Fragment): OnrampCoordinator {
             return create(
                 viewModelStoreOwner = fragment,
@@ -144,7 +160,6 @@ internal class OnrampCoordinator @Inject internal constructor(
                 modelClass = OnrampCoordinatorViewModel::class.java
             )
 
-            // Get Application from the lifecycle owner (which should be an Activity or Fragment)
             val application = when (lifecycleOwner) {
                 is Fragment -> lifecycleOwner.requireActivity().application
                 is ComponentActivity -> lifecycleOwner.application
@@ -166,29 +181,3 @@ internal class OnrampCoordinator @Inject internal constructor(
     }
 }
 
-/**
- * ViewModel that stores Onramp configuration in a SavedStateHandle for
- * process death restoration.
- *
- * @property handle SavedStateHandle backing persistent state.
- */
-internal class OnrampCoordinatorViewModel(
-    private val handle: SavedStateHandle
-) : ViewModel() {
-
-    /**
-     * The current OnrampConfiguration, persisted across process restarts.
-     */
-    var onRampConfiguration: OnrampConfiguration?
-        get() = handle["configuration"]
-        set(value) = handle.set("configuration", value)
-
-    class Factory : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return OnrampCoordinatorViewModel(
-                handle = extras.createSavedStateHandle(),
-            ) as T
-        }
-    }
-}
