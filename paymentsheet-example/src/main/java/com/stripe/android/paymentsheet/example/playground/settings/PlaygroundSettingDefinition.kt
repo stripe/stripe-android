@@ -42,6 +42,7 @@ internal interface PlaygroundSettingDefinition<T> {
         value: T,
         configurationBuilder: LinkController.Configuration.Builder,
         playgroundState: PlaygroundState.Payment,
+        configurationData: LinkControllerConfigurationData,
     ) {
     }
 
@@ -140,6 +141,25 @@ internal interface PlaygroundSettingDefinition<T> {
 
     data class CustomerSheetConfigurationData(
         private val configurationBuilder: CustomerSheet.Configuration.Builder,
+        private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
+            BillingDetailsCollectionConfigurationBuilder()
+    ) {
+        // Billing details is a nested configuration, but we have individual settings for it in the
+        // UI, this helper keeps all of the configurations, rather than just the most recent.
+        fun updateBillingDetails(
+            block: BillingDetailsCollectionConfigurationBuilder.() -> Unit
+        ) {
+            billingDetailsCollectionConfigurationBuilder.apply {
+                block()
+            }
+            configurationBuilder.billingDetailsCollectionConfiguration(
+                billingDetailsCollectionConfigurationBuilder.build()
+            )
+        }
+    }
+
+    data class LinkControllerConfigurationData(
+        private val configurationBuilder: LinkController.Configuration.Builder,
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {

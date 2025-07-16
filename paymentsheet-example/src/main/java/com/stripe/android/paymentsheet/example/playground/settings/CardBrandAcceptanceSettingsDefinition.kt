@@ -49,7 +49,8 @@ internal object CardBrandAcceptanceSettingsDefinition :
     override fun configure(
         value: CardBrandAcceptanceType,
         configurationBuilder: LinkController.Configuration.Builder,
-        playgroundState: PlaygroundState.Payment
+        playgroundState: PlaygroundState.Payment,
+        configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {
         configurationBuilder.cardBrandAcceptance(value.cardBrandAcceptance)
     }
