@@ -32,7 +32,7 @@ internal data class EmbeddedContent(
          *
          * Having validation here ensures that we only validate when the embedded content is shown.
          */
-        LaunchedEffect(rowStyle, isImmediateAction, embeddedViewDisplaysMandateText) {
+        LaunchedEffect(rowStyle, isImmediateAction) {
             if (rowStyle is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
                 throw IllegalArgumentException(
                     "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
