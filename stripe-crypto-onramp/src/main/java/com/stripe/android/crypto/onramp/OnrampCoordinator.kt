@@ -8,52 +8,6 @@ import com.stripe.android.link.LinkController
 import javax.inject.Inject
 
 /**
- * Coordinator interface for managing the Onramp lifecycle, Link user checks,
- * and authentication flows.
- */
-internal interface OnrampCoordinator {
-
-    /**
-     * Initialize the coordinator with the provided configuration.
-     *
-     * @param configuration The OnrampConfiguration to apply.
-     * @param callback Callback receiving success or failure.
-     */
-    fun configure(
-        configuration: OnrampConfiguration,
-        callback: ConfigurationCallback
-    )
-
-    /**
-     * Check if the given email corresponds to an existing Link user.
-     *
-     * @param email The email address to look up.
-     */
-    fun isLinkUser(email: String)
-
-    /**
-     * Given the required information, registers a new Link user.
-     *
-     * @param info The LinkInfo for the new user.
-     */
-    fun registerNewLinkUser(info: LinkUserInfo)
-
-    /**
-     * Authenticate an existing Link user via email.
-     *
-     * @param email The email address of the existing user.
-     */
-    fun authenticateExistingLinkUser(email: String)
-
-    /**
-     * Present UI to authenticate a Link user.
-     *
-     * @param email The email address to authenticate.
-     */
-    fun presentForAuthentication(email: String)
-}
-
-/**
  * Default implementation of [OnrampCoordinator].
  *
  * @param viewModel The ViewModel that persists configuration state across process restarts.
@@ -61,11 +15,11 @@ internal interface OnrampCoordinator {
  * @param isLinkUserCallback Callback invoked with the result of determining if a
  *                           provided email is associated with a Link user.
  */
-internal class DefaultOnrampCoordinator @Inject constructor(
+internal class OnrampCoordinator @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val isLinkUserCallback: (Boolean) -> Unit
-) : OnrampCoordinator {
+) {
 
     private val linkController: LinkController by lazy {
         // Resolve the hosting activity, fail fast if incorrect type
@@ -89,7 +43,13 @@ internal class DefaultOnrampCoordinator @Inject constructor(
         )
     }
 
-    override fun configure(
+    /**
+     * Initialize the coordinator with the provided configuration.
+     *
+     * @param configuration The OnrampConfiguration to apply.
+     * @param callback Callback receiving success or failure.
+     */
+    fun configure(
         configuration: OnrampConfiguration,
         callback: ConfigurationCallback
     ) {
@@ -98,19 +58,39 @@ internal class DefaultOnrampCoordinator @Inject constructor(
         callback.onConfigured(success = true, error = null)
     }
 
-    override fun isLinkUser(email: String) {
+    /**
+     * Check if the given email corresponds to an existing Link user.
+     *
+     * @param email The email address to look up.
+     */
+    fun isLinkUser(email: String) {
         linkController.lookupConsumer(email)
     }
 
-    override fun registerNewLinkUser(info: LinkUserInfo) {
+    /**
+     * Given the required information, registers a new Link user.
+     *
+     * @param info The LinkInfo for the new user.
+     */
+    fun registerNewLinkUser(info: LinkUserInfo) {
         TODO("Not yet implemented")
     }
 
-    override fun authenticateExistingLinkUser(email: String) {
+    /**
+     * Authenticate an existing Link user via email.
+     *
+     * @param email The email address of the existing user.
+     */
+    fun authenticateExistingLinkUser(email: String) {
         TODO("Not yet implemented")
     }
 
-    override fun presentForAuthentication(email: String) {
+    /**
+     * Present UI to authenticate a Link user.
+     *
+     * @param email The email address to authenticate.
+     */
+    fun presentForAuthentication(email: String) {
         TODO("Not yet implemented")
     }
 }
