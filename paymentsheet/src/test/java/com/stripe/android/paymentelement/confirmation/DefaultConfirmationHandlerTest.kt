@@ -225,6 +225,7 @@ class DefaultConfirmationHandlerTest {
             intent = UPDATED_PAYMENT_INTENT,
             confirmationOption = SomeConfirmationDefinition.Option,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            completedFullPaymentFlow = true,
         ),
     ) {
         confirmationHandler.state.test {
@@ -241,6 +242,36 @@ class DefaultConfirmationHandlerTest {
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType)
                 .isEqualTo(DeferredIntentConfirmationType.Client)
+            assertThat(successResult.completedFullPaymentFlow).isTrue()
+
+            confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
+        }
+    }
+
+    @Test
+    fun `On complete action with uncompleted flow, should complete with success result`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Complete(
+            intent = UPDATED_PAYMENT_INTENT,
+            confirmationOption = SomeConfirmationDefinition.Option,
+            deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+            completedFullPaymentFlow = false,
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
+
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+
+            val completeState = awaitCompleteState()
+            val successResult = completeState.result.assertSucceeded()
+
+            assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
+            assertThat(successResult.deferredIntentConfirmationType)
+                .isEqualTo(DeferredIntentConfirmationType.Client)
+            assertThat(successResult.completedFullPaymentFlow).isFalse()
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
         }
@@ -259,13 +290,31 @@ class DefaultConfirmationHandlerTest {
         result = ConfirmationDefinition.Result.Succeeded(
             intent = UPDATED_PAYMENT_INTENT,
             deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+            completedFullPaymentFlow = true,
         ),
     ) { completeState ->
         val successResult = completeState.result.assertSucceeded()
 
         assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
         assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(successResult.completedFullPaymentFlow).isTrue()
     }
+
+    @Test
+    fun `On success result with uncompleted flow from launched action, should complete as expected`() =
+        launcherResultTest(
+            result = ConfirmationDefinition.Result.Succeeded(
+                intent = UPDATED_PAYMENT_INTENT,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                completedFullPaymentFlow = false,
+            ),
+        ) { completeState ->
+            val successResult = completeState.result.assertSucceeded()
+
+            assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
+            assertThat(successResult.deferredIntentConfirmationType).isEqualTo(DeferredIntentConfirmationType.Server)
+            assertThat(successResult.completedFullPaymentFlow).isFalse()
+        }
 
     @Test
     fun `On failed result from launched action, should complete with failed result`() = launcherResultTest(

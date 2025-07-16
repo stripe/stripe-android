@@ -129,6 +129,7 @@ internal class ShopPayConfirmationDefinitionTest {
 
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
+        assertThat(succeededResult.completedFullPaymentFlow).isFalse()
     }
 
     @Test

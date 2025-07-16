@@ -170,6 +170,12 @@ internal interface ConfirmationDefinition<
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            /**
+             * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
+             * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
+             * complete and require no action by Stripe flows afterwards.
+             */
+            val completedFullPaymentFlow: Boolean = true,
         ) : Result
 
         /**
@@ -231,6 +237,12 @@ internal interface ConfirmationDefinition<
              * DO NOT USE OUTSIDE OF INTENT CONFIRMATION
              */
             val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            /**
+             * Indicates if the full payment flow was completed by the handler. Can be used to decide if internal
+             * product state needs to be reset. Useful for confirmation flows that are handed off to merchants to
+             * complete and require no action by Stripe flows afterwards.
+             */
+            val completedFullPaymentFlow: Boolean,
         ) : Action<TLauncherArgs>
 
         /**

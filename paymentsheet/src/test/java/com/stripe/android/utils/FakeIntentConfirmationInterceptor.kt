@@ -33,8 +33,9 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
 
     fun enqueueCompleteStep(
         isForceSuccess: Boolean = false,
+        completedFullPaymentFlow: Boolean = true,
     ) {
-        channel.trySend(IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess))
+        channel.trySend(IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess, completedFullPaymentFlow))
     }
 
     fun enqueueNextActionStep(clientSecret: String) {

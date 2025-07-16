@@ -164,6 +164,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         val succeededResult = result.asSucceeded()
         assertThat(succeededResult.intent).isEqualTo(CONFIRMATION_PARAMETERS.intent)
         assertThat(succeededResult.deferredIntentConfirmationType).isNull()
+        assertThat(succeededResult.completedFullPaymentFlow).isTrue()
     }
 
     @Test

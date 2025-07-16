@@ -39,7 +39,9 @@ internal class ShopPayConfirmationDefinition @Inject constructor(
             is ShopPayActivityResult.Completed -> {
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationParameters.intent,
-                    deferredIntentConfirmationType = deferredIntentConfirmationType
+                    deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    // Shop Pay is handed off for `preparePaymentMethod` purposes
+                    completedFullPaymentFlow = false,
                 )
             }
             is ShopPayActivityResult.Failed -> {

@@ -69,7 +69,10 @@ internal interface IntentConfirmationInterceptor {
                 get() = DeferredIntentConfirmationType.Server
         }
 
-        data class Complete(val isForceSuccess: Boolean) : NextStep {
+        data class Complete(
+            val isForceSuccess: Boolean,
+            val completedFullPaymentFlow: Boolean = true,
+        ) : NextStep {
 
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType
                 get() = if (isForceSuccess) {
@@ -369,7 +372,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         shippingAddress = shippingValues?.toAddressDetails(),
                     )
 
-                    NextStep.Complete(isForceSuccess = true)
+                    NextStep.Complete(isForceSuccess = true, completedFullPaymentFlow = false)
                 } catch (exception: Exception) {
                     NextStep.Fail(
                         cause = exception,

@@ -591,6 +591,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentResult = PaymentResult.Completed,
                     deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                     shouldLog = false,
+                    shouldResetOnCompleted = result.completedFullPaymentFlow,
                 )
             }
             is ConfirmationHandler.Result.Failed -> {
@@ -667,6 +668,7 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentResult: PaymentResult,
         deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
         shouldLog: Boolean = true,
+        shouldResetOnCompleted: Boolean = true,
     ) {
         if (shouldLog) {
             logPaymentResult(paymentResult, deferredIntentConfirmationType)
@@ -678,7 +680,7 @@ internal class DefaultFlowController @Inject internal constructor(
             linkHandler.logOut()
         }
 
-        if (paymentResult is PaymentResult.Completed) {
+        if (paymentResult is PaymentResult.Completed && shouldResetOnCompleted) {
             viewModel.paymentSelection = null
             viewModel.state = null
         }
