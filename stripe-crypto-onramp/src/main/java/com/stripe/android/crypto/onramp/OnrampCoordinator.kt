@@ -72,6 +72,7 @@ internal class OnrampCoordinator @Inject constructor(
      *
      * @param info The LinkInfo for the new user.
      */
+    @Suppress("UnusedParameter")
     fun registerNewLinkUser(info: LinkUserInfo) {
         print(info)
         TODO("Not yet implemented")
@@ -82,8 +83,8 @@ internal class OnrampCoordinator @Inject constructor(
      *
      * @param email The email address of the existing user.
      */
+    @Suppress("UnusedParameter")
     fun authenticateExistingLinkUser(email: String) {
-        print(email)
         TODO("Not yet implemented")
     }
 
@@ -92,8 +93,8 @@ internal class OnrampCoordinator @Inject constructor(
      *
      * @param email The email address to authenticate.
      */
+    @Suppress("UnusedParameter")
     fun presentForAuthentication(email: String) {
-        print(email)
         TODO("Not yet implemented")
     }
 }
