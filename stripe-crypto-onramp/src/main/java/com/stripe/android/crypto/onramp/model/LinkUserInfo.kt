@@ -1,8 +1,8 @@
 package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
 import dev.drewhamilton.poko.Poko
+import kotlinx.parcelize.Parcelize
 
 /**
  * Data representing a Link user for registration.

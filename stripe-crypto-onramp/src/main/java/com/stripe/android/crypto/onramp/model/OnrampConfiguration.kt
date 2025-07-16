@@ -2,8 +2,8 @@ package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.PaymentSheet
-import kotlinx.parcelize.Parcelize
 import dev.drewhamilton.poko.Poko
+import kotlinx.parcelize.Parcelize
 
 /**
  * Configuration options required to initialize the Onramp flow.
