@@ -188,11 +188,14 @@ internal class DefaultEmbeddedStateHelperTest {
     }
 
     @Test
-    fun `setState fails when rowSelectionBehavior is immediateAction and embeddedViewDisplaysMandateText is true`() = testScenario(
+    fun `setState fails when rowSelectionBehavior is immediateAction and embeddedViewDisplaysMandateText is true`() =
+    testScenario(
         rowSelectionCallback = { /* no-op */ }
     ) {
         assertFailsWith<IllegalArgumentException>(
-            message = "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate (`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button and/or before confirmation when `rowSelectionBehavior = .immediateAction`"
+            message = "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
+                "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button and/or before " +
+                "confirmation when `rowSelectionBehavior = .immediateAction`"
         ) {
             setState {
                 embeddedViewDisplaysMandateText(true)
