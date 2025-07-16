@@ -621,13 +621,19 @@ class LinkControllerViewModelTest {
     fun `onPresentForAuthentication() on matching email passes existing account`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         configure(viewModel)
-        signIn()
+
+        // Create an unverified account (one that needs verification)
+        val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+        )
+        val unverifiedAccount = LinkAccount(unverifiedSession)
+        linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, TestFactory.LINK_ACCOUNT.email)
+        viewModel.onPresentForAuthentication(launcher, unverifiedAccount.email)
 
         val args = launcher.calls.awaitItem().input
-        assertThat(args.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(args.linkAccountInfo.account).isEqualTo(unverifiedAccount)
         assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
     }
 
@@ -732,20 +738,24 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
-        // Set up an existing account
-        signIn()
-        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+        // Create an unverified account (one that needs verification)
+        val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
+        )
+        val unverifiedAccount = LinkAccount(unverifiedSession)
+        linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(unverifiedAccount)
 
         // Call onPresentForAuthentication with a matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, TestFactory.LINK_ACCOUNT.email)
+        viewModel.onPresentForAuthentication(launcher, unverifiedAccount.email)
 
         // Verify that the account holder was NOT cleared
-        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(unverifiedAccount)
 
         // Verify that the launcher was called with the existing account
         val call = launcher.calls.awaitItem()
-        assertThat(call.input.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(call.input.linkAccountInfo.account).isEqualTo(unverifiedAccount)
     }
 
     @Test
