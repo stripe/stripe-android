@@ -2,8 +2,16 @@ package com.stripe.android.crypto.onramp
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
+import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.ConfigurationCallback
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -100,6 +108,62 @@ internal class OnrampCoordinator @Inject internal constructor(
     fun presentForAuthentication(email: String) {
         TODO("Not yet implemented")
     }
+
+    class Builder(
+        private val isLinkUserCallback: (Boolean) -> Unit
+    ) {
+        fun build(activity: ComponentActivity): OnrampCoordinator {
+            return create(
+                viewModelStoreOwner = activity,
+                lifecycleOwner = activity,
+                activityResultRegistryOwner = activity
+            )
+        }
+
+        fun build(fragment: Fragment): OnrampCoordinator {
+            return create(
+                viewModelStoreOwner = fragment,
+                lifecycleOwner = fragment,
+                activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
+                    ?: fragment.requireActivity()
+            )
+        }
+
+        private fun create(
+            viewModelStoreOwner: ViewModelStoreOwner,
+            lifecycleOwner: LifecycleOwner,
+            activityResultRegistryOwner: ActivityResultRegistryOwner
+        ): OnrampCoordinator {
+            val linkElementCallbackIdentifier = "OnrampCoordinator"
+
+            val viewModel = ViewModelProvider(
+                owner = viewModelStoreOwner,
+                factory = OnrampCoordinatorViewModel.Factory()
+            ).get(
+                key = "OnRampCoordinatorViewModel(instance = $linkElementCallbackIdentifier)",
+                modelClass = OnrampCoordinatorViewModel::class.java
+            )
+
+            // Get Application from the lifecycle owner (which should be an Activity or Fragment)
+            val application = when (lifecycleOwner) {
+                is Fragment -> lifecycleOwner.requireActivity().application
+                is ComponentActivity -> lifecycleOwner.application
+                else -> throw IllegalArgumentException("LifecycleOwner must be an Activity or Fragment")
+            }
+
+            val onrampComponent: OnrampComponent =
+                DaggerOnrampComponent
+                    .builder()
+                    .application(application)
+                    .onRampCoordinatorViewModel(viewModel)
+                    .linkElementCallbackIdentifier(linkElementCallbackIdentifier)
+                    .activityResultRegistryOwner(activityResultRegistryOwner)
+                    .isLinkUserCallback(isLinkUserCallback)
+                    .build()
+
+            return onrampComponent.onrampCoordinator
+        }
+    }
 }
 
 /**
@@ -118,4 +182,13 @@ internal class OnrampCoordinatorViewModel(
     var onRampConfiguration: OnrampConfiguration?
         get() = handle["configuration"]
         set(value) = handle.set("configuration", value)
+
+    class Factory : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            return OnrampCoordinatorViewModel(
+                handle = extras.createSavedStateHandle(),
+            ) as T
+        }
+    }
 }
