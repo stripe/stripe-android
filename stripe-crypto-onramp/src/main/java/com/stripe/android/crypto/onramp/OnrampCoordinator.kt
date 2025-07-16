@@ -4,6 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import com.stripe.android.crypto.onramp.model.ConfigurationCallback
+import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.link.LinkController
 import javax.inject.Inject
 
@@ -75,7 +78,6 @@ internal class OnrampCoordinator @Inject internal constructor(
      */
     @Suppress("UnusedParameter")
     fun registerNewLinkUser(info: LinkUserInfo) {
-        print(info)
         TODO("Not yet implemented")
     }
 
