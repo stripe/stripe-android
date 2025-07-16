@@ -38,7 +38,7 @@ class PhoneNumberController private constructor(
 
     private val countryConfig = CountryConfig(
         overrideCountryCodes,
-        tinyMode = true,
+        mode = DropdownConfig.Mode.Condensed,
         expandedLabelMapper = { country ->
             listOfNotNull(
                 CountryConfig.countryCodeToEmoji(country.code.value),
@@ -60,13 +60,13 @@ class PhoneNumberController private constructor(
 
     private val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.forCountry(
-            countryConfig.countries[it].code.value
+            countryConfig.countries[it ?: 0].code.value
         )
     }
 
     private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.lengthForCountry(
-            countryConfig.countries[it].code.value
+            countryConfig.countries[it ?: 0].code.value
         )
     }
 
