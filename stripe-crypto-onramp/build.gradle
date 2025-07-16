@@ -2,6 +2,7 @@ apply from: configs.androidLibrary
 
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'dev.drewhamilton.poko'
+apply plugin: 'com.google.devtools.ksp'
 
 dependencies {
     implementation project(':stripe-core')
@@ -15,6 +16,8 @@ dependencies {
     implementation libs.kotlin.serialization
 
     implementation libs.dagger
+
+    ksp libs.daggerCompiler
 
     testImplementation testLibs.androidx.junit
 

@@ -2,11 +2,16 @@ package com.stripe.android.crypto.onramp
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
+import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.ConfigurationCallback
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import javax.inject.Inject
 
@@ -100,22 +105,74 @@ internal class OnrampCoordinator @Inject internal constructor(
     fun presentForAuthentication(email: String) {
         TODO("Not yet implemented")
     }
-}
-
-/**
- * ViewModel that stores Onramp configuration in a SavedStateHandle for
- * process death restoration.
- *
- * @property handle SavedStateHandle backing persistent state.
- */
-internal class OnrampCoordinatorViewModel(
-    private val handle: SavedStateHandle
-) : ViewModel() {
 
     /**
-     * The current OnrampConfiguration, persisted across process restarts.
+     * A Builder utility type to create an [OnrampCoordinator] with appropriate parameters.
+     *
+     * @param isLinkUserCallback A callback for handling if a given user has a link account.
      */
-    var onRampConfiguration: OnrampConfiguration?
-        get() = handle["configuration"]
-        set(value) = handle.set("configuration", value)
+    class Builder(
+        private val isLinkUserCallback: (Boolean) -> Unit
+    ) {
+        /**
+         * Constructs an [OnrampCoordinator] for the given parameters.
+         *
+         * @param activity The Activity that is using the [OnrampCoordinator].
+         */
+        fun build(activity: ComponentActivity): OnrampCoordinator {
+            return create(
+                viewModelStoreOwner = activity,
+                lifecycleOwner = activity,
+                activityResultRegistryOwner = activity
+            )
+        }
+
+        /**
+         * Constructs an [OnrampCoordinator] for the given parameters.
+         *
+         * @param fragment The Fragment that is using the [OnrampCoordinator].
+         */
+        fun build(fragment: Fragment): OnrampCoordinator {
+            return create(
+                viewModelStoreOwner = fragment,
+                lifecycleOwner = fragment,
+                activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
+                    ?: fragment.requireActivity()
+            )
+        }
+
+        private fun create(
+            viewModelStoreOwner: ViewModelStoreOwner,
+            lifecycleOwner: LifecycleOwner,
+            activityResultRegistryOwner: ActivityResultRegistryOwner
+        ): OnrampCoordinator {
+            val linkElementCallbackIdentifier = "OnrampCoordinator"
+
+            val viewModel = ViewModelProvider(
+                owner = viewModelStoreOwner,
+                factory = OnrampCoordinatorViewModel.Factory()
+            ).get(
+                key = "OnRampCoordinatorViewModel(instance = $linkElementCallbackIdentifier)",
+                modelClass = OnrampCoordinatorViewModel::class.java
+            )
+
+            val application = when (lifecycleOwner) {
+                is Fragment -> lifecycleOwner.requireActivity().application
+                is ComponentActivity -> lifecycleOwner.application
+                else -> throw IllegalArgumentException("LifecycleOwner must be an Activity or Fragment")
+            }
+
+            val onrampComponent: OnrampComponent =
+                DaggerOnrampComponent
+                    .builder()
+                    .application(application)
+                    .onRampCoordinatorViewModel(viewModel)
+                    .linkElementCallbackIdentifier(linkElementCallbackIdentifier)
+                    .activityResultRegistryOwner(activityResultRegistryOwner)
+                    .isLinkUserCallback(isLinkUserCallback)
+                    .build()
+
+            return onrampComponent.onrampCoordinator
+        }
+    }
 }
