@@ -15,6 +15,7 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkLaunchMode.Authentication
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
@@ -230,23 +231,28 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
-        // For Authentication mode, dismiss with success after account is fetched
-        if (linkLaunchMode is LinkLaunchMode.Authentication) {
+        val targetScreen = when {
+            linkAccount?.completedSignup == true -> LinkScreen.PaymentMethod
+            linkAccount?.isVerified == true -> LinkScreen.Wallet
+            else -> LinkScreen.Verification
+        }
+
+        // Return the account in authentication mode if verification not required
+        if (linkLaunchMode is Authentication && targetScreen != LinkScreen.Verification) {
+            dismissWithAccount(linkAccount)
+        } else {
+            navigateAndClearStack(targetScreen)
+        }
+    }
+
+    private fun dismissWithAccount(linkAccount: LinkAccount?) {
+        if (linkLaunchMode is Authentication) {
             dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                     selectedPayment = null,
                 )
             )
-        } else {
-            // Regular flow navigation
-            if (linkAccount?.completedSignup == true) {
-                navigateAndClearStack(LinkScreen.PaymentMethod)
-            } else if (linkAccount?.isVerified == true) {
-                navigateAndClearStack(LinkScreen.Wallet)
-            } else {
-                navigateAndClearStack(LinkScreen.Verification)
-            }
         }
     }
 

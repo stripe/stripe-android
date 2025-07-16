@@ -170,6 +170,12 @@ internal class LinkControllerViewModel @Inject constructor(
                     val state = _state.value
                     val linkAccountInfo = getLinkAccountInfo(email, state)
 
+                    if (linkAccountInfo.account?.isVerified == true) {
+                        logger.debug("$tag: account is already verified, skipping authentication")
+                        _presentForAuthenticationResultFlow.emit(PresentForAuthenticationResult.Success)
+                        return@withConfiguration
+                    }
+
                     val launchMode = LinkLaunchMode.Authentication
 
                     _state.update {
