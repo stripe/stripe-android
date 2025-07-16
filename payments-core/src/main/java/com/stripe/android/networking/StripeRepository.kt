@@ -282,6 +282,12 @@ interface StripeRepository {
     ): Result<RadarSessionWithHCaptcha>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun createSavedPaymentMethodRadarSession(
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSessionWithHCaptcha>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun attachHCaptchaToRadarSession(
         radarSessionToken: String,
         hcaptchaToken: String,

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -364,6 +365,24 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
+        runCatching {
+            stripeRepository.createSavedPaymentMethodRadarSession(
+                paymentMethodId = paymentMethod.id
+                    ?: throw GenericStripeException(
+                        cause = IllegalStateException(
+                            "No payment method ID was found for provided 'PaymentMethod' object!"
+                        ),
+                        analyticsValue = "noPaymentMethodId"
+                    ),
+                requestOptions = requestOptions,
+            ).getOrThrow()
+        }.onFailure {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE,
+                stripeException = StripeException.create(it),
+            )
+        }
+
         return when (val handler = waitForPreparePaymentMethodHandler()) {
             is PreparePaymentMethodHandler -> {
                 try {
