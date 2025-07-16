@@ -59,7 +59,7 @@ internal fun LinkControllerUi(
     onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
-    onPresentForAuthenticationClick: (email: String) -> Unit,
+    onAuthenticationClick: (email: String) -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -101,7 +101,7 @@ internal fun LinkControllerUi(
         )
 
         Button(
-            onClick = { onPresentForAuthenticationClick(email) },
+            onClick = { onAuthenticationClick(email) },
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Test Authentication Flow")
@@ -144,7 +144,7 @@ private fun StatusBox(
         add("Consumer Lookup" to lookupText)
         add("Consumer Verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method Created" to (controllerState.createdPaymentMethod?.id ?: ""))
-        add("Authentication Result" to (playgroundState.presentForAuthenticationResult?.toString() ?: ""))
+        add("Authentication Result" to (playgroundState.authenticationResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -187,7 +187,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
-    (presentForAuthenticationResult as? LinkController.PresentForAuthenticationResult.Failed)?.error,
+    (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
 ).firstOrNull { it != null }
 
 @Composable
@@ -201,7 +201,7 @@ private fun LinkControllerUiPreview() {
             onEmailChange = {},
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {},
-            onPresentForAuthenticationClick = {},
+            onAuthenticationClick = {},
             onErrorMessage = {},
         )
     }

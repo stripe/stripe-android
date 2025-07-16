@@ -41,7 +41,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                     presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
-                    presentForAuthenticationCallback = viewModel::onLinkControllerPresentForAuthentication,
+                    authenticationCallback = viewModel::onLinkControllerAuthentication,
                 )
             }
             LaunchedEffect(Unit) {
@@ -66,8 +66,8 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                             linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
                         },
                         onCreatePaymentMethodClick = linkController::createPaymentMethod,
-                        onPresentForAuthenticationClick = { email ->
-                            linkController.presentForAuthentication(email = email.takeIf { it.isNotBlank() })
+                        onAuthenticationClick = { email ->
+                            linkController.authenticate(email = email.takeIf { it.isNotBlank() })
                         },
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )

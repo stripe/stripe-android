@@ -61,22 +61,22 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ON-RAMP ONLY] Present the Link authentication screen.
+     * [CRYPTO ON-RAMP ONLY] Authenticate with Link.
      *
      * This will launch the Link activity where users can authenticate with their Link account.
      * The authentication flow will close after successful authentication instead of continuing
-     * to payment selection. The result will be communicated through the [PresentForAuthenticationCallback]
+     * to payment selection. The result will be communicated through the [AuthenticationCallback]
      * provided during controller creation.
      *
-     * If a presentation is already in progress, this call will be ignored.
+     * If authentication is already in progress, this call will be ignored.
      *
      * @param email The email address to use for Link account lookup. If provided and the email
      * matches an existing Link account, the user will be able to authenticate with that account.
      * If null, the user will need to sign in or create a Link account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun presentForAuthentication(email: String?) {
-        viewModel.onPresentForAuthentication(
+    fun authenticate(email: String?) {
+        viewModel.onAuthenticate(
             launcher = linkControllerCoordinator.linkActivityResultLauncher,
             email = email
         )
@@ -329,30 +329,30 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Result of presenting Link for authentication.
+     * Result of authenticating with Link.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    sealed interface PresentForAuthenticationResult {
+    sealed interface AuthenticationResult {
 
         /**
          * The user successfully authenticated with Link.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Success : PresentForAuthenticationResult
+        data object Success : AuthenticationResult
 
         /**
          * The user canceled the Link authentication.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Canceled : PresentForAuthenticationResult
+        data object Canceled : AuthenticationResult
 
         /**
-         * An error occurred while presenting Link for authentication.
+         * An error occurred while authenticating with Link.
          *
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Failed internal constructor(val error: Throwable) : PresentForAuthenticationResult
+        class Failed internal constructor(val error: Throwable) : AuthenticationResult
     }
 
     /**
@@ -380,11 +380,11 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Callback for receiving results from [presentForAuthentication].
+     * Callback for receiving results from [authenticate].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface PresentForAuthenticationCallback {
-        fun onPresentForAuthenticationResult(result: PresentForAuthenticationResult)
+    fun interface AuthenticationCallback {
+        fun onAuthenticationResult(result: AuthenticationResult)
     }
 
     /**
@@ -412,7 +412,7 @@ class LinkController @Inject internal constructor(
          * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
          * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
          * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
-         * @param presentForAuthenticationCallback Called with the result when [presentForAuthentication] completes.
+         * @param authenticationCallback Called with the result when [authenticate] completes.
          *
          * @return A configured [LinkController] instance.
          */
@@ -422,7 +422,7 @@ class LinkController @Inject internal constructor(
             presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
-            presentForAuthenticationCallback: PresentForAuthenticationCallback,
+            authenticationCallback: AuthenticationCallback,
         ): LinkController {
             val viewModelProvider = ViewModelProvider(
                 owner = activity,
@@ -437,7 +437,7 @@ class LinkController @Inject internal constructor(
                     presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                     lookupConsumerCallback = lookupConsumerCallback,
                     createPaymentMethodCallback = createPaymentMethodCallback,
-                    presentForAuthenticationCallback = presentForAuthenticationCallback,
+                    authenticationCallback = authenticationCallback,
                 )
                 .controller
         }

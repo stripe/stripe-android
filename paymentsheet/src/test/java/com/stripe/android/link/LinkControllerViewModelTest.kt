@@ -590,23 +590,23 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentForAuthentication() fails when configuration is not set`() = runTest {
+    fun `onAuthenticate() fails when configuration is not set`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.presentForAuthenticationResultFlow.test {
-            viewModel.onPresentForAuthentication(mock(), "test@example.com")
-            val result = awaitItem() as LinkController.PresentForAuthenticationResult.Failed
+        viewModel.authenticationResultFlow.test {
+            viewModel.onAuthenticate(mock(), "test@example.com")
+            val result = awaitItem() as LinkController.AuthenticationResult.Failed
             assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
         }
     }
 
     @Test
-    fun `onPresentForAuthentication() launches Link with correct arguments`() = runTest {
+    fun `onAuthenticate() launches Link with correct arguments`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, "test@example.com")
+        viewModel.onAuthenticate(launcher, "test@example.com")
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.startWithVerificationDialog).isTrue()
@@ -618,7 +618,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentForAuthentication() on matching email passes existing account`() = runTest(dispatcher) {
+    fun `onAuthenticate() on matching email passes existing account`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         configure(viewModel)
 
@@ -630,7 +630,7 @@ class LinkControllerViewModelTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, unverifiedAccount.email)
+        viewModel.onAuthenticate(launcher, unverifiedAccount.email)
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.linkAccountInfo.account).isEqualTo(unverifiedAccount)
@@ -638,13 +638,13 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentForAuthentication() on non-matching email clears account state`() = runTest {
+    fun `onAuthenticate() on non-matching email clears account state`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
         signIn()
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, "another@email.com")
+        viewModel.onAuthenticate(launcher, "another@email.com")
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -653,13 +653,13 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentForAuthentication() updates state with presentedForEmail and currentLaunchMode`() = runTest {
+    fun `onAuthenticate() updates state with presentedForEmail and currentLaunchMode`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
         val email = "test@example.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, email)
+        viewModel.onAuthenticate(launcher, email)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -668,25 +668,25 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentForAuthentication() handles configuration loading failure`() = runTest {
+    fun `onAuthenticate() handles configuration loading failure`() = runTest {
         val viewModel = createViewModel()
         // Don't configure the viewModel, so it will fail with MissingConfigurationException
 
-        viewModel.presentForAuthenticationResultFlow.test {
-            viewModel.onPresentForAuthentication(mock(), "test@example.com")
+        viewModel.authenticationResultFlow.test {
+            viewModel.onAuthenticate(mock(), "test@example.com")
 
-            val result = awaitItem() as LinkController.PresentForAuthenticationResult.Failed
+            val result = awaitItem() as LinkController.AuthenticationResult.Failed
             assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
         }
     }
 
     @Test
-    fun `onPresentForAuthentication() with null email passes null to configuration`() = runTest {
+    fun `onAuthenticate() with null email passes null to configuration`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, null)
+        viewModel.onAuthenticate(launcher, null)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -695,13 +695,13 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onPresentForAuthentication() sets correct customer info in configuration`() = runTest {
+    fun `onAuthenticate() sets correct customer info in configuration`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
 
         val email = "test@example.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, email)
+        viewModel.onAuthenticate(launcher, email)
 
         val call = launcher.calls.awaitItem()
         val args = call.input
@@ -721,9 +721,9 @@ class LinkControllerViewModelTest {
         signIn()
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(TestFactory.LINK_ACCOUNT)
 
-        // Call onPresentForAuthentication with a non-matching email
+        // Call onAuthenticate with a non-matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, "different@email.com")
+        viewModel.onAuthenticate(launcher, "different@email.com")
 
         // Verify that the account holder was cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
@@ -746,9 +746,9 @@ class LinkControllerViewModelTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(unverifiedAccount))
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(unverifiedAccount)
 
-        // Call onPresentForAuthentication with a matching email
+        // Call onAuthenticate with a matching email
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        viewModel.onPresentForAuthentication(launcher, unverifiedAccount.email)
+        viewModel.onAuthenticate(launcher, unverifiedAccount.email)
 
         // Verify that the account holder was NOT cleared
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isEqualTo(unverifiedAccount)
