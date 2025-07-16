@@ -2847,13 +2847,18 @@ class PaymentSheet internal constructor(
     @Parcelize
     class LinkConfiguration internal constructor(
         internal val display: Display,
-        internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean
+        internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
+        internal val allowUserEmailEdits: Boolean,
     ) : Parcelable {
 
         @JvmOverloads
         constructor(
             display: Display = Display.Automatic
-        ) : this(display, true)
+        ) : this(
+            display = display,
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true,
+        )
 
         internal val shouldDisplay: Boolean
             get() = when (display) {
@@ -2880,7 +2885,8 @@ class PaymentSheet internal constructor(
             fun build() = LinkConfiguration(
                 display = display,
                 collectMissingBillingDetailsForExistingPaymentMethods =
-                collectMissingBillingDetailsForExistingPaymentMethods
+                    collectMissingBillingDetailsForExistingPaymentMethods,
+                allowUserEmailEdits = true,
             )
         }
 

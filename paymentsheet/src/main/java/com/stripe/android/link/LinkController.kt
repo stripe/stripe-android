@@ -121,6 +121,7 @@ class LinkController @Inject internal constructor(
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        internal val allowUserEmailEdits: Boolean,
     ) : Parcelable {
 
         /**
@@ -141,6 +142,7 @@ class LinkController @Inject internal constructor(
                 ConfigurationDefaults.billingDetails
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
+            private var allowUserEmailEdits: Boolean = true
 
             /**
              * Configuration for which card brands should be accepted or blocked.
@@ -179,11 +181,22 @@ class LinkController @Inject internal constructor(
             }
 
             /**
+             * Whether to allow users to edit their email address within Link.
+             *
+             * @param allowUserEmailEdits True to allow email editing, false to disable it.
+             * @return This builder instance for method chaining.
+             */
+            fun allowUserEmailEdits(allowUserEmailEdits: Boolean) = apply {
+                this.allowUserEmailEdits = allowUserEmailEdits
+            }
+
+            /**
              * Build the [Configuration] instance.
              *
              * @return A new [Configuration] with the specified settings.
              */
             fun build(): Configuration = Configuration(
+                allowUserEmailEdits = allowUserEmailEdits,
                 merchantDisplayName = merchantDisplayName,
                 cardBrandAcceptance = cardBrandAcceptance,
                 defaultBillingDetails = defaultBillingDetails,

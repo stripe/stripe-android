@@ -195,7 +195,11 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
-    link = PaymentSheet.LinkConfiguration(PaymentSheet.LinkConfiguration.Display.Automatic),
+    link = PaymentSheet.LinkConfiguration(
+        display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        collectMissingBillingDetailsForExistingPaymentMethods = true,
+        allowUserEmailEdits = allowUserEmailEdits,
+    ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
 )

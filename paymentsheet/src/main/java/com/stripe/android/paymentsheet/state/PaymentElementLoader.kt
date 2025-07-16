@@ -601,7 +601,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
             googlePlacesApiKey = configuration.googlePlacesApiKey,
             collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+                configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+            allowUserEmailEdits = configuration.link.allowUserEmailEdits,
         )
 
         // CBF isn't currently supported in the web flow.
