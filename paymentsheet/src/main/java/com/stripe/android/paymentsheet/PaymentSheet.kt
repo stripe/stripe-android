@@ -2885,7 +2885,7 @@ class PaymentSheet internal constructor(
             fun build() = LinkConfiguration(
                 display = display,
                 collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods,
+                collectMissingBillingDetailsForExistingPaymentMethods,
                 allowUserEmailEdits = true,
             )
         }

@@ -614,7 +614,8 @@ class ConfirmationHandlerOptionKtxTest {
             disableRuxInFlowController = false,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             defaultBillingDetails = null,
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true
         )
     }
 }

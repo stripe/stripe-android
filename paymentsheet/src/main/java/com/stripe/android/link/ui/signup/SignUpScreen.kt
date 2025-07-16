@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.signup
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -113,9 +114,10 @@ internal fun SignUpBody(
         )
         StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
-                enabled = signUpScreenState.canEditForm,
+                canEditForm = signUpScreenState.canEditForm,
+                canEditEmail = signUpScreenState.canEditEmail,
                 emailController = emailController,
-                signUpScreenState = signUpScreenState,
+                signUpState = signUpScreenState.signUpState,
                 focusRequester = emailFocusRequester,
             )
         }
@@ -158,11 +160,13 @@ internal fun SignUpBody(
     }
 }
 
+@VisibleForTesting
 @Composable
-private fun EmailCollectionSection(
-    enabled: Boolean,
+internal fun EmailCollectionSection(
+    canEditForm: Boolean,
+    canEditEmail: Boolean,
     emailController: TextFieldController,
-    signUpScreenState: SignUpScreenState,
+    signUpState: SignUpState,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     var focused by rememberSaveable { mutableStateOf(false) }
@@ -184,15 +188,17 @@ private fun EmailCollectionSection(
                     .focusRequester(focusRequester)
                     .onFocusChanged { focused = it.isFocused },
                 textFieldController = emailController,
-                imeAction = if (signUpScreenState.signUpState == SignUpState.InputtingRemainingFields) {
+                imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
                     ImeAction.Next
                 } else {
                     ImeAction.Done
                 },
-                enabled = enabled && signUpScreenState.signUpState != SignUpState.VerifyingEmail,
+                enabled = canEditForm &&
+                    canEditEmail &&
+                    signUpState != SignUpState.VerifyingEmail,
             )
         }
-        if (signUpScreenState.signUpState == SignUpState.VerifyingEmail) {
+        if (signUpState == SignUpState.VerifyingEmail) {
             Row {
                 LinkSpinner(
                     filledColor = LinkTheme.colors.iconPrimary,
@@ -284,6 +290,7 @@ private fun SignUpScreenLoadingPreview() {
                 signUpEnabled = false,
                 signUpState = SignUpState.VerifyingEmail,
                 requiresNameCollection = true,
+                canEditEmail = true,
             ),
             onSignUpClick = {}
         )
@@ -303,6 +310,7 @@ private fun SignUpScreenPreview() {
                 signUpEnabled = false,
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
+                canEditEmail = true,
             ),
             onSignUpClick = {}
         )
