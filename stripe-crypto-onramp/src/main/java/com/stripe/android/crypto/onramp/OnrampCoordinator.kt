@@ -4,12 +4,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.ConfigurationCallback
@@ -180,4 +176,3 @@ internal class OnrampCoordinator @Inject internal constructor(
         }
     }
 }
-
