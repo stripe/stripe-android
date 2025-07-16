@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
@@ -39,6 +38,8 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -678,20 +679,6 @@ class PaymentSheet internal constructor(
         val googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
 
         /**
-         * The color of the Pay or Add button. Keep in mind the text color is white.
-         *
-         * If set, PaymentSheet displays the button with this color.
-         */
-        @Deprecated(
-            message = "Use Appearance parameter to customize primary button color",
-            replaceWith = ReplaceWith(
-                expression = "Appearance.colorsLight/colorsDark.primary " +
-                    "or PrimaryButton.colorsLight/colorsDark.background"
-            )
-        )
-        val primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
-
-        /**
          * The billing information for the customer.
          *
          * If set, PaymentSheet will pre-populate the form fields with the values provided.
@@ -814,13 +801,6 @@ class PaymentSheet internal constructor(
             googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay,
 
             /**
-             * The color of the Pay or Add button. Keep in mind the text color is white.
-             *
-             * If set, PaymentSheet displays the button with this color.
-             */
-            primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor,
-
-            /**
              * The billing information for the customer.
              *
              * If set, PaymentSheet will pre-populate the form fields with the values provided.
@@ -901,7 +881,6 @@ class PaymentSheet internal constructor(
             merchantDisplayName = merchantDisplayName,
             customer = customer,
             googlePay = googlePay,
-            primaryButtonColor = primaryButtonColor,
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
@@ -924,7 +903,6 @@ class PaymentSheet internal constructor(
         ) {
             private var customer: CustomerConfiguration? = ConfigurationDefaults.customer
             private var googlePay: GooglePayConfiguration? = ConfigurationDefaults.googlePay
-            private var primaryButtonColor: ColorStateList? = ConfigurationDefaults.primaryButtonColor
             private var defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
@@ -957,16 +935,6 @@ class PaymentSheet internal constructor(
 
             fun googlePay(googlePay: GooglePayConfiguration?) =
                 apply { this.googlePay = googlePay }
-
-            @Deprecated(
-                message = "Use Appearance parameter to customize primary button color",
-                replaceWith = ReplaceWith(
-                    expression = "Appearance.colorsLight/colorsDark.primary " +
-                        "or PrimaryButton.colorsLight/colorsDark.background"
-                )
-            )
-            fun primaryButtonColor(primaryButtonColor: ColorStateList?) =
-                apply { this.primaryButtonColor = primaryButtonColor }
 
             fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
@@ -1105,7 +1073,6 @@ class PaymentSheet internal constructor(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
                 googlePay = googlePay,
-                primaryButtonColor = primaryButtonColor,
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
@@ -1140,11 +1107,9 @@ class PaymentSheet internal constructor(
             WalletButtonsPreview::class,
             ShopPayPreview::class
         )
-        @Suppress("DEPRECATION")
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
             .googlePay(googlePay)
-            .primaryButtonColor(primaryButtonColor)
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
