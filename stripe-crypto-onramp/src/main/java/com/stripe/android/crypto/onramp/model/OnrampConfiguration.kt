@@ -1,8 +1,9 @@
-package com.stripe.android.crypto.onramp
+package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
+import dev.drewhamilton.poko.Poko
 
 /**
  * Configuration options required to initialize the Onramp flow.
@@ -11,7 +12,8 @@ import kotlinx.parcelize.Parcelize
  * @property paymentSheetAppearance Appearance settings for the PaymentSheet UI.
  */
 @Parcelize
-internal data class OnrampConfiguration(
+@Poko
+internal class OnrampConfiguration(
     val publishableKey: String,
     val paymentSheetAppearance: PaymentSheet.Appearance
 ) : Parcelable

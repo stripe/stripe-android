@@ -1,4 +1,4 @@
-package com.stripe.android.crypto.onramp
+package com.stripe.android.crypto.onramp.model
 
 /**
  * Callback invoked after attempting to configure the Onramp flow.

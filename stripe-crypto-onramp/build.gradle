@@ -1,6 +1,7 @@
 apply from: configs.androidLibrary
 
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
     implementation project(':stripe-core')

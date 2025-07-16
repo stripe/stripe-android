@@ -16,7 +16,7 @@ import javax.inject.Inject
  * @param isLinkUserCallback Callback invoked with the result of determining if a
  *                           provided email is associated with a Link user.
  */
-internal class OnrampCoordinator @Inject constructor(
+internal class OnrampCoordinator @Inject internal constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val isLinkUserCallback: (Boolean) -> Unit
