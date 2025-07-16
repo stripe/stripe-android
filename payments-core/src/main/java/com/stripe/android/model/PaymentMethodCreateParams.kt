@@ -928,24 +928,6 @@ constructor(
         }
 
         /**
-         * @return params for creating a [PaymentMethod.Type.Giropay] payment method
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun createGiropay(
-            billingDetails: PaymentMethod.BillingDetails,
-            metadata: Map<String, String>? = null,
-            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(
-                type = PaymentMethod.Type.Giropay,
-                billingDetails = billingDetails,
-                metadata = metadata,
-                allowRedisplay = allowRedisplay,
-            )
-        }
-
-        /**
          * @return params for creating a [PaymentMethod.Type.GrabPay] payment method
          */
         @JvmStatic
