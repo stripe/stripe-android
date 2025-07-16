@@ -8,7 +8,8 @@ import com.stripe.android.link.LinkController
 import javax.inject.Inject
 
 /**
- * Default implementation of [OnrampCoordinator].
+ * Coordinator interface for managing the Onramp lifecycle, Link user checks,
+ * and authentication flows.
  *
  * @param viewModel The ViewModel that persists configuration state across process restarts.
  * @param activityResultRegistryOwner Host providing ActivityResultRegistry for LinkController.
