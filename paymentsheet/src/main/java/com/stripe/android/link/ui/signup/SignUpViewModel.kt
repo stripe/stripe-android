@@ -239,20 +239,14 @@ internal class SignUpViewModel @Inject constructor(
 
         // Return the account in authentication mode if verification not required
         if (linkLaunchMode is Authentication && targetScreen != LinkScreen.Verification) {
-            dismissWithAccount(linkAccount)
-        } else {
-            navigateAndClearStack(targetScreen)
-        }
-    }
-
-    private fun dismissWithAccount(linkAccount: LinkAccount?) {
-        if (linkLaunchMode is Authentication) {
             dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                     selectedPayment = null,
                 )
             )
+        } else {
+            navigateAndClearStack(targetScreen)
         }
     }
 
