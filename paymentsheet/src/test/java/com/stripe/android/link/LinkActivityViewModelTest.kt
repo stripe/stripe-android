@@ -347,6 +347,29 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
+    fun `onCreate should return Failed result when Authentication existingOnly and account status is SignedOut`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = true)
+        )
+        linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
+
+        vm.result.test {
+            vm.onCreate(mock())
+
+            advanceUntilIdle()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkActivityResult.Failed::class.java)
+            val failedResult = result as LinkActivityResult.Failed
+            assertThat(failedResult.error).isInstanceOf(NoLinkAccountFoundException::class.java)
+            assertThat(failedResult.linkAccountUpdate).isEqualTo(LinkAccountUpdate.None)
+        }
+    }
+
+    @Test
     fun `onCreate should navigate to signUp screen when account status is Error`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
 

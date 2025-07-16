@@ -151,6 +151,21 @@ internal class LinkControllerViewModel @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
     ) {
+        performAuthentication(launcher, email, existingOnly = false)
+    }
+
+    internal fun onAuthenticateExistingConsumer(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String
+    ) {
+        performAuthentication(launcher, email, existingOnly = true)
+    }
+
+    private fun performAuthentication(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String?,
+        existingOnly: Boolean
+    ) {
         if (presentJob?.isActive == true) {
             logger.debug("$tag: already presenting")
             return
@@ -176,7 +191,7 @@ internal class LinkControllerViewModel @Inject constructor(
                         return@withConfiguration
                     }
 
-                    val launchMode = LinkLaunchMode.Authentication
+                    val launchMode = LinkLaunchMode.Authentication(existingOnly = existingOnly)
 
                     _state.update {
                         it.copy(

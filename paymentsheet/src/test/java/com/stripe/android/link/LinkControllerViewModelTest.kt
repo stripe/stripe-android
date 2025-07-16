@@ -611,7 +611,7 @@ class LinkControllerViewModelTest {
         val args = launcher.calls.awaitItem().input
         assertThat(args.startWithVerificationDialog).isTrue()
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
 
         val state = viewModel.state(application).first()
         assertThat(state.isConsumerVerified).isNull()
@@ -634,7 +634,7 @@ class LinkControllerViewModelTest {
 
         val args = launcher.calls.awaitItem().input
         assertThat(args.linkAccountInfo.account).isEqualTo(unverifiedAccount)
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
     }
 
     @Test
@@ -649,7 +649,7 @@ class LinkControllerViewModelTest {
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
     }
 
     @Test
@@ -664,7 +664,7 @@ class LinkControllerViewModelTest {
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.configuration.customerInfo.email).isEqualTo(email)
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
     }
 
     @Test
@@ -691,7 +691,7 @@ class LinkControllerViewModelTest {
         val call = launcher.calls.awaitItem()
         val args = call.input
         assertThat(args.configuration.customerInfo.email).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication)
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication())
     }
 
     @Test
@@ -710,6 +710,34 @@ class LinkControllerViewModelTest {
         assertThat(customerInfo.name).isNull()
         assertThat(customerInfo.phone).isNull()
         assertThat(customerInfo.billingCountryCode).isNull()
+    }
+
+    @Test
+    fun `onAuthenticateExistingConsumer() launches Link with existingOnly flag set to true`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        viewModel.onAuthenticateExistingConsumer(launcher, "test@example.com")
+
+        val args = launcher.calls.awaitItem().input
+        assertThat(args.startWithVerificationDialog).isTrue()
+        assertThat(args.linkAccountInfo.account).isNull()
+        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.Authentication(existingOnly = true))
+    }
+
+    @Test
+    fun `onAuthenticateExistingConsumer() on succeeds immediately with matching email`() = runTest(dispatcher) {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        viewModel.authenticationResultFlow.test {
+            val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+            viewModel.onAuthenticateExistingConsumer(launcher, TestFactory.LINK_ACCOUNT.email)
+
+            assertThat(awaitItem()).isEqualTo(LinkController.AuthenticationResult.Success)
+        }
     }
 
     @Test

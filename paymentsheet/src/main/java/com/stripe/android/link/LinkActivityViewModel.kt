@@ -285,6 +285,21 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun updateScreenState() {
         val accountStatus = linkAccountManager.accountStatus.first()
+
+        // Handle existingOnly + SignedOut case
+        if (linkLaunchMode is LinkLaunchMode.Authentication &&
+            linkLaunchMode.existingOnly &&
+            accountStatus == AccountStatus.SignedOut
+        ) {
+            dismissWithResult(
+                LinkActivityResult.Failed(
+                    error = NoLinkAccountFoundException(),
+                    linkAccountUpdate = LinkAccountUpdate.None
+                )
+            )
+            return
+        }
+
         val linkAccount = linkAccountManager.linkAccountInfo.value.account
         when (accountStatus) {
             AccountStatus.Verified,

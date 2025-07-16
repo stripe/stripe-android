@@ -39,5 +39,7 @@ internal sealed interface LinkLaunchMode : Parcelable {
      * The flow will close after successful authentication instead of continuing to payment selection.
      */
     @Parcelize
-    data object Authentication : LinkLaunchMode
+    data class Authentication(
+        val existingOnly: Boolean = false,
+    ) : LinkLaunchMode
 }
