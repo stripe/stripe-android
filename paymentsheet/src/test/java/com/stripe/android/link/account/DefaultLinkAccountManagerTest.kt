@@ -41,6 +41,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("LargeClass")
 class DefaultLinkAccountManagerTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
