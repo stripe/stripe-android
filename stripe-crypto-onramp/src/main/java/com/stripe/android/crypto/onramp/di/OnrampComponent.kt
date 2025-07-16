@@ -5,7 +5,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.OnrampCoordinatorViewModel
+import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
