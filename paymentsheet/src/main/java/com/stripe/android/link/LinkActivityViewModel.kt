@@ -286,10 +286,9 @@ internal class LinkActivityViewModel @Inject constructor(
     private suspend fun updateScreenState() {
         val accountStatus = linkAccountManager.accountStatus.first()
 
-        // Handle existingOnly + SignedOut case
         if (linkLaunchMode is LinkLaunchMode.Authentication &&
-            linkLaunchMode.existingOnly &&
-            accountStatus == AccountStatus.SignedOut
+            (accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error) &&
+            (linkLaunchMode.existingOnly || !linkConfiguration.allowUserEmailEdits)
         ) {
             dismissWithResult(
                 LinkActivityResult.Failed(

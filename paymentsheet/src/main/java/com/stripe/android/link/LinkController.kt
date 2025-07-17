@@ -377,6 +377,7 @@ class LinkController @Inject internal constructor(
          * @param error The error that occurred.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
         class Failed internal constructor(val error: Throwable) : AuthenticationResult
     }
 

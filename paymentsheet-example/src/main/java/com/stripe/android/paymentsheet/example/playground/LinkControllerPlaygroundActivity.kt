@@ -66,8 +66,13 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                             linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
                         },
                         onCreatePaymentMethodClick = linkController::createPaymentMethod,
-                        onAuthenticationClick = { email ->
-                            linkController.authenticate(email = email.takeIf { it.isNotBlank() })
+                        onAuthenticationClick = { email, existingOnly ->
+                            val cleanedEmail = email.takeIf { it.isNotBlank() } ?: ""
+                            if (existingOnly) {
+                                linkController.authenticateExistingConsumer(cleanedEmail)
+                            } else {
+                                linkController.authenticate(cleanedEmail)
+                            }
                         },
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )
