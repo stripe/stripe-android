@@ -3,8 +3,11 @@ package com.stripe.android.link.ui.paymentmethod
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.FakeLinkActionManager
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
+import com.stripe.android.link.LinkActionIntent
+import com.stripe.android.link.LinkActionManager
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -106,10 +109,11 @@ class PaymentMethodViewModelTest {
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         var result: LinkActivityResult? = null
+        val linkActionManager = FakeLinkActionManager()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
-            dismissWithResult = { result = it }
+            linkActionManager = linkActionManager
         )
 
         viewModel.formValuesChanged(
@@ -126,7 +130,8 @@ class PaymentMethodViewModelTest {
         val paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
         assertThat(call.paymentDetails).isEqualTo(paymentDetails)
         assertThat(call.cvc).isEqualTo("111")
-        assertThat(result)
+        val emittedAction = linkActionManager.emittedActions.single() as LinkActionIntent.DismissWithResult
+        assertThat(emittedAction.result)
             .isEqualTo(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
@@ -146,10 +151,11 @@ class PaymentMethodViewModelTest {
 
         linkAccountManager.createCardPaymentDetailsResult = Result.failure(error)
 
+        val linkActionManager = FakeLinkActionManager()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             logger = logger,
-            dismissWithResult = { result = it },
+            linkActionManager = linkActionManager,
             linkConfirmationHandler = linkConfirmationHandler
         )
 
@@ -161,7 +167,7 @@ class PaymentMethodViewModelTest {
 
         assertThat(linkConfirmationHandler.confirmWithLinkPaymentDetailsCall).isEmpty()
 
-        assertThat(result).isEqualTo(null)
+        assertThat(linkActionManager.emittedActions).isEmpty()
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
         assertThat(viewModel.state.value.errorMessage).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(logger.errorLogs).containsExactly(
@@ -235,12 +241,12 @@ class PaymentMethodViewModelTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-        dismissWithResult: (LinkActivityResult) -> Unit = {},
+        linkActionManager: LinkActionManager = FakeLinkActionManager(),
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAccount = TestFactory.LINK_ACCOUNT,
-            dismissWithResult = dismissWithResult,
+            linkActionManager = linkActionManager,
             formHelper = formHelper,
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,

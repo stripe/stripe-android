@@ -4,7 +4,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.FakeLinkActionManager
+import com.stripe.android.link.LinkActionManager
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -205,10 +206,10 @@ internal class VerificationViewModelTest {
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
+        linkActionManager: LinkActionManager = FakeLinkActionManager(),
         onVerificationSucceeded: () -> Unit = { },
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
-        dismissWithResult: (LinkActivityResult) -> Unit = { },
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -216,11 +217,11 @@ internal class VerificationViewModelTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             linkLaunchMode = linkLaunchMode,
+            linkActionManager = linkActionManager,
             isDialog = false,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
-            dismissWithResult = dismissWithResult
         )
     }
 }

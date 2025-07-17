@@ -155,6 +155,7 @@ internal class LinkActivityTest {
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
                 navigationManager = TestNavigationManager(),
+                linkActionManager = FakeLinkActionManager(),
                 linkLaunchMode = LinkLaunchMode.Full,
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
                 autocompleteLauncher = TestAutocompleteLauncher.noOp(),

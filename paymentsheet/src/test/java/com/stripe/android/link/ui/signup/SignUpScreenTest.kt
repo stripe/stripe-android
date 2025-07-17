@@ -14,6 +14,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.link.FakeLinkActionManager
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -255,11 +256,11 @@ internal class SignUpScreenTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = SavedStateHandle(),
-            navigateAndClearStack = {},
             dismissalCoordinator = dismissalCoordinator,
+            linkActionManager = FakeLinkActionManager(),
+            navigateAndClearStack = {},
             moveToWeb = moveToWeb,
             linkLaunchMode = LinkLaunchMode.Full,
-            dismissWithResult = {}
         )
     }
 

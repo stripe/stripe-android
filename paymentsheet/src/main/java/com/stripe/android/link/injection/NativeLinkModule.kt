@@ -20,6 +20,8 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActionManager
+import com.stripe.android.link.LinkActionManagerImpl
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -91,6 +93,12 @@ internal interface NativeLinkModule {
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+    @Binds
+    @NativeLinkScope
+    fun bindsLinkActionManager(
+        impl: LinkActionManagerImpl
+    ): LinkActionManager
 
     @Binds
     @NativeLinkScope

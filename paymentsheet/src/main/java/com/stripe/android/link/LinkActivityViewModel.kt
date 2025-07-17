@@ -16,6 +16,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
+import com.stripe.android.link.LinkActionIntent.DismissWithResult
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -63,6 +64,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
     private val navigationManager: NavigationManager,
+    private val linkActionManager: LinkActionManager,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
 ) : ViewModel(), DefaultLifecycleObserver {
@@ -84,6 +86,16 @@ internal class LinkActivityViewModel @Inject constructor(
         get() = linkAccountManager.linkAccountInfo.value.account
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+
+    init {
+        viewModelScope.launch {
+            linkActionManager.actionFlow.collect { action ->
+                when (action) {
+                    is DismissWithResult -> _result.emit(action.result)
+                }
+            }
+        }
+    }
 
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss

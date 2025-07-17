@@ -11,7 +11,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActionIntent.DismissWithResult
+import com.stripe.android.link.LinkActionManager
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -52,7 +53,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkLaunchMode: LinkLaunchMode,
     private val completeLinkFlow: CompleteLinkFlow,
-    private val dismissWithResult: (LinkActivityResult) -> Unit,
+    private val linkActionManager: LinkActionManager,
     paymentDetailsId: String,
     billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
 ) : ViewModel() {
@@ -127,7 +128,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         when (confirmationResult) {
                             is Result.Canceled -> Unit
                             is Result.Failed -> _state.update { it.copy(error = confirmationResult.error) }
-                            is Result.Completed -> dismissWithResult(confirmationResult.linkActivityResult)
+                            is Result.Completed -> linkActionManager.emit(
+                                DismissWithResult(confirmationResult.linkActivityResult)
+                            )
                         }
                     } else {
                         // Regular update flow, just navigate back
@@ -214,7 +217,6 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             paymentDetailsId: String,
             billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
-            dismissWithResult: (LinkActivityResult) -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -233,7 +235,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
                             linkLaunchMode = parentComponent.linkLaunchMode,
                         ),
-                        dismissWithResult = dismissWithResult,
+                        linkActionManager = parentComponent.linkActionManager,
                         paymentDetailsId = paymentDetailsId,
                         billingDetailsUpdateFlow = billingDetailsUpdateFlow,
                     )

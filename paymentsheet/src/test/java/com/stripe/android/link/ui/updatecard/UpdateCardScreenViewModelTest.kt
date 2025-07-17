@@ -2,6 +2,8 @@ package com.stripe.android.link.ui.updatecard
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.link.FakeLinkActionManager
+import com.stripe.android.link.LinkActionManager
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -133,6 +135,7 @@ class UpdateCardScreenViewModelTest {
         navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
+        linkActionManager: LinkActionManager = FakeLinkActionManager(),
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         paymentDetailsId: String = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id,
         billingDetailsUpdateFlow: BillingDetailsUpdateFlow? = null
@@ -152,7 +155,7 @@ class UpdateCardScreenViewModelTest {
             ),
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
             linkLaunchMode = LinkLaunchMode.Full,
-            dismissWithResult = {}
+            linkActionManager = linkActionManager
         )
     }
 }

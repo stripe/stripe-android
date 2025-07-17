@@ -7,7 +7,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkActionIntent.DismissWithResult
+import com.stripe.android.link.LinkActionManager
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -45,7 +46,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val formHelper: FormHelper,
     private val dismissalCoordinator: LinkDismissalCoordinator,
     private val linkLaunchMode: LinkLaunchMode,
-    private val dismissWithResult: (LinkActivityResult) -> Unit,
+    private val linkActionManager: LinkActionManager,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
         PaymentMethodState(
@@ -136,7 +137,9 @@ internal class PaymentMethodViewModel @Inject constructor(
         when (result) {
             is Result.Canceled -> Unit
             is Result.Failed -> _state.update { it.copy(errorMessage = result.error) }
-            is Result.Completed -> dismissWithResult(result.linkActivityResult)
+            is Result.Completed -> linkActionManager.emit(
+                DismissWithResult(result.linkActivityResult)
+            )
         }
     }
 
@@ -158,7 +161,6 @@ internal class PaymentMethodViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -195,7 +197,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkLaunchMode = parentComponent.linkLaunchMode,
-                        dismissWithResult = dismissWithResult
+                        linkActionManager = parentComponent.linkActionManager
                     )
                 }
             }

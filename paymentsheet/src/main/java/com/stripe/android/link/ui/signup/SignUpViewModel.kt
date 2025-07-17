@@ -11,6 +11,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActionIntent.DismissWithResult
+import com.stripe.android.link.LinkActionManager
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -50,10 +52,10 @@ internal class SignUpViewModel @Inject constructor(
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val linkActionManager: LinkActionManager,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit,
     private val linkLaunchMode: LinkLaunchMode,
-    private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val useLinkConfigurationCustomerInfo =
         savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
@@ -239,10 +241,12 @@ internal class SignUpViewModel @Inject constructor(
 
         // Return the account in authentication mode if verification not required
         if (linkLaunchMode is Authentication && targetScreen != LinkScreen.Verification) {
-            dismissWithResult(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
-                    selectedPayment = null,
+            linkActionManager.emit(
+                DismissWithResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                        selectedPayment = null,
+                    )
                 )
             )
         } else {
@@ -295,7 +299,6 @@ internal class SignUpViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             navigateAndClearStack: (LinkScreen) -> Unit,
             moveToWeb: () -> Unit,
-            dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -306,10 +309,10 @@ internal class SignUpViewModel @Inject constructor(
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        linkActionManager = parentComponent.linkActionManager,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb,
                         linkLaunchMode = parentComponent.linkLaunchMode,
-                        dismissWithResult = dismissWithResult
                     )
                 }
             }

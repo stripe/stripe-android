@@ -27,6 +27,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.FakeLinkActionManager
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
@@ -795,10 +796,10 @@ internal class WalletScreenTest {
             linkAccountManager = linkAccountManager,
             logger = FakeLogger(),
             navigateAndClearStack = {},
-            dismissWithResult = {},
             navigationManager = navigationManager,
             linkLaunchMode = linkLaunchMode,
             dismissalCoordinator = dismissalCoordinator,
+            linkActionManager = FakeLinkActionManager(),
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,

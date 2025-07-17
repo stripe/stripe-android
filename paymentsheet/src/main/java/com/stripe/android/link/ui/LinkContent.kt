@@ -130,7 +130,6 @@ private fun Screens(
                 SignUpRoute(
                     navigateAndClearStack = navigateAndClearStack,
                     moveToWeb = moveToWeb,
-                    dismissWithResult = dismissWithResult
                 )
             }
         }
@@ -142,7 +141,6 @@ private fun Screens(
             UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId,
                 billingDetailsUpdateFlow = backStackEntry.billingDetailsUpdateFlow(),
-                dismissWithResult = dismissWithResult
             )
         }
 
@@ -156,7 +154,6 @@ private fun Screens(
                     changeEmail = changeEmail,
                     navigateAndClearStack = navigateAndClearStack,
                     goBack = goBack,
-                    dismissWithResult = dismissWithResult
                 )
             }
         }
@@ -168,7 +165,6 @@ private fun Screens(
                 navigateAndClearStack = navigateAndClearStack,
                 showBottomSheetContent = showBottomSheetContent,
                 hideBottomSheetContent = hideBottomSheetContent,
-                dismissWithResult = dismissWithResult,
                 onLogoutClicked = onLogoutClicked,
             )
         }
@@ -177,7 +173,6 @@ private fun Screens(
             val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
             PaymentMethodRoute(
                 linkAccount = linkAccount,
-                dismissWithResult = dismissWithResult,
             )
         }
     }
@@ -187,14 +182,12 @@ private fun Screens(
 private fun SignUpRoute(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     moveToWeb: () -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
-            dismissWithResult = dismissWithResult
         )
     }
     SignUpScreen(
@@ -208,7 +201,6 @@ private fun VerificationRoute(
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     changeEmail: () -> Unit,
     goBack: () -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
         VerificationViewModel.factory(
@@ -220,7 +212,6 @@ private fun VerificationRoute(
                 navigateAndClearStack(LinkScreen.Wallet)
             },
             onChangeEmailClicked = changeEmail,
-            dismissWithResult = dismissWithResult
         )
     }
     VerificationScreen(viewModel)
@@ -230,14 +221,12 @@ private fun VerificationRoute(
 private fun UpdateCardRoute(
     paymentDetailsId: String,
     billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
-    dismissWithResult: (LinkActivityResult) -> Unit
 ) {
     val viewModel: UpdateCardScreenViewModel = linkViewModel { parentComponent ->
         UpdateCardScreenViewModel.factory(
             parentComponent = parentComponent,
             paymentDetailsId = paymentDetailsId,
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
-            dismissWithResult = dismissWithResult
         )
     }
     UpdateCardScreen(
@@ -248,13 +237,11 @@ private fun UpdateCardRoute(
 @Composable
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
-    dismissWithResult: (LinkActivityResult) -> Unit,
 ) {
     val viewModel: PaymentMethodViewModel = linkViewModel { parentComponent ->
         PaymentMethodViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
-            dismissWithResult = dismissWithResult
         )
     }
     PaymentMethodScreen(
@@ -266,7 +253,6 @@ private fun PaymentMethodRoute(
 private fun WalletRoute(
     linkAccount: LinkAccount,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
     onLogoutClicked: () -> Unit,
@@ -275,8 +261,7 @@ private fun WalletRoute(
         WalletViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
-            navigateAndClearStack = navigateAndClearStack,
-            dismissWithResult = dismissWithResult
+            navigateAndClearStack = navigateAndClearStack
         )
     }
     WalletScreen(
