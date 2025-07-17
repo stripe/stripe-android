@@ -45,7 +45,7 @@ internal interface OnrampComponent {
         ): Builder
 
         @BindsInstance
-        fun onRampCallbacks(onRampCallbacks: OnrampCallbacks): Builder
+        fun onrampCallbacks(onrampCallbacks: OnrampCallbacks): Builder
 
         fun build(): OnrampComponent
     }
