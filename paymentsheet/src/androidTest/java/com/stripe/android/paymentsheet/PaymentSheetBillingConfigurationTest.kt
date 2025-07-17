@@ -233,6 +233,7 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
+        page.assertIsOnFormPage()
         page.replaceText("123 Main Street", "123 Main Road")
         page.fillExpirationDate("12/34")
 
@@ -320,5 +321,6 @@ internal class PaymentSheetBillingConfigurationTest {
         }
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("cashapp", "Cash App Pay")
     }
 }

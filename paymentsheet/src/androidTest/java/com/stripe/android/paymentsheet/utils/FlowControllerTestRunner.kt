@@ -37,6 +37,12 @@ internal class FlowControllerTestRunnerContext(
         activityLaunchObserver.awaitLaunch()
     }
 
+    suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
+        val paymentOption = configureCallbackTurbine.awaitItem()
+        assertThat(paymentOption?.label).endsWith(label)
+        assertThat(paymentOption?.paymentMethodType).isEqualTo(paymentMethodType)
+    }
+
     /**
      * Normally we know a test succeeds when it calls [PaymentSheetResultCallback], but some tests
      * succeed based on other criteria. In these cases, call this method to manually mark a test as

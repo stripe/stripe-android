@@ -93,6 +93,8 @@ internal class CustomPaymentMethodsTest {
             )
 
             page.clickPrimaryButton()
+
+            context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
         }
     }
 
@@ -170,6 +172,8 @@ internal class CustomPaymentMethodsTest {
             page.fillOutBillingCollectionDetails()
 
             page.clickPrimaryButton()
+
+            context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
         }
     }
 
@@ -236,6 +240,8 @@ internal class CustomPaymentMethodsTest {
             )
 
             page.clickPrimaryButton()
+
+            context.consumePaymentOptionEventForFlowController("cpmt_123", "TestPay")
         }
     }
 
