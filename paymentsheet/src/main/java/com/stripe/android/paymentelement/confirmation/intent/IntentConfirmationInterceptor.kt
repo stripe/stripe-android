@@ -639,6 +639,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.Link -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.SepaDebit -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.BacsDebit, null -> false
         }
 

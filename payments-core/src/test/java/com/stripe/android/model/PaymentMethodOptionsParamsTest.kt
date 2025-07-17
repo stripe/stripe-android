@@ -51,4 +51,42 @@ class PaymentMethodOptionsParamsTest {
                 .toParamMap()
         ).isEmpty()
     }
+
+    @Test
+    fun sepaDebitToParamMap_withSetupFutureUsage_shouldIncludeSetupFutureUsage() {
+        assertThat(
+            PaymentMethodOptionsParams.SepaDebit(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "sepa_debit" to mapOf(
+                    "setup_future_usage" to "off_session"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun sepaDebitToParamMap_withNoData_shouldHaveEmptyParams() {
+        assertThat(
+            PaymentMethodOptionsParams.SepaDebit()
+                .toParamMap()
+        ).isEmpty()
+    }
+
+    @Test
+    fun sepaDebitToParamMap_withSetupFutureUsageOnSession_shouldIncludeSetupFutureUsage() {
+        assertThat(
+            PaymentMethodOptionsParams.SepaDebit(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "sepa_debit" to mapOf(
+                    "setup_future_usage" to "on_session"
+                )
+            )
+        )
+    }
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.testTag
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -75,11 +76,13 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
 }
 
 internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
-    paymentMethodCode: PaymentMethodCode
+    paymentMethodCode: PaymentMethodCode,
+    setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
         fieldValuePairs = fieldValuePairs,
         code = paymentMethodCode,
+        setupFutureUsage = setupFutureUsage,
     )
 }
 
@@ -96,16 +99,16 @@ internal fun FormFieldValues.transformToPaymentSelection(
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection {
+    val setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
+        paymentMethodMetadata.hasIntentToSetup(PaymentMethod.Type.Card.code)
+    )
+
     val params = transformToPaymentMethodCreateParams(paymentMethod.code, paymentMethodMetadata)
-    val options = transformToPaymentMethodOptionsParams(paymentMethod.code)
+    val options = transformToPaymentMethodOptionsParams(paymentMethod.code, setupFutureUsage)
     val extras = transformToExtraParams(paymentMethod.code)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {
         PaymentSelection.New.Card(
-            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = userRequestedReuse.getSetupFutureUseValue(
-                    paymentMethodMetadata.hasIntentToSetup(PaymentMethod.Type.Card.code)
-                )
-            ),
+            paymentMethodOptionsParams = options,
             paymentMethodCreateParams = params,
             paymentMethodExtraParams = extras,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),

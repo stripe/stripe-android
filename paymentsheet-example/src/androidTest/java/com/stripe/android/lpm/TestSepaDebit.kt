@@ -4,6 +4,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymen
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
@@ -40,7 +42,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
     @Test
     fun testSepaDebit() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters,
+            testParameters = testParameters.copy(
+                saveForFutureUseCheckboxVisible = true,
+            ),
         ) {
             fillOutIban()
         }
@@ -73,7 +77,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
     @Test
     fun testSepaDebitInCustomFlow() {
         testDriver.confirmCustom(
-            testParameters = testParameters,
+            testParameters = testParameters.copy(
+                saveForFutureUseCheckboxVisible = true,
+            ),
             populateCustomLpmFields = {
                 fillOutIban()
             }
@@ -84,6 +90,35 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 )
             }
         }
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    @Test
+    fun testSavedWithPaymentIntentAndCheckbox() {
+        val testParameters = testParameters.copy(
+            saveForFutureUseCheckboxVisible = true,
+            saveCheckboxValue = true,
+        )
+
+        val state = testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters,
+            populateCustomLpmFields = {
+                fillOutIban()
+            },
+        )
+
+        testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
+            customerId = state?.asPaymentState()?.customerConfig?.id,
+            testParameters = testParameters,
+            beforeBuyAction = { selectors ->
+                selectors.composeTestRule.waitUntilExactlyOneExists(
+                    matcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                        .and(isSelected())
+                        .and(hasText(IBAN.takeLast(4), substring = true)),
+                    timeoutMillis = 5000L
+                )
+            },
+        )
     }
 
     @Test
@@ -143,9 +178,11 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
         )
         rules.compose.onNodeWithText("IBAN").apply {
-            performTextInput(
-                "DE89370400440532013000"
-            )
+            performTextInput(IBAN)
         }
+    }
+
+    private companion object {
+        const val IBAN = "DE89370400440532013000"
     }
 }

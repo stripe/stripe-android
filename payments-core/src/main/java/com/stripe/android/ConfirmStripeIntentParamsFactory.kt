@@ -158,6 +158,7 @@ private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraPa
     return when (this) {
         is PaymentMethodExtraParams.Card -> this.setAsDefault
         is PaymentMethodExtraParams.USBankAccount -> this.setAsDefault
+        is PaymentMethodExtraParams.SepaDebit -> this.setAsDefault
         else -> null
     }
 }
