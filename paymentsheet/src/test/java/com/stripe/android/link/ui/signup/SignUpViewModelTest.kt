@@ -9,6 +9,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -23,6 +25,7 @@ import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
@@ -397,7 +400,6 @@ internal class SignUpViewModelTest {
 
     @Test
     fun `When in Authentication mode and account is fetched then dismissWithResult is called`() = runTest(dispatcher) {
-        val dismissResults = mutableListOf<LinkActivityResult>()
         val linkAuth = FakeLinkAuth()
         val linkAccount = LinkAccount(
             mockConsumerSessionWithVerificationSession(
@@ -407,17 +409,17 @@ internal class SignUpViewModelTest {
         )
         linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
+        val linkActions = createTestLinkActions()
         val viewModel = createViewModel(
             linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             },
-            dismissWithResult = { result ->
-                dismissResults.add(result)
-            }
+            linkActions = linkActions
         )
 
         // Override the linkLaunchMode to Authentication mode
+        val authLinkActions = createTestLinkActions()
         val authViewModel = SignUpViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAuth = linkAuth,
@@ -426,23 +428,23 @@ internal class SignUpViewModelTest {
             },
             logger = FakeLogger(),
             savedStateHandle = SavedStateHandle(),
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkActions = authLinkActions,
             navigateAndClearStack = {},
             moveToWeb = {},
-            dismissalCoordinator = RealLinkDismissalCoordinator(),
             linkLaunchMode = LinkLaunchMode.Authentication,
-            dismissWithResult = { result ->
-                dismissResults.add(result)
-            }
         )
 
-        authViewModel.emailController.onRawValueChange("test@example.com")
-        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        authLinkActions.test {
+            authViewModel.emailController.onRawValueChange("test@example.com")
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        assertThat(dismissResults).hasSize(1)
-        assertThat(dismissResults[0]).isInstanceOf(LinkActivityResult.Completed::class.java)
-        val completedResult = dismissResults[0] as LinkActivityResult.Completed
-        assertThat(completedResult.selectedPayment).isNull()
-        assertThat(completedResult.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+            val emittedAction = awaitItem() as LinkAction.DismissWithResult
+            assertThat(emittedAction.result).isInstanceOf(LinkActivityResult.Completed::class.java)
+            val completedResult = emittedAction.result as LinkActivityResult.Completed
+            assertThat(completedResult.selectedPayment).isNull()
+            assertThat(completedResult.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+        }
     }
 
     @Test
@@ -651,7 +653,6 @@ internal class SignUpViewModelTest {
     @Test
     fun `When lookup succeeds with completed signup in Authentication mode then dismisses with account`() =
         runTest(dispatcher) {
-            val dismissResults = mutableListOf<LinkActivityResult>()
             val linkAuth = FakeLinkAuth()
             val signupSession = ConsumerSession.VerificationSession(
                 type = ConsumerSession.VerificationSession.SessionType.SignUp,
@@ -664,23 +665,26 @@ internal class SignUpViewModelTest {
             )
             linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
+            val linkActions = createTestLinkActions()
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
                 linkLaunchMode = LinkLaunchMode.Authentication,
-                dismissWithResult = { result -> dismissResults.add(result) }
+                linkActions = linkActions
             )
 
-            viewModel.emailController.onRawValueChange("test@example.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+            linkActions.test {
+                viewModel.emailController.onRawValueChange("test@example.com")
+                advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            val result = dismissResults[0] as LinkActivityResult.Completed
-            assertThat(result.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+                val emittedAction = awaitItem() as LinkAction.DismissWithResult
+                val result = emittedAction.result as LinkActivityResult.Completed
+                assertThat(result.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+            }
         }
 
     @Test
     fun `When lookup succeeds with verified account in Authentication mode then dismisses with account`() =
         runTest(dispatcher) {
-            val dismissResults = mutableListOf<LinkActivityResult>()
             val linkAuth = FakeLinkAuth()
             val linkAccount = LinkAccount(
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
@@ -689,22 +693,25 @@ internal class SignUpViewModelTest {
             )
             linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
+            val linkActions = createTestLinkActions()
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
                 linkLaunchMode = LinkLaunchMode.Authentication,
-                dismissWithResult = { result -> dismissResults.add(result) }
+                linkActions = linkActions
             )
 
-            viewModel.emailController.onRawValueChange("test@example.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+            linkActions.test {
+                viewModel.emailController.onRawValueChange("test@example.com")
+                advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            assertThat(dismissResults[0]).isInstanceOf(LinkActivityResult.Completed::class.java)
+                val emittedAction = awaitItem() as LinkAction.DismissWithResult
+                assertThat(emittedAction.result).isInstanceOf(LinkActivityResult.Completed::class.java)
+            }
         }
 
     @Test
     fun `When lookup succeeds with unverified account in Authentication mode then navigates to Verification`() =
         runTest(dispatcher) {
-            val dismissResults = mutableListOf<LinkActivityResult>()
             val screens = arrayListOf<LinkScreen>()
             val linkAuth = FakeLinkAuth()
             val linkAccount = LinkAccount(
@@ -714,18 +721,21 @@ internal class SignUpViewModelTest {
             )
             linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
+            val linkActions = createTestLinkActions()
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
                 linkLaunchMode = LinkLaunchMode.Authentication,
                 navigateAndClearStack = { screen -> screens.add(screen) },
-                dismissWithResult = { result -> dismissResults.add(result) }
+                linkActions = linkActions
             )
 
-            viewModel.emailController.onRawValueChange("test@example.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+            linkActions.test {
+                viewModel.emailController.onRawValueChange("test@example.com")
+                advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            assertThat(screens).containsExactly(LinkScreen.Verification)
-            assertThat(dismissResults).isEmpty()
+                assertThat(screens).containsExactly(LinkScreen.Verification)
+                expectNoEvents()
+            }
         }
 
     @Test
@@ -813,10 +823,10 @@ internal class SignUpViewModelTest {
         },
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
+        linkActions: LinkActions = createTestLinkActions(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {},
-        dismissWithResult: (LinkActivityResult) -> Unit = {},
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): SignUpViewModel {
         return SignUpViewModel(
@@ -833,11 +843,11 @@ internal class SignUpViewModelTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = savedStateHandle,
+            dismissalCoordinator = dismissalCoordinator,
+            linkActions = linkActions,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
-            dismissalCoordinator = dismissalCoordinator,
             linkLaunchMode = linkLaunchMode,
-            dismissWithResult = dismissWithResult
         )
     }
 

@@ -9,6 +9,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -61,6 +62,7 @@ internal interface NativeLinkComponent {
     val viewModel: LinkActivityViewModel
     val eventReporter: EventReporter
     val navigationManager: NavigationManager
+    val linkActions: LinkActions
     val dismissalCoordinator: LinkDismissalCoordinator
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher

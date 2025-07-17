@@ -11,6 +11,8 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -63,8 +65,8 @@ internal class WalletViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val linkLaunchMode: LinkLaunchMode,
     private val dismissalCoordinator: LinkDismissalCoordinator,
-    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
-    private val dismissWithResult: (LinkActivityResult) -> Unit
+    private val linkActions: LinkActions,
+    private val navigateAndClearStack: (route: LinkScreen) -> Unit
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
 
@@ -175,10 +177,12 @@ internal class WalletViewModel @Inject constructor(
 
     private fun onFatal(fatalError: Throwable) {
         logger.error("WalletViewModel Fatal error: ", fatalError)
-        dismissWithResult(
-            LinkActivityResult.Failed(
-                error = fatalError,
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+        linkActions.tryEmit(
+            LinkAction.DismissWithResult(
+                LinkActivityResult.Failed(
+                    error = fatalError,
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                )
             )
         )
     }
@@ -305,16 +309,20 @@ internal class WalletViewModel @Inject constructor(
                 }
             }
             is CompleteLinkFlow.Result.Completed -> {
-                dismissWithResult(result.linkActivityResult)
+                linkActions.tryEmit(
+                    LinkAction.DismissWithResult(result.linkActivityResult)
+                )
             }
         }
     }
 
     fun onPayAnotherWayClicked() {
-        dismissWithResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.PayAnotherWay,
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+        linkActions.tryEmit(
+            LinkAction.DismissWithResult(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.PayAnotherWay,
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                )
             )
         )
     }
@@ -544,8 +552,7 @@ internal class WalletViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            navigateAndClearStack: (route: LinkScreen) -> Unit,
-            dismissWithResult: (LinkActivityResult) -> Unit
+            navigateAndClearStack: (route: LinkScreen) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -564,10 +571,10 @@ internal class WalletViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         navigationManager = parentComponent.navigationManager,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
+                        linkActions = parentComponent.linkActions,
                         linkAccount = linkAccount,
                         navigateAndClearStack = navigateAndClearStack,
-                        linkLaunchMode = parentComponent.linkLaunchMode,
-                        dismissWithResult = dismissWithResult
+                        linkLaunchMode = parentComponent.linkLaunchMode
                     )
                 }
             }

@@ -58,7 +58,6 @@ internal class LinkContentScreenshotTest {
                         hideBottomSheetContent = {},
                         handleViewAction = {},
                         navigate = { _, _ -> },
-                        dismissWithResult = {},
                         getLinkAccount = { null },
                         onBackPressed = {},
                         moveToWeb = {},

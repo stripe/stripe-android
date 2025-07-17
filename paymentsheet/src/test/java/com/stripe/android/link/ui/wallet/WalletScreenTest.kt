@@ -36,6 +36,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -795,10 +796,10 @@ internal class WalletScreenTest {
             linkAccountManager = linkAccountManager,
             logger = FakeLogger(),
             navigateAndClearStack = {},
-            dismissWithResult = {},
             navigationManager = navigationManager,
             linkLaunchMode = linkLaunchMode,
             dismissalCoordinator = dismissalCoordinator,
+            linkActions = createTestLinkActions(),
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,

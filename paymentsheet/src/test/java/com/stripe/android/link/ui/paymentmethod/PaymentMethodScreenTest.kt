@@ -26,6 +26,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.link.ui.paymentmenthod.PAYMENT_METHOD_ERROR_TAG
@@ -188,7 +189,7 @@ internal class PaymentMethodScreenTest {
             formHelper = formHelper,
             dismissalCoordinator = dismissalCoordinator,
             linkLaunchMode = LinkLaunchMode.Full,
-            dismissWithResult = {}
+            linkActions = createTestLinkActions()
         )
     }
 

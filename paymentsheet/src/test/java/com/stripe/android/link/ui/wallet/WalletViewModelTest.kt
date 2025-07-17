@@ -13,6 +13,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
+import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -27,6 +29,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -103,26 +106,25 @@ class WalletViewModelTest {
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         linkAccountManager.listPaymentDetailsResult = Result.failure(error)
 
-        var linkActivityResult: LinkActivityResult? = null
-        fun dismissWithResult(result: LinkActivityResult) {
-            linkActivityResult = result
-        }
-
         val logger = FakeLogger()
+        val linkActions = createTestLinkActions()
 
-        createViewModel(
-            linkAccountManager = linkAccountManager,
-            logger = logger,
-            dismissWithResult = ::dismissWithResult
-        )
-
-        assertThat(linkActivityResult)
-            .isEqualTo(
-                LinkActivityResult.Failed(
-                    error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
-                )
+        linkActions.test {
+            createViewModel(
+                linkAccountManager = linkAccountManager,
+                logger = logger,
+                linkActions = linkActions
             )
+
+            val emittedAction = awaitItem() as LinkAction.DismissWithResult
+            assertThat(emittedAction.result)
+                .isEqualTo(
+                    LinkActivityResult.Failed(
+                        error = error,
+                        linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                    )
+                )
+        }
         assertThat(logger.errorLogs).isEqualTo(listOf("WalletViewModel Fatal error: " to error))
     }
 
@@ -497,34 +499,36 @@ class WalletViewModelTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
 
         var result: LinkActivityResult? = null
+        val linkActions = createTestLinkActions()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
-            dismissWithResult = {
-                result = it
-            }
+            linkActions = linkActions
         )
         viewModel.onItemSelected(validCard)
 
-        viewModel.onPrimaryButtonClicked()
+        linkActions.test {
+            viewModel.onPrimaryButtonClicked()
 
-        assertThat(linkAccountManager.updatePaymentDetailsCalls).isEmpty()
+            assertThat(linkAccountManager.updatePaymentDetailsCalls).isEmpty()
 
-        assertThat(linkConfirmationHandler.calls).containsExactly(
-            FakeLinkConfirmationHandler.Call(
-                paymentDetails = validCard,
-                cvc = null,
-                linkAccount = TestFactory.LINK_ACCOUNT
-            )
-        )
-
-        assertThat(result)
-            .isEqualTo(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
-                    selectedPayment = null
+            assertThat(linkConfirmationHandler.calls).containsExactly(
+                FakeLinkConfirmationHandler.Call(
+                    paymentDetails = validCard,
+                    cvc = null,
+                    linkAccount = TestFactory.LINK_ACCOUNT
                 )
             )
+
+            val emittedAction = awaitItem() as LinkAction.DismissWithResult
+            assertThat(emittedAction.result)
+                .isEqualTo(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
+                        selectedPayment = null
+                    )
+                )
+        }
     }
 
     @Test
@@ -540,20 +544,21 @@ class WalletViewModelTest {
         linkConfirmationHandler.confirmResult = confirmationResult
 
         var result: LinkActivityResult? = null
+        val linkActions = createTestLinkActions()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
-            dismissWithResult = {
-                result = it
-            }
+            linkActions = linkActions
         )
         viewModel.onItemSelected(validCard)
 
-        viewModel.onPrimaryButtonClicked()
+        linkActions.test {
+            viewModel.onPrimaryButtonClicked()
 
-        assertThat(viewModel.uiState.value.errorMessage).isEqualTo(confirmationResult.message)
-        assertThat(viewModel.uiState.value.isProcessing).isFalse()
-        assertThat(result).isNull()
+            assertThat(viewModel.uiState.value.errorMessage).isEqualTo(confirmationResult.message)
+            assertThat(viewModel.uiState.value.isProcessing).isFalse()
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -569,19 +574,20 @@ class WalletViewModelTest {
         linkConfirmationHandler.confirmResult = confirmationResult
 
         var result: LinkActivityResult? = null
+        val linkActions = createTestLinkActions()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
-            dismissWithResult = {
-                result = it
-            }
+            linkActions = linkActions
         )
         viewModel.onItemSelected(validCard)
 
-        viewModel.onPrimaryButtonClicked()
+        linkActions.test {
+            viewModel.onPrimaryButtonClicked()
 
-        assertThat(viewModel.uiState.value.errorMessage).isNull()
-        assertThat(result).isNull()
+            assertThat(viewModel.uiState.value.errorMessage).isNull()
+            expectNoEvents()
+        }
     }
 
     @Test
@@ -855,24 +861,23 @@ class WalletViewModelTest {
             passthroughModeEnabled = false,
         )
 
-        var linkActivityResult: LinkActivityResult? = null
-        fun dismissWithResult(result: LinkActivityResult) {
-            linkActivityResult = result
-        }
-
+        val linkActions = createTestLinkActions()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             configuration = configuration,
             linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
                 selectedPayment = null,
             ),
-            dismissWithResult = ::dismissWithResult,
+            linkActions = linkActions
         )
 
-        viewModel.onPrimaryButtonClicked()
+        linkActions.test {
+            viewModel.onPrimaryButtonClicked()
 
-        val completedResult = linkActivityResult as? LinkActivityResult.Completed
-        assertThat(completedResult?.shippingAddress).isEqualTo(CONSUMER_SHIPPING_ADDRESSES.addresses.first())
+            val emittedAction = awaitItem() as LinkAction.DismissWithResult
+            val completedResult = emittedAction.result as? LinkActivityResult.Completed
+            assertThat(completedResult?.shippingAddress).isEqualTo(CONSUMER_SHIPPING_ADDRESSES.addresses.first())
+        }
     }
 
     @Test
@@ -895,7 +900,6 @@ class WalletViewModelTest {
             linkAccountManager = linkAccountManager,
             configuration = configuration,
             linkLaunchMode = LinkLaunchMode.Full,
-            dismissWithResult = ::dismissWithResult,
         )
 
         viewModel.onPrimaryButtonClicked()
@@ -926,7 +930,6 @@ class WalletViewModelTest {
             linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
                 selectedPayment = null,
             ),
-            dismissWithResult = ::dismissWithResult,
         )
 
         viewModel.onPrimaryButtonClicked()
@@ -942,8 +945,8 @@ class WalletViewModelTest {
         logger: Logger = FakeLogger(),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
+        linkActions: LinkActions = createTestLinkActions(),
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
-        dismissWithResult: (LinkActivityResult) -> Unit = {},
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full
     ): WalletViewModel {
@@ -953,9 +956,9 @@ class WalletViewModelTest {
             linkAccountManager = linkAccountManager,
             logger = logger,
             navigateAndClearStack = navigateAndClearStack,
-            dismissWithResult = dismissWithResult,
             navigationManager = navigationManager,
             dismissalCoordinator = dismissalCoordinator,
+            linkActions = linkActions,
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,

@@ -63,6 +63,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
     private val navigationManager: NavigationManager,
+    private val linkActions: LinkActions,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
 ) : ViewModel(), DefaultLifecycleObserver {
@@ -88,12 +89,19 @@ internal class LinkActivityViewModel @Inject constructor(
     val canDismissSheet: Boolean
         get() = activityRetainedComponent.dismissalCoordinator.canDismiss
 
-    fun handleViewAction(action: LinkAction) {
-        when (action) {
-            LinkAction.BackPressed -> handleBackPressed()
-            LinkAction.LogoutClicked -> handleLogoutClicked()
+    init {
+        viewModelScope.launch {
+            linkActions.collect { action ->
+                when (action) {
+                    is LinkAction.DismissWithResult -> _result.emit(action.result)
+                    LinkAction.BackPressed -> handleBackPressed()
+                    LinkAction.LogoutClicked -> handleLogoutClicked()
+                }
+            }
         }
     }
+
+    fun handleViewAction(action: LinkAction) = linkActions.tryEmit(action)
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {
