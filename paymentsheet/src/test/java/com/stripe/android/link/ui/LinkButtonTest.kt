@@ -26,7 +26,11 @@ class LinkButtonTest {
     @Test
     fun signedInButton_hasUsefulContentDescription() {
         composeRule.setContent {
-            LinkButton(email = "email@email.com", enabled = true, onClick = {})
+            LinkButton(
+                state = LinkButtonState.Email("email@email.com"),
+                enabled = true,
+                onClick = {}
+            )
         }
 
         composeRule.onNodeWithTag(
@@ -39,7 +43,11 @@ class LinkButtonTest {
     @Test
     fun signedOutButton_hasUsefulContentDescription() {
         composeRule.setContent {
-            LinkButton(email = null, enabled = true, onClick = {})
+            LinkButton(
+                state = LinkButtonState.Plain,
+                enabled = true,
+                onClick = {}
+            )
         }
 
         composeRule.onNodeWithTag(

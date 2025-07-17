@@ -7,6 +7,23 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
+ * Displayable payment details for a Link user.
+ */
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Serializable
+data class DisplayablePaymentDetails(
+    @SerialName("default_card_brand")
+    val defaultCardBrand: String? = null,
+    @SerialName("default_payment_type")
+    val defaultPaymentType: String? = null,
+    @SerialName("last_4")
+    val last4: String? = null,
+    @SerialName("number_of_saved_payment_details")
+    val numberOfSavedPaymentDetails: Long? = null,
+) : StripeModel
+
+/**
  * The result of a call to retrieve the [ConsumerSession] for a Link user.
  */
 @Parcelize
@@ -21,4 +38,6 @@ data class ConsumerSessionLookup(
     val errorMessage: String? = null,
     @SerialName("publishable_key")
     val publishableKey: String? = null,
+    @SerialName("displayable_payment_details")
+    val displayablePaymentDetails: DisplayablePaymentDetails? = null,
 ) : StripeModel

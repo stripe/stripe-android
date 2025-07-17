@@ -3,14 +3,17 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.appendInlineContent
@@ -23,11 +26,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.invisibleToUser
@@ -45,6 +50,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
@@ -72,26 +78,74 @@ internal const val LinkButtonTestTag = "LinkButtonTestTag"
 @Preview
 @Composable
 private fun LinkEmailButton() {
-    LinkButton(
-        enabled = false,
-        email = "theop@email.com",
-        onClick = {}
-    )
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.Email("theop@email.com"),
+            enabled = false,
+            onClick = {}
+        )
+    }
 }
 
 @Preview(locale = "ru", fontScale = 1.5f)
 @Composable
 private fun LinkNoEmailButton() {
-    LinkButton(
-        enabled = true,
-        email = null,
-        onClick = {}
-    )
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.Plain,
+            enabled = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LinkPaymentMethodButton() {
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.DefaultPayment(
+                cardBrand = CardBrand.Visa,
+                last4 = "4242",
+                numberOfSavedPaymentDetails = 5L
+            ),
+            enabled = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LinkEmailOnlyButton() {
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.Email("user@example.com"),
+            enabled = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LinkMasterCardButton() {
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.DefaultPayment(
+                cardBrand = CardBrand.MasterCard,
+                last4 = null,
+                numberOfSavedPaymentDetails = 2L
+            ),
+            enabled = true,
+            onClick = {}
+        )
+    }
 }
 
 @Composable
 internal fun LinkButton(
-    email: String?,
+    state: LinkButtonState,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -125,13 +179,49 @@ internal fun LinkButton(
                     bottom = LinkButtonVerticalPadding
                 )
             ) {
-                if (email == null) {
-                    SignedOutButtonContent()
-                } else {
-                    SignedInButtonContent(email = email)
+                when (state) {
+                    is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
+                        cardBrand = state.cardBrand,
+                        last4 = state.last4
+                    )
+
+                    is LinkButtonState.Email -> SignedInButtonContent(state.email)
+                    LinkButtonState.Plain -> SignedOutButtonContent()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PaymentDetailsButtonContent(
+    cardBrand: CardBrand,
+    last4: String?
+) {
+    val color = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        LinkIconAndDivider()
+
+        Image(
+            painter = painterResource(cardBrand.icon),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            colorFilter = null
+        )
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Text(
+            text = last4 ?: "••••",
+            color = color,
+            style = LinkTheme.typography.bodyEmphasized,
+            fontSize = LINK_EMAIL_FONT_SIZE.sp,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
+            maxLines = 1
+        )
     }
 }
 

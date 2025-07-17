@@ -2,6 +2,7 @@ package com.stripe.android.link.model
 
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -13,6 +14,7 @@ import kotlinx.parcelize.Parcelize
 internal class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
+    val displayablePaymentDetails: DisplayablePaymentDetails? = null,
 ) : Parcelable {
 
     @IgnoredOnParcel

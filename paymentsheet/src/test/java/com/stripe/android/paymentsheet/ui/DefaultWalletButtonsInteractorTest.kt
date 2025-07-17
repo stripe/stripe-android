@@ -10,6 +10,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -193,7 +194,11 @@ class DefaultWalletButtonsInteractorTest {
         )
 
         interactor.handleViewAction(
-            WalletButtonsInteractor.ViewAction.OnButtonPressed(WalletButtonsInteractor.WalletButton.Link(email = null))
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(
+                WalletButtonsInteractor.WalletButton.Link(
+                    state = LinkButtonState.Plain,
+                )
+            )
         )
 
         val call = errorReporter.awaitCall()
@@ -218,7 +223,9 @@ class DefaultWalletButtonsInteractorTest {
         )
 
         interactor.handleViewAction(
-            WalletButtonsInteractor.ViewAction.OnButtonPressed(WalletButtonsInteractor.WalletButton.Link(email = null))
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(
+                WalletButtonsInteractor.WalletButton.Link(state = LinkButtonState.Plain)
+            )
         )
 
         val call = errorReporter.awaitCall()
@@ -272,7 +279,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            assertThat(button.email).isNull()
+            assertThat(button.state).isInstanceOf<LinkButtonState.Plain>()
         }
     }
 
@@ -293,7 +300,8 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            assertThat(button.email).isEqualTo("email@email.com")
+            val buttonState = button.state as LinkButtonState.Email
+            assertThat(buttonState.email).isEqualTo("email@email.com")
         }
     }
 

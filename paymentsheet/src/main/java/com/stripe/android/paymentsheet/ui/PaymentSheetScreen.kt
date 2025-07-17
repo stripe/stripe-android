@@ -56,7 +56,6 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonContainerBinding
@@ -98,7 +97,7 @@ internal fun PaymentSheetScreen(
 
 @Composable
 internal fun PaymentSheetScreen(
-    viewModel: PaymentOptionsViewModel,
+    viewModel: BaseSheetViewModel,
 ) {
     val scrollState = rememberScrollState()
     PaymentSheetScreen(viewModel, scrollState) {
@@ -432,7 +431,7 @@ internal fun Wallet(
             }
 
             LinkButton(
-                email = it.email,
+                state = it.state,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )
