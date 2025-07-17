@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [CHANGED][11151](https://github.com/stripe/stripe-android/pull/11151) Remove intrinsic top and bottom padding from `EmbeddedPaymentElement.Content`.
+
 ## 21.20.2 - 2025-07-09
 
 ### PaymentSheet

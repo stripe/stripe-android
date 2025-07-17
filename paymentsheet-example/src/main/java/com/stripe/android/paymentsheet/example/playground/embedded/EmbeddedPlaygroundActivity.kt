@@ -365,7 +365,9 @@ internal class EmbeddedPlaygroundActivity :
                     }
                 }
 
-                embeddedPaymentElement.Content()
+                Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
+                    embeddedPaymentElement.Content()
+                }
             }
         }
         data class Failed(val message: String) : LoadingState() {

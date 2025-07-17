@@ -2,12 +2,10 @@ package com.stripe.android.paymentelement.embedded.content
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
@@ -44,13 +42,11 @@ internal data class EmbeddedContent(
         StripeTheme {
             Column(
                 modifier = Modifier
-                    .padding(top = 8.dp)
                     .animateContentSize()
             ) {
                 PaymentMethodEmbeddedLayoutUI(
                     interactor = interactor,
                     embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                    modifier = Modifier.padding(bottom = 8.dp),
                     rowStyle = rowStyle
                 )
             }
