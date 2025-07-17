@@ -68,8 +68,7 @@ internal data class PaymentMethodMetadata(
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
-    val linkEnableDisplayableDefaultValuesInEce: Boolean = false
+    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?
 ) : Parcelable {
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
@@ -325,8 +324,7 @@ internal data class PaymentMethodMetadata(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 elementsSessionId = elementsSession.elementsSessionId,
-                shopPayConfiguration = configuration.shopPayConfiguration,
-                linkEnableDisplayableDefaultValuesInEce = elementsSession.linkEnableDisplayableDefaultValuesInEce
+                shopPayConfiguration = configuration.shopPayConfiguration
             )
         }
 

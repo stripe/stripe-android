@@ -158,10 +158,12 @@ internal class DefaultWalletButtonsInteractor(
                         val enableDefaultValuesInECE =
                             arguments.paymentMethodMetadata.linkState?.configuration
                                 ?.enableDisplayableDefaultValuesInEce == true
-                        WalletButton.Link(state = LinkButtonState.from(
-                            email = linkEmail,
-                            paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
-                                ?.takeIf { enableDefaultValuesInECE })
+                        WalletButton.Link(
+                            state = LinkButtonState.from(
+                                email = linkEmail,
+                                paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
+                                    ?.takeIf { enableDefaultValuesInECE }
+                            )
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
