@@ -286,17 +286,18 @@ internal class LinkActivityViewModel @Inject constructor(
     private suspend fun updateScreenState() {
         val accountStatus = linkAccountManager.accountStatus.first()
 
-        if (linkLaunchMode is LinkLaunchMode.Authentication &&
-            (accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error) &&
-            (linkLaunchMode.existingOnly || !linkConfiguration.allowUserEmailEdits)
-        ) {
-            dismissWithResult(
-                LinkActivityResult.Failed(
-                    error = NoLinkAccountFoundException(),
-                    linkAccountUpdate = LinkAccountUpdate.None
+        if (linkLaunchMode is LinkLaunchMode.Authentication) {
+            val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
+            val cannotChangeEmails = linkLaunchMode.existingOnly || !linkConfiguration.allowUserEmailEdits
+            if (accountNotFound && cannotChangeEmails) {
+                dismissWithResult(
+                    LinkActivityResult.Failed(
+                        error = NoLinkAccountFoundException(),
+                        linkAccountUpdate = LinkAccountUpdate.None
+                    )
                 )
-            )
-            return
+                return
+            }
         }
 
         val linkAccount = linkAccountManager.linkAccountInfo.value.account

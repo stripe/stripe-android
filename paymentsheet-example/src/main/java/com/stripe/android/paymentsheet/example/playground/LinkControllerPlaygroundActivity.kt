@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
+@Suppress("LongMethod")
 internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
     private val viewModel: LinkControllerPlaygroundViewModel by viewModels()
 

@@ -347,14 +347,79 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate should return Failed result when Authentication existingOnly and account status is SignedOut`() = runTest {
+    fun `onCreate returns Failed when Authentication existingOnly and SignedOut`() = runTest {
+        testAuthenticationFailureCase(
+            accountStatus = AccountStatus.SignedOut,
+            existingOnly = true,
+            allowUserEmailEdits = true
+        )
+    }
+
+    @Test
+    fun `onCreate returns Failed result when Authentication existingOnly and account status is Error`() = runTest {
+        testAuthenticationFailureCase(
+            accountStatus = AccountStatus.Error,
+            existingOnly = true,
+            allowUserEmailEdits = true
+        )
+    }
+
+    @Test
+    fun `onCreate returns Failed when Authentication with email edits disabled and SignedOut`() = runTest {
+        testAuthenticationFailureCase(
+            accountStatus = AccountStatus.SignedOut,
+            existingOnly = false,
+            allowUserEmailEdits = false
+        )
+    }
+
+    @Test
+    fun `onCreate returns Failed when Authentication with email edits disabled and Error`() = runTest {
+        testAuthenticationFailureCase(
+            accountStatus = AccountStatus.Error,
+            existingOnly = false,
+            allowUserEmailEdits = false
+        )
+    }
+
+    @Test
+    fun `onCreate navigates to SignUp when Authentication with email edits enabled and SignedOut`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
+        val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            allowUserEmailEdits = true
+        )
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = true)
+            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = false),
+            linkConfiguration = linkConfiguration
         )
         linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        val state = vm.linkScreenState.value as ScreenState.FullScreen
+        assertEquals(state.initialDestination, LinkScreen.SignUp)
+    }
+
+    private fun testAuthenticationFailureCase(
+        accountStatus: AccountStatus,
+        existingOnly: Boolean,
+        allowUserEmailEdits: Boolean
+    ) = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            allowUserEmailEdits = allowUserEmailEdits
+        )
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.Authentication(existingOnly = existingOnly),
+            linkConfiguration = linkConfiguration
+        )
+        linkAccountManager.setAccountStatus(accountStatus)
 
         vm.result.test {
             vm.onCreate(mock())
@@ -721,6 +786,7 @@ internal class LinkActivityViewModelTest {
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         launchWeb: (LinkConfiguration) -> Unit = {},
         autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
+        linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
@@ -729,7 +795,7 @@ internal class LinkActivityViewModelTest {
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },
             linkAttestationCheck = linkAttestationCheck,
-            linkConfiguration = TestFactory.LINK_CONFIGURATION,
+            linkConfiguration = linkConfiguration,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle,
