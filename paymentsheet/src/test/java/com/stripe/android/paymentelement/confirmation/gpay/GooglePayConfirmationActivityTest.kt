@@ -92,6 +92,7 @@ internal class GooglePayConfirmationActivityTest {
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT.copy(paymentMethod = paymentMethod))
             assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
 

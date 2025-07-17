@@ -71,6 +71,7 @@ internal class IntentConfirmationDefinition(
                     intent = confirmationParameters.intent,
                     confirmationOption = confirmationOption,
                     deferredIntentConfirmationType = deferredIntentConfirmationType,
+                    completedFullPaymentFlow = nextStep.completedFullPaymentFlow,
                 )
             }
         }
