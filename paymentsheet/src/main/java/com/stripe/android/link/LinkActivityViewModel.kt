@@ -72,7 +72,9 @@ internal class LinkActivityViewModel @Inject constructor(
     private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
 
-    private val _result = MutableSharedFlow<LinkActivityResult>(extraBufferCapacity = 1)
+    // Enable replay because the result can be emitted during `onCreate` while observation occurs
+    // in the Compose UI, which is invoked after `onCreate`.
+    private val _result = MutableSharedFlow<LinkActivityResult>(replay = 1, extraBufferCapacity = 1)
     val result: SharedFlow<LinkActivityResult> = _result.asSharedFlow()
 
     val navigationFlow = navigationManager.navigationFlow
@@ -286,18 +288,17 @@ internal class LinkActivityViewModel @Inject constructor(
     private suspend fun updateScreenState() {
         val accountStatus = linkAccountManager.accountStatus.first()
 
-        if (linkLaunchMode is LinkLaunchMode.Authentication) {
-            val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
-            val cannotChangeEmails = linkLaunchMode.existingOnly || !linkConfiguration.allowUserEmailEdits
-            if (accountNotFound && cannotChangeEmails) {
-                dismissWithResult(
-                    LinkActivityResult.Failed(
-                        error = NoLinkAccountFoundException(),
-                        linkAccountUpdate = LinkAccountUpdate.None
-                    )
+        val authenticatingExistingAccount = (linkLaunchMode as? LinkLaunchMode.Authentication)?.existingOnly == true
+        val cannotChangeEmails = !linkConfiguration.allowUserEmailEdits
+        val accountNotFound = accountStatus == AccountStatus.SignedOut || accountStatus == AccountStatus.Error
+        if (accountNotFound && (authenticatingExistingAccount || cannotChangeEmails)) {
+            dismissWithResult(
+                LinkActivityResult.Failed(
+                    error = NoLinkAccountFoundException(),
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
-                return
-            }
+            )
+            return
         }
 
         val linkAccount = linkAccountManager.linkAccountInfo.value.account

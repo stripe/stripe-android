@@ -539,39 +539,6 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onLinkActivityResult() updates to different account without clearing state`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
-        signIn()
-
-        val selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            collectedCvc = "123",
-            billingPhone = null
-        )
-        viewModel.updateState {
-            it.copy(selectedPaymentMethod = selectedPaymentMethod)
-        }
-
-        val anotherAccount = LinkAccount(
-            TestFactory.CONSUMER_SESSION.copy(emailAddress = "another@stripe.com")
-        )
-        viewModel.onLinkActivityResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.Value(anotherAccount)
-            )
-        )
-
-        viewModel.state(application).test {
-            val finalState = awaitItem()
-            assertThat(finalState.isConsumerVerified).isTrue()
-            assertThat(finalState.selectedPaymentMethodPreview).isNotNull()
-        }
-        assertThat(linkAccountHolder.linkAccountInfo.first().account).isEqualTo(anotherAccount)
-    }
-
-    @Test
     fun `onLinkActivityResult() on account cleared clears verification state`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)

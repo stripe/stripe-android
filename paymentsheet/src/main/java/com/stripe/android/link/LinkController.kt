@@ -9,6 +9,7 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.link.injection.LinkControllerScope
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
@@ -134,6 +135,32 @@ class LinkController @Inject internal constructor(
         viewModel.onAuthenticateExistingConsumer(
             launcher = linkControllerCoordinator.linkActivityResultLauncher,
             email = email
+        )
+    }
+
+    /**
+     * [CRYPTO ONRAMP ONLY] Register a new Link consumer account.
+     *
+     * @param email The email address to register for the new Link consumer account.
+     * @param phone The phone number associated with the new account.
+     * @param country The country code for the new account, in ISO 3166-1 alpha-2 format.
+     * @param name The name of the consumer. Optional, can be null.
+     * @param consentAction How the user provided consent for the Link account.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun registerConsumer(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        consentAction: ConsumerSignUpConsentAction
+    ) {
+        viewModel.onRegisterConsumer(
+            email = email,
+            phone = phone,
+            country = country,
+            name = name,
+            consentAction = consentAction
         )
     }
 
@@ -356,7 +383,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Result of authenticating with Link.
+     * [CRYPTO ONRAMP ONLY] Result of authenticating with Link.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AuthenticationResult {
@@ -381,6 +408,28 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : AuthenticationResult
+    }
+
+    /**
+     * [CRYPTO ONRAMP ONLY] Result of registering a new Link consumer account.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface RegisterConsumerResult {
+
+        /**
+         * The user successfully registered a new Link consumer account.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Success : RegisterConsumerResult
+
+        /**
+         * An error occurred while registering a new Link consumer account.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : RegisterConsumerResult
     }
 
     /**
@@ -413,6 +462,14 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface AuthenticationCallback {
         fun onAuthenticationResult(result: AuthenticationResult)
+    }
+
+    /**
+     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [registerConsumer].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface RegisterConsumerCallback {
+        fun onRegisterConsumerResult(result: RegisterConsumerResult)
     }
 
     /**
@@ -455,7 +512,9 @@ class LinkController @Inject internal constructor(
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                 lookupConsumerCallback = lookupConsumerCallback,
                 createPaymentMethodCallback = createPaymentMethodCallback,
-                authenticationCallback = {} // Only for crypto onramp flows
+                // Only for crypto onramp flows
+                authenticationCallback = {},
+                registerConsumerCallback = {},
             )
         }
 
@@ -467,6 +526,7 @@ class LinkController @Inject internal constructor(
          * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
          * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
          * @param authenticationCallback Called with the result when authentication methods complete.
+         * @param registerConsumerCallback Called with the result when [registerConsumer] completes.
          *
          * @return A configured [LinkController] instance.
          */
@@ -478,6 +538,7 @@ class LinkController @Inject internal constructor(
             lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
             authenticationCallback: AuthenticationCallback,
+            registerConsumerCallback: RegisterConsumerCallback
         ): LinkController {
             val viewModelProvider = ViewModelProvider(
                 owner = activity,
@@ -493,6 +554,7 @@ class LinkController @Inject internal constructor(
                     lookupConsumerCallback = lookupConsumerCallback,
                     createPaymentMethodCallback = createPaymentMethodCallback,
                     authenticationCallback = authenticationCallback,
+                    registerConsumerCallback = registerConsumerCallback,
                 )
                 .controller
         }

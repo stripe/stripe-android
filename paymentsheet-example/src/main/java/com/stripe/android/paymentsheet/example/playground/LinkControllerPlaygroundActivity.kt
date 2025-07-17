@@ -43,6 +43,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
                     authenticationCallback = viewModel::onLinkControllerAuthentication,
+                    registerConsumerCallback = {},
                 )
             }
             LaunchedEffect(Unit) {
