@@ -162,7 +162,7 @@ private fun EmbeddedMandate(
         Mandate(
             mandateText = mandate?.resolve(),
             modifier = Modifier
-                .padding(bottom = 8.dp)
+                .padding(top = 8.dp)
                 .testTag(EMBEDDED_MANDATE_TEXT_TEST_TAG),
         )
     }
