@@ -3,7 +3,6 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -32,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.invisibleToUser
@@ -52,6 +50,7 @@ import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
 
@@ -204,11 +203,11 @@ private fun PaymentDetailsButtonContent(
     ) {
         LinkIconAndDivider()
 
-        Image(
-            painter = painterResource(cardBrand.icon),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            colorFilter = null
+        PaymentMethodIconFromResource(
+            iconRes = cardBrand.icon,
+            colorFilter = null,
+            alignment = Alignment.Center,
+            modifier = Modifier.size(24.dp)
         )
 
         Spacer(modifier = Modifier.width(4.dp))
