@@ -233,6 +233,7 @@ internal class PaymentSheetBillingConfigurationTest {
             )
         }
 
+        page.assertIsOnFormPage()
         page.replaceText("123 Main Street", "123 Main Road")
         page.fillExpirationDate("12/34")
 
