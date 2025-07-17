@@ -117,7 +117,7 @@ internal class OnrampCoordinator @Inject internal constructor(
      */
     @Suppress("UnusedParameter")
     fun presentForAuthentication(email: String) {
-        linkController.presentForAuthentication(email)
+        TODO("Not yet implemented")
     }
 
     /**
