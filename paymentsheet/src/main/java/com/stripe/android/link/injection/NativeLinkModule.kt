@@ -20,8 +20,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkActionManager
-import com.stripe.android.link.LinkActionManagerImpl
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -67,6 +66,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
@@ -93,12 +93,6 @@ internal interface NativeLinkModule {
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
-
-    @Binds
-    @NativeLinkScope
-    fun bindsLinkActionManager(
-        impl: LinkActionManagerImpl
-    ): LinkActionManager
 
     @Binds
     @NativeLinkScope
@@ -175,6 +169,10 @@ internal interface NativeLinkModule {
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
+
+        @Provides
+        @NativeLinkScope
+        fun providesLinkActions(): LinkActions = MutableSharedFlow(extraBufferCapacity = 1)
 
         @Provides
         @NativeLinkScope

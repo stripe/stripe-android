@@ -8,10 +8,9 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.FakeLinkActionManager
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkActionIntent
-import com.stripe.android.link.LinkActionManager
+import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -26,6 +25,7 @@ import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
@@ -409,17 +409,17 @@ internal class SignUpViewModelTest {
         )
         linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
-        val linkActionManager = FakeLinkActionManager()
+        val linkActions = createTestLinkActions()
         val viewModel = createViewModel(
             linkAuth = linkAuth,
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             },
-            linkActionManager = linkActionManager
+            linkActions = linkActions
         )
 
         // Override the linkLaunchMode to Authentication mode
-        val authLinkActionManager = FakeLinkActionManager()
+        val authLinkActions = createTestLinkActions()
         val authViewModel = SignUpViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
             linkAuth = linkAuth,
@@ -429,21 +429,22 @@ internal class SignUpViewModelTest {
             logger = FakeLogger(),
             savedStateHandle = SavedStateHandle(),
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkActionManager = authLinkActionManager,
+            linkActions = authLinkActions,
             navigateAndClearStack = {},
             moveToWeb = {},
             linkLaunchMode = LinkLaunchMode.Authentication,
         )
 
-        authViewModel.emailController.onRawValueChange("test@example.com")
-        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+        authLinkActions.test {
+            authViewModel.emailController.onRawValueChange("test@example.com")
+            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-        assertThat(authLinkActionManager.emittedActions).hasSize(1)
-        val emittedAction = authLinkActionManager.emittedActions[0] as LinkActionIntent.DismissWithResult
-        assertThat(emittedAction.result).isInstanceOf(LinkActivityResult.Completed::class.java)
-        val completedResult = emittedAction.result as LinkActivityResult.Completed
-        assertThat(completedResult.selectedPayment).isNull()
-        assertThat(completedResult.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+            val emittedAction = awaitItem() as LinkAction.DismissWithResult
+            assertThat(emittedAction.result).isInstanceOf(LinkActivityResult.Completed::class.java)
+            val completedResult = emittedAction.result as LinkActivityResult.Completed
+            assertThat(completedResult.selectedPayment).isNull()
+            assertThat(completedResult.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+        }
     }
 
     @Test
@@ -664,19 +665,21 @@ internal class SignUpViewModelTest {
             )
             linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
-            val linkActionManager = FakeLinkActionManager()
+            val linkActions = createTestLinkActions()
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
                 linkLaunchMode = LinkLaunchMode.Authentication,
-                linkActionManager = linkActionManager
+                linkActions = linkActions
             )
 
-            viewModel.emailController.onRawValueChange("test@example.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+            linkActions.test {
+                viewModel.emailController.onRawValueChange("test@example.com")
+                advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            val emittedAction = linkActionManager.emittedActions[0] as LinkActionIntent.DismissWithResult
-            val result = emittedAction.result as LinkActivityResult.Completed
-            assertThat(result.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+                val emittedAction = awaitItem() as LinkAction.DismissWithResult
+                val result = emittedAction.result as LinkActivityResult.Completed
+                assertThat(result.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
+            }
         }
 
     @Test
@@ -690,18 +693,20 @@ internal class SignUpViewModelTest {
             )
             linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
-            val linkActionManager = FakeLinkActionManager()
+            val linkActions = createTestLinkActions()
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
                 linkLaunchMode = LinkLaunchMode.Authentication,
-                linkActionManager = linkActionManager
+                linkActions = linkActions
             )
 
-            viewModel.emailController.onRawValueChange("test@example.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+            linkActions.test {
+                viewModel.emailController.onRawValueChange("test@example.com")
+                advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            val emittedAction = linkActionManager.emittedActions[0] as LinkActionIntent.DismissWithResult
-            assertThat(emittedAction.result).isInstanceOf(LinkActivityResult.Completed::class.java)
+                val emittedAction = awaitItem() as LinkAction.DismissWithResult
+                assertThat(emittedAction.result).isInstanceOf(LinkActivityResult.Completed::class.java)
+            }
         }
 
     @Test
@@ -716,19 +721,21 @@ internal class SignUpViewModelTest {
             )
             linkAuth.lookupResult = LinkAuthResult.Success(linkAccount)
 
-            val linkActionManager = FakeLinkActionManager()
+            val linkActions = createTestLinkActions()
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
                 linkLaunchMode = LinkLaunchMode.Authentication,
                 navigateAndClearStack = { screen -> screens.add(screen) },
-                linkActionManager = linkActionManager
+                linkActions = linkActions
             )
 
-            viewModel.emailController.onRawValueChange("test@example.com")
-            advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+            linkActions.test {
+                viewModel.emailController.onRawValueChange("test@example.com")
+                advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
-            assertThat(screens).containsExactly(LinkScreen.Verification)
-            assertThat(linkActionManager.emittedActions).isEmpty()
+                assertThat(screens).containsExactly(LinkScreen.Verification)
+                expectNoEvents()
+            }
         }
 
     @Test
@@ -816,7 +823,7 @@ internal class SignUpViewModelTest {
         },
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
-        linkActionManager: LinkActionManager = FakeLinkActionManager(),
+        linkActions: LinkActions = createTestLinkActions(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {},
@@ -837,7 +844,7 @@ internal class SignUpViewModelTest {
             logger = logger,
             savedStateHandle = savedStateHandle,
             dismissalCoordinator = dismissalCoordinator,
-            linkActionManager = linkActionManager,
+            linkActions = linkActions,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
             linkLaunchMode = linkLaunchMode,

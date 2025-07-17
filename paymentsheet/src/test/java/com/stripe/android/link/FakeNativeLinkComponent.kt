@@ -44,5 +44,5 @@ internal class FakeNativeLinkComponent(
     override val dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
     override val linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full,
     override val autocompleteLauncher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
-    override val linkActionManager: LinkActionManager = FakeLinkActionManager(),
+    override val linkActions: LinkActions = createTestLinkActions(),
 ) : NativeLinkComponent

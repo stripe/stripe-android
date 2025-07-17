@@ -70,15 +70,19 @@ internal class LinkActivityViewModelTest {
     fun `test that cancel result is called on back pressed`() = runTest(dispatcher) {
         val linkAccountManager = FakeLinkAccountManager()
         val navigationManager = TestNavigationManager()
+        val linkActions = createTestLinkActions()
+        val activityRetainedComponent = FakeNativeLinkComponent(linkActions = linkActions)
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val vm = createViewModel(
             navigationManager = navigationManager,
             linkAccountManager = linkAccountManager,
+            linkActions = linkActions,
+            activityRetainedComponent = activityRetainedComponent,
         )
 
         vm.result.test {
-            vm.handleViewAction(LinkAction.BackPressed)
+            linkActions.tryEmit(LinkAction.BackPressed)
             assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
@@ -581,12 +585,16 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `logout action should dismiss screen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
+        val linkActions = createTestLinkActions()
+        val activityRetainedComponent = FakeNativeLinkComponent(linkActions = linkActions)
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
+            linkActions = linkActions,
+            activityRetainedComponent = activityRetainedComponent,
         )
 
         viewModel.result.test {
-            viewModel.handleViewAction(LinkAction.LogoutClicked)
+            linkActions.tryEmit(LinkAction.LogoutClicked)
 
             linkAccountManager.awaitLogoutCall()
             assertThat(awaitItem()).isEqualTo(
@@ -691,7 +699,7 @@ internal class LinkActivityViewModelTest {
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         eventReporter: EventReporter = FakeEventReporter(),
         navigationManager: NavigationManager = TestNavigationManager(),
-        linkActionManager: LinkActionManager = FakeLinkActionManager(),
+        linkActions: LinkActions = createTestLinkActions(),
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
@@ -710,7 +718,7 @@ internal class LinkActivityViewModelTest {
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = startWithVerificationDialog,
             navigationManager = navigationManager,
-            linkActionManager = linkActionManager,
+            linkActions = linkActions,
             savedStateHandle = savedStateHandle,
             linkLaunchMode = linkLaunchMode,
             linkConfirmationHandlerFactory = { linkConfirmationHandler },

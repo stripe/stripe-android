@@ -16,7 +16,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.LoggedOut
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
-import com.stripe.android.link.LinkActionIntent.DismissWithResult
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -64,7 +63,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
     private val navigationManager: NavigationManager,
-    private val linkActionManager: LinkActionManager,
+    private val linkActions: LinkActions,
     val linkLaunchMode: LinkLaunchMode,
     private val autocompleteLauncher: AutocompleteActivityLauncher,
 ) : ViewModel(), DefaultLifecycleObserver {
@@ -87,25 +86,22 @@ internal class LinkActivityViewModel @Inject constructor(
 
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
 
+    val canDismissSheet: Boolean
+        get() = activityRetainedComponent.dismissalCoordinator.canDismiss
+
     init {
         viewModelScope.launch {
-            linkActionManager.actionFlow.collect { action ->
+            linkActions.collect { action ->
                 when (action) {
-                    is DismissWithResult -> _result.emit(action.result)
+                    is LinkAction.DismissWithResult -> _result.emit(action.result)
+                    LinkAction.BackPressed -> handleBackPressed()
+                    LinkAction.LogoutClicked -> handleLogoutClicked()
                 }
             }
         }
     }
 
-    val canDismissSheet: Boolean
-        get() = activityRetainedComponent.dismissalCoordinator.canDismiss
-
-    fun handleViewAction(action: LinkAction) {
-        when (action) {
-            LinkAction.BackPressed -> handleBackPressed()
-            LinkAction.LogoutClicked -> handleLogoutClicked()
-        }
-    }
+    fun handleViewAction(action: LinkAction) = linkActions.tryEmit(action)
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {

@@ -4,14 +4,14 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.FakeLinkActionManager
-import com.stripe.android.link.LinkActionManager
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.testing.CoroutineTestRule
@@ -206,7 +206,7 @@ internal class VerificationViewModelTest {
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         logger: Logger = FakeLogger(),
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
-        linkActionManager: LinkActionManager = FakeLinkActionManager(),
+        linkActions: LinkActions = createTestLinkActions(),
         onVerificationSucceeded: () -> Unit = { },
         onChangeEmailRequested: () -> Unit = {},
         onDismissClicked: () -> Unit = {},
@@ -217,7 +217,7 @@ internal class VerificationViewModelTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             linkLaunchMode = linkLaunchMode,
-            linkActionManager = linkActionManager,
+            linkActions = linkActions,
             isDialog = false,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,

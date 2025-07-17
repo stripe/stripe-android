@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.link.FakeLinkActionManager
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -24,6 +23,7 @@ import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -257,7 +257,7 @@ internal class SignUpScreenTest {
             logger = logger,
             savedStateHandle = SavedStateHandle(),
             dismissalCoordinator = dismissalCoordinator,
-            linkActionManager = FakeLinkActionManager(),
+            linkActions = createTestLinkActions(),
             navigateAndClearStack = {},
             moveToWeb = moveToWeb,
             linkLaunchMode = LinkLaunchMode.Full,

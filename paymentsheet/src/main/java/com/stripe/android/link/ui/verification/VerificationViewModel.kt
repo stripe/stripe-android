@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.link.LinkActionIntent.DismissWithResult
-import com.stripe.android.link.LinkActionManager
+import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.account.LinkAccountManager
@@ -35,7 +35,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val linkLaunchMode: LinkLaunchMode,
-    private val linkActionManager: LinkActionManager,
+    private val linkActions: LinkActions,
     private val isDialog: Boolean,
     private val onVerificationSucceeded: () -> Unit,
     private val onChangeEmailRequested: () -> Unit,
@@ -90,8 +90,8 @@ internal class VerificationViewModel @Inject constructor(
                 updateViewState { it.copy(isProcessing = false) }
                 // Handle Authentication mode logic in ViewModel
                 if (linkLaunchMode is LinkLaunchMode.Authentication) {
-                    linkActionManager.emit(
-                        DismissWithResult(
+                    linkActions.tryEmit(
+                        LinkAction.DismissWithResult(
                             LinkActivityResult.Completed(
                                 linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                                 selectedPayment = null,
@@ -197,7 +197,7 @@ internal class VerificationViewModel @Inject constructor(
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         linkLaunchMode = parentComponent.linkLaunchMode,
-                        linkActionManager = parentComponent.linkActionManager,
+                        linkActions = parentComponent.linkActions,
                         isDialog = isDialog,
                         onVerificationSucceeded = onVerificationSucceeded,
                         onChangeEmailRequested = onChangeEmailClicked,

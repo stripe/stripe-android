@@ -19,7 +19,6 @@ import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.FakeLinkActionManager
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
@@ -27,6 +26,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.link.ui.paymentmenthod.PAYMENT_METHOD_ERROR_TAG
@@ -189,7 +189,7 @@ internal class PaymentMethodScreenTest {
             formHelper = formHelper,
             dismissalCoordinator = dismissalCoordinator,
             linkLaunchMode = LinkLaunchMode.Full,
-            linkActionManager = FakeLinkActionManager()
+            linkActions = createTestLinkActions()
         )
     }
 

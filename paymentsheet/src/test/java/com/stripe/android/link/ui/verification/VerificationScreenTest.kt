@@ -13,14 +13,14 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.link.FakeLinkActionManager
-import com.stripe.android.link.LinkActionManager
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.createTestLinkActions
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.testing.CoroutineTestRule
@@ -260,7 +260,7 @@ internal class VerificationScreenTest {
         isDialog: Boolean = false,
         onDismissClicked: () -> Unit = {},
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.PaymentMethodSelection(null),
-        linkActionManager: LinkActionManager = FakeLinkActionManager()
+        linkActions: LinkActions = createTestLinkActions()
     ): VerificationViewModel {
         return VerificationViewModel(
             linkAccountManager = linkAccountManager,
@@ -272,7 +272,7 @@ internal class VerificationScreenTest {
             linkAccount = TestFactory.LINK_ACCOUNT,
             isDialog = isDialog,
             linkLaunchMode = linkLaunchMode,
-            linkActionManager = linkActionManager
+            linkActions = linkActions
         )
     }
 

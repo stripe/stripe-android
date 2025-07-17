@@ -11,8 +11,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkActionIntent.DismissWithResult
-import com.stripe.android.link.LinkActionManager
+import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActions
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
@@ -53,7 +53,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkLaunchMode: LinkLaunchMode,
     private val completeLinkFlow: CompleteLinkFlow,
-    private val linkActionManager: LinkActionManager,
+    private val linkActions: LinkActions,
     paymentDetailsId: String,
     billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
 ) : ViewModel() {
@@ -128,8 +128,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                         when (confirmationResult) {
                             is Result.Canceled -> Unit
                             is Result.Failed -> _state.update { it.copy(error = confirmationResult.error) }
-                            is Result.Completed -> linkActionManager.emit(
-                                DismissWithResult(confirmationResult.linkActivityResult)
+                            is Result.Completed -> linkActions.tryEmit(
+                                LinkAction.DismissWithResult(confirmationResult.linkActivityResult)
                             )
                         }
                     } else {
@@ -235,7 +235,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
                             linkLaunchMode = parentComponent.linkLaunchMode,
                         ),
-                        linkActionManager = parentComponent.linkActionManager,
+                        linkActions = parentComponent.linkActions,
                         paymentDetailsId = paymentDetailsId,
                         billingDetailsUpdateFlow = billingDetailsUpdateFlow,
                     )
