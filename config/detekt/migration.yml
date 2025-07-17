@@ -1,0 +1,10 @@
+build:
+  maxIssues: 100
+
+# Include custom migration rules
+stripe-v25-migration:
+  active: true
+  RememberPaymentSheetMigration:
+    active: true
+  RememberPaymentSheetFlowControllerMigration:
+    active: true
