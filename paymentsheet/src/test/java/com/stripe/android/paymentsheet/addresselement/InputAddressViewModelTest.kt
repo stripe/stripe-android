@@ -301,7 +301,7 @@ class InputAddressViewModelTest {
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),

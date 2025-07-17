@@ -89,7 +89,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.Line1 to FormFieldEntry(value = "", isComplete = false),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
@@ -239,7 +239,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
@@ -292,7 +292,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
@@ -309,7 +309,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
@@ -340,7 +340,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "AL", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "US", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
@@ -358,7 +358,7 @@ class AutocompleteAddressControllerTest {
                     IdentifierSpec.Line1 to FormFieldEntry(value = "123 Main Street", isComplete = true),
                     IdentifierSpec.Line2 to FormFieldEntry(value = "", isComplete = true),
                     IdentifierSpec.City to FormFieldEntry(value = "", isComplete = false),
-                    IdentifierSpec.State to FormFieldEntry(value = "AB", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry(value = null, isComplete = false),
                     IdentifierSpec.Country to FormFieldEntry(value = "CA", isComplete = true),
                     IdentifierSpec.PostalCode to FormFieldEntry(value = "", isComplete = false),
                 )
