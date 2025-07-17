@@ -16,10 +16,14 @@ import com.stripe.android.uicore.utils.extractActivity
 internal inline fun <reified T : ViewModel> linkViewModel(
     factory: (NativeLinkComponent) -> ViewModelProvider.Factory
 ): T {
-    val component = parentActivity().viewModel?.activityRetainedComponent
-        ?: throw IllegalStateException("no viewmodel in parent activity")
+    val component = parentComponent()
     return viewModel<T>(factory = factory(component))
 }
+
+@Composable
+internal fun parentComponent(): NativeLinkComponent = parentActivity()
+    .viewModel?.activityRetainedComponent
+    ?: throw IllegalStateException("no viewmodel in parent activity")
 
 /**
  * Retrieves the parent [LinkActivity] from the current Compose context.

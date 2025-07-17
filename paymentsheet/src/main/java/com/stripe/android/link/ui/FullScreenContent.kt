@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAction
-import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -41,7 +40,6 @@ internal fun FullScreenContent(
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismiss: () -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     changeEmail: () -> Unit
 ) {
@@ -82,15 +80,10 @@ internal fun FullScreenContent(
                 onBackPressed = onBackPressed,
                 moveToWeb = moveToWeb,
                 bottomSheetContent = linkContentBottomSheetContent,
-                showBottomSheetContent = { content ->
-                    linkContentBottomSheetContent = content
-                },
-                hideBottomSheetContent = {
-                    linkContentBottomSheetState.hide()
-                },
+                showBottomSheetContent = { content -> linkContentBottomSheetContent = content },
+                hideBottomSheetContent = { linkContentBottomSheetState.hide() },
                 handleViewAction = handleViewAction,
                 navigate = navigate,
-                dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
                 goBack = goBack,
                 changeEmail = changeEmail
@@ -102,11 +95,7 @@ internal fun FullScreenContent(
                 state = linkContentBottomSheetState,
                 cornerRadius = 24.dp,
                 onDismissed = { linkContentBottomSheetContent = null },
-                content = {
-                    DefaultLinkTheme {
-                        Column { content() }
-                    }
-                },
+                content = { DefaultLinkTheme { Column { content() } } },
             )
         }
     }

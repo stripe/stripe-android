@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
+import com.stripe.android.link.LinkActionIntent.DismissWithResult
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
@@ -20,6 +21,7 @@ import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.parentComponent
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
@@ -45,7 +47,6 @@ internal fun LinkContent(
     hideBottomSheetContent: suspend () -> Unit,
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
@@ -84,7 +85,6 @@ internal fun LinkContent(
                     navigateAndClearStack = { screen ->
                         navigate(screen, true)
                     },
-                    dismissWithResult = dismissWithResult,
                     getLinkAccount = getLinkAccount,
                     showBottomSheetContent = showBottomSheetContent,
                     changeEmail = changeEmail,
@@ -107,7 +107,6 @@ private fun Screens(
     getLinkAccount: () -> LinkAccount?,
     goBack: () -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: suspend () -> Unit,
     moveToWeb: () -> Unit,
@@ -137,7 +136,8 @@ private fun Screens(
         composable(LinkScreen.UpdateCard.route) { backStackEntry ->
             val paymentDetailsId = backStackEntry
                 .arguments?.getString(EXTRA_PAYMENT_DETAILS)
-                ?: return@composable dismissWithResult(noPaymentDetailsResult())
+                ?: return@composable parentComponent()
+                    .linkActionManager.emit(DismissWithResult(noPaymentDetailsResult()))
             UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId,
                 billingDetailsUpdateFlow = backStackEntry.billingDetailsUpdateFlow(),
@@ -147,7 +147,8 @@ private fun Screens(
         composable(LinkScreen.Verification.route) {
             // Keep height fixed to reduce animations caused by IME toggling on both
             // this screen and SignUp screen.
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            val linkAccount = getLinkAccount() ?: return@composable parentComponent()
+                .linkActionManager.emit(DismissWithResult(noLinkAccountResult()))
             MinScreenHeightBox(screenHeightPercentage = if (initialDestination == LinkScreen.SignUp) 1f else 0f) {
                 VerificationRoute(
                     linkAccount = linkAccount,
@@ -159,7 +160,8 @@ private fun Screens(
         }
 
         composable(LinkScreen.Wallet.route) {
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            val linkAccount = getLinkAccount() ?: return@composable parentComponent()
+                .linkActionManager.emit(DismissWithResult(noLinkAccountResult()))
             WalletRoute(
                 linkAccount = linkAccount,
                 navigateAndClearStack = navigateAndClearStack,
@@ -170,7 +172,8 @@ private fun Screens(
         }
 
         composable(LinkScreen.PaymentMethod.route) {
-            val linkAccount = getLinkAccount() ?: return@composable dismissWithResult(noLinkAccountResult())
+            val linkAccount = getLinkAccount() ?: return@composable parentComponent()
+                .linkActionManager.emit(DismissWithResult(noLinkAccountResult()))
             PaymentMethodRoute(
                 linkAccount = linkAccount,
             )

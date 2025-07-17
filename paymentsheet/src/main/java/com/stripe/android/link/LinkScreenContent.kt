@@ -44,7 +44,6 @@ internal fun LinkScreenContent(
             onBackPressed = viewModel::goBack,
             navigate = viewModel::navigate,
             dismiss = viewModel::dismissSheet,
-            dismissWithResult = viewModel::handleResult,
             getLinkAccount = {
                 viewModel.linkAccount
             },
@@ -71,7 +70,6 @@ internal fun LinkScreenContentBody(
     onBackPressed: () -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismiss: () -> Unit,
-    dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
     moveToWeb: () -> Unit,
@@ -89,7 +87,6 @@ internal fun LinkScreenContentBody(
                 appBarState = appBarState,
                 navigate = navigate,
                 dismiss = dismiss,
-                dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
                 moveToWeb = moveToWeb,
                 goBack = goBack,
