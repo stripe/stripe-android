@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.crypto.onramp.OnRampCallbacks
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -45,7 +45,7 @@ internal interface OnrampComponent {
         ): Builder
 
         @BindsInstance
-        fun onRampCallbacks(onRampCallbacks: OnRampCallbacks): Builder
+        fun onRampCallbacks(onRampCallbacks: OnrampCallbacks): Builder
 
         fun build(): OnrampComponent
     }
