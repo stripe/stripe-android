@@ -184,8 +184,9 @@ internal class LinkControllerViewModel @Inject constructor(
                 onSuccess = { configuration ->
                     val state = _state.value
                     val linkAccountInfo = getLinkAccountInfo(email, state)
+                    val linkAccount = linkAccountInfo.account
 
-                    if (linkAccountInfo.account?.isVerified == true) {
+                    if (linkAccount?.isVerified == true) {
                         logger.debug("$tag: account is already verified, skipping authentication")
                         _authenticationResultFlow.emit(AuthenticationResult.Success)
                         return@withConfiguration
@@ -197,6 +198,9 @@ internal class LinkControllerViewModel @Inject constructor(
                         it.copy(
                             presentedForEmail = email,
                             currentLaunchMode = launchMode,
+                            // Clear saved data if the account is not present, i.e. email changed
+                            selectedPaymentMethod = it.selectedPaymentMethod.takeIf { linkAccount != null },
+                            createdPaymentMethod = it.createdPaymentMethod.takeIf { linkAccount != null },
                         )
                     }
 
