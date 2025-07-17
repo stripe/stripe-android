@@ -21,7 +21,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.LinkWalletButtonState
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -854,7 +854,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.walletsState.test {
             val state = awaitItem()
-            assertThat(state?.link).isEqualTo(WalletsState.Link(state = LinkWalletButtonState.Plain))
+            assertThat(state?.link).isEqualTo(WalletsState.Link(state = LinkButtonState.Plain))
             assertThat(state?.googlePay).isNull()
         }
     }
