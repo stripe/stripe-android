@@ -787,6 +787,20 @@ class LinkControllerViewModelTest {
     }
 
     @Test
+    fun `onAuthenticate() on non-matching email clears saved payment data`() = runTest {
+        testAuthenticationClearsSavedPaymentData { viewModel, launcher, email ->
+            viewModel.onAuthenticate(launcher, email)
+        }
+    }
+
+    @Test
+    fun `onAuthenticateExistingConsumer() on non-matching email clears saved payment data`() = runTest {
+        testAuthenticationClearsSavedPaymentData { viewModel, launcher, email ->
+            viewModel.onAuthenticateExistingConsumer(launcher, email)
+        }
+    }
+
+    @Test
     fun `onPresentPaymentMethods() clears account holder when email doesn't match`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
@@ -805,6 +819,50 @@ class LinkControllerViewModelTest {
         // Verify that the launcher was called with null account
         val call = launcher.calls.awaitItem()
         assertThat(call.input.linkAccountInfo.account).isNull()
+    }
+
+    private suspend fun testAuthenticationClearsSavedPaymentData(
+        authenticateCall: (
+            viewModel: LinkControllerViewModel,
+            launcher: FakeActivityResultLauncher<LinkActivityContract.Args>,
+            email: String
+        ) -> Unit
+    ) {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        // Set up some saved payment data
+        val selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = "123",
+            billingPhone = null
+        )
+        val createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        viewModel.updateState {
+            it.copy(
+                selectedPaymentMethod = selectedPaymentMethod,
+                createdPaymentMethod = createdPaymentMethod
+            )
+        }
+
+        // Verify initial state has the saved data
+        viewModel.state(application).test {
+            val initialState = awaitItem()
+            assertThat(initialState.selectedPaymentMethodPreview).isNotNull()
+            assertThat(initialState.createdPaymentMethod).isEqualTo(createdPaymentMethod)
+        }
+
+        // Call the authentication method with a non-matching email
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        authenticateCall(viewModel, launcher, "another@email.com")
+
+        // Verify that saved payment data is cleared
+        viewModel.state(application).test {
+            val finalState = awaitItem()
+            assertThat(finalState.selectedPaymentMethodPreview).isNull()
+            assertThat(finalState.createdPaymentMethod).isNull()
+        }
     }
 
     private fun createViewModel(
