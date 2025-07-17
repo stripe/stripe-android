@@ -14,5 +14,13 @@
             android:name=".cardscan.CardScanActivity"
             android:screenOrientation="nosensor"
             android:theme="@style/StripeCardScanDefaultTheme" />
+
+
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
+
+
     </application>
+
 </manifest>

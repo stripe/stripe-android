@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -18,10 +17,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanContract
+import com.stripe.android.ui.core.cardscan.rememberCardScanner
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
 
@@ -31,10 +29,10 @@ internal fun ScanCardButtonUI(
     elementsSessionId: String?,
     onResult: (CardScanSheetResult) -> Unit
 ) {
-    val cardScanLauncher =
-        rememberLauncherForActivityResult(CardScanContract()) {
-            onResult(it)
-        }
+    val cardScanLauncher = rememberCardScanner(
+        elementsSessionId = elementsSessionId,
+        onResult = onResult
+    )
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable(
@@ -42,13 +40,7 @@ internal fun ScanCardButtonUI(
             indication = null,
             enabled = enabled,
             onClick = {
-                cardScanLauncher.launch(
-                    input = CardScanContract.Args(
-                        configuration = CardScanConfiguration(
-                            elementsSessionId = elementsSessionId
-                        )
-                    )
-                )
+                cardScanLauncher.launch()
             }
         )
     ) {
