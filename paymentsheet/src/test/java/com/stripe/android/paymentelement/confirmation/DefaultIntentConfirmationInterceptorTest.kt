@@ -1034,9 +1034,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 stripeAccountIdProvider = { null },
                 errorReporter = eventReporter,
                 allowsManualConfirmation = false,
-                intentCreationCallbackProvider = {
-                    null
-                },
+                intentCreationCallbackProvider = { null },
                 preparePaymentMethodHandlerProvider = {
                     PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
                         completablePaymentMethod.complete(paymentMethod)
@@ -1067,7 +1065,10 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
             )
 
             val paymentMethod = completablePaymentMethod.await()
