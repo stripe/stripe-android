@@ -83,6 +83,9 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
                     )
                 )
             ),
+            embeddedAppearance = PaymentSheet.Appearance.Embedded(
+
+            )
         ),
     );
 

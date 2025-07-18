@@ -163,6 +163,18 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         )
     }
 
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_FloatingButton(
+            iconMargins = PaymentSheet.Insets(
+                startDp = 10f,
+                topDp = 15f,
+                endDp = 20f,
+                bottomDp = 10f
+            )
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -194,6 +206,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        iconMargins: PaymentSheet.Insets? = null
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -204,7 +217,10 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            rowStyle = rowStyle,
+            appearance = PaymentSheet.Appearance.Embedded(
+                style = rowStyle,
+                paymentMethodIconMargins = iconMargins
+            ),
             paparazziRule = paparazziRule
         )
     }

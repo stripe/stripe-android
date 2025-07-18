@@ -139,6 +139,18 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         )
     }
 
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_RadioButton(
+            iconMargins = PaymentSheet.Insets(
+                startDp = 10f,
+                topDp = 15f,
+                endDp = 20f,
+                bottomDp = 10f
+            )
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -169,6 +181,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        iconMargins: PaymentSheet.Insets? = null
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -179,7 +192,10 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            rowStyle = rowStyle,
+            appearance = PaymentSheet.Appearance.Embedded(
+                style = rowStyle,
+                paymentMethodIconMargins = iconMargins
+            ),
             paparazziRule = paparazziRule,
         )
     }

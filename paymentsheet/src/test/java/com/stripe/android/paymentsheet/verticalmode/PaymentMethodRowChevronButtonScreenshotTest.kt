@@ -125,6 +125,18 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         )
     }
 
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_Chevron(
+            iconMargins = PaymentSheet.Insets(
+                startDp = 10f,
+                topDp = 15f,
+                endDp = 20f,
+                bottomDp = 10f
+            )
+        )
+    }
+
     private fun testPaymentMethodRowButton_Chevron(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
@@ -137,6 +149,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         subtitle: String? = null,
         promoText: String? = null,
         shouldShowDefaultBadge: Boolean = false,
+        iconMargins: PaymentSheet.Insets? = null
     ) {
         testPaymentMethodRowButton(
             isEnabled = isEnabled,
@@ -147,7 +160,10 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            rowStyle = rowStyle,
+            appearance = PaymentSheet.Appearance.Embedded(
+                style = rowStyle,
+                paymentMethodIconMargins = iconMargins
+            ),
             paparazziRule = paparazziRule,
         )
     }
