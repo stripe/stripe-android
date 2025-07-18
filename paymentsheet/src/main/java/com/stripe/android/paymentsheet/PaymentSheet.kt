@@ -1432,6 +1432,77 @@ class PaymentSheet internal constructor(
                             ),
                         )
                     }
+
+                    class Builder {
+                        private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
+                            .additionalVerticalInsetsDp
+                        private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight = Colors(
+                            separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                            selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                            unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                        )
+                        private var colorsDark = Colors(
+                            separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                            selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                            unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                        )
+
+                        fun separatorThicknessDp(thickness: Float) = apply {
+                            this.separatorThicknessDp = thickness
+                        }
+
+                        fun startSeparatorInsetDp(inset: Float) = apply {
+                            this.startSeparatorInsetDp = inset
+                        }
+
+                        fun endSeparatorInsetDp(inset: Float) = apply {
+                            this.endSeparatorInsetDp = inset
+                        }
+
+                        fun topSeparatorEnabled(enabled: Boolean) = apply {
+                            this.topSeparatorEnabled = enabled
+                        }
+
+                        fun bottomSeparatorEnabled(enabled: Boolean) = apply {
+                            this.bottomSeparatorEnabled = enabled
+                        }
+
+                        fun additionalVerticalInsetsDp(insets: Float) = apply {
+                            this.additionalVerticalInsetsDp = insets
+                        }
+
+                        fun horizontalInsetsDp(insets: Float) = apply {
+                            this.horizontalInsetsDp = insets
+                        }
+
+                        fun colorsLight(colors: Colors) = apply {
+                            this.colorsLight = colors
+                        }
+
+                        fun colorsDark(colors: Colors) = apply {
+                            this.colorsDark = colors
+                        }
+
+                        fun build(): FlatWithRadio {
+                            return FlatWithRadio(
+                                separatorThicknessDp = separatorThicknessDp,
+                                startSeparatorInsetDp = startSeparatorInsetDp,
+                                endSeparatorInsetDp = endSeparatorInsetDp,
+                                topSeparatorEnabled = topSeparatorEnabled,
+                                bottomSeparatorEnabled = bottomSeparatorEnabled,
+                                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                                horizontalInsetsDp = horizontalInsetsDp,
+                                colorsLight = colorsLight,
+                                colorsDark = colorsDark
+                            )
+                        }
+                    }
                 }
 
                 @Parcelize
@@ -1554,6 +1625,81 @@ class PaymentSheet internal constructor(
                             )
                         )
                     }
+
+                    class Builder {
+                        private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp
+                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
+                            .additionalVerticalInsetsDp
+                        private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight = Colors(
+                            separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                            checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb(),
+                        )
+                        private var colorsDark = Colors(
+                            separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                            checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb(),
+                        )
+
+                        fun separatorThicknessDp(thickness: Float) = apply {
+                            this.separatorThicknessDp = thickness
+                        }
+
+                        fun startSeparatorInsetDp(inset: Float) = apply {
+                            this.startSeparatorInsetDp = inset
+                        }
+
+                        fun endSeparatorInsetDp(inset: Float) = apply {
+                            this.endSeparatorInsetDp = inset
+                        }
+
+                        fun topSeparatorEnabled(enabled: Boolean) = apply {
+                            this.topSeparatorEnabled = enabled
+                        }
+
+                        fun bottomSeparatorEnabled(enabled: Boolean) = apply {
+                            this.bottomSeparatorEnabled = enabled
+                        }
+
+                        fun checkmarkInsetsDp(insets: Float) = apply {
+                            this.checkmarkInsetDp = insets
+                        }
+
+                        fun additionalVerticalInsetsDp(insets: Float) = apply {
+                            this.additionalVerticalInsetsDp = insets
+                        }
+
+                        fun horizontalInsetsDp(insets: Float) = apply {
+                            this.horizontalInsetsDp = insets
+                        }
+
+                        fun colorsLight(colors: Colors) = apply {
+                            this.colorsLight = colors
+                        }
+
+                        fun colorsDark(colors: Colors) = apply {
+                            this.colorsDark = colors
+                        }
+
+                        fun build(): FlatWithCheckmark {
+                            return FlatWithCheckmark(
+                                separatorThicknessDp = separatorThicknessDp,
+                                startSeparatorInsetDp = startSeparatorInsetDp,
+                                endSeparatorInsetDp = endSeparatorInsetDp,
+                                topSeparatorEnabled = topSeparatorEnabled,
+                                bottomSeparatorEnabled = bottomSeparatorEnabled,
+                                checkmarkInsetDp = checkmarkInsetDp,
+                                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                                horizontalInsetsDp = horizontalInsetsDp,
+                                colorsLight = colorsLight,
+                                colorsDark = colorsDark
+                            )
+                        }
+                    }
                 }
 
                 @Parcelize
@@ -1586,6 +1732,26 @@ class PaymentSheet internal constructor(
                             spacingDp = StripeThemeDefaults.floating.spacing,
                             additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
                         )
+                    }
+
+                    class Builder {
+                        private var spacingDp = StripeThemeDefaults.floating.spacing
+                        private var additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+
+                        fun spacingDp(spacing: Float) = apply {
+                            this.spacingDp = spacing
+                        }
+
+                        fun additionalInsetsDp(insets: Float) = apply {
+                            this.additionalInsetsDp = insets
+                        }
+
+                        fun build(): FloatingButton {
+                            return FloatingButton(
+                                spacingDp = spacingDp,
+                                additionalInsetsDp = additionalInsetsDp
+                            )
+                        }
                     }
                 }
 
@@ -1699,6 +1865,91 @@ class PaymentSheet internal constructor(
                                 separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
                                 chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
                             )
+                        )
+                    }
+
+                    class Builder {
+                        private var separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness
+                        private var startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets
+                        private var topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled
+                        private var bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled
+                        private var additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon
+                            .additionalVerticalInsetsDp
+                        private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                        private var colorsLight = Colors(
+                            separatorColor = StripeThemeDefaults.chevronColorsLight.separatorColor.toArgb(),
+                            chevronColor = StripeThemeDefaults.chevronColorsLight.chevronColor.toArgb()
+                        )
+                        private var colorsDark = Colors(
+                            separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
+                            chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
+                        )
+
+                        fun separatorThicknessDp(thickness: Float) = apply {
+                            this.separatorThicknessDp = thickness
+                        }
+
+                        fun startSeparatorInsetDp(inset: Float) = apply {
+                            this.startSeparatorInsetDp = inset
+                        }
+
+                        fun endSeparatorInsetDp(inset: Float) = apply {
+                            this.endSeparatorInsetDp = inset
+                        }
+
+                        fun topSeparatorEnabled(enabled: Boolean) = apply {
+                            this.topSeparatorEnabled = enabled
+                        }
+
+                        fun bottomSeparatorEnabled(enabled: Boolean) = apply {
+                            this.bottomSeparatorEnabled = enabled
+                        }
+
+                        fun additionalVerticalInsetsDp(insets: Float) = apply {
+                            this.additionalVerticalInsetsDp = insets
+                        }
+
+                        fun horizontalInsetsDp(insets: Float) = apply {
+                            this.horizontalInsetsDp = insets
+                        }
+
+                        fun colorsLight(colors: Colors) = apply {
+                            this.colorsLight = colors
+                        }
+
+                        fun colorsDark(colors: Colors) = apply {
+                            this.colorsDark = colors
+                        }
+
+                        fun build(): FlatWithChevron {
+                            return FlatWithChevron(
+                                separatorThicknessDp = separatorThicknessDp,
+                                startSeparatorInsetDp = startSeparatorInsetDp,
+                                endSeparatorInsetDp = endSeparatorInsetDp,
+                                topSeparatorEnabled = topSeparatorEnabled,
+                                bottomSeparatorEnabled = bottomSeparatorEnabled,
+                                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                                horizontalInsetsDp = horizontalInsetsDp,
+                                colorsLight = colorsLight,
+                                colorsDark = colorsDark
+                            )
+                        }
+                    }
+                }
+            }
+
+            class Builder {
+                class Builder {
+                    private var rowStyle: RowStyle = default.style
+
+                    fun rowStyle(rowStyle: RowStyle) = apply {
+                        this.rowStyle = rowStyle
+                    }
+
+                    fun build(): Embedded {
+                        return Embedded(
+                            style = rowStyle,
                         )
                     }
                 }

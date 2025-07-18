@@ -111,6 +111,7 @@
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt$com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance$Builder</ID>
+    <ID>TooManyFunctions:PaymentSheet.kt$PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark$Builder</ID>
     <ID>TooManyFunctions:WalletViewModel.kt$WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
