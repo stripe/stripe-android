@@ -159,11 +159,13 @@ internal class DefaultWalletButtonsInteractor(
                             state = LinkButtonState.create(
                                 linkEmail = arguments.linkEmail,
                                 paymentDetails = linkAccountInfo.account?.displayablePaymentDetails,
-                                enableDisplayableDefaultValuesInEce = arguments.paymentMethodMetadata.linkState?.configuration?.enableDisplayableDefaultValuesInEce ?: false
+                                enableDisplayableDefaultValuesInEce = arguments.paymentMethodMetadata.linkState
+                                    ?.configuration?.enableDisplayableDefaultValuesInEce ?: false
                             )
                         ).takeIf {
                             // Show Link button if verification state is ready OR if we have a direct linkEmail
-                            (linkEmbeddedState.verificationState is VerificationState.RenderButton || arguments.linkEmail != null) &&
+                            (linkEmbeddedState.verificationState is VerificationState.RenderButton ||
+                                arguments.linkEmail != null) &&
                                 walletsAllowedByMerchant.contains(WalletType.Link)
                         }
                     }
