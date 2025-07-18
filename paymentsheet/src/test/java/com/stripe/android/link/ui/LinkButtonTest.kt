@@ -44,7 +44,7 @@ class LinkButtonTest {
     fun signedOutButton_hasUsefulContentDescription() {
         composeRule.setContent {
             LinkButton(
-                state = LinkButtonState.Plain,
+                state = LinkButtonState.Default,
                 enabled = true,
                 onClick = {}
             )

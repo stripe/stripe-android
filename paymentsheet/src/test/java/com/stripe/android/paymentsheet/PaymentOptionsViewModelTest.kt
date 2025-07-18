@@ -854,7 +854,7 @@ internal class PaymentOptionsViewModelTest {
 
         viewModel.walletsState.test {
             val state = awaitItem()
-            assertThat(state?.link).isEqualTo(WalletsState.Link(state = LinkButtonState.Plain))
+            assertThat(state?.link).isEqualTo(WalletsState.Link(state = LinkButtonState.Default))
             assertThat(state?.googlePay).isNull()
         }
     }

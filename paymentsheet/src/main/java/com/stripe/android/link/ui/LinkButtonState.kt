@@ -26,7 +26,7 @@ internal sealed class LinkButtonState {
     /**
      * Show signed out state
      */
-    object Plain : LinkButtonState()
+    object Default : LinkButtonState()
 
     companion object {
         /**
@@ -40,7 +40,7 @@ internal sealed class LinkButtonState {
             return when {
                 paymentUI != null -> DefaultPayment(paymentUI = paymentUI)
                 linkEmail != null -> Email(email = linkEmail)
-                else -> Plain
+                else -> Default
             }
         }
     }

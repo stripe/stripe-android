@@ -93,7 +93,7 @@ private fun LinkEmailButton() {
 private fun LinkNoEmailButton() {
     DefaultLinkTheme {
         LinkButton(
-            state = LinkButtonState.Plain,
+            state = LinkButtonState.Default,
             enabled = true,
             onClick = {}
         )
@@ -171,7 +171,7 @@ internal fun LinkButton(
                     )
 
                     is LinkButtonState.Email -> SignedInButtonContent(state.email)
-                    LinkButtonState.Plain -> SignedOutButtonContent()
+                    LinkButtonState.Default -> SignedOutButtonContent()
                 }
             }
         }

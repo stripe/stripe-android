@@ -233,7 +233,7 @@ internal class DefaultWalletButtonsInteractor(
         } else {
             handleButtonPressed(
                 WalletButton.Link(
-                    state = LinkButtonState.Plain
+                    state = LinkButtonState.Default
                 ),
                 arguments
             )

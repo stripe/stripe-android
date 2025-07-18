@@ -69,21 +69,21 @@ internal class LinkButtonScreenshotTest {
     @Test
     fun testNewUser() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Plain, enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
         }
     }
 
     @Test
     fun testNewUserInDifferentLocales() {
         localesPaparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Plain, enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
         }
     }
 
     @Test
     fun testNewUserDisabled() {
         paparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Plain, enabled = false, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = false, onClick = { })
         }
     }
 
@@ -126,7 +126,7 @@ internal class LinkButtonScreenshotTest {
     @Test
     fun testRoundedCornerSurfaceColor() {
         surfacePaparazziRule.snapshot {
-            LinkButton(state = LinkButtonState.Plain, enabled = true, onClick = { })
+            LinkButton(state = LinkButtonState.Default, enabled = true, onClick = { })
         }
     }
 

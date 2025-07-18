@@ -218,7 +218,7 @@ class DefaultWalletButtonsInteractorTest {
         interactor.handleViewAction(
             WalletButtonsInteractor.ViewAction.OnButtonPressed(
                 WalletButtonsInteractor.WalletButton.Link(
-                    state = LinkButtonState.Plain,
+                    state = LinkButtonState.Default,
                 )
             )
         )
@@ -246,7 +246,7 @@ class DefaultWalletButtonsInteractorTest {
 
         interactor.handleViewAction(
             WalletButtonsInteractor.ViewAction.OnButtonPressed(
-                WalletButtonsInteractor.WalletButton.Link(state = LinkButtonState.Plain)
+                WalletButtonsInteractor.WalletButton.Link(state = LinkButtonState.Default)
             )
         )
 
@@ -301,7 +301,7 @@ class DefaultWalletButtonsInteractorTest {
 
             val button = state.walletButtons.first().asLinkWalletButton()
 
-            assertThat(button.state).isInstanceOf<LinkButtonState.Plain>()
+            assertThat(button.state).isInstanceOf<LinkButtonState.Default>()
         }
     }
 

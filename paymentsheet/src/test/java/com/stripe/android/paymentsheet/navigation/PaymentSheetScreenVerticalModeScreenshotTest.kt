@@ -143,7 +143,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(interactor)
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
-            link = WalletsState.Link(state = LinkButtonState.Plain),
+            link = WalletsState.Link(state = LinkButtonState.Default),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,

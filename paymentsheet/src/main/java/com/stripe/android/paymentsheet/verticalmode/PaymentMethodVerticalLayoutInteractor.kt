@@ -339,7 +339,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 val subtitle = when (val state = it.state) {
                     is LinkButtonState.Email -> state.email.resolvableString
                     is LinkButtonState.DefaultPayment,
-                    is LinkButtonState.Plain -> PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
+                    is LinkButtonState.Default ->
+                        PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
                 }
 
                 wallets += DisplayablePaymentMethod(

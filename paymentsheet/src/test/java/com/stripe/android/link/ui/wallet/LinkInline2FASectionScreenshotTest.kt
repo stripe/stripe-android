@@ -6,7 +6,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.verification.VerificationViewState
-import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule

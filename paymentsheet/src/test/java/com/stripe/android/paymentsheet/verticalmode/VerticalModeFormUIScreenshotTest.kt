@@ -102,7 +102,7 @@ internal class VerticalModeFormUIScreenshotTest {
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
-                state = LinkButtonState.Plain,
+                state = LinkButtonState.Default,
             ),
             googlePay = null,
             buttonsEnabled = true,
