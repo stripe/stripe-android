@@ -1297,12 +1297,14 @@ class PaymentSheet internal constructor(
         @Parcelize
         @Poko
         class Embedded(
-            internal val style: RowStyle
+            internal val style: RowStyle,
+            internal val paymentMethodIconMargins: Insets? = null
         ) : Parcelable {
 
             internal companion object {
                 val default = Embedded(
-                    style = RowStyle.FlatWithRadio.default
+                    style = RowStyle.FlatWithRadio.default,
+                    paymentMethodIconMargins = null
                 )
             }
 
@@ -1941,14 +1943,20 @@ class PaymentSheet internal constructor(
 
             class Builder {
                 private var rowStyle: RowStyle = default.style
+                private var paymentMethodIconMargins: Insets? = null
 
                 fun rowStyle(rowStyle: RowStyle) = apply {
                     this.rowStyle = rowStyle
                 }
 
+                fun paymentMethodIconMargins(margins: Insets) = apply {
+                    this.paymentMethodIconMargins = margins
+                }
+
                 fun build(): Embedded {
                     return Embedded(
                         style = rowStyle,
+                        paymentMethodIconMargins = paymentMethodIconMargins
                     )
                 }
             }

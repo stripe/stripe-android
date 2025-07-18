@@ -15,7 +15,7 @@ import com.stripe.android.uicore.StripeTheme
 internal data class EmbeddedContent(
     private val interactor: PaymentMethodVerticalLayoutInteractor,
     private val embeddedViewDisplaysMandateText: Boolean,
-    private val rowStyle: Embedded.RowStyle,
+    private val appearance: Embedded,
     private val isImmediateAction: Boolean,
 ) {
     @Composable
@@ -30,8 +30,8 @@ internal data class EmbeddedContent(
          *
          * Having validation here ensures that we only validate when the embedded content is shown.
          */
-        LaunchedEffect(rowStyle, isImmediateAction) {
-            if (rowStyle is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
+        LaunchedEffect(appearance.style, isImmediateAction) {
+            if (appearance.style is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
                 throw IllegalArgumentException(
                     "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
                         "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
@@ -47,7 +47,7 @@ internal data class EmbeddedContent(
                 PaymentMethodEmbeddedLayoutUI(
                     interactor = interactor,
                     embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                    rowStyle = rowStyle
+                    appearance = appearance
                 )
             }
         }
