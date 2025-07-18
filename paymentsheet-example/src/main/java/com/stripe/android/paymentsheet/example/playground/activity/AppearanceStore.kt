@@ -148,7 +148,7 @@ internal object AppearanceStore {
             val selectedColor: Int = Color(0xFF007AFF).toArgb(),
             val unselectedColor: Int = Color(0x33787880).toArgb(),
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
-            val chevronColor: Int = Color.DarkGray.toArgb(),
+            val chevronColor: Int = Color.DarkGray.toArgb()
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
