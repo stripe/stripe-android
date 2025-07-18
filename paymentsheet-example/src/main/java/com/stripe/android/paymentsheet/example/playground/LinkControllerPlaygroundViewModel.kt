@@ -28,4 +28,8 @@ internal class LinkControllerPlaygroundViewModel(
     fun onLinkControllerAuthentication(result: LinkController.AuthenticationResult) {
         linkControllerState.update { it.copy(authenticationResult = result) }
     }
+
+    fun onRegisterConsumer(result: LinkController.RegisterConsumerResult) {
+        linkControllerState.update { it.copy(registerConsumerResult = result) }
+    }
 }

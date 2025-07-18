@@ -21,6 +21,7 @@ internal class LinkControllerCoordinator @Inject constructor(
     private val lookupConsumerCallback: LinkController.LookupConsumerCallback,
     private val createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
     private val authenticationCallback: LinkController.AuthenticationCallback,
+    private val registerConsumerCallback: LinkController.RegisterConsumerCallback,
 ) {
     val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
 
@@ -51,6 +52,10 @@ internal class LinkControllerCoordinator @Inject constructor(
                 launch {
                     viewModel.authenticationResultFlow
                         .collect(authenticationCallback::onAuthenticationResult)
+                }
+                launch {
+                    viewModel.registerConsumerResultFlow
+                        .collect(registerConsumerCallback::onRegisterConsumerResult)
                 }
             }
         }
