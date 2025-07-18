@@ -1,5 +1,8 @@
 package com.stripe.android.crypto.onramp.model
 
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface OnrampLinkLookupCallback {
     fun onResult(result: OnrampLinkLookupResult)
 }
@@ -7,6 +10,7 @@ fun interface OnrampLinkLookupCallback {
 /**
  * Result of an OnRamp Link user lookup operation.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface OnrampLinkLookupResult {
     /**
      * Link user lookup was successful.

@@ -25,7 +25,7 @@ internal class LinkControllerCoordinator @Inject constructor(
     val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
 
     init {
-        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED))
+        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
 
         linkActivityResultLauncher = activityResultRegistryOwner.activityResultRegistry.register(
             key = "LinkController_LinkActivityResultLauncher",

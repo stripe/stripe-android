@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
@@ -25,7 +26,8 @@ import javax.inject.Inject
  * @param onrampCallbacks Callback structure that manages the results of asynchronous requests
  *                        made by the coordinator.
  */
-internal class OnrampCoordinator @Inject internal constructor(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class OnrampCoordinator @Inject internal constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val onrampCallbacks: OnrampCallbacks
