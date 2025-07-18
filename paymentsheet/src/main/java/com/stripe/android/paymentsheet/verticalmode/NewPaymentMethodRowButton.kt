@@ -28,7 +28,8 @@ internal fun NewPaymentMethodRowButton(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
+    appearance: Embedded = Embedded.default,
+    disclosureView: @Composable (() -> Unit)?,
 ) {
     val iconUrl = if (isSystemInDarkTheme() && displayablePaymentMethod.darkThemeIconUrl != null) {
         displayablePaymentMethod.darkThemeIconUrl
@@ -49,7 +50,8 @@ internal fun NewPaymentMethodRowButton(
             displayablePaymentMethod.onClick()
         },
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
-        rowStyle = rowStyle,
+        appearance = appearance,
+        disclosureView = disclosureView,
         trailingContent = trailingContent,
     )
 }
@@ -68,7 +70,8 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
+    appearance: Embedded,
+    disclosureView: @Composable (() -> Unit)?,
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -89,7 +92,8 @@ internal fun NewPaymentMethodRowButton(
         promoText = promoText,
         onClick = onClick,
         modifier = modifier,
-        style = rowStyle,
+        appearance = appearance,
+        disclosureView = disclosureView,
         trailingContent = trailingContent,
     )
 }

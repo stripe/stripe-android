@@ -35,7 +35,8 @@ internal fun SavedPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
-    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
+    appearance: Embedded = Embedded.default,
+    disclosureView: @Composable (() -> Unit)? = null,
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -73,8 +74,9 @@ internal fun SavedPaymentMethodRowButton(
             ),
         contentDescription = contentDescription,
         trailingContent = trailingContent,
-        style = rowStyle,
-        shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge
+        appearance = appearance,
+        shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge,
+        disclosureView = disclosureView
     )
 }
 

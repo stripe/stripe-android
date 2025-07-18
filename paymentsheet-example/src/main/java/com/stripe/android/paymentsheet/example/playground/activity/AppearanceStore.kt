@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.activity
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlinx.parcelize.Parcelize
@@ -37,8 +39,28 @@ internal object AppearanceStore {
         val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
         val iconStyle: IconStyle = IconStyle.Filled,
     ) {
-        @OptIn(AppearanceAPIAdditionsPreview::class)
+//        @OptIn(AppearanceAPIAdditionsPreview::class)
+        //@OptIn(AppearanceAPIAdditionsPreview::class)
         fun toPaymentSheetAppearance(): PaymentSheet.Appearance {
+val embeddedAppearance = PaymentSheet.Appearance.Embedded.Builder()
+    .rowStyle(
+        PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron(
+            //...
+            disclosureIconRes = R.drawable.ic_custom_chevorn
+        )
+    )
+    .paymentMethodIconLayoutMargins(
+        PaymentSheet.Insets(
+            horizontalDp = 0f, verticalDp = 0f
+        )
+    )
+    .titleFont(
+        PaymentSheet.Typography.Font(
+            fontSizeSp = 15f,
+            fontWeight = 200
+        )
+    )
+
             return PaymentSheet.Appearance.Builder()
                 .colorsLight(colorsLight.build())
                 .colorsDark(colorsDark.build())
@@ -212,7 +234,8 @@ internal object AppearanceStore {
                         colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
                             separatorColor = Color(0x40FFFFFF).toArgb(),
                             chevronColor = Color.LightGray.toArgb()
-                        )
+                        ),
+                        disclosureIconRes = R.drawable.test_ic
                     )
                     Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                         spacingDp = floatingButtonSpacingDp,

@@ -47,7 +47,8 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
     embeddedViewDisplaysMandateText: Boolean,
     modifier: Modifier = Modifier,
-    rowStyle: Embedded.RowStyle
+    appearance: Embedded,
+    disclosureView: @Composable (() -> Unit)?,
 ) {
     val context = LocalContext.current
     val imageLoader = remember {
@@ -80,7 +81,8 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         imageLoader = imageLoader,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
-        rowStyle = rowStyle
+        appearance = appearance,
+        disclosureView = disclosureView
     )
 
     EmbeddedMandate(
@@ -101,16 +103,17 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
-    rowStyle: Embedded.RowStyle,
+    appearance: Embedded,
+    disclosureView: @Composable (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
-    val arrangement = if (rowStyle is Embedded.RowStyle.FloatingButton) {
-        Arrangement.spacedBy(rowStyle.spacingDp.dp)
+    val arrangement = if (appearance.style is RowStyle.FloatingButton) {
+        Arrangement.spacedBy(appearance.style.spacingDp.dp)
     } else {
         Arrangement.Top
     }
     Column(modifier = modifier, verticalArrangement = arrangement) {
-        if (rowStyle.topSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
+        if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
 
         EmbeddedSavedPaymentMethodRowButton(
             paymentMethods = paymentMethods,
@@ -121,7 +124,8 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             onViewMorePaymentMethods = onViewMorePaymentMethods,
             onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
-            rowStyle = rowStyle
+            appearance = appearance,
+            disclosureView = disclosureView
         )
 
         EmbeddedNewPaymentMethodRowButtonsLayoutUi(
@@ -129,10 +133,11 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             selection = selection,
             isEnabled = isEnabled,
             imageLoader = imageLoader,
-            rowStyle = rowStyle,
+            disclosureView = disclosureView,
+            appearance = appearance,
         )
 
-        if (rowStyle.bottomSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
+        if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
@@ -232,7 +237,8 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    rowStyle: Embedded.RowStyle,
+    appearance: Embedded,
+    disclosureView: @Composable (() -> Unit)?
 ) {
     if (displayedSavedPaymentMethod != null) {
         SavedPaymentMethodRowButton(
@@ -241,17 +247,18 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isSelected = selection?.isSaved == true,
             trailingContent = {
                 SavedPaymentMethodTrailingContent(
-                    viewMoreShowChevron = rowStyle.viewMoreShowsChevron,
+                    viewMoreShowChevron = appearance.style.viewMoreShowsChevron,
                     savedPaymentMethodAction = savedPaymentMethodAction,
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                 )
             },
             onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
-            rowStyle = rowStyle
+            appearance = appearance,
+            disclosureView = disclosureView
         )
 
-        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
+        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
@@ -261,7 +268,8 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
-    rowStyle: Embedded.RowStyle,
+    appearance: Embedded,
+    disclosureView: @Composable (() -> Unit)?,
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
         if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
@@ -284,10 +292,11 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 isSelected = true,
                 displayablePaymentMethod = displayablePaymentMethod,
                 imageLoader = imageLoader,
-                rowStyle = rowStyle,
+                appearance = appearance,
+                disclosureView = disclosureView,
                 trailingContent = {
                     EmbeddedNewPaymentMethodTrailingContent(
-                        showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
+                        showChevron = appearance.style !is Embedded.RowStyle.FlatWithCheckmark,
                     )
                 }
             )
@@ -297,11 +306,12 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 isSelected = isSelected,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                rowStyle = rowStyle,
+                disclosureView = disclosureView,
+                appearance = appearance,
             )
         }
 
-        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
+        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(appearance.style)
     }
 }
 

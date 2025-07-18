@@ -6,13 +6,16 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
+import com.google.firebase.encoders.annotations.Encodable.Ignore
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
@@ -1296,8 +1299,11 @@ class PaymentSheet internal constructor(
 
         @Parcelize
         @Poko
-        class Embedded(
-            internal val style: RowStyle
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        class Embedded internal constructor(
+            internal val style: RowStyle,
+            internal val paymentMethodIconLayoutMargins: Insets?,
+            internal val titleFont: Typography.Font?
         ) : Parcelable {
 
             internal companion object {
@@ -1305,6 +1311,15 @@ class PaymentSheet internal constructor(
                     style = RowStyle.FlatWithRadio.default
                 )
             }
+
+            //@OptIn(AppearanceAPIAdditionsPreview::class)
+            constructor(
+                style: RowStyle
+            ) : this(
+                style = style,
+                paymentMethodIconLayoutMargins = null,
+                titleFont = null
+            )
 
             @Parcelize
             sealed class RowStyle : Parcelable {
@@ -1591,7 +1606,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithChevron(
+                class FlatWithChevron @AppearanceAPIAdditionsPreview constructor(
                     /**
                      * The thickness of the separator line between rows.
                      */
@@ -1637,8 +1652,17 @@ class PaymentSheet internal constructor(
                     /**
                      * Describes the colors used while the system is in dark mode.
                      */
-                    internal val colorsDark: Colors
+                    internal val colorsDark: Colors,
+
+                    /**
+                     * The dra displayed on the end of the row - typically, a chevron. This should be a resource ID
+                     * value.
+                     * - Note: If `null`, uses a default chevron
+                     */
+                    @DrawableRes
+                    internal val disclosureIconRes: Int?
                 ) : RowStyle() {
+
                     constructor(
                         context: Context,
                         @DimenRes separatorThicknessRes: Int,
@@ -1659,7 +1683,31 @@ class PaymentSheet internal constructor(
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
                         horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
-                        colorsDark = colorsDark
+                        colorsDark = colorsDark,
+                        disclosureIconRes = null
+                    )
+
+                    constructor(
+                        separatorThicknessDp: Float,
+                        startSeparatorInsetDp: Float,
+                        endSeparatorInsetDp: Float,
+                        topSeparatorEnabled: Boolean,
+                        additionalVerticalInsetsDp: Float,
+                        bottomSeparatorEnabled: Boolean,
+                        horizontalInsetsDp: Float,
+                        colorsLight: Colors,
+                        colorsDark: Colors,
+                    ) : this(
+                        separatorThicknessDp = separatorThicknessDp,
+                        startSeparatorInsetDp = startSeparatorInsetDp,
+                        endSeparatorInsetDp = endSeparatorInsetDp,
+                        topSeparatorEnabled = topSeparatorEnabled,
+                        additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                        bottomSeparatorEnabled = bottomSeparatorEnabled,
+                        horizontalInsetsDp = horizontalInsetsDp,
+                        colorsLight = colorsLight,
+                        colorsDark = colorsDark,
+                        disclosureIconRes = null
                     )
 
                     @Parcelize
@@ -1698,9 +1746,50 @@ class PaymentSheet internal constructor(
                             colorsDark = Colors(
                                 separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
                                 chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
-                            )
+                            ),
+                            disclosureIconRes = null
                         )
                     }
+                }
+            }
+
+            //@OptIn(AppearanceAPIAdditionsPreview::class)
+            class Builder {
+                private var rowStyle: RowStyle = default.style
+                private var paymentMethodIconLayoutMargins: Insets? = null
+                //@OptIn(AppearanceAPIAdditionsPreview::class)
+                private var titleFont: Typography.Font? = null
+
+                fun rowStyle(rowStyle: RowStyle) = apply {
+                    this.rowStyle = rowStyle
+                }
+
+                /**
+                 * Controls the padding around the payment method icon.
+                 * - Note: The top and bottom margins are ignored; use `additionalVerticalInsetsDp` to control the height
+                 * of the row.
+                 */
+                fun paymentMethodIconLayoutMargins(margins: Insets?) = apply {
+                    this.paymentMethodIconLayoutMargins = margins
+                }
+
+                /**
+                 * The font of the title in a payment method row e.g. "New card"
+                 * - Note: If `null`, uses a default font based on `appearance.typography`.
+                 */
+                //@OptIn(AppearanceAPIAdditionsPreview::class)
+                @AppearanceAPIAdditionsPreview
+                fun titleFont(font: Typography.Font?) = apply {
+                    this.titleFont = font
+                }
+
+                //@OptIn(AppearanceAPIAdditionsPreview::class)
+                fun build(): Embedded {
+                    return Embedded(
+                        style = rowStyle,
+                        paymentMethodIconLayoutMargins = paymentMethodIconLayoutMargins,
+                        titleFont = titleFont
+                    )
                 }
             }
         }
@@ -2319,6 +2408,13 @@ class PaymentSheet internal constructor(
                 topDp = 0f,
                 endDp = 20f,
                 bottomDp = 40f,
+            )
+
+            internal val defaultEmptyInsets = Insets(
+                startDp = 0f,
+                topDp = 0f,
+                endDp = 0f,
+                bottomDp = 0f
             )
 
             internal val defaultTextFieldInsets = Insets(

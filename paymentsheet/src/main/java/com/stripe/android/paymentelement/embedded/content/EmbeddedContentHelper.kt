@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Parcelable
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
@@ -10,6 +11,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.verification.NoOpLinkInlineInteractor
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.callbacks.ViewHolder
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -51,7 +53,7 @@ internal interface EmbeddedContentHelper {
 
     fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     )
 
@@ -75,6 +77,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val embeddedLinkHelper: EmbeddedLinkHelper,
     private val rowSelectionImmediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val disclosureView: Provider<ViewHolder>,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
@@ -110,8 +113,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                             walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
                         ),
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
-                        rowStyle = state.rowStyle,
-                        isImmediateAction = internalRowSelectionCallback.get() != null
+                        appearance = state.appearance,
+                        isImmediateAction = internalRowSelectionCallback.get() != null,
+                        disclosureView = disclosureView.get().disclosureView
                     )
                 }
             }
@@ -134,13 +138,13 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         eventReporter.onShowNewPaymentOptions()
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
-            rowStyle = rowStyle,
+            appearance = appearance,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
     }
@@ -299,7 +303,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @Parcelize
     class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val rowStyle: Embedded.RowStyle,
+        val appearance: Embedded,
         val embeddedViewDisplaysMandateText: Boolean,
     ) : Parcelable
 

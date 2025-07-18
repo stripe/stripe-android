@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import android.app.Application
 import android.content.Context
 import android.content.res.Resources
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -19,6 +20,8 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.callbacks.ViewHolder
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
@@ -228,10 +231,24 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
-        fun providesInternalRowSelectionCallback(
+        fun providesCallbackReferences(
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): PaymentElementCallbacks? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+        }
+
+        @Provides
+        fun providesInternalRowSelectionCallback(
+            callbacks: PaymentElementCallbacks?,
         ): InternalRowSelectionCallback? {
-            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.rowSelectionCallback
+            return callbacks?.rowSelectionCallback
+        }
+
+        @Provides
+        fun providesDisclosureView(
+            callbacks: PaymentElementCallbacks?,
+        ): ViewHolder? {
+            return callbacks?.disclosureView
         }
     }
 }

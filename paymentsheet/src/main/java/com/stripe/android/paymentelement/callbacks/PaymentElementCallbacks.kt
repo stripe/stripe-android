@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.callbacks
 
+import androidx.compose.runtime.Composable
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -28,6 +29,7 @@ internal data class PaymentElementCallbacks private constructor(
     val rowSelectionCallback: InternalRowSelectionCallback?,
     val shopPayHandlers: ShopPayHandlers?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
+    val disclosureView: ViewHolder,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -37,6 +39,7 @@ internal data class PaymentElementCallbacks private constructor(
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
         private var shopPayHandlers: ShopPayHandlers? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
+        private var disclosureView: @Composable (() -> Unit)? = null
 
         fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
             this.createIntentCallback = createIntentCallback
@@ -77,6 +80,10 @@ internal data class PaymentElementCallbacks private constructor(
             this.shopPayHandlers = shopPayHandlers
         }
 
+        fun disclosureView(view: @Composable (() -> Unit)?) = apply {
+            this.disclosureView = view
+        }
+
         fun build(): PaymentElementCallbacks {
             return PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
@@ -86,7 +93,12 @@ internal data class PaymentElementCallbacks private constructor(
                 rowSelectionCallback = rowSelectionCallback,
                 shopPayHandlers = shopPayHandlers,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
+                disclosureView = ViewHolder(disclosureView)
             )
         }
     }
 }
+
+internal data class ViewHolder(
+    val disclosureView: @Composable (() -> Unit)?
+)

@@ -168,6 +168,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
+        internal var disclosureView: @Composable (() -> Unit)? = null
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -201,6 +203,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
             this.rowSelectionBehavior = rowSelectionBehavior
         }
 
+        /**
+         * Set the disclosureView, a custom composable to be displayed at the end of the `FlatWithDisclosure` row style.
+         * Typically a chevron.
+         * - Note: If `null`, uses a default chevron.
+         */
+        fun disclosureView(view: @Composable (() -> Unit)?) = apply {
+            this.disclosureView = view
+        }
+
         @OptIn(SharedPaymentTokenSessionPreview::class)
         internal sealed interface DeferredHandler {
             class Intent(val createIntentCallback: CreateIntentCallback) : DeferredHandler
@@ -213,8 +224,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
     /** Configuration for [EmbeddedPaymentElement] **/
     @Parcelize
-    @Poko
-    class Configuration internal constructor(
+    //@Poko
+    data class Configuration constructor(
         internal val merchantDisplayName: String,
         internal val customer: PaymentSheet.CustomerConfiguration?,
         internal val googlePay: PaymentSheet.GooglePayConfiguration?,

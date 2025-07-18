@@ -9,13 +9,20 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Colors
+import androidx.compose.material.Icon
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,10 +34,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -40,6 +51,7 @@ import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
@@ -89,6 +101,7 @@ internal class EmbeddedPlaygroundActivity :
     private lateinit var playgroundSettings: PlaygroundSettings
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
 
+    //@OptIn(AppearanceAPIAdditionsPreview::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -99,6 +112,7 @@ internal class EmbeddedPlaygroundActivity :
         }
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
         val embeddedBuilder = EmbeddedPaymentElement.Builder(
             createIntentCallback = { _, _ ->
@@ -121,6 +135,9 @@ internal class EmbeddedPlaygroundActivity :
             .rowSelectionBehavior(
                 playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
             )
+            .disclosureView {
+                Text("This is new")
+            }
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
@@ -132,11 +149,51 @@ internal class EmbeddedPlaygroundActivity :
 
             val coroutineScope = rememberCoroutineScope()
 
+            val oldConfig = playgroundState.embeddedConfiguration()
+            val newConfig = oldConfig.copy(
+                appearance = PaymentSheet.Appearance.Builder()
+                    .embeddedAppearance(
+                        PaymentSheet.Appearance.Embedded.Builder()
+                            .rowStyle(
+                                PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron(
+                                    separatorThicknessDp = 2.0f,
+                                    startSeparatorInsetDp = 0f,
+                                    endSeparatorInsetDp = 0f,
+                                    topSeparatorEnabled = true,
+                                    additionalVerticalInsetsDp = 0f,
+                                    bottomSeparatorEnabled = true,
+                                    horizontalInsetsDp = 0f,
+                                    colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                                        separatorColor = Color(0xFF000000).toArgb(),
+                                        chevronColor = Color(0x40FFFFFF).toArgb()
+                                    ),
+                                    colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                                        separatorColor = Color(0xFF000000).toArgb(),
+                                        chevronColor = Color(0x40FFFFFF).toArgb(),
+                                    ),
+                                    disclosureIconRes = R.drawable.test_ic
+                                ),
+                            )
+                            .titleFont(
+                            PaymentSheet.Typography.Font(
+                                    fontSizeSp = 15f,
+                                    fontWeight = 200
+                                )
+                            )
+                            .paymentMethodIconLayoutMargins(
+                                PaymentSheet.Insets(horizontalDp = 20f, verticalDp = 0f)
+                            ).build()
+                        ).build()
+                    )
+                )
+            )
+
+
             fun configure() = coroutineScope.launch {
                 loadingState = LoadingState.Loading
                 val result = embeddedPaymentElement.configure(
                     intentConfiguration = playgroundState.intentConfiguration(),
-                    configuration = playgroundState.embeddedConfiguration(),
+                    configuration = oldConfig,
                 )
                 loadingState = when (result) {
                     is EmbeddedPaymentElement.ConfigureResult.Failed -> {

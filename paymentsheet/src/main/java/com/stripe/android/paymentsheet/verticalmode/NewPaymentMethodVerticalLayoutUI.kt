@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.uicore.image.StripeImageLoader
 
@@ -30,7 +31,8 @@ internal fun NewPaymentMethodVerticalLayoutUI(
                 isSelected = index == selectedIndex,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                rowStyle = rowStyle
+                appearance = PaymentSheet.Appearance.Embedded(rowStyle),
+                disclosureView = null
             )
         }
     }

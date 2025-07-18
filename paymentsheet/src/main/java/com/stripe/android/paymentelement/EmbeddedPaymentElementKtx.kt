@@ -78,6 +78,7 @@ fun rememberEmbeddedPaymentElement(
             .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
             .analyticEventCallback(builder.analyticEventCallback)
             .rowSelectionImmediateActionCallback(builder.rowSelectionBehavior, embeddedPaymentElement)
+            .disclosureView(builder.disclosureView)
             .build()
     }
 

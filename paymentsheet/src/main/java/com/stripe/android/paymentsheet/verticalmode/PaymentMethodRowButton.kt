@@ -40,8 +40,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -64,7 +67,8 @@ internal fun PaymentMethodRowButton(
     onClick: () -> Unit,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
-    style: RowStyle = RowStyle.FloatingButton.default,
+    appearance: PaymentSheet.Appearance.Embedded,
+    disclosureView: @Composable (() -> Unit)? = null,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val contentPaddingValues = if (subtitle != null) {
@@ -74,7 +78,7 @@ internal fun PaymentMethodRowButton(
     }
 
     RowButtonOuterContent(
-        style = style,
+        style = appearance.style,
         isEnabled = isEnabled,
         isSelected = isSelected,
         contentPaddingValues = contentPaddingValues,
@@ -87,6 +91,7 @@ internal fun PaymentMethodRowButton(
                 onClick = onClick
             ),
         trailingContent = trailingContent,
+        disclosureView = disclosureView,
         onClick = onClick
     ) { displayTrailingContent ->
         Row(
@@ -100,8 +105,8 @@ internal fun PaymentMethodRowButton(
                 title = title,
                 subtitle = subtitle,
                 contentDescription = contentDescription,
-                style = style,
-                modifier = if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
+                appearance = appearance,
+                modifier = if (appearance.style !is RowStyle.FlatWithCheckmark && appearance.style !is RowStyle.FlatWithChevron) {
                     Modifier.weight(1f, fill = true)
                 } else {
                     Modifier
@@ -126,6 +131,7 @@ private fun RowButtonOuterContent(
     isSelected: Boolean,
     contentPaddingValues: Dp,
     modifier: Modifier,
+    disclosureView: @Composable (() -> Unit)?,
     trailingContent: @Composable (RowScope.() -> Unit)?,
     onClick: () -> Unit,
     rowContent: @Composable (displayTrailingContent: Boolean) -> Unit
@@ -166,6 +172,7 @@ private fun RowButtonOuterContent(
                 ),
                 trailingContent = trailingContent,
                 style = style,
+                disclosureView = disclosureView,
                 modifier = modifier
             ) {
                 rowContent(false)
@@ -290,6 +297,7 @@ private fun RowButtonChevronOuterContent(
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
     style: RowStyle.FlatWithChevron,
+    disclosureView: @Composable (() -> Unit)?,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     RowButtonWithEndIconOuterContent(
@@ -297,13 +305,25 @@ private fun RowButtonChevronOuterContent(
         trailingContent = trailingContent,
         modifier = modifier,
         iconContent = {
-            Icon(
-                painter = painterResource(R.drawable.stripe_ic_chevron_right),
-                contentDescription = null,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically),
-                tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
-            )
+//            if (disclosureView != null) {
+//                disclosureView.invoke()
+            if (style.disclosureIconRes != null) {
+                Icon(
+                    painter = painterResource(style.disclosureIconRes),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically),
+                    tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
+                )
+            }
+
         },
         content = content
     )
@@ -348,7 +368,7 @@ private fun RowButtonInnerContent(
     title: String,
     subtitle: String?,
     contentDescription: String? = null,
-    style: RowStyle,
+    appearance: PaymentSheet.Appearance.Embedded,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -356,14 +376,16 @@ private fun RowButtonInnerContent(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
+        Spacer(Modifier.size(appearance.paymentMethodIconLayoutMargins?.startDp?.dp ?: 0.dp))
         iconContent()
+        Spacer(Modifier.size(appearance.paymentMethodIconLayoutMargins?.endDp?.dp ?: 0.dp))
 
         TitleContent(
             title = title,
             subtitle = subtitle,
             isEnabled = isEnabled,
             contentDescription = contentDescription,
-            style = style
+            appearance = appearance
         )
 
         if (shouldShowDefaultBadge) {
@@ -375,19 +397,25 @@ private fun RowButtonInnerContent(
     }
 }
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun TitleContent(
     title: String,
     subtitle: String?,
     isEnabled: Boolean,
     contentDescription: String?,
-    style: RowStyle
+    appearance: PaymentSheet.Appearance.Embedded,
 ) {
-    val titleColor = style.getTitleTextColor()
+    val titleColor = appearance.style.getTitleTextColor()
+    val style = if (appearance.titleFont != null) {
+        appearance.titleFont.toTextStyle()
+    } else {
+        MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium)
+    }
     Column {
         Text(
             text = title,
-            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
+            style = style,
             color = if (isEnabled) titleColor else titleColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -399,7 +427,7 @@ private fun TitleContent(
         )
 
         if (subtitle != null) {
-            val subtitleTextColor = style.getSubtitleTextColor()
+            val subtitleTextColor = appearance.style.getSubtitleTextColor()
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
@@ -437,7 +465,7 @@ private fun ButtonPreview() {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = RowStyle.FloatingButton.default,
+                appearance = PaymentSheet.Appearance.Embedded.default,
                 trailingContent = {
                     Text("Edit")
                 }
@@ -462,7 +490,7 @@ private fun ButtonPreview() {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = RowStyle.FloatingButton.default,
+                appearance = PaymentSheet.Appearance.Embedded.default,
                 trailingContent = {
                     Text("Edit")
                 }

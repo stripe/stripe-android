@@ -127,7 +127,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                     )
                 },
-                rowStyle = rowStyle,
+                appearance = PaymentSheet.Appearance.Embedded(rowStyle),
             )
             Spacer(Modifier.size(24.dp))
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
