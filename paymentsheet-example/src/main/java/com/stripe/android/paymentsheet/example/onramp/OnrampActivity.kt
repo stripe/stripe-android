@@ -208,61 +208,95 @@ private fun RegistrationScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email Address *") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
+        RegistrationFields(
+            email = email,
+            onEmailChange = { email = it },
+            phone = phone,
+            onPhoneChange = { phone = it },
+            country = country,
+            onCountryChange = { country = it },
+            fullName = fullName,
+            onFullNameChange = { fullName = it }
         )
 
-        OutlinedTextField(
-            value = phone,
-            onValueChange = { phone = it },
-            label = { Text("Phone Number (E.164 format) *") },
-            placeholder = { Text("+1234567890") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
+        RegistrationButtons(
+            onBack = onBack,
+            onRegister = { onRegister(email, phone, country, fullName) }
         )
+    }
+}
 
-        OutlinedTextField(
-            value = country,
-            onValueChange = { country = it },
-            label = { Text("Country Code *") },
-            placeholder = { Text("US") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        )
+@Composable
+private fun RegistrationFields(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    phone: String,
+    onPhoneChange: (String) -> Unit,
+    country: String,
+    onCountryChange: (String) -> Unit,
+    fullName: String,
+    onFullNameChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = email,
+        onValueChange = onEmailChange,
+        label = { Text("Email Address *") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    )
 
-        OutlinedTextField(
-            value = fullName,
-            onValueChange = { fullName = it },
-            label = { Text("Full Name (optional)") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 20.dp)
-        )
+    OutlinedTextField(
+        value = phone,
+        onValueChange = onPhoneChange,
+        label = { Text("Phone Number (E.164 format) *") },
+        placeholder = { Text("+1234567890") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+    OutlinedTextField(
+        value = country,
+        onValueChange = onCountryChange,
+        label = { Text("Country Code *") },
+        placeholder = { Text("US") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    )
+
+    OutlinedTextField(
+        value = fullName,
+        onValueChange = onFullNameChange,
+        label = { Text("Full Name (optional)") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 20.dp)
+    )
+}
+
+@Composable
+private fun RegistrationButtons(
+    onBack: () -> Unit,
+    onRegister: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        TextButton(
+            onClick = onBack,
+            modifier = Modifier.weight(1f)
         ) {
-            TextButton(
-                onClick = onBack,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Back")
-            }
+            Text("Back")
+        }
 
-            Button(
-                onClick = { onRegister(email, phone, country, fullName) },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Register")
-            }
+        Button(
+            onClick = onRegister,
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("Register")
         }
     }
 }
@@ -307,4 +341,3 @@ private fun AuthenticationScreen(
         }
     }
 }
-

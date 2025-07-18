@@ -54,7 +54,7 @@ internal class OnrampViewModel : ViewModel() {
             onRegister(userInfo)
             _message.value = "Registration attempted (not yet implemented)"
             _uiState.value = OnrampUiState.EmailInput
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
             _message.value = "Registration failed: ${e.message}"
             _uiState.value = OnrampUiState.Registration(email)
         }
@@ -71,7 +71,7 @@ internal class OnrampViewModel : ViewModel() {
             onAuthenticate(email.trim())
             _message.value = "Authentication attempted (not yet implemented)"
             _uiState.value = OnrampUiState.EmailInput
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
             _message.value = "Authentication failed: ${e.message}"
             _uiState.value = OnrampUiState.Authentication(email)
         }
@@ -141,4 +141,4 @@ internal sealed class OnrampUiState {
     object Loading : OnrampUiState()
     data class Registration(val email: String) : OnrampUiState()
     data class Authentication(val email: String) : OnrampUiState()
-} 
+}
