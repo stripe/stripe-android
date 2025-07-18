@@ -690,7 +690,7 @@ class DefaultWalletButtonsInteractorTest {
     fun `when linkEnableDisplayableDefaultValuesInEce is true, should use payment details if available`() = runTest {
         val paymentDetails = DisplayablePaymentDetails(
             defaultCardBrand = "VISA",
-            defaultPaymentType = "card",
+            defaultPaymentType = "CARD",
             last4 = "4242",
             numberOfSavedPaymentDetails = 3L
         )
@@ -729,7 +729,7 @@ class DefaultWalletButtonsInteractorTest {
             val paymentState = button.state as LinkButtonState.DefaultPayment
             assertThat(paymentState.paymentUI.last4).isEqualTo("4242")
             assertThat(paymentState.paymentUI.paymentIconRes)
-                .isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
+                .isEqualTo(com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded)
         }
     }
 

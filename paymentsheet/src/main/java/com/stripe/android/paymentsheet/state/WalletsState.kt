@@ -46,7 +46,8 @@ internal data class WalletsState(
                 Link(
                     state = LinkButtonState.create(
                         linkEmail = linkEmail,
-                        paymentDetails = null
+                        paymentDetails = null,
+                        enableDisplayableDefaultValuesInEce = false
                     )
                 )
             } else {
