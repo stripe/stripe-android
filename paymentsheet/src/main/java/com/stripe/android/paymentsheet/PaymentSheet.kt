@@ -1940,18 +1940,16 @@ class PaymentSheet internal constructor(
             }
 
             class Builder {
-                class Builder {
-                    private var rowStyle: RowStyle = default.style
+                private var rowStyle: RowStyle = default.style
 
-                    fun rowStyle(rowStyle: RowStyle) = apply {
-                        this.rowStyle = rowStyle
-                    }
+                fun rowStyle(rowStyle: RowStyle) = apply {
+                    this.rowStyle = rowStyle
+                }
 
-                    fun build(): Embedded {
-                        return Embedded(
-                            style = rowStyle,
-                        )
-                    }
+                fun build(): Embedded {
+                    return Embedded(
+                        style = rowStyle,
+                    )
                 }
             }
         }
