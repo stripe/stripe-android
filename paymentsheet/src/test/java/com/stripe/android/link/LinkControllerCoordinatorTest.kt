@@ -45,7 +45,7 @@ internal class LinkControllerCoordinatorTest {
     private val lookupConsumerResults = mutableListOf<LinkController.LookupConsumerResult>()
     private val createPaymentMethodResults = mutableListOf<LinkController.CreatePaymentMethodResult>()
 
-    private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.CREATED)
+    private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
     private fun createCoordinator(
         activityResult: LinkActivityResult? = null
@@ -67,16 +67,16 @@ internal class LinkControllerCoordinatorTest {
     }
 
     @Test
-    fun `constructor() throws when lifecycle is not CREATED`() = runTest {
+    fun `constructor() throws when lifecycle is not INITIALIZED`() = runTest {
         assertFailsWith<IllegalStateException> {
-            lifecycleOwner.setCurrentState(Lifecycle.State.INITIALIZED)
+            lifecycleOwner.setCurrentState(Lifecycle.State.DESTROYED)
             createCoordinator()
         }
     }
 
     @Test
-    fun `constructor() succeeds when lifecycle is CREATED`() = runTest {
-        lifecycleOwner.setCurrentState(Lifecycle.State.CREATED)
+    fun `constructor() succeeds when lifecycle is INITIALIZED`() = runTest {
+        lifecycleOwner.setCurrentState(Lifecycle.State.INITIALIZED)
         val coordinator = createCoordinator()
         assertThat(coordinator.linkActivityResultLauncher).isNotNull()
     }

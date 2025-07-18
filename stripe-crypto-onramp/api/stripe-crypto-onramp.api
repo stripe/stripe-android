@@ -5,6 +5,12 @@ public final class com/stripe/android/crypto/onramp/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Builder {
+	public fun <init> (Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;)V
+	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
+	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
+}
+
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;

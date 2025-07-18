@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
+import com.stripe.android.paymentsheet.example.onramp.OnrampActivity
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
@@ -102,6 +103,12 @@ class MainActivity : AppCompatActivity() {
                 klass = AddressElementExampleActivity::class.java,
                 section = MenuItem.Section.AddressElement,
             ),
+            MenuItem(
+                titleResId = R.string.onramp_title,
+                subtitleResId = R.string.onramp_subtitle,
+                klass = OnrampActivity::class.java,
+                section = MenuItem.Section.Onramp,
+            ),
         )
     }
 
@@ -140,6 +147,7 @@ private data class MenuItem(
         CustomerSheet,
         Embedded,
         AddressElement,
+        Onramp,
     }
 }
 
@@ -178,6 +186,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Address Element",
             items = groupedItems.getOrElse(MenuItem.Section.AddressElement) { emptyList() }
+        )
+
+        Section(
+            title = "Onramp",
+            items = groupedItems.getOrElse(MenuItem.Section.Onramp) { emptyList() }
         )
 
         item {
