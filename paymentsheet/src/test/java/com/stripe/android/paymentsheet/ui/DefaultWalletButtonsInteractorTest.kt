@@ -25,38 +25,28 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
 @Suppress("LargeClass")
 class DefaultWalletButtonsInteractorTest {
+
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `on init with no arguments, state should be empty`() = runTest {
@@ -687,51 +677,50 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
-    fun `when linkEnableDisplayableDefaultValuesInEce is true, should use payment details if available`() = runTest {
-        val paymentDetails = DisplayablePaymentDetails(
-            defaultCardBrand = "VISA",
-            defaultPaymentType = "CARD",
-            last4 = "4242",
-            numberOfSavedPaymentDetails = 3L
-        )
+    fun `when linkEnableDisplayableDefaultValuesInEce is true, should not use payment details in the button`() =
+        runTest {
+            val paymentDetails = DisplayablePaymentDetails(
+                defaultCardBrand = "VISA",
+                defaultPaymentType = "CARD",
+                last4 = "4242",
+                numberOfSavedPaymentDetails = 3L
+            )
 
-        val linkAccount = LinkAccount(
-            consumerSession = TestFactory.CONSUMER_SESSION,
-            consumerPublishableKey = TestFactory.PUBLISHABLE_KEY,
-            displayablePaymentDetails = paymentDetails
-        )
+            val linkAccount = LinkAccount(
+                consumerSession = TestFactory.CONSUMER_SESSION,
+                consumerPublishableKey = TestFactory.PUBLISHABLE_KEY,
+                displayablePaymentDetails = paymentDetails
+            )
 
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
+            val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            linkAccountHolder.set(LinkAccountUpdate.Value(linkAccount))
 
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.Link),
-                linkEmail = "test@example.com",
-                linkState = LinkState(
-                    configuration = TestFactory.LINK_CONFIGURATION.copy(
-                        enableDisplayableDefaultValuesInEce = true
-                    ),
-                    loginState = LinkState.LoginState.LoggedOut,
-                    signupMode = null,
-                )
-            ),
-            linkAccountHolder = linkAccountHolder
-        )
+            val interactor = createInteractor(
+                arguments = createArguments(
+                    availableWallets = listOf(WalletType.Link),
+                    linkEmail = "test@example.com",
+                    linkState = LinkState(
+                        configuration = TestFactory.LINK_CONFIGURATION.copy(
+                            enableDisplayableDefaultValuesInEce = true
+                        ),
+                        loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
+                    )
+                ),
+                linkAccountHolder = linkAccountHolder
+            )
 
-        interactor.state.test {
-            val state = awaitItem()
+            interactor.state.test {
+                val state = awaitItem()
 
-            assertThat(state.walletButtons).hasSize(1)
-            val button = state.walletButtons.first().asLinkWalletButton()
+                assertThat(state.walletButtons).hasSize(1)
+                val button = state.walletButtons.first().asLinkWalletButton()
 
-            assertThat(button.state).isInstanceOf<LinkButtonState.DefaultPayment>()
-            val paymentState = button.state as LinkButtonState.DefaultPayment
-            assertThat(paymentState.paymentUI.last4).isEqualTo("4242")
-            assertThat(paymentState.paymentUI.paymentIconRes)
-                .isEqualTo(com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded)
+                // Should show email since we for now don't want to show default card details in the ECE button
+                val buttonState = button.state as LinkButtonState.Email
+                assertThat(buttonState.email).isEqualTo("test@example.com")
+            }
         }
-    }
 
     @Test
     fun `on init with mixed wallet order including ShopPay, state should preserve order`() = runTest {

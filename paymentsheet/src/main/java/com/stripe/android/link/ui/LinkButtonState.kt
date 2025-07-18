@@ -34,10 +34,9 @@ internal sealed class LinkButtonState {
          */
         fun create(
             linkEmail: String?,
-            paymentDetails: DisplayablePaymentDetails?,
-            enableDisplayableDefaultValuesInEce: Boolean
+            paymentDetails: DisplayablePaymentDetails?
         ): LinkButtonState {
-            val paymentUI = paymentDetails?.toDefaultPaymentUI(enableDisplayableDefaultValuesInEce)
+            val paymentUI = paymentDetails?.toDefaultPaymentUI(enableDefaultValuesInECE = false)
             return when {
                 paymentUI != null -> DefaultPayment(paymentUI = paymentUI)
                 linkEmail != null -> Email(email = linkEmail)
