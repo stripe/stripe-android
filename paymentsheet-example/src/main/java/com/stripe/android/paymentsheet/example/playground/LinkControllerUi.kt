@@ -100,6 +100,12 @@ internal fun LinkControllerUi(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        StatusBox(
+            controllerState = controllerState,
+            playgroundState = playgroundState,
+        )
+        Divider(Modifier.padding(bottom = 10.dp))
+
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             value = email,
@@ -180,22 +186,16 @@ internal fun LinkControllerUi(
                             registrationName.trim().takeIf { it.isNotEmpty() }
                         )
                     },
-                    enabled = email.trim().isNotEmpty() &&
-                        registrationPhone.trim().isNotEmpty() &&
-                        registrationCountry.trim().isNotEmpty()
+                    enabled = email.isNotBlank() &&
+                        registrationPhone.isNotBlank() &&
+                        registrationCountry.isNotBlank()
                 ) {
                     Text("Register")
                 }
             }
         }
-        Divider(Modifier.padding(bottom = 20.dp))
-
-        StatusBox(
-            controllerState = controllerState,
-            playgroundState = playgroundState,
-        )
-
         Divider(Modifier.padding(bottom = 10.dp))
+
         AuthenticateButton(
             modifier = Modifier.fillMaxWidth(),
             email = email,
@@ -209,7 +209,7 @@ internal fun LinkControllerUi(
             label = "Require existing consumer",
             checked = existingOnly,
         )
-        Divider(Modifier.padding(bottom = 20.dp))
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
         PaymentMethodButton(
             preview = controllerState.selectedPaymentMethodPreview,
@@ -456,6 +456,7 @@ private fun LabeledCheckbox(
             modifier = Modifier.padding(start = 8.dp),
             text = label,
             maxLines = 1,
+            style = MaterialTheme.typography.body2,
             overflow = TextOverflow.Ellipsis
         )
     }
