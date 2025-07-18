@@ -13,9 +13,9 @@ import kotlinx.parcelize.Parcelize
  * @property country User's ISO country code.
  * @property fullName Optional full name of the user.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 @Poko
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class LinkUserInfo(
     val email: String,
     val phone: String,

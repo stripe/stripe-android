@@ -12,9 +12,9 @@ import kotlinx.parcelize.Parcelize
  * @property publishableKey Your Stripe publishable API key.
  * @property paymentSheetAppearance Appearance settings for the PaymentSheet UI.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 @Poko
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampConfiguration(
     val publishableKey: String,
     val paymentSheetAppearance: PaymentSheet.Appearance
