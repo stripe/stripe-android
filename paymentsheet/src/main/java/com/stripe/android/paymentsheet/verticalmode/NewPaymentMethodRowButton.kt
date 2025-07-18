@@ -28,7 +28,7 @@ internal fun NewPaymentMethodRowButton(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    appearance: Embedded
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
 ) {
     val iconUrl = if (isSystemInDarkTheme() && displayablePaymentMethod.darkThemeIconUrl != null) {
         displayablePaymentMethod.darkThemeIconUrl
@@ -68,7 +68,7 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    appearance: Embedded
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,

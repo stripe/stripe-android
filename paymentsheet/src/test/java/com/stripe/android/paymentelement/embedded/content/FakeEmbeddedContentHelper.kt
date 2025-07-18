@@ -21,13 +21,13 @@ internal class FakeEmbeddedContentHelper(
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         _dataLoadedTurbine.add(
             DefaultEmbeddedContentHelper.State(
                 paymentMethodMetadata = paymentMethodMetadata,
-                rowStyle = rowStyle,
+                appearance = appearance,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         )

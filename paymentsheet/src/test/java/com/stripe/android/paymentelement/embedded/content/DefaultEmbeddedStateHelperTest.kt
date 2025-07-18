@@ -31,7 +31,7 @@ import kotlin.test.assertFailsWith
 
 internal class DefaultEmbeddedStateHelperTest {
     @Test
-    fun `setting state correctly sets row style`() = testScenario {
+    fun `setting state correctly sets appearance`() = testScenario {
         setState {
             appearance(
                 PaymentSheet.Appearance(
@@ -42,8 +42,8 @@ internal class DefaultEmbeddedStateHelperTest {
             )
         }
 
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().rowStyle)
-            .isEqualTo(Embedded.RowStyle.FlatWithRadio.default)
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().appearance)
+            .isEqualTo(Embedded(Embedded.RowStyle.FlatWithRadio.default))
     }
 
     @Test

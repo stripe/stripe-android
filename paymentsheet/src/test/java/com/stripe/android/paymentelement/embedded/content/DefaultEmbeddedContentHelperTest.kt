@@ -39,11 +39,11 @@ internal class DefaultEmbeddedContentHelperTest {
         assertThat(savedStateHandle.get<PaymentMethodMetadata?>(STATE_KEY_EMBEDDED_CONTENT))
             .isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val rowStyle = Embedded.RowStyle.FlatWithRadio.default
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata, rowStyle, embeddedViewDisplaysMandateText = true)
+        val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
+        embeddedContentHelper.dataLoaded(paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText = true)
         val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
         assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(state?.rowStyle).isEqualTo(rowStyle)
+        assertThat(state?.appearance).isEqualTo(appearance)
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
@@ -53,7 +53,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -67,7 +67,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -81,7 +81,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -97,7 +97,7 @@ internal class DefaultEmbeddedContentHelperTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
@@ -114,7 +114,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 STATE_KEY_EMBEDDED_CONTENT,
                 DefaultEmbeddedContentHelper.State(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FloatingButton.default,
+                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
                 )
             )

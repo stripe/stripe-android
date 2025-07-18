@@ -204,7 +204,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            rowStyle = rowStyle,
+            appearance = PaymentSheet.Appearance.Embedded(rowStyle),
             paparazziRule = paparazziRule
         )
     }

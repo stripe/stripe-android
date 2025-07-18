@@ -43,7 +43,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFloatingButton() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FloatingButton::class)
+                appearance = getEmbeddedAppearance(FloatingButton::class)
             )
         }
     }
@@ -52,7 +52,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FlatWithRadio::class)
+                appearance = getEmbeddedAppearance(FlatWithRadio::class)
             )
         }
     }
@@ -61,7 +61,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithCheckmark() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FlatWithCheckmark::class)
+                appearance = getEmbeddedAppearance(FlatWithCheckmark::class)
             )
         }
     }
@@ -70,7 +70,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithChevron() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(FlatWithChevron::class)
+                appearance = getEmbeddedAppearance(FlatWithChevron::class)
             )
         }
     }
@@ -79,7 +79,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testSeparatorColorAndInsets() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     separatorThicknessDp = 5f,
                     separatorColor = Color.CYAN,
@@ -94,7 +94,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testBottomSeparatorOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = false,
                     bottomSeparatorEnabled = true
@@ -107,7 +107,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testTopSeparatorOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = false
@@ -120,7 +120,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testSavedPaymentMethodOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = true,
@@ -135,7 +135,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testNewPaymentMethodsOnly() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(
+                appearance = getEmbeddedAppearance(
                     type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = true,
@@ -194,7 +194,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
 
     @Composable
     private fun TestPaymentMethodLayoutUi(
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod? = savedPaymentMethod,
         newPaymentMethods: List<DisplayablePaymentMethod> = paymentMethods
     ) {
@@ -210,7 +210,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
-            rowStyle = rowStyle,
+            appearance = appearance,
             modifier = Modifier.verticalScroll(scrollState),
         )
     }
@@ -233,7 +233,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
-            rowStyle = rowStyle,
+            appearance = Embedded(rowStyle),
             modifier = Modifier.verticalScroll(scrollState),
         )
     }
@@ -255,13 +255,13 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = mock(),
-                rowStyle = getRowStyle(FloatingButton::class),
+                appearance = getEmbeddedAppearance(FloatingButton::class),
             )
         }
     }
 
     @Suppress("CyclomaticComplexMethod")
-    private fun <T : Embedded.RowStyle> getRowStyle(
+    private fun <T : Embedded.RowStyle> getEmbeddedAppearance(
         type: KClass<T>,
         separatorThicknessDp: Float? = null,
         separatorColor: Int? = null,
@@ -277,8 +277,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         chevronColor: Int? = null,
         checkmarkInsetDp: Float? = null,
         spacingDp: Float? = null
-    ): Embedded.RowStyle {
-        return when (type) {
+    ): Embedded {
+        val row = when (type) {
             FlatWithRadio::class -> FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp ?: FlatWithRadio.default.separatorThicknessDp,
                 startSeparatorInsetDp = startSeparatorInset ?: FlatWithRadio.default.startSeparatorInsetDp,
@@ -333,5 +333,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 additionalInsetsDp = additionalVerticalInsetsDp ?: FloatingButton.default.additionalInsetsDp
             )
         }
+
+        return Embedded(row)
     }
 }
