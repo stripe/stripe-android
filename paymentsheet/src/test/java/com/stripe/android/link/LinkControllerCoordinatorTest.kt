@@ -33,17 +33,21 @@ internal class LinkControllerCoordinatorTest {
     private val lookupConsumerResultFlow = MutableSharedFlow<LinkController.LookupConsumerResult>()
     private val createPaymentMethodResultFlow = MutableSharedFlow<LinkController.CreatePaymentMethodResult>()
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
+    private val registerConsumerResultFlow = MutableSharedFlow<LinkController.RegisterConsumerResult>()
 
     private val viewModel: LinkControllerViewModel = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { lookupConsumerResultFlow } doReturn lookupConsumerResultFlow
         on { createPaymentMethodResultFlow } doReturn createPaymentMethodResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
+        on { registerConsumerResultFlow } doReturn registerConsumerResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
     private val lookupConsumerResults = mutableListOf<LinkController.LookupConsumerResult>()
     private val createPaymentMethodResults = mutableListOf<LinkController.CreatePaymentMethodResult>()
+    private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
+    private val registerConsumerResults = mutableListOf<LinkController.RegisterConsumerResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -62,8 +66,8 @@ internal class LinkControllerCoordinatorTest {
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             lookupConsumerCallback = { lookupConsumerResults.add(it) },
             createPaymentMethodCallback = { createPaymentMethodResults.add(it) },
-            authenticationCallback = {},
-            registerConsumerCallback = {},
+            authenticationCallback = { authenticationResults.add(it) },
+            registerConsumerCallback = { registerConsumerResults.add(it) },
         )
     }
 
@@ -96,9 +100,17 @@ internal class LinkControllerCoordinatorTest {
         val createResult = LinkController.CreatePaymentMethodResult.Success
         createPaymentMethodResultFlow.emit(createResult)
 
+        val authResult = LinkController.AuthenticationResult.Success
+        authenticationResultFlow.emit(authResult)
+
+        val registerResult = LinkController.RegisterConsumerResult.Success
+        registerConsumerResultFlow.emit(registerResult)
+
         assertThat(presentPaymentMethodsResults).containsExactly(presentResult)
         assertThat(lookupConsumerResults).containsExactly(lookupResult)
         assertThat(createPaymentMethodResults).containsExactly(createResult)
+        assertThat(authenticationResults).containsExactly(authResult)
+        assertThat(registerConsumerResults).containsExactly(registerResult)
     }
 
     @Test
@@ -109,10 +121,14 @@ internal class LinkControllerCoordinatorTest {
         presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
         lookupConsumerResultFlow.emit(LinkController.LookupConsumerResult.Success("test@example.com", true))
         createPaymentMethodResultFlow.emit(LinkController.CreatePaymentMethodResult.Success)
+        authenticationResultFlow.emit(LinkController.AuthenticationResult.Success)
+        registerConsumerResultFlow.emit(LinkController.RegisterConsumerResult.Success)
 
         assertThat(presentPaymentMethodsResults).isEmpty()
         assertThat(lookupConsumerResults).isEmpty()
         assertThat(createPaymentMethodResults).isEmpty()
+        assertThat(authenticationResults).isEmpty()
+        assertThat(registerConsumerResults).isEmpty()
     }
 
     @Test
