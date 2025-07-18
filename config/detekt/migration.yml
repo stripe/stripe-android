@@ -5,6 +5,8 @@ build:
 stripe-v25-migration:
   active: true
   RememberPaymentSheetMigration:
-    active: true
+    active: false
   RememberPaymentSheetFlowControllerMigration:
+    active: false
+  ClassMigration:
     active: true
