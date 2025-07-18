@@ -10,3 +10,6 @@ stripe-v25-migration:
     active: false
   ClassMigration:
     active: true
+  UnusedImports:
+    active: true
+    autoCorrect: true
