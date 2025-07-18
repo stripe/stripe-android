@@ -7,13 +7,12 @@ import io.gitlab.arturbosch.detekt.api.RuleSetProvider
 class StripeV25MigrationRuleSetProvider : RuleSetProvider {
     override val ruleSetId: String = "stripe-v25-migration"
 
-    override fun instance(config: Config): RuleSet {
-        return RuleSet(
-            ruleSetId,
-            listOf(
-                RememberPaymentSheetMigration(config),
-                RememberPaymentSheetFlowControllerMigration(config),
-            )
+    override fun instance(config: Config) = RuleSet(
+        id = ruleSetId,
+        rules = listOf(
+            RememberPaymentSheetMigration(config),
+            RememberPaymentSheetFlowControllerMigration(config),
+            ClassMigration(config),
         )
-    }
+    )
 }

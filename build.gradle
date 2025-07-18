@@ -131,3 +131,65 @@ subprojects {
         }
     }
 }
+
+// Add migration configuration
+dependencies {
+    detektPlugins project(':migration-rules')
+}
+
+// Create migration directory if it doesn't exist
+def migrationConfigDir = file("config/detekt")
+if (!migrationConfigDir.exists()) {
+    migrationConfigDir.mkdirs()
+}
+
+// Create migration config file if it doesn't exist
+def migrationConfigFile = file("config/detekt/migration.yml")
+if (!migrationConfigFile.exists()) {
+    migrationConfigFile.createNewFile()
+    migrationConfigFile.text = """
+stripe-v25-migration:
+  active: true
+  RememberPaymentSheetMigration:
+    active: true
+  RememberPaymentSheetFlowControllerMigration:
+    active: true
+  ClassMigration:
+    active: true
+"""
+}
+
+// Add the migration tasks
+tasks.register('detektMigration', io.gitlab.arturbosch.detekt.Detekt) {
+    description = 'Run detekt with v25 migration rules'
+    group = 'migration'
+    
+    buildUponDefaultConfig = false
+    parallel = false  // Disable parallel execution to avoid concurrent modifications
+    autoCorrect = true
+    config.setFrom(files("config/detekt/migration.yml"))
+    setSource(files("${projectDir}"))
+    include("**/*.kt")
+    exclude("**/build/**", "**/migration-rules/**")
+    
+    reports {
+        html.enabled = true
+        xml.enabled = true  
+        txt.enabled = true
+    }
+}
+
+tasks.register('migrateToV25') {
+    group = 'migration'
+    description = 'Migrates codebase from Stripe Android SDK v21+ to v25'
+    dependsOn 'detektMigration'
+    
+    doLast {
+        println "\n🎉 Migration analysis completed!"
+        println "📋 Check the detekt reports for migration suggestions:"
+        println "   - HTML: build/reports/detekt/detekt.html" 
+        println "   - Text: build/reports/detekt/detekt.txt"
+        println "📝 Copy-paste the suggested replacements into your code"
+        println "🐛 Report issues at: https://github.com/stripe/stripe-android/issues"
+    }
+}
