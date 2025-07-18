@@ -62,7 +62,8 @@ internal class LinkControllerCoordinatorTest {
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             lookupConsumerCallback = { lookupConsumerResults.add(it) },
             createPaymentMethodCallback = { createPaymentMethodResults.add(it) },
-            authenticationCallback = { },
+            authenticationCallback = {},
+            registerConsumerCallback = {},
         )
     }
 

@@ -11,6 +11,7 @@ import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -786,6 +787,74 @@ class LinkControllerViewModelTest {
         // Verify that the launcher was called with null account
         val call = launcher.calls.awaitItem()
         assertThat(call.input.linkAccountInfo.account).isNull()
+    }
+
+    @Test
+    fun `onRegisterConsumer() on success emits success result and updates account`() = runTest {
+        val viewModel = createViewModel()
+
+        val email = "test@example.com"
+        val phone = "1234567890"
+        val country = "US"
+        val name = "Test User"
+        val consentAction = ConsumerSignUpConsentAction.Checkbox
+
+        linkRepository.consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
+
+        viewModel.registerConsumerResultFlow.test {
+            viewModel.onRegisterConsumer(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = consentAction
+            )
+
+            val result = awaitItem()
+            assertThat(result).isEqualTo(LinkController.RegisterConsumerResult.Success)
+        }
+
+        // Verify that the account was updated
+        val account = linkAccountHolder.linkAccountInfo.value.account
+        val expectedAccount = TestFactory.CONSUMER_SESSION_SIGN_UP.let {
+            LinkAccount(
+                consumerSession = it.consumerSession,
+                consumerPublishableKey = it.publishableKey,
+            )
+        }
+        assertThat(account).isEqualTo(expectedAccount)
+    }
+
+    @Test
+    fun `onRegisterConsumer() on failure emits failure result and clears account`() = runTest {
+        val viewModel = createViewModel()
+        signIn()
+
+        val email = "test@example.com"
+        val phone = "1234567890"
+        val country = "US"
+        val name = "Test User"
+        val consentAction = ConsumerSignUpConsentAction.Checkbox
+        val error = Exception("Registration failed")
+
+        linkRepository.consumerSignUpResult = Result.failure(error)
+
+        viewModel.registerConsumerResultFlow.test {
+            viewModel.onRegisterConsumer(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = consentAction
+            )
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
+            assertThat((result as LinkController.RegisterConsumerResult.Failed).error).isEqualTo(error)
+        }
+
+        // Verify that the account was cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
     }
 
     private suspend fun testAuthenticationClearsSavedPaymentData(
