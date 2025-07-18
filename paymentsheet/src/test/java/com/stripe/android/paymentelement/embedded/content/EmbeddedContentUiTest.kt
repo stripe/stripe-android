@@ -102,7 +102,7 @@ internal class EmbeddedContentUiTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                Embedded(Embedded.RowStyle.FlatWithChevron.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()

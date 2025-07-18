@@ -114,7 +114,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 STATE_KEY_EMBEDDED_CONTENT,
                 DefaultEmbeddedContentHelper.State(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                    Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = true,
                 )
             )
