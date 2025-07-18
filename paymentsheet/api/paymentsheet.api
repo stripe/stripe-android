@@ -1505,6 +1505,18 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded;
+	public final fun rowStyle (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded;
@@ -1527,6 +1539,22 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalVerticalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun bottomSeparatorEnabled (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark;
+	public final fun checkmarkInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun colorsDark (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun colorsLight (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun endSeparatorInsetDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun horizontalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun separatorThicknessDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun startSeparatorInsetDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
+	public final fun topSeparatorEnabled (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors : android/os/Parcelable {
@@ -1568,6 +1596,21 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalVerticalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun bottomSeparatorEnabled (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron;
+	public final fun colorsDark (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun colorsLight (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun endSeparatorInsetDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun horizontalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun separatorThicknessDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun startSeparatorInsetDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+	public final fun topSeparatorEnabled (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -1607,6 +1650,21 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalVerticalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun bottomSeparatorEnabled (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio;
+	public final fun colorsDark (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun colorsLight (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun endSeparatorInsetDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun horizontalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun separatorThicknessDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun startSeparatorInsetDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+	public final fun topSeparatorEnabled (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Builder;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -1644,6 +1702,14 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FloatingButton$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun additionalInsetsDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FloatingButton$Builder;
+	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FloatingButton;
+	public final fun spacingDp (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FloatingButton$Builder;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FloatingButton$Creator : android/os/Parcelable$Creator {
