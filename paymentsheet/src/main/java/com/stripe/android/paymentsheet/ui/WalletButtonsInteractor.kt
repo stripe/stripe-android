@@ -164,8 +164,10 @@ internal class DefaultWalletButtonsInteractor(
                             )
                         ).takeIf {
                             // Show Link button if verification state is ready OR if we have a direct linkEmail
-                            (linkEmbeddedState.verificationState is VerificationState.RenderButton ||
-                                arguments.linkEmail != null) &&
+                            (
+                                linkEmbeddedState.verificationState is VerificationState.RenderButton ||
+                                    arguments.linkEmail != null
+                            ) &&
                                 walletsAllowedByMerchant.contains(WalletType.Link)
                         }
                     }
