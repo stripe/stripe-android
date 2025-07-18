@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -10,6 +11,7 @@ import kotlinx.parcelize.Parcelize
  * Immutable object representing a Link account.
  */
 @Parcelize
+@Poko
 internal class LinkAccount(
     private val consumerSession: ConsumerSession,
     val consumerPublishableKey: String? = null,
