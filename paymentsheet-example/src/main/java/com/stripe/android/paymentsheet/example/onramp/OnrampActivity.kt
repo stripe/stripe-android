@@ -107,7 +107,7 @@ internal fun OnrampScreen(
             .padding(16.dp)
     ) {
         Text(
-            text = "Onramp Coordinator Test",
+            text = "Onramp Coordinator",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -306,4 +306,5 @@ private fun AuthenticationScreen(
             Text("Back to Email Input")
         }
     }
-} 
+}
+

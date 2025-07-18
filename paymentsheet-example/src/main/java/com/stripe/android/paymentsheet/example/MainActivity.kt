@@ -62,12 +62,6 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.Internal,
             ),
             MenuItem(
-                titleResId = R.string.onramp_title,
-                subtitleResId = R.string.onramp_subtitle,
-                klass = OnrampActivity::class.java,
-                section = MenuItem.Section.Internal,
-            ),
-            MenuItem(
                 titleResId = R.string.paymentsheet_title,
                 subtitleResId = R.string.paymentsheet_subtitle,
                 klass = CompleteFlowActivity::class.java,
@@ -109,6 +103,12 @@ class MainActivity : AppCompatActivity() {
                 klass = AddressElementExampleActivity::class.java,
                 section = MenuItem.Section.AddressElement,
             ),
+            MenuItem(
+                titleResId = R.string.onramp_title,
+                subtitleResId = R.string.onramp_subtitle,
+                klass = OnrampActivity::class.java,
+                section = MenuItem.Section.Onramp,
+            ),
         )
     }
 
@@ -147,6 +147,7 @@ private data class MenuItem(
         CustomerSheet,
         Embedded,
         AddressElement,
+        Onramp,
     }
 }
 
@@ -185,6 +186,11 @@ private fun MainScreen(items: List<MenuItem>) {
         Section(
             title = "Address Element",
             items = groupedItems.getOrElse(MenuItem.Section.AddressElement) { emptyList() }
+        )
+
+        Section(
+            title = "Onramp",
+            items = groupedItems.getOrElse(MenuItem.Section.Onramp) { emptyList() }
         )
 
         item {
