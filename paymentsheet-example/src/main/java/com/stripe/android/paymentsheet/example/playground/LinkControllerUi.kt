@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -43,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkController
@@ -59,10 +61,11 @@ internal fun LinkControllerUi(
     onEmailChange: (email: String) -> Unit,
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
-    onPresentForAuthenticationClick: (email: String) -> Unit,
+    onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
+    var existingOnly by rememberSaveable { mutableStateOf(false) }
     val errorToPresent = playgroundState.linkControllerError()
 
     val scope = rememberCoroutineScope()
@@ -100,13 +103,21 @@ internal fun LinkControllerUi(
             playgroundState = playgroundState,
         )
 
-        Button(
-            onClick = { onPresentForAuthenticationClick(email) },
+        Divider(Modifier.padding(bottom = 10.dp))
+        AuthenticateButton(
             modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Test Authentication Flow")
-        }
-        Spacer(Modifier.height(16.dp))
+            email = email,
+            onClick = { onAuthenticationClick(email, existingOnly) },
+        )
+        LabeledCheckbox(
+            modifier = Modifier
+                .clickable(onClick = { existingOnly = !existingOnly })
+                .align(Alignment.Start)
+                .padding(8.dp),
+            label = "Require existing consumer",
+            checked = existingOnly,
+        )
+        Divider(Modifier.padding(bottom = 20.dp))
 
         PaymentMethodButton(
             preview = controllerState.selectedPaymentMethodPreview,
@@ -141,10 +152,10 @@ private fun StatusBox(
                 }
             }
 
-        add("Consumer Lookup" to lookupText)
-        add("Consumer Verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
-        add("Payment Method Created" to (controllerState.createdPaymentMethod?.id ?: ""))
-        add("Authentication Result" to (playgroundState.presentForAuthenticationResult?.toString() ?: ""))
+        add("Consumer lookup" to lookupText)
+        add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
+        add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
+        add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -187,7 +198,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
-    (presentForAuthenticationResult as? LinkController.PresentForAuthenticationResult.Failed)?.error,
+    (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
 ).firstOrNull { it != null }
 
 @Composable
@@ -201,7 +212,7 @@ private fun LinkControllerUiPreview() {
             onEmailChange = {},
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {},
-            onPresentForAuthenticationClick = {},
+            onAuthenticationClick = { _, _ -> },
             onErrorMessage = {},
         )
     }
@@ -329,5 +340,52 @@ private fun PaymentMethodButtonPreview() {
                 onClick = {},
             )
         }
+    }
+}
+
+@Composable
+private fun LabeledCheckbox(
+    label: String,
+    checked: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = null,
+            enabled = true,
+        )
+        Text(
+            modifier = Modifier.padding(start = 8.dp),
+            text = label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun AuthenticateButton(
+    email: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildString {
+                append("Authenticate")
+                if (email.isNotBlank()) {
+                    append(" ${email.trim()}")
+                }
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

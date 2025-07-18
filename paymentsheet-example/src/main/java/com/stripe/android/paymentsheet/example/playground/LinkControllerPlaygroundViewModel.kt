@@ -25,7 +25,7 @@ internal class LinkControllerPlaygroundViewModel(
         linkControllerState.update { it.copy(createPaymentMethodResult = result) }
     }
 
-    fun onLinkControllerPresentForAuthentication(result: LinkController.PresentForAuthenticationResult) {
-        linkControllerState.update { it.copy(presentForAuthenticationResult = result) }
+    fun onLinkControllerAuthentication(result: LinkController.AuthenticationResult) {
+        linkControllerState.update { it.copy(authenticationResult = result) }
     }
 }

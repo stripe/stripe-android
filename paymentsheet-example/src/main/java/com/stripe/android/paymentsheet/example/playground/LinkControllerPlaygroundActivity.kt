@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
+@Suppress("LongMethod")
 internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
     private val viewModel: LinkControllerPlaygroundViewModel by viewModels()
 
@@ -41,7 +42,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                     presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
-                    presentForAuthenticationCallback = viewModel::onLinkControllerPresentForAuthentication,
+                    authenticationCallback = viewModel::onLinkControllerAuthentication,
                 )
             }
             LaunchedEffect(Unit) {
@@ -66,8 +67,13 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                             linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
                         },
                         onCreatePaymentMethodClick = linkController::createPaymentMethod,
-                        onPresentForAuthenticationClick = { email ->
-                            linkController.presentForAuthentication(email = email.takeIf { it.isNotBlank() })
+                        onAuthenticationClick = { email, existingOnly ->
+                            val cleanedEmail = email.takeIf { it.isNotBlank() } ?: ""
+                            if (existingOnly) {
+                                linkController.authenticateExistingConsumer(cleanedEmail)
+                            } else {
+                                linkController.authenticate(cleanedEmail)
+                            }
                         },
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )

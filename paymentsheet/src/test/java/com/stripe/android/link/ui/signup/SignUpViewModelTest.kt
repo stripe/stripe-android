@@ -429,7 +429,7 @@ internal class SignUpViewModelTest {
             navigateAndClearStack = {},
             moveToWeb = {},
             dismissalCoordinator = RealLinkDismissalCoordinator(),
-            linkLaunchMode = LinkLaunchMode.Authentication,
+            linkLaunchMode = LinkLaunchMode.Authentication(),
             dismissWithResult = { result ->
                 dismissResults.add(result)
             }
@@ -666,7 +666,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
-                linkLaunchMode = LinkLaunchMode.Authentication,
+                linkLaunchMode = LinkLaunchMode.Authentication(),
                 dismissWithResult = { result -> dismissResults.add(result) }
             )
 
@@ -691,7 +691,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
-                linkLaunchMode = LinkLaunchMode.Authentication,
+                linkLaunchMode = LinkLaunchMode.Authentication(),
                 dismissWithResult = { result -> dismissResults.add(result) }
             )
 
@@ -716,7 +716,7 @@ internal class SignUpViewModelTest {
 
             val viewModel = createViewModel(
                 linkAuth = linkAuth,
-                linkLaunchMode = LinkLaunchMode.Authentication,
+                linkLaunchMode = LinkLaunchMode.Authentication(),
                 navigateAndClearStack = { screen -> screens.add(screen) },
                 dismissWithResult = { result -> dismissResults.add(result) }
             )

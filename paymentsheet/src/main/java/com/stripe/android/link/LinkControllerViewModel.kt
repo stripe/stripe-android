@@ -12,7 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.link.LinkController.PresentForAuthenticationResult
+import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.MissingConfigurationException
@@ -64,9 +64,9 @@ internal class LinkControllerViewModel @Inject constructor(
         MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1)
     val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
 
-    private val _presentForAuthenticationResultFlow =
-        MutableSharedFlow<PresentForAuthenticationResult>(extraBufferCapacity = 1)
-    val presentForAuthenticationResultFlow = _presentForAuthenticationResultFlow.asSharedFlow()
+    private val _authenticationResultFlow =
+        MutableSharedFlow<AuthenticationResult>(extraBufferCapacity = 1)
+    val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
 
     private var presentJob: Job? = null
 
@@ -147,9 +147,24 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    internal fun onPresentForAuthentication(
+    internal fun onAuthenticate(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
+    ) {
+        performAuthentication(launcher, email, existingOnly = false)
+    }
+
+    internal fun onAuthenticateExistingConsumer(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String
+    ) {
+        performAuthentication(launcher, email, existingOnly = true)
+    }
+
+    private fun performAuthentication(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String?,
+        existingOnly: Boolean
     ) {
         if (presentJob?.isActive == true) {
             logger.debug("$tag: already presenting")
@@ -157,31 +172,35 @@ internal class LinkControllerViewModel @Inject constructor(
         }
 
         presentJob = viewModelScope.launch {
-            logger.debug("$tag: presenting for authentication")
+            logger.debug("$tag: authenticating")
 
             withConfiguration(
                 email = email,
                 onError = { error ->
-                    _presentForAuthenticationResultFlow.emit(
-                        PresentForAuthenticationResult.Failed(error)
+                    _authenticationResultFlow.emit(
+                        AuthenticationResult.Failed(error)
                     )
                 },
                 onSuccess = { configuration ->
                     val state = _state.value
                     val linkAccountInfo = getLinkAccountInfo(email, state)
+                    val linkAccount = linkAccountInfo.account
 
-                    if (linkAccountInfo.account?.isVerified == true) {
+                    if (linkAccount?.isVerified == true) {
                         logger.debug("$tag: account is already verified, skipping authentication")
-                        _presentForAuthenticationResultFlow.emit(PresentForAuthenticationResult.Success)
+                        _authenticationResultFlow.emit(AuthenticationResult.Success)
                         return@withConfiguration
                     }
 
-                    val launchMode = LinkLaunchMode.Authentication
+                    val launchMode = LinkLaunchMode.Authentication(existingOnly = existingOnly)
 
                     _state.update {
                         it.copy(
                             presentedForEmail = email,
                             currentLaunchMode = launchMode,
+                            // Clear saved data if the account is not present, i.e. email changed
+                            selectedPaymentMethod = it.selectedPaymentMethod.takeIf { linkAccount != null },
+                            createdPaymentMethod = it.createdPaymentMethod.takeIf { linkAccount != null },
                         )
                     }
 
@@ -296,27 +315,27 @@ internal class LinkControllerViewModel @Inject constructor(
     private fun handleAuthenticationResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
-                logger.debug("$tag: presentForAuthentication canceled")
+                logger.debug("$tag: authentication canceled")
                 viewModelScope.launch {
-                    _presentForAuthenticationResultFlow.emit(PresentForAuthenticationResult.Canceled)
+                    _authenticationResultFlow.emit(AuthenticationResult.Canceled)
                 }
             }
             is LinkActivityResult.Completed -> {
-                logger.debug("$tag: presentForAuthentication completed")
+                logger.debug("$tag: authentication completed")
                 viewModelScope.launch {
-                    _presentForAuthenticationResultFlow.emit(PresentForAuthenticationResult.Success)
+                    _authenticationResultFlow.emit(AuthenticationResult.Success)
                 }
             }
             is LinkActivityResult.Failed -> {
-                logger.debug("$tag: presentForAuthentication failed")
+                logger.debug("$tag: authentication failed")
                 viewModelScope.launch {
-                    _presentForAuthenticationResultFlow.emit(
-                        PresentForAuthenticationResult.Failed(result.error)
+                    _authenticationResultFlow.emit(
+                        AuthenticationResult.Failed(result.error)
                     )
                 }
             }
             is LinkActivityResult.PaymentMethodObtained -> {
-                logger.warning("$tag: presentForAuthentication unexpected result: $result")
+                logger.warning("$tag: authentication unexpected result: $result")
             }
         }
     }

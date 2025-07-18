@@ -32,13 +32,13 @@ internal class LinkControllerCoordinatorTest {
     private val presentPaymentMethodsResultFlow = MutableSharedFlow<LinkController.PresentPaymentMethodsResult>()
     private val lookupConsumerResultFlow = MutableSharedFlow<LinkController.LookupConsumerResult>()
     private val createPaymentMethodResultFlow = MutableSharedFlow<LinkController.CreatePaymentMethodResult>()
-    private val presentForAuthenticationResultFlow = MutableSharedFlow<LinkController.PresentForAuthenticationResult>()
+    private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
 
     private val viewModel: LinkControllerViewModel = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { lookupConsumerResultFlow } doReturn lookupConsumerResultFlow
         on { createPaymentMethodResultFlow } doReturn createPaymentMethodResultFlow
-        on { presentForAuthenticationResultFlow } doReturn presentForAuthenticationResultFlow
+        on { authenticationResultFlow } doReturn authenticationResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
@@ -62,7 +62,7 @@ internal class LinkControllerCoordinatorTest {
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             lookupConsumerCallback = { lookupConsumerResults.add(it) },
             createPaymentMethodCallback = { createPaymentMethodResults.add(it) },
-            presentForAuthenticationCallback = { },
+            authenticationCallback = { },
         )
     }
 

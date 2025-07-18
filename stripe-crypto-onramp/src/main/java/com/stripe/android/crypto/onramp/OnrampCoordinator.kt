@@ -147,7 +147,7 @@ internal class OnrampCoordinator @Inject internal constructor(
                         }
                     },
                     createPaymentMethodCallback = { /* No-op for now */ },
-                    presentForAuthenticationCallback = { /* No-op for now */ }
+                    authenticationCallback = { /* No-op for now */ }
                 )
             }
 
