@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -726,8 +727,9 @@ class DefaultWalletButtonsInteractorTest {
 
             assertThat(button.state).isInstanceOf<LinkButtonState.DefaultPayment>()
             val paymentState = button.state as LinkButtonState.DefaultPayment
-            assertThat(paymentState.cardBrand.code).isEqualTo("visa")
-            assertThat(paymentState.last4).isEqualTo("4242")
+            assertThat(paymentState.paymentUI.last4).isEqualTo("4242")
+            assertThat(paymentState.paymentUI.paymentIconRes)
+                .isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         }
     }
 

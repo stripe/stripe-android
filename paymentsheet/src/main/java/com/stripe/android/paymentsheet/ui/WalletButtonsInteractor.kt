@@ -155,14 +155,10 @@ internal class DefaultWalletButtonsInteractor(
                         walletsAllowedByMerchant.contains(WalletType.GooglePay)
                     }
                     WalletType.Link -> {
-                        val enableDefaultValuesInECE =
-                            arguments.paymentMethodMetadata.linkState?.configuration
-                                ?.enableDisplayableDefaultValuesInEce == true
                         WalletButton.Link(
-                            state = LinkButtonState.from(
-                                email = linkEmail,
+                            state = LinkButtonState.create(
+                                linkEmail = arguments.linkEmail,
                                 paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
-                                    ?.takeIf { enableDefaultValuesInECE }
                             )
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.

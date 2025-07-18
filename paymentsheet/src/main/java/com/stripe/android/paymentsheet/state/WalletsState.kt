@@ -43,7 +43,12 @@ internal data class WalletsState(
             isSetupIntent: Boolean
         ): WalletsState? {
             val link = if (isLinkAvailable == true) {
-                Link(state = LinkButtonState.from(linkEmail, null))
+                Link(
+                    state = LinkButtonState.create(
+                        linkEmail = linkEmail,
+                        paymentDetails = null
+                    )
+                )
             } else {
                 null
             }

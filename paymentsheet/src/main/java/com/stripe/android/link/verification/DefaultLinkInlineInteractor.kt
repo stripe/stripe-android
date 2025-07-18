@@ -10,6 +10,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -69,6 +70,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             return
         }
 
+        val enableDefaultValuesInECE = linkConfiguration.enableDisplayableDefaultValuesInEce
+        val account = linkAccountManager.linkAccountInfo.value.account
+        val defaultPaymentUI = account?.displayablePaymentDetails
+            ?.toDefaultPaymentUI(enableDefaultValuesInECE)
         updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
         observeOtp(linkAccountManager)
         startVerification()
@@ -119,7 +124,9 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             }
     }
 
-    private fun LinkAccount.initial2FAState(linkConfiguration: LinkConfiguration) = Render2FA(
+    private fun LinkAccount.initial2FAState(
+        linkConfiguration: LinkConfiguration
+    ) = Render2FA(
         linkConfiguration = linkConfiguration,
         viewState = VerificationViewState(
             email = email,
@@ -129,7 +136,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             didSendNewCode = false,
             isDialog = true,
             requestFocus = false,
-            errorMessage = null
+            errorMessage = null,
+            defaultPayment = displayablePaymentDetails?.toDefaultPaymentUI(
+                linkConfiguration.enableDisplayableDefaultValuesInEce
+            )
         )
     )
 

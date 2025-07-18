@@ -48,7 +48,9 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
-import com.stripe.android.model.CardBrand
+import com.stripe.android.link.ui.wallet.DefaultPaymentUI
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
@@ -100,22 +102,6 @@ private fun LinkNoEmailButton() {
 
 @Preview
 @Composable
-private fun LinkPaymentMethodButton() {
-    DefaultLinkTheme {
-        LinkButton(
-            state = LinkButtonState.DefaultPayment(
-                cardBrand = CardBrand.Visa,
-                last4 = "4242",
-                numberOfSavedPaymentDetails = 5L
-            ),
-            enabled = true,
-            onClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
 private fun LinkEmailOnlyButton() {
     DefaultLinkTheme {
         LinkButton(
@@ -130,12 +116,13 @@ private fun LinkEmailOnlyButton() {
 @Composable
 private fun LinkMasterCardButton() {
     DefaultLinkTheme {
+        val paymentUI = DisplayablePaymentDetails(
+            defaultCardBrand = "mastercard",
+            last4 = "4242",
+            defaultPaymentType = "CARD",
+        ).toDefaultPaymentUI(true)!!
         LinkButton(
-            state = LinkButtonState.DefaultPayment(
-                cardBrand = CardBrand.MasterCard,
-                last4 = null,
-                numberOfSavedPaymentDetails = 2L
-            ),
+            state = LinkButtonState.DefaultPayment(paymentUI = paymentUI),
             enabled = true,
             onClick = {}
         )
@@ -180,8 +167,7 @@ internal fun LinkButton(
             ) {
                 when (state) {
                     is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
-                        cardBrand = state.cardBrand,
-                        last4 = state.last4
+                        paymentUI = state.paymentUI
                     )
 
                     is LinkButtonState.Email -> SignedInButtonContent(state.email)
@@ -194,8 +180,7 @@ internal fun LinkButton(
 
 @Composable
 private fun PaymentDetailsButtonContent(
-    cardBrand: CardBrand,
-    last4: String?
+    paymentUI: DefaultPaymentUI
 ) {
     val color = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
     Row(
@@ -204,7 +189,7 @@ private fun PaymentDetailsButtonContent(
         LinkIconAndDivider()
 
         PaymentMethodIconFromResource(
-            iconRes = cardBrand.icon,
+            iconRes = paymentUI.paymentIconRes,
             colorFilter = null,
             alignment = Alignment.Center,
             modifier = Modifier.size(24.dp)
@@ -213,7 +198,7 @@ private fun PaymentDetailsButtonContent(
         Spacer(modifier = Modifier.width(4.dp))
 
         Text(
-            text = last4 ?: "••••",
+            text = paymentUI.last4,
             color = color,
             style = LinkTheme.typography.bodyEmphasized,
             fontSize = LINK_EMAIL_FONT_SIZE.sp,

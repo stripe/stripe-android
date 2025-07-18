@@ -1,10 +1,14 @@
 package com.stripe.android.link.ui.wallet
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -27,7 +31,9 @@ import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -51,14 +57,8 @@ internal fun LinkInline2FASection(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = spacedBy(16.dp)
         ) {
-            // Link logo at the top
-            Image(
-                modifier = Modifier
-                    .width(48.dp)
-                    .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-                painter = painterResource(R.drawable.stripe_link_logo),
-                contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
-            )
+            // Link logo and payment details in a row
+            LinkHeaderSection(verificationState = verificationState)
 
             // Verification instruction message
             Title(verificationState)
@@ -88,6 +88,62 @@ internal fun LinkInline2FASection(
                 onClick = onResend,
             )
         }
+    }
+}
+
+@Composable
+private fun LinkHeaderSection(
+    verificationState: VerificationViewState
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Link logo
+        Image(
+            modifier = Modifier
+                .width(48.dp)
+                .testTag(VERIFICATION_HEADER_IMAGE_TAG),
+            painter = painterResource(R.drawable.stripe_link_logo),
+            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+        )
+
+        verificationState.defaultPayment?.let { paymentUI ->
+            // Vertical divider
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(LinkTheme.colors.borderDefault)
+            )
+
+            // Payment details
+            PaymentDetailsDisplay(paymentUI = paymentUI)
+        }
+    }
+}
+
+@Composable
+private fun PaymentDetailsDisplay(
+    paymentUI: DefaultPaymentUI
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        PaymentMethodIconFromResource(
+            iconRes = paymentUI.paymentIconRes,
+            colorFilter = null,
+            alignment = Alignment.Center,
+            modifier = Modifier.size(20.dp)
+        )
+        Text(
+            text = paymentUI.last4,
+            style = LinkTheme.typography.detailEmphasized,
+            color = LinkTheme.colors.textPrimary,
+            modifier = Modifier.padding(start = 4.dp)
+        )
     }
 }
 
@@ -232,5 +288,71 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         verificationState = verificationState,
         otpElement = otpElement,
         onResend = { }
+    )
+}
+
+@Preview(name = "With card", showBackground = true)
+@Composable
+private fun LinkEmbeddedOtpSectionWithCardPreview() {
+    val otpElement = OTPElement(
+        identifier = IdentifierSpec.Generic("otp"),
+        controller = OTPController()
+    )
+
+    val paymentUI = DisplayablePaymentDetails(
+        defaultCardBrand = "visa",
+        last4 = "4242",
+        defaultPaymentType = "CARD",
+    ).toDefaultPaymentUI(true)
+
+    val verificationState = VerificationViewState(
+        isProcessing = false,
+        requestFocus = true,
+        errorMessage = null,
+        isSendingNewCode = false,
+        didSendNewCode = false,
+        redactedPhoneNumber = "***-***-1234",
+        email = "user@example.com",
+        isDialog = false,
+        defaultPayment = paymentUI
+    )
+
+    LinkInline2FASection(
+        verificationState = verificationState,
+        otpElement = otpElement,
+        onResend = {}
+    )
+}
+
+@Preview(name = "With bank", showBackground = true)
+@Composable
+private fun LinkEmbeddedOtpSectionWithBankPreview() {
+    val otpElement = OTPElement(
+        identifier = IdentifierSpec.Generic("otp"),
+        controller = OTPController()
+    )
+
+    val paymentUI = DisplayablePaymentDetails(
+        defaultCardBrand = null,
+        last4 = "4242",
+        defaultPaymentType = "BANK_ACCOUNT",
+    ).toDefaultPaymentUI(true)
+
+    val verificationState = VerificationViewState(
+        isProcessing = false,
+        requestFocus = true,
+        errorMessage = null,
+        isSendingNewCode = false,
+        didSendNewCode = false,
+        redactedPhoneNumber = "***-***-1234",
+        email = "user@example.com",
+        isDialog = false,
+        defaultPayment = paymentUI
+    )
+
+    LinkInline2FASection(
+        verificationState = verificationState,
+        otpElement = otpElement,
+        onResend = {}
     )
 }

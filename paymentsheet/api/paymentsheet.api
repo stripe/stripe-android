@@ -473,7 +473,6 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkButtonKt 
 	public final fun getLambda-5$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-6$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-7$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-8$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ComposableSingletons$LinkContentKt {
@@ -612,6 +611,14 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Paymen
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/link/ui/wallet/DefaultPaymentUI$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/ui/wallet/DefaultPaymentUI;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/ui/wallet/DefaultPaymentUI;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/link/verification/LinkInlineState$Creator : android/os/Parcelable$Creator {

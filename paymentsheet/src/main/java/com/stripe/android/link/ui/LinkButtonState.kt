@@ -1,7 +1,8 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.model.CardBrand
+import com.stripe.android.link.ui.wallet.DefaultPaymentUI
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
 
 /**
@@ -14,9 +15,7 @@ internal sealed class LinkButtonState {
      * Show payment details (card info)
      */
     data class DefaultPayment(
-        val cardBrand: CardBrand,
-        val last4: String?,
-        val numberOfSavedPaymentDetails: Long?
+        val paymentUI: DefaultPaymentUI
     ) : LinkButtonState()
 
     /**
@@ -29,35 +28,20 @@ internal sealed class LinkButtonState {
      */
     object Plain : LinkButtonState()
 
-    companion object Companion {
+    companion object {
         /**
-         * Create LinkWalletButtonState from email and payment details
-         * Priority: payment details -> email -> plain
+         * Creates appropriate LinkButtonState based on configuration and payment details.
          */
-        fun from(
-            email: String?,
-            paymentDetails: DisplayablePaymentDetails?
+        fun create(
+            linkEmail: String?,
+            paymentDetails: DisplayablePaymentDetails?,
         ): LinkButtonState {
-            // Priority 1: Payment details (cards only)
-            paymentDetails?.let { details ->
-                if (details.defaultPaymentType?.uppercase() == "CARD") {
-                    details.defaultCardBrand?.let { brandCode ->
-                        return DefaultPayment(
-                            cardBrand = CardBrand.fromCode(brandCode),
-                            last4 = details.last4,
-                            numberOfSavedPaymentDetails = details.numberOfSavedPaymentDetails
-                        )
-                    }
-                }
+            val paymentUI = paymentDetails?.toDefaultPaymentUI(enableDefaultValuesInECE = false)
+            return when {
+                paymentUI != null -> DefaultPayment(paymentUI = paymentUI)
+                linkEmail != null -> Email(email = linkEmail)
+                else -> Plain
             }
-
-            // Priority 2: Email
-            email?.let {
-                return Email(it)
-            }
-
-            // Priority 3: Plain (signed out)
-            return Plain
         }
     }
 }

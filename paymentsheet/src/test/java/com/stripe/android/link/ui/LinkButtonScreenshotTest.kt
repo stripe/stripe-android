@@ -5,8 +5,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.model.CardBrand
+import com.stripe.android.link.ui.wallet.DefaultPaymentUI
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.Locale
@@ -134,9 +135,10 @@ internal class LinkButtonScreenshotTest {
         paparazziRule.snapshot {
             LinkButton(
                 state = LinkButtonState.DefaultPayment(
-                    cardBrand = CardBrand.Visa,
-                    last4 = "4242",
-                    numberOfSavedPaymentDetails = 3L
+                    paymentUI = DefaultPaymentUI(
+                        paymentIconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
+                        last4 = "4242"
+                    ),
                 ),
                 enabled = true,
                 onClick = { }
@@ -149,9 +151,10 @@ internal class LinkButtonScreenshotTest {
         paparazziRule.snapshot {
             LinkButton(
                 state = LinkButtonState.DefaultPayment(
-                    cardBrand = CardBrand.Visa,
-                    last4 = null,
-                    numberOfSavedPaymentDetails = 8L
+                    paymentUI = DefaultPaymentUI(
+                        paymentIconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
+                        last4 = "••••"
+                    ),
                 ),
                 enabled = true,
                 onClick = { }
