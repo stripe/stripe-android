@@ -69,11 +69,6 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return
         }
-
-        val enableDefaultValuesInECE = linkConfiguration.enableDisplayableDefaultValuesInEce
-        val account = linkAccountManager.linkAccountInfo.value.account
-        val defaultPaymentUI = account?.displayablePaymentDetails
-            ?.toDefaultPaymentUI(enableDefaultValuesInECE)
         updateState { it.copy(verificationState = linkAccount.initial2FAState(linkConfiguration)) }
         observeOtp(linkAccountManager)
         startVerification()

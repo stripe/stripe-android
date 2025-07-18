@@ -6,7 +6,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.getCardBrandIcon
+import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -29,8 +29,8 @@ internal fun DisplayablePaymentDetails.toDefaultPaymentUI(
     if (last4 == null) return null
 
     val paymentIcon = when (defaultPaymentType) {
-        "CARD" -> CardBrand.fromCode(defaultCardBrand).getCardBrandIcon()
-        "BANK_ACCOUNT" -> R.drawable.stripe_ic_paymentsheet_bank
+        "CARD" -> CardBrand.fromCode(defaultCardBrand).getCardBrandIconForVerticalMode()
+        "BANK_ACCOUNT" -> R.drawable.stripe_link_bank_outlined
         else -> null
     }
     // do not render default payment details if icon is not available

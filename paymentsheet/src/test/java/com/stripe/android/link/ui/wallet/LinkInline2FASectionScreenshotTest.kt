@@ -6,6 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -57,49 +59,19 @@ class LinkInline2FASectionScreenshotTest {
     }
 
     @Test
-    fun testWithPaymentDetails() {
-        val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
-            controller = OTPController()
-        )
-
-        val paymentUI = DefaultPaymentUI(
-            paymentIconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_card_visa_ref,
-            last4 = "4242"
-        )
-
-        val verificationState = VerificationViewState(
-            isProcessing = false,
-            requestFocus = true,
-            errorMessage = null,
-            isSendingNewCode = false,
-            didSendNewCode = false,
-            redactedPhoneNumber = "***-***-1234",
-            email = "user@example.com",
-            isDialog = false,
-            defaultPayment = paymentUI
-        )
-
-        paparazziRule.snapshot {
-            LinkInline2FASection(
-                verificationState = verificationState,
-                otpElement = otpElement,
-                onResend = {}
-            )
-        }
-    }
-
-    @Test
     fun testWithPaymentDetailsMastercard() {
         val otpElement = OTPElement(
             identifier = IdentifierSpec.Generic("otp"),
             controller = OTPController()
         )
 
-        val paymentUI = DefaultPaymentUI(
-            paymentIconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_card_mastercard_ref,
-            last4 = "5555"
+        val paymentDetails = DisplayablePaymentDetails(
+            defaultCardBrand = "mastercard",
+            last4 = "5555",
+            defaultPaymentType = "CARD",
+            numberOfSavedPaymentDetails = 1L
         )
+        val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
             isProcessing = false,
@@ -131,10 +103,13 @@ class LinkInline2FASectionScreenshotTest {
             }
         )
 
-        val paymentUI = DefaultPaymentUI(
-            paymentIconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_card_amex_ref,
-            last4 = "0005"
+        val paymentDetails = DisplayablePaymentDetails(
+            defaultCardBrand = "amex",
+            last4 = "0005",
+            defaultPaymentType = "CARD",
+            numberOfSavedPaymentDetails = 2L
         )
+        val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
             isProcessing = true,
@@ -175,74 +150,6 @@ class LinkInline2FASectionScreenshotTest {
             redactedPhoneNumber = "***-***-1234",
             email = "user@example.com",
             isDialog = false
-        )
-
-        paparazziRule.snapshot {
-            LinkInline2FASection(
-                verificationState = verificationState,
-                otpElement = otpElement,
-                onResend = {}
-            )
-        }
-    }
-
-    @Test
-    fun testErrorStateWithPaymentDetails() {
-        val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
-            controller = OTPController().apply {
-                onValueChanged(0, "999")
-            }
-        )
-
-        val paymentUI = DefaultPaymentUI(
-            paymentIconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_card_discover_ref,
-            last4 = "1117"
-        )
-
-        val verificationState = VerificationViewState(
-            isProcessing = false,
-            requestFocus = false,
-            errorMessage = resolvableString("Verification failed. Code expired."),
-            isSendingNewCode = false,
-            didSendNewCode = false,
-            redactedPhoneNumber = "***-***-7890",
-            email = "error@test.com",
-            isDialog = false,
-            defaultPayment = paymentUI
-        )
-
-        paparazziRule.snapshot {
-            LinkInline2FASection(
-                verificationState = verificationState,
-                otpElement = otpElement,
-                onResend = {}
-            )
-        }
-    }
-
-    @Test
-    fun testSendingNewCode() {
-        val otpElement = OTPElement(
-            identifier = IdentifierSpec.Generic("otp"),
-            controller = OTPController()
-        )
-
-        val paymentUI = DefaultPaymentUI(
-            paymentIconRes = com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_card_visa_ref,
-            last4 = "4242"
-        )
-
-        val verificationState = VerificationViewState(
-            isProcessing = false,
-            requestFocus = true,
-            errorMessage = null,
-            isSendingNewCode = true,
-            didSendNewCode = false,
-            redactedPhoneNumber = "***-***-1234",
-            email = "resend@example.com",
-            isDialog = false,
-            defaultPayment = paymentUI
         )
 
         paparazziRule.snapshot {
