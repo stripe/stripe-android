@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 dependencies {
     api project(":stripe-core")
@@ -21,6 +22,10 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+    implementation libs.playServicesWallet
+    implementation libs.compose.foundation
+    api libs.compose.ui
+    implementation libs.compose.activity
 
 
     testImplementation project(':payments-core-testing')
