@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -481,7 +482,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = false,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -512,7 +513,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -545,7 +546,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             canShowWalletsInline = true,
         ) {
             walletsState.value = WalletsState(
-                link = WalletsState.Link("email@email.com"),
+                link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
@@ -614,7 +615,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletsInline = true,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -675,7 +676,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         canShowWalletButtons = false,
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link("email@email.com"),
+            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
             googlePay = null,
             buttonsEnabled = true,
             dividerTextResource = 0,
@@ -1473,7 +1474,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private val linkAndGooglePayWalletState = WalletsState(
-        link = WalletsState.Link("email@email.com"),
+        link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
         googlePay = WalletsState.GooglePay(
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,

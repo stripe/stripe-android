@@ -74,7 +74,7 @@ internal class WalletButtonsContent(
                             )
                             // Link button is filtered out if the 2FA verification is in progress
                             is WalletButtonsInteractor.WalletButton.Link -> LinkButton(
-                                email = button.email,
+                                state = button.state,
                                 enabled = state.buttonsEnabled,
                                 onClick = {
                                     interactor.handleViewAction(

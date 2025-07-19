@@ -6,11 +6,13 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.appendInlineContent
@@ -23,6 +25,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -45,7 +48,11 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
+import com.stripe.android.link.ui.wallet.DefaultPaymentUI
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
 
@@ -72,26 +79,59 @@ internal const val LinkButtonTestTag = "LinkButtonTestTag"
 @Preview
 @Composable
 private fun LinkEmailButton() {
-    LinkButton(
-        enabled = false,
-        email = "theop@email.com",
-        onClick = {}
-    )
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.Email("theop@email.com"),
+            enabled = false,
+            onClick = {}
+        )
+    }
 }
 
 @Preview(locale = "ru", fontScale = 1.5f)
 @Composable
 private fun LinkNoEmailButton() {
-    LinkButton(
-        enabled = true,
-        email = null,
-        onClick = {}
-    )
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.Default,
+            enabled = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LinkEmailOnlyButton() {
+    DefaultLinkTheme {
+        LinkButton(
+            state = LinkButtonState.Email("user@example.com"),
+            enabled = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun LinkMasterCardButton() {
+    DefaultLinkTheme {
+        val paymentUI = DisplayablePaymentDetails(
+            defaultCardBrand = "mastercard",
+            last4 = "4242",
+            defaultPaymentType = "CARD",
+        ).toDefaultPaymentUI(true)!!
+        LinkButton(
+            state = LinkButtonState.DefaultPayment(paymentUI = paymentUI),
+            enabled = true,
+            onClick = {}
+        )
+    }
 }
 
 @Composable
 internal fun LinkButton(
-    email: String?,
+    state: LinkButtonState,
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -125,13 +165,47 @@ internal fun LinkButton(
                     bottom = LinkButtonVerticalPadding
                 )
             ) {
-                if (email == null) {
-                    SignedOutButtonContent()
-                } else {
-                    SignedInButtonContent(email = email)
+                when (state) {
+                    is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
+                        paymentUI = state.paymentUI
+                    )
+
+                    is LinkButtonState.Email -> SignedInButtonContent(state.email)
+                    LinkButtonState.Default -> SignedOutButtonContent()
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PaymentDetailsButtonContent(
+    paymentUI: DefaultPaymentUI
+) {
+    val color = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        LinkIconAndDivider()
+
+        PaymentMethodIconFromResource(
+            iconRes = paymentUI.paymentIconRes,
+            colorFilter = null,
+            alignment = Alignment.Center,
+            modifier = Modifier.size(24.dp)
+        )
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Text(
+            text = paymentUI.last4,
+            color = color,
+            style = LinkTheme.typography.bodyEmphasized,
+            fontSize = LINK_EMAIL_FONT_SIZE.sp,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
+            maxLines = 1
+        )
     }
 }
 

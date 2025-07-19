@@ -97,7 +97,8 @@ internal object LinkTestUtils {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
-            allowUserEmailEdits = true
+            allowUserEmailEdits = true,
+            enableDisplayableDefaultValuesInEce = false
         )
     }
 }

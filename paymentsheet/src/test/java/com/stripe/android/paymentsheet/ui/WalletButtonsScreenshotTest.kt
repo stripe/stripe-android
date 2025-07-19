@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,7 @@ class WalletButtonsScreenshotTest {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
-                    email = "email@email.com",
+                    state = LinkButtonState.Email("email@email.com"),
                 )
             ),
             buttonsEnabled = true,
@@ -31,7 +32,7 @@ class WalletButtonsScreenshotTest {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
-                    email = "email@email.com",
+                    state = LinkButtonState.Email("email@email.com"),
                 ),
             ),
             buttonsEnabled = false,
