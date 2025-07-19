@@ -3,8 +3,12 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -62,10 +67,15 @@ internal fun LinkControllerUi(
     onPaymentMethodButtonClick: (email: String) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
+    onRegisterConsumerClick: (email: String, phone: String, country: String, name: String?) -> Unit,
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var existingOnly by rememberSaveable { mutableStateOf(false) }
+    var showRegistrationForm by rememberSaveable { mutableStateOf(false) }
+    var registrationPhone by rememberSaveable { mutableStateOf("") }
+    var registrationCountry by rememberSaveable { mutableStateOf("US") }
+    var registrationName by rememberSaveable { mutableStateOf("") }
     val errorToPresent = playgroundState.linkControllerError()
 
     val scope = rememberCoroutineScope()
@@ -90,20 +100,102 @@ internal fun LinkControllerUi(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = email,
-            label = { Text(text = "Customer email (optional)") },
-            onValueChange = { email = it }
-        )
-        Divider(Modifier.padding(vertical = 20.dp))
-
         StatusBox(
             controllerState = controllerState,
             playgroundState = playgroundState,
         )
-
         Divider(Modifier.padding(bottom = 10.dp))
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = email,
+            label = { Text(text = "Consumer email") },
+            onValueChange = { email = it }
+        )
+
+        // Registration Form Section
+        val chevronRotation by animateFloatAsState(
+            targetValue = if (!showRegistrationForm) -180f else 0f,
+            label = "chevron_rotation"
+        )
+
+        Row(
+            modifier = Modifier
+                .clickable { showRegistrationForm = !showRegistrationForm }
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (showRegistrationForm) "Hide registration form" else "Show registration form",
+                style = MaterialTheme.typography.subtitle2,
+                color = color,
+            )
+            Icon(
+                modifier = Modifier
+                    .size(12.dp)
+                    .graphicsLayer {
+                        rotationZ = chevronRotation
+                    },
+                painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_chevron_down),
+                contentDescription = null,
+                tint = color,
+            )
+        }
+        AnimatedVisibility(
+            visible = showRegistrationForm,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = registrationPhone,
+                    label = { Text(text = "Phone") },
+                    onValueChange = { registrationPhone = it }
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = registrationCountry,
+                    label = { Text(text = "Country") },
+                    onValueChange = { registrationCountry = it }
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = registrationName,
+                    label = { Text(text = "Name (optional)") },
+                    onValueChange = { registrationName = it }
+                )
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        onRegisterConsumerClick(
+                            email.trim(),
+                            registrationPhone.trim(),
+                            registrationCountry.trim(),
+                            registrationName.trim().takeIf { it.isNotEmpty() }
+                        )
+                    },
+                    enabled = email.isNotBlank() &&
+                        registrationPhone.isNotBlank() &&
+                        registrationCountry.isNotBlank()
+                ) {
+                    Text("Register")
+                }
+            }
+        }
+        Divider(Modifier.padding(bottom = 10.dp))
+
         AuthenticateButton(
             modifier = Modifier.fillMaxWidth(),
             email = email,
@@ -117,7 +209,7 @@ internal fun LinkControllerUi(
             label = "Require existing consumer",
             checked = existingOnly,
         )
-        Divider(Modifier.padding(bottom = 20.dp))
+        Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
         PaymentMethodButton(
             preview = controllerState.selectedPaymentMethodPreview,
@@ -156,6 +248,7 @@ private fun StatusBox(
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
+        add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
     }
 
     if (statusItems.isNotEmpty()) {
@@ -213,6 +306,7 @@ private fun LinkControllerUiPreview() {
             onPaymentMethodButtonClick = {},
             onCreatePaymentMethodClick = {},
             onAuthenticationClick = { _, _ -> },
+            onRegisterConsumerClick = { _, _, _, _ -> },
             onErrorMessage = {},
         )
     }
@@ -362,6 +456,7 @@ private fun LabeledCheckbox(
             modifier = Modifier.padding(start = 8.dp),
             text = label,
             maxLines = 1,
+            style = MaterialTheme.typography.body2,
             overflow = TextOverflow.Ellipsis
         )
     }
