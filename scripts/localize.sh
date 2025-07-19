@@ -86,6 +86,7 @@ do
         mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
         mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
         mv android/$MODULE/values-id android/$MODULE/values-in
+        cp -R android/$MODULE/values-ro-rRO android/$MODULE/values-ro
     fi
 
     # This is used by the untranslated_project_keys.sh script

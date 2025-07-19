@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- title for accepted types of ids -->
+  <string name="stripe_accepted_forms_of_id">Forme de documente de identitate acceptate</string>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">Formele de identificare acceptate includ</string>
+  <!-- Instructional text when user needs to align the edge with camera -->
+  <string name="stripe_align_document">Țineți documentul de identitate drept</string>
+  <!-- Opens the app's settings in the Settings app -->
+  <string name="stripe_app_settings">Setările aplicației</string>
+  <!-- Description of back of driver's license image -->
+  <string name="stripe_back_of_dl">Verso-ul permisului de conducere</string>
+  <!-- Description of the checkmark to indicate back of driver's license is uploaded, used for A11Y -->
+  <string name="stripe_back_of_dl_selected">Este selectat verso-ul permisului de conducere</string>
+  <!-- Description of back of identity card image -->
+  <string name="stripe_back_of_id">Verso-ul cărții de identitate</string>
+  <!-- Title of ID document scanning screen when scanning the back of an identity card -->
+  <string name="stripe_back_of_id_document">Spatele documentului de identitate</string>
+  <!-- Description of the checkmark to indicate back of ID is uploaded, used for A11Y -->
+  <string name="stripe_back_of_id_selected">Este selectat verso-ul cărții de identitate</string>
+  <!-- Title displayed when requesting camera permissions -->
+  <string name="stripe_camera_permission">Permisiune cameră</string>
+  <string name="stripe_camera_permission_rationale">Această aplicație utilizează camera pentru a vă scana documentele de identificare și face fotografii pentru a vă verifica identitatea.</string>
+  <!-- Instructional text during selfie is being captured -->
+  <string name="stripe_capturing">Se captează…</string>
+  <!-- Description of the check mark, used for A11Y -->
+  <string name="stripe_check_mark">Bifă care indică faptul că documentele au fost captate cu succes</string>
+  <!-- Text for choosing a photo from gallery -->
+  <string name="stripe_choose_file">Alegeți o fotografie</string>
+  <!-- Close button text -->
+  <string name="stripe_close_button_text">închidere</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Finalizați cu datele de testare</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Economisiți timp alegând rezultatul dorit și completând instantaneu cu acel rezultat. Fluxul SDK pe mobil va returna rezultatul Finalizat.</string>
+  <!-- Line1 body text of error screen when live capture fails -->
+  <string name="stripe_could_not_capture_body1">Nu am putut captura o imagine de înaltă calitate.</string>
+  <!-- Line2 body text of error screen when live capture fails -->
+  <string name="stripe_could_not_capture_body2">Puteți să încercați din nou sau să încărcați o imagine de pe dispozitivul dvs.</string>
+  <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
+  <string name="stripe_could_not_capture_title">Nu s-a putut capta imaginea</string>
+  <!-- Instructional text when environment is too bright -->
+  <string name="stripe_decrease_lighting">Datele nu sunt vizibile</string>
+  <string name="stripe_decrease_lighting_2">Mutați-vă într-o zonă mai întunecată</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">pictogramă cameră</string>
+  <!-- Description of the clock icon, used for A11Y -->
+  <string name="stripe_description_clock">Pictogramă ceas</string>
+  <!-- Content description for close button -->
+  <string name="stripe_description_close">închidere pagină verificare</string>
+  <!-- Content description for cloud icon -->
+  <string name="stripe_description_cloud">pictogramă nor</string>
+  <!-- Content description for create_identity_verification icon -->
+  <string name="stripe_description_create_identity_verification">pictogramă create_identity_verification</string>
+  <!-- Content description for dispute_protection icon -->
+  <string name="stripe_description_dispute_protection">pictogramă dispute_protection</string>
+  <!-- Content description for document icon -->
+  <string name="stripe_description_document">pictogramă document</string>
+  <!-- Content description for ellipsis icon -->
+  <string name="stripe_description_ellipsis">pictogramă puncte de suspensie</string>
+  <!-- Content description for exclamation icon -->
+  <string name="stripe_description_exclamation">pictogramă exclamație</string>
+  <!-- Content description for back button -->
+  <string name="stripe_description_go_back">revenire la ecranul anterior</string>
+  <!-- Content description for lock icon -->
+  <string name="stripe_description_lock">pictogramă blocare</string>
+  <!-- Content description for merchant logo -->
+  <string name="stripe_description_merchant_logo">logo comerciant</string>
+  <!-- Content description for moved icon -->
+  <string name="stripe_description_moved">pictogramă element mutat</string>
+  <!-- Content description for phone icon -->
+  <string name="stripe_description_phone">pictogramă telefon</string>
+  <!-- Content description for plus icon -->
+  <string name="stripe_description_plus">pictogramă plus</string>
+  <!-- Content description for the icon for privacy policy -->
+  <string name="stripe_description_privacy_policy">pictogramă politică de confidențialitate</string>
+  <!-- Content description for stripe logo -->
+  <string name="stripe_description_stripe_logo">logo Stripe</string>
+  <!-- Content description for the icon for estimated time to complete verification -->
+  <string name="stripe_description_time_estimate">pictogramă timp estimat pentru finalizarea verificării</string>
+  <!-- Content description for wallet icon -->
+  <string name="stripe_description_wallet">pictogramă portofel</string>
+  <!-- Label for Date of birth field -->
+  <string name="stripe_dob">Data nașterii</string>
+  <!-- Body for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_body">Asigurați-vă că vă aflați într-un spațiu bine luminat.</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">Pregătiți-vă să vă scanați documentul de identitate cu fotografie</string>
+  <!-- Label of the driver's license option for document type selection -->
+  <string name="stripe_driver_license">Permis de conducere</string>
+  <!-- Text for error labels -->
+  <string name="stripe_error">Eroare</string>
+  <!-- Button that opens file upload screen -->
+  <string name="stripe_file_upload">Încărcare fișier</string>
+  <!-- Instructions for uploading images of drivers license -->
+  <string name="stripe_file_upload_content_dl">Vă rugăm să încărcați imagini cu partea frontală și verso-ul permisului dvs. de conducere</string>
+  <!-- Instructions for uploading images of identity card -->
+  <string name="stripe_file_upload_content_id">Vă rugăm să încărcați imagini cu partea frontală și verso-ul cărții dvs. de identitate</string>
+  <!-- Instructions for uploading images of passport -->
+  <string name="stripe_file_upload_content_passport">Vă rugăm să încărcați o imagine a pașaportului dvs.</string>
+  <!-- Label for first (given) name field -->
+  <string name="stripe_first_name">Prenume</string>
+  <!-- Content description of selfie flash animation mask -->
+  <string name="stripe_flash_mask">Mască pentru animație selfie</string>
+  <!-- Description of front of driver's license image -->
+  <string name="stripe_front_of_dl">Partea frontală a permisului de conducere</string>
+  <!-- Description of the checkmark to indicate front of driver's license is uploaded, used for A11Y -->
+  <string name="stripe_front_of_dl_selected">Este selectată partea din față a permisului de conducere</string>
+  <!-- Description of front of identity card image -->
+  <string name="stripe_front_of_id">Partea frontală a cărții de identitate</string>
+  <!-- Title of ID document scanning screen when scanning the front of an identity card -->
+  <string name="stripe_front_of_id_document">Partea frontală a documentului de identitate</string>
+  <!-- Description of the checkmark to indicate front of ID is uploaded, used for A11Y -->
+  <string name="stripe_front_of_id_selected">Este selectată partea din față a cărții de identitate</string>
+  <!-- Button to go back to the previous screen -->
+  <string name="stripe_go_back">Înapoi</string>
+  <!-- display name for Government issued photo ID -->
+  <string name="stripe_government_id">Document de identitate cu fotografie emis de guvern</string>
+  <!-- Text displayed when requesting camera permissions -->
+  <string name="stripe_grant_camera_permission_text">Avem nevoie de permisiunea de a utiliza camera dvs. Vă rugăm să permiteți accesul la cameră în setările aplicației.</string>
+  <!-- Instructional text when camera is focusing on a document while scanning it -->
+  <string name="stripe_hold_still">Nu mișcați, se scanează</string>
+  <!-- display name for ID -->
+  <string name="stripe_id_card">Carte de identitate</string>
+  <!-- Label for ID number section -->
+  <string name="stripe_id_number">Număr de identificare</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">Sunt gata</string>
+  <!-- An error message. -->
+  <string name="stripe_incomplete_id_number">Numărul de identificare pe care l-ați introdus nu este complet.</string>
+  <!-- Instructional text when environment is too dark -->
+  <string name="stripe_increase_lighting">Mutați-vă într-o zonă bine luminată</string>
+  <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
+  <string name="stripe_individual_cpf">CPF persoană fizică</string>
+  <!-- Message for invalid Date of birth field -->
+  <string name="stripe_invalid_dob_error">Data nașterii pare a nu fi validă</string>
+  <!-- Instructional text when user needs remove anything blocking the document -->
+  <string name="stripe_keep_fully_visible">Datele nu sunt vizibile</string>
+  <!-- Continue button text -->
+  <string name="stripe_kontinue">continuare</string>
+  <!-- Label for the ID field to collect last 4 of social security number for US ID -->
+  <string name="stripe_last_4_of_ssn">Ultimele 4 cifre ale numărului de securitate socială</string>
+  <!-- Label for last (family) name field -->
+  <string name="stripe_last_name">Nume de familie</string>
+  <!-- Status while screen is loading -->
+  <string name="stripe_loading">Se încarcă</string>
+  <!-- Instructional text when camera is too far from a document -->
+  <string name="stripe_move_closer">Apropiați documentul de identitate</string>
+  <!-- Instructional text when camera is too close to a document -->
+  <string name="stripe_move_farther">Depărtați documentul de identitate</string>
+  <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
+  <string name="stripe_nric_or_fin">NRIC sau FIN</string>
+  <!-- No comment provided by engineer. -->
+  <string name="stripe_ok">OK</string>
+  <!-- Label of the passport option for document type selection -->
+  <string name="stripe_passport">Pașaport</string>
+  <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
+  <string name="stripe_passport_selected">Este selectat pașaportul</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Număr de telefon</string>
+  <!-- Instructional text when there is no document in camera frame -->
+  <string name="stripe_point_camera_to_document">Nu s-a detectat niciun document</string>
+  <!-- Instructional text for scanning back of a driver's license -->
+  <string name="stripe_position_dl_back">Întoarceți permisul de conducere pe partea cealaltă</string>
+  <!-- Instructional text for scanning front of a driver's license -->
+  <string name="stripe_position_dl_front">Poziționați-vă permisul de conducere în centrul cadrului</string>
+  <!-- Instructional text for scanning back of a identity card -->
+  <string name="stripe_position_id_back">Întoarceți cartea de identitate pe partea cealaltă</string>
+  <!-- Instructional text for scanning front of a identity card -->
+  <string name="stripe_position_id_front">Poziționați-vă cartea de identitate în centrul cadrului</string>
+  <!-- Instructional text for scanning a passport -->
+  <string name="stripe_position_passport">Poziționați-vă pașaportul în centrul cadrului</string>
+  <!-- Instructional text for capturing selfie -->
+  <string name="stripe_position_selfie">Poziționați-vă fața în centrul cadrului.</string>
+  <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">Documentul de identitate nu este focalizat</string>
+  <!-- Instructional text when the document has too much glare -->
+  <string name="stripe_reduce_glare">Informațiile nu sunt vizibile</string>
+  <string name="stripe_reduce_glare_2">Încercați să reduceți strălucirea și să faceți vizibil documentul de identitate</string>
+  <!-- Button text displayed to the user to retake photo -->
+  <string name="stripe_retake_photos">Faceți din nou fotografii</string>
+  <!-- Instructional text when user needs to rotate the document to align with camera -->
+  <string name="stripe_rotate_document">Țineți documentul de identitate drept</string>
+  <!-- State when identity document has been successfully scanned -->
+  <string name="stripe_scanned">Scanat</string>
+  <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
+  <string name="stripe_select">Selectare</string>
+  <!-- Instructional text when selfie is captured -->
+  <string name="stripe_selfie_capture_complete">Capturile de tip selfie sunt complete</string>
+  <!-- Title of selfie capture screen -->
+  <string name="stripe_selfie_captures">Capturi de tip selfie</string>
+  <!-- Content description of a captured selfie -->
+  <string name="stripe_selfie_item_description">un selfie captat</string>
+  <!-- Text for message of warning alert when selfie is not yet saved -->
+  <string name="stripe_selfie_not_saved_warning">Fotografiile dvs. de tip selfie nu au fost salvate. Doriți să ieșiți?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Câteva fotografii vor fi efectuate automat la următorul pas pentru a verifica dacă sunteți dvs.</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Pregătiți-vă pentru a efectua un selfie</string>
+  <!-- When selected in an action sheet, opens the device's camera interface -->
+  <string name="stripe_take_photo">Faceți o fotografie</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Această pagină este afișată numai în modul de testare.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">În prezent, sunteți în modul de testare</string>
+  <!-- Button to attempt to re-scan identity document image -->
+  <string name="stripe_try_again">Încercați din nou</string>
+  <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
+  <string name="stripe_unexpected_error_try_again">A apărut o eroare neașteptată -- încercați din nou în câteva secunde</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Încărcați o fotografie</string>
+  <!-- Title of dialog to upload back of driver license -->
+  <string name="stripe_upload_dialog_title_dl_back">Încărcați verso-ul permisului de conducere</string>
+  <!-- Title of dialog to upload front of driver license -->
+  <string name="stripe_upload_dialog_title_dl_front">Încărcați partea din față a permisului de conducere</string>
+  <!-- Title of dialog to upload back of ID -->
+  <string name="stripe_upload_dialog_title_id_back">Încărcați verso-ul cărții de identitate</string>
+  <!-- Title of dialog to upload front of ID -->
+  <string name="stripe_upload_dialog_title_id_front">Încărcați partea din față a cărții de identitate</string>
+  <!-- Title of dialog to upload passport -->
+  <string name="stripe_upload_dialog_title_passport">Încărcați pașaportul</string>
+  <!-- Generic message for alternative options when uploading a document -->
+  <string name="stripe_upload_file_generic_text">Alternativ, puteți încărca manual o fotografie a documentului dvs. de identitate cu fotografie</string>
+  <!-- Message for alternative options when uploading a document -->
+  <string name="stripe_upload_file_text">Alternativ, puteți încărca manual o fotografie a %1$s</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Încărcați documentul de identitate cu fotografie</string>
+</resources>
