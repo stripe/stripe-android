@@ -51,7 +51,7 @@ internal interface EmbeddedContentHelper {
 
     fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     )
 
@@ -110,7 +110,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                             walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
                         ),
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
-                        rowStyle = state.rowStyle,
+                        appearance = state.appearance,
                         isImmediateAction = internalRowSelectionCallback.get() != null
                     )
                 }
@@ -134,13 +134,13 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     override fun dataLoaded(
         paymentMethodMetadata: PaymentMethodMetadata,
-        rowStyle: Embedded.RowStyle,
+        appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         eventReporter.onShowNewPaymentOptions()
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
-            rowStyle = rowStyle,
+            appearance = appearance,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
     }
@@ -299,7 +299,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @Parcelize
     class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
-        val rowStyle: Embedded.RowStyle,
+        val appearance: Embedded,
         val embeddedViewDisplaysMandateText: Boolean,
     ) : Parcelable
 
