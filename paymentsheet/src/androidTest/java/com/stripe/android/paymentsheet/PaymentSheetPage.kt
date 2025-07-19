@@ -110,6 +110,11 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun fillOutFieldWithLabel(label: String, text: String) {
+        waitForText(label)
+        replaceText(label, text)
+    }
+
     fun clickSavedCard(last4: String) {
         val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText(last4, substring = true))
@@ -246,6 +251,12 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
+    fun clickViewWithContentDescription(description: String) {
+        composeTestRule.onNode(hasContentDescription(description))
+            .performScrollTo()
+            .performClick()
+    }
+
     fun waitForTag(testTag: String) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
@@ -258,7 +269,17 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil(timeoutMillis = 15_000) {
             composeTestRule
                 .onAllNodes(hasText(text, substring = substring))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+    }
+
+    fun waitForContentDescription(description: String) {
+        composeTestRule.waitUntil(timeoutMillis = 15_000) {
+            composeTestRule
+                .onAllNodes(hasContentDescription(description))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
     }
 

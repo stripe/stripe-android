@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.text.style.StyleSpan
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -37,6 +38,9 @@ interface PlacesClientProxy {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        @Volatile
+        @VisibleForTesting
+        var override: PlacesClientProxy? = null
 
         fun create(
             context: Context,
@@ -47,11 +51,13 @@ interface PlacesClientProxy {
             errorReporter: ErrorReporter
         ): PlacesClientProxy {
             return if (isPlacesAvailable()) {
-                initializer()
-                DefaultPlacesClientProxy(
-                    clientFactory(context),
-                    errorReporter
-                )
+                override ?: run {
+                    initializer()
+                    DefaultPlacesClientProxy(
+                        clientFactory(context),
+                        errorReporter
+                    )
+                }
             } else {
                 UnsupportedPlacesClientProxy(errorReporter)
             }
@@ -68,7 +74,7 @@ interface PlacesClientProxy {
                     PlacesR.drawable.places_powered_by_google_light
                 }
             } else {
-                if (BuildConfig.DEBUG) {
+                if (BuildConfig.DEBUG && override == null) {
                     throw IllegalStateException(
                         "Missing Google Places dependency, please add it to your apps build.gradle"
                     )
