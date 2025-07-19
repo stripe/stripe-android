@@ -27,12 +27,12 @@ import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
-import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.strings.resolve
 
@@ -41,9 +41,11 @@ internal fun LinkInline2FASection(
     verificationState: VerificationViewState,
     otpElement: OTPElement,
     onResend: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    appearance: PaymentSheet.Appearance?
 ) {
     DefaultLinkTheme {
+        val theme = createLinkOtpSectionTheme(appearance)
         Column(
             modifier = modifier
                 .fillMaxWidth()
@@ -61,12 +63,16 @@ internal fun LinkInline2FASection(
             )
 
             // Verification instruction message
-            Title(verificationState)
+            Title(
+                verificationState = verificationState,
+                theme = theme
+            )
 
             // OTP input
             OTPSection(
                 state = verificationState,
-                otpElement = otpElement
+                otpElement = otpElement,
+                theme = theme
             )
 
             // Compact error message
@@ -94,7 +100,8 @@ internal fun LinkInline2FASection(
 @Composable
 private fun OTPSection(
     state: VerificationViewState,
-    otpElement: OTPElement
+    otpElement: OTPElement,
+    theme: LinkInlineOTPTheme
 ) {
     Box(
         contentAlignment = Alignment.Center
@@ -106,18 +113,12 @@ private fun OTPSection(
                 middleSpacing = 8.dp,
                 boxSpacing = 8.dp,
                 otpInputPlaceholder = " ",
-                boxShape = LinkTheme.shapes.default,
+                boxShape = theme.cornerShape,
                 modifier = Modifier
                     // 48dp per OTP box plus 8dp per space
                     .width(328.dp)
                     .testTag(VERIFICATION_OTP_TAG),
-                colors = OTPElementColors(
-                    selectedBorder = LinkTheme.colors.borderSelected,
-                    placeholder = LinkTheme.colors.textPrimary,
-                    selectedBackground = LinkTheme.colors.surfacePrimary,
-                    background = LinkTheme.colors.surfacePrimary,
-                    unselectedBorder = LinkTheme.colors.borderDefault
-                ),
+                colors = theme.createOtpColors(state.isProcessing),
                 selectedStrokeWidth = 1.5.dp,
             )
         }
@@ -135,14 +136,15 @@ private fun OTPSection(
 
 @Composable
 private fun Title(
-    verificationState: VerificationViewState
+    verificationState: VerificationViewState,
+    theme: LinkInlineOTPTheme
 ) {
     Text(
         text = stringResource(
             R.string.stripe_link_verification_message,
             verificationState.redactedPhoneNumber
         ),
-        style = LinkTheme.typography.body,
+        style = theme.titleTextStyle,
         color = LinkTheme.colors.textPrimary,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
@@ -171,7 +173,8 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
     LinkInline2FASection(
         verificationState = verificationState,
         otpElement = otpElement,
-        onResend = {}
+        onResend = {},
+        appearance = null
     )
 }
 
@@ -202,7 +205,8 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
         LinkInline2FASection(
             verificationState = verificationState,
             otpElement = otpElement,
-            onResend = {}
+            onResend = {},
+            appearance = null
         )
     }
 }
@@ -231,6 +235,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
     LinkInline2FASection(
         verificationState = verificationState,
         otpElement = otpElement,
-        onResend = { }
+        onResend = { },
+        appearance = null
     )
 }

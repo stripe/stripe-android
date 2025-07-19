@@ -49,6 +49,7 @@ internal interface WalletButtonsInteractor {
         val link2FAState: LinkOtpState?,
         val walletButtons: List<WalletButton>,
         val buttonsEnabled: Boolean,
+        val appearance: PaymentSheet.Appearance?,
     ) {
         data class LinkOtpState(
             val viewState: VerificationViewState,
@@ -183,6 +184,7 @@ internal class DefaultWalletButtonsInteractor(
             link2FAState = linkOTPState,
             walletButtons = walletButtons,
             buttonsEnabled = confirmationState !is ConfirmationHandler.State.Confirming,
+            appearance = arguments?.appearance,
         )
     }
 
