@@ -31,7 +31,7 @@ internal fun testPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     iconContent: @Composable RowScope.() -> Unit,
-    rowStyle: PaymentSheet.Appearance.Embedded.RowStyle,
+    appearance: PaymentSheet.Appearance.Embedded,
     trailingContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,
@@ -50,7 +50,7 @@ internal fun testPaymentMethodRowButton(
             onClick = {},
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            style = rowStyle
+            appearance = appearance
         )
     }
 }

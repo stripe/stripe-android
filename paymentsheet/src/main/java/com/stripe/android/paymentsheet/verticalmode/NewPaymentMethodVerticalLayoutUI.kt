@@ -30,7 +30,7 @@ internal fun NewPaymentMethodVerticalLayoutUI(
                 isSelected = index == selectedIndex,
                 displayablePaymentMethod = item,
                 imageLoader = imageLoader,
-                rowStyle = rowStyle
+                appearance = Embedded.Builder().rowStyle(rowStyle).build()
             )
         }
     }
