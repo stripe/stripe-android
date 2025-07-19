@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
@@ -64,7 +65,7 @@ internal fun PaymentMethodRowButton(
     onClick: () -> Unit,
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
-    style: RowStyle = RowStyle.FloatingButton.default,
+    appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val contentPaddingValues = if (subtitle != null) {
@@ -74,7 +75,7 @@ internal fun PaymentMethodRowButton(
     }
 
     RowButtonOuterContent(
-        style = style,
+        appearance = appearance,
         isEnabled = isEnabled,
         isSelected = isSelected,
         contentPaddingValues = contentPaddingValues,
@@ -100,8 +101,8 @@ internal fun PaymentMethodRowButton(
                 title = title,
                 subtitle = subtitle,
                 contentDescription = contentDescription,
-                style = style,
-                modifier = if (style !is RowStyle.FlatWithCheckmark && style !is RowStyle.FlatWithChevron) {
+                appearance = appearance,
+                modifier = if (appearance.style.shouldAddModifierWeight()) {
                     Modifier.weight(1f, fill = true)
                 } else {
                     Modifier
@@ -121,7 +122,7 @@ internal fun PaymentMethodRowButton(
 
 @Composable
 private fun RowButtonOuterContent(
-    style: RowStyle,
+    appearance: Appearance.Embedded,
     isEnabled: Boolean,
     isSelected: Boolean,
     contentPaddingValues: Dp,
@@ -130,14 +131,14 @@ private fun RowButtonOuterContent(
     onClick: () -> Unit,
     rowContent: @Composable (displayTrailingContent: Boolean) -> Unit
 ) {
-    when (style) {
+    when (appearance.style) {
         is RowStyle.FloatingButton -> {
             RowButtonFloatingOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
                     horizontal = ROW_CONTENT_HORIZONTAL_SPACING.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    vertical = contentPaddingValues + appearance.style.additionalInsetsDp.dp
                 ),
                 modifier = modifier,
             ) {
@@ -148,11 +149,11 @@ private fun RowButtonOuterContent(
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = style.horizontalInsetsDp.dp,
-                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
+                    horizontal = appearance.style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + appearance.style.additionalVerticalInsetsDp.dp
                 ),
                 trailingContent = trailingContent,
-                style = style,
+                style = appearance.style,
                 modifier = modifier
             ) {
                 rowContent(false)
@@ -161,11 +162,11 @@ private fun RowButtonOuterContent(
         is RowStyle.FlatWithChevron -> {
             RowButtonChevronOuterContent(
                 contentPaddingValues = PaddingValues(
-                    horizontal = style.horizontalInsetsDp.dp,
-                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
+                    horizontal = appearance.style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + appearance.style.additionalVerticalInsetsDp.dp
                 ),
                 trailingContent = trailingContent,
-                style = style,
+                style = appearance.style,
                 modifier = modifier
             ) {
                 rowContent(false)
@@ -176,11 +177,11 @@ private fun RowButtonOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = style.horizontalInsetsDp.dp,
-                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
+                    horizontal = appearance.style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + appearance.style.additionalVerticalInsetsDp.dp
                 ),
                 onClick = onClick,
-                style = style,
+                style = appearance.style,
                 modifier = modifier
             ) {
                 rowContent(true)
@@ -348,7 +349,7 @@ private fun RowButtonInnerContent(
     title: String,
     subtitle: String?,
     contentDescription: String? = null,
-    style: RowStyle,
+    appearance: Appearance.Embedded,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -363,7 +364,7 @@ private fun RowButtonInnerContent(
             subtitle = subtitle,
             isEnabled = isEnabled,
             contentDescription = contentDescription,
-            style = style
+            style = appearance.style
         )
 
         if (shouldShowDefaultBadge) {
@@ -437,7 +438,7 @@ private fun ButtonPreview() {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = RowStyle.FloatingButton.default,
+                appearance = Appearance.Embedded.default,
                 trailingContent = {
                     Text("Edit")
                 }
@@ -462,7 +463,7 @@ private fun ButtonPreview() {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = RowStyle.FloatingButton.default,
+                appearance = Appearance.Embedded.default,
                 trailingContent = {
                     Text("Edit")
                 }
@@ -481,6 +482,14 @@ private fun RowStyle.getTitleTextColor() = when (this) {
 private fun RowStyle.getSubtitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
     else -> MaterialTheme.stripeColors.subtitle
+}
+
+private fun RowStyle.shouldAddModifierWeight(): Boolean {
+    return when (this) {
+        is RowStyle.FlatWithCheckmark,
+        is RowStyle.FlatWithChevron -> false
+        else -> true
+    }
 }
 
 private const val ROW_CONTENT_HORIZONTAL_SPACING = 12

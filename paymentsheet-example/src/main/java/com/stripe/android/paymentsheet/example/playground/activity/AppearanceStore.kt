@@ -45,7 +45,7 @@ internal object AppearanceStore {
                 .shapes(shapes.build())
                 .typography(typography.build())
                 .primaryButton(primaryButton.build())
-                .embeddedAppearance(PaymentSheet.Appearance.Embedded(embedded.getRow()))
+                .embeddedAppearance(embedded.getEmbeddedAppearance())
                 .verticalModeRowPadding(verticalModeRowPadding)
                 .apply {
                     formInsetValues.getPaymentSheetInsets()?.let {
@@ -157,67 +157,85 @@ internal object AppearanceStore {
                 FloatingButton
             }
 
+            fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
+                return PaymentSheet.Appearance.Embedded.Builder()
+                    .rowStyle(getRow())
+                    .build()
+            }
+
             @Suppress("LongMethod")
-            fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
+            private fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
                 return when (embeddedRowStyle) {
-                    Row.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
-                        separatorThicknessDp = separatorThicknessDp,
-                        startSeparatorInsetDp = startSeparatorInset,
-                        endSeparatorInsetDp = endSeparatorInset,
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                        horizontalInsetsDp = horizontalInsetsDp,
-                        colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
-                            separatorColor = separatorColor,
-                            selectedColor = selectedColor,
-                            unselectedColor = unselectedColor
-                        ),
-                        colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
-                            separatorColor = Color(0x40FFFFFF).toArgb(),
-                            selectedColor = Color(0xFF0074D4).toArgb(),
-                            unselectedColor = Color(0x40FFFFFF).toArgb(),
+                    Row.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Builder()
+                        .separatorThicknessDp(separatorThicknessDp)
+                        .startSeparatorInsetDp(startSeparatorInset)
+                        .endSeparatorInsetDp(endSeparatorInset)
+                        .topSeparatorEnabled(topSeparatorEnabled)
+                        .bottomSeparatorEnabled(bottomSeparatorEnabled)
+                        .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
+                        .horizontalInsetsDp(horizontalInsetsDp)
+                        .colorsLight(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                                separatorColor = separatorColor,
+                                selectedColor = selectedColor,
+                                unselectedColor = unselectedColor
+                            )
                         )
-                    )
-                    Row.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
-                        separatorThicknessDp = separatorThicknessDp,
-                        startSeparatorInsetDp = startSeparatorInset,
-                        endSeparatorInsetDp = endSeparatorInset,
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkInsetDp = checkmarkInsetsDp,
-                        additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                        horizontalInsetsDp = horizontalInsetsDp,
-                        colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
-                            separatorColor = separatorColor,
-                            checkmarkColor = checkmarkColor
-                        ),
-                        colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
-                            separatorColor = Color(0x40FFFFFF).toArgb(),
-                            checkmarkColor = Color(0xFF0074D4).toArgb()
+                        .colorsDark(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                                separatorColor = Color(0x40FFFFFF).toArgb(),
+                                selectedColor = Color(0xFF0074D4).toArgb(),
+                                unselectedColor = Color(0x40FFFFFF).toArgb(),
+                            )
                         )
-                    )
-                    Row.FlatWithChevron -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron(
-                        separatorThicknessDp = separatorThicknessDp,
-                        startSeparatorInsetDp = startSeparatorInset,
-                        endSeparatorInsetDp = endSeparatorInset,
-                        topSeparatorEnabled = topSeparatorEnabled,
-                        bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                        horizontalInsetsDp = horizontalInsetsDp,
-                        colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
-                            separatorColor = separatorColor,
-                            chevronColor = chevronColor
-                        ),
-                        colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
-                            separatorColor = Color(0x40FFFFFF).toArgb(),
-                            chevronColor = Color.LightGray.toArgb()
+                        .build()
+                    Row.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Builder()
+                        .separatorThicknessDp(separatorThicknessDp)
+                        .startSeparatorInsetDp(startSeparatorInset)
+                        .endSeparatorInsetDp(endSeparatorInset)
+                        .topSeparatorEnabled(topSeparatorEnabled)
+                        .bottomSeparatorEnabled(bottomSeparatorEnabled)
+                        .checkmarkInsetsDp(checkmarkInsetsDp)
+                        .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
+                        .horizontalInsetsDp(horizontalInsetsDp)
+                        .colorsLight(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                                separatorColor = separatorColor,
+                                checkmarkColor = checkmarkColor
+                            )
                         )
-                    )
-                    Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
-                        spacingDp = floatingButtonSpacingDp,
-                        additionalInsetsDp = additionalVerticalInsetsDp
-                    )
+                        .colorsDark(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                                separatorColor = Color(0x40FFFFFF).toArgb(),
+                                checkmarkColor = Color(0xFF0074D4).toArgb()
+                            )
+                        )
+                        .build()
+                    Row.FlatWithChevron -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Builder()
+                        .separatorThicknessDp(separatorThicknessDp)
+                        .startSeparatorInsetDp(startSeparatorInset)
+                        .endSeparatorInsetDp(endSeparatorInset)
+                        .topSeparatorEnabled(topSeparatorEnabled)
+                        .bottomSeparatorEnabled(bottomSeparatorEnabled)
+                        .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
+                        .horizontalInsetsDp(horizontalInsetsDp)
+                        .colorsLight(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                                separatorColor = separatorColor,
+                                chevronColor = chevronColor
+                            )
+                        )
+                        .colorsDark(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                                separatorColor = Color(0x40FFFFFF).toArgb(),
+                                chevronColor = Color.LightGray.toArgb()
+                            )
+                        )
+                        .build()
+                    Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
+                        .spacingDp(floatingButtonSpacingDp)
+                        .additionalInsetsDp(additionalVerticalInsetsDp)
+                        .build()
                 }
             }
         }
