@@ -26,26 +26,30 @@ internal class InputAddressViewModel @Inject constructor(
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
-    private var setShippingSameAsShippingAtLeastOnce: Boolean = false
-    private var previousUserInput: Map<IdentifierSpec, String?>? = null
+    private val initialBillingAddress = args.config?.billingAddress?.toAddressDetails()
+    private val initialShippingAddress = args.config?.address
 
-    private val unparsedBillingAddress = args.config?.address?.toIdentifierMap()
+    private val unparsedBillingAddress = initialBillingAddress?.toIdentifierMap()
     private var parsedBillingAddress: Map<IdentifierSpec, String?>? = null
 
     private val _shippingSameAsBillingState = MutableStateFlow(
         if (canUseShippingSameAsBilling()) {
-            ShippingSameAsBillingState.Show(isChecked = false)
+            ShippingSameAsBillingState.Show(
+                isChecked = initialBillingAddress != null && initialShippingAddress == null
+            )
         } else {
             ShippingSameAsBillingState.Hide
         }
     )
+
+    private var previousUserInput: Map<IdentifierSpec, String?>? = initialShippingAddress?.toIdentifierMap()
+    private var setShippingSameAsShippingAtLeastOnce: Boolean = _shippingSameAsBillingState.value.run {
+        this is ShippingSameAsBillingState.Show && isChecked
+    }
+
     val shippingSameAsBillingState = _shippingSameAsBillingState.asStateFlow()
 
-    private val _collectedAddress = MutableStateFlow(
-        args.config?.address?.takeIf {
-            _shippingSameAsBillingState.value is ShippingSameAsBillingState.Hide
-        }
-    )
+    private val _collectedAddress = MutableStateFlow(value = initialShippingAddress ?: initialBillingAddress)
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
@@ -201,7 +205,7 @@ internal class InputAddressViewModel @Inject constructor(
                 setShippingSameAsShippingAtLeastOnce = true
 
                 if (newState.isChecked) {
-                    args.config?.address?.toIdentifierMap()?.let {
+                    (parsedBillingAddress ?: unparsedBillingAddress)?.let {
                         eventListener?.invoke(AutocompleteAddressInteractor.Event.OnValues(it))
                     }
                 } else {
@@ -221,15 +225,12 @@ internal class InputAddressViewModel @Inject constructor(
 
     private fun canUseShippingSameAsBilling(): Boolean {
         return args.config?.let { config ->
-            if (config.additionalFields?.showUseBillingAddressCheckbox != true) {
+            if (initialBillingAddress == null) {
                 return false
             }
 
-            // No default address provided, cannot use checkbox
-            val addressDetails = config.address ?: return false
-
             // Country has no default country, can use checkbox for any country
-            val country = addressDetails.address?.country ?: return true
+            val country = initialBillingAddress.address?.country ?: return true
 
             val allowedCountries = config.allowedCountries.takeIf {
                 it.isNotEmpty()
@@ -238,6 +239,14 @@ internal class InputAddressViewModel @Inject constructor(
             // Allow if in the allowed countries
             return allowedCountries.contains(country)
         } ?: false
+    }
+
+    private fun PaymentSheet.BillingDetails.toAddressDetails(): AddressDetails {
+        return AddressDetails(
+            name = name,
+            phoneNumber = phone,
+            address = address,
+        )
     }
 
     override fun onAutocomplete(country: String) {
