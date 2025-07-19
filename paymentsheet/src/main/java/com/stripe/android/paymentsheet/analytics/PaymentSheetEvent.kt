@@ -802,5 +802,7 @@ internal fun PaymentSelection.linkContext(): String? {
     }
 }
 
-@Suppress("DEPRECATION")
-internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean = primaryButtonColor != null
+internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean {
+    return appearance.primaryButton.colorsLight.background != null ||
+        appearance.primaryButton.colorsDark.background != null
+}
