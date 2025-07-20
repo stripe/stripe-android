@@ -609,6 +609,14 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Paymen
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/link/ui/wallet/DefaultPaymentUI$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/ui/wallet/DefaultPaymentUI;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/ui/wallet/DefaultPaymentUI;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/link/verification/LinkInlineState$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/verification/LinkInlineState;

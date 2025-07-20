@@ -58,6 +58,9 @@ data class ElementsSession(
     val allowLinkDefaultOptIn: Boolean
         get() = linkSettings?.linkFlags?.get("link_mobile_disable_default_opt_in") != true
 
+    val linkEnableDisplayableDefaultValuesInEce: Boolean
+        get() = linkSettings?.linkEnableDisplayableDefaultValuesInEce ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -69,7 +72,8 @@ data class ElementsSession(
         val linkConsumerIncentive: LinkConsumerIncentive?,
         val useAttestationEndpoints: Boolean,
         val suppress2faModal: Boolean,
-        val disableLinkRuxInFlowController: Boolean
+        val disableLinkRuxInFlowController: Boolean,
+        val linkEnableDisplayableDefaultValuesInEce: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
