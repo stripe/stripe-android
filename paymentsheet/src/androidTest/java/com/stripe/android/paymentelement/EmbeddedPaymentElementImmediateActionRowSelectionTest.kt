@@ -358,6 +358,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
                 networkRule.setupV1PaymentMethodsResponse(card1, card2)
             }
             testContext.configure {
+                embeddedViewDisplaysMandateText(false)
                 configureBlock()
             }
             testBlock(testContext)

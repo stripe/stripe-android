@@ -31,7 +31,7 @@ import kotlin.test.assertFailsWith
 
 internal class DefaultEmbeddedStateHelperTest {
     @Test
-    fun `setting state correctly sets row style`() = testScenario {
+    fun `setting state correctly sets appearance`() = testScenario {
         setState {
             appearance(
                 PaymentSheet.Appearance(
@@ -42,8 +42,8 @@ internal class DefaultEmbeddedStateHelperTest {
             )
         }
 
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().rowStyle)
-            .isEqualTo(Embedded.RowStyle.FlatWithRadio.default)
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().appearance)
+            .isEqualTo(Embedded(Embedded.RowStyle.FlatWithRadio.default))
     }
 
     @Test
@@ -106,6 +106,7 @@ internal class DefaultEmbeddedStateHelperTest {
         setState {
             googlePay(null)
             customer(null)
+            embeddedViewDisplaysMandateText(false)
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
@@ -143,6 +144,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            embeddedViewDisplaysMandateText(false)
         }
 
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
@@ -181,6 +183,21 @@ internal class DefaultEmbeddedStateHelperTest {
                     )
                 )
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            }
+        }
+    }
+
+    @Test
+    fun `setState fails rowSelectionBehavior = immediate, embeddedViewDisplaysMandateText = true`() = testScenario(
+        rowSelectionCallback = { /* no-op */ }
+    ) {
+        assertFailsWith<IllegalArgumentException>(
+            message = "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
+                "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button and/or before " +
+                "confirmation when `rowSelectionBehavior = .immediateAction`"
+        ) {
+            setState {
+                embeddedViewDisplaysMandateText(true)
             }
         }
     }

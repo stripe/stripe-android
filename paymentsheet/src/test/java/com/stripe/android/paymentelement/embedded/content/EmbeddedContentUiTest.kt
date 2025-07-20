@@ -56,7 +56,7 @@ internal class EmbeddedContentUiTest {
                 assertThat(awaitItem()).isNull()
                 embeddedContentHelper.dataLoaded(
                     PaymentMethodMetadataFactory.create(),
-                    Embedded.RowStyle.FlatWithRadio.default,
+                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
                 )
                 val content = awaitItem()
@@ -79,7 +79,7 @@ internal class EmbeddedContentUiTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithRadio.default,
+                Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()
@@ -102,7 +102,7 @@ internal class EmbeddedContentUiTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded.RowStyle.FlatWithChevron.default,
+                Embedded(Embedded.RowStyle.FlatWithChevron.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()

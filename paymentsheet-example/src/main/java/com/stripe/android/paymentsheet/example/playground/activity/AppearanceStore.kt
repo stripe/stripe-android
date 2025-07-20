@@ -172,7 +172,7 @@ internal object AppearanceStore {
             }
 
             @Suppress("LongMethod")
-            fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
+            private fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
                 return when (embeddedRowStyle) {
                     Row.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Builder()
                         .separatorThicknessDp(separatorThicknessDp)

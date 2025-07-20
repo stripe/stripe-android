@@ -1,6 +1,9 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### PaymentSheet
+* [FIXED][11111](https://github.com/stripe/stripe-android/pull/11083) EmbeddedPaymentElement now errors when `configuration.rowSelectionBehavior` is `.immediateAction` and `configuration.embeddedViewDisplaysMandateText` is `true` to ensure integrations display legal mandate text to the customer.
+
 
 ### PaymentSheet
 * [CHANGED][11151](https://github.com/stripe/stripe-android/pull/11151) Remove intrinsic top and bottom padding from `EmbeddedPaymentElement.Content`.
