@@ -1820,7 +1820,7 @@ class PaymentSheet internal constructor(
                     /**
                      * The drawable displayed on the end of the row - typically, a chevron. This should be a resource ID
                      * value.
-                     * - Note: If `null`, uses a default chevron
+                     * - Note: If not set, uses a default chevron
                      */
                     @DrawableRes
                     internal val disclosureIconRes: Int
