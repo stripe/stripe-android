@@ -4,6 +4,8 @@ plugins {
 
 dependencies {
     compileOnly "io.gitlab.arturbosch.detekt:detekt-api:${versions.detekt}"
+    implementation "io.gitlab.arturbosch.detekt:detekt-rules-style:${versions.detekt}"
+    implementation "io.gitlab.arturbosch.detekt:detekt-formatting:${versions.detekt}"
     testImplementation "io.gitlab.arturbosch.detekt:detekt-test:${versions.detekt}"
     testImplementation "junit:junit:${versions.junit}"
     testImplementation "com.google.truth:truth:${versions.truth}"

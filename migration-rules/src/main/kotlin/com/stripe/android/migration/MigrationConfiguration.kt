@@ -15,15 +15,30 @@ internal object MigrationConfiguration {
      */
     val allMigrationRules: List<MigrationRule> = listOf(
 
-        // === Nested Class Extraction Examples ===
-//         Moving nested classes from PaymentSheet to top-level classes in elements package
-        NestedClassExtractionMigration(
-            fromParentClass = "PaymentSheet",
-            fromNestedClass = "CardBrandAcceptance",
+        SimpleClassMigration(
+            fromPackage = "paymentsheet",
+            fromClass = "PaymentSheet.Appearance.Embedded.RowStyle",
+            toPackage = "elements",
+            toClass = "Appearance.Embedded.RowStyle",
+            description = "RowStyle moved from paymentsheet to elements package"
+        ),
+
+        SimpleClassMigration(
+            fromPackage = "paymentsheet",
+            fromClass = "PaymentSheet.CardBrandAcceptance",
             toPackage = "elements",
             toClass = "CardBrandAcceptance",
-            description = "CardBrandAcceptance moved from PaymentSheet to elements package"
+            description = "CardBrandAcceptance moved from paymentsheet to elements package"
         ),
+        // === Nested Class Extraction Examples ===
+//         Moving nested classes from PaymentSheet to top-level classes in elements package
+//        NestedClassExtractionMigration(
+//            fromParentClass = "PaymentSheet",
+//            fromNestedClass = "CardBrandAcceptance",
+//            toPackage = "elements",
+//            toClass = "CardBrandAcceptance",
+//            description = "CardBrandAcceptance moved from PaymentSheet to elements package"
+//        ),
 //        NestedClassExtractionMigration(
 //            fromParentClass = "PaymentSheet",
 //            fromNestedClass = "IntentConfiguration",

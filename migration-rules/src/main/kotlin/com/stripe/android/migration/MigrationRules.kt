@@ -35,9 +35,10 @@ internal data class SimpleClassMigration(
     }
     
     override fun matchesExpression(text: String): Boolean {
-        return text == fromClass || text == toClass
+//        return text == fromClass || text == toClass
+        return text.contains(fromClass)
     }
-    
+
     override fun replaceInExpression(text: String): Pair<String, String>? {
         return if (matchesExpression(text)) {
             Pair(text.replace(fromClass, toClass), toFullPath)

@@ -3,6 +3,7 @@ package com.stripe.android.migration
 import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.RuleSet
 import io.gitlab.arturbosch.detekt.api.RuleSetProvider
+import io.gitlab.arturbosch.detekt.rules.style.UnusedImports
 
 class StripeV25MigrationRuleSetProvider : RuleSetProvider {
     override val ruleSetId: String = "stripe-v25-migration"
@@ -13,6 +14,7 @@ class StripeV25MigrationRuleSetProvider : RuleSetProvider {
             RememberPaymentSheetMigration(config),
             RememberPaymentSheetFlowControllerMigration(config),
             ClassMigration(config),
+            UnusedImports(config.subConfig("UnusedImports")),
         )
     )
 }
