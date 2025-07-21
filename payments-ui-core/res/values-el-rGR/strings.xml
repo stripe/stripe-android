@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Με την επιβεβαίωση της πληρωμής σας μέσω PayPal, επιτρέπετε στην %s να χρεώσει τον λογαριασμό σας PayPal για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Αν επιβεβαιώσετε την πληρωμή σας με RevolutPay, επιτρέπετε στην %s να χρεώνει τον λογαριασμό σας RevolutPay για μελλοντικές πληρωμές σύμφωνα με τους όρους της.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Αν συνεχίσετε, εξουσιοδοτείτε την %1$s να χρεώνει αυτόματα το υπόλοιπό σας Satispay σε επαναλαμβανόμενη βάση σύμφωνα με το πρόγραμμα αγοράς ή συνδρομής σας.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Αποθήκευση για μελλοντικές πληρωμές %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Vahvistamalla maksusi PayPalin kanssa valtuutat kohteen %s veloittamaan tulevia maksuja PayPal-tililtäsi heidän ehtojensa mukaisesti.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Vahvistamalla maksusi RevolutPayn kanssa, valtuutat yrityksen %s veloittamaan tulevia maksuja RevolutPay-tililtäsi heidän ehtojensa mukaisesti.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Jatkamalla sallit, että %1$s voi veloittaa Satispay-saldoasi automaattisesti toistuvasti ostoksesi tai tilaussuunnitelmasi mukaisesti.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Tallenna tulevia maksuja (%s) varten</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
