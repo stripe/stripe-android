@@ -1958,7 +1958,7 @@ class PaymentSheet internal constructor(
                 }
 
                 @AppearanceAPIAdditionsPreview
-                fun paymentMethodIconMargins(margins: Insets) = apply {
+                fun paymentMethodIconMargins(margins: Insets?) = apply {
                     this.paymentMethodIconMargins = margins
                 }
 

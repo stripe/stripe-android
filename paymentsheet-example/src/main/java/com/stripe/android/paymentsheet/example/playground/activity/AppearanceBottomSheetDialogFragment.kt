@@ -1079,7 +1079,7 @@ private fun EmbeddedPicker(
 
     IncrementDecrementItem(
         "verticalIconMargin",
-        embeddedAppearance.verticalPaymentMethodIconMargin
+        embeddedAppearance.verticalPaymentMethodIconMargin ?: 0f
     ) {
         updateEmbedded(
             embeddedAppearance.copy(
@@ -1091,7 +1091,7 @@ private fun EmbeddedPicker(
 
     IncrementDecrementItem(
         "horizontalIconMargin",
-        embeddedAppearance.horizontalPaymentMethodIconMargin
+        embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
     ) {
         updateEmbedded(
             embeddedAppearance.copy(
