@@ -306,7 +306,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 .bottomSeparatorEnabled(
                     bottomSeparatorEnabled ?: FlatWithCheckmark.default.bottomSeparatorEnabled
                 )
-                .checkmarkInsetsDp(checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp)
+                .checkmarkInsetDp(checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp)
                 .additionalVerticalInsetsDp(
                     additionalVerticalInsetsDp ?: FlatWithCheckmark.default.additionalVerticalInsetsDp
                 )
