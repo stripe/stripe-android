@@ -343,13 +343,12 @@ private fun RowButtonInnerContent(
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
-        OptionalSpacer(appearance.paymentMethodIconMargins?.startDp)
+        Spacer(Modifier.size(appearance.paymentMethodIconMargins?.startDp?.dp ?: 0.dp))
         iconContent()
-        OptionalSpacer(appearance.paymentMethodIconMargins?.endDp)
+        Spacer(Modifier.size(appearance.paymentMethodIconMargins?.endDp?.dp ?: ROW_CONTENT_HORIZONTAL_SPACING.dp))
 
         TitleContent(
             title = title,
@@ -362,7 +361,7 @@ private fun RowButtonInnerContent(
         if (shouldShowDefaultBadge) {
             DefaultPaymentMethodLabel(
                 modifier = Modifier
-                    .padding(top = 4.dp, end = 6.dp, bottom = 4.dp)
+                    .padding(start = ROW_CONTENT_HORIZONTAL_SPACING.dp, top = 4.dp, end = 6.dp, bottom = 4.dp)
             )
         }
     }
@@ -474,13 +473,6 @@ private fun RowStyle.getTitleTextColor() = when (this) {
 private fun RowStyle.getSubtitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
     else -> MaterialTheme.stripeColors.subtitle
-}
-
-@Composable
-private fun OptionalSpacer(size: Float?) {
-    size?.let {
-        Spacer(Modifier.size(it.dp))
-    }
 }
 
 private fun RowStyle.shouldAddModifierWeight(): Boolean {

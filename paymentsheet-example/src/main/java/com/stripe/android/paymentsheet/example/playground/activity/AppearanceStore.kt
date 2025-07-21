@@ -149,7 +149,7 @@ internal object AppearanceStore {
             val unselectedColor: Int = Color(0x33787880).toArgb(),
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
             val chevronColor: Int = Color.DarkGray.toArgb(),
-            val horizontalPaymentMethodIconMargin: Float = 0f,
+            val horizontalPaymentMethodIconMargin: Float = 12f,
             val verticalPaymentMethodIconMargin: Float = 0f
         ) : Parcelable {
             enum class Row {

@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
@@ -185,6 +186,7 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         }
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_FloatingButton(
