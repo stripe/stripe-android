@@ -57,7 +57,7 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
-    var shareNewPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
+    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
         value = TestFactory.LINK_SAVED_PAYMENT_DETAILS
     )
     var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
@@ -199,7 +199,7 @@ internal open class FakeLinkAccountManager(
         paymentDetailsId: String,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.Saved> {
-        return shareNewPaymentDetailsResult
+        return shareCardPaymentDetailsResult
     }
 
     override suspend fun createBankAccountPaymentDetails(
