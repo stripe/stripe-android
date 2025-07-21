@@ -96,7 +96,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             val params = paymentMethodCreateParams.toParamMap()
                             val cardMap = params["card"] as? Map<*, *>?
                             val billingDetailsMap = params["billing_details"] as? Map<*, *>?
-                            performConfirmation(
+                            attemptCompletion(
                                 paymentDetails = linkPaymentDetails,
                                 cvc = cardMap?.get("cvc") as? String?,
                                 billingPhone = billingDetailsMap?.get("phone") as? String?
@@ -120,7 +120,7 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    private suspend fun performConfirmation(
+    private suspend fun attemptCompletion(
         paymentDetails: LinkPaymentDetails,
         cvc: String?,
         billingPhone: String?
