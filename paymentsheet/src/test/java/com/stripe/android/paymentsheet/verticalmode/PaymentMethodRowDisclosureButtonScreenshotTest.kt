@@ -20,7 +20,7 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
-internal class PaymentMethodRowChevronButtonScreenshotTest {
+internal class PaymentMethodRowDisclosureButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
@@ -33,33 +33,33 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testInitialState() {
-        testPaymentMethodRowButton_Chevron()
+        testPaymentMethodRowButton_Disclosure()
     }
 
     @Test
     fun testDisabledState() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             isEnabled = false,
         )
     }
 
     @Test
     fun testSelectedState() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             isSelected = true,
         )
     }
 
     @Test
     fun testMultilineText() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             subtitle = "Please click me, I'm fancy",
         )
     }
 
     @Test
     fun testMultilineTextTruncation() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
                 "forever.",
         )
@@ -67,7 +67,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testTrailingContent() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             trailingContent = {
                 Text("View more")
             },
@@ -91,10 +91,10 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
             colorsDark = FlatWithDisclosure.Colors(
                 separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
                 disclosureColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
-            )
+            ),
+            disclosureIconRes = null
         )
-
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded(style),
             trailingContent = {
                 Text("View more")
@@ -104,7 +104,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testNonTintedIcon() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             iconContent = {
                 DefaultPaymentMethodRowIcon(
                     iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna
@@ -116,7 +116,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testLongTitle() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             iconContent = {
                 DefaultPaymentMethodRowIcon(
                     iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna
@@ -129,7 +129,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
     @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
     fun testIconMargins() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded.Builder()
                 .rowStyle(FlatWithDisclosure.default)
                 .paymentMethodIconMargins(
@@ -142,7 +142,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
     @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
     fun testTitleFont() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded.Builder()
                 .rowStyle(FlatWithDisclosure.default)
                 .titleFont(
@@ -157,7 +157,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         )
     }
 
-    private fun testPaymentMethodRowButton_Chevron(
+    private fun testPaymentMethodRowButton_Disclosure(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = {

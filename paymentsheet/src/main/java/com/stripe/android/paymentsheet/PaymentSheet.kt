@@ -1308,8 +1308,8 @@ class PaymentSheet internal constructor(
                 style: RowStyle
             ) : this(
                 style = style,
-                titleFont = null,
-                paymentMethodIconMargins = null
+                paymentMethodIconMargins = null,
+                titleFont = null
             )
 
             internal companion object {
@@ -1859,7 +1859,7 @@ class PaymentSheet internal constructor(
                         internal val separatorColor: Int,
 
                         /**
-                         * The color of the chevron.
+                         * The color of the disclosure icon.
                          */
                         @ColorInt
                         internal val disclosureColor: Int,
@@ -1885,6 +1885,7 @@ class PaymentSheet internal constructor(
                             colorsDark = Colors(
                                 separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
                                 disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+
                             ),
                             disclosureIconRes = null
                         )

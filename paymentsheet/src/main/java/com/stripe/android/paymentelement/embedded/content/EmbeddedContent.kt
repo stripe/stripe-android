@@ -34,7 +34,12 @@ internal data class EmbeddedContent(
             if (appearance.style is Embedded.RowStyle.FlatWithDisclosure && !isImmediateAction) {
                 throw IllegalArgumentException(
                     "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
+<<<<<<< HEAD
                         "FlatWithDisclosure RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+=======
+                        "FlatWithDisclosure RowStyle. Use a different style or enable ImmediateAction " +
+                        "rowSelectionBehavior"
+>>>>>>> master
                 )
             }
         }

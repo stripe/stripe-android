@@ -50,7 +50,7 @@ internal class EmbeddedContentUiTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `rowStyle FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() =
+    fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
@@ -72,7 +72,7 @@ internal class EmbeddedContentUiTest {
         }
 
     @Test
-    fun `rowStyle not FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
+    fun `rowStyle not FlatWithDisclosure, dataLoaded emits event that passes validation`() = runScenario(
         internalRowSelectionCallback = null
     ) {
         embeddedContentHelper.embeddedContent.test {

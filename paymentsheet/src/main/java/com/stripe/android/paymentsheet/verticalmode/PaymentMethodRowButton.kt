@@ -158,7 +158,8 @@ private fun RowButtonOuterContent(
             }
         }
         is RowStyle.FlatWithDisclosure -> {
-            RowButtonChevronOuterContent(
+            RowButtonDisclosureOuterContent(
+
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
@@ -278,7 +279,7 @@ private fun RowButtonCheckmarkOuterContent(
 }
 
 @Composable
-private fun RowButtonChevronOuterContent(
+private fun RowButtonDisclosureOuterContent(
     contentPaddingValues: PaddingValues,
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,

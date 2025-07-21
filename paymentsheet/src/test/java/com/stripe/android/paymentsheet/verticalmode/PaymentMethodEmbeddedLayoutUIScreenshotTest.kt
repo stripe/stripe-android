@@ -67,7 +67,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testFlatWithChevron() {
+    fun testFlatWithDisclosure() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 appearance = getEmbeddedAppearance(FlatWithDisclosure::class)
@@ -274,7 +274,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         additionalVerticalInsetsDp: Float? = null,
         horizontalInsetsDp: Float? = null,
         checkmarkColor: Int? = null,
-        chevronColor: Int? = null,
+        disclosureColor: Int? = null,
         checkmarkInsetDp: Float? = null,
         spacingDp: Float? = null
     ): Embedded {
@@ -324,9 +324,10 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 horizontalInsetsDp = horizontalInsetsDp ?: FlatWithDisclosure.default.horizontalInsetsDp,
                 colorsLight = FlatWithDisclosure.Colors(
                     separatorColor = separatorColor ?: FlatWithDisclosure.default.colorsLight.separatorColor,
-                    disclosureColor = chevronColor ?: FlatWithDisclosure.default.colorsLight.disclosureColor
+                    disclosureColor = disclosureColor ?: FlatWithDisclosure.default.colorsLight.disclosureColor
                 ),
-                colorsDark = FlatWithDisclosure.default.colorsDark
+                colorsDark = FlatWithDisclosure.default.colorsDark,
+                disclosureIconRes = null
             )
             else -> FloatingButton(
                 spacingDp = spacingDp ?: FloatingButton.default.spacingDp,
