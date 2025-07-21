@@ -285,7 +285,9 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 .endSeparatorInsetDp(endSeparatorInset ?: FlatWithRadio.default.endSeparatorInsetDp)
                 .topSeparatorEnabled(topSeparatorEnabled ?: FlatWithRadio.default.topSeparatorEnabled)
                 .bottomSeparatorEnabled(bottomSeparatorEnabled ?: FlatWithRadio.default.bottomSeparatorEnabled)
-                .additionalVerticalInsetsDp(additionalVerticalInsetsDp ?: FlatWithRadio.default.additionalVerticalInsetsDp)
+                .additionalVerticalInsetsDp(
+                    additionalVerticalInsetsDp ?: FlatWithRadio.default.additionalVerticalInsetsDp
+                )
                 .horizontalInsetsDp(horizontalInsetsDp ?: FlatWithRadio.default.horizontalInsetsDp)
                 .colorsLight(
                     FlatWithRadio.Colors(
@@ -301,14 +303,20 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 .startSeparatorInsetDp(startSeparatorInset ?: FlatWithCheckmark.default.startSeparatorInsetDp)
                 .endSeparatorInsetDp(endSeparatorInset ?: FlatWithCheckmark.default.endSeparatorInsetDp)
                 .topSeparatorEnabled(topSeparatorEnabled ?: FlatWithCheckmark.default.topSeparatorEnabled)
-                .bottomSeparatorEnabled(bottomSeparatorEnabled ?: FlatWithCheckmark.default.bottomSeparatorEnabled)
+                .bottomSeparatorEnabled(
+                    bottomSeparatorEnabled ?: FlatWithCheckmark.default.bottomSeparatorEnabled
+                )
                 .checkmarkInsetsDp(checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp)
-                .additionalVerticalInsetsDp(additionalVerticalInsetsDp ?: FlatWithCheckmark.default.additionalVerticalInsetsDp)
+                .additionalVerticalInsetsDp(
+                    additionalVerticalInsetsDp ?: FlatWithCheckmark.default.additionalVerticalInsetsDp
+                )
                 .horizontalInsetsDp(horizontalInsetsDp ?: FlatWithCheckmark.default.horizontalInsetsDp)
-                .colorsLight(FlatWithCheckmark.Colors(
-                    separatorColor = separatorColor ?: FlatWithCheckmark.default.colorsLight.separatorColor,
-                    checkmarkColor = checkmarkColor ?: FlatWithCheckmark.default.colorsLight.checkmarkColor
-                ))
+                .colorsLight(
+                    FlatWithCheckmark.Colors(
+                        separatorColor = separatorColor ?: FlatWithCheckmark.default.colorsLight.separatorColor,
+                        checkmarkColor = checkmarkColor ?: FlatWithCheckmark.default.colorsLight.checkmarkColor
+                    )
+                )
                 .colorsDark(FlatWithCheckmark.default.colorsDark)
                 .build()
             FlatWithDisclosure::class -> FlatWithDisclosure.Builder()
@@ -323,10 +331,12 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                     additionalVerticalInsetsDp ?: FlatWithDisclosure.default.additionalVerticalInsetsDp
                 )
                 .horizontalInsetsDp(horizontalInsetsDp ?: FlatWithDisclosure.default.horizontalInsetsDp)
-                .colorsLight(FlatWithDisclosure.Colors(
-                    separatorColor = separatorColor ?: FlatWithDisclosure.default.colorsLight.separatorColor,
-                    disclosureColor = disclosureColor ?: FlatWithDisclosure.default.colorsLight.disclosureColor
-                ))
+                .colorsLight(
+                    FlatWithDisclosure.Colors(
+                        separatorColor = separatorColor ?: FlatWithDisclosure.default.colorsLight.separatorColor,
+                        disclosureColor = disclosureColor ?: FlatWithDisclosure.default.colorsLight.disclosureColor
+                    )
+                )
                 .colorsDark(FlatWithDisclosure.default.colorsDark)
                 .build()
             else -> FloatingButton.Builder()
