@@ -49,9 +49,9 @@
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Your ZIP code is invalid.</string>
   <!-- Error text indicating zip/ postal code is invalid, used for addresses of unknown country -->
-  <string name="stripe_address_zip_postal_invalid">Your ZIP/Postal code is invalid</string>
+  <string name="stripe_address_zip_postal_invalid">Your ZIP/Postal code is invalid.</string>
   <!-- Error text indicating postal code is invalid, used for non-US addresses -->
-  <string name="stripe_address_postal_code_invalid">Your postal code is invalid</string>
+  <string name="stripe_address_postal_code_invalid">Your postal code is invalid.</string>
   <!-- Label for a checkbox that makes customers billing address same as their shipping address -->
   <string name="stripe_billing_same_as_shipping">Billing address is same as shipping</string>
   <!-- Used when a required field is blank and submit is clicked. -->
