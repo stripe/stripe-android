@@ -102,14 +102,14 @@ internal class EmbeddedContentUiTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithChevron.default),
+                Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
             assertFailsWith<IllegalArgumentException>(
                 message = "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to " +
-                    "ImmediateAction when using FlatWithChevron RowStyle. " +
+                    "ImmediateAction when using FlatWithDisclosure RowStyle. " +
                     "Use a different style or enable ImmediateAction rowSelectionBehavior"
             ) {
                 composeRule.setContent {

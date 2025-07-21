@@ -148,18 +148,19 @@ internal object AppearanceStore {
             val selectedColor: Int = Color(0xFF007AFF).toArgb(),
             val unselectedColor: Int = Color(0x33787880).toArgb(),
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
-            val chevronColor: Int = Color.DarkGray.toArgb(),
+            val disclosureColor: Int = Color.DarkGray.toArgb(),
             val horizontalPaymentMethodIconMargin: Float? = null,
             val verticalPaymentMethodIconMargin: Float? = null,
             val fontFamilyRes: Int? = null,
             val fontSizeSp: Float? = null,
             val fontWeight: Int? = null,
-            val letterSpacingSp: Float? = null
+            val letterSpacingSp: Float? = null,
+            val disclosureIconRes: Int? = null
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
                 FlatWithCheckmark,
-                FlatWithChevron,
+                FlatWithDisclosure,
                 FloatingButton
             }
 
@@ -190,6 +191,7 @@ internal object AppearanceStore {
                     .build()
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             @Suppress("LongMethod")
             private fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
                 return when (embeddedRowStyle) {
@@ -238,7 +240,7 @@ internal object AppearanceStore {
                             )
                         )
                         .build()
-                    Row.FlatWithChevron -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Builder()
+                    Row.FlatWithDisclosure -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Builder()
                         .separatorThicknessDp(separatorThicknessDp)
                         .startSeparatorInsetDp(startSeparatorInset)
                         .endSeparatorInsetDp(endSeparatorInset)
@@ -247,17 +249,18 @@ internal object AppearanceStore {
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
                                 separatorColor = separatorColor,
-                                chevronColor = chevronColor
+                                disclosureColor = disclosureColor
                             )
                         )
                         .colorsDark(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron.Colors(
+                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
                                 separatorColor = Color(0x40FFFFFF).toArgb(),
-                                chevronColor = Color.LightGray.toArgb()
+                                disclosureColor = Color.LightGray.toArgb()
                             )
                         )
+                        .disclosureIconRes(disclosureIconRes)
                         .build()
                     Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
                         .spacingDp(floatingButtonSpacingDp)

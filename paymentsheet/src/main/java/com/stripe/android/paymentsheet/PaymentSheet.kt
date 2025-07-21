@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -1768,7 +1769,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithChevron(
+                class FlatWithDisclosure internal constructor(
                     /**
                      * The thickness of the separator line between rows.
                      */
@@ -1814,7 +1815,15 @@ class PaymentSheet internal constructor(
                     /**
                      * Describes the colors used while the system is in dark mode.
                      */
-                    internal val colorsDark: Colors
+                    internal val colorsDark: Colors,
+
+                    /**
+                     * The dra displayed on the end of the row - typically, a chevron. This should be a resource ID
+                     * value.
+                     * - Note: If `null`, uses a default chevron
+                     */
+                    @DrawableRes
+                    internal val disclosureIconRes: Int?
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1836,7 +1845,8 @@ class PaymentSheet internal constructor(
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
                         horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
-                        colorsDark = colorsDark
+                        colorsDark = colorsDark,
+                        disclosureIconRes = null
                     )
 
                     @Parcelize
@@ -1852,7 +1862,7 @@ class PaymentSheet internal constructor(
                          * The color of the chevron.
                          */
                         @ColorInt
-                        internal val chevronColor: Int,
+                        internal val disclosureColor: Int,
                     ) : Parcelable
 
                     override fun hasSeparators() = true
@@ -1860,7 +1870,7 @@ class PaymentSheet internal constructor(
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val default = FlatWithChevron(
+                        val default = FlatWithDisclosure(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
@@ -1869,13 +1879,14 @@ class PaymentSheet internal constructor(
                             additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
                             horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
                             colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.chevronColorsLight.separatorColor.toArgb(),
-                                chevronColor = StripeThemeDefaults.chevronColorsLight.chevronColor.toArgb()
+                                separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                             ),
                             colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
-                                chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
-                            )
+                                separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+                            ),
+                            disclosureIconRes = null
                         )
                     }
 
@@ -1889,13 +1900,14 @@ class PaymentSheet internal constructor(
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
                         private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.chevronColorsLight.separatorColor.toArgb(),
-                            chevronColor = StripeThemeDefaults.chevronColorsLight.chevronColor.toArgb()
+                            separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                            disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                         )
                         private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
-                            chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
+                            separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                            disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
                         )
+                        private var disclosureIconRes: Int? = null
 
                         fun separatorThicknessDp(thickness: Float) = apply {
                             this.separatorThicknessDp = thickness
@@ -1933,8 +1945,13 @@ class PaymentSheet internal constructor(
                             this.colorsDark = colors
                         }
 
-                        fun build(): FlatWithChevron {
-                            return FlatWithChevron(
+                        @AppearanceAPIAdditionsPreview
+                        fun disclosureIconRes(@DrawableRes iconRes: Int?) = apply {
+                            this.disclosureIconRes = iconRes
+                        }
+
+                        fun build(): FlatWithDisclosure {
+                            return FlatWithDisclosure(
                                 separatorThicknessDp = separatorThicknessDp,
                                 startSeparatorInsetDp = startSeparatorInsetDp,
                                 endSeparatorInsetDp = endSeparatorInsetDp,
@@ -1943,7 +1960,8 @@ class PaymentSheet internal constructor(
                                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
                                 horizontalInsetsDp = horizontalInsetsDp,
                                 colorsLight = colorsLight,
-                                colorsDark = colorsDark
+                                colorsDark = colorsDark,
+                                disclosureIconRes = disclosureIconRes
                             )
                         }
                     }

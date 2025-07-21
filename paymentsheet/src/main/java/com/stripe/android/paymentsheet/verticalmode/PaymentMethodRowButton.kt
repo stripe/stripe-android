@@ -157,7 +157,7 @@ private fun RowButtonOuterContent(
                 rowContent(false)
             }
         }
-        is RowStyle.FlatWithChevron -> {
+        is RowStyle.FlatWithDisclosure -> {
             RowButtonChevronOuterContent(
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
@@ -282,7 +282,7 @@ private fun RowButtonChevronOuterContent(
     contentPaddingValues: PaddingValues,
     trailingContent: (@Composable RowScope.() -> Unit)?,
     modifier: Modifier,
-    style: RowStyle.FlatWithChevron,
+    style: RowStyle.FlatWithDisclosure,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     RowButtonWithEndIconOuterContent(
@@ -290,12 +290,13 @@ private fun RowButtonChevronOuterContent(
         trailingContent = trailingContent,
         modifier = modifier,
         iconContent = {
+            val iconRes = style.disclosureIconRes ?: R.drawable.stripe_ic_chevron_right
             Icon(
-                painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                painter = painterResource(iconRes),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterVertically),
-                tint = Color(style.getColors(isSystemInDarkTheme()).chevronColor)
+                tint = Color(style.getColors(isSystemInDarkTheme()).disclosureColor)
             )
         },
         content = content
@@ -486,7 +487,7 @@ private fun RowStyle.getSubtitleTextColor() = when (this) {
 private fun RowStyle.shouldAddModifierWeight(): Boolean {
     return when (this) {
         is RowStyle.FlatWithCheckmark,
-        is RowStyle.FlatWithChevron -> false
+        is RowStyle.FlatWithDisclosure -> false
         else -> true
     }
 }
@@ -503,14 +504,14 @@ private fun Appearance.Embedded.getPaddingValues(defaultPadding: Dp): PaddingVal
 private fun RowStyle.getVerticalInsets(): Dp = when (this) {
     is RowStyle.FloatingButton -> additionalInsetsDp.dp
     is RowStyle.FlatWithCheckmark -> additionalVerticalInsetsDp.dp
-    is RowStyle.FlatWithChevron -> additionalVerticalInsetsDp.dp
+    is RowStyle.FlatWithDisclosure -> additionalVerticalInsetsDp.dp
     is RowStyle.FlatWithRadio -> additionalVerticalInsetsDp.dp
 }
 
 private fun RowStyle.getHorizontalInsets(): Dp = when (this) {
     is RowStyle.FloatingButton -> ROW_CONTENT_HORIZONTAL_SPACING.dp
     is RowStyle.FlatWithCheckmark -> horizontalInsetsDp.dp
-    is RowStyle.FlatWithChevron -> horizontalInsetsDp.dp
+    is RowStyle.FlatWithDisclosure -> horizontalInsetsDp.dp
     is RowStyle.FlatWithRadio -> horizontalInsetsDp.dp
 }
 

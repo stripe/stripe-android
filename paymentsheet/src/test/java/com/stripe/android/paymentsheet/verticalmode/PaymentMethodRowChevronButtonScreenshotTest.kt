@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -76,7 +76,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithChevron(
+        val style = FlatWithDisclosure(
             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
@@ -84,13 +84,13 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
             additionalVerticalInsetsDp = 40f,
             horizontalInsetsDp = 40f,
-            colorsLight = FlatWithChevron.Colors(
+            colorsLight = FlatWithDisclosure.Colors(
                 separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                chevronColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                disclosureColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
             ),
-            colorsDark = FlatWithChevron.Colors(
+            colorsDark = FlatWithDisclosure.Colors(
                 separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                chevronColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                disclosureColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
             )
         )
 
@@ -131,7 +131,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
     fun testIconMargins() {
         testPaymentMethodRowButton_Chevron(
             appearance = PaymentSheet.Appearance.Embedded.Builder()
-                .rowStyle(FlatWithChevron.default)
+                .rowStyle(FlatWithDisclosure.default)
                 .paymentMethodIconMargins(
                     PaymentSheet.Insets(10f, 10f, 10f, 10f)
                 )
@@ -144,7 +144,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
     fun testTitleFont() {
         testPaymentMethodRowButton_Chevron(
             appearance = PaymentSheet.Appearance.Embedded.Builder()
-                .rowStyle(FlatWithChevron.default)
+                .rowStyle(FlatWithDisclosure.default)
                 .titleFont(
                     PaymentSheet.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
@@ -163,7 +163,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         iconContent: @Composable RowScope.() -> Unit = {
             DefaultPaymentMethodRowIcon()
         },
-        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithChevron.default),
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithDisclosure.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,

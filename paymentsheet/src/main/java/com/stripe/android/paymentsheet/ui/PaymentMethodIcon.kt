@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
