@@ -1727,7 +1727,7 @@ class PaymentSheet internal constructor(
                         private var additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
 
                         /**
-                         * The spacing between payment method rows
+                         * The spacing between payment method rows.
                          */
                         fun spacingDp(spacing: Float) = apply {
                             this.spacingDp = spacing
