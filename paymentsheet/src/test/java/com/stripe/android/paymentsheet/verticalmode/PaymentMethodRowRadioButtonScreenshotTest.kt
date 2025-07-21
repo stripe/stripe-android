@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -111,7 +112,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             trailingContent = {
                 TrailingContent()
             },
-            rowStyle = style,
+            appearance = PaymentSheet.Appearance.Embedded(style),
         )
     }
 
@@ -139,6 +140,19 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_RadioButton(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithRadio.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -163,7 +177,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon() },
-        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FlatWithRadio.default,
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithRadio.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
@@ -179,7 +193,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            appearance = PaymentSheet.Appearance.Embedded(rowStyle),
+            appearance = appearance,
             paparazziRule = paparazziRule,
         )
     }

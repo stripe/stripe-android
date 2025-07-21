@@ -68,11 +68,13 @@ internal fun PaymentMethodRowButton(
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
-    val contentPaddingValues = if (subtitle != null) {
+    val defaultPadding = if (subtitle != null) {
         8.dp
     } else {
         12.dp
     }
+
+    val contentPaddingValues = appearance.getPaddingValues(defaultPadding)
 
     RowButtonOuterContent(
         appearance = appearance,
@@ -125,7 +127,7 @@ private fun RowButtonOuterContent(
     appearance: Appearance.Embedded,
     isEnabled: Boolean,
     isSelected: Boolean,
-    contentPaddingValues: Dp,
+    contentPaddingValues: PaddingValues,
     modifier: Modifier,
     trailingContent: @Composable (RowScope.() -> Unit)?,
     onClick: () -> Unit,
@@ -136,10 +138,7 @@ private fun RowButtonOuterContent(
             RowButtonFloatingOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
-                contentPaddingValues = PaddingValues(
-                    horizontal = ROW_CONTENT_HORIZONTAL_SPACING.dp,
-                    vertical = contentPaddingValues + appearance.style.additionalInsetsDp.dp
-                ),
+                contentPaddingValues = contentPaddingValues,
                 modifier = modifier,
             ) {
                 rowContent(true)
@@ -148,10 +147,7 @@ private fun RowButtonOuterContent(
         is RowStyle.FlatWithCheckmark -> {
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
-                contentPaddingValues = PaddingValues(
-                    horizontal = appearance.style.horizontalInsetsDp.dp,
-                    vertical = contentPaddingValues + appearance.style.additionalVerticalInsetsDp.dp
-                ),
+                contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
                 modifier = modifier
@@ -161,10 +157,7 @@ private fun RowButtonOuterContent(
         }
         is RowStyle.FlatWithChevron -> {
             RowButtonChevronOuterContent(
-                contentPaddingValues = PaddingValues(
-                    horizontal = appearance.style.horizontalInsetsDp.dp,
-                    vertical = contentPaddingValues + appearance.style.additionalVerticalInsetsDp.dp
-                ),
+                contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
                 modifier = modifier
@@ -176,10 +169,7 @@ private fun RowButtonOuterContent(
             RowButtonRadioOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
-                contentPaddingValues = PaddingValues(
-                    horizontal = appearance.style.horizontalInsetsDp.dp,
-                    vertical = contentPaddingValues + appearance.style.additionalVerticalInsetsDp.dp
-                ),
+                contentPaddingValues = contentPaddingValues,
                 onClick = onClick,
                 style = appearance.style,
                 modifier = modifier
@@ -353,11 +343,12 @@ private fun RowButtonInnerContent(
     modifier: Modifier = Modifier
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
+        Spacer(Modifier.size(appearance.paymentMethodIconMargins?.startDp?.dp ?: 0.dp))
         iconContent()
+        Spacer(Modifier.size(appearance.paymentMethodIconMargins?.endDp?.dp ?: ROW_CONTENT_HORIZONTAL_SPACING.dp))
 
         TitleContent(
             title = title,
@@ -370,7 +361,7 @@ private fun RowButtonInnerContent(
         if (shouldShowDefaultBadge) {
             DefaultPaymentMethodLabel(
                 modifier = Modifier
-                    .padding(top = 4.dp, end = 6.dp, bottom = 4.dp)
+                    .padding(start = ROW_CONTENT_HORIZONTAL_SPACING.dp, top = 4.dp, end = 6.dp, bottom = 4.dp)
             )
         }
     }
@@ -490,6 +481,29 @@ private fun RowStyle.shouldAddModifierWeight(): Boolean {
         is RowStyle.FlatWithChevron -> false
         else -> true
     }
+}
+
+private fun Appearance.Embedded.getPaddingValues(defaultPadding: Dp): PaddingValues {
+    return PaddingValues(
+        start = style.getHorizontalInsets(),
+        top = style.getVerticalInsets() + defaultPadding + (paymentMethodIconMargins?.topDp?.dp ?: 0.dp),
+        end = style.getHorizontalInsets(),
+        bottom = style.getVerticalInsets() + defaultPadding + (paymentMethodIconMargins?.bottomDp?.dp ?: 0.dp)
+    )
+}
+
+private fun RowStyle.getVerticalInsets(): Dp = when (this) {
+    is RowStyle.FloatingButton -> additionalInsetsDp.dp
+    is RowStyle.FlatWithCheckmark -> additionalVerticalInsetsDp.dp
+    is RowStyle.FlatWithChevron -> additionalVerticalInsetsDp.dp
+    is RowStyle.FlatWithRadio -> additionalVerticalInsetsDp.dp
+}
+
+private fun RowStyle.getHorizontalInsets(): Dp = when (this) {
+    is RowStyle.FloatingButton -> ROW_CONTENT_HORIZONTAL_SPACING.dp
+    is RowStyle.FlatWithCheckmark -> horizontalInsetsDp.dp
+    is RowStyle.FlatWithChevron -> horizontalInsetsDp.dp
+    is RowStyle.FlatWithRadio -> horizontalInsetsDp.dp
 }
 
 private const val ROW_CONTENT_HORIZONTAL_SPACING = 12

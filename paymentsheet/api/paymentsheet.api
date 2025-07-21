@@ -1509,6 +1509,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public static final field $stable I
 	public fun <init> ()V
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded;
+	public final fun paymentMethodIconMargins (Lcom/stripe/android/paymentsheet/PaymentSheet$Insets;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder;
 	public final fun rowStyle (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder;
 }
 

@@ -148,7 +148,9 @@ internal object AppearanceStore {
             val selectedColor: Int = Color(0xFF007AFF).toArgb(),
             val unselectedColor: Int = Color(0x33787880).toArgb(),
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
-            val chevronColor: Int = Color.DarkGray.toArgb()
+            val chevronColor: Int = Color.DarkGray.toArgb(),
+            val horizontalPaymentMethodIconMargin: Float? = null,
+            val verticalPaymentMethodIconMargin: Float? = null
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
@@ -157,9 +159,22 @@ internal object AppearanceStore {
                 FloatingButton
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
+                // paymentMethodIconMargins will override default spacing in PaymentMethodRowButton so we only
+                // want to init them if they were set in the playground
+                val insets = if (horizontalPaymentMethodIconMargin != null || verticalPaymentMethodIconMargin != null) {
+                    PaymentSheet.Insets(
+                        horizontalDp = horizontalPaymentMethodIconMargin ?: 0f,
+                        verticalDp = verticalPaymentMethodIconMargin ?: 0f
+                    )
+                } else {
+                    null
+                }
+
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
+                    .paymentMethodIconMargins(insets)
                     .build()
             }
 
