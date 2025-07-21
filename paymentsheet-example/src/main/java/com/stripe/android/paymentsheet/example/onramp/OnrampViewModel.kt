@@ -69,7 +69,6 @@ internal class OnrampViewModel : ViewModel() {
         _uiState.value = OnrampUiState.Loading
         try {
             onAuthenticate(email.trim())
-            _message.value = "Authentication attempted (not yet implemented)"
             _uiState.value = OnrampUiState.EmailInput
         } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
             _message.value = "Authentication failed: ${e.message}"
