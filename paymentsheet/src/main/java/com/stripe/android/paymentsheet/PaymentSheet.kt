@@ -1311,7 +1311,7 @@ class PaymentSheet internal constructor(
 
             internal companion object {
                 val default = Embedded(
-                    style = RowStyle.FlatWithRadio.default,
+                    style = RowStyle.FlatWithRadio.default
                 )
             }
 
