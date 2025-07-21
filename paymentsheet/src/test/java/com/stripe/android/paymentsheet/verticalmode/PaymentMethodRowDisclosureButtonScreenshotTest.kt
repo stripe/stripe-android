@@ -76,24 +76,27 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithDisclosure(
-            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f,
-            colorsLight = FlatWithDisclosure.Colors(
-                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                disclosureColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
-            ),
-            colorsDark = FlatWithDisclosure.Colors(
-                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                disclosureColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+        val style = FlatWithDisclosure.Builder()
+            .separatorThicknessDp(StripeThemeDefaults.flat.separatorThickness)
+            .startSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .endSeparatorInsetDp(StripeThemeDefaults.flat.separatorInsets)
+            .topSeparatorEnabled(StripeThemeDefaults.flat.topSeparatorEnabled)
+            .bottomSeparatorEnabled(StripeThemeDefaults.flat.bottomSeparatorEnabled)
+            .additionalVerticalInsetsDp(40f)
+            .horizontalInsetsDp(40f)
+            .colorsLight(
+                FlatWithDisclosure.Colors(
+                    separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                    disclosureColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                )
             )
-        )
-
+            .colorsDark(
+                FlatWithDisclosure.Colors(
+                    separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                    disclosureColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                )
+            )
+            .build()
         testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded(style),
             trailingContent = {
@@ -152,6 +155,20 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
                         fontWeight = 30,
                         letterSpacingSp = 10f
                     )
+                )
+                .build()
+        )
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testDisclosureIcon() {
+        testPaymentMethodRowButton_Disclosure(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(
+                    rowStyle = FlatWithDisclosure.Builder()
+                        .disclosureIconRes(com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_add_dark)
+                        .build()
                 )
                 .build()
         )

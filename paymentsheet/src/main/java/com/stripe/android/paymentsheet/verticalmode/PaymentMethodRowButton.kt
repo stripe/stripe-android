@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
@@ -291,7 +290,7 @@ private fun RowButtonDisclosureOuterContent(
         modifier = modifier,
         iconContent = {
             Icon(
-                painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                painter = painterResource(style.disclosureIconRes),
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterVertically),

@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -1768,7 +1769,7 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithDisclosure(
+                class FlatWithDisclosure internal constructor(
                     /**
                      * The thickness of the separator line between rows.
                      */
@@ -1814,7 +1815,15 @@ class PaymentSheet internal constructor(
                     /**
                      * Describes the colors used while the system is in dark mode.
                      */
-                    internal val colorsDark: Colors
+                    internal val colorsDark: Colors,
+
+                    /**
+                     * The drawable displayed on the end of the row - typically, a chevron. This should be a resource ID
+                     * value.
+                     * - Note: If not set, uses a default chevron
+                     */
+                    @DrawableRes
+                    internal val disclosureIconRes: Int
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1836,7 +1845,8 @@ class PaymentSheet internal constructor(
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
                         horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
-                        colorsDark = colorsDark
+                        colorsDark = colorsDark,
+                        disclosureIconRes = R.drawable.stripe_ic_chevron_right
                     )
 
                     @Parcelize
@@ -1875,7 +1885,9 @@ class PaymentSheet internal constructor(
                             colorsDark = Colors(
                                 separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
                                 disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
-                            )
+
+                            ),
+                            disclosureIconRes = R.drawable.stripe_ic_chevron_right
                         )
                     }
 
@@ -1896,6 +1908,7 @@ class PaymentSheet internal constructor(
                             separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
                             disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
                         )
+                        private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         fun separatorThicknessDp(thickness: Float) = apply {
                             this.separatorThicknessDp = thickness
@@ -1933,6 +1946,11 @@ class PaymentSheet internal constructor(
                             this.colorsDark = colors
                         }
 
+                        @AppearanceAPIAdditionsPreview
+                        fun disclosureIconRes(@DrawableRes iconRes: Int) = apply {
+                            this.disclosureIconRes = iconRes
+                        }
+
                         fun build(): FlatWithDisclosure {
                             return FlatWithDisclosure(
                                 separatorThicknessDp = separatorThicknessDp,
@@ -1943,7 +1961,8 @@ class PaymentSheet internal constructor(
                                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
                                 horizontalInsetsDp = horizontalInsetsDp,
                                 colorsLight = colorsLight,
-                                colorsDark = colorsDark
+                                colorsDark = colorsDark,
+                                disclosureIconRes = disclosureIconRes
                             )
                         }
                     }
