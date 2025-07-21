@@ -161,6 +161,20 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
+    fun testNewPaymentMethodsWithSelectionAndDisclosure() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewSelection(
+                rowStyle = FlatWithDisclosure.default,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "card",
+                    changeDetails = "Visa **** 4242",
+                    canBeChanged = true
+                )
+            )
+        }
+    }
+
+    @Test
     fun testNewPaymentMethodsWithSelectionWithoutChangeDetails() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUiWithNewSelection(
