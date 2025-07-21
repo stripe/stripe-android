@@ -37,6 +37,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">%1$s 선불</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">%1$s 카드</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">결제 세부사항 확인</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">로그인 또는 등록</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -79,6 +81,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">주소 저장</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">배송 주소</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">배송에 청구지 주소 사용</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">영업일 기준 3일 이내에 %s(으)로 이 인출 지침 설정을 확인하는 이메일이 전송됩니다.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->

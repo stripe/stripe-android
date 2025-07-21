@@ -37,6 +37,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">Predplatená platba %1$s</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">Karta %1$s</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Potvrdiť platobné údaje</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Prihlásiť sa alebo zaregistrovať</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -79,6 +81,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Uložiť adresu</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Dodacia adresa</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Použiť fakturačnú adresu na doručenie</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">Do troch pracovných dní sa na adresu %s pošle e-mail s potvrdením o nastavení tohto príkazu na odúčtovanie.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
