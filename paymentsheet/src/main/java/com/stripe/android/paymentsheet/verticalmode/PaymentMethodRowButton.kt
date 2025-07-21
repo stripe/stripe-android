@@ -347,9 +347,9 @@ private fun RowButtonInnerContent(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
-        Spacer(Modifier.size(appearance.paymentMethodIconMargins?.startDp?.dp ?: 0.dp))
+        OptionalSpacer(appearance.paymentMethodIconMargins?.startDp)
         iconContent()
-        Spacer(Modifier.size(appearance.paymentMethodIconMargins?.endDp?.dp ?: 0.dp))
+        OptionalSpacer(appearance.paymentMethodIconMargins?.endDp)
 
         TitleContent(
             title = title,
@@ -474,6 +474,13 @@ private fun RowStyle.getTitleTextColor() = when (this) {
 private fun RowStyle.getSubtitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
     else -> MaterialTheme.stripeColors.subtitle
+}
+
+@Composable
+private fun OptionalSpacer(size: Float?) {
+    size?.let {
+        Spacer(Modifier.size(it.dp))
+    }
 }
 
 private fun RowStyle.shouldAddModifierWeight(): Boolean {
