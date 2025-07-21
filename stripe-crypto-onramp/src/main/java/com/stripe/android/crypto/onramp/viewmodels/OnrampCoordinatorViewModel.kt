@@ -66,10 +66,6 @@ internal class OnrampCoordinatorViewModel(
         linkController.authenticateExistingConsumer(email)
     }
 
-    fun presentForAuthentication(email: String) {
-        linkController.authenticate(email)
-    }
-
     class Factory(
         private val linkController: LinkController // pass into factory
     ) : ViewModelProvider.Factory {
