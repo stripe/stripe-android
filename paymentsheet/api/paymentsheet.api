@@ -1497,7 +1497,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Creat
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -1527,8 +1526,6 @@ public abstract class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Em
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark : com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (FFFZZFFFLcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;)V
-	public fun <init> (Landroid/content/Context;IIIZZIIILcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithCheckmark$Colors;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -1582,8 +1579,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron : com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (FFFZFZFLcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors;)V
-	public fun <init> (Landroid/content/Context;IIIZZIILcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithChevron$Colors;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -1636,8 +1631,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio : com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (FFFZZFFLcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;)V
-	public fun <init> (Landroid/content/Context;IIIZZIILcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FlatWithRadio$Colors;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -1690,8 +1683,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle$FloatingButton : com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (FF)V
-	public fun <init> (Landroid/content/Context;II)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
