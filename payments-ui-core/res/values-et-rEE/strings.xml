@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Kinnitades oma PayPali makse, lubate ettevõttel %s oma PayPali kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Revolut Pay makse kinnitamisega lubate ettevõttel %s oma Revolut Pay kontot tulevasteks makseteks vastavalt nende tingimustele debiteerida.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Jätkates annate loa, et %1$s debiteerib regulaarselt teie Satispay kontot vastavalt teie ostule või tellimusplaanile.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Salvestage tulevasteks %s makseteks</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
