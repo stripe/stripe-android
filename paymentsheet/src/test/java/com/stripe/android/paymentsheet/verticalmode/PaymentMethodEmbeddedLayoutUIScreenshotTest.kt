@@ -260,7 +260,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
-    @Suppress("CyclomaticComplexMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod")
     private fun <T : Embedded.RowStyle> getEmbeddedAppearance(
         type: KClass<T>,
         separatorThicknessDp: Float? = null,
