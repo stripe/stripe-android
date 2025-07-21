@@ -148,7 +148,11 @@ internal object AppearanceStore {
             val selectedColor: Int = Color(0xFF007AFF).toArgb(),
             val unselectedColor: Int = Color(0x33787880).toArgb(),
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
-            val chevronColor: Int = Color.DarkGray.toArgb()
+            val chevronColor: Int = Color.DarkGray.toArgb(),
+            val fontFamilyRes: Int? = null,
+            val fontSizeSp: Float? = null,
+            val fontWeight: Int? = null,
+            val letterSpacingSp: Float? = null
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
@@ -157,9 +161,18 @@ internal object AppearanceStore {
                 FloatingButton
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
+                    .titleFont(
+                        PaymentSheet.Typography.Font(
+                            fontFamily = fontFamilyRes,
+                            fontSizeSp = fontSizeSp,
+                            fontWeight = fontWeight,
+                            letterSpacingSp = letterSpacingSp
+                        )
+                    )
                     .build()
             }
 

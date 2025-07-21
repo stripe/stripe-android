@@ -1296,9 +1296,18 @@ class PaymentSheet internal constructor(
 
         @Parcelize
         @Poko
-        class Embedded(
-            internal val style: RowStyle
+        class Embedded @AppearanceAPIAdditionsPreview constructor(
+            internal val style: RowStyle,
+            internal val titleFont: Typography.Font?,
         ) : Parcelable {
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            constructor(
+                style: RowStyle
+            ) : this(
+                style = style,
+                titleFont = null
+            )
 
             internal companion object {
                 val default = Embedded(
@@ -1939,16 +1948,24 @@ class PaymentSheet internal constructor(
                 }
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             class Builder {
                 private var rowStyle: RowStyle = default.style
+                private var titleFont: Typography.Font? = null
 
                 fun rowStyle(rowStyle: RowStyle) = apply {
                     this.rowStyle = rowStyle
                 }
 
+                @AppearanceAPIAdditionsPreview
+                fun titleFont(font: Typography.Font?) = apply {
+                    this.titleFont = font
+                }
+
                 fun build(): Embedded {
                     return Embedded(
                         style = rowStyle,
+                        titleFont = titleFont
                     )
                 }
             }

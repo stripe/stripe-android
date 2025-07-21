@@ -1076,6 +1076,41 @@ private fun EmbeddedPicker(
         )
     }
     Divider()
+
+    FontDropDown(embeddedAppearance.fontFamilyRes) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                fontFamilyRes = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("fontSizeSp", embeddedAppearance.fontSizeSp ?: 0f) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                fontSizeSp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("fontWeight", embeddedAppearance.fontWeight?.toFloat() ?: 0f) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                fontWeight = it.toInt()
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("letterSpacingSp", embeddedAppearance.letterSpacingSp ?: 0f) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                letterSpacingSp = it
+            )
+        )
+    }
 }
 
 @Composable
