@@ -1309,7 +1309,7 @@ class PaymentSheet internal constructor(
             ) : this(
                 style = style,
                 paymentMethodIconMargins = null,
-                titleFont = null
+                titleFont = null,
             )
 
             internal companion object {
@@ -1823,7 +1823,7 @@ class PaymentSheet internal constructor(
                      * - Note: If `null`, uses a default chevron
                      */
                     @DrawableRes
-                    internal val disclosureIconRes: Int?
+                    internal val disclosureIconRes: Int
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1846,7 +1846,7 @@ class PaymentSheet internal constructor(
                         horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
                         colorsDark = colorsDark,
-                        disclosureIconRes = null
+                        disclosureIconRes = R.drawable.stripe_ic_chevron_right
                     )
 
                     @Parcelize
@@ -1887,7 +1887,7 @@ class PaymentSheet internal constructor(
                                 disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
 
                             ),
-                            disclosureIconRes = null
+                            disclosureIconRes = R.drawable.stripe_ic_chevron_right
                         )
                     }
 
@@ -1908,7 +1908,7 @@ class PaymentSheet internal constructor(
                             separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
                             disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
                         )
-                        private var disclosureIconRes: Int? = null
+                        private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
                         fun separatorThicknessDp(thickness: Float) = apply {
                             this.separatorThicknessDp = thickness
@@ -1947,7 +1947,7 @@ class PaymentSheet internal constructor(
                         }
 
                         @AppearanceAPIAdditionsPreview
-                        fun disclosureIconRes(@DrawableRes iconRes: Int?) = apply {
+                        fun disclosureIconRes(@DrawableRes iconRes: Int) = apply {
                             this.disclosureIconRes = iconRes
                         }
 

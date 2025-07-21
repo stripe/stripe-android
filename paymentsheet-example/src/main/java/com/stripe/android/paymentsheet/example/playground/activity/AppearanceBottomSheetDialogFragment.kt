@@ -1457,12 +1457,12 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
 }
 
 @Composable
-private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int?) -> Unit) {
+private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val items = mapOf(
         com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
         com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
-        null to "None"
+        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
     )
 
     items[iconResId].let {
