@@ -40,9 +40,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
@@ -355,7 +357,7 @@ private fun RowButtonInnerContent(
             subtitle = subtitle,
             isEnabled = isEnabled,
             contentDescription = contentDescription,
-            style = appearance.style
+            appearance = appearance
         )
 
         if (shouldShowDefaultBadge) {
@@ -367,19 +369,25 @@ private fun RowButtonInnerContent(
     }
 }
 
+@OptIn(AppearanceAPIAdditionsPreview::class)
 @Composable
 private fun TitleContent(
     title: String,
     subtitle: String?,
     isEnabled: Boolean,
     contentDescription: String?,
-    style: RowStyle
+    appearance: Appearance.Embedded,
 ) {
-    val titleColor = style.getTitleTextColor()
+    val titleColor = appearance.style.getTitleTextColor()
+    val textStyle = if (appearance.titleFont != null) {
+        appearance.titleFont.toTextStyle()
+    } else {
+        MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium)
+    }
     Column {
         Text(
             text = title,
-            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
+            style = textStyle,
             color = if (isEnabled) titleColor else titleColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -391,7 +399,7 @@ private fun TitleContent(
         )
 
         if (subtitle != null) {
-            val subtitleTextColor = style.getSubtitleTextColor()
+            val subtitleTextColor = appearance.style.getSubtitleTextColor()
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),

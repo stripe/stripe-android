@@ -153,6 +153,24 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testTitleFont() {
+        testPaymentMethodRowButton_RadioButton(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithRadio.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 30,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .build()
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(

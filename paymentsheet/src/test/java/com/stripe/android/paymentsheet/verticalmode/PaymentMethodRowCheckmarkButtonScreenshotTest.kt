@@ -141,6 +141,24 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testTitleFont() {
+        testPaymentMethodRowButton_Checkmark(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithCheckmark.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 30,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .build()
+        )
+    }
+
     private fun testPaymentMethodRowButton_Checkmark(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
