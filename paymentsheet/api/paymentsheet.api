@@ -1498,7 +1498,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle;Lcom/stripe/android/paymentsheet/PaymentSheet$Insets;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I

@@ -1296,12 +1296,11 @@ class PaymentSheet internal constructor(
 
         @Parcelize
         @Poko
-        class Embedded @AppearanceAPIAdditionsPreview constructor(
+        class Embedded internal constructor(
             internal val style: RowStyle,
             internal val paymentMethodIconMargins: Insets?
         ) : Parcelable {
 
-            @OptIn(AppearanceAPIAdditionsPreview::class)
             constructor(
                 style: RowStyle
             ) : this(
