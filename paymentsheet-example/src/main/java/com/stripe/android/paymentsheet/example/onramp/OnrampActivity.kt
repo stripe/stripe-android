@@ -58,7 +58,8 @@ internal class OnrampActivity : ComponentActivity() {
         // Create callbacks to handle async responses
         val callbacks = OnrampCallbacks(
             configurationCallback = viewModel::onConfigurationResult,
-            linkLookupCallback = viewModel::onLookupResult
+            linkLookupCallback = viewModel::onLookupResult,
+            authenticationCallback = viewModel::onAuthenticationResult
         )
 
         onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
