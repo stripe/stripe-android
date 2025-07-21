@@ -1089,7 +1089,6 @@ private fun EmbeddedPicker(
     }
     Divider()
 
-
     IncrementDecrementItem(
         "horizontalIconMargin",
         embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
@@ -1101,7 +1100,6 @@ private fun EmbeddedPicker(
         )
     }
     Divider()
-
 
     FontDropDown(embeddedAppearance.fontFamilyRes) {
         updateEmbedded(
