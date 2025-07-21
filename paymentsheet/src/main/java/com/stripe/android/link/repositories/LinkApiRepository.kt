@@ -258,8 +258,9 @@ internal class LinkApiRepository @Inject constructor(
         }.map { passthroughModePaymentMethodId ->
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
-                    id = passthroughModePaymentMethodId,
+                    id = id,
                     last4 = last4,
+                    paymentMethodId = passthroughModePaymentMethodId,
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = passthroughModePaymentMethodId,

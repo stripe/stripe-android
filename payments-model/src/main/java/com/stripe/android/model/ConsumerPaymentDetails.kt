@@ -73,6 +73,7 @@ data class ConsumerPaymentDetails(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Passthrough(
         override val id: String,
+        val paymentMethodId: String,
         override val last4: String,
         override val billingAddress: BillingAddress? = null,
         override val billingEmailAddress: String? = null,

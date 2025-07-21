@@ -473,7 +473,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
-        val id = "csmrpd*AYq4D_sXdAAAAOQ0"
+        val paymentDetailsId = "csmrpd*AYq4D_sXdAAAAOQ0"
 
         whenever(
             stripeRepository.sharePaymentDetails(
@@ -487,7 +487,7 @@ class LinkApiRepositoryTest {
         val result = linkRepository.shareCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
-            id = id,
+            id = paymentDetailsId,
             last4 = "4242",
             allowRedisplay = null,
         )
@@ -497,12 +497,18 @@ class LinkApiRepositoryTest {
 
         verify(stripeRepository).sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionSecret,
-            id = id,
+            id = paymentDetailsId,
             extraParams = mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to "123"))),
             requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
-            .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
+            .isEqualTo(
+                ConsumerPaymentDetails.Passthrough(
+                    id = paymentDetailsId,
+                    last4 = "4242",
+                    paymentMethodId = "pm_123"
+                )
+            )
         assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.createLink(

@@ -239,8 +239,9 @@ internal class PaymentDetailsListItemScreenShotTest {
         snapshot(
             state = State(
                 details = ConsumerPaymentDetails.Passthrough(
-                    id = "wAAACGA",
+                    id = "csmrpd_wAAACGA",
                     last4 = "6789",
+                    paymentMethodId = "pm_123",
                 ),
                 enabled = true,
                 isSelected = false,
