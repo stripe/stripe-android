@@ -49,6 +49,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
+    private var isSpt: Boolean = false
     private var linkEnabled: Boolean = false
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
@@ -78,6 +79,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 primaryButtonColor = primaryButtonColor,
                 configurationSpecificPayload = configurationSpecificPayload,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 isStripeCardScanAvailable = isStripeCardScanAvailable(),
@@ -88,7 +90,15 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadStarted(initializedViaCompose: Boolean) {
         durationProvider.start(DurationProvider.Key.Loading)
-        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled, googlePaySupported, initializedViaCompose))
+        fireEvent(
+            PaymentSheetEvent.LoadStarted(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                isSpt = isSpt,
+                initializedViaCompose = initializedViaCompose
+            )
+        )
     }
 
     override fun onLoadSucceeded(
@@ -110,6 +120,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.currency = currency
         this.linkEnabled = linkEnabled
         this.linkMode = linkMode
+        this.isSpt = initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent &&
+            initializationMode.intentConfiguration.intentBehavior is
+            PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken
         this.googlePaySupported = googlePaySupported
         this.financialConnectionsAvailability = financialConnectionsAvailability
 
@@ -122,6 +135,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 linkMode = linkMode,
                 googlePaySupported = googlePaySupported,
@@ -147,6 +161,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 error = error,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -158,6 +173,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ElementsSessionLoadFailed(
                 error = error,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -168,6 +184,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Dismiss(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -183,6 +200,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 currency = currency,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
             )
         )
     }
@@ -195,6 +213,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 currency = currency,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
             )
         )
     }
@@ -208,6 +227,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 currency = currency,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
             )
         )
     }
@@ -220,6 +240,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = code,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 currency = currency,
                 linkEnabled = linkEnabled,
                 linkContext = determineLinkContextForPaymentMethodType(code),
@@ -237,6 +258,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 code = code,
                 currency = currency,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -251,6 +273,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ShowPaymentOptionForm(
                 code = code,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -265,6 +288,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isSpt = isSpt,
             )
         )
     }
@@ -281,6 +305,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isSpt = isSpt,
             )
         )
     }
@@ -289,6 +314,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.CardNumberCompleted(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -309,6 +335,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 currency = currency,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -320,6 +347,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.CardBrandDisallowed(
                 cardBrand = brand,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -337,6 +365,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 financialConnectionsAvailability = financialConnectionsAvailability,
@@ -363,6 +392,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Success,
                 currency = currency,
                 isDeferred = deferredIntentConfirmationType != null,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
@@ -384,6 +414,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 result = PaymentSheetEvent.Payment.Result.Failure(error),
                 currency = currency,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = null,
@@ -395,6 +426,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.LpmSerializeFailureEvent(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 errorMessage = errorMessage
@@ -409,6 +441,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.AutofillEvent(
                 type = type,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -419,6 +452,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShowEditablePaymentOption(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -429,6 +463,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.HideEditablePaymentOption(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -448,6 +483,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 },
                 selectedBrand = selectedBrand,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported
             )
@@ -461,6 +497,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.UpdatePaymentOptionSucceeded(
                 selectedBrand = selectedBrand,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -476,6 +513,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 selectedBrand = selectedBrand,
                 error = error,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -488,6 +526,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 paymentMethodType = paymentMethodType,
@@ -502,6 +541,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ExperimentExposure(
                 experiment = experiment,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -516,6 +556,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.SetAsDefaultPaymentMethodFailed(
                 error = error,
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 paymentMethodType = paymentMethodType,
@@ -531,6 +572,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         val analyticsEvent = when (event) {
             is USBankAccountFormViewModel.AnalyticsEvent.Started -> BankAccountCollectorStarted(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 financialConnectionsAvailability = financialConnectionsAvailability
@@ -538,6 +580,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
             is USBankAccountFormViewModel.AnalyticsEvent.Finished -> BankAccountCollectorFinished(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 event = event,
@@ -562,6 +605,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShopPayWebviewLoadAttempt(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -572,6 +616,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShopPayWebviewConfirmSuccess(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
@@ -582,6 +627,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.ShopPayWebviewCancelled(
                 isDeferred = isDeferred,
+                isSpt = isSpt,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 didReceiveECEClick = didReceiveECEClick,
