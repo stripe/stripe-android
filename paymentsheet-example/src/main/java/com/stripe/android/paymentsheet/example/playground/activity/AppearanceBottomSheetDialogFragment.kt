@@ -1077,6 +1077,32 @@ private fun EmbeddedPicker(
     }
     Divider()
 
+    IncrementDecrementItem(
+        "verticalIconMargin",
+        embeddedAppearance.verticalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                verticalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+
+    IncrementDecrementItem(
+        "horizontalIconMargin",
+        embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                horizontalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+
     FontDropDown(embeddedAppearance.fontFamilyRes) {
         updateEmbedded(
             embeddedAppearance.copy(

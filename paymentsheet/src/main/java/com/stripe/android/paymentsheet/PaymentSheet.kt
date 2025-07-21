@@ -1296,17 +1296,19 @@ class PaymentSheet internal constructor(
 
         @Parcelize
         @Poko
-        class Embedded @AppearanceAPIAdditionsPreview constructor(
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        class Embedded internal constructor(
             internal val style: RowStyle,
+            internal val paymentMethodIconMargins: Insets?,
             internal val titleFont: Typography.Font?,
         ) : Parcelable {
 
-            @OptIn(AppearanceAPIAdditionsPreview::class)
             constructor(
                 style: RowStyle
             ) : this(
                 style = style,
-                titleFont = null
+                titleFont = null,
+                paymentMethodIconMargins = null
             )
 
             internal companion object {
@@ -1951,10 +1953,16 @@ class PaymentSheet internal constructor(
             @OptIn(AppearanceAPIAdditionsPreview::class)
             class Builder {
                 private var rowStyle: RowStyle = default.style
+                private var paymentMethodIconMargins: Insets? = null
                 private var titleFont: Typography.Font? = null
 
                 fun rowStyle(rowStyle: RowStyle) = apply {
                     this.rowStyle = rowStyle
+                }
+
+                @AppearanceAPIAdditionsPreview
+                fun paymentMethodIconMargins(margins: Insets?) = apply {
+                    this.paymentMethodIconMargins = margins
                 }
 
                 @AppearanceAPIAdditionsPreview
@@ -1965,6 +1973,7 @@ class PaymentSheet internal constructor(
                 fun build(): Embedded {
                     return Embedded(
                         style = rowStyle,
+                        paymentMethodIconMargins = paymentMethodIconMargins,
                         titleFont = titleFont
                     )
                 }

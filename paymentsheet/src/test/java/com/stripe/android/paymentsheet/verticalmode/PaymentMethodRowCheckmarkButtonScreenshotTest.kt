@@ -8,8 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -96,7 +98,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         )
 
         testPaymentMethodRowButton_Checkmark(
-            rowStyle = style,
+            appearance = PaymentSheet.Appearance.Embedded(style),
             trailingContent = {
                 Text("View more")
             },
@@ -127,13 +129,26 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_Checkmark(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithCheckmark.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
+        )
+    }
+
     private fun testPaymentMethodRowButton_Checkmark(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = {
             DefaultPaymentMethodRowIcon()
         },
-        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FlatWithCheckmark.default,
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithCheckmark.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
@@ -149,7 +164,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            appearance = PaymentSheet.Appearance.Embedded(rowStyle),
+            appearance = appearance,
             paparazziRule = paparazziRule,
         )
     }
