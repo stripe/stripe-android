@@ -19,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
@@ -162,6 +161,24 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
                 )
             },
             title = "Buy now or pay later with Klarna"
+        )
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testTitleFont() {
+        testPaymentMethodRowButton_FloatingButton(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FloatingButton.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 30,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .build()
         )
     }
 
