@@ -9,7 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -94,7 +96,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         )
 
         testPaymentMethodRowButton_Chevron(
-            rowStyle = style,
+            appearance = PaymentSheet.Appearance.Embedded(style),
             trailingContent = {
                 Text("View more")
             },
@@ -125,13 +127,23 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         )
     }
 
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_Chevron(
+            appearance = PaymentSheet.Appearance.Embedded(
+                style = FlatWithRadio.default,
+                paymentMethodIconMargins = PaymentSheet.Insets(10f, 10f, 10f, 10f)
+            )
+        )
+    }
+
     private fun testPaymentMethodRowButton_Chevron(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = {
             DefaultPaymentMethodRowIcon()
         },
-        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FlatWithChevron.default,
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithChevron.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
@@ -147,7 +159,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
             promoText = promoText,
             trailingContent = trailingContent,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
-            appearance = PaymentSheet.Appearance.Embedded(rowStyle),
+            appearance = appearance,
             paparazziRule = paparazziRule,
         )
     }
