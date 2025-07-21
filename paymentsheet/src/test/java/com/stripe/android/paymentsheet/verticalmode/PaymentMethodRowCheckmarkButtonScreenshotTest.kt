@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -132,10 +133,12 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_Checkmark(
-            appearance = PaymentSheet.Appearance.Embedded(
-                style = FlatWithCheckmark.default,
-                paymentMethodIconMargins = PaymentSheet.Insets(10f, 10f, 10f, 10f)
-            )
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithCheckmark.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
         )
     }
 

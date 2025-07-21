@@ -131,10 +131,12 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_Chevron(
-            appearance = PaymentSheet.Appearance.Embedded(
-                style = FlatWithRadio.default,
-                paymentMethodIconMargins = PaymentSheet.Insets(10f, 10f, 10f, 10f)
-            )
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithChevron.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
         )
     }
 

@@ -190,10 +190,12 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_FloatingButton(
-            appearance = PaymentSheet.Appearance.Embedded(
-                style = FlatWithRadio.default,
-                paymentMethodIconMargins = PaymentSheet.Insets(10f, 10f, 10f, 10f)
-            )
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FloatingButton.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
         )
     }
 

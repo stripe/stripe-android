@@ -144,10 +144,12 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_RadioButton(
-            appearance = PaymentSheet.Appearance.Embedded(
-                style = FlatWithRadio.default,
-                paymentMethodIconMargins = PaymentSheet.Insets(10f, 10f, 10f, 10f)
-            )
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithRadio.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
         )
     }
 
