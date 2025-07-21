@@ -985,11 +985,11 @@ private fun EmbeddedPicker(
     Divider()
 
     ColorItem(
-        label = "chevronColor",
-        currentColor = Color(embeddedAppearance.chevronColor),
+        label = "disclosureColor",
+        currentColor = Color(embeddedAppearance.disclosureColor),
         onColorPicked = {
             embeddedAppearance.copy(
-                chevronColor = it.toArgb()
+                disclosureColor = it.toArgb()
             )
         },
         updateAppearance = updateEmbedded,

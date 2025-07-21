@@ -69,7 +69,7 @@ internal fun PaymentSheet.Appearance.Embedded.RowStyle.toAnalyticsValue(): Strin
         is PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton -> "floating_button"
         is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio -> "flat_with_radio"
         is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark -> "flat_with_checkmark"
-        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron -> "flat_with_chevron"
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure -> "flat_with_disclosure"
     }
 }
 

@@ -50,7 +50,7 @@ internal class EmbeddedContentUiTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `rowStyle FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() =
+    fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
@@ -72,7 +72,7 @@ internal class EmbeddedContentUiTest {
         }
 
     @Test
-    fun `rowStyle not FlatWithChevron, dataLoaded emits embeddedContent event that passes validation`() = runScenario(
+    fun `rowStyle not FlatWithDisclosure, dataLoaded emits event that passes validation`() = runScenario(
         internalRowSelectionCallback = null
     ) {
         embeddedContentHelper.embeddedContent.test {
@@ -102,14 +102,14 @@ internal class EmbeddedContentUiTest {
             assertThat(awaitItem()).isNull()
             embeddedContentHelper.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithChevron.default),
+                Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
             assertFailsWith<IllegalArgumentException>(
                 message = "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to " +
-                    "ImmediateAction when using FlatWithChevron RowStyle. " +
+                    "ImmediateAction when using FlatWithDisclosure RowStyle. " +
                     "Use a different style or enable ImmediateAction rowSelectionBehavior"
             ) {
                 composeRule.setContent {

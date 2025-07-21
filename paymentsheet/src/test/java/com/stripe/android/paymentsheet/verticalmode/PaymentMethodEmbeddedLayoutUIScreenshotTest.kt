@@ -12,7 +12,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -67,10 +67,10 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testFlatWithChevron() {
+    fun testFlatWithDisclosure() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                appearance = getEmbeddedAppearance(FlatWithChevron::class)
+                appearance = getEmbeddedAppearance(FlatWithDisclosure::class)
             )
         }
     }
@@ -274,7 +274,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         additionalVerticalInsetsDp: Float? = null,
         horizontalInsetsDp: Float? = null,
         checkmarkColor: Int? = null,
-        chevronColor: Int? = null,
+        disclosureColor: Int? = null,
         checkmarkInsetDp: Float? = null,
         spacingDp: Float? = null
     ): Embedded {
@@ -312,21 +312,21 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 ),
                 colorsDark = FlatWithCheckmark.default.colorsDark
             )
-            FlatWithChevron::class -> FlatWithChevron(
-                separatorThicknessDp = separatorThicknessDp ?: FlatWithChevron.default.separatorThicknessDp,
-                startSeparatorInsetDp = startSeparatorInset ?: FlatWithChevron.default.startSeparatorInsetDp,
-                endSeparatorInsetDp = endSeparatorInset ?: FlatWithChevron.default.endSeparatorInsetDp,
-                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithChevron.default.topSeparatorEnabled,
+            FlatWithDisclosure::class -> FlatWithDisclosure(
+                separatorThicknessDp = separatorThicknessDp ?: FlatWithDisclosure.default.separatorThicknessDp,
+                startSeparatorInsetDp = startSeparatorInset ?: FlatWithDisclosure.default.startSeparatorInsetDp,
+                endSeparatorInsetDp = endSeparatorInset ?: FlatWithDisclosure.default.endSeparatorInsetDp,
+                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithDisclosure.default.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled
-                    ?: FlatWithChevron.default.bottomSeparatorEnabled,
+                    ?: FlatWithDisclosure.default.bottomSeparatorEnabled,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: FlatWithChevron.default.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithChevron.default.horizontalInsetsDp,
-                colorsLight = FlatWithChevron.Colors(
-                    separatorColor = separatorColor ?: FlatWithChevron.default.colorsLight.separatorColor,
-                    chevronColor = chevronColor ?: FlatWithChevron.default.colorsLight.chevronColor
+                    ?: FlatWithDisclosure.default.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithDisclosure.default.horizontalInsetsDp,
+                colorsLight = FlatWithDisclosure.Colors(
+                    separatorColor = separatorColor ?: FlatWithDisclosure.default.colorsLight.separatorColor,
+                    disclosureColor = disclosureColor ?: FlatWithDisclosure.default.colorsLight.disclosureColor
                 ),
-                colorsDark = FlatWithChevron.default.colorsDark
+                colorsDark = FlatWithDisclosure.default.colorsDark
             )
             else -> FloatingButton(
                 spacingDp = spacingDp ?: FloatingButton.default.spacingDp,
