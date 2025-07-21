@@ -164,6 +164,19 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testIconMargins() {
+        testPaymentMethodRowButton_FloatingButton(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FloatingButton.default)
+                .paymentMethodIconMargins(
+                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                )
+                .build()
+        )
+    }
+
     @Composable
     private fun TrailingContent() {
         Row(
@@ -183,19 +196,6 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
                     .defaultMinSize(minWidth = iconWidth, minHeight = iconHeight)
             )
         }
-    }
-
-    @OptIn(AppearanceAPIAdditionsPreview::class)
-    @Test
-    fun testIconMargins() {
-        testPaymentMethodRowButton_FloatingButton(
-            appearance = PaymentSheet.Appearance.Embedded.Builder()
-                .rowStyle(FloatingButton.default)
-                .paymentMethodIconMargins(
-                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
-                )
-                .build()
-        )
     }
 
     private fun testPaymentMethodRowButton_FloatingButton(
