@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
+import com.stripe.android.model.CryptoCustomerResponse
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -440,4 +441,10 @@ interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun grantPartnerMerchantPermissions(
+        consumerSessionClientSecret: String,
+        options: ApiRequest.Options
+    ): Result<CryptoCustomerResponse>
 }
