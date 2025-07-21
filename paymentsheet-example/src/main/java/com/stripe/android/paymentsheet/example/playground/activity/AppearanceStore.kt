@@ -150,7 +150,11 @@ internal object AppearanceStore {
             val checkmarkColor: Int = Color(0xFF007AFF).toArgb(),
             val chevronColor: Int = Color.DarkGray.toArgb(),
             val horizontalPaymentMethodIconMargin: Float? = null,
-            val verticalPaymentMethodIconMargin: Float? = null
+            val verticalPaymentMethodIconMargin: Float? = null,
+            val fontFamilyRes: Int? = null,
+            val fontSizeSp: Float? = null,
+            val fontWeight: Int? = null,
+            val letterSpacingSp: Float? = null
         ) : Parcelable {
             enum class Row {
                 FlatWithRadio,
@@ -175,6 +179,14 @@ internal object AppearanceStore {
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
                     .paymentMethodIconMargins(insets)
+                    .titleFont(
+                        PaymentSheet.Typography.Font(
+                            fontFamily = fontFamilyRes,
+                            fontSizeSp = fontSizeSp,
+                            fontWeight = fontWeight,
+                            letterSpacingSp = letterSpacingSp
+                        )
+                    )
                     .build()
             }
 

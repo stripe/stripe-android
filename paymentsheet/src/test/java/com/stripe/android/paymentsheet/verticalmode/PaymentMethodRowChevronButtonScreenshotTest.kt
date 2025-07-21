@@ -139,6 +139,24 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testTitleFont() {
+        testPaymentMethodRowButton_Chevron(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(FlatWithChevron.default)
+                .titleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 20f,
+                        fontWeight = 30,
+                        letterSpacingSp = 10f
+                    )
+                )
+                .build()
+        )
+    }
+
     private fun testPaymentMethodRowButton_Chevron(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
