@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -20,7 +20,7 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
-internal class PaymentMethodRowChevronButtonScreenshotTest {
+internal class PaymentMethodRowDisclosureButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
@@ -33,33 +33,33 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testInitialState() {
-        testPaymentMethodRowButton_Chevron()
+        testPaymentMethodRowButton_Disclosure()
     }
 
     @Test
     fun testDisabledState() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             isEnabled = false,
         )
     }
 
     @Test
     fun testSelectedState() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             isSelected = true,
         )
     }
 
     @Test
     fun testMultilineText() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             subtitle = "Please click me, I'm fancy",
         )
     }
 
     @Test
     fun testMultilineTextTruncation() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
                 "forever.",
         )
@@ -67,7 +67,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testTrailingContent() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             trailingContent = {
                 Text("View more")
             },
@@ -76,7 +76,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testStyleAppearance() {
-        val style = FlatWithChevron(
+        val style = FlatWithDisclosure(
             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
@@ -84,17 +84,17 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
             additionalVerticalInsetsDp = 40f,
             horizontalInsetsDp = 40f,
-            colorsLight = FlatWithChevron.Colors(
+            colorsLight = FlatWithDisclosure.Colors(
                 separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                chevronColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+                disclosureColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
             ),
-            colorsDark = FlatWithChevron.Colors(
+            colorsDark = FlatWithDisclosure.Colors(
                 separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                chevronColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+                disclosureColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
             )
         )
 
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded(style),
             trailingContent = {
                 Text("View more")
@@ -104,7 +104,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testNonTintedIcon() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             iconContent = {
                 DefaultPaymentMethodRowIcon(
                     iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna
@@ -116,7 +116,7 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
 
     @Test
     fun testLongTitle() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             iconContent = {
                 DefaultPaymentMethodRowIcon(
                     iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna
@@ -129,9 +129,9 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
     @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
     fun testIconMargins() {
-        testPaymentMethodRowButton_Chevron(
+        testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded.Builder()
-                .rowStyle(FlatWithChevron.default)
+                .rowStyle(FlatWithDisclosure.default)
                 .paymentMethodIconMargins(
                     PaymentSheet.Insets(10f, 10f, 10f, 10f)
                 )
@@ -139,13 +139,13 @@ internal class PaymentMethodRowChevronButtonScreenshotTest {
         )
     }
 
-    private fun testPaymentMethodRowButton_Chevron(
+    private fun testPaymentMethodRowButton_Disclosure(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = {
             DefaultPaymentMethodRowIcon()
         },
-        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithChevron.default),
+        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithDisclosure.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,
