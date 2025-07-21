@@ -237,7 +237,7 @@ internal class LinkApiRepository @Inject constructor(
         last4: String,
         consumerSessionClientSecret: String,
         allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails> = withContext(workContext) {
+    ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
         val allowRedisplay = allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()

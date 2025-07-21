@@ -27,7 +27,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var createLinkAccountSessionResult = Result.success(TestFactory.LINK_ACCOUNT_SESSION)
     var createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
     var createBankAccountPaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT)
-    var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+    var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_SAVED_PAYMENT_DETAILS)
     var sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var createPaymentMethod = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)

@@ -518,6 +518,7 @@ class DefaultLinkAccountManagerTest {
 
     @Test
     fun `createCardPaymentDetails makes correct calls in passthrough mode`() = runSuspendTest {
+        val newPaymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
         val linkRepository = object : FakeLinkRepository() {
             var createCardPaymentDetailsCallCount = 0
             var shareCardPaymentDetailsCallCount = 0
@@ -530,7 +531,7 @@ class DefaultLinkAccountManagerTest {
                 active: Boolean
             ): Result<LinkPaymentDetails.New> {
                 createCardPaymentDetailsCallCount += 1
-                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+                return Result.success(newPaymentDetails)
             }
 
             override suspend fun shareCardPaymentDetails(
@@ -539,10 +540,10 @@ class DefaultLinkAccountManagerTest {
                 last4: String,
                 consumerSessionClientSecret: String,
                 allowRedisplay: PaymentMethod.AllowRedisplay?,
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.Saved> {
                 val paymentDetailsMatch = paymentMethodCreateParams == TestFactory.PAYMENT_METHOD_CREATE_PARAMS &&
-                    id == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id &&
-                    last4 == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.last4
+                    id == newPaymentDetails.paymentDetails.id &&
+                    last4 == newPaymentDetails.paymentDetails.last4
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
                     shareCardPaymentDetailsCallCount += 1
                 }
@@ -567,7 +568,7 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.isSuccess).isTrue()
         val linkPaymentDetails = result.getOrThrow()
         assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id)
+            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
 
         assertThat(linkRepository.createCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
@@ -1137,10 +1138,10 @@ class DefaultLinkAccountManagerTest {
                 last4: String,
                 consumerSessionClientSecret: String,
                 allowRedisplay: PaymentMethod.AllowRedisplay?,
-            ): Result<LinkPaymentDetails.New> {
+            ): Result<LinkPaymentDetails.Saved> {
                 actualAllowRedisplay = allowRedisplay
 
-                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+                return Result.success(TestFactory.LINK_SAVED_PAYMENT_DETAILS)
             }
         }
 
