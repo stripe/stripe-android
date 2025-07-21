@@ -517,23 +517,10 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `createCardPaymentDetails makes correct calls in passthrough mode`() = runSuspendTest {
+    fun `shareCardPaymentDetails makes correct calls`() = runSuspendTest {
         val newPaymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
         val linkRepository = object : FakeLinkRepository() {
-            var createCardPaymentDetailsCallCount = 0
             var shareCardPaymentDetailsCallCount = 0
-            override suspend fun createCardPaymentDetails(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
-                userEmail: String,
-                stripeIntent: StripeIntent,
-                consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
-                active: Boolean
-            ): Result<LinkPaymentDetails.New> {
-                createCardPaymentDetailsCallCount += 1
-                return Result.success(newPaymentDetails)
-            }
-
             override suspend fun shareCardPaymentDetails(
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
@@ -556,21 +543,23 @@ class DefaultLinkAccountManagerTest {
                 )
             }
         }
-        val accountManager = accountManager(passthroughModeEnabled = true, linkRepository = linkRepository)
+        val accountManager = accountManager(linkRepository = linkRepository)
 
         accountManager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
         )
 
-        val result = accountManager.createCardPaymentDetails(TestFactory.PAYMENT_METHOD_CREATE_PARAMS)
+        val result = accountManager.shareCardPaymentDetails(
+            paymentDetailsId = newPaymentDetails.paymentDetails.id,
+            paymentMethodCreateParams = TestFactory.PAYMENT_METHOD_CREATE_PARAMS,
+        )
 
         assertThat(result.isSuccess).isTrue()
         val linkPaymentDetails = result.getOrThrow()
         assertThat(linkPaymentDetails.paymentDetails.id)
             .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
 
-        assertThat(linkRepository.createCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
     }
@@ -1019,19 +1008,19 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `allow_redisplay equals null when sharing card payment details in passthrough mode`() =
+    fun `allow_redisplay equals null when sharing card payment details`() =
         allowRedisplayTest(expectedAllowRedisplay = null)
 
     @Test
-    fun `allow_redisplay equals UNSPECIFIED when sharing card payment details in passthrough mode`() =
+    fun `allow_redisplay equals UNSPECIFIED when sharing card payment details`() =
         allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED)
 
     @Test
-    fun `allow_redisplay equals LIMITED when sharing card payment details in passthrough mode`() =
+    fun `allow_redisplay equals LIMITED when sharing card payment details`() =
         allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED)
 
     @Test
-    fun `allow_redisplay equals ALWAYS when sharing card payment details in passthrough mode`() =
+    fun `allow_redisplay equals ALWAYS when sharing card payment details`() =
         allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS)
 
     @Test
@@ -1121,17 +1110,6 @@ class DefaultLinkAccountManagerTest {
         var actualAllowRedisplay: PaymentMethod.AllowRedisplay? = null
 
         val linkRepository = object : FakeLinkRepository() {
-            override suspend fun createCardPaymentDetails(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
-                userEmail: String,
-                stripeIntent: StripeIntent,
-                consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
-                active: Boolean
-            ): Result<LinkPaymentDetails.New> {
-                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
-            }
-
             override suspend fun shareCardPaymentDetails(
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
@@ -1151,7 +1129,8 @@ class DefaultLinkAccountManagerTest {
         )
 
         manager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
-        manager.createCardPaymentDetails(
+        manager.shareCardPaymentDetails(
+            paymentDetailsId = "csmrpd_123",
             paymentMethodCreateParams = PaymentMethodCreateParams.create(
                 card = PaymentMethodCreateParamsFixtures.CARD,
                 allowRedisplay = expectedAllowRedisplay,

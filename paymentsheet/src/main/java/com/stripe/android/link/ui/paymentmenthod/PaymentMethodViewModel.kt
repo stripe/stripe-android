@@ -91,6 +91,16 @@ internal class PaymentMethodViewModel @Inject constructor(
 
             dismissalCoordinator.withDismissalDisabled {
                 linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
+                    .mapCatching { linkPaymentDetails ->
+                        if (configuration.passthroughModeEnabled) {
+                            linkAccountManager.shareCardPaymentDetails(
+                                paymentDetailsId = linkPaymentDetails.paymentDetails.id,
+                                paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams,
+                            ).getOrThrow()
+                        } else {
+                            linkPaymentDetails
+                        }
+                    }
                     .fold(
                         onSuccess = { linkPaymentDetails ->
                             val params = paymentMethodCreateParams.toParamMap()
