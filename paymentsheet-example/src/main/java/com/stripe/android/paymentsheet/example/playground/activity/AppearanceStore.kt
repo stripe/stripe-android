@@ -159,6 +159,7 @@ internal object AppearanceStore {
                 FloatingButton
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
