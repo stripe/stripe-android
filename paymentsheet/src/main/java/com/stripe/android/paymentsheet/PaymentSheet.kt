@@ -1307,8 +1307,8 @@ class PaymentSheet internal constructor(
                 style: RowStyle
             ) : this(
                 style = style,
+                paymentMethodIconMargins = null,
                 titleFont = null,
-                paymentMethodIconMargins = null
             )
 
             internal companion object {
