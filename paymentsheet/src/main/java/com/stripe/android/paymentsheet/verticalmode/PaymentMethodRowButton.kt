@@ -158,7 +158,6 @@ private fun RowButtonOuterContent(
         }
         is RowStyle.FlatWithDisclosure -> {
             RowButtonDisclosureOuterContent(
-
                 contentPaddingValues = contentPaddingValues,
                 trailingContent = trailingContent,
                 style = appearance.style,
