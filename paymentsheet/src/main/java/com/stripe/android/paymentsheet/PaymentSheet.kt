@@ -1818,7 +1818,7 @@ class PaymentSheet internal constructor(
                     internal val colorsDark: Colors,
 
                     /**
-                     * The dra displayed on the end of the row - typically, a chevron. This should be a resource ID
+                     * The drawable displayed on the end of the row - typically, a chevron. This should be a resource ID
                      * value.
                      * - Note: If `null`, uses a default chevron
                      */
