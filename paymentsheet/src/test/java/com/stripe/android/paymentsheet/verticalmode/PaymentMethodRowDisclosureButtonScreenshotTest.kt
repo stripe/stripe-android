@@ -157,6 +157,20 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
         )
     }
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun testDisclosureIcon() {
+        testPaymentMethodRowButton_Disclosure(
+            appearance = PaymentSheet.Appearance.Embedded.Builder()
+                .rowStyle(
+                    rowStyle = FlatWithDisclosure.Builder()
+                        .disclosureIconRes(com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_add_dark)
+                        .build()
+                )
+                .build()
+        )
+    }
+
     private fun testPaymentMethodRowButton_Disclosure(
         isEnabled: Boolean = true,
         isSelected: Boolean = false,

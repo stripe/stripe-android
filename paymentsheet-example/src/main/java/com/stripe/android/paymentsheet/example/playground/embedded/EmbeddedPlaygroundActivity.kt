@@ -9,7 +9,6 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,10 +17,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,7 +91,6 @@ internal class EmbeddedPlaygroundActivity :
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
         val initialPlaygroundState = getPlaygroundState(savedInstanceState).validate()
         if (initialPlaygroundState == null) {
@@ -369,10 +365,7 @@ internal class EmbeddedPlaygroundActivity :
                     }
                 }
 
-                val LocalTheme = compositionLocalOf {  }
-
                 Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
-                    CompositionLocalProvider(Local) { }
                     embeddedPaymentElement.Content()
                 }
             }
