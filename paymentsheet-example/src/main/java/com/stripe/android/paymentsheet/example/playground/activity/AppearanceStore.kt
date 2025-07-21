@@ -225,7 +225,7 @@ internal object AppearanceStore {
                         .endSeparatorInsetDp(endSeparatorInset)
                         .topSeparatorEnabled(topSeparatorEnabled)
                         .bottomSeparatorEnabled(bottomSeparatorEnabled)
-                        .checkmarkInsetsDp(checkmarkInsetsDp)
+                        .checkmarkInsetDp(checkmarkInsetsDp)
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
