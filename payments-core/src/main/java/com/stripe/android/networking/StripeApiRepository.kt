@@ -58,8 +58,6 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
-import com.stripe.android.model.CryptoCustomerRequestParams
-import com.stripe.android.model.CryptoCustomerResponse
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -86,7 +84,6 @@ import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerShippingAddressesParser
-import com.stripe.android.model.parsers.CryptoCustomerJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.FinancialConnectionsSessionJsonParser
@@ -622,20 +619,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = mapOf("payment_method" to (paymentMethodId ?: ""))
             ),
             jsonParser = CustomerJsonParser()
-        )
-    }
-
-    override suspend fun grantPartnerMerchantPermissions(
-        consumerSessionClientSecret: String,
-        options: ApiRequest.Options
-    ): Result<CryptoCustomerResponse> {
-        return fetchStripeModelResult(
-            apiRequest = apiRequestFactory.createPost(
-                url = getGrantPartnerMerchantPermissionsUrl,
-                options = options,
-                params = CryptoCustomerRequestParams(consumerSessionClientSecret).toParamMap()
-            ),
-            jsonParser = CryptoCustomerJsonParser()
         )
     }
 
@@ -2013,13 +1996,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         internal val mobileCardElementConfigUrl: String
             get() = getMerchantUiUrl("mobile-card-element-config")
-
-        /**
-         * @return `https://api.stripe.com/v1/crypto/internal/customers`
-         */
-        internal val getGrantPartnerMerchantPermissionsUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("crypto/internal/customers")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/payment_details/:id`
