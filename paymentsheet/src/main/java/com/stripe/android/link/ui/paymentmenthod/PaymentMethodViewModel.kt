@@ -98,7 +98,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         if (shouldShare) {
                             linkAccountManager.shareCardPaymentDetails(
                                 paymentDetailsId = linkPaymentDetails.paymentDetails.id,
-                                paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams,
+                                paymentMethodCreateParams = paymentMethodCreateParams,
                             ).getOrThrow()
                         } else {
                             linkPaymentDetails
