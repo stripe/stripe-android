@@ -360,7 +360,13 @@ class LinkControllerViewModelTest {
         val args = call.input
         assertThat(args.startWithVerificationDialog).isTrue()
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.PaymentMethodSelection(null))
+        assertThat(args.launchMode)
+            .isEqualTo(
+                LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = null,
+                    sharePaymentDetailsImmediatelyAfterCreation = false
+                )
+            )
 
         val state = viewModel.state(application).first()
         assertThat(state.isConsumerVerified).isNull()
