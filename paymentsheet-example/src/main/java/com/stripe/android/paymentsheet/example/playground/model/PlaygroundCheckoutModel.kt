@@ -189,7 +189,9 @@ class CheckoutRequest private constructor(
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
                 paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
-                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature.takeIf {
+                    paymentMethodRemoveLastFeature == FeatureState.Enabled
+                },
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
