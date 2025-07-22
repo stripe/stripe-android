@@ -265,4 +265,5 @@ fun Bitmap.mirrorVertically(): Bitmap =
         false
     )
 
-private fun Bitmap.Config?.orDefault() = this ?: Bitmap.Config.ARGB_8888
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Bitmap.Config?.orDefault() = this ?: Bitmap.Config.ARGB_8888
