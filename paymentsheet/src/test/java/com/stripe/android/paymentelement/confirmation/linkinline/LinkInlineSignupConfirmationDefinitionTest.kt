@@ -697,7 +697,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                 defaultBillingDetails = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
-                allowUserEmailEdits = true
+                allowUserEmailEdits = true,
+                enableDisplayableDefaultValuesInEce = false
             ),
             userInput = userInput,
         )

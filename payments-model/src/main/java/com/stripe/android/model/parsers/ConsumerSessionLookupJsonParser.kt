@@ -14,12 +14,16 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
         val consumerSession = ConsumerSessionJsonParser().parse(json)
         val errorMessage = optString(json, FIELD_ERROR_MESSAGE)
         val publishableKey = optString(json, FIELD_PUBLISHABLE_KEY)
-        return ConsumerSessionLookup(exists, consumerSession, errorMessage, publishableKey)
+        val displayablePaymentDetails = json.optJSONObject(FIELD_DISPLAYABLE_PAYMENT_DETAILS)?.let {
+            DisplayablePaymentDetailsJsonParser.parse(it)
+        }
+        return ConsumerSessionLookup(exists, consumerSession, errorMessage, publishableKey, displayablePaymentDetails)
     }
 
     private companion object {
         private const val FIELD_EXISTS = "exists"
         private const val FIELD_ERROR_MESSAGE = "error_message"
         private const val FIELD_PUBLISHABLE_KEY = "publishable_key"
+        private const val FIELD_DISPLAYABLE_PAYMENT_DETAILS = "displayable_payment_details"
     }
 }

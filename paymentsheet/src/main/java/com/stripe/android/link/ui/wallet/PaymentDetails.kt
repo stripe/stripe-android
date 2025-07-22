@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
@@ -22,11 +21,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
@@ -57,7 +54,6 @@ import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
@@ -413,46 +409,6 @@ private fun RowScope.PaymentMethodInfo(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun BankIcon(
-    bankIconCode: String?,
-    modifier: Modifier = Modifier
-) {
-    val icon = remember(bankIconCode) {
-        transformBankIconCodeToBankIcon(
-            iconCode = bankIconCode,
-            fallbackIcon = R.drawable.stripe_link_bank_outlined,
-        )
-    }
-
-    val isGenericIcon = icon == R.drawable.stripe_link_bank_outlined
-
-    val containerModifier = if (isGenericIcon) {
-        modifier
-            .background(
-                color = LinkTheme.colors.surfaceTertiary,
-                shape = RoundedCornerShape(3.dp),
-            )
-            .padding(4.dp)
-    } else {
-        modifier
-    }
-
-    Box(modifier = containerModifier) {
-        Image(
-            painter = painterResource(icon),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit,
-            colorFilter = if (isGenericIcon) {
-                ColorFilter.tint(LinkTheme.colors.textTertiary)
-            } else {
-                null
-            },
-        )
     }
 }
 

@@ -49,6 +49,7 @@ internal class VerificationViewModel @Inject constructor(
             errorMessage = null,
             isSendingNewCode = false,
             didSendNewCode = false,
+            defaultPayment = null,
             isDialog = isDialog
         )
     )
