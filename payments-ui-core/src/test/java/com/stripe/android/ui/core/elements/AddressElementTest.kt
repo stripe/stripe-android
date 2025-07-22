@@ -433,24 +433,25 @@ class AddressElementTest {
     }
 
     @Test
-    fun `when google api key not supplied, condensed shipping address element is not one line address element`() = runTest {
-        val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                null,
-                setOf(),
-                PhoneNumberState.OPTIONAL
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
+    fun `when google api key not supplied, condensed shipping address element is not one line address element`() =
+        runTest {
+            val addressElement = AddressElement(
+                IdentifierSpec.Generic("address"),
+                countryElement = countryElement,
+                addressInputMode = AddressInputMode.AutocompleteCondensed(
+                    null,
+                    setOf(),
+                    PhoneNumberState.OPTIONAL
+                ) { throw AssertionError("Not Expected") },
+                sameAsShippingElement = null,
+                shippingValuesMap = null
+            )
 
-        val identifierSpecs = addressElement.fields.first().map {
-            it.identifier
+            val identifierSpecs = addressElement.fields.first().map {
+                it.identifier
+            }
+            assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
         }
-        assertThat(identifierSpecs.contains(IdentifierSpec.OneLineAddress)).isFalse()
-    }
 
     @Test
     fun `expanded shipping address element should not have one line address element`() = runTest {
