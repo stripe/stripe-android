@@ -11,14 +11,6 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Builder {
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/crypto/onramp/OnrampCoordinator;
 }
 
-public final class com/stripe/android/crypto/onramp/model/CryptoCustomerResponse$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/CryptoCustomerResponse;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/crypto/onramp/model/CryptoCustomerResponse;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;
