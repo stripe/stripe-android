@@ -85,3 +85,22 @@ public final class com/stripe/android/crypto/onramp/model/OnrampVerificationResu
 	public final fun getError ()Ljava/lang/Throwable;
 }
 
+public final class com/stripe/android/model/CryptoCustomerRequestParams$Companion {
+}
+
+public final class com/stripe/android/model/CryptoCustomerRequestParams$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/CryptoCustomerRequestParams;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/CryptoCustomerRequestParams;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/CryptoCustomerResponse$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/CryptoCustomerResponse;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/CryptoCustomerResponse;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+

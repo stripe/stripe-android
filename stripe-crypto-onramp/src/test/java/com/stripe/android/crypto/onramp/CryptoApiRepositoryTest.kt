@@ -7,16 +7,16 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.robolectric.RobolectricTestRunner
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import kotlinx.coroutines.test.runTest
+import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class CryptoApiRepositoryTest {
@@ -49,7 +49,9 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.grantPartnerMerchantPermissions(consumerSessionClientSecret = "test-secret")
+            val result = cryptoApiRepository.grantPartnerMerchantPermissions(
+                consumerSessionClientSecret = "test-secret"
+            )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             val apiRequest = apiRequestArgumentCaptor.firstValue

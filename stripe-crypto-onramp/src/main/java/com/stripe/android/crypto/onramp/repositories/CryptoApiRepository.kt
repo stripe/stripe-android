@@ -49,7 +49,7 @@ internal class CryptoApiRepository @Inject constructor(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = request,
             responseJsonParser = CryptoCustomerJsonParser()
-            )
+        )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
