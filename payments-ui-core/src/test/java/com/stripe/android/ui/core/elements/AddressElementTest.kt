@@ -60,7 +60,7 @@ class AddressElementTest {
             assertThat(addressElement.addressController.value.error.first())
                 .isNotNull()
             assertThat(addressElement.addressController.value.error.first()?.errorMessage)
-                .isEqualTo(UiCoreR.string.stripe_address_zip_invalid)
+                .isEqualTo(UiCoreR.string.stripe_address_zip_incomplete)
 
             countryElement.controller.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -72,7 +72,7 @@ class AddressElementTest {
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
             assertThat(addressElement.addressController.value.error.first()?.errorMessage)
-                .isEqualTo(UiCoreR.string.stripe_address_zip_postal_invalid)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
         }
     }
 
