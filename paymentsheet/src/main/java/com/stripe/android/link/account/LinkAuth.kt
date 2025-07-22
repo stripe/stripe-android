@@ -15,6 +15,7 @@ internal interface LinkAuth {
     suspend fun lookUp(
         email: String,
         emailSource: EmailSource,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): LinkAuthResult
 }

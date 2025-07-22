@@ -604,6 +604,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             collectMissingBillingDetailsForExistingPaymentMethods =
             configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
             allowUserEmailEdits = configuration.link.allowUserEmailEdits,
+            customerId = elementsSession.customer?.session?.customerId,
         )
 
         // CBF isn't currently supported in the web flow.

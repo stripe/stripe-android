@@ -301,7 +301,10 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onLookupConsumer(email: String) {
         viewModelScope.launch {
-            val result = linkRepository.lookupConsumer(email)
+            val result = linkRepository.lookupConsumer(
+                email = email,
+                customerId = null
+            )
                 .map { it.exists }
                 .fold(
                     onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },

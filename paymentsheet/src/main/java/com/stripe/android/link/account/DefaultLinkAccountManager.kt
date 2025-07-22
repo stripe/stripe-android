@@ -75,8 +75,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun lookupConsumer(
         email: String,
         startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email)
+        linkRepository.lookupConsumer(email, customerId)
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
@@ -91,14 +92,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
         emailSource: EmailSource,
         verificationToken: String,
         appId: String,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> {
         return linkRepository.mobileLookupConsumer(
             verificationToken = verificationToken,
             appId = appId,
             email = email,
             sessionId = config.elementsSessionId,
-            emailSource = emailSource
+            emailSource = emailSource,
+            customerId = customerId
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -125,7 +128,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         userInput: UserInput
     ): Result<LinkAccount> =
         when (userInput) {
-            is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
+            is UserInput.SignIn -> lookupConsumer(
+                email = userInput.email,
+                startSession = true,
+                customerId = config.customerId
+            ).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
             is UserInput.SignUp -> signUpIfValidSessionState(
@@ -483,7 +490,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         // Look up the customer email if possible.
         return config.customerInfo.email?.takeIf { canLookupCustomerEmail }
             ?.let { customerEmail ->
-                lookupConsumer(customerEmail)
+                lookupConsumer(
+                    email = customerEmail,
+                    startSession = false,
+                    customerId = config.customerId
+                )
                     .map { it?.accountStatus }
                     .getOrElse { AccountStatus.Error }
             }

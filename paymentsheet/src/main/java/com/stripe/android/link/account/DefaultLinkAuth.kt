@@ -50,18 +50,21 @@ internal class DefaultLinkAuth @Inject constructor(
     override suspend fun lookUp(
         email: String,
         emailSource: EmailSource,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): LinkAuthResult {
         val lookupResult = if (linkGate.useAttestationEndpoints) {
             mobileLookUp(
                 email = email,
                 emailSource = emailSource,
-                startSession = startSession
+                startSession = startSession,
+                customerId = customerId
             )
         } else {
             linkAccountManager.lookupConsumer(
                 email = email,
-                startSession = startSession
+                startSession = startSession,
+                customerId = customerId
             )
         }
         return lookupResult.toLinkAuthResult()
@@ -93,7 +96,8 @@ internal class DefaultLinkAuth @Inject constructor(
     private suspend fun mobileLookUp(
         email: String,
         emailSource: EmailSource,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> {
         return runCatching {
             val verificationToken = integrityRequestManager.requestToken().getOrThrow()
@@ -102,7 +106,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 emailSource = emailSource,
                 verificationToken = verificationToken,
                 appId = applicationId,
-                startSession = startSession
+                startSession = startSession,
+                customerId = customerId
             ).getOrThrow()
         }.onFailure { error ->
             reportError(error, operation = "lookup")

@@ -131,7 +131,8 @@ internal class SignUpViewModel @Inject constructor(
         val lookupResult = linkAuth.lookUp(
             email = email,
             emailSource = EmailSource.USER_ACTION,
-            startSession = true
+            startSession = true,
+            customerId = configuration.customerId
         )
 
         updateSignUpState(SignUpState.InputtingPrimaryField)
@@ -157,7 +158,8 @@ internal class SignUpViewModel @Inject constructor(
                 linkAuth.lookUp(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
-                    startSession = true
+                    startSession = true,
+                    customerId = configuration.customerId
                 )
             }
             handleLookupResult(
