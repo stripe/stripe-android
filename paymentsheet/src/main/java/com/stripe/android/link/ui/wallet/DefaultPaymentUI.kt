@@ -5,7 +5,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Immutable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.DisplayablePaymentDetails
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import kotlinx.parcelize.Parcelize
 
@@ -16,9 +15,20 @@ import kotlinx.parcelize.Parcelize
 @Immutable
 @Parcelize
 internal data class DefaultPaymentUI(
-    @DrawableRes val paymentIconRes: Int,
+    val paymentType: PaymentType,
     val last4: String
-) : Parcelable
+) : Parcelable {
+
+    @Immutable
+    @Parcelize
+    internal sealed interface PaymentType : Parcelable {
+        @Parcelize
+        data class Card(@DrawableRes val iconRes: Int) : PaymentType
+
+        @Parcelize
+        data class BankAccount(val bankIconCode: String?) : PaymentType
+    }
+}
 
 internal fun DisplayablePaymentDetails.toDefaultPaymentUI(
     enableDefaultValuesInECE: Boolean
@@ -28,16 +38,24 @@ internal fun DisplayablePaymentDetails.toDefaultPaymentUI(
     // do not render default payment details if there's no last4.
     if (last4 == null) return null
 
-    val paymentIcon = when (defaultPaymentType) {
-        "CARD" -> CardBrand.fromCode(defaultCardBrand).getCardBrandIconForVerticalMode()
-        "BANK_ACCOUNT" -> R.drawable.stripe_link_bank_outlined
+    val paymentType = when (defaultPaymentType) {
+        "CARD" -> {
+            val cardIcon = CardBrand.fromCode(defaultCardBrand).getCardBrandIconForVerticalMode()
+            DefaultPaymentUI.PaymentType.Card(cardIcon)
+        }
+        "BANK_ACCOUNT" -> {
+            // Note: DisplayablePaymentDetails doesn't include bankIconCode, so we pass null
+            // This will result in the generic bank icon being used
+            DefaultPaymentUI.PaymentType.BankAccount(bankIconCode = null)
+        }
         else -> null
     }
-    // do not render default payment details if icon is not available
-    if (paymentIcon == null) return null
+
+    // do not render default payment details if payment type is not supported
+    if (paymentType == null) return null
 
     return DefaultPaymentUI(
-        paymentIconRes = paymentIcon,
+        paymentType = paymentType,
         last4 = requireNotNull(last4)
     )
 }

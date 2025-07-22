@@ -15,7 +15,7 @@ class ConsumerSessionLookupJsonParser : ModelJsonParser<ConsumerSessionLookup> {
         val errorMessage = optString(json, FIELD_ERROR_MESSAGE)
         val publishableKey = optString(json, FIELD_PUBLISHABLE_KEY)
         val displayablePaymentDetails = json.optJSONObject(FIELD_DISPLAYABLE_PAYMENT_DETAILS)?.let {
-            DisplayablePaymentDetailsJsonParser().parse(it)
+            DisplayablePaymentDetailsJsonParser.parse(it)
         }
         return ConsumerSessionLookup(exists, consumerSession, errorMessage, publishableKey, displayablePaymentDetails)
     }

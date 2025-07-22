@@ -1,6 +1,5 @@
 package com.stripe.android.link.account
 
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -340,14 +339,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newConsumerPublishableKey = publishableKey
             ?: currentAccount?.consumerPublishableKey
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
-        val displayablePaymentDetails = displayablePaymentDetails
+        val newPaymentDetails = displayablePaymentDetails
             ?: currentAccount?.displayablePaymentDetails
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
 
         val newAccount = LinkAccount(
             consumerSession = consumerSession,
             consumerPublishableKey = newConsumerPublishableKey,
-            displayablePaymentDetails = displayablePaymentDetails
+            displayablePaymentDetails = newPaymentDetails
         )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
@@ -466,28 +465,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     billingPhone = phone
                 )
             }
-        }
-    }
-
-    @VisibleForTesting
-    internal suspend fun setAccountNullable(
-        consumerSession: ConsumerSession?,
-        publishableKey: String?,
-        displayablePaymentDetails: DisplayablePaymentDetails? = null
-    ): LinkAccount? {
-        return consumerSession?.let {
-            setAccount(
-                consumerSession = it,
-                publishableKey = publishableKey,
-                displayablePaymentDetails = displayablePaymentDetails
-            )
-        } ?: run {
-            withContext(Dispatchers.Main.immediate) {
-                linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
-                _consumerState.value = null
-            }
-            cachedShippingAddresses = null
-            null
         }
     }
 

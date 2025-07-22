@@ -45,6 +45,7 @@ class LinkInline2FASectionScreenshotTest {
             didSendNewCode = false,
             redactedPhoneNumber = "***-***-1234",
             email = "user@example.com",
+            defaultPayment = null,
             isDialog = false
         )
 
@@ -68,6 +69,42 @@ class LinkInline2FASectionScreenshotTest {
             defaultCardBrand = "mastercard",
             last4 = "5555",
             defaultPaymentType = "CARD",
+            numberOfSavedPaymentDetails = 1L
+        )
+        val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
+
+        val verificationState = VerificationViewState(
+            isProcessing = false,
+            requestFocus = true,
+            errorMessage = null,
+            isSendingNewCode = false,
+            didSendNewCode = false,
+            redactedPhoneNumber = "***-***-5678",
+            email = "test@stripe.com",
+            isDialog = false,
+            defaultPayment = paymentUI
+        )
+
+        paparazziRule.snapshot {
+            LinkInline2FASection(
+                verificationState = verificationState,
+                otpElement = otpElement,
+                onResend = {}
+            )
+        }
+    }
+
+    @Test
+    fun testWithPaymentDetailsBank() {
+        val otpElement = OTPElement(
+            identifier = IdentifierSpec.Generic("otp"),
+            controller = OTPController()
+        )
+
+        val paymentDetails = DisplayablePaymentDetails(
+            defaultCardBrand = null,
+            last4 = "5555",
+            defaultPaymentType = "BANK_ACCOUNT",
             numberOfSavedPaymentDetails = 1L
         )
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
@@ -148,6 +185,7 @@ class LinkInline2FASectionScreenshotTest {
             didSendNewCode = false,
             redactedPhoneNumber = "***-***-1234",
             email = "user@example.com",
+            defaultPayment = null,
             isDialog = false
         )
 

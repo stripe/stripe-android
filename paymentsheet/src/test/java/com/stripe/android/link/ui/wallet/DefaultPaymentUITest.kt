@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.payments.model.R
 import org.junit.Test
-import com.stripe.android.paymentsheet.R as PaymentsSheetR
 
 class DefaultPaymentUITest {
 
@@ -23,7 +22,7 @@ class DefaultPaymentUITest {
     }
 
     @Test
-    fun `toDefaultPaymentUI with BANK_ACCOUNT type should return bank icon`() {
+    fun `toDefaultPaymentUI with BANK_ACCOUNT type should return bank payment type`() {
         val paymentDetails = DisplayablePaymentDetails(
             defaultCardBrand = "visa",
             last4 = "4242",
@@ -34,7 +33,9 @@ class DefaultPaymentUITest {
         val result = paymentDetails.toDefaultPaymentUI(enableDefaultValuesInECE = true)
 
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentIconRes).isEqualTo(PaymentsSheetR.drawable.stripe_link_bank_outlined)
+        assertThat(result!!.paymentType).isInstanceOf(DefaultPaymentUI.PaymentType.BankAccount::class.java)
+        val bankAccountType = result.paymentType as DefaultPaymentUI.PaymentType.BankAccount
+        assertThat(bankAccountType.bankIconCode).isNull()
         assertThat(result.last4).isEqualTo("4242")
     }
 
@@ -50,7 +51,9 @@ class DefaultPaymentUITest {
         val result = paymentDetails.toDefaultPaymentUI(enableDefaultValuesInECE = true)
 
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentIconRes).isEqualTo(R.drawable.stripe_ic_unknown_brand_unpadded)
+        assertThat(result!!.paymentType).isInstanceOf(DefaultPaymentUI.PaymentType.Card::class.java)
+        val cardType = result.paymentType as DefaultPaymentUI.PaymentType.Card
+        assertThat(cardType.iconRes).isEqualTo(R.drawable.stripe_ic_unknown_brand_unpadded)
         assertThat(result.last4).isEqualTo("4242")
     }
 
@@ -80,7 +83,9 @@ class DefaultPaymentUITest {
         val result = paymentDetails.toDefaultPaymentUI(enableDefaultValuesInECE = true)
 
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentIconRes).isEqualTo(R.drawable.stripe_ic_visa_unpadded)
+        assertThat(result!!.paymentType).isInstanceOf(DefaultPaymentUI.PaymentType.Card::class.java)
+        val cardType = result.paymentType as DefaultPaymentUI.PaymentType.Card
+        assertThat(cardType.iconRes).isEqualTo(R.drawable.stripe_ic_visa_unpadded)
         assertThat(result.last4).isEqualTo("4242")
     }
 
@@ -96,7 +101,9 @@ class DefaultPaymentUITest {
         val result = paymentDetails.toDefaultPaymentUI(enableDefaultValuesInECE = true)
 
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentIconRes).isEqualTo(R.drawable.stripe_ic_mastercard_unpadded)
+        assertThat(result!!.paymentType).isInstanceOf(DefaultPaymentUI.PaymentType.Card::class.java)
+        val cardType = result.paymentType as DefaultPaymentUI.PaymentType.Card
+        assertThat(cardType.iconRes).isEqualTo(R.drawable.stripe_ic_mastercard_unpadded)
         assertThat(result.last4).isEqualTo("5555")
     }
 
@@ -112,7 +119,9 @@ class DefaultPaymentUITest {
         val result = paymentDetails.toDefaultPaymentUI(enableDefaultValuesInECE = true)
 
         assertThat(result).isNotNull()
-        assertThat(result!!.paymentIconRes).isEqualTo(R.drawable.stripe_ic_amex_unpadded)
+        assertThat(result!!.paymentType).isInstanceOf(DefaultPaymentUI.PaymentType.Card::class.java)
+        val cardType = result.paymentType as DefaultPaymentUI.PaymentType.Card
+        assertThat(cardType.iconRes).isEqualTo(R.drawable.stripe_ic_amex_unpadded)
         assertThat(result.last4).isEqualTo("0005")
     }
 }
