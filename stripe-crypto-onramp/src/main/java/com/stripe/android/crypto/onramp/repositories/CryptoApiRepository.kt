@@ -22,7 +22,7 @@ import javax.inject.Named
 * Repository interface for crypto-related operations.
 */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-internal class CryptoApiRepository @Inject constructor(
+internal class CryptoApiRepository @Inject internal constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
