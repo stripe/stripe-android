@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampAuthenticateUserResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -60,8 +59,9 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param info The LinkInfo for the new user.
      */
+    @Suppress("UnusedParameter")
     fun registerNewLinkUser(info: LinkUserInfo) {
-        viewModel.registerLinkUser(info)
+        TODO("Not yet implemented")
     }
 
     /**
