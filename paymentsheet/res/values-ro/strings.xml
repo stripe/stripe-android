@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Adăugare cont bancar</string>
+  <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
+  <string name="stripe_add_new_payment_method">Adăuga o nouă metodă de plată</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Adăugați o metodă de plată</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_afterpay_subtitle">Cumpărați acum sau plătiți mai târziu folosind Afterpay</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_bank_account_ending_in">Cont bancar care se termină în %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
+  <string name="stripe_bank_account_plus_last_4">Cont bancar ···· %s</string>
+  <!-- Concise description of a saved bank account. E.g. 'Bank account ····4242' -->
+  <string name="stripe_bank_account_with_last_4">Cont bancar ····%s</string>
+  <!-- Text for alert message when user needs to confirm payment in their banking app -->
+  <string name="stripe_blik_confirm_payment">Confirmați plata în aplicația băncii dvs. în termen de %s pentru a finaliza achiziția.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Cumpărați acum sau plătiți mai târziu folosind Cash App Afterpay</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
+  <string name="stripe_clearpay_subtitle">Cumpărați acum sau plătiți mai târziu folosind Clearpay</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Informațiile dvs. de plată nu vor fi salvate.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Doriți să închideți acest formular?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Salvați-vă informațiile pentru o finalizare securizată a comenzii cu un singur clic cu Link</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in">Salvează informațiile mele pentru finalizarea mai rapidă a comenzii cu Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">%1$s Credit</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">%1$s Debit</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">%1$s Preplătit</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">%1$s Card</string>
+  <!-- Title for a button that indicates a user can log in or sign up. -->
+  <string name="stripe_link_log_in_or_sign_up">Conectați-vă sau înregistrați-vă</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Confirmare și continuare</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Finalizare a comenzii sigură și rapidă cu un singur clic</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Salvați-vă informațiile privind plata cu Link și finalizați comanda în siguranță cu un singur clic pe site-urile acceptate de Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Continuând, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Actualizare card</string>
+  <!-- Text informing the user that the card to be updated is their default -->
+  <string name="stripe_link_update_card_default_card">Aceasta este setarea dvs. implicită</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Actualizare card</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Introduceți codul pe care vi l-am trimis la %s pentru a utiliza informațiile dvs. salvate.</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message_short">Introduceți codul trimis la %s.</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Actualizare card</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Deconectare de la Link</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">A apărut o eroare. Verificați conexiunea și încercați din nou.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Plătiți cu Link</string>
+  <!-- Text providing link to terms for ACH payments -->
+  <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Continuând, sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
+  <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
+  <string name="stripe_paymentsheet_ach_save_mandate"><![CDATA[Prin salvarea contului dvs. bancar pentru %s sunteți de acord să autorizați plățile în conformitate cu <terms>acești termeni</terms>.]]></string>
+  <!-- Error message when an error case happens when linking your account -->
+  <string name="stripe_paymentsheet_ach_something_went_wrong">Ceva nu a mers bine la asocierea contului dvs.\nVă rugăm să încercați din nou mai târziu.</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add payment method details -->
+  <string name="stripe_paymentsheet_add_payment_method_button_label">+ Adăugare</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_add_payment_method_title">Adăuga informațiile privind plata</string>
+  <!-- Title for a button that when pressed saves the provided address. -->
+  <string name="stripe_paymentsheet_address_element_primary_button">Salvare adresă</string>
+  <!-- Title for shipping address entry section -->
+  <string name="stripe_paymentsheet_address_element_shipping_address">Adresa de expediere</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Un e-mail va fi trimis la adresa %s în termen de trei zile lucrătoare pentru a confirma configurarea acestei instrucțiuni privind debitul.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Confirmare detalii despre debitul direct</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modificare date</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">În plus, veți primi o notificare cu două zile înainte, prin e-mail, cu privire la orice sumă care urmează să fie debitată în temeiul acestei instrucțiuni. Plățile vor apărea ca „%s” în extrasul dvs. de cont bancar.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Plățile dvs. sunt protejate de %s.</string>
+  <!-- Text displayed on manage bank account screen when bank account details are not editable. -->
+  <string name="stripe_paymentsheet_bank_account_details_cannot_be_changed">Detaliile contului bancar nu pot fi modificate.</string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is paying, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_payment"><![CDATA[Primiți %s înapoi atunci când plătiți prin bancă. <a href=\"https://link.com/promotion-terms\">Consultați&#160;termenii</a>]]></string>
+  <!-- Text shown in the bank payment form when a promo is available and the user is setting up an account, e.g. 'Get $5 back when you pay by bank. See terms'. Note that 'See terms' contains a non-breaking space. -->
+  <string name="stripe_paymentsheet_bank_payment_promo_for_setup"><![CDATA[Primiți %s înapoi atunci când plătiți pentru prima dată cu banca dvs. <a href=\"https://link.com/promotion-terms\">Consultați&#160;termenii</a>]]></string>
+  <!-- Label shown when paying with a bank account is not eligible for the incentive, e.g. 'No $5 promo' -->
+  <string name="stripe_paymentsheet_bank_payment_promo_ineligible">Fără promoție %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_card_details_cannot_be_changed">Detaliile cardului nu pot fi modificate.</string>
+  <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
+  <string name="stripe_paymentsheet_card_mandate">Prin furnizarea informațiilor despre cardul dvs., permiteți %s să vă taxeze cardul pentru plățile viitoare în conformitate cu termenii acesteia.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Cardul nu a fost actualizat. Te rugăm să încerci din nou.</string>
+  <!-- Title shown above a carousel containing available payment methods -->
+  <string name="stripe_paymentsheet_choose_payment_method">Alege o metodă de plată</string>
+  <string name="stripe_paymentsheet_close">Închidere</string>
+  <!-- A button used to confirm selecting a saved payment method -->
+  <string name="stripe_paymentsheet_confirm">Confirmare</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">Confirmă CVC-ul</string>
+  <!-- Text for a button that allows manual entry of an address -->
+  <string name="stripe_paymentsheet_enter_address_manually">Introduceți adresa manual</string>
+  <!-- Title shown above a view containing a customer's bank account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_bank_account">Gestionare cont bancar din SUA</string>
+  <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_card">Gestionare card</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Gestionare carduri</string>
+  <!-- Title shown above a view containing the customer's bank account that they can delete -->
+  <string name="stripe_paymentsheet_manage_international_bank_account">Administrați contul bancar</string>
+  <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_methods">Gestionare metode de plată</string>
+  <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_sepa_debit">Gestionare debit SEPA</string>
+  <!-- Title shown above a carousel containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_manage_your_payment_methods">Gestionați metodele de plată</string>
+  <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
+  <string name="stripe_paymentsheet_microdeposit">Stripe va depune 0,01 USD în contul dvs. în decurs de 1-2 zile lucrătoare. Apoi veți primi un e-mail cu instrucțiuni pentru a finaliza plata către %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Editare %s</string>
+  <!-- Label of a button that appears on a checkout screen. When tapped, it displays a credit card form. This button is shown next to another button representing the customer's saved card; the word 'new' is meant to differentiate this button's action with the saved card button. -->
+  <string name="stripe_paymentsheet_new_card">Card nou</string>
+  <!-- Title shown above a section containing payment methods that a customer can choose to pay with e.g. card, bank account, etc. -->
+  <string name="stripe_paymentsheet_new_pm">Metodă de plată nouă</string>
+  <!-- Text displayed on manage card screen when the only editable card detail is the card brand. -->
+  <string name="stripe_paymentsheet_only_card_brand_can_be_changed">Doar marca cardului poate fi modificată.</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_using">Sau poti alege ca metodă de plată</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <string name="stripe_paymentsheet_or_pay_with_card">Sau poti alege ca metodă de plată un card</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Sau utilizează</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Sau utilizează un card</string>
+  <!-- Label for a button that starts processing the payment. -->
+  <string name="stripe_paymentsheet_pay_button_label">Adaugă</string>
+  <!-- Title shown above a section containing various payment options -->
+  <string name="stripe_paymentsheet_pay_using">Adaugă folosind</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_pay_with_bank_title">Plătiți cu contul dvs. bancar în doar câțiva pași.</string>
+  <!-- Label of a button that, when tapped, initiates payment, becomes disabled, and displays this text -->
+  <string name="stripe_paymentsheet_primary_button_processing">Se procesează...</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_question_title">Eliminați contul bancar?</string>
+  <!-- Title for confirmation alert to remove a saved bank account payment method -->
+  <string name="stripe_paymentsheet_remove_bank_account_title">Eliminați contul bancar</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Eliminare card</string>
+  <!-- Title for confirmation alert to remove a card -->
+  <string name="stripe_paymentsheet_remove_card_title">Doresti sa elimini cardul?</string>
+  <!-- Content for alert popup prompting to confirm removing saved payment method. -->
+  <string name="stripe_paymentsheet_remove_pm">Elimina %s</string>
+  <!-- Title shown above a view containing a customer's payment method that they can delete -->
+  <string name="stripe_paymentsheet_remove_pm_title">Eliminare metodă de plată</string>
+  <!-- A button used for saving a new payment method -->
+  <string name="stripe_paymentsheet_save">Salvare</string>
+  <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
+  <string name="stripe_paymentsheet_save_a_new_payment_method">Salvează o metodă de plată nouă</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Salvați-vă contul bancar în doar câțiva pași.</string>
+  <!-- The label of a switch indicating whether to save the payment method for future payments. -->
+  <string name="stripe_paymentsheet_save_for_future_payments">Salvează pentru plăți viitoare</string>
+  <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
+  <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Salvează acest card pentru plăți viitoare către %s</string>
+  <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
+  <string name="stripe_paymentsheet_saved">Carduri salvate</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Selectare card</string>
+  <!-- Title shown above a view containing the customer's payment methods -->
+  <string name="stripe_paymentsheet_select_payment_method">Selectare metodă de plată</string>
+  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
+  <string name="stripe_paymentsheet_select_your_payment_method">Selectează metoda de plată</string>
+  <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
+  <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Detaliile debitului SEPA nu pot fi modificate.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Metoda de plată implicită nu a fost modificată. Te rugăm să încerci din nou.</string>
+  <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
+  <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Marca cardului nu a fost actualizată. Vă rugăm să încercați din nou.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Setează ca metodă de plată implicită</string>
+  <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
+  <string name="stripe_remove_bank_account_ending_in">Eliminați contul bancar care se termină cu %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Butonul Shop Pay</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Afișare meniu</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Înscrieți-vă în Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Finalizare securizată a comenzii cu un singur clic</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Plătiți mai rapid la %s și alți mii de comercianți.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Prin accesarea link-ului de asociere, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Prin furnizarea adresei de e-mail, sunteți de acord să creați un cont Link și să vă salvați informațiile de plată în Link, în conformitate cu <terms>Termenii Link</terms>i și <privacy>Politica de confidențialitate</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Prin furnizarea numărului dvs. de telefon, sunteți de acord să creați un cont Link și să salvați informațiile dvs. de plată în Link, în conformitate cu <terms>Termenii Link</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Prin furnizarea numărului de telefon și a adresei de e-mail, sunteți de acord să creați un cont Link supus <terms>Termenilor</terms> și <privacy>politicii de confidențialitate</privacy> Link.]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">Contul dvs. a fost dezactivat</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Ceva nu a mers bine</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Tranzacție finalizată</string>
+  <!-- Button text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_cancel">Anulați și folosiți altă metodă de plată</string>
+  <!-- Text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_header">Aprobare plată</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">Deschideți aplicația UPI pentru a aproba plata în termen de %s</string>
+  <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
+  <string name="stripe_upi_polling_payment_failed_message">Vă rugăm să reveniți și să selectați o altă metodă de plată</string>
+  <!-- Text on a screen that indicates a payment has failed -->
+  <string name="stripe_upi_polling_payment_failed_title">Plata nu a reușit</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Schimbați adresa de e-mail</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email_new">Nu sunteți dvs.?</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Codul a fost trimis</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_dialog_header">Confirmați că sunteți dvs.</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Introduceți codul de verificare</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Conectați-vă la contul dvs. Link</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Folosiți informațiile dvs. salvate pentru a finaliza comanda mai rapid</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Introduceți codul trimis la %s pentru a utiliza Link ca metodă de plată implicită</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Nu este %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Retrimitere cod</string>
+  <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
+  <string name="stripe_view_more">Vizualizați mai multe</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Continuând, sunteți de acord să autorizați plățile în conformitate cu acești <terms>termeni</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Plată</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_continue_another_way">Continuați într-un alt mod</string>
+  <!-- Label for identifying the default payment method. -->
+  <string name="stripe_wallet_default">Implicit</string>
+  <string name="stripe_wallet_expand_accessibility">Modificare selecție</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Metode de plată</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Passthrough</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Folosiți altă metodă de plată</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Din motive de securitate, vă rugăm să introduceți din nou codul de securitate al cardului dvs.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Sigur doriți să eliminați acest cont asociat?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Sigur doriți să eliminați acest card?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Eliminare cont asociat</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Setați ca implicită</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Nu este disponibilă pentru această achiziție</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Actualizare card</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Acest card a expirat. Actualizați datele cardului sau alegeți o altă metodă de plată.</string>
+</resources>

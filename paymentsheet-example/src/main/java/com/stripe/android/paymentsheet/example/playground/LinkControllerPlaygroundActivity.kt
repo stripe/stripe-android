@@ -43,6 +43,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                     lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
                     authenticationCallback = viewModel::onLinkControllerAuthentication,
+                    registerConsumerCallback = viewModel::onRegisterConsumer,
                 )
             }
             LaunchedEffect(Unit) {
@@ -74,6 +75,15 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                             } else {
                                 linkController.authenticate(cleanedEmail)
                             }
+                        },
+                        onRegisterConsumerClick = { email, phone, country, name ->
+                            linkController.registerConsumer(
+                                email = email,
+                                phone = phone,
+                                country = country,
+                                name = name,
+                                consentAction = com.stripe.android.model.ConsumerSignUpConsentAction.Checkbox
+                            )
                         },
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
                     )

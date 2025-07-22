@@ -162,9 +162,9 @@ data class EmbeddedFloatingStyle(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class EmbeddedChevronColors(
+data class EmbeddedDisclosureColors(
     val separatorColor: Color,
-    val chevronColor: Color
+    val disclosureColor: Color
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -309,14 +309,14 @@ object StripeThemeDefaults {
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK
     )
 
-    val chevronColorsLight = EmbeddedChevronColors(
+    val disclosureColorsLight = EmbeddedDisclosureColors(
         separatorColor = colorsLight.componentBorder,
-        chevronColor = Color.DarkGray
+        disclosureColor = Color.DarkGray
     )
 
-    val chevronColorsDark = EmbeddedChevronColors(
+    val disclosureColorsDark = EmbeddedDisclosureColors(
         separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
-        chevronColor = Color.LightGray
+        disclosureColor = Color.LightGray
     )
 
     val embeddedCommon = EmbeddedInsets(

@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">PayPal による支払いを確定すると、%s が規約に従って今後の支払いをお客様の PayPal アカウントに請求することを許可することになります。</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">RevolutPay による支払いを確定すると、%s が規約に従って今後の支払いをお客様の RevolutPay アカウントに請求することを許可することになります。</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">継続することで、%1$s がお客様の購入またはサブスクリプションプランに従って、定期的に Satispay Balance から自動的に引き落とすことを許可します。</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">今後の %s の支払いのために保存する</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

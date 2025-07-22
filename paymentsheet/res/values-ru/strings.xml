@@ -37,6 +37,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_prepaid">%1$s предоплаченная</string>
   <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
   <string name="stripe_link_card_type_unknown">Карта %1$s</string>
+  <!-- Title for the update card screen in Link native when the user is confirming their payment details -->
+  <string name="stripe_link_confirm_payment_title">Подтвердить платежные данные</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Войдите или зарегистрируйтесь</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -79,6 +81,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_address_element_primary_button">Сохранить адрес</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Адрес доставки</string>
+  <!-- Label for a checkbox when pressed used the provided billing address details as shipping address -->
+  <string name="stripe_paymentsheet_address_element_use_billing_as_shipping">Используйте для доставки адрес для выставления счетов</string>
   <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
   <string name="stripe_paymentsheet_bacs_email_mandate">В течение трех рабочих дней на электронный адрес %s будет отправлено письмо для подтверждения настройки этой инструкции по дебетованию.</string>
   <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->

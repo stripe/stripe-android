@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Meta tikkonferma l-pagament tiegħek ma\' PayPal, tkun qed tagħti permess lil %s biex fil-ġejjieni tiġbor il-pagamenti mill-kont ta\' PayPal tiegħek skont ir-regoli tagħha.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Meta tikkonferma l-pagament tiegħek b\'RevolutPay, tkun qed tħalli lil %s tiġbor il-flus mill-kont ta\' RevolutPay tiegħek għall-pagamenti tal-ġejjieni skont ir-regoli tagħha.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Billi tkompli, tawtorizza lil %1$s biex awtomatikament tiddebita l-Bilanċ ta’ Satispay tiegħek fuq bażi rikorrenti skont il-pjan tax-xiri jew tal-abbonament tiegħek.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Issejvja għall-pagamenti futuri lil %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

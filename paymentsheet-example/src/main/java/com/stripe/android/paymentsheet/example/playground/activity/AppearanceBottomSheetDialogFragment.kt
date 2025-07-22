@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -985,11 +986,11 @@ private fun EmbeddedPicker(
     Divider()
 
     ColorItem(
-        label = "chevronColor",
-        currentColor = Color(embeddedAppearance.chevronColor),
+        label = "disclosureColor",
+        currentColor = Color(embeddedAppearance.disclosureColor),
         onColorPicked = {
             embeddedAppearance.copy(
-                chevronColor = it.toArgb()
+                disclosureColor = it.toArgb()
             )
         },
         updateAppearance = updateEmbedded,
@@ -1076,6 +1077,74 @@ private fun EmbeddedPicker(
         )
     }
     Divider()
+
+    IncrementDecrementItem(
+        "verticalIconMargin",
+        embeddedAppearance.verticalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                verticalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem(
+        "horizontalIconMargin",
+        embeddedAppearance.horizontalPaymentMethodIconMargin ?: 0f
+    ) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                horizontalPaymentMethodIconMargin = it
+            )
+        )
+    }
+    Divider()
+
+    FontDropDown(embeddedAppearance.fontFamilyRes) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                fontFamilyRes = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("fontSizeSp", embeddedAppearance.fontSizeSp ?: 0f) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                fontSizeSp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("fontWeight", embeddedAppearance.fontWeight?.toFloat() ?: 0f) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                fontWeight = it.toInt()
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("letterSpacingSp", embeddedAppearance.letterSpacingSp ?: 0f) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                letterSpacingSp = it
+            )
+        )
+    }
+    Divider()
+
+    IconDropDown(embeddedAppearance.disclosureIconRes) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                disclosureIconRes = it
+            )
+        )
+    }
 }
 
 @Composable
@@ -1384,6 +1453,58 @@ private fun FontDropDownMenuItem(label: String, fontResId: Int?, onClick: () -> 
             text = label,
             fontFamily = getFontFromResource(fontResId)
         )
+    }
+}
+
+@Composable
+private fun IconDropDown(iconResId: Int?, iconSelectedCallback: (Int) -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        com.stripe.android.R.drawable.stripe_ic_arrow_down to "Down",
+        com.stripe.android.R.drawable.stripe_ic_add_black_32dp to "Add",
+        com.stripe.android.paymentsheet.R.drawable.stripe_ic_chevron_right to "Default"
+    )
+
+    items[iconResId].let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(all = BASE_PADDING)
+                .wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "Icon Resource: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { icon ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            iconSelectedCallback(icon.key)
+                        }
+                    ) {
+                        Text(
+                            text = icon.value
+                        )
+                        icon.key?.let { iconResId ->
+                            Icon(
+                                painter = painterResource(iconResId),
+                                contentDescription = null
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

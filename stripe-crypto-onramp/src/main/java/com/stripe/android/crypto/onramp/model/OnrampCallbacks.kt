@@ -11,5 +11,6 @@ import dev.drewhamilton.poko.Poko
 @Poko
 class OnrampCallbacks(
     val configurationCallback: OnrampConfigurationCallback,
-    val linkLookupCallback: OnrampLinkLookupCallback
+    val linkLookupCallback: OnrampLinkLookupCallback,
+    val authenticationCallback: OnrampVerificationCallback
 )

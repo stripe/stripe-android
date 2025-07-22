@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">PayPal\'la ödemeyi onayladığınızda, %s şirketine gelecekteki ödemeler için kendi koşullarına uygun olarak PayPal hesabınızı ücretlendirme izni vermiş olursunuz.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">RevolutPay ile ödemenizi doğrulayarak, %s tarafından RevolutPay hesabınızdan, kendi koşulları doğrultusunda gelecekteki ödemelerinizin tahsil edilmesine izin vermektesiniz.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Devam ederek %1$s tarafından satın alma veya abonelik planınıza uygun olarak Satispay Bakiyenizin otomatik ve düzenli olarak tahsil etmesine izin vermiş olursunuz.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Gelecekteki %s ödemeleri için kaydedilsin</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

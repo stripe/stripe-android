@@ -30,7 +30,7 @@ sealed class PaymentFlowResult {
         internal val canCancelSource: Boolean = false,
         internal val sourceId: String? = null,
         internal val source: Source? = null,
-        internal val stripeAccountId: String? = null
+        val stripeAccountId: String? = null
     ) : Parcelable {
         @JvmSynthetic
         fun toBundle() = bundleOf(EXTRA to this)
@@ -102,6 +102,6 @@ sealed class PaymentFlowResult {
 
         internal val sourceId: String? = null,
         internal val source: Source? = null,
-        internal val stripeAccountId: String? = null
+        val stripeAccountId: String? = null
     )
 }

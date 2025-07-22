@@ -80,52 +80,75 @@ class AddressLauncher internal constructor(
 
     /** Configuration for [AddressLauncher] **/
     @Parcelize
-    data class Configuration @JvmOverloads constructor(
-        /**
-         * Configuration for the look and feel of the UI
-         */
+    data class Configuration internal constructor(
         val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-
-        /**
-         * The values to pre-populate shipping address fields with.
-         */
         val address: AddressDetails? = null,
-
-        /**
-         * A list of two-letter country codes representing countries the customers can select.
-         * If the list is empty (the default), we display all countries.
-         */
         val allowedCountries: Set<String> = emptySet(),
-
-        /**
-         * The title of the primary button displayed at the bottom of the screen.
-         * Defaults to "Save address".
-         */
         val buttonTitle: String? = null,
-
-        /**
-         * Configuration for fields to collect in addition to the physical shipping address
-         */
         val additionalFields: AdditionalFieldsConfiguration? = null,
-
-        /**
-         * Configuration for the title displayed at the top of the screen.
-         * Defaults to "Address"
-         */
         val title: String? = null,
-
-        /**
-         * Google Places api key used to provide autocomplete suggestions
-         * When null, autocomplete is disabled.
-         */
         val googlePlacesApiKey: String? = null,
-
-        /**
-         * A list of two-letter country codes that support autocomplete. Defaults to a list of
-         * countries that Stripe has audited to ensure a good autocomplete experience.
-         */
-        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
+        val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+        internal val billingAddress: PaymentSheet.BillingDetails?,
     ) : Parcelable {
+        @JvmOverloads
+        constructor(
+            /**
+             * Configuration for the look and feel of the UI
+             */
+            appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+
+            /**
+             * The values to pre-populate shipping address fields with.
+             */
+            address: AddressDetails? = null,
+
+            /**
+             * A list of two-letter country codes representing countries the customers can select.
+             * If the list is empty (the default), we display all countries.
+             */
+            allowedCountries: Set<String> = emptySet(),
+
+            /**
+             * The title of the primary button displayed at the bottom of the screen.
+             * Defaults to "Save address".
+             */
+            buttonTitle: String? = null,
+
+            /**
+             * Configuration for fields to collect in addition to the physical shipping address
+             */
+            additionalFields: AdditionalFieldsConfiguration? = null,
+
+            /**
+             * Configuration for the title displayed at the top of the screen.
+             * Defaults to "Address"
+             */
+            title: String? = null,
+
+            /**
+             * Google Places api key used to provide autocomplete suggestions
+             * When null, autocomplete is disabled.
+             */
+            googlePlacesApiKey: String? = null,
+
+            /**
+             * A list of two-letter country codes that support autocomplete. Defaults to a list of
+             * countries that Stripe has audited to ensure a good autocomplete experience.
+             */
+            autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+        ) : this(
+            appearance = appearance,
+            address = address,
+            allowedCountries = allowedCountries,
+            buttonTitle = buttonTitle,
+            additionalFields = additionalFields,
+            title = title,
+            googlePlacesApiKey = googlePlacesApiKey,
+            autocompleteCountries = autocompleteCountries,
+            billingAddress = null,
+        )
+
         /**
          * [Configuration] builder for cleaner object creation from Java.
          */
@@ -137,7 +160,8 @@ class AddressLauncher internal constructor(
             private var additionalFields: AdditionalFieldsConfiguration? = null
             private var title: String? = null
             private var googlePlacesApiKey: String? = null
-            private var autocompleteCountries: Set<String>? = null
+            private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
+            private var billingAddress: PaymentSheet.BillingDetails? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -163,14 +187,20 @@ class AddressLauncher internal constructor(
             fun autocompleteCountries(autocompleteCountries: Set<String>) =
                 apply { this.autocompleteCountries = autocompleteCountries }
 
+            @AddressElementSameAsBillingPreview
+            fun billingAddress(billingAddress: PaymentSheet.BillingDetails?) =
+                apply { this.billingAddress = billingAddress }
+
             fun build() = Configuration(
-                appearance,
-                address,
-                allowedCountries,
-                buttonTitle,
-                additionalFields,
-                title,
-                googlePlacesApiKey
+                appearance = appearance,
+                address = address,
+                allowedCountries = allowedCountries,
+                buttonTitle = buttonTitle,
+                additionalFields = additionalFields,
+                title = title,
+                googlePlacesApiKey = googlePlacesApiKey,
+                autocompleteCountries = autocompleteCountries,
+                billingAddress = billingAddress,
             )
         }
     }
@@ -182,28 +212,10 @@ class AddressLauncher internal constructor(
      * checkbox is not displayed. Defaults to null
      */
     @Parcelize
-    data class AdditionalFieldsConfiguration @AddressElementSameAsBillingPreview constructor(
+    data class AdditionalFieldsConfiguration(
         val phone: FieldConfiguration = FieldConfiguration.HIDDEN,
         val checkboxLabel: String? = null,
-        /**
-         * Shows a "Use billing address" checkbox when `address` is set.
-         * Toggles between populating fields with defaults (checked) and clearing
-         * them (unchecked).
-         * Hidden if the default country is not in `allowedCountries`.
-         */
-        val showUseBillingAddressCheckbox: Boolean = false,
     ) : Parcelable {
-        @OptIn(AddressElementSameAsBillingPreview::class)
-        @JvmOverloads
-        constructor(
-            phone: FieldConfiguration = FieldConfiguration.HIDDEN,
-            checkboxLabel: String? = null
-        ) : this(
-            phone = phone,
-            checkboxLabel = checkboxLabel,
-            showUseBillingAddressCheckbox = false,
-        )
-
         @Parcelize
         enum class FieldConfiguration : Parcelable {
             /**
