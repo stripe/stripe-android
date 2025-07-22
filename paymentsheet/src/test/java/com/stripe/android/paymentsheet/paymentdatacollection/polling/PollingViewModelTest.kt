@@ -1,10 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
@@ -15,24 +12,13 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import kotlin.test.BeforeTest
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
-@RunWith(RobolectricTestRunner::class)
 class PollingViewModelTest {
-
-    private val context = ApplicationProvider.getApplicationContext<Context>()
-
-    @BeforeTest
-    fun setup() {
-        PaymentConfiguration.clearInstance()
-    }
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -226,7 +212,7 @@ private fun createPollingViewModel(
             initialDelay = initialDelay,
             maxAttempts = 10,
             ctaText = R.string.stripe_upi_polling_message,
-            stripeAccountId = null,
+            stripeAccountId = null
         ),
         poller = poller,
         timeProvider = timeProvider,
