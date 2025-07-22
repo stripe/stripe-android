@@ -94,7 +94,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                     .mapCatching { linkPaymentDetails ->
                         val shouldShare = configuration.passthroughModeEnabled &&
                             (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)
-                                ?.shareAfterCreatingInPassthroughMode != false
+                                ?.sharePaymentDetailsImmediatelyAfterCreation != false
                         if (shouldShare) {
                             linkAccountManager.shareCardPaymentDetails(
                                 paymentDetailsId = linkPaymentDetails.paymentDetails.id,

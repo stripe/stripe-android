@@ -364,7 +364,7 @@ class LinkControllerViewModelTest {
             .isEqualTo(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = null,
-                    shareAfterCreatingInPassthroughMode = false
+                    sharePaymentDetailsImmediatelyAfterCreation = false
                 )
             )
 

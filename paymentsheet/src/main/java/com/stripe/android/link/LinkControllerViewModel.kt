@@ -116,7 +116,7 @@ internal class LinkControllerViewModel @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
-                    shareAfterCreatingInPassthroughMode = false,
+                    sharePaymentDetailsImmediatelyAfterCreation = false,
                 )
             }
         )

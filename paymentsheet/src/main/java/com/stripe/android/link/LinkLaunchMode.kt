@@ -19,9 +19,9 @@ internal sealed interface LinkLaunchMode : Parcelable {
         val selectedPayment: ConsumerPaymentDetails.PaymentDetails?,
 
         /**
-         * If true, shares the payment method after creating it in passthrough mode.
+         * If true, shares the payment details immediately after creating it in passthrough mode.
          */
-        val shareAfterCreatingInPassthroughMode: Boolean = true,
+        val sharePaymentDetailsImmediatelyAfterCreation: Boolean = true,
     ) : LinkLaunchMode
 
     /**
