@@ -13,6 +13,7 @@ import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import javax.inject.Inject
@@ -68,19 +69,8 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param email The email address of the existing user.
      */
-    @Suppress("UnusedParameter")
     fun authenticateExistingLinkUser(email: String) {
-        TODO("Not yet implemented")
-    }
-
-    /**
-     * Present UI to authenticate a Link user.
-     *
-     * @param email The email address to authenticate.
-     */
-    @Suppress("UnusedParameter")
-    fun presentForAuthentication(email: String) {
-        TODO("Not yet implemented")
+        viewModel.authenticateExistingUser(email)
     }
 
     /**
@@ -136,20 +126,9 @@ class OnrampCoordinator @Inject internal constructor(
                 LinkController.create(
                     activity = activity,
                     presentPaymentMethodsCallback = { /* No-op for now */ },
-                    lookupConsumerCallback = { result ->
-                        when (result) {
-                            is LinkController.LookupConsumerResult.Success ->
-                                onrampCallbacks.linkLookupCallback.onResult(
-                                    OnrampLinkLookupResult.Completed(result.isConsumer)
-                                )
-                            is LinkController.LookupConsumerResult.Failed ->
-                                onrampCallbacks.linkLookupCallback.onResult(
-                                    OnrampLinkLookupResult.Failed(result.error)
-                                )
-                        }
-                    },
+                    lookupConsumerCallback = { handleConsumerLookupResult(it) },
                     createPaymentMethodCallback = { /* No-op for now */ },
-                    authenticationCallback = { /* No-op for now */ }
+                    authenticationCallback = { handleAuthenticationResult(it) }
                 )
             }
 
@@ -178,6 +157,36 @@ class OnrampCoordinator @Inject internal constructor(
                     .build()
 
             return onrampComponent.onrampCoordinator
+        }
+
+        private fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
+            when (result) {
+                is LinkController.LookupConsumerResult.Success ->
+                    onrampCallbacks.linkLookupCallback.onResult(
+                        OnrampLinkLookupResult.Completed(result.isConsumer)
+                    )
+                is LinkController.LookupConsumerResult.Failed ->
+                    onrampCallbacks.linkLookupCallback.onResult(
+                        OnrampLinkLookupResult.Failed(result.error)
+                    )
+            }
+        }
+
+        private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
+            when (result) {
+                is LinkController.AuthenticationResult.Success ->
+                    onrampCallbacks.authenticationCallback.onResult(
+                        OnrampVerificationResult.Completed("temporary-id")
+                    )
+                is LinkController.AuthenticationResult.Failed ->
+                    onrampCallbacks.authenticationCallback.onResult(
+                        OnrampVerificationResult.Failed(result.error)
+                    )
+                is LinkController.AuthenticationResult.Canceled ->
+                    onrampCallbacks.authenticationCallback.onResult(
+                        OnrampVerificationResult.Cancelled()
+                    )
+            }
         }
     }
 }

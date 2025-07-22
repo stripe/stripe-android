@@ -56,6 +56,10 @@ internal class OnrampCoordinatorViewModel(
         linkController.lookupConsumer(email)
     }
 
+    fun authenticateExistingUser(email: String) {
+        linkController.authenticateExistingConsumer(email)
+    }
+
     class Factory(
         private val linkController: LinkController // pass into factory
     ) : ViewModelProvider.Factory {

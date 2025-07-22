@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,7 +70,7 @@ internal class OnrampViewModel : ViewModel() {
         _uiState.value = OnrampUiState.Loading
         try {
             onAuthenticate(email.trim())
-            _message.value = "Authentication attempted (not yet implemented)"
+            _message.value = "Authentication attempted"
             _uiState.value = OnrampUiState.EmailInput
         } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
             _message.value = "Authentication failed: ${e.message}"
@@ -118,6 +119,22 @@ internal class OnrampViewModel : ViewModel() {
             }
             is OnrampLinkLookupResult.Failed -> {
                 _message.value = "Lookup failed: ${result.error.message}"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+        }
+    }
+
+    fun onAuthenticationResult(result: OnrampVerificationResult) {
+        when (result) {
+            is OnrampVerificationResult.Completed -> {
+                _message.value = "Authentication successful"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+            is OnrampVerificationResult.Cancelled -> {
+                _message.value = "Authentication cancelled, please try again"
+            }
+            is OnrampVerificationResult.Failed -> {
+                _message.value = "Authentication failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.EmailInput
             }
         }
