@@ -5,9 +5,15 @@
 * [FIXED][11111](https://github.com/stripe/stripe-android/pull/11083) EmbeddedPaymentElement now errors when `configuration.rowSelectionBehavior` is `.immediateAction` and `configuration.embeddedViewDisplaysMandateText` is `true` to ensure integrations display legal mandate text to the customer.
 * [FIXED][11184](https://github.com/stripe/stripe-android/pull/11184) PaymentSheet will now accurately show a success state when confirming Blik and UPI PaymentIntents using a Stripe Connect account ID.
 
-
+## 21.21.0 - 2025-07-21
 ### PaymentSheet
 * [CHANGED][11151](https://github.com/stripe/stripe-android/pull/11151) Remove intrinsic top and bottom padding from `EmbeddedPaymentElement.Content`.
+* [FIXED][11111](https://github.com/stripe/stripe-android/pull/11083) EmbeddedPaymentElement now errors when `configuration.rowSelectionBehavior` is `.immediateAction` and `configuration.embeddedViewDisplaysMandateText` is `true` to ensure integrations display legal mandate text to the customer.
+* [ADDED][11178](https://github.com/stripe/stripe-android/pull/11178) Added `disclosureIconRes` property to `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure` to customize the chevron icon displayed in EmbeddedPaymentElement payment method rows.
+* [ADDED][11173](https://github.com/stripe/stripe-android/pull/11173) Added `titleFont` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row titles.
+* [ADDED][11166](https://github.com/stripe/stripe-android/pull/11166) Added `paymentMethodIconMargins` to `PaymentSheet.Appearance.Embedded` for customization of EmbeddedPaymentElement payment method row icon spacing.
+* [CHANGED][11175](https://github.com/stripe/stripe-android/pull/11175) Renamed `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron` to `PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure`.
+* [ADDED][11162](https://github.com/stripe/stripe-android/pull/11162) Added Builders for `PaymentSheet.Appearance.Embedded` and `PaymentSheet.Appearance.Embedded.RowStyle`.
 
 ## 21.20.2 - 2025-07-09
 

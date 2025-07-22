@@ -31,10 +31,11 @@ internal data class EmbeddedContent(
          * Having validation here ensures that we only validate when the embedded content is shown.
          */
         LaunchedEffect(appearance.style, isImmediateAction) {
-            if (appearance.style is Embedded.RowStyle.FlatWithChevron && !isImmediateAction) {
+            if (appearance.style is Embedded.RowStyle.FlatWithDisclosure && !isImmediateAction) {
                 throw IllegalArgumentException(
                     "EmbeddedPaymentElement.Builder.rowSelectionBehavior() must be set to ImmediateAction when using " +
-                        "FlatWithChevron RowStyle. Use a different style or enable ImmediateAction rowSelectionBehavior"
+                        "FlatWithDisclosure RowStyle. Use a different style or enable ImmediateAction " +
+                        "rowSelectionBehavior"
                 )
             }
         }
