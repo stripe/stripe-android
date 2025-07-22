@@ -8,10 +8,13 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.model.CryptoCustomerRequestParams
-import com.stripe.android.model.CryptoCustomerResponse
-import com.stripe.android.model.parsers.CryptoCustomerJsonParser
+import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
+import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
+import com.stripe.android.crypto.onramp.model.parsers.CryptoCustomerJsonParser
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -38,10 +41,11 @@ internal class CryptoApiRepository @Inject constructor(
     suspend fun grantPartnerMerchantPermissions(
         consumerSessionClientSecret: String
     ): Result<CryptoCustomerResponse> {
+        val params = CryptoCustomerRequestParams(CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
         val request = apiRequestFactory.createPost(
             url = getGrantPartnerMerchantPermissionsUrl,
             options = buildRequestOptions(),
-            params = CryptoCustomerRequestParams(consumerSessionClientSecret).toParamMap()
+            params = Json.encodeToJsonElement(params).toMap()
         )
 
         return executeRequestWithResultParser(
