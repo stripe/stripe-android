@@ -54,8 +54,11 @@ internal open class FakeLinkAccountManager(
     var mobileSignUpResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
-    var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
+    var createCardPaymentDetailsResult: Result<LinkPaymentDetails.New> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
+    )
+    var shareCardPaymentDetailsResult: Result<LinkPaymentDetails.Saved> = Result.success(
+        value = TestFactory.LINK_SAVED_PAYMENT_DETAILS
     )
     var createBankAccountPaymentDetailsResult: Result<ConsumerPaymentDetails.BankAccount> = Result.success(
         value = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -188,8 +191,14 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> {
+    ): Result<LinkPaymentDetails.New> {
         return createCardPaymentDetailsResult
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        cardPaymentDetails: LinkPaymentDetails.New
+    ): Result<LinkPaymentDetails.Saved> {
+        return shareCardPaymentDetailsResult
     }
 
     override suspend fun createBankAccountPaymentDetails(

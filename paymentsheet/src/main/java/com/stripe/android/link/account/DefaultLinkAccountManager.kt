@@ -256,7 +256,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> {
+    ): Result<LinkPaymentDetails.New> {
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccountValue != null) {
             linkAccountValue.let { account ->
@@ -267,19 +267,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSessionClientSecret = account.clientSecret,
                     consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                     active = config.passthroughModeEnabled,
-                ).mapCatching {
-                    if (config.passthroughModeEnabled) {
-                        linkRepository.shareCardPaymentDetails(
-                            id = it.paymentDetails.id,
-                            last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                            consumerSessionClientSecret = account.clientSecret,
-                            paymentMethodCreateParams = paymentMethodCreateParams,
-                            allowRedisplay = paymentMethodCreateParams.allowRedisplay,
-                        ).getOrThrow()
-                    } else {
-                        it
-                    }
-                }.onSuccess {
+                ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
             }
@@ -288,6 +276,22 @@ internal class DefaultLinkAccountManager @Inject constructor(
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
+        }
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        cardPaymentDetails: LinkPaymentDetails.New
+    ): Result<LinkPaymentDetails.Saved> {
+        return runCatching {
+            requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+        }.mapCatching { account ->
+            val paymentDetails = cardPaymentDetails.paymentDetails
+            val paymentMethodCreateParams = cardPaymentDetails.originalParams
+            linkRepository.shareCardPaymentDetails(
+                id = paymentDetails.id,
+                consumerSessionClientSecret = account.clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+            ).getOrThrow()
         }
     }
 

@@ -93,10 +93,8 @@ internal interface LinkRepository {
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
-        last4: String,
         consumerSessionClientSecret: String,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails>
+    ): Result<LinkPaymentDetails.Saved>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,

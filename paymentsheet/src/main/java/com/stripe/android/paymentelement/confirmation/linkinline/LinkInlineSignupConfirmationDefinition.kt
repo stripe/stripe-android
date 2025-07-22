@@ -151,7 +151,7 @@ internal class LinkInlineSignupConfirmationDefinition(
 
         return PaymentMethodConfirmationOption.Saved(
             paymentMethod = PaymentMethod.Builder()
-                .setId(paymentDetails.id)
+                .setId(paymentDetails.paymentMethodId)
                 .setCode(createParams.typeCode)
                 .setCard(
                     PaymentMethod.Card(

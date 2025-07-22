@@ -152,14 +152,14 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun savedConfirmationArgs(
-        paymentDetails: LinkPaymentDetails,
+        paymentDetails: LinkPaymentDetails.Saved,
         cvc: String?
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             intent = configuration.stripeIntent,
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 paymentMethod = PaymentMethod.Builder()
-                    .setId(paymentDetails.paymentDetails.id)
+                    .setId(paymentDetails.paymentDetails.paymentMethodId)
                     .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
                     .setCard(
                         PaymentMethod.Card(
