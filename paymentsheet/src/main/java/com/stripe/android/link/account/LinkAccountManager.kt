@@ -107,8 +107,7 @@ internal interface LinkAccountManager {
     ): Result<ConsumerPaymentDetails.PaymentDetails>
 
     suspend fun shareCardPaymentDetails(
-        paymentDetailsId: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        cardPaymentDetails: LinkPaymentDetails.New,
     ): Result<LinkPaymentDetails.Saved>
 
     suspend fun sharePaymentDetails(

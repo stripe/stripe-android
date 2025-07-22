@@ -280,18 +280,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun shareCardPaymentDetails(
-        paymentDetailsId: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        cardPaymentDetails: LinkPaymentDetails.New
     ): Result<LinkPaymentDetails.Saved> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
         }.mapCatching { account ->
+            val paymentDetails = cardPaymentDetails.paymentDetails
+            val paymentMethodCreateParams = cardPaymentDetails.originalParams
             linkRepository.shareCardPaymentDetails(
-                id = paymentDetailsId,
-                last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
+                id = paymentDetails.id,
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
-                allowRedisplay = paymentMethodCreateParams.allowRedisplay,
             ).getOrThrow()
         }
     }

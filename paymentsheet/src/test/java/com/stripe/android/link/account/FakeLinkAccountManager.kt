@@ -196,8 +196,7 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun shareCardPaymentDetails(
-        paymentDetailsId: String,
-        paymentMethodCreateParams: PaymentMethodCreateParams
+        cardPaymentDetails: LinkPaymentDetails.New
     ): Result<LinkPaymentDetails.Saved> {
         return shareCardPaymentDetailsResult
     }

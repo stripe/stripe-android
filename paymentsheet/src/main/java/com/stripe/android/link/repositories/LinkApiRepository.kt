@@ -234,11 +234,9 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
-        last4: String,
         consumerSessionClientSecret: String,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
     ): Result<LinkPaymentDetails.Saved> = withContext(workContext) {
-        val allowRedisplay = allowRedisplay?.let {
+        val allowRedisplay = paymentMethodCreateParams.allowRedisplay?.let {
             mapOf(ALLOW_REDISPLAY_PARAM to it.value)
         } ?: emptyMap()
 
@@ -259,7 +257,7 @@ internal class LinkApiRepository @Inject constructor(
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,
-                    last4 = last4,
+                    last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
                     paymentMethodId = passthroughModePaymentMethodId,
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(

@@ -488,8 +488,6 @@ class LinkApiRepositoryTest {
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
             id = paymentDetailsId,
-            last4 = "4242",
-            allowRedisplay = null,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -505,7 +503,7 @@ class LinkApiRepositoryTest {
             .isEqualTo(
                 ConsumerPaymentDetails.Passthrough(
                     id = paymentDetailsId,
-                    last4 = "4242",
+                    last4 = cardPaymentMethodCreateParams.cardLast4().orEmpty(),
                     paymentMethodId = "pm_123"
                 )
             )
@@ -536,8 +534,6 @@ class LinkApiRepositoryTest {
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
-            last4 = "4242",
-            allowRedisplay = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
@@ -774,11 +770,9 @@ class LinkApiRepositoryTest {
         ).thenReturn(Result.success("pm_123"))
 
         val result = linkRepository.shareCardPaymentDetails(
-            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            paymentMethodCreateParams = cardPaymentMethodCreateParams.copy(allowRedisplay = allowRedisplay),
             consumerSessionClientSecret = "consumer_session_secret",
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
-            last4 = "4242",
-            allowRedisplay = allowRedisplay,
         )
 
         assertThat(result).isNotNull()

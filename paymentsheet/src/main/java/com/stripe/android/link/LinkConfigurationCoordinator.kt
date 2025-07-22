@@ -108,10 +108,7 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
         val linkPaymentDetailsResult = accountManager.createCardPaymentDetails(paymentMethodCreateParams)
         return linkPaymentDetailsResult.mapCatching { linkPaymentDetails ->
             if (configuration.passthroughModeEnabled) {
-                accountManager.shareCardPaymentDetails(
-                    paymentDetailsId = linkPaymentDetails.paymentDetails.id,
-                    paymentMethodCreateParams = paymentMethodCreateParams
-                ).getOrThrow()
+                accountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
             } else {
                 linkPaymentDetails
             }
