@@ -16,6 +16,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -680,7 +681,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 owner = viewModelStoreOwner,
                 factory = EmbeddedPaymentElementViewModel.Factory(
                     paymentElementCallbackIdentifier,
-                    activity.window?.statusBarColor,
+                    StatusBarCompat.color(activity),
                 )
             ).get(
                 key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",
