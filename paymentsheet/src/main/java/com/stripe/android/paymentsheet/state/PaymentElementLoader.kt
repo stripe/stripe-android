@@ -602,6 +602,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             googlePlacesApiKey = configuration.googlePlacesApiKey,
             collectMissingBillingDetailsForExistingPaymentMethods =
             configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+            allowUserEmailEdits = configuration.link.allowUserEmailEdits,
         )
 
         // CBF isn't currently supported in the web flow.

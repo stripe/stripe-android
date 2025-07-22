@@ -1091,6 +1091,46 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    /**
+     * Get the latest [FraudDetectionData] from [FraudDetectionDataRepository] and send in POST request
+     * to `/v1/radar/saved_payment_method_session`.
+     */
+    override suspend fun createSavedPaymentMethodRadarSession(
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSessionWithHCaptcha> {
+        val validation = runCatching {
+            require(Stripe.advancedFraudSignalsEnabled) {
+                "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
+            }
+
+            requireNotNull(fraudDetectionDataRepository.getLatest()) {
+                "Could not obtain fraud data required to create a Radar Session."
+            }
+        }
+
+        return validation.mapCatching { fraudData ->
+            val params = fraudData.params + buildPaymentUserAgentPair() + mapOf(
+                "payment_method" to paymentMethodId,
+            )
+
+            fetchStripeModelResult(
+                apiRequest = apiRequestFactory.createPost(
+                    url = getApiUrl("radar/saved_payment_method_session"),
+                    options = requestOptions,
+                    params = params,
+                ),
+                jsonParser = RadarSessionWithHCaptchaJsonParser(),
+            ) {
+                fireAnalyticsRequest(
+                    paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.RadarSessionCreate)
+                )
+            }
+        }.getOrElse {
+            Result.failure(StripeException.create(it))
+        }
+    }
+
     override suspend fun attachHCaptchaToRadarSession(
         radarSessionToken: String,
         hcaptchaToken: String,

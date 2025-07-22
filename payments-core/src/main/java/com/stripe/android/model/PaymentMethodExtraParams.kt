@@ -67,6 +67,18 @@ sealed class PaymentMethodExtraParams(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class SepaDebit(
+        val setAsDefault: Boolean? = null
+    ) : PaymentMethodExtraParams(PaymentMethod.Type.SepaDebit) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+            )
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class USBankAccount(
         val setAsDefault: Boolean? = null
     ) : PaymentMethodExtraParams(PaymentMethod.Type.USBankAccount) {

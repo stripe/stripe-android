@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.ConfirmStripeIntentParamsFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -69,7 +70,10 @@ internal interface IntentConfirmationInterceptor {
                 get() = DeferredIntentConfirmationType.Server
         }
 
-        data class Complete(val isForceSuccess: Boolean) : NextStep {
+        data class Complete(
+            val isForceSuccess: Boolean,
+            val completedFullPaymentFlow: Boolean = true,
+        ) : NextStep {
 
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType
                 get() = if (isForceSuccess) {
@@ -361,6 +365,24 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
+        runCatching {
+            stripeRepository.createSavedPaymentMethodRadarSession(
+                paymentMethodId = paymentMethod.id
+                    ?: throw GenericStripeException(
+                        cause = IllegalStateException(
+                            "No payment method ID was found for provided 'PaymentMethod' object!"
+                        ),
+                        analyticsValue = "noPaymentMethodId"
+                    ),
+                requestOptions = requestOptions,
+            ).getOrThrow()
+        }.onFailure {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE,
+                stripeException = StripeException.create(it),
+            )
+        }
+
         return when (val handler = waitForPreparePaymentMethodHandler()) {
             is PreparePaymentMethodHandler -> {
                 try {
@@ -369,7 +391,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         shippingAddress = shippingValues?.toAddressDetails(),
                     )
 
-                    NextStep.Complete(isForceSuccess = true)
+                    NextStep.Complete(isForceSuccess = true, completedFullPaymentFlow = false)
                 } catch (exception: Exception) {
                     NextStep.Fail(
                         cause = exception,
@@ -636,6 +658,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.Link -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.SepaDebit -> paymentMethodExtraParams.setAsDefault == true
             is PaymentMethodExtraParams.BacsDebit, null -> false
         }
 

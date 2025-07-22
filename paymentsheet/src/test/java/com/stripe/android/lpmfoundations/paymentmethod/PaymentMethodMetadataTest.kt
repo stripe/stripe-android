@@ -1960,7 +1960,8 @@ internal class PaymentMethodMetadataTest {
             disableRuxInFlowController = false,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             defaultBillingDetails = null,
-            collectMissingBillingDetailsForExistingPaymentMethods = true
+            collectMissingBillingDetailsForExistingPaymentMethods = true,
+            allowUserEmailEdits = true
         )
     }
 

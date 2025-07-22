@@ -217,6 +217,7 @@ internal class PaymentSheetAnalyticsTest {
         )
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
@@ -372,6 +373,7 @@ internal class PaymentSheetAnalyticsTest {
         )
 
         page.clickPrimaryButton()
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 

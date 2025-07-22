@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentMethodType
 import com.stripe.android.paymentsheet.utils.PaymentMethodTypeProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
+import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -92,6 +93,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController()
     }
 
     @Test
@@ -139,6 +142,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
             )
 
             paymentSheetPage.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController()
         }
 
     @Test
@@ -187,6 +192,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
             )
 
             paymentSheetPage.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController()
         }
 
     @Test
@@ -228,6 +235,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController()
     }
 
     @Test
@@ -269,6 +278,8 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController()
     }
 
     private fun navigateToFormForLpm() {
@@ -277,5 +288,16 @@ internal class DefaultPaymentMethodsConfirmationTest {
 
         verticalModePage.clickNewPaymentMethodButton(paymentMethodType.type.code)
         formPage.waitUntilVisible()
+    }
+
+    private suspend fun ProductIntegrationTestRunnerContext.consumePaymentOptionEventForFlowController() {
+        consumePaymentOptionEventForFlowController(
+            paymentMethodType = paymentMethodType.type.code,
+            label = if (paymentMethodType is PaymentMethodType.Card) {
+                "4242"
+            } else {
+                "6789"
+            },
+        )
     }
 }

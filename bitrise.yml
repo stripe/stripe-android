@@ -43,7 +43,6 @@ stages:
       - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
-      - run-paymentsheet-screenshot-tests: { }
       - check-dependencies: { }
   stage-run-connect-e2e-tests:
     workflows:
@@ -266,35 +265,6 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
-  run-paymentsheet-screenshot-tests:
-    envs:
-      - INCLUDE_SCREENSHOT_ON_FAILURE: true
-    before_run:
-      - start_screenshot_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Assemble Instrumentation tests
-          timeout: 600
-          inputs:
-            - content: ./gradlew :paymentsheet:assembleAndroidTest
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute instrumentation tests
-          timeout: 1200
-          inputs:
-            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
-      - script@1:
-          inputs:
-            - content: asdf install ruby 3.2.4
-      - script@1:
-          title: Check updated screenshots
-          inputs:
-            - content: ruby scripts/check_for_changed_paymentsheet_screenshots.rb
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator

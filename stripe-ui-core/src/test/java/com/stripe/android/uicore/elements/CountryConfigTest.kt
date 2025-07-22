@@ -37,7 +37,7 @@ class CountryConfigTest {
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                tinyMode = false
+                mode = DropdownConfig.Mode.Full(),
             ).getSelectedItemLabel(0)
         ).isEqualTo("Austria")
     }
@@ -48,7 +48,7 @@ class CountryConfigTest {
             CountryConfig(
                 onlyShowCountryCodes = setOf("AT"),
                 locale = Locale.US,
-                tinyMode = true,
+                mode = DropdownConfig.Mode.Condensed,
                 collapsedLabelMapper = { country ->
                     CountryConfig.countryCodeToEmoji(country.code.value)
                 },

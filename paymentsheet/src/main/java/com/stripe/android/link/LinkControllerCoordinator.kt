@@ -20,17 +20,19 @@ internal class LinkControllerCoordinator @Inject constructor(
     private val selectedPaymentMethodCallback: LinkController.PresentPaymentMethodsCallback,
     private val lookupConsumerCallback: LinkController.LookupConsumerCallback,
     private val createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
+    private val authenticationCallback: LinkController.AuthenticationCallback,
+    private val registerConsumerCallback: LinkController.RegisterConsumerCallback,
 ) {
     val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
 
     init {
-        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED))
+        check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
 
         linkActivityResultLauncher = activityResultRegistryOwner.activityResultRegistry.register(
             key = "LinkController_LinkActivityResultLauncher",
             contract = linkActivityContract,
         ) { result ->
-            viewModel.onPresentPaymentMethodsActivityResult(result)
+            viewModel.onLinkActivityResult(result)
         }
 
         lifecycleOwner.lifecycleScope.launch {
@@ -43,10 +45,17 @@ internal class LinkControllerCoordinator @Inject constructor(
                     viewModel.lookupConsumerResultFlow
                         .collect(lookupConsumerCallback::onLookupConsumerResult)
                 }
-
                 launch {
                     viewModel.createPaymentMethodResultFlow
                         .collect(createPaymentMethodCallback::onCreatePaymentMethodResult)
+                }
+                launch {
+                    viewModel.authenticationResultFlow
+                        .collect(authenticationCallback::onAuthenticationResult)
+                }
+                launch {
+                    viewModel.registerConsumerResultFlow
+                        .collect(registerConsumerCallback::onRegisterConsumerResult)
                 }
             }
         }

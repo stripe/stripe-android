@@ -30,6 +30,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -57,8 +58,19 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override var cachedShippingAddresses: ConsumerShippingAddresses? = null
 
-    override val accountStatus = linkAccountHolder.linkAccountInfo
-        .map { it.account.fetchAccountStatus(it.lastUpdateReason != UpdateReason.LoggedOut) }
+    override val accountStatus: Flow<AccountStatus> =
+        linkAccountHolder.linkAccountInfo
+            .map {
+                // Don't lookup by the configured email if the user already logged out of that
+                // account *unless* the user isn't able to change emails.
+                val canLookupCustomerEmail =
+                    it.lastUpdateReason != UpdateReason.LoggedOut ||
+                        !config.allowUserEmailEdits
+                getAccountStatus(
+                    linkAccount = it.account,
+                    canLookupCustomerEmail = canLookupCustomerEmail,
+                )
+            }
 
     override suspend fun lookupConsumer(
         email: String,
@@ -160,7 +172,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
 
-        return when (val status = currentAccount.fetchAccountStatus(shouldLookup = true)) {
+        return when (val status = getAccountStatus(currentAccount, canLookupCustomerEmail = true)) {
             AccountStatus.Verified -> {
                 linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
 
@@ -449,21 +461,23 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private suspend fun LinkAccount?.fetchAccountStatus(shouldLookup: Boolean): AccountStatus =
-        /**
-         * If we already fetched an account, return its status, otherwise if a customer
-         * email was passed in (and the user hasn't logged out) lookup the account.
-         */
-        this?.accountStatus
-            ?: config.customerInfo.email
-                ?.takeIf { shouldLookup }
-                ?.let { customerEmail ->
-                    lookupConsumer(customerEmail).map {
-                        it?.accountStatus
-                    }.getOrElse {
-                        AccountStatus.Error
-                    }
-                } ?: AccountStatus.SignedOut
+    private suspend fun getAccountStatus(
+        linkAccount: LinkAccount?,
+        canLookupCustomerEmail: Boolean
+    ): AccountStatus {
+        // If we already have an account, return its status.
+        if (linkAccount != null) {
+            return linkAccount.accountStatus
+        }
+        // Look up the customer email if possible.
+        return config.customerInfo.email?.takeIf { canLookupCustomerEmail }
+            ?.let { customerEmail ->
+                lookupConsumer(customerEmail)
+                    .map { it?.accountStatus }
+                    .getOrElse { AccountStatus.Error }
+            }
+            ?: AccountStatus.SignedOut
+    }
 
     private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
         get() = when (this) {

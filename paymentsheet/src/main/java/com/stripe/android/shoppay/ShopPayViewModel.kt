@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.webkit.WebViewAssetLoader
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.core.exception.GenericStripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Address
@@ -21,6 +23,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -47,6 +50,7 @@ internal class ShopPayViewModel @Inject constructor(
     private val requestOptions: ApiRequest.Options,
     private val preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?>,
     private val eventReporter: EventReporter,
+    private val errorReporter: ErrorReporter,
     @UIContext workContext: CoroutineContext = Dispatchers.Main,
 ) : ViewModel(CoroutineScope(workContext + SupervisorJob())) {
 
@@ -108,6 +112,8 @@ internal class ShopPayViewModel @Inject constructor(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = requestOptions
         ).map { paymentMethod ->
+            createRadarSessionIfPossible(paymentMethod)
+
             val paymentMethodHandler = preparePaymentMethodHandlerProvider.get()
                 ?: return@map ShopPayActivityResult.Failed(
                     error = IllegalStateException("PreparePaymentMethodHandler is required for ShopPay")
@@ -133,6 +139,28 @@ internal class ShopPayViewModel @Inject constructor(
             ShopPayActivityResult.Completed
         }.getOrElse {
             ShopPayActivityResult.Failed(it)
+        }
+    }
+
+    private suspend fun createRadarSessionIfPossible(
+        paymentMethod: PaymentMethod,
+    ) {
+        runCatching {
+            stripeApiRepository.createSavedPaymentMethodRadarSession(
+                paymentMethodId = paymentMethod.id
+                    ?: throw GenericStripeException(
+                        cause = IllegalStateException(
+                            "No payment method ID was found for provided 'PaymentMethod' object!"
+                        ),
+                        analyticsValue = "noPaymentMethodId"
+                    ),
+                requestOptions = requestOptions,
+            ).getOrThrow()
+        }.onFailure {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE,
+                stripeException = StripeException.create(it),
+            )
         }
     }
 

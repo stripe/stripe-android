@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
-import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -160,15 +159,6 @@ internal class PaymentSheetPlaygroundActivity :
             }
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
-            val linkController = remember {
-                LinkController.create(
-                    activity = this,
-                    presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
-                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
-                    createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
-                )
-            }
-
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
             )
@@ -252,7 +242,6 @@ internal class PaymentSheetPlaygroundActivity :
                                 playgroundState = playgroundState,
                                 paymentSheet = paymentSheet,
                                 flowController = flowController,
-                                linkController = linkController,
                                 customerSheet = customerSheet,
                                 addressLauncher = addressLauncher,
                             )
@@ -268,21 +257,6 @@ internal class PaymentSheetPlaygroundActivity :
                     Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
-            }
-
-            var lastPlaygroundState by remember { mutableStateOf(playgroundState) }
-            LaunchedEffect(playgroundState) {
-                if (
-                    playgroundState?.integrationType == PlaygroundConfigurationData.IntegrationType.LinkController &&
-                    playgroundState != lastPlaygroundState
-                ) {
-                    playgroundState?.asPaymentState()?.linkControllerConfiguration()?.let { configuration ->
-                        linkController.configure(configuration)
-                    }
-                }
-                if (lastPlaygroundState != null) {
-                    lastPlaygroundState = playgroundState
-                }
             }
         }
     }
@@ -320,6 +294,24 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
+    private fun LinkControllerButton(playgroundState: PlaygroundState.Payment) {
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                context.startActivity(
+                    LinkControllerPlaygroundActivity.create(
+                        context = context,
+                        playgroundState = playgroundState
+                    )
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("LinkController Playground")
+        }
+    }
+
+    @Composable
     private fun ClearLinkDataButton() {
         val context = LocalContext.current
         Button(
@@ -353,7 +345,6 @@ internal class PaymentSheetPlaygroundActivity :
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
-        linkController: LinkController,
         customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
@@ -394,10 +385,7 @@ internal class PaymentSheetPlaygroundActivity :
                     }
 
                     PlaygroundConfigurationData.IntegrationType.LinkController -> {
-                        LinkControllerUi(
-                            viewModel = viewModel,
-                            linkController = linkController,
-                        )
+                        LinkControllerButton(playgroundState = playgroundState)
                     }
 
                     else -> Unit

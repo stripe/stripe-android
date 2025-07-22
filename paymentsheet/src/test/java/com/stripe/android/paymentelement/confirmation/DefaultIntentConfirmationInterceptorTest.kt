@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.APIException
@@ -15,6 +16,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -876,6 +878,7 @@ class DefaultIntentConfirmationInterceptorTest {
         runTest {
             val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
             val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
 
             val providedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             val providedShippingAddress = SHIPPING_ADDRESS
@@ -883,15 +886,14 @@ class DefaultIntentConfirmationInterceptorTest {
             val interceptor = DefaultIntentConfirmationInterceptor(
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
-                    onRetrievePaymentMethodId = "pm_5678"
+                    onRetrievePaymentMethodId = "pm_5678",
+                    createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
                 ),
                 publishableKeyProvider = { "pk" },
                 stripeAccountIdProvider = { null },
                 errorReporter = FakeErrorReporter(),
                 allowsManualConfirmation = false,
-                intentCreationCallbackProvider = {
-                    null
-                },
+                intentCreationCallbackProvider = { null },
                 preparePaymentMethodHandlerProvider = {
                     PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
                         completablePaymentMethod.complete(paymentMethod)
@@ -921,7 +923,10 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
             )
 
             val paymentMethod = completablePaymentMethod.await()
@@ -930,14 +935,15 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val shippingAddress = completableShippingAddress.await()
 
-            assertThat(shippingAddress?.name).isEqualTo(providedShippingAddress.getName())
-            assertThat(shippingAddress?.phoneNumber).isEqualTo(providedShippingAddress.getPhone())
-            assertThat(shippingAddress?.address?.line1).isEqualTo(providedShippingAddress.getAddress().line1)
-            assertThat(shippingAddress?.address?.line2).isEqualTo(providedShippingAddress.getAddress().line2)
-            assertThat(shippingAddress?.address?.city).isEqualTo(providedShippingAddress.getAddress().city)
-            assertThat(shippingAddress?.address?.state).isEqualTo(providedShippingAddress.getAddress().state)
-            assertThat(shippingAddress?.address?.country)
-                .isEqualTo(providedShippingAddress.getAddress().country)
+            verifyShipping(providedShippingAddress, shippingAddress)
+
+            val createRadarSessionCall = createSavedPaymentMethodRadarSessionCalls.awaitItem()
+
+            assertThat(createRadarSessionCall.paymentMethodId).isEqualTo("pm_123456789")
+            assertThat(createRadarSessionCall.requestOptions.apiKey).isEqualTo("pk")
+            assertThat(createRadarSessionCall.requestOptions.stripeAccount).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.ensureAllEventsConsumed()
         }
 
     @Test
@@ -945,11 +951,13 @@ class DefaultIntentConfirmationInterceptorTest {
         runTest {
             val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
             val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
 
             val interceptor = DefaultIntentConfirmationInterceptor(
                 stripeRepository = stripeRepositoryReturning(
                     onCreatePaymentMethodId = "pm_1234",
-                    onRetrievePaymentMethodId = "pm_5678"
+                    onRetrievePaymentMethodId = "pm_5678",
+                    createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
                 ),
                 publishableKeyProvider = { "pk" },
                 stripeAccountIdProvider = { null },
@@ -988,7 +996,10 @@ class DefaultIntentConfirmationInterceptorTest {
             )
 
             assertThat(nextStep).isEqualTo(
-                IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
             )
 
             val paymentMethod = completablePaymentMethod.await()
@@ -998,6 +1009,79 @@ class DefaultIntentConfirmationInterceptorTest {
             val shippingAddress = completableShippingAddress.await()
 
             assertThat(shippingAddress).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.verify()
+        }
+
+    @Test
+    fun `If failed to make radar session, should still continue with preparing payment method`() =
+        runTest {
+            val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
+            val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+            val createSavedPaymentMethodRadarSessionCalls = Turbine<CreateSavedPaymentMethodRadarSessionCall>()
+
+            val error = IllegalStateException("Failed to make radar session!")
+            val eventReporter = FakeErrorReporter()
+
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = stripeRepositoryReturning(
+                    onCreatePaymentMethodId = "pm_1234",
+                    onRetrievePaymentMethodId = "pm_5678",
+                    createSavedPaymentMethodRadarSessionResult = Result.failure(error),
+                    createSavedPaymentMethodRadarSessionCalls = createSavedPaymentMethodRadarSessionCalls,
+                ),
+                publishableKeyProvider = { "pk" },
+                stripeAccountIdProvider = { null },
+                errorReporter = eventReporter,
+                allowsManualConfirmation = false,
+                intentCreationCallbackProvider = { null },
+                preparePaymentMethodHandlerProvider = {
+                    PreparePaymentMethodHandler { paymentMethod, shippingAddress ->
+                        completablePaymentMethod.complete(paymentMethod)
+                        completableShippingAddress.complete(shippingAddress)
+                    }
+                },
+            )
+
+            val nextStep = interceptor.intercept(
+                initializationMode = InitializationMode.DeferredIntent(
+                    intentConfiguration = PaymentSheet.IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                            amount = 1099L,
+                            currency = "usd",
+                        ),
+                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
+                    ),
+                ),
+                intent = PaymentIntentFactory.create(),
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                shippingValues = null,
+                customerRequestedSave = false,
+            )
+
+            assertThat(nextStep).isEqualTo(
+                IntentConfirmationInterceptor.NextStep.Complete(
+                    isForceSuccess = true,
+                    completedFullPaymentFlow = false,
+                )
+            )
+
+            val paymentMethod = completablePaymentMethod.await()
+
+            assertThat(paymentMethod.id).isEqualTo("pm_1234")
+
+            val shippingAddress = completableShippingAddress.await()
+
+            assertThat(shippingAddress).isNull()
+
+            createSavedPaymentMethodRadarSessionCalls.verify()
+
+            eventReporter.verifyCreateSavedPaymentMethodRadarSessionCall(error)
         }
 
     private fun testNoProvider(
@@ -1081,6 +1165,14 @@ class DefaultIntentConfirmationInterceptorTest {
     private fun stripeRepositoryReturning(
         onCreatePaymentMethodId: String,
         onRetrievePaymentMethodId: String,
+        createSavedPaymentMethodRadarSessionCalls: Turbine<CreateSavedPaymentMethodRadarSessionCall> = Turbine(),
+        createSavedPaymentMethodRadarSessionResult: Result<RadarSessionWithHCaptcha> = Result.success(
+            RadarSessionWithHCaptcha(
+                id = "rse_123",
+                passiveCaptchaSiteKey = "1234",
+                passiveCaptchaRqdata = "123456789",
+            )
+        ),
     ): StripeRepository {
         return object : AbsFakeStripeRepository() {
             override suspend fun createPaymentMethod(
@@ -1105,7 +1197,54 @@ class DefaultIntentConfirmationInterceptorTest {
                     )
                 )
             }
+
+            override suspend fun createSavedPaymentMethodRadarSession(
+                paymentMethodId: String,
+                requestOptions: ApiRequest.Options
+            ): Result<RadarSessionWithHCaptcha> {
+                createSavedPaymentMethodRadarSessionCalls.add(
+                    CreateSavedPaymentMethodRadarSessionCall(paymentMethodId, requestOptions)
+                )
+
+                return createSavedPaymentMethodRadarSessionResult
+            }
         }
+    }
+
+    private fun verifyShipping(
+        expectedShippingAddress: ConfirmPaymentIntentParams.Shipping,
+        actualShippingAddress: AddressDetails?
+    ) {
+        assertThat(actualShippingAddress?.name).isEqualTo(expectedShippingAddress.getName())
+        assertThat(actualShippingAddress?.phoneNumber).isEqualTo(expectedShippingAddress.getPhone())
+        assertThat(actualShippingAddress?.address?.line1).isEqualTo(expectedShippingAddress.getAddress().line1)
+        assertThat(actualShippingAddress?.address?.line2).isEqualTo(expectedShippingAddress.getAddress().line2)
+        assertThat(actualShippingAddress?.address?.city).isEqualTo(expectedShippingAddress.getAddress().city)
+        assertThat(actualShippingAddress?.address?.state).isEqualTo(expectedShippingAddress.getAddress().state)
+        assertThat(actualShippingAddress?.address?.country)
+            .isEqualTo(expectedShippingAddress.getAddress().country)
+    }
+
+    private suspend fun Turbine<CreateSavedPaymentMethodRadarSessionCall>.verify() {
+        val createRadarSessionCall = awaitItem()
+
+        assertThat(createRadarSessionCall.paymentMethodId).isEqualTo("pm_1234")
+        assertThat(createRadarSessionCall.requestOptions.apiKey).isEqualTo("pk")
+        assertThat(createRadarSessionCall.requestOptions.stripeAccount).isNull()
+
+        ensureAllEventsConsumed()
+    }
+
+    private suspend fun FakeErrorReporter.verifyCreateSavedPaymentMethodRadarSessionCall(
+        error: Exception,
+    ) {
+        val failedRadarEvent = awaitCall()
+
+        assertThat(failedRadarEvent.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE)
+        assertThat(failedRadarEvent.stripeException?.cause).isEqualTo(error)
+
+        ensureAllEventsConsumed()
     }
 
     private fun IntentConfirmationInterceptor.NextStep.asFail(): IntentConfirmationInterceptor.NextStep.Fail {
@@ -1122,6 +1261,11 @@ class DefaultIntentConfirmationInterceptorTest {
             return other is TestException && other.message == message
         }
     }
+
+    private data class CreateSavedPaymentMethodRadarSessionCall(
+        val paymentMethodId: String,
+        val requestOptions: ApiRequest.Options
+    )
 
     private companion object {
         const val CREATE_INTENT_CALLBACK_MESSAGE =

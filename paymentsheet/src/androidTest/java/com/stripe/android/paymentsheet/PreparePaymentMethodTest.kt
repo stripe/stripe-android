@@ -99,6 +99,7 @@ internal class PreparePaymentMethodTest {
     fun withFlowController() {
         val completablePaymentMethod = CompletableDeferred<PaymentMethod>()
         val completableShippingAddress = CompletableDeferred<AddressDetails?>()
+        val completableFlow = CompletableDeferred<Unit>()
 
         runFlowControllerTest(
             networkRule = networkRule,
@@ -108,7 +109,10 @@ internal class PreparePaymentMethodTest {
                     completableShippingAddress.complete(shippingAddress)
                 }
             },
-            resultCallback = ::assertCompleted,
+            resultCallback = {
+                assertCompleted(it)
+                completableFlow.complete(Unit)
+            },
         ) { context ->
             enqueueElementsSession(
                 networkId = "network_456",
@@ -159,6 +163,10 @@ internal class PreparePaymentMethodTest {
             val shippingAddress = completableShippingAddress.await()
 
             assertThat(shippingAddress).isEqualTo(SHIPPING_ADDRESS)
+
+            completableFlow.await()
+
+            assertThat(context.flowController.getPaymentOption()).isNotNull()
         }
     }
 

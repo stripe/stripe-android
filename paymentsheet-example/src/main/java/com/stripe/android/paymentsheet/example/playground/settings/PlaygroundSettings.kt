@@ -182,10 +182,11 @@ internal class PlaygroundSettings private constructor(
             playgroundState: PlaygroundState.Payment
         ): LinkController.Configuration {
             val builder = LinkController.Configuration.Builder("Example, Inc.")
+            val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(builder)
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData)
             }.onEach { (settingDefinition, value) ->
-                settingDefinition.configure(value, builder, playgroundState)
+                settingDefinition.configure(value, builder, playgroundState, linkControllerConfigurationData)
             }
             return builder.build()
         }
@@ -240,12 +241,14 @@ internal class PlaygroundSettings private constructor(
             value: Any?,
             configurationBuilder: LinkController.Configuration.Builder,
             playgroundState: PlaygroundState.Payment,
+            configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(
                 value = value as T,
                 configurationBuilder = configurationBuilder,
                 playgroundState = playgroundState,
+                configurationData = configurationData,
             )
         }
 
@@ -530,6 +533,7 @@ internal class PlaygroundSettings private constructor(
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
             ShopPaySettingsDefinition,
+            LinkControllerAllowUserEmailEditsSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

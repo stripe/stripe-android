@@ -12,18 +12,22 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.wallet.displayName
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,6 +66,16 @@ internal class LinkControllerViewModel @Inject constructor(
         MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1)
     val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
 
+    private val _authenticationResultFlow =
+        MutableSharedFlow<AuthenticationResult>(replay = 1)
+    val authenticationResultFlow = _authenticationResultFlow.asSharedFlow()
+
+    private val _registerConsumerResultFlow =
+        MutableSharedFlow<LinkController.RegisterConsumerResult>(replay = 1)
+    val registerConsumerResultFlow = _registerConsumerResultFlow.asSharedFlow()
+
+    private var presentJob: Job? = null
+
     fun state(context: Context): StateFlow<LinkController.State> {
         return combineAsStateFlow(_account, _state) { account, state ->
             LinkController.State(
@@ -91,52 +105,139 @@ internal class LinkControllerViewModel @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?
     ) {
-        logger.debug("$tag: presenting payment methods")
-        val configuration = requireConfiguration()
-            .map {
-                it.copy(
-                    customerInfo = LinkConfiguration.CustomerInfo(
-                        name = null,
-                        email = email,
-                        phone = null,
-                        billingCountryCode = null,
-                    )
+        present(
+            launcher = launcher,
+            email = email,
+            onConfigurationError = { error ->
+                _presentPaymentMethodsResultFlow.emit(
+                    LinkController.PresentPaymentMethodsResult.Failed(error)
+                )
+            },
+            getLaunchMode = { _, state ->
+                LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = state.selectedPaymentMethod?.details
                 )
             }
-            .getOrElse {
-                _presentPaymentMethodsResultFlow.tryEmit(LinkController.PresentPaymentMethodsResult.Failed(it))
-                return
-            }
-        val state = _state.value
-        val linkAccountInfo = linkAccountHolder.linkAccountInfo.value
-            .takeIf { email == state.presentedForEmail || email == it.account?.email }
-            ?: LinkAccountUpdate.Value(null)
-
-        // If the account changed, clear account-related state.
-        val selectedPaymentMethod = state.selectedPaymentMethod
-            .takeIf { linkAccountInfo.account != null }
-        val createdPaymentMethod = state.createdPaymentMethod
-            .takeIf { linkAccountInfo.account != null }
-
-        updateState {
-            it.copy(
-                presentedForEmail = email,
-                selectedPaymentMethod = selectedPaymentMethod,
-                createdPaymentMethod = createdPaymentMethod,
-            )
-        }
-
-        launcher.launch(
-            LinkActivityContract.Args(
-                configuration = configuration,
-                startWithVerificationDialog = true,
-                linkAccountInfo = linkAccountInfo,
-                launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPaymentMethod?.details),
-            )
         )
     }
 
-    fun onPresentPaymentMethodsActivityResult(result: LinkActivityResult) {
+    fun onAuthenticate(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String?
+    ) {
+        performAuthentication(launcher, email, existingOnly = false)
+    }
+
+    fun onAuthenticateExistingConsumer(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String
+    ) {
+        performAuthentication(launcher, email, existingOnly = true)
+    }
+
+    private fun performAuthentication(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String?,
+        existingOnly: Boolean
+    ) {
+        present(
+            launcher = launcher,
+            email = email,
+            onConfigurationError = { error ->
+                _authenticationResultFlow.emit(
+                    AuthenticationResult.Failed(error)
+                )
+            },
+            getLaunchMode = { linkAccount, state ->
+                if (linkAccount?.isVerified == true) {
+                    logger.debug("$tag: account is already verified, skipping authentication")
+                    _authenticationResultFlow.emit(AuthenticationResult.Success)
+                    null
+                } else {
+                    LinkLaunchMode.Authentication(existingOnly = existingOnly)
+                }
+            }
+        )
+    }
+
+    private suspend fun withConfiguration(
+        email: String?,
+        onError: suspend (Throwable) -> Unit,
+        onSuccess: suspend (LinkConfiguration) -> Unit
+    ) {
+        val configuration = requireConfiguration()
+            .map { config ->
+                email
+                    ?.let { config.copy(customerInfo = config.customerInfo.copy(email = email)) }
+                    ?: config
+            }
+
+        configuration.fold(
+            onSuccess = { onSuccess(it) },
+            onFailure = { error -> onError(error) }
+        )
+    }
+
+    fun onLinkActivityResult(result: LinkActivityResult) {
+        val currentLaunchMode = _state.value.currentLaunchMode
+        updateState { it.copy(currentLaunchMode = null) }
+
+        when (currentLaunchMode) {
+            is LinkLaunchMode.PaymentMethodSelection ->
+                handlePaymentMethodSelectionResult(result)
+            is LinkLaunchMode.Authentication ->
+                handleAuthenticationResult(result)
+            else ->
+                logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
+        }
+
+        updateStateOnAccountUpdate(result.linkAccountUpdate)
+    }
+
+    private fun updateStateOnNewEmail(email: String?) {
+        val currentAccountEmail = _account.value?.email
+        // Keep state if...
+        val keepState =
+            // input email matches previous input email (to support user changing emails), or
+            email == _state.value.emailInput ||
+                // not previously logged in, or
+                currentAccountEmail == null ||
+                // input email matches current logged in account email
+                email == currentAccountEmail
+        if (!keepState) {
+            linkAccountHolder.set(LinkAccountUpdate.Value(null))
+        }
+        updateState {
+            it.copy(
+                emailInput = email,
+                selectedPaymentMethod = it.selectedPaymentMethod.takeIf { keepState },
+                createdPaymentMethod = it.createdPaymentMethod.takeIf { keepState },
+            )
+        }
+    }
+
+    private fun updateStateOnAccountUpdate(update: LinkAccountUpdate?) {
+        when (update) {
+            is LinkAccountUpdate.Value -> {
+                val currentAccountEmail = _account.value?.email
+                val newAccountEmail = update.account?.email
+                // Keep state if not previously logged in or new account email matches previous email
+                val keepState = currentAccountEmail == null || newAccountEmail == currentAccountEmail
+                linkAccountHolder.set(update)
+                updateState {
+                    it.copy(
+                        selectedPaymentMethod = it.selectedPaymentMethod.takeIf { keepState },
+                        createdPaymentMethod = it.createdPaymentMethod.takeIf { keepState },
+                    )
+                }
+            }
+            is LinkAccountUpdate.None, null -> {
+                // Do nothing.
+            }
+        }
+    }
+
+    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
         when (result) {
             is LinkActivityResult.Canceled -> {
                 logger.debug("$tag: presentPaymentMethods canceled")
@@ -152,9 +253,7 @@ internal class LinkControllerViewModel @Inject constructor(
                     it.copy(selectedPaymentMethod = result.selectedPayment)
                 }
                 viewModelScope.launch {
-                    _presentPaymentMethodsResultFlow.emit(
-                        LinkController.PresentPaymentMethodsResult.Success
-                    )
+                    _presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Success)
                 }
             }
             is LinkActivityResult.Failed -> {
@@ -169,24 +268,32 @@ internal class LinkControllerViewModel @Inject constructor(
                 logger.warning("$tag: presentPaymentMethods unexpected result: $result")
             }
         }
+    }
 
-        // Update account, clearing state if null.
-        result.linkAccountUpdate?.let { update ->
-            when (update) {
-                is LinkAccountUpdate.Value -> {
-                    linkAccountHolder.set(update)
-                    if (update.account == null) {
-                        updateState {
-                            it.copy(
-                                selectedPaymentMethod = null,
-                                createdPaymentMethod = null,
-                            )
-                        }
-                    }
+    private fun handleAuthenticationResult(result: LinkActivityResult) {
+        when (result) {
+            is LinkActivityResult.Canceled -> {
+                logger.debug("$tag: authentication canceled")
+                viewModelScope.launch {
+                    _authenticationResultFlow.emit(AuthenticationResult.Canceled)
                 }
-                LinkAccountUpdate.None -> {
-                    // Do nothing.
+            }
+            is LinkActivityResult.Completed -> {
+                logger.debug("$tag: authentication completed")
+                viewModelScope.launch {
+                    _authenticationResultFlow.emit(AuthenticationResult.Success)
                 }
+            }
+            is LinkActivityResult.Failed -> {
+                logger.debug("$tag: authentication failed")
+                viewModelScope.launch {
+                    _authenticationResultFlow.emit(
+                        AuthenticationResult.Failed(result.error)
+                    )
+                }
+            }
+            is LinkActivityResult.PaymentMethodObtained -> {
+                logger.warning("$tag: authentication unexpected result: $result")
             }
         }
     }
@@ -216,10 +323,87 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
+    fun onRegisterConsumer(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?,
+        consentAction: ConsumerSignUpConsentAction
+    ) {
+        viewModelScope.launch {
+            val result = linkRepository.consumerSignUp(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = consentAction,
+            )
+                .map {
+                    LinkAccount(
+                        consumerSession = it.consumerSession,
+                        consumerPublishableKey = it.publishableKey
+                    )
+                }
+                .fold(
+                    onSuccess = { account ->
+                        updateStateOnAccountUpdate(LinkAccountUpdate.Value(account))
+                        LinkController.RegisterConsumerResult.Success
+                    },
+                    onFailure = {
+                        updateStateOnAccountUpdate(LinkAccountUpdate.Value(null))
+                        LinkController.RegisterConsumerResult.Failed(it)
+                    }
+                )
+            _registerConsumerResultFlow.emit(result)
+        }
+    }
+
     private fun requireConfiguration(state: State = _state.value): Result<LinkConfiguration> {
         return state.linkConfiguration
             ?.let { Result.success(it) }
             ?: Result.failure(MissingConfigurationException())
+    }
+
+    private fun present(
+        launcher: ActivityResultLauncher<LinkActivityContract.Args>,
+        email: String?,
+        onConfigurationError: suspend (Throwable) -> Unit,
+        getLaunchMode: suspend (linkAccount: LinkAccount?, state: State) -> LinkLaunchMode?
+    ) {
+        if (presentJob?.isActive == true) {
+            logger.debug("$tag: already presenting")
+            return
+        }
+        presentJob = viewModelScope.launch {
+            logger.debug("$tag: presenting")
+
+            withConfiguration(
+                email = email,
+                onError = onConfigurationError,
+                onSuccess = { configuration ->
+                    updateStateOnNewEmail(email)
+
+                    val launchMode = getLaunchMode(_account.value, _state.value)
+                        ?: return@withConfiguration
+
+                    updateState {
+                        it.copy(
+                            emailInput = email,
+                            currentLaunchMode = launchMode,
+                        )
+                    }
+
+                    launcher.launch(
+                        LinkActivityContract.Args(
+                            configuration = configuration,
+                            startWithVerificationDialog = true,
+                            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                            launchMode = launchMode,
+                        )
+                    )
+                }
+            )
+        }
     }
 
     private suspend fun createPaymentMethod(): Result<PaymentMethod> {
@@ -272,9 +456,10 @@ internal class LinkControllerViewModel @Inject constructor(
 
     internal data class State(
         val linkConfiguration: LinkConfiguration? = null,
-        val presentedForEmail: String? = null,
+        val emailInput: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
+        val currentLaunchMode: LinkLaunchMode? = null,
     )
 
     class Factory : ViewModelProvider.Factory {

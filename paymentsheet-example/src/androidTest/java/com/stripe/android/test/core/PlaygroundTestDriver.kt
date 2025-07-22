@@ -33,7 +33,6 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
-import com.karumi.shot.ScreenshotTest
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
@@ -88,7 +87,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
-) : ScreenshotTest {
+) {
     @Volatile
     private var resultCountDownLatch: CountDownLatch? = null
 
@@ -1132,34 +1131,6 @@ internal class PlaygroundTestDriver(
         this.executeFlow()
 
         afterCollectingBankInfo(selectors)
-
-        teardown()
-    }
-
-    /**
-     * This test will open the payment sheet complete flow and take a picture when it has finished
-     * opening. The sheet is then closed. We will use the screenshot to compare o a golden value
-     * in our repository.
-     *
-     * A test calling this takes about 20 seconds
-     */
-    fun screenshotRegression(
-        testParameters: TestParameters,
-        customOperations: () -> Unit = {}
-    ) {
-        setup(testParameters)
-        launchComplete()
-
-        composeTestRule.waitForIdle()
-        device.waitForIdle()
-
-        waitForScreenToLoad(testParameters)
-        customOperations()
-        composeTestRule.waitForIdle()
-
-        currentActivity?.let {
-            compareScreenshot(it)
-        }
 
         teardown()
     }

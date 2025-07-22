@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Når du stadfestar betalinga di med PayPal, gir du %s tillating til å trekkje framtidige betalingar frå PayPal-kontoen din i samsvar med vilkåra deira.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Ved å stadfeste betalinga di med RevolutPay tillet du at %s trekk framtidige betalingar frå RevolutPay-kontoen din i samsvar med vilkåra deira.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Ved å fortsette autoriserer du %1$s til automatisk å debitere din Satispay-saldo på regelmessig basis i samsvar med kjøpet ditt eller abonnementsplanen din.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Lagre for framtidige %s betalingar</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

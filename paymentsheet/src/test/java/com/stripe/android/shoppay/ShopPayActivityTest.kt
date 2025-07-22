@@ -33,6 +33,7 @@ import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler
 import com.stripe.android.shoppay.bridge.ShopPayConfirmationState
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -350,6 +351,7 @@ internal class ShopPayActivityTest {
                         preparePaymentMethodHandler
                     },
                     workContext = dispatcher,
+                    errorReporter = FakeErrorReporter(),
                     eventReporter = FakeEventReporter(),
                 ) as T
             }

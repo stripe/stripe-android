@@ -121,6 +121,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -225,6 +227,8 @@ internal class LinkTest {
             }
 
             page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
         }
 
     @Test
@@ -310,6 +314,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
     }
 
     @Test
@@ -402,6 +408,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -513,6 +521,8 @@ internal class LinkTest {
             }
 
             page.clickPrimaryButton()
+
+            testContext.consumePaymentOptionEventForFlowController("card", "4242")
         }
 
     @Test
@@ -610,6 +620,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "1001")
     }
 
     @Test
@@ -673,6 +685,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -736,6 +750,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -806,6 +822,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -861,6 +879,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -892,6 +912,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -972,6 +994,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @Test
@@ -1044,6 +1068,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -1148,6 +1174,8 @@ internal class LinkTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
     private fun linkInformation(): RequestMatcher {

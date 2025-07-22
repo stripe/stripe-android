@@ -158,6 +158,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         FRAUD_DETECTION_API_FAILURE(
             eventName = "fraud_detection_data_repository.api_failure"
         ),
+        SAVED_PAYMENT_METHOD_RADAR_SESSION_FAILURE(
+            eventName = "stripe_android.saved_payment_method_radar_session_failure"
+        ),
         EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.external_payment_method.confirm_handler_is_null"
         ),

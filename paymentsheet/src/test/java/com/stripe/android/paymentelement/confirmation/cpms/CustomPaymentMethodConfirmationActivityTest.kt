@@ -85,6 +85,7 @@ internal class CustomPaymentMethodConfirmationActivityTest {
 
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
             assertThat(successResult.deferredIntentConfirmationType).isNull()
+            assertThat(successResult.completedFullPaymentFlow).isTrue()
         }
     }
 

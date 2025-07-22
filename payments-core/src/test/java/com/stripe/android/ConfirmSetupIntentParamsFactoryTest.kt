@@ -80,6 +80,62 @@ class ConfirmSetupIntentParamsFactoryTest {
         assertThat(params.setAsDefaultPaymentMethod).isFalse()
     }
 
+    @Test
+    fun `create() should set setAsDefault as true for sepa debit when using create params`() {
+        val result = getConfirmSetupIntentParamsForTesting(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = true
+            )
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+
+        assertThat(params.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() should set setAsDefault as false for sepa debit when using create params`() {
+        val result = getConfirmSetupIntentParamsForTesting(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = false
+            )
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+
+        assertThat(params.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `create() should set setAsDefault as true for sepa debit when using payment method`() {
+        val result = getConfirmSetupIntentParamsForTesting(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = true
+            )
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+
+        assertThat(params.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() should set setAsDefault as false for sepa debit when using payment method`() {
+        val result = getConfirmSetupIntentParamsForTesting(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            extraParams = PaymentMethodExtraParams.SepaDebit(
+                setAsDefault = false
+            )
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+
+        assertThat(params.setAsDefaultPaymentMethod).isFalse()
+    }
+
     private fun getConfirmSetupIntentParamsForTesting(): ConfirmSetupIntentParams {
         val factoryWithConfig = ConfirmSetupIntentParamsFactory(
             clientSecret = CLIENT_SECRET,

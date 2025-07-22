@@ -110,6 +110,11 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun fillOutFieldWithLabel(label: String, text: String) {
+        waitForText(label)
+        replaceText(label, text)
+    }
+
     fun clickSavedCard(last4: String) {
         val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText(last4, substring = true))
@@ -197,6 +202,8 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
+
+        composeTestRule.waitForIdle()
     }
 
     fun assertPrimaryButton(expectedStateDescription: String, canPay: Boolean) {
@@ -244,6 +251,12 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
+    fun clickViewWithContentDescription(description: String) {
+        composeTestRule.onNode(hasContentDescription(description))
+            .performScrollTo()
+            .performClick()
+    }
+
     fun waitForTag(testTag: String) {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
@@ -256,7 +269,17 @@ internal class PaymentSheetPage(
         composeTestRule.waitUntil(timeoutMillis = 15_000) {
             composeTestRule
                 .onAllNodes(hasText(text, substring = substring))
-                .fetchSemanticsNodes().isNotEmpty()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+    }
+
+    fun waitForContentDescription(description: String) {
+        composeTestRule.waitUntil(timeoutMillis = 15_000) {
+            composeTestRule
+                .onAllNodes(hasContentDescription(description))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
     }
 
@@ -295,7 +318,7 @@ internal class PaymentSheetPage(
     fun checkSaveForFuture() {
         composeTestRule.waitUntil(timeoutMillis = 5_000L) {
             composeTestRule
-                .onAllNodesWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+                .onAllNodes(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG).and(isEnabled()))
                 .fetchSemanticsNodes(
                     atLeastOneRootRequired = false
                 ).isNotEmpty()
@@ -303,17 +326,19 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG))
             .performScrollTo()
             .performClick()
+        composeTestRule.waitForIdle()
     }
 
     fun checkSetAsDefaultCheckbox() {
         composeTestRule.waitUntil {
-            composeTestRule.onAllNodesWithTag(
-                SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+            composeTestRule.onAllNodes(
+                hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG).and(isEnabled())
             ).fetchSemanticsNodes().isNotEmpty()
         }
         composeTestRule.onNode(hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG))
             .performScrollTo()
             .performClick()
+        composeTestRule.waitForIdle()
     }
 
     fun assertNoSetAsDefaultCheckbox() {

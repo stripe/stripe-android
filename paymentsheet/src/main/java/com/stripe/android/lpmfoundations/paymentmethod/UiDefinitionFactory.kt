@@ -112,6 +112,19 @@ internal sealed interface UiDefinitionFactory {
             metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
             transformSpecToElements: TransformSpecToElements,
+            arguments: Arguments,
+        ): List<FormElement> {
+            return createFormElements(
+                metadata = metadata,
+                sharedDataSpec = sharedDataSpec,
+                transformSpecToElements = transformSpecToElements,
+            )
+        }
+
+        fun createFormElements(
+            metadata: PaymentMethodMetadata,
+            sharedDataSpec: SharedDataSpec,
+            transformSpecToElements: TransformSpecToElements,
         ): List<FormElement> {
             return transformSpecToElements.transform(
                 metadata = metadata,
@@ -212,6 +225,7 @@ internal sealed interface UiDefinitionFactory {
                     metadata = metadata,
                     sharedDataSpec = sharedDataSpec,
                     transformSpecToElements = TransformSpecToElements(arguments),
+                    arguments = arguments,
                 )
             } else {
                 null
