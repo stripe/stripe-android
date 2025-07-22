@@ -134,6 +134,42 @@ internal class PollingActivityTest {
         }
     }
 
+    @Test
+    fun `Passes stripeAccountId through to result when polling succeeds`() {
+        val fakePoller = FakeIntentStatusPoller()
+        val testStripeAccountId = "acct_test_123"
+        val argsWithStripeAccountId = defaultArgs.copy(stripeAccountId = testStripeAccountId)
+        val scenario = pollingScenario(args = argsWithStripeAccountId, poller = fakePoller)
+
+        scenario.onActivity {
+            fakePoller.emitNextPollResult(StripeIntent.Status.Succeeded)
+            waitForActivityFinish()
+
+            val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
+            assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
+            assertThat(result.stripeAccountId).isEqualTo(testStripeAccountId)
+        }
+    }
+
+    @Test
+    fun `Passes stripeAccountId through to result when polling is canceled`() {
+        val testStripeAccountId = "acct_test_456"
+        val argsWithStripeAccountId = defaultArgs.copy(stripeAccountId = testStripeAccountId)
+        val scenario = pollingScenario(args = argsWithStripeAccountId)
+
+        scenario.onActivity {
+            composeTestRule
+                .onNodeWithText("Cancel and pay another way")
+                .performClick()
+
+            waitForActivityFinish()
+
+            val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
+            assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
+            assertThat(result.stripeAccountId).isEqualTo(testStripeAccountId)
+        }
+    }
+
     private fun pollingScenario(
         args: PollingContract.Args = defaultArgs,
         poller: IntentStatusPoller = FakeIntentStatusPoller(),
@@ -153,6 +189,7 @@ internal class PollingActivityTest {
                 args.initialDelayInSeconds.seconds,
                 args.maxAttempts,
                 args.ctaText,
+                args.stripeAccountId
             ),
             poller = poller,
             timeProvider = timeProvider,
@@ -193,6 +230,7 @@ internal class PollingActivityTest {
             maxAttempts = 3,
             statusBarColor = null,
             ctaText = R.string.stripe_upi_polling_message,
+            stripeAccountId = null
         )
     }
 }
