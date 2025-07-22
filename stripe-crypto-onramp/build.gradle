@@ -19,7 +19,13 @@ dependencies {
 
     ksp libs.daggerCompiler
 
+    testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
 
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.espresso.core
