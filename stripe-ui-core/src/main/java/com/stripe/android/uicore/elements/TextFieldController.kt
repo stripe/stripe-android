@@ -4,9 +4,8 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-@OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface TextFieldController : InputController, SectionFieldComposable, SectionFieldErrorController {
     fun onValueChange(displayFormatted: String): TextFieldState?
@@ -31,7 +29,7 @@ interface TextFieldController : InputController, SectionFieldComposable, Section
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
 
     val initialValue: String?
-    val autofillType: AutofillType?
+    val contentType: ContentType?
     val debugLabel: String
     val trailingIcon: StateFlow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
@@ -136,12 +134,11 @@ class SimpleTextFieldController(
     override val debugLabel = textFieldConfig.debugLabel
     override val layoutDirection: LayoutDirection? = textFieldConfig.layoutDirection
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType? = when (textFieldConfig) {
-        is DateConfig -> AutofillType.CreditCardExpirationDate
-        is PostalCodeConfig -> AutofillType.PostalCode
-        is EmailConfig -> AutofillType.EmailAddress
-        is NameConfig -> AutofillType.PersonFullName
+    override val contentType: ContentType? = when (textFieldConfig) {
+        is DateConfig -> ContentType.CreditCardExpirationDate
+        is PostalCodeConfig -> ContentType.PostalCode
+        is EmailConfig -> ContentType.EmailAddress
+        is NameConfig -> ContentType.PersonFullName
         else -> null
     }
 

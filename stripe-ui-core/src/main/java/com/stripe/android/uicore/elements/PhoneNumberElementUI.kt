@@ -23,7 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,7 +46,6 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
@@ -150,10 +151,9 @@ fun PhoneNumberElementUI(
                 .fillMaxWidth()
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .focusRequester(focusRequester)
-                .autofill(
-                    types = listOf(AutofillType.PhoneNumberNational),
-                    onFill = controller::onValueChange,
-                )
+                .semantics {
+                    contentType = ContentType.PhoneNumberNational
+                }
                 .onFocusEvent {
                     if (it.isFocused) {
                         coroutineScope.launch { bringIntoViewRequester.bringIntoView() }

@@ -18,7 +18,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -327,7 +327,7 @@ private fun LabelUI(label: String, color: Int?) {
                     // This shouldn't be visible for accessibility purposes
                     // due to the content description and the click listener
                     // being defined outside of compose, in PrimaryButton.
-                    invisibleToUser()
+                    hideFromAccessibility()
                 }
         )
     }

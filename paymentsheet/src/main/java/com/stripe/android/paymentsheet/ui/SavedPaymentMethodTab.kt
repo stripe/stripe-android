@@ -36,7 +36,7 @@ import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -107,7 +107,7 @@ internal fun SavedPaymentMethodTab(
                             // This shouldn't be visible for accessibility purposes
                             // due to it not being clickable, the user should be
                             // interacting with the badge instead
-                            invisibleToUser()
+                            hideFromAccessibility()
                         }
                     },
             ) {

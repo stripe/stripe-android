@@ -7,9 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.LayoutDirection
@@ -58,8 +57,7 @@ internal sealed class CardNumberController : TextFieldController {
 
     abstract val cardScanEnabled: Boolean
 
-    @OptIn(ExperimentalComposeUiApi::class)
-    override val autofillType: AutofillType = AutofillType.CreditCardNumber
+    override val contentType: ContentType = ContentType.CreditCardNumber
 
     fun onCardScanResult(cardScanSheetResult: CardScanSheetResult) {
         // Don't need to populate the card number if the result is Canceled or Failed
