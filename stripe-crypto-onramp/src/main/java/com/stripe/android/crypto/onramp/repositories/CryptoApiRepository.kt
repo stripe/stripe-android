@@ -2,17 +2,18 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
-import com.stripe.android.crypto.onramp.model.parsers.CryptoCustomerJsonParser
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import javax.inject.Inject
@@ -30,8 +31,6 @@ internal class CryptoApiRepository @Inject internal constructor(
     sdkVersion: String = StripeSdkVersion.VERSION,
     appInfo: AppInfo?
 ) {
-    private val stripeErrorJsonParser = StripeErrorJsonParser()
-
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
         apiVersion = apiVersion,
@@ -48,12 +47,24 @@ internal class CryptoApiRepository @Inject internal constructor(
             params = Json.encodeToJsonElement(params).toMap()
         )
 
-        return executeRequestWithResultParser(
-            stripeNetworkClient = stripeNetworkClient,
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            request = request,
-            responseJsonParser = CryptoCustomerJsonParser()
-        )
+        return runCatching {
+            stripeNetworkClient.executeRequest(request)
+        }.mapCatching { response ->
+            if (response.isError) {
+                val error = StripeErrorJsonParser().parse(response.responseJson())
+
+                return Result.failure(APIConnectionException("Failed to execute $request", cause = APIException(error)))
+            } else {
+                val cryptoResponse = Json.decodeFromString(
+                    CryptoCustomerResponse.serializer(),
+                    requireNotNull(response.body)
+                )
+
+                return Result.success(cryptoResponse)
+            }
+        }.recoverCatching {
+            throw APIConnectionException("Failed to execute $request", cause = it)
+        }
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
