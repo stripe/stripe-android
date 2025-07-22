@@ -57,17 +57,8 @@ internal class OnrampCoordinatorViewModel(
         linkController.lookupConsumer(email)
     }
 
-    @Suppress("UnusedParameter")
-    fun registerLinkUser(info: LinkUserInfo) {
-        TODO("Fill out")
-    }
-
     fun authenticateExistingUser(email: String) {
         linkController.authenticateExistingConsumer(email)
-    }
-
-    fun presentForAuthentication(email: String) {
-        linkController.authenticate(email)
     }
 
     class Factory(

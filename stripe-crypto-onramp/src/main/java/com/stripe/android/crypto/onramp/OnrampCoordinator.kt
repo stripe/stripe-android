@@ -14,6 +14,7 @@ import com.stripe.android.crypto.onramp.model.OnrampAuthenticateUserResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import javax.inject.Inject
@@ -70,15 +71,6 @@ class OnrampCoordinator @Inject internal constructor(
      */
     fun authenticateExistingLinkUser(email: String) {
         viewModel.authenticateExistingUser(email)
-    }
-
-    /**
-     * Present UI to authenticate a Link user.
-     *
-     * @param email The email address to authenticate.
-     */
-    fun presentForAuthentication(email: String) {
-        viewModel.presentForAuthentication(email)
     }
 
     /**
@@ -184,15 +176,15 @@ class OnrampCoordinator @Inject internal constructor(
             when (result) {
                 is LinkController.AuthenticationResult.Success ->
                     onrampCallbacks.authenticationCallback.onResult(
-                        OnrampAuthenticateUserResult.Completed(true)
+                        OnrampVerificationResult.Completed("temporary-id")
                     )
                 is LinkController.AuthenticationResult.Failed ->
                     onrampCallbacks.authenticationCallback.onResult(
-                        OnrampAuthenticateUserResult.Failed(result.error)
+                        OnrampVerificationResult.Failed(result.error)
                     )
                 is LinkController.AuthenticationResult.Canceled ->
                     onrampCallbacks.authenticationCallback.onResult(
-                        OnrampAuthenticateUserResult.Completed(false)
+                        OnrampVerificationResult.Cancelled()
                     )
             }
         }

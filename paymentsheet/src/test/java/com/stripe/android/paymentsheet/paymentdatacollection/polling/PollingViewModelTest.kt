@@ -211,7 +211,8 @@ private fun createPollingViewModel(
             timeLimit = timeLimit,
             initialDelay = initialDelay,
             maxAttempts = 10,
-            ctaText = R.string.stripe_upi_polling_message
+            ctaText = R.string.stripe_upi_polling_message,
+            stripeAccountId = null
         ),
         poller = poller,
         timeProvider = timeProvider,
