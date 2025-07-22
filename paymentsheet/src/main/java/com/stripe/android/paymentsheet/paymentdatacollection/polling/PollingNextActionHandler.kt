@@ -39,6 +39,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     initialDelayInSeconds = UPI_INITIAL_DELAY_IN_SECONDS,
                     maxAttempts = UPI_MAX_ATTEMPTS,
                     ctaText = R.string.stripe_upi_polling_message,
+                    stripeAccountId = requestOptions.stripeAccount,
                 )
             PaymentMethod.Type.Blik ->
                 PollingContract.Args(
@@ -48,6 +49,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                     initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
                     maxAttempts = BLIK_MAX_ATTEMPTS,
                     ctaText = R.string.stripe_blik_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
                 )
             else ->
                 error(

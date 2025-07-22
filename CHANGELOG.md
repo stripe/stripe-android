@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### PaymentSheet
+* [FIXED][11184](https://github.com/stripe/stripe-android/pull/11184) PaymentSheet will now accurately show a success state when confirming Blik and UPI PaymentIntents using a Stripe Connect account ID.
 
 ## 21.21.0 - 2025-07-21
 ### PaymentSheet

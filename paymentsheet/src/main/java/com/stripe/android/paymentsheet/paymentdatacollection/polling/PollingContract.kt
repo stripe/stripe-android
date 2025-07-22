@@ -32,6 +32,7 @@ internal class PollingContract :
         val initialDelayInSeconds: Int,
         val maxAttempts: Int,
         @StringRes val ctaText: Int,
+        val stripeAccountId: String?,
     ) : Parcelable {
 
         internal companion object {
