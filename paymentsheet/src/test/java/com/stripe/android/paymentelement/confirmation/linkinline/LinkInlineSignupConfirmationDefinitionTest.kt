@@ -223,7 +223,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = "csmrpd_123",
                     last4 = "4242",
-                    paymentMethodId = "pm_123",
+                    paymentMethodId = "pm_1",
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             )
