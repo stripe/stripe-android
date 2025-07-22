@@ -287,7 +287,8 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 appearance = appearance,
                 trailingContent = {
                     EmbeddedNewPaymentMethodTrailingContent(
-                        showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
+                        showChevron = appearance.style !is RowStyle.FlatWithCheckmark &&
+                            appearance.style !is RowStyle.FlatWithDisclosure,
                     )
                 }
             )
