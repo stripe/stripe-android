@@ -4,7 +4,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encoding.*
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 @Serializable
 private data class AddressSurrogate(
@@ -22,12 +23,12 @@ internal object PaymentSheetAddressSerializer : KSerializer<PaymentSheet.Address
 
     override fun serialize(encoder: Encoder, value: PaymentSheet.Address) {
         val surrogate = AddressSurrogate(
-            city       = value.city,
-            country    = value.country,
-            line1      = value.line1,
-            line2      = value.line2,
+            city = value.city,
+            country = value.country,
+            line1 = value.line1,
+            line2 = value.line2,
             postalCode = value.postalCode,
-            state      = value.state
+            state = value.state
         )
 
         delegate.serialize(encoder, surrogate)
