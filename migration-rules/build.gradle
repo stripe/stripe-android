@@ -1,14 +1,20 @@
+import io.gitlab.arturbosch.detekt.Detekt
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.10'
+    id 'io.gitlab.arturbosch.detekt' version '1.23.7'
 }
 
 dependencies {
-    compileOnly "io.gitlab.arturbosch.detekt:detekt-api:${versions.detekt}"
-    implementation "io.gitlab.arturbosch.detekt:detekt-rules-style:${versions.detekt}"
-    implementation "io.gitlab.arturbosch.detekt:detekt-formatting:${versions.detekt}"
-    testImplementation "io.gitlab.arturbosch.detekt:detekt-test:${versions.detekt}"
-    testImplementation "junit:junit:${versions.junit}"
-    testImplementation "com.google.truth:truth:${versions.truth}"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "com.google.truth:truth:1.4.4"
+    
+    // Detekt API for custom rules
+    implementation "io.gitlab.arturbosch.detekt:detekt-api:1.23.7"
+    implementation "io.gitlab.arturbosch.detekt:detekt-rules-style:1.23.7"
+    
+    // Add the compiled jar as a detekt plugin
+    detektPlugins files(jar)
 }
 
 java {
@@ -19,5 +25,69 @@ java {
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     kotlinOptions {
         jvmTarget = "11"
+    }
+}
+
+// Create migration directory if it doesn't exist
+def migrationConfigDir = file("config/detekt")
+if (!migrationConfigDir.exists()) {
+    migrationConfigDir.mkdirs()
+}
+
+// Create migration config file if it doesn't exist
+def migrationConfigFile = file("config/detekt/migration.yml")
+if (!migrationConfigFile.exists()) {
+    migrationConfigFile.createNewFile()
+    migrationConfigFile.text = """
+stripe-v25-migration:
+  active: true
+  RememberPaymentSheetMigration:
+    active: true
+  RememberPaymentSheetFlowControllerMigration:
+    active: true
+  ClassMigration:
+    active: true
+"""
+}
+
+// Add the migration tasks
+tasks.register('detektMigration', Detekt) {
+    description = 'Run detekt with v25 migration rules'
+    group = 'migration'
+    
+    dependsOn jar
+
+    buildUponDefaultConfig = false
+    parallel = false  // Disable parallel execution to avoid concurrent modifications
+    autoCorrect = true
+    config.setFrom(files("config/detekt/migration.yml"))
+//    setSource(files("${projectDir}"))
+    setSource(files("/Users/cttsai/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/common/analytics/testfile.kt"))
+    include("**/*.kt")
+    exclude("**/build/**", "**/migration-rules/**")
+}
+tasks.withType(Detekt).configureEach {
+    reports {
+        html.required.set(true) // observe findings in your browser with structure and code snippets
+        xml.required.set(true) // checkstyle like format mainly for integrations like Jenkins
+        txt.required.set(true) // simple text format
+    }
+}
+tasks.withType(Detekt).configureEach {
+    jvmTarget = "1.8"
+}
+
+tasks.register('migrateToV25') {
+    group = 'migration'
+    description = 'Migrates codebase from Stripe Android SDK v21+ to v25'
+    dependsOn 'detektMigration'
+
+    doLast {
+        println "\n🎉 Migration analysis completed!"
+        println "📋 Check the detekt reports for migration suggestions:"
+        println "   - HTML: build/reports/detekt/detekt.html"
+        println "   - Text: build/reports/detekt/detekt.txt"
+        println "📝 Copy-paste the suggested replacements into your code"
+        println "🐛 Report issues at: https://github.com/stripe/stripe-android/issues"
     }
 }

@@ -1,17 +1,16 @@
 package com.stripe.android.common.analytics
-import com.stripe.android.elements.Appearance.Embedded.RowStyle
-import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.paymentsheet.PaymentSheet
 
-internal fun CardBrandAcceptance.toAnalyticsValu(): Boolean {
-    return this !is CardBrandAcceptance.All
+internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValu(): Boolean {
+    return this !is PaymentSheet.CardBrandAcceptance.All
 }
 
 @Suppress("LongMethod")
-fun getRow(a: Appearance.Embedded.RowStyle): Int {
+fun getRow(a: PaymentSheet.Appearance.Embedded.RowStyle): Int {
     return when (a) {
-        is Appearance.Embedded.RowStyle.FlatWithRadio -> 1
-        is Appearance.Embedded.RowStyle.FlatWithCheckmark -> 2
-        is Appearance.Embedded.RowStyle.FlatWithChevron -> 4
-        is Appearance.Embedded.RowStyle.FloatingButton -> 8
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio -> 1
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark -> 2
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithChevron -> 4
+        is PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton -> 8
     }
 }
