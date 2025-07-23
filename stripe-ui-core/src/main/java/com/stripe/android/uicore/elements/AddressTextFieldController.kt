@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -42,7 +42,7 @@ class AddressTextFieldController(
     override val debugLabel = config.debugLabel
 
     @ExperimentalComposeUiApi
-    override val autofillType: AutofillType? = null
+    override val contentType: ContentType? = null
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")

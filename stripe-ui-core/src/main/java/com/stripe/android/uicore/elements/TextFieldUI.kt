@@ -36,7 +36,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
@@ -56,7 +55,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.editableText
+import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
@@ -75,7 +76,6 @@ import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -525,25 +525,21 @@ private fun Modifier.onPreviewKeyEvent(
     }
 }
 
-/*
- * Using 'composed' is no longer recommended
- * https://developer.android.com/jetpack/compose/custom-modifiers#create_a_custom_modifier_using_a_composable_modifier_factory
- */
-@SuppressLint("ComposableModifierFactory")
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun Modifier.onAutofill(
     textFieldController: TextFieldController,
     autofillReporter: (String) -> Unit
-): Modifier = autofill(
-    types = listOfNotNull(textFieldController.autofillType),
-    onFill = {
-        textFieldController.autofillType?.let { type ->
-            autofillReporter(type.name)
+): Modifier = semantics {
+    contentType = textFieldController.contentType ?: contentType
+
+    onAutofillText {
+        textFieldController.contentType?.let { type ->
+            autofillReporter(type.toString())
         }
-        textFieldController.onValueChange(it)
+
+        false
     }
-)
+}
 
 private fun Modifier.onFocusChanged(
     textFieldController: TextFieldController,

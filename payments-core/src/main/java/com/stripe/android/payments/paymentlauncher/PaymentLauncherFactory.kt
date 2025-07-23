@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.utils.StatusBarCompat
 
 /**
  * Factory to create a [PaymentLauncher], initialize all required dependencies.
@@ -25,7 +26,7 @@ class PaymentLauncherFactory(
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
-        statusBarColor = activity.window?.statusBarColor,
+        statusBarColor = StatusBarCompat.color(activity),
     )
 
     constructor(
@@ -36,7 +37,7 @@ class PaymentLauncherFactory(
             PaymentLauncherContract(),
             callback::onPaymentResult
         ),
-        statusBarColor = fragment.requireActivity().window?.statusBarColor,
+        statusBarColor = StatusBarCompat.color(fragment.requireActivity()),
     )
 
     fun create(
