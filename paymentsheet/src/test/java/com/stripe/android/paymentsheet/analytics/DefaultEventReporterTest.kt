@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
@@ -1136,6 +1137,73 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_shoppay_webview_cancelled" &&
                     req.params["did_receive_ece_click"] == false
+            }
+        )
+    }
+
+    @Test
+    fun `is_spt is false for all requests after load succeeded event`() = isSptTest(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000L,
+                currency = "CAD",
+            ),
+        ),
+        expectedIsSptValue = false,
+    )
+
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    @Test
+    fun `is_spt is true for all requests after load succeeded event`() = isSptTest(
+        intentConfiguration = PaymentSheet.IntentConfiguration(
+            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000L,
+                currency = "CAD",
+            ),
+            sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                networkId = "network_id",
+                externalId = "external_id",
+            ),
+        ),
+        expectedIsSptValue = true,
+    )
+
+    private fun isSptTest(
+        intentConfiguration: PaymentSheet.IntentConfiguration,
+        expectedIsSptValue: Boolean,
+    ) {
+        analyticEventCallbackRule.setCallback(null)
+
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration = intentConfiguration,
+                )
+            )
+        }
+
+        completeEventReporter.onShowNewPaymentOptions()
+        completeEventReporter.onCardNumberCompleted()
+        completeEventReporter.onPaymentMethodFormCompleted(code = "card")
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_sheet_newpm_show" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_card_number_completed" &&
+                    req.params["is_spt"] == expectedIsSptValue
+            }
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_completed" &&
+                    req.params["is_spt"] == expectedIsSptValue
             }
         )
     }
