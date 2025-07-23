@@ -41,6 +41,11 @@ internal class CryptoApiRepository @Inject internal constructor(
         sdkVersion = sdkVersion
     )
 
+    /**
+     * Grants the provided session merchant permissions.
+     *
+     * @param consumerSessionClientSecret The client session secret to attach permissions to.
+     */
     suspend fun grantPartnerMerchantPermissions(
         consumerSessionClientSecret: String
     ): Result<CryptoCustomerResponse> {
@@ -53,6 +58,11 @@ internal class CryptoApiRepository @Inject internal constructor(
         )
     }
 
+    /**
+     * Collects KYC data to attach it to a link account.
+     *
+     * @param kycInfo The KycInfo to attach.
+     */
     suspend fun collectKycData(
         kycInfo: KycInfo
     ): Result<Unit> {
