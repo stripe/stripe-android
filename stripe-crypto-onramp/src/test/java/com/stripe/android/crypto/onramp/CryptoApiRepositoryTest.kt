@@ -86,6 +86,8 @@ class CryptoApiRepositoryTest {
 
             val result = cryptoApiRepository.collectKycData(
                 KycInfo(
+                    firstName = "Test",
+                    lastName = "User",
                     dateOfBirth = "1975-01-01",
                     address = PaymentSheet.Address(city = "Orlando", state = "FL"),
                     ssn = "999-99-9999"

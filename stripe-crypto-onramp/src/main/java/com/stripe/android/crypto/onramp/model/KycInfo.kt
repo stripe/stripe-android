@@ -8,6 +8,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 internal data class KycInfo(
+    val firstName: String,
+    val lastName: String,
     @SerialName("date_of_birth")
     val dateOfBirth: String, // ISO 8601 format (YYYY-MM-DD)
     val address: PaymentSheet.Address,
