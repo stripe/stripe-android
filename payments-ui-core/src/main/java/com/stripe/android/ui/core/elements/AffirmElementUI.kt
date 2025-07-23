@@ -13,11 +13,13 @@ import com.stripe.android.uicore.text.EmbeddableImage
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.R as StripeR
 
+private const val MIN_LUMINANCE_FOR_LIGHT_ICON = 0.5
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AffirmElementUI(modifier: Modifier = Modifier) {
     val color = MaterialTheme.stripeColors.component
-    val iconRes = if (color.luminance() < .5) {
+    val iconRes = if (isSystemInDarkTheme() || color.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON) {
         R.drawable.stripe_ic_affirm_logo_night
     } else {
         R.drawable.stripe_ic_affirm_logo_day
