@@ -38,7 +38,6 @@ internal data class ClassMigrationRule(
     }
     
     override fun matchesExpression(text: String): Boolean {
-//        return text == fromClass || text == toClass
         return text.contains(fromClass)
     }
 

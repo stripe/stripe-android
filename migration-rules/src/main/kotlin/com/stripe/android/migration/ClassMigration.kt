@@ -32,38 +32,24 @@ internal class ClassMigration(config: Config = Config.empty) : Rule(config) {
 
     override val autoCorrect: Boolean = true
     
-    /**
-     * Get all migration rules from the configuration.
-     */
     private val migrationRules: List<MigrationRule> = MigrationConfiguration.allMigrationRules
-
-    private val pendingReplacePair: MutableList<Pair<KtElement, KtElement>> = mutableListOf()
+    private val pendingReplacements: MutableList<Pair<KtElement, KtElement>> = mutableListOf()
 
     override fun visitImportDirective(importDirective: KtImportDirective) {
         super.visitImportDirective(importDirective)
         
         val importPath = importDirective.importPath?.pathStr ?: return
         
-        // Check each migration rule
         migrationRules.forEach { rule ->
             if (rule.matchesImport(importPath)) {
-                val replacement = rule.getReplacementImport(importPath)
-                if (replacement != null) {
-                    if (autoCorrect) {
-                        // Create new import directive
-                        val factory = KtPsiFactory(importDirective.project)
-                        val newImportPath = ImportPath.fromString(replacement)
-                        val newImport = factory.createImportDirective(newImportPath)
-                        importDirective.replace(newImport)
-                    } else {
-                        report(
-                            CodeSmell(
-                                issue,
-                                Entity.from(importDirective),
-                                "${rule.description}. Replace import '$importPath' with '$replacement'"
-                            )
-                        )
-                    }
+                val replacement = rule.getReplacementImport(importPath) ?: return@forEach
+                
+                if (autoCorrect) {
+                    val factory = KtPsiFactory(importDirective.project)
+                    val newImport = factory.createImportDirective(ImportPath.fromString(replacement))
+                    importDirective.replace(newImport)
+                } else {
+                    reportImportIssue(importDirective, rule, importPath, replacement)
                 }
                 return@forEach
             }
@@ -72,121 +58,100 @@ internal class ClassMigration(config: Config = Config.empty) : Rule(config) {
 
     override fun visitDotQualifiedExpression(expression: KtDotQualifiedExpression) {
         super.visitDotQualifiedExpression(expression)
-
-        val fullText = expression.text
-//        println("Visiting DotQualifiedExpression: $fullText")
-        
-        // Check each migration rule
-        migrationRules.forEach { rule ->
-            val replacement = rule.replaceInExpression(fullText)
-            if (replacement != null) {
-                val (newText, importToAdd) = replacement
-                println("replacing $fullText with $newText")
-                if (autoCorrect) {
-                    // Get file context BEFORE replace operation
-                    val ktFile = expression.containingKtFile
-                    // Add import using the file we got earlier
-                    addImportSafely(ktFile, importToAdd)
-
-                    // Replace the expression
-                    val factory = KtPsiFactory(expression.project)
-                    val newExpression = factory.createExpression(newText)
-                    expression.replace(newExpression)
-                } else {
-                    report(
-                        CodeSmell(
-                            issue,
-                            Entity.from(expression),
-                            "${rule.description}. Replace '$fullText' with '$newText' and add import '$importToAdd'"
-                        )
-                    )
-                }
-                return@forEach
-            }
-        }
+        handleTextReplacement(expression, expression.text, ::createExpression)
     }
 
     override fun visitTypeReference(typeReference: KtTypeReference) {
         super.visitTypeReference(typeReference)
-
-        val fullText = typeReference.text
-//        println("from: ${typeReference.parent}")
-//        for (child in typeReference.parent.children) {
-//            println("${child.text}, $child")
-//        }
-        println("Visiting TypeReference: $fullText")
-
-        migrationRules.forEach { rule ->
-            val replacement = rule.replaceInExpression(fullText)
-            if (replacement != null) {
-                val (newText, importToAdd) = replacement
-                println("replacing $fullText with $newText")
-                if (autoCorrect) {
-                    // Get file context BEFORE replace operation
-                    val ktFile = typeReference.containingKtFile
-                    // Add import BEFORE replace to avoid DummyHolder issue
-                    addImportSafely(ktFile, importToAdd)
-
-                    // Replace the type reference
-                    typeReference.let {
-                        val factory = KtPsiFactory(typeReference.project)
-                        val newTypeReference = factory.createType(newText)
-
-                        pendingReplacePair.add(it to newTypeReference)
-                    }
-                } else {
-                    report(
-                        CodeSmell(
-                            issue,
-                            Entity.from(typeReference),
-                            "${rule.description}. Replace type '$fullText' with '$newText' and add import '$importToAdd'"
-                        )
-                    )
-                }
-            }
-        }
+        handleTextReplacement(typeReference, typeReference.text, ::createTypeReference)
     }
 
-//    override fun visitElement(element: PsiElement) {
-//        super.visitElement(element)
-//        println("$element, ${element.text}")
-//    }
-
     override fun visitKtFile(file: KtFile) {
-        pendingReplacePair.clear()
+        pendingReplacements.clear()
         super.visitKtFile(file)
         withAutoCorrect {
-            pendingReplacePair.forEach { (oldElement, newElement) ->
+            pendingReplacements.forEach { (oldElement, newElement) ->
                 oldElement.replace(newElement)
             }
         }
     }
 
+    private fun handleTextReplacement(
+        element: KtElement,
+        text: String,
+        createElement: (KtPsiFactory, String) -> KtElement
+    ) {
+        migrationRules.forEach { rule ->
+            val replacement = rule.replaceInExpression(text) ?: return@forEach
+            val (newText, importToAdd) = replacement
+            
+            if (autoCorrect) {
+                addImportSafely(element.containingKtFile, importToAdd)
+                
+                val factory = KtPsiFactory(element.project)
+                val newElement = createElement(factory, newText)
+                
+                // Type references need deferred replacement to avoid AST issues
+                if (element is KtTypeReference) {
+                    pendingReplacements.add(element to newElement)
+                } else {
+                    element.replace(newElement)
+                }
+            } else {
+                reportTextIssue(element, rule, text, newText, importToAdd)
+            }
+            return@forEach
+        }
+    }
+
+    private fun createExpression(factory: KtPsiFactory, text: String) = factory.createExpression(text)
+    private fun createTypeReference(factory: KtPsiFactory, text: String) = factory.createType(text)
+
+    private fun reportImportIssue(
+        element: KtImportDirective,
+        rule: MigrationRule,
+        oldImport: String,
+        newImport: String
+    ) {
+        report(CodeSmell(
+            issue,
+            Entity.from(element),
+            "${rule.description}. Replace import '$oldImport' with '$newImport'"
+        ))
+    }
+
+    private fun reportTextIssue(
+        element: KtElement,
+        rule: MigrationRule,
+        oldText: String,
+        newText: String,
+        importToAdd: String
+    ) {
+        val elementType = if (element is KtTypeReference) "type" else "expression"
+        report(CodeSmell(
+            issue,
+            Entity.from(element),
+            "${rule.description}. Replace $elementType '$oldText' with '$newText' and add import '$importToAdd'"
+        ))
+    }
+
     private fun addImportSafely(ktFile: KtFile, importPath: String) {
         val existingImports = ktFile.importDirectives.mapNotNull { it.importPath?.pathStr }
 
-        // Don't add if import already exists
-        if (existingImports.contains(importPath)) {
-            return
-        }
+        if (existingImports.contains(importPath)) return
 
-        // Don't add if there are any existing imports that would be replaced by this same import
-        // This handles the case where we're processing expressions after import replacement
         val hasConflictingImport = migrationRules.any { rule ->
             existingImports.any { existing ->
                 rule.matchesImport(existing) && rule.getReplacementImport(existing) == importPath
             }
         }
 
-        if (hasConflictingImport) {
-            return
-        }
+        if (hasConflictingImport) return
 
         val factory = KtPsiFactory(ktFile.project)
         val importDirective = factory.createImportDirective(ImportPath.fromString(importPath))
 
-        val importList = ktFile.importList
-        importList?.apply {
+        ktFile.importList?.apply {
             add(factory.createNewLine(1))
             add(importDirective)
         }
