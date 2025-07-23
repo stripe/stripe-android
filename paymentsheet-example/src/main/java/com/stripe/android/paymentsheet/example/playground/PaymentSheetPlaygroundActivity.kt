@@ -10,11 +10,15 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -325,6 +329,43 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
+    private fun LinkSignupToggle(flowController: PaymentSheet.FlowController) {
+        val linkSignupToggleState by flowController.linkSignupToggleState.collectAsState()
+        var isChecked by remember { mutableStateOf(false) }
+
+        if (linkSignupToggleState.shouldDisplay) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = linkSignupToggleState.title,
+                        style = MaterialTheme.typography.body1
+                    )
+                    Text(
+                        text = linkSignupToggleState.subtitle,
+                        style = MaterialTheme.typography.caption,
+                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+                Switch(
+                    checked = isChecked,
+                    onCheckedChange = { checked ->
+                        isChecked = checked
+                        flowController.setLinkSignupToggleValue(checked)
+                    }
+                )
+            }
+        }
+    }
+
+    @Composable
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
         Button(
             onClick = {
@@ -449,6 +490,8 @@ internal class PaymentSheetPlaygroundActivity :
         if (playgroundState.snapshot[WalletButtonsSettingsDefinition] != WalletButtonsPlaygroundType.Disabled) {
             flowController.WalletButtons()
         }
+
+        LinkSignupToggle(flowController = flowController)
 
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
