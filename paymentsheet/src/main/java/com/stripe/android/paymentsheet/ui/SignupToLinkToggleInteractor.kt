@@ -45,7 +45,6 @@ internal class DefaultSignupToLinkToggleInteractor(
     ) { arguments, isChecked, linkAccountInfo ->
         val shouldDisplay = arguments?.run {
             paymentMethodMetadata.linkState != null &&
-                configuration.link.shouldDisplay &&
                 linkAccountInfo.account == null
         } ?: false
 
