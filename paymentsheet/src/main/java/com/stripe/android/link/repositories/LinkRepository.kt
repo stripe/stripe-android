@@ -28,24 +28,27 @@ internal interface LinkRepository {
      * Check if the email already has a link account.
      *
      * @param customerId Optional customer ID to associate with the lookup. When provided, enables
-     *                   retrieval of detailed user data including displayable payment details (card
-     *                   icons, last4 digits, etc.) that can be shown in the UI. When null, the
-     *                   response will not include this detailed payment information.
+     *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
         email: String,
         customerId: String?
     ): Result<ConsumerSessionLookup>
 
-    suspend fun lookupConsumerWithoutBackendLoggingForExposure(email: String): Result<ConsumerSessionLookup>
+    /**
+     * Performs a lookup of a consumer session without triggering any
+     * back end logging events. This is currently only being used by the
+     * Link global holdback to look up consumers in the event Link is disabled.
+     */
+    suspend fun lookupConsumerWithoutBackendLoggingForExposure(
+        email: String
+    ): Result<ConsumerSessionLookup>
 
     /**
      * Performs a consumer lookup with mobile attestation verification.
      *
      * @param customerId Optional customer ID to associate with the lookup. When provided, enables
-     *                   retrieval of detailed user data including displayable payment details (card
-     *                   icons, last4 digits, etc.) that can be shown in the UI. When null, the
-     *                   response will not include this detailed payment information.
+     *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
         email: String,

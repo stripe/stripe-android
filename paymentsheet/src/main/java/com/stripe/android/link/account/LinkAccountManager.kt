@@ -43,7 +43,7 @@ internal interface LinkAccountManager {
      * verification if needed.
      *
      * @param customerId Optional customer ID to associate with the lookup. When provided, enables
-     *                   retrieval of detailed user data including displayable payment details.
+     *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
         email: String,
@@ -58,9 +58,7 @@ internal interface LinkAccountManager {
      * verification if needed.
      *
      * @param customerId Optional customer ID to associate with the lookup. When provided, enables
-     *                   retrieval of detailed user data including displayable payment details (card
-     *                   icons, last4 digits, etc.) that can be shown in the UI. When null, the
-     *                   response will not include this detailed payment information.
+     *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
         email: String,
