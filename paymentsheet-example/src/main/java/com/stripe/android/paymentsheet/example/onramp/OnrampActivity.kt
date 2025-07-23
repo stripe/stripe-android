@@ -59,7 +59,8 @@ internal class OnrampActivity : ComponentActivity() {
         val callbacks = OnrampCallbacks(
             configurationCallback = viewModel::onConfigurationResult,
             linkLookupCallback = viewModel::onLookupResult,
-            authenticationCallback = viewModel::onAuthenticationResult
+            authenticationCallback = viewModel::onAuthenticationResult,
+            registerUserCallback = viewModel::onRegisterUserResult
         )
 
         onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
