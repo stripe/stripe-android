@@ -6,7 +6,11 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.DateOfBirth
+import com.stripe.android.crypto.onramp.model.IdType
+import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,6 +71,43 @@ class CryptoApiRepositoryTest {
 
             assertThat(result.getOrThrow().id)
                 .isEqualTo("test-id")
+        }
+    }
+
+    @Test
+    fun testCollectKycDataSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                "{}",
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.collectKycData(
+                KycInfo(
+                    firstName = "Test",
+                    lastName = "User",
+                    idNumber = "999-88-7777",
+                    idType = IdType.SOCIAL_SECURITY_NUMBER,
+                    dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
+                    address = PaymentSheet.Address(city = "Orlando", state = "FL"),
+                    nationalities = listOf("TestNationality"),
+                    birthCountry = "US",
+                    birthCity = "Chicago"
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
+
+            assertThat(result.isSuccess)
+                .isEqualTo(true)
         }
     }
 }
