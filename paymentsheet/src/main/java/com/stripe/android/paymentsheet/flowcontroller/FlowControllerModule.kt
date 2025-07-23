@@ -18,7 +18,9 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
+import com.stripe.android.paymentsheet.ui.DefaultSignupToLinkToggleInteractor
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
+import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Module
@@ -109,6 +111,14 @@ internal object FlowControllerModule {
         return WalletButtonsContent(
             interactor = DefaultWalletButtonsInteractor.create(viewModel, walletsButtonLinkLauncher)
         )
+    }
+
+    @Provides
+    @Singleton
+    fun providesSignupToLinkToggleInteractor(
+        viewModel: FlowControllerViewModel,
+    ): SignupToLinkToggleInteractor {
+        return DefaultSignupToLinkToggleInteractor.create(viewModel)
     }
 
     @Provides

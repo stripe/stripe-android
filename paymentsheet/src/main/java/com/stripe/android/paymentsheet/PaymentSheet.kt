@@ -48,6 +48,7 @@ import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -3293,6 +3294,15 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * State information for the Link signup toggle that merchants can observe to render their own UI.
+     */
+    data class LinkSignupToggleState(
+        val shouldDisplay: Boolean,
+        val title: String,
+        val subtitle: String
+    )
+
+    /**
      * A class that presents the individual steps of a payment sheet flow.
      */
     interface FlowController {
@@ -3305,6 +3315,12 @@ class PaymentSheet internal constructor(
         @WalletButtonsPreview
         @Composable
         fun WalletButtons()
+
+        /**
+         * StateFlow that provides information about the Link signup toggle display state and content.
+         * Merchants can observe this to render their own Link signup toggle UI.
+         */
+        val linkSignupToggleState: StateFlow<PaymentSheet.LinkSignupToggleState>
 
         /**
          * Configure the FlowController to process a [PaymentIntent].
@@ -3350,6 +3366,13 @@ class PaymentSheet internal constructor(
          * You can use this to e.g. display the payment option in your UI.
          */
         fun getPaymentOption(): PaymentOption?
+
+        /**
+         * Set the value of the Link signup toggle.
+         * This allows merchants to programmatically control whether the customer has opted in to Link signup.
+         * @param isChecked true if the customer has opted in to Link signup, false otherwise
+         */
+        fun setLinkSignupToggleValue(isChecked: Boolean)
 
         /**
          * Present a sheet where the customer chooses how to pay, either by selecting an existing
