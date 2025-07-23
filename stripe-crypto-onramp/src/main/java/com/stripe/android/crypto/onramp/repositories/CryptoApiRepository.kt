@@ -14,8 +14,12 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
+import com.stripe.android.crypto.onramp.model.KycInfo
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -41,30 +45,21 @@ internal class CryptoApiRepository @Inject internal constructor(
         consumerSessionClientSecret: String
     ): Result<CryptoCustomerResponse> {
         val params = CryptoCustomerRequestParams(CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
-        val request = apiRequestFactory.createPost(
-            url = getGrantPartnerMerchantPermissionsUrl,
-            options = buildRequestOptions(),
-            params = Json.encodeToJsonElement(params).toMap()
+
+        return executeSerializedCryptoRequest(
+            getGrantPartnerMerchantPermissionsUrl,
+            Json.encodeToJsonElement(params).jsonObject,
+            CryptoCustomerResponse.serializer()
         )
+    }
 
-        return runCatching {
-            stripeNetworkClient.executeRequest(request)
-        }.mapCatching { response ->
-            if (response.isError) {
-                val error = StripeErrorJsonParser().parse(response.responseJson())
-
-                return Result.failure(APIConnectionException("Failed to execute $request", cause = APIException(error)))
-            } else {
-                val cryptoResponse = Json.decodeFromString(
-                    CryptoCustomerResponse.serializer(),
-                    requireNotNull(response.body)
-                )
-
-                return Result.success(cryptoResponse)
-            }
-        }.recoverCatching {
-            throw APIConnectionException("Failed to execute $request", cause = it)
-        }
+    suspend fun collectKycData(
+        kycInfo: KycInfo
+    ): Result<Unit> {
+        return executeCryptoRequest(
+            collectKycDataUrl,
+            Json.encodeToJsonElement(kycInfo).jsonObject
+        )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
@@ -74,11 +69,56 @@ internal class CryptoApiRepository @Inject internal constructor(
         )
     }
 
+    private suspend fun <T> executeSerializedCryptoRequest(
+        url: String,
+        paramsJson: JsonObject,
+        serializer: KSerializer<T>
+    ): Result<T> = executeCryptoRequestInternal(url, paramsJson) { raw ->
+        Json.decodeFromString(serializer, raw)
+    }
+
+    private suspend fun executeCryptoRequest(
+        url: String,
+        paramsJson: JsonObject
+    ): Result<Unit> = executeCryptoRequestInternal(url, paramsJson) { }
+
+    private suspend fun <T> executeCryptoRequestInternal(
+        url: String,
+        paramsJson: JsonObject,
+        transform: (rawBody: String) -> T
+    ): Result<T> {
+        val request = apiRequestFactory.createPost(
+            url = url,
+            options = buildRequestOptions(),
+            params = paramsJson.toMap()
+        )
+
+        return runCatching {
+            stripeNetworkClient.executeRequest(request)
+        }.mapCatching { response ->
+            if (response.isError) {
+                val error = StripeErrorJsonParser().parse(response.responseJson())
+
+                throw APIConnectionException("Failed to execute $request", cause = APIException(error))
+            }
+
+            val body = requireNotNull(response.body) { "No response body found" }
+            transform(body)
+        }.recoverCatching {
+            throw APIConnectionException("Failed to execute $request", cause = it)
+        }
+    }
+
     internal companion object {
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/customers`
          */
         internal val getGrantPartnerMerchantPermissionsUrl: String = getApiUrl("crypto/internal/customers")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/kyc_data_collection`
+         */
+        internal val collectKycDataUrl: String = getApiUrl("crypto/internal/kyc_data_collection")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"
