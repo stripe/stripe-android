@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.luminance
@@ -30,7 +29,7 @@ internal object IconHelper {
     @Composable
     fun isDark(): Boolean {
         val color = MaterialTheme.stripeColors.component
-        return isSystemInDarkTheme() || color.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
+        return color.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
     }
 
     @Composable
