@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
@@ -51,7 +52,7 @@ internal class CryptoApiRepository @Inject internal constructor(
     ): Result<CryptoCustomerResponse> {
         val params = CryptoCustomerRequestParams(CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret))
 
-        return executeSerializedCryptoRequest(
+        return execute(
             getGrantPartnerMerchantPermissionsUrl,
             Json.encodeToJsonElement(params).jsonObject,
             CryptoCustomerResponse.serializer()
@@ -66,9 +67,10 @@ internal class CryptoApiRepository @Inject internal constructor(
     suspend fun collectKycData(
         kycInfo: KycInfo
     ): Result<Unit> {
-        return executeCryptoRequest(
+        return execute(
             collectKycDataUrl,
-            Json.encodeToJsonElement(kycInfo).jsonObject
+            Json.encodeToJsonElement(kycInfo).jsonObject,
+            Unit.serializer()
         )
     }
 
@@ -79,24 +81,11 @@ internal class CryptoApiRepository @Inject internal constructor(
         )
     }
 
-    private suspend fun <T> executeSerializedCryptoRequest(
+    private suspend fun<Response> execute(
         url: String,
         paramsJson: JsonObject,
-        serializer: KSerializer<T>
-    ): Result<T> = executeCryptoRequestInternal(url, paramsJson) { raw ->
-        Json.decodeFromString(serializer, raw)
-    }
-
-    private suspend fun executeCryptoRequest(
-        url: String,
-        paramsJson: JsonObject
-    ): Result<Unit> = executeCryptoRequestInternal(url, paramsJson) { }
-
-    private suspend fun <T> executeCryptoRequestInternal(
-        url: String,
-        paramsJson: JsonObject,
-        transform: (rawBody: String) -> T
-    ): Result<T> {
+        responseSerializer: KSerializer<Response>
+    ): Result<Response> {
         val request = apiRequestFactory.createPost(
             url = url,
             options = buildRequestOptions(),
@@ -108,12 +97,11 @@ internal class CryptoApiRepository @Inject internal constructor(
         }.mapCatching { response ->
             if (response.isError) {
                 val error = StripeErrorJsonParser().parse(response.responseJson())
-
                 throw APIConnectionException("Failed to execute $request", cause = APIException(error))
             }
 
             val body = requireNotNull(response.body) { "No response body found" }
-            transform(body)
+            Json.decodeFromString(responseSerializer, body)
         }.recoverCatching {
             throw APIConnectionException("Failed to execute $request", cause = it)
         }

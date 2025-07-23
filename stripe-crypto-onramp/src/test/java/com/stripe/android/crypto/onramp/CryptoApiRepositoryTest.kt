@@ -6,6 +6,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.DateOfBirth
+import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -77,7 +79,7 @@ class CryptoApiRepositoryTest {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
-                "",
+                "{}",
                 emptyMap()
             )
 
@@ -88,9 +90,13 @@ class CryptoApiRepositoryTest {
                 KycInfo(
                     firstName = "Test",
                     lastName = "User",
-                    dateOfBirth = "1975-01-01",
+                    idNumber = "999-88-7777",
+                    idType = IdType.SOCIAL_SECURITY_NUMBER,
+                    dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
                     address = PaymentSheet.Address(city = "Orlando", state = "FL"),
-                    ssn = "999-99-9999"
+                    nationalities = listOf("TestNationality"),
+                    birthCountry = "US",
+                    birthCity = "Chicago"
                 )
             )
 
