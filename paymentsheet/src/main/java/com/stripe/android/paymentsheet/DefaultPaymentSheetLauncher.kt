@@ -9,6 +9,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -93,7 +94,7 @@ internal class DefaultPaymentSheetLauncher(
         val args = PaymentSheetContractV2.Args(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
-            statusBarColor = activity.window?.statusBarColor,
+            statusBarColor = StatusBarCompat.color(activity),
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = initializedViaCompose,
         )
