@@ -8,6 +8,9 @@ plugins {
 dependencies {
     testImplementation "junit:junit:4.13.2"
     testImplementation "com.google.truth:truth:1.4.4"
+    testImplementation "io.gitlab.arturbosch.detekt:detekt-test:1.23.7"
+    testImplementation "io.gitlab.arturbosch.detekt:detekt-test-utils:1.23.7"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:2.1.10"
     
     // Detekt API for custom rules
     implementation "io.gitlab.arturbosch.detekt:detekt-api:1.23.7"
