@@ -60,7 +60,6 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param info The LinkInfo for the new user.
      */
-    @Suppress("UnusedParameter")
     fun registerNewLinkUser(info: LinkUserInfo) {
         viewModel.registerNewUser(info)
     }
