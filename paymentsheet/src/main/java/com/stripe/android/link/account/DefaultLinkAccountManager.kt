@@ -131,7 +131,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             is UserInput.SignIn -> lookupConsumer(
                 email = userInput.email,
                 startSession = true,
-                customerId = config.customerId
+                customerId = config.customerIdForEceDefaultValues
             ).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
@@ -493,7 +493,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 lookupConsumer(
                     email = customerEmail,
                     startSession = false,
-                    customerId = config.customerId
+                    customerId = config.customerIdForEceDefaultValues
                 )
                     .map { it?.accountStatus }
                     .getOrElse { AccountStatus.Error }

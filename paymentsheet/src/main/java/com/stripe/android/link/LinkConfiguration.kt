@@ -37,6 +37,10 @@ internal data class LinkConfiguration(
     val enableDisplayableDefaultValuesInEce: Boolean,
     val customerId: String?
 ) : Parcelable {
+
+    val customerIdForEceDefaultValues: String?
+        get() = if (enableDisplayableDefaultValuesInEce) customerId else null
+
     @Parcelize
     data class CustomerInfo(
         val name: String?,

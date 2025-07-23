@@ -132,7 +132,7 @@ internal class SignUpViewModel @Inject constructor(
             email = email,
             emailSource = EmailSource.USER_ACTION,
             startSession = true,
-            customerId = configuration.customerId
+            customerId = configuration.customerIdForEceDefaultValues
         )
 
         updateSignUpState(SignUpState.InputtingPrimaryField)
@@ -159,7 +159,7 @@ internal class SignUpViewModel @Inject constructor(
                     email = email,
                     emailSource = EmailSource.USER_ACTION,
                     startSession = true,
-                    customerId = configuration.customerId
+                    customerId = configuration.customerIdForEceDefaultValues
                 )
             }
             handleLookupResult(
