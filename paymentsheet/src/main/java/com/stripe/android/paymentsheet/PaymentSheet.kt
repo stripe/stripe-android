@@ -50,8 +50,6 @@ import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 
 /**
  * A drop-in class that presents a bottom sheet to collect and process a customer's payment.
@@ -2601,7 +2599,6 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    @Serializable
     data class Address(
         /**
          * City, district, suburb, town, or village.
@@ -2626,7 +2623,6 @@ class PaymentSheet internal constructor(
          * ZIP or postal code.
          * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
          */
-        @SerialName("postal_code")
         val postalCode: String? = null,
         /**
          * State, county, province, or region.
