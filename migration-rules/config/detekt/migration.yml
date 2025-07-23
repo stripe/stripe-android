@@ -1,15 +1,9 @@
-build:
-  maxIssues: 100
 
-# Include custom migration rules
 stripe-v25-migration:
   active: true
   RememberPaymentSheetMigration:
-    active: false
+    active: true
   RememberPaymentSheetFlowControllerMigration:
-    active: false
+    active: true
   ClassMigration:
     active: true
-  UnusedImports:
-    active: true
-    autoCorrect: true
