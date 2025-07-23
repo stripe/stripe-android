@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.Editable
@@ -138,6 +139,12 @@ class CardInputWidget @JvmOverloads constructor(
     internal var layoutWidthCalculator: LayoutWidthCalculator = DefaultLayoutWidthCalculator()
 
     internal val placement = CardInputWidgetPlacement()
+    
+    /**
+     * Detects if accessibility font scaling is enabled that could cause field truncation
+     */
+    private val isAccessibilityFontScalingEnabled: Boolean
+        get() = context.resources.configuration.fontScale > ACCESSIBILITY_FONT_SCALE_THRESHOLD
 
     private val postalCodeValue: String?
         get() {
@@ -1277,6 +1284,7 @@ class CardInputWidget @JvmOverloads constructor(
         private const val FULL_SIZING_CARD_TEXT = "4242 4242 4242 4242 424"
         private const val FULL_SIZING_DATE_TEXT = "MM/MM"
         private const val FULL_SIZING_POSTAL_CODE_TEXT = "1234567890"
+        private const val ACCESSIBILITY_FONT_SCALE_THRESHOLD = 1.3f
 
         private const val STATE_CARD_VIEWED = "state_card_viewed"
         private const val STATE_SUPER_STATE = "state_super_state"

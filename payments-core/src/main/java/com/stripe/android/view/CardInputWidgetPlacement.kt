@@ -77,6 +77,54 @@ internal data class CardInputWidgetPlacement(
         MIN_SEPARATION_IN_PX
     }
 
+    /**
+     * Calculates the total required width for all fields and separations in the compact layout.
+     * This helps detect when accessibility font scaling would cause field overflow.
+     */
+    @JvmSynthetic
+    internal fun calculateRequiredWidth(postalCodeEnabled: Boolean): Int {
+        return if (postalCodeEnabled) {
+            peekCardWidth + cardDateSeparation + dateWidth + dateCvcSeparation + 
+            cvcWidth + cvcPostalCodeSeparation + postalCodeWidth
+        } else {
+            peekCardWidth + cardDateSeparation + dateWidth + dateCvcSeparation + cvcWidth
+        }
+    }
+
+    /**
+     * Detects if the current field widths would cause overflow and adapts spacing accordingly.
+     * This addresses accessibility font scaling issues where enlarged text causes field truncation.
+     */
+    @JvmSynthetic
+    internal fun detectAndAdaptForOverflow(
+        frameWidth: Int,
+        postalCodeEnabled: Boolean
+    ): AccessibilityAdaptation {
+        val requiredWidth = calculateRequiredWidth(postalCodeEnabled)
+        val availableWidth = frameWidth
+        
+        return if (requiredWidth > availableWidth) {
+            val overflowAmount = requiredWidth - availableWidth
+            AccessibilityAdaptation.OverflowDetected(
+                overflowAmount = overflowAmount,
+                compressionRatio = availableWidth.toFloat() / requiredWidth.toFloat()
+            )
+        } else {
+            AccessibilityAdaptation.NoOverflow
+        }
+    }
+
+    /**
+     * Sealed class representing different accessibility adaptation states
+     */
+    internal sealed class AccessibilityAdaptation {
+        object NoOverflow : AccessibilityAdaptation()
+        data class OverflowDetected(
+            val overflowAmount: Int,
+            val compressionRatio: Float
+        ) : AccessibilityAdaptation()
+    }
+
     @JvmSynthetic
     internal fun updateSpacing(
         isShowingFullCard: Boolean,
@@ -92,44 +140,166 @@ internal data class CardInputWidgetPlacement(
                 dateStartPosition = frameStart + cardWidth + cardDateSeparation
             }
             postalCodeEnabled -> {
-                this.cardDateSeparation = toMinimalValueIfNegative(
-                    (frameWidth * 3 / 10) - peekCardWidth - dateWidth / 4
+                updateSpacingWithAccessibilitySupport(
+                    postalCodeEnabled = true,
+                    frameStart = frameStart,
+                    frameWidth = frameWidth
                 )
-                this.dateCvcSeparation = toMinimalValueIfNegative(
-                    (frameWidth * 3 / 5) - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
-                )
-                this.cvcPostalCodeSeparation =
-                    toMinimalValueIfNegative(
-                        frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation -
-                            postalCodeWidth
-                    )
-
-                val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
-                this.cardTouchBufferLimit = dateStartPosition / 3
-                this.dateStartPosition = dateStartPosition
-
-                val cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
-                this.dateEndTouchBufferLimit = cvcStartPosition / 3
-                this.cvcStartPosition = cvcStartPosition
-
-                val postalCodeStartPosition = cvcStartPosition + cvcWidth + cvcPostalCodeSeparation
-                this.cvcEndTouchBufferLimit = postalCodeStartPosition / 3
-                this.postalCodeStartPosition = postalCodeStartPosition
             }
             else -> {
-                this.cardDateSeparation = toMinimalValueIfNegative(
-                    frameWidth / 2 - peekCardWidth - dateWidth / 2
+                updateSpacingWithAccessibilitySupport(
+                    postalCodeEnabled = false,
+                    frameStart = frameStart,
+                    frameWidth = frameWidth
                 )
-                this.dateCvcSeparation = toMinimalValueIfNegative(
-                    frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
-                )
-
-                this.cardTouchBufferLimit = frameStart + peekCardWidth + cardDateSeparation / 2
-                this.dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
-
-                this.dateEndTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
-                this.cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
             }
+        }
+    }
+
+    /**
+     * Updates spacing with accessibility font scaling support.
+     * Detects overflow conditions and adapts field spacing to prevent truncation.
+     */
+    @JvmSynthetic
+    private fun updateSpacingWithAccessibilitySupport(
+        postalCodeEnabled: Boolean,
+        frameStart: Int,
+        frameWidth: Int
+    ) {
+        // First, calculate spacing using the original algorithm
+        if (postalCodeEnabled) {
+            updateOriginalPostalCodeSpacing(frameStart, frameWidth)
+        } else {
+            updateOriginalNonPostalCodeSpacing(frameStart, frameWidth)
+        }
+
+        // Check for overflow and adapt if necessary
+        val adaptation = detectAndAdaptForOverflow(frameWidth, postalCodeEnabled)
+        
+        when (adaptation) {
+            is AccessibilityAdaptation.NoOverflow -> {
+                // No adaptation needed, keep original spacing
+            }
+            is AccessibilityAdaptation.OverflowDetected -> {
+                // Apply adaptive spacing to prevent field truncation
+                applyAdaptiveSpacing(
+                    postalCodeEnabled = postalCodeEnabled,
+                    frameStart = frameStart,
+                    frameWidth = frameWidth,
+                    compressionRatio = adaptation.compressionRatio
+                )
+            }
+        }
+    }
+
+    /**
+     * Applies the original postal code spacing algorithm
+     */
+    @JvmSynthetic
+    private fun updateOriginalPostalCodeSpacing(frameStart: Int, frameWidth: Int) {
+        this.cardDateSeparation = toMinimalValueIfNegative(
+            (frameWidth * 3 / 10) - peekCardWidth - dateWidth / 4
+        )
+        this.dateCvcSeparation = toMinimalValueIfNegative(
+            (frameWidth * 3 / 5) - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
+        )
+        this.cvcPostalCodeSeparation =
+            toMinimalValueIfNegative(
+                frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth - dateCvcSeparation -
+                    postalCodeWidth
+            )
+
+        val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
+        this.cardTouchBufferLimit = dateStartPosition / 3
+        this.dateStartPosition = dateStartPosition
+
+        val cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
+        this.dateEndTouchBufferLimit = cvcStartPosition / 3
+        this.cvcStartPosition = cvcStartPosition
+
+        val postalCodeStartPosition = cvcStartPosition + cvcWidth + cvcPostalCodeSeparation
+        this.cvcEndTouchBufferLimit = postalCodeStartPosition / 3
+        this.postalCodeStartPosition = postalCodeStartPosition
+    }
+
+    /**
+     * Applies the original non-postal code spacing algorithm
+     */
+    @JvmSynthetic
+    private fun updateOriginalNonPostalCodeSpacing(frameStart: Int, frameWidth: Int) {
+        this.cardDateSeparation = toMinimalValueIfNegative(
+            frameWidth / 2 - peekCardWidth - dateWidth / 2
+        )
+        this.dateCvcSeparation = toMinimalValueIfNegative(
+            frameWidth - peekCardWidth - cardDateSeparation - dateWidth - cvcWidth
+        )
+
+        this.cardTouchBufferLimit = frameStart + peekCardWidth + cardDateSeparation / 2
+        this.dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
+
+        this.dateEndTouchBufferLimit = dateStartPosition + dateWidth + dateCvcSeparation / 2
+        this.cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
+    }
+
+    /**
+     * Applies adaptive spacing when accessibility font scaling causes overflow.
+     * Proportionally reduces field separations while maintaining minimum touch targets.
+     */
+    @JvmSynthetic
+    private fun applyAdaptiveSpacing(
+        postalCodeEnabled: Boolean,
+        frameStart: Int,
+        frameWidth: Int,
+        compressionRatio: Float
+    ) {
+        // Calculate adaptive separations that fit the available space
+        val totalFieldWidth = if (postalCodeEnabled) {
+            peekCardWidth + dateWidth + cvcWidth + postalCodeWidth
+        } else {
+            peekCardWidth + dateWidth + cvcWidth
+        }
+        
+        val availableSpaceForSeparations = frameWidth - totalFieldWidth
+        val minTotalSeparation = if (postalCodeEnabled) {
+            MIN_SEPARATION_IN_PX * 3 // card-date, date-cvc, cvc-postal
+        } else {
+            MIN_SEPARATION_IN_PX * 2 // card-date, date-cvc
+        }
+
+        if (availableSpaceForSeparations >= minTotalSeparation) {
+            // We can fit with minimal separations
+            if (postalCodeEnabled) {
+                val remainingSpace = availableSpaceForSeparations - minTotalSeparation
+                this.cardDateSeparation = MIN_SEPARATION_IN_PX + remainingSpace / 3
+                this.dateCvcSeparation = MIN_SEPARATION_IN_PX + remainingSpace / 3
+                this.cvcPostalCodeSeparation = MIN_SEPARATION_IN_PX + remainingSpace / 3
+            } else {
+                val remainingSpace = availableSpaceForSeparations - minTotalSeparation
+                this.cardDateSeparation = MIN_SEPARATION_IN_PX + remainingSpace / 2
+                this.dateCvcSeparation = MIN_SEPARATION_IN_PX + remainingSpace / 2
+            }
+        } else {
+            // Extreme case: use absolute minimum separations
+            this.cardDateSeparation = MIN_SEPARATION_IN_PX
+            this.dateCvcSeparation = MIN_SEPARATION_IN_PX
+            if (postalCodeEnabled) {
+                this.cvcPostalCodeSeparation = MIN_SEPARATION_IN_PX
+            }
+        }
+
+        // Recalculate positions with new separations
+        val dateStartPosition = frameStart + peekCardWidth + cardDateSeparation
+        this.cardTouchBufferLimit = dateStartPosition / 3
+        this.dateStartPosition = dateStartPosition
+
+        val cvcStartPosition = dateStartPosition + dateWidth + dateCvcSeparation
+        this.dateEndTouchBufferLimit = cvcStartPosition / 3
+        this.cvcStartPosition = cvcStartPosition
+
+        if (postalCodeEnabled) {
+            val postalCodeStartPosition = cvcStartPosition + cvcWidth + cvcPostalCodeSeparation
+            this.cvcEndTouchBufferLimit = postalCodeStartPosition / 3
+            this.postalCodeStartPosition = postalCodeStartPosition
         }
     }
 

@@ -321,6 +321,169 @@ class CardInputWidgetPlacementTest {
         ).isNull()
     }
 
+    @Test
+    fun calculateRequiredWidth_postalCodeEnabled_returnsCorrectWidth() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 40,
+            cardDateSeparation = 10,
+            dateWidth = 50,
+            dateCvcSeparation = 10,
+            cvcWidth = 30,
+            cvcPostalCodeSeparation = 10,
+            postalCodeWidth = 60
+        )
+        
+        val requiredWidth = placement.calculateRequiredWidth(postalCodeEnabled = true)
+        
+        // 40 + 10 + 50 + 10 + 30 + 10 + 60 = 210
+        assertThat(requiredWidth).isEqualTo(210)
+    }
+
+    @Test
+    fun calculateRequiredWidth_postalCodeDisabled_returnsCorrectWidth() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 40,
+            cardDateSeparation = 10,
+            dateWidth = 50,
+            dateCvcSeparation = 10,
+            cvcWidth = 30
+        )
+        
+        val requiredWidth = placement.calculateRequiredWidth(postalCodeEnabled = false)
+        
+        // 40 + 10 + 50 + 10 + 30 = 140
+        assertThat(requiredWidth).isEqualTo(140)
+    }
+
+    @Test
+    fun detectAndAdaptForOverflow_whenNoOverflow_returnsNoOverflow() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 40,
+            cardDateSeparation = 10,
+            dateWidth = 50,
+            dateCvcSeparation = 10,
+            cvcWidth = 30
+        )
+        
+        val adaptation = placement.detectAndAdaptForOverflow(
+            frameWidth = 200, // More than required 140
+            postalCodeEnabled = false
+        )
+        
+        assertThat(adaptation).isInstanceOf(CardInputWidgetPlacement.AccessibilityAdaptation.NoOverflow::class.java)
+    }
+
+    @Test
+    fun detectAndAdaptForOverflow_whenOverflow_returnsOverflowDetected() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 60,
+            cardDateSeparation = 20,
+            dateWidth = 80,
+            dateCvcSeparation = 20,
+            cvcWidth = 40,
+            cvcPostalCodeSeparation = 20,
+            postalCodeWidth = 100
+        )
+        
+        val adaptation = placement.detectAndAdaptForOverflow(
+            frameWidth = 250, // Less than required 340
+            postalCodeEnabled = true
+        )
+        
+        assertThat(adaptation).isInstanceOf(CardInputWidgetPlacement.AccessibilityAdaptation.OverflowDetected::class.java)
+        val overflowAdaptation = adaptation as CardInputWidgetPlacement.AccessibilityAdaptation.OverflowDetected
+        assertThat(overflowAdaptation.overflowAmount).isEqualTo(90) // 340 - 250
+        assertThat(overflowAdaptation.compressionRatio).isWithin(0.01f).of(0.735f) // 250/340
+    }
+
+    @Test
+    fun updateSpacingWithAccessibilitySupport_whenOverflow_reducesSpacing() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 60,
+            dateWidth = 80,
+            cvcWidth = 40,
+            postalCodeWidth = 80
+        )
+        
+        placement.updateSpacing(
+            isShowingFullCard = false,
+            postalCodeEnabled = true,
+            frameStart = 0,
+            frameWidth = 280 // Tight space that would cause overflow with normal spacing
+        )
+        
+        // Verify that separations are reduced to fit the available space
+        val totalSeparations = placement.cardDateSeparation + 
+                              placement.dateCvcSeparation + 
+                              placement.cvcPostalCodeSeparation
+        val totalFieldWidth = placement.peekCardWidth + placement.dateWidth + 
+                             placement.cvcWidth + placement.postalCodeWidth
+        
+        assertThat(totalFieldWidth + totalSeparations).isAtMost(280)
+        
+        // Verify minimum separations are maintained
+        assertThat(placement.cardDateSeparation).isAtLeast(10)
+        assertThat(placement.dateCvcSeparation).isAtLeast(10)
+        assertThat(placement.cvcPostalCodeSeparation).isAtLeast(10)
+    }
+
+    @Test
+    fun updateSpacingWithAccessibilitySupport_whenNoOverflow_maintainsOriginalSpacing() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 40,
+            dateWidth = 50,
+            cvcWidth = 30,
+            postalCodeWidth = 60
+        )
+        
+        // Capture original spacing with wide frame
+        placement.updateSpacing(
+            isShowingFullCard = false,
+            postalCodeEnabled = true,
+            frameStart = 0,
+            frameWidth = 500 // Wide space with no overflow
+        )
+        
+        val originalCardDateSeparation = placement.cardDateSeparation
+        val originalDateCvcSeparation = placement.dateCvcSeparation
+        val originalCvcPostalSeparation = placement.cvcPostalCodeSeparation
+        
+        // Test again with the same parameters - should get same spacing
+        placement.updateSpacing(
+            isShowingFullCard = false,
+            postalCodeEnabled = true,
+            frameStart = 0,
+            frameWidth = 500
+        )
+        
+        assertThat(placement.cardDateSeparation).isEqualTo(originalCardDateSeparation)
+        assertThat(placement.dateCvcSeparation).isEqualTo(originalDateCvcSeparation)
+        assertThat(placement.cvcPostalCodeSeparation).isEqualTo(originalCvcPostalSeparation)
+    }
+
+    @Test
+    fun applyAdaptiveSpacing_extremeOverflow_usesMinimumSeparations() {
+        val placement = CardInputWidgetPlacement(
+            peekCardWidth = 100,
+            dateWidth = 100,
+            cvcWidth = 80,
+            postalCodeWidth = 120
+        )
+        
+        // Total field width: 400, but only 410 available (extreme case)
+        placement.updateSpacing(
+            isShowingFullCard = false,
+            postalCodeEnabled = true,
+            frameStart = 0,
+            frameWidth = 410
+        )
+        
+        // Should use minimum separations of 10px each
+        assertThat(placement.cardDateSeparation).isEqualTo(10)
+        assertThat(placement.dateCvcSeparation).isEqualTo(10)
+        assertThat(placement.cvcPostalCodeSeparation).isEqualTo(10)
+    }
+
     private companion object {
         private const val SCREEN_WIDTH = 500
         private const val BRAND_ICON_WIDTH = 60
