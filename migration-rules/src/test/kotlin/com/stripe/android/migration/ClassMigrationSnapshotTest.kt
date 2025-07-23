@@ -24,6 +24,8 @@ class ClassMigrationSnapshotTest {
         rule.visitFile(ktFile)
         
         val correctedCode = ktFile.text
+
+        // Compare the autocorrected code with expected output
         assertEquals(expectedCode.trim(), correctedCode.trim())
     }
 }
