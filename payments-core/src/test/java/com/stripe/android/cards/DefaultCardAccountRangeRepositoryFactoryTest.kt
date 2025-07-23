@@ -37,7 +37,7 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
         val event = analyticsRequests.first()
 
         assertThat(event.params["event"]).isEqualTo("stripe_android.card_metadata_pk_unavailable")
-        assertThat(event.params["product_usage"]).isEqualTo("SomeProduct")
+        assertThat(event.params["product_usage"]).isEqualTo(listOf("SomeProduct"))
     }
 
     @Test
@@ -51,6 +51,6 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
         val event = analyticsRequests.first()
 
         assertThat(event.params["event"]).isEqualTo("stripe_android.card_metadata_pk_available")
-        assertThat(event.params["product_usage"]).isEqualTo("SomeProduct")
+        assertThat(event.params["product_usage"]).isEqualTo(listOf("SomeProduct"))
     }
 }

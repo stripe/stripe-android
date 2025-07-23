@@ -16,7 +16,12 @@ internal fun NetworkRule.validateAnalyticsRequest(
         host("q.stripe.com"),
         method("GET"),
         query("event", eventName),
-        query("product_usage", urlEncode(productUsage.joinToString(","))),
+        // q.stripe.com pulls these as HTTP query array elements
+        *productUsage
+            .map { usage ->
+                query(urlEncode("product_usage[]"), urlEncode(usage))
+            }
+            .toTypedArray(),
         *requestMatchers,
     ) { response ->
         response.status = "HTTP/1.1 200 OK"

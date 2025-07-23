@@ -365,7 +365,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.SourceCreate,
-                productUsage = "CardInputView"
+                productUsage = listOf("CardInputView")
             )
         }
 
@@ -610,7 +610,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.PaymentIntentConfirm,
-                productUsage = productUsage,
+                productUsage = listOf(productUsage),
             )
         }
 
@@ -640,7 +640,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.PaymentIntentConfirm,
-                productUsage = productUsage,
+                productUsage = listOf(productUsage),
                 errorMessage = "ioException",
             )
         }
@@ -674,7 +674,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.PaymentIntentConfirm,
-                productUsage = productUsage,
+                productUsage = listOf(productUsage),
                 errorMessage = "apiError",
             )
         }
@@ -833,7 +833,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
-                productUsage = productUsage,
+                productUsage = listOf(productUsage),
             )
         }
 
@@ -865,7 +865,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
-                productUsage = productUsage,
+                productUsage = listOf(productUsage),
                 errorMessage = "ioException",
             )
         }
@@ -901,7 +901,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
-                productUsage = productUsage,
+                productUsage = listOf(productUsage),
                 errorMessage = "apiError",
             )
         }
@@ -1473,7 +1473,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.TokenCreate,
-                productUsage = "CardInputView",
+                productUsage = listOf("CardInputView"),
             )
         }
 
@@ -1613,7 +1613,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.PaymentMethodCreate,
-                productUsage = "CardInputView",
+                productUsage = listOf("CardInputView"),
             )
         }
 
@@ -1653,7 +1653,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.PaymentMethodCreate,
-                productUsage = "PaymentSheet",
+                productUsage = listOf("PaymentSheet"),
             )
         }
 
@@ -3251,7 +3251,7 @@ internal class StripeApiRepositoryTest {
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
         event: PaymentAnalyticsEvent,
-        productUsage: String? = null
+        productUsage: List<String>? = null
     ) {
         verify(fraudDetectionDataRepository, times(2))
             .refresh()
@@ -3261,7 +3261,7 @@ internal class StripeApiRepositoryTest {
 
     private fun verifyAnalyticsRequest(
         event: PaymentAnalyticsEvent,
-        productUsage: String? = null,
+        productUsage: List<String>? = null,
         errorMessage: String? = null
     ) {
         verify(analyticsRequestExecutor)

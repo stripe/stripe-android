@@ -123,7 +123,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         validateAnalyticsRequest(
             eventName = "stripe_android.payment_method_creation",
-            additionalProductUsage = setOf("deferred-intent", "autopm"),
+            additionalProductUsage = setOf("deferred-intent"),
         )
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         validateAnalyticsRequest(

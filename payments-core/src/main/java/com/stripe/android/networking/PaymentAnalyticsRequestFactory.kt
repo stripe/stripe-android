@@ -81,7 +81,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         return super.createRequest(
             event = event,
             additionalParams = defaultProductUsageTokens
-                .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
+                .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.toList()) }
                 .orEmpty()
                 .plus(additionalParams),
         )
@@ -242,7 +242,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return defaultProductUsageTokens
             .plus(productUsageTokens)
-            .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
+            .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.toList()) }
             .orEmpty()
             .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
             .plus(createTokenTypeParam(sourceType, tokenType))

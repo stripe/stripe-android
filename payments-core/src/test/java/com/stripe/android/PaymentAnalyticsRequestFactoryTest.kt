@@ -118,7 +118,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "bindings_version" to StripeSdkVersion.VERSION_NAME,
                 "app_name" to "com.stripe.android.test",
                 "app_version" to 0,
-                "product_usage" to ATTRIBUTION.joinToString(","),
+                "product_usage" to ATTRIBUTION.toList(),
                 "source_type" to "card",
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
@@ -148,7 +148,7 @@ class PaymentAnalyticsRequestFactoryTest {
                 "bindings_version" to StripeSdkVersion.VERSION_NAME,
                 "app_name" to "com.stripe.android.test",
                 "app_version" to 0,
-                "product_usage" to ATTRIBUTION.joinToString(","),
+                "product_usage" to ATTRIBUTION.toList(),
                 "source_type" to "card",
                 "is_development" to true,
                 "session_id" to AnalyticsRequestFactory.sessionId,
@@ -271,7 +271,7 @@ class PaymentAnalyticsRequestFactoryTest {
         assertThat(params)
             .hasSize(VALID_PARAM_FIELDS.size - 2)
         assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
-        assertEquals(ATTRIBUTION.joinToString(","), params[PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE])
+        assertEquals(ATTRIBUTION.toList(), params[PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE])
         assertEquals(Token.Type.Card.code, params[PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE])
         assertEquals(Build.VERSION.SDK_INT, params[AnalyticsFields.OS_VERSION])
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
@@ -390,7 +390,7 @@ class PaymentAnalyticsRequestFactoryTest {
 
         val productUsage = analyticsRequest.params["product_usage"]
         assertThat(productUsage)
-            .isEqualTo("Hello,World")
+            .isEqualTo(listOf("Hello", "World"))
     }
 
     @Test
@@ -407,7 +407,7 @@ class PaymentAnalyticsRequestFactoryTest {
         )
 
         assertThat(analyticsRequest.params["product_usage"])
-            .isEqualTo("Hello")
+            .isEqualTo(listOf("Hello"))
     }
 
     @Test
@@ -423,7 +423,7 @@ class PaymentAnalyticsRequestFactoryTest {
         )
 
         val productUsage = analyticsRequest.params["product_usage"]
-        assertThat(productUsage).isEqualTo("Hello")
+        assertThat(productUsage).isEqualTo(listOf("Hello"))
     }
 
     private companion object {

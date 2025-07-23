@@ -75,9 +75,21 @@ object RequestMatchers {
 
     fun query(name: String, value: String): RequestMatcher {
         return ToStringRequestMatcher("query($name, $value)") { request ->
-            request.path.substringAfter("?")
+            val unparsedQueryParameters = request.path.substringAfter("?")
                 .split("&")
-                .associate { Pair(it.substringBefore("="), it.substringAfter("=")) }[name] == value
+
+            val parameters = mutableMapOf<String, List<String>>()
+
+            unparsedQueryParameters.forEach {
+                val queryKey = it.substringBefore("=")
+                val queryValue = it.substringAfter("=")
+
+                parameters[queryKey] = parameters[queryValue]?.let { values ->
+                    values + value
+                } ?: listOf(value)
+            }
+
+            parameters[name]?.contains(value) ?: false
         }
     }
 
