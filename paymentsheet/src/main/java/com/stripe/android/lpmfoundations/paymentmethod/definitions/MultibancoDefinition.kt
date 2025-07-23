@@ -34,6 +34,7 @@ private object MultibancoUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         paymentMethodDefinition = MultibancoDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_multibanco,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_multibanco,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_multibanco_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_multibanco_night,
     )
 }

@@ -358,6 +358,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     code = "google_pay",
                     displayName = PaymentsCoreR.string.stripe_google_pay.resolvableString,
                     iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark,
+                    iconResourceNight = null,
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,

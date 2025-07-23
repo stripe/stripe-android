@@ -75,22 +75,13 @@ internal fun NewPaymentMethodTabLayoutUI(
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
-                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
-                    item.darkThemeIconUrl
-                } else {
-                    item.lightThemeIconUrl
-                }
                 NewPaymentMethodTab(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
-                    iconRes = if (LocalIconStyle.current == IconStyle.Filled) {
-                        item.iconResource
-                    } else {
-                        item.outlinedIconResource ?: item.iconResource
-                    },
-                    iconUrl = iconUrl,
+                    iconRes = item.icon(),
+                    iconUrl = item.iconUrl(),
                     imageLoader = imageLoader,
                     title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,

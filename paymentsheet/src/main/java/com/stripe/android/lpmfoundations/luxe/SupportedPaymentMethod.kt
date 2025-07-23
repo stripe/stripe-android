@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.luxe
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -10,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.ui.IconHelper
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -27,6 +29,8 @@ internal data class SupportedPaymentMethod(
 
     /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
     @DrawableRes val iconResource: Int,
+
+    @DrawableRes val iconResourceNight: Int? = null,
 
     /** An optional light theme icon url if it's supported. */
     val lightThemeIconUrl: String?,
@@ -48,6 +52,7 @@ internal data class SupportedPaymentMethod(
         sharedDataSpec: SharedDataSpec? = null,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
+        @DrawableRes iconResourceNight: Int? = null,
         iconRequiresTinting: Boolean = false,
         subtitle: ResolvableString? = null,
         @DrawableRes outlinedIconResource: Int? = null,
@@ -55,6 +60,7 @@ internal data class SupportedPaymentMethod(
         code = paymentMethodDefinition.type.code,
         displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
+        iconResourceNight = iconResourceNight,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
         iconRequiresTinting = iconRequiresTinting,
@@ -67,6 +73,7 @@ internal data class SupportedPaymentMethod(
         syntheticCode: PaymentMethodCode = code,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
+        @DrawableRes iconResourceNight: Int? = null,
         iconRequiresTinting: Boolean = false,
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
@@ -77,6 +84,7 @@ internal data class SupportedPaymentMethod(
         syntheticCode = syntheticCode,
         displayName = displayNameResource.resolvableString,
         iconResource = iconResource,
+        iconResourceNight = iconResourceNight,
         lightThemeIconUrl = lightThemeIconUrl,
         darkThemeIconUrl = darkThemeIconUrl,
         iconRequiresTinting = iconRequiresTinting,
@@ -91,6 +99,7 @@ internal data class SupportedPaymentMethod(
             displayName = displayName,
             shouldShowIcon = true,
             iconResource = iconResource,
+            iconResourceNight = iconResourceNight,
             outlinedIconResource = outlinedIconResource,
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
@@ -119,6 +128,7 @@ internal data class SupportedPaymentMethod(
             syntheticCode = syntheticCode,
             displayName = displayName,
             iconResource = iconResource,
+            iconResourceNight = iconResourceNight,
             outlinedIconResource = outlinedIconResource,
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
@@ -128,4 +138,18 @@ internal data class SupportedPaymentMethod(
             onClick = onClick,
         )
     }
+
+    @Composable
+    @DrawableRes
+    fun icon() = IconHelper.icon(
+        iconRes = iconResource,
+        iconResNight = iconResourceNight,
+        outlinedIconResource = outlinedIconResource
+    )
+
+    @Composable
+    fun iconUrl() = IconHelper.iconUrl(
+        lightThemeIconUrl = lightThemeIconUrl,
+        darkThemeIconUrl = darkThemeIconUrl
+    )
 }
