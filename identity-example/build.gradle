@@ -22,11 +22,25 @@ emerge {
 }
 
 android {
+    compileSdkVersion 36
+
     defaultConfig {
         applicationId "com.stripe.android.identity.example"
         versionCode 20
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        targetSdkVersion 36
+        minSdkVersion 34
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled true
+            signingConfig signingConfigs.debug
+            shrinkResources true
+        }
     }
 
     buildFeatures {
