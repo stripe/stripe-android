@@ -83,8 +83,10 @@ class OnrampCoordinator @Inject internal constructor(
      * @param onrampCallbacks Callbacks for handling asynchronous responses from the coordinator.
      */
     class Builder(
-        private val onrampCallbacks: OnrampCallbacks
-    ) {
+        private val onrampCallbacks: OnrampCallbacks,
+        private val publishableKey: String,
+        private val stripeAccountId: String,
+        ) {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.
          *
@@ -141,10 +143,20 @@ class OnrampCoordinator @Inject internal constructor(
                 )
             }
 
+            val cryptoApiRepository = CryptoApiRepository(
+                stripeNetworkClient = DefaultStripeNetworkClient(),
+                publishableKeyProvider = { publishableKey },
+                stripeAccountIdProvider = { stripeAccountId },
+                apiVersion = Stripe.API_VERSION,
+                sdkVersion = StripeSdkVersion.VERSION,
+                appInfo = Stripe.appInfo
+            )
+
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
                 factory = OnrampCoordinatorViewModel.Factory(
                     linkController = linkController,
+                    cryptoApiRepository = cryptoApiRepository,
                     onrampCallbacks = onrampCallbacks
                 )
             ).get(

@@ -33,6 +33,7 @@ import kotlinx.coroutines.launch
 internal class OnrampCoordinatorViewModel(
     private val handle: SavedStateHandle,
     private val linkController: LinkController,
+    private val cryptoApiRepository: CryptoApiRepository,
     private val onrampCallbacks: OnrampCallbacks
 ) : ViewModel() {
 
@@ -43,10 +44,6 @@ internal class OnrampCoordinatorViewModel(
         get() = handle["configuration"]
         set(value) = handle.set("configuration", value)
 
-    private var cryptoApiRepository: CryptoApiRepository?
-        get() = handle["cryptoApiRepository"]
-        set(value) = handle.set("cryptoApiRepository", value)
-
     /**
      * Configure the view model and associated types.
      *
@@ -54,15 +51,6 @@ internal class OnrampCoordinatorViewModel(
      */
     fun configure(configuration: OnrampConfiguration) {
         onRampConfiguration = configuration
-
-        cryptoApiRepository = CryptoApiRepository(
-            stripeNetworkClient = DefaultStripeNetworkClient(),
-            publishableKeyProvider = { configuration.publishableKey },
-            stripeAccountIdProvider = { configuration.stripeAccountId },
-            apiVersion = Stripe.API_VERSION,
-            sdkVersion = StripeSdkVersion.VERSION,
-            appInfo = Stripe.appInfo
-        )
 
         viewModelScope.launch {
             val config = LinkController.Configuration.Builder(merchantDisplayName = "").build()
@@ -165,6 +153,7 @@ internal class OnrampCoordinatorViewModel(
 
     internal class Factory(
         private val linkController: LinkController,
+        private val cryptoApiRepository: CryptoApiRepository,
         private val onrampCallbacks: OnrampCallbacks
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -172,6 +161,7 @@ internal class OnrampCoordinatorViewModel(
             return OnrampCoordinatorViewModel(
                 handle = extras.createSavedStateHandle(),
                 linkController = linkController,
+                cryptoApiRepository = cryptoApiRepository,
                 onrampCallbacks = onrampCallbacks
             ) as T
         }

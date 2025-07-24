@@ -63,13 +63,16 @@ internal class OnrampActivity : ComponentActivity() {
             registerUserCallback = viewModel::onRegisterUserResult
         )
 
-        onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
+        onrampCoordinator = OnrampCoordinator.Builder(
+            callbacks,
+            "pk_test_your_key_here",
+            "test_account_id"
+        ).build(this)
 
         val configuration = OnrampConfiguration(
-            publishableKey = "pk_test_your_key_here",
-            stripeAccountId = "test_account_id",
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
+
         onrampCoordinator.configure(configuration)
 
         setContent {
