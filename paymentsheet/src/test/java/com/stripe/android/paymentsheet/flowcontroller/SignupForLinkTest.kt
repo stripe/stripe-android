@@ -1,13 +1,12 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
@@ -18,24 +17,23 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
+import com.stripe.android.paymentsheet.ui.FakeSignupToLinkToggleInteractor
 import com.stripe.android.testing.FakeLogger
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.whenever
 
 class SignupForLinkTest {
 
-    private val linkAccountHolder = mock<LinkAccountHolder>()
-    private val linkHandler = mock<LinkHandler>()
-    private val signupToLinkToggleInteractor = mock<SignupToLinkToggleInteractor>()
+    private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+    private val signupToLinkToggleInteractor = FakeSignupToLinkToggleInteractor()
     private val logger = FakeLogger()
-    private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
-    private val linkComponent = mock<LinkComponent>()
     private val linkAccountManager = FakeLinkAccountManager()
+    private val linkComponent = FakeLinkComponent(linkAccountManager = linkAccountManager)
+    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component = linkComponent)
+    private val linkHandler = LinkHandler(linkConfigurationCoordinator)
 
     private val signupForLink = SignupForLink(
         linkAccountHolder = linkAccountHolder,
@@ -78,52 +76,51 @@ class SignupForLinkTest {
     @Test
     fun `invoke should return early when signup toggle is disabled`() = runTest {
         // Given
-        whenever(signupToLinkToggleInteractor.getSignupToLinkValue()).thenReturn(false)
+        signupToLinkToggleInteractor.setSignupToLinkValue(false)
 
         // When
         signupForLink(testLinkConfiguration, testPaymentSelection)
 
         // Then
-        verifyNoInteractions(linkAccountHolder, linkHandler)
+        // Verify that signup was not attempted
+        linkAccountManager.ensureAllEventsConsumed()
     }
 
     @Test
     fun `invoke should return early when link account already exists`() = runTest {
         // Given
-        whenever(signupToLinkToggleInteractor.getSignupToLinkValue()).thenReturn(true)
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
         val existingAccount = mock<LinkAccount>()
         val accountInfo = LinkAccountUpdate.Value(existingAccount)
-        whenever(linkAccountHolder.linkAccountInfo).thenReturn(MutableStateFlow(accountInfo))
+        linkAccountHolder.set(accountInfo)
 
         // When
         signupForLink(testLinkConfiguration, testPaymentSelection)
 
         // Then
-        verifyNoInteractions(linkHandler)
+        // Verify that signup was not attempted
+        linkAccountManager.ensureAllEventsConsumed()
     }
 
     @Test
     fun `invoke should return early when linkConfiguration is null`() = runTest {
         // Given
-        whenever(signupToLinkToggleInteractor.getSignupToLinkValue()).thenReturn(true)
-        whenever(linkAccountHolder.linkAccountInfo).thenReturn(
-            MutableStateFlow(LinkAccountUpdate.Value(null))
-        )
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
 
         // When
         signupForLink(null, testPaymentSelection)
 
         // Then
-        verifyNoInteractions(linkHandler)
+        // Verify that signup was not attempted
+        linkAccountManager.ensureAllEventsConsumed()
     }
 
     @Test
     fun `invoke should return early when email is null`() = runTest {
         // Given
-        whenever(signupToLinkToggleInteractor.getSignupToLinkValue()).thenReturn(true)
-        whenever(linkAccountHolder.linkAccountInfo).thenReturn(
-            MutableStateFlow(LinkAccountUpdate.Value(null))
-        )
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
 
         val paymentSelectionWithoutEmail = PaymentSelection.New.Card(
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
@@ -137,22 +134,22 @@ class SignupForLinkTest {
         signupForLink(testLinkConfiguration, paymentSelectionWithoutEmail)
 
         // Then
-        verifyNoInteractions(linkHandler)
+        // Verify that signup was not attempted
+        linkAccountManager.ensureAllEventsConsumed()
     }
 
     @Test
     fun `invoke should return early when paymentSelection is null`() = runTest {
         // Given
-        whenever(signupToLinkToggleInteractor.getSignupToLinkValue()).thenReturn(true)
-        whenever(linkAccountHolder.linkAccountInfo).thenReturn(
-            MutableStateFlow(LinkAccountUpdate.Value(null))
-        )
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
 
         // When
         signupForLink(testLinkConfiguration, null)
 
         // Then
-        verifyNoInteractions(linkHandler)
+        // Verify that signup was not attempted
+        linkAccountManager.ensureAllEventsConsumed()
     }
 
     @Test
@@ -177,7 +174,7 @@ class SignupForLinkTest {
         // Then
         val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
         assertThat(signInCall).isEqualTo(expectedUserInput)
-        
+
         val createCardCall = linkAccountManager.awaitCreateCardPaymentDetailsCall()
         assertThat(createCardCall).isEqualTo(testPaymentSelection.paymentMethodCreateParams)
     }
@@ -275,7 +272,7 @@ class SignupForLinkTest {
         // Should still sign up to Link with user input (since we have email)
         val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
         assertThat(signInCall).isEqualTo(expectedUserInput)
-        
+
         // But should NOT create card payment details since it's not a New payment selection
         // No more invocations should be made to createCardPaymentDetails
     }
@@ -336,13 +333,7 @@ class SignupForLinkTest {
     }
 
     private fun setupSuccessfulSignupMocks() {
-        whenever(signupToLinkToggleInteractor.getSignupToLinkValue()).thenReturn(true)
-        whenever(linkAccountHolder.linkAccountInfo).thenReturn(
-            MutableStateFlow(LinkAccountUpdate.Value(null))
-        )
-        whenever(linkHandler.linkConfigurationCoordinator).thenReturn(linkConfigurationCoordinator)
-        whenever(linkConfigurationCoordinator.getComponent(testLinkConfiguration))
-            .thenReturn(linkComponent)
-        whenever(linkComponent.linkAccountManager).thenReturn(linkAccountManager)
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
     }
 }
