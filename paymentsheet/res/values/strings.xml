@@ -49,6 +49,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Save your payment information with Link, and securely check out in 1-click on Link-supported sites.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Title for the Link signup toggle that merchants can render -->
+  <string name="stripe_link_signup_toggle_title">Save my info for faster checkout with Link</string>
+  <!-- Description for the Link signup toggle that merchants can render -->
+  <string name="stripe_link_signup_toggle_description">Pay faster everywhere Link is accepted.</string>
   <!-- Confirm CTA for the update card screen in Link native -->
   <string name="stripe_link_update_card_confirm_cta">Update card</string>
   <!-- Text informing the user that the card to be updated is their default -->

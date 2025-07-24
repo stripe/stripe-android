@@ -68,8 +68,8 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -185,15 +185,11 @@ internal class DefaultFlowController @Inject internal constructor(
         viewModel.flowControllerStateComponent.walletButtonsContent.Content()
     }
 
-    override val linkSignupToggleState: StateFlow<PaymentSheet.LinkSignupToggleState> =
+    override val linkSignupOptInState: StateFlow<PaymentSheet.LinkSignupOptInState> =
         viewModel.flowControllerStateComponent.signupToLinkToggleInteractor.state
-            .mapAsStateFlow {
-                PaymentSheet.LinkSignupToggleState(
-                    shouldDisplay = it.shouldDisplay,
-                    title = it.title,
-                    subtitle = it.subtitle
-                )
-            }
+
+    override val linkSignupOptInValue: MutableStateFlow<Boolean> =
+        viewModel.flowControllerStateComponent.signupToLinkToggleInteractor.toggleValue
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -249,10 +245,6 @@ internal class DefaultFlowController @Inject internal constructor(
         return viewModel.paymentSelection?.let {
             paymentOptionFactory.create(it)
         }
-    }
-
-    override fun setLinkSignupToggleValue(isChecked: Boolean) {
-        viewModel.flowControllerStateComponent.signupToLinkToggleInteractor.handleToggleChange(isChecked)
     }
 
     private fun withCurrentState(block: (State) -> Unit) {

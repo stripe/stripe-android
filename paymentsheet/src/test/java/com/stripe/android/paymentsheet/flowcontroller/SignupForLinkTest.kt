@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.FakeSignupToLinkToggleInteractor
 import com.stripe.android.testing.FakeLogger
@@ -35,11 +36,14 @@ class SignupForLinkTest {
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component = linkComponent)
     private val linkHandler = LinkHandler(linkConfigurationCoordinator)
 
+    private val eventReporter = FakeEventReporter()
+
     private val signupForLink = SignupForLink(
         linkAccountHolder = linkAccountHolder,
         linkHandler = linkHandler,
         signupToLinkToggleInteractor = signupToLinkToggleInteractor,
-        logger = logger
+        logger = logger,
+        eventReporter = eventReporter
     )
 
     private val testEmail = "test@example.com"

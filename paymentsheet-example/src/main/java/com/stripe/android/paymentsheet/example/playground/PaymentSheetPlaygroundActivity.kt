@@ -27,8 +27,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
@@ -76,6 +82,7 @@ import kotlinx.coroutines.withContext
     ExperimentalCustomPaymentMethodsApi::class,
     WalletButtonsPreview::class,
 )
+@Suppress("LargeClass")
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
@@ -330,37 +337,47 @@ internal class PaymentSheetPlaygroundActivity :
 
     @Composable
     private fun LinkSignupToggle(flowController: PaymentSheet.FlowController) {
-        val linkSignupToggleState by flowController.linkSignupToggleState.collectAsState()
-        var isChecked by remember { mutableStateOf(false) }
+        val linkSignupOptInState by flowController.linkSignupOptInState.collectAsState()
+        val isChecked by flowController.linkSignupOptInValue.collectAsState()
 
-        if (linkSignupToggleState.shouldDisplay) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f)
+        when (val state = linkSignupOptInState) {
+            is PaymentSheet.LinkSignupOptInState.Visible -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = linkSignupToggleState.title,
-                        style = MaterialTheme.typography.body1
-                    )
-                    Text(
-                        text = linkSignupToggleState.subtitle,
-                        style = MaterialTheme.typography.caption,
-                        color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = state.title,
+                            style = MaterialTheme.typography.body1
+                        )
+                        Text(
+                            text = state.description,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                        LinkText(
+                            text = state.termsAndConditions,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = { checked ->
+                            flowController.linkSignupOptInValue.value = checked
+                        }
                     )
                 }
-                Switch(
-                    checked = isChecked,
-                    onCheckedChange = { checked ->
-                        isChecked = checked
-                        flowController.setLinkSignupToggleValue(checked)
-                    }
-                )
+            }
+            PaymentSheet.LinkSignupOptInState.Hidden -> {
+                Text("not shown.")
+                // Don't display anything when hidden
             }
         }
     }
@@ -733,6 +750,34 @@ internal class PaymentSheetPlaygroundActivity :
                 .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
+}
+
+@Composable
+private fun LinkText(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    style: TextStyle = MaterialTheme.typography.body1,
+) {
+    val styledText = remember(text) {
+        buildAnnotatedString {
+            append(text)
+            text.getLinkAnnotations(0, text.length)
+                .forEach { annotation ->
+                    addStyle(
+                        style = SpanStyle(textDecoration = TextDecoration.Underline),
+                        start = annotation.start,
+                        end = annotation.end
+                    )
+                }
+        }
+    }
+
+    Text(
+        text = styledText,
+        style = style.copy(color = color),
+        modifier = modifier
+    )
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"

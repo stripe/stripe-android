@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
@@ -17,7 +18,8 @@ internal class SignupForLink @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val linkHandler: LinkHandler,
     private val signupToLinkToggleInteractor: SignupToLinkToggleInteractor,
-    private val logger: Logger
+    private val logger: Logger,
+    private val eventReporter: EventReporter
 ) {
 
     suspend operator fun invoke(
@@ -51,13 +53,19 @@ internal class SignupForLink @Inject constructor(
             val accountResult = linkAccountManager.signInWithUserInput(userInput)
             if (accountResult.isSuccess) {
                 logger.debug("Link account created successfully")
+                eventReporter.onLinkUserSignupSucceeded()
                 createCardPaymentDetailsIfNeeded(paymentSelection, linkAccountManager)
             } else {
-                val errorMessage = accountResult.exceptionOrNull()?.message
+                val error = accountResult.exceptionOrNull()
+                val errorMessage = error?.message
                 logger.debug("Failed to create Link account: $errorMessage")
+                if (error != null) {
+                    eventReporter.onLinkUserSignupFailed(error)
+                }
             }
         } catch (e: StripeException) {
             logger.debug("Failed to create Link account: ${e.message}")
+            eventReporter.onLinkUserSignupFailed(e)
         }
     }
 
@@ -73,9 +81,12 @@ internal class SignupForLink @Inject constructor(
             )
             if (cardPaymentDetailsResult.isSuccess) {
                 logger.debug("Card payment details created in Link successfully")
+                eventReporter.onLinkUserPaymentDetailCreationCompleted(error = null)
             } else {
-                val errorMessage = cardPaymentDetailsResult.exceptionOrNull()?.message
+                val error = cardPaymentDetailsResult.exceptionOrNull()
+                val errorMessage = error?.message
                 logger.debug("Failed to create card payment details: $errorMessage")
+                eventReporter.onLinkUserPaymentDetailCreationCompleted(error = error)
             }
         }
     }
