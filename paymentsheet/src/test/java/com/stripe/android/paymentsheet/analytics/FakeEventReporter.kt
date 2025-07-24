@@ -275,6 +275,15 @@ internal class FakeEventReporter : EventReporter {
     override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
     }
 
+    override fun onLinkUserSignupSucceeded() {
+    }
+
+    override fun onLinkUserSignupFailed(error: Throwable) {
+    }
+
+    override fun onLinkUserPaymentDetailCreationCompleted(error: Throwable?) {
+    }
+
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection,
         val error: PaymentSheetConfirmationError

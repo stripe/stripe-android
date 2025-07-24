@@ -13,6 +13,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.AnnotatedString
 import androidx.fragment.app.Fragment
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
@@ -48,6 +49,7 @@ import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -3294,13 +3296,27 @@ class PaymentSheet internal constructor(
     }
 
     /**
-     * State information for the Link signup toggle that merchants can observe to render their own UI.
+     * State information for the Link signup opt-in that merchants can observe to render their own UI.
      */
-    data class LinkSignupToggleState(
-        val shouldDisplay: Boolean,
-        val title: String,
-        val subtitle: String
-    )
+    sealed class LinkSignupOptInState {
+        /**
+         * The current user has been recognized as a Link consumer. No signup opt-in UI should be shown.
+         */
+        data object Hidden : LinkSignupOptInState()
+
+        /**
+         * The current user has not been recognized as a Link consumer. Display signup opt-in UI.
+         *
+         * @param title The title text to display
+         * @param description The description text to display
+         * @param termsAndConditions The terms and conditions text with clickable links
+         */
+        data class Visible(
+            val title: String,
+            val description: String,
+            val termsAndConditions: AnnotatedString
+        ) : LinkSignupOptInState()
+    }
 
     /**
      * A class that presents the individual steps of a payment sheet flow.
@@ -3317,10 +3333,18 @@ class PaymentSheet internal constructor(
         fun WalletButtons()
 
         /**
-         * StateFlow that provides information about the Link signup toggle display state and content.
-         * Merchants can observe this to render their own Link signup toggle UI.
+         * StateFlow that provides information about the Link signup opt-in display state and content.
+         * Merchants can observe this to render their own Link signup opt-in UI.
          */
-        val linkSignupToggleState: StateFlow<PaymentSheet.LinkSignupToggleState>
+        val linkSignupOptInState: StateFlow<LinkSignupOptInState>
+
+        /**
+         * MutableStateFlow for the Link signup opt-in toggle value.
+         * Merchants can observe this value and update it directly to control the toggle state.
+         * Use this like: `flowController.linkSignupOptInValue.value = true`
+         * Or observe changes: `flowController.linkSignupOptInValue.collect { isChecked -> ... }`
+         */
+        val linkSignupOptInValue: MutableStateFlow<Boolean>
 
         /**
          * Configure the FlowController to process a [PaymentIntent].
@@ -3366,13 +3390,6 @@ class PaymentSheet internal constructor(
          * You can use this to e.g. display the payment option in your UI.
          */
         fun getPaymentOption(): PaymentOption?
-
-        /**
-         * Set the value of the Link signup toggle.
-         * This allows merchants to programmatically control whether the customer has opted in to Link signup.
-         * @param isChecked true if the customer has opted in to Link signup, false otherwise
-         */
-        fun setLinkSignupToggleValue(isChecked: Boolean)
 
         /**
          * Present a sheet where the customer chooses how to pay, either by selecting an existing

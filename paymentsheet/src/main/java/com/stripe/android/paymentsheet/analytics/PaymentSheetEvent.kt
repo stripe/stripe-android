@@ -706,6 +706,50 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class LinkUserSignupSucceeded(
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "link.new_user_signup_api.signup_success"
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class LinkUserSignupFailed(
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        error: Throwable,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "link.new_user_signup_api.signup_failure"
+        override val additionalParams: Map<String, Any?> = buildMap {
+            val errorParams = ErrorReporter.getAdditionalParamsFromError(error)
+            putAll(errorParams)
+        }
+    }
+
+    class LinkUserPaymentDetailCreationCompleted(
+        override val isDeferred: Boolean,
+        override val isSpt: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        error: Throwable?,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = if (error == null) {
+            "link.new_user_signup_api.payment_detail_creation_success"
+        } else {
+            "link.new_user_signup_api.payment_detail_creation_failure"
+        }
+        override val additionalParams: Map<String, Any?> = buildMap {
+            error?.let { err ->
+                val errorParams = ErrorReporter.getAdditionalParamsFromError(err)
+                putAll(errorParams)
+            }
+        }
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         isSpt: Boolean,

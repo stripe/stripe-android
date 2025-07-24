@@ -45,6 +45,7 @@ import javax.inject.Singleton
     ]
 )
 internal interface FlowControllerStateComponent {
+    val application: Application
     val flowControllerComponentBuilder: FlowControllerComponent.Builder
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler

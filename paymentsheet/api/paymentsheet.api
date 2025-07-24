@@ -2127,11 +2127,11 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public static fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
-	public abstract fun getLinkSignupToggleState ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getLinkSignupOptInState ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun getLinkSignupOptInValue ()Lkotlinx/coroutines/flow/MutableStateFlow;
 	public abstract fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
 	public abstract fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
 	public abstract fun presentPaymentOptions ()V
-	public abstract fun setLinkSignupToggleValue (Z)V
 	public abstract fun setShippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
 }
 
@@ -2486,17 +2486,29 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$LinkConfiguratio
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration$Display;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheet$LinkSignupToggleState {
+public abstract class com/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState {
 	public static final field $stable I
-	public fun <init> (ZLjava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Z
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (ZLjava/lang/String;Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupToggleState;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupToggleState;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupToggleState;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState$Hidden : com/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState$Hidden;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getShouldDisplay ()Z
-	public final fun getSubtitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState$Visible : com/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/text/AnnotatedString;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Landroidx/compose/ui/text/AnnotatedString;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/text/AnnotatedString;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState$Visible;
+	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState$Visible;Ljava/lang/String;Ljava/lang/String;Landroidx/compose/ui/text/AnnotatedString;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheet$LinkSignupOptInState$Visible;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getTermsAndConditions ()Landroidx/compose/ui/text/AnnotatedString;
 	public final fun getTitle ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

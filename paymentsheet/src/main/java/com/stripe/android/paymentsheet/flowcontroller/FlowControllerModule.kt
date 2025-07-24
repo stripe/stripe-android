@@ -117,8 +117,13 @@ internal object FlowControllerModule {
     @Singleton
     fun providesSignupToLinkToggleInteractor(
         viewModel: FlowControllerViewModel,
+        application: Application,
     ): SignupToLinkToggleInteractor {
-        return DefaultSignupToLinkToggleInteractor.create(viewModel)
+        return DefaultSignupToLinkToggleInteractor(
+            flowControllerState = viewModel.stateFlow,
+            linkAccountHolder = viewModel.flowControllerStateComponent.linkAccountHolder,
+            application = application,
+        )
     }
 
     @Provides
