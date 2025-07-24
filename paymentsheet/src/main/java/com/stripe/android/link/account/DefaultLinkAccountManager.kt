@@ -142,6 +142,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 name = userInput.name,
                 consentAction = userInput.consentAction,
             )
+            is UserInput.SignUpOptionalPhone -> signUpIfValidSessionState(
+                email = userInput.email,
+                country = userInput.country,
+                phone = userInput.phone,
+                name = userInput.name,
+                consentAction = userInput.consentAction,
+            )
         }
 
     override suspend fun logOut(): Result<ConsumerSession> {
@@ -171,8 +178,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
      */
     private suspend fun signUpIfValidSessionState(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -220,8 +227,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun signUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
