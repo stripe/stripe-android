@@ -7,16 +7,20 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
+import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -43,7 +47,7 @@ class OnrampCoordinator @Inject internal constructor(
     fun configure(
         configuration: OnrampConfiguration,
     ) {
-        viewModel.configure(configuration, onrampCallbacks.configurationCallback)
+        viewModel.configure(configuration)
     }
 
     /**
@@ -115,6 +119,10 @@ class OnrampCoordinator @Inject internal constructor(
         ): OnrampCoordinator {
             val linkElementCallbackIdentifier = "OnrampCoordinator"
 
+            var authCallback: (LinkController.AuthenticationResult) -> Unit = {}
+            var lookupCallback: (LinkController.LookupConsumerResult) -> Unit = {}
+            var registerCallback: (LinkController.RegisterConsumerResult) -> Unit = {}
+
             val linkController: LinkController by lazy {
                 // Resolve the hosting activity, fail fast if incorrect type
                 val activity: ComponentActivity =
@@ -126,16 +134,16 @@ class OnrampCoordinator @Inject internal constructor(
                 LinkController.create(
                     activity = activity,
                     presentPaymentMethodsCallback = { /* No-op for now */ },
-                    lookupConsumerCallback = { handleConsumerLookupResult(it) },
+                    lookupConsumerCallback = { lookupCallback(it) },
                     createPaymentMethodCallback = { /* No-op for now */ },
-                    authenticationCallback = { handleAuthenticationResult(it) },
-                    registerConsumerCallback = { handleRegisterNewUserResult(it) },
+                    authenticationCallback = { authCallback(it) },
+                    registerConsumerCallback = { registerCallback(it) },
                 )
             }
 
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = OnrampCoordinatorViewModel.Factory(linkController = linkController)
+                factory = OnrampCoordinatorViewModel.Factory(linkController = linkController, onrampCallbacks = onrampCallbacks)
             ).get(
                 key = "OnRampCoordinatorViewModel(instance = $linkElementCallbackIdentifier)",
                 modelClass = OnrampCoordinatorViewModel::class.java
@@ -157,50 +165,12 @@ class OnrampCoordinator @Inject internal constructor(
                     .onrampCallbacks(onrampCallbacks)
                     .build()
 
-            return onrampComponent.onrampCoordinator
-        }
+            val coordinator = onrampComponent.onrampCoordinator
+            authCallback = viewModel::handleAuthenticationResult
+            lookupCallback = viewModel::handleConsumerLookupResult
+            registerCallback = viewModel::handleRegisterNewUserResult
 
-        private fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
-            when (result) {
-                is LinkController.LookupConsumerResult.Success ->
-                    onrampCallbacks.linkLookupCallback.onResult(
-                        OnrampLinkLookupResult.Completed(result.isConsumer)
-                    )
-                is LinkController.LookupConsumerResult.Failed ->
-                    onrampCallbacks.linkLookupCallback.onResult(
-                        OnrampLinkLookupResult.Failed(result.error)
-                    )
-            }
-        }
-
-        private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
-            when (result) {
-                is LinkController.AuthenticationResult.Success ->
-                    onrampCallbacks.authenticationCallback.onResult(
-                        OnrampVerificationResult.Completed("temporary-id")
-                    )
-                is LinkController.AuthenticationResult.Failed ->
-                    onrampCallbacks.authenticationCallback.onResult(
-                        OnrampVerificationResult.Failed(result.error)
-                    )
-                is LinkController.AuthenticationResult.Canceled ->
-                    onrampCallbacks.authenticationCallback.onResult(
-                        OnrampVerificationResult.Cancelled()
-                    )
-            }
-        }
-
-        private fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
-            when (result) {
-                is LinkController.RegisterConsumerResult.Success ->
-                    onrampCallbacks.registerUserCallback.onResult(
-                        OnrampRegisterUserResult.Completed(customerId = "temporary-id")
-                    )
-                is LinkController.RegisterConsumerResult.Failed ->
-                    onrampCallbacks.registerUserCallback.onResult(
-                        OnrampRegisterUserResult.Failed(result.error)
-                    )
-            }
+            return coordinator
         }
     }
 }
