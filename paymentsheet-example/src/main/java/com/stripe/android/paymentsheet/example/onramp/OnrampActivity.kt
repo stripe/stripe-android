@@ -67,6 +67,7 @@ internal class OnrampActivity : ComponentActivity() {
 
         val configuration = OnrampConfiguration(
             publishableKey = "pk_test_your_key_here",
+            stripeAccountId = "test_account_id",
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
         onrampCoordinator.configure(configuration)
