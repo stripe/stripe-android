@@ -7,20 +7,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
-import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
-import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -143,7 +136,10 @@ class OnrampCoordinator @Inject internal constructor(
 
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = OnrampCoordinatorViewModel.Factory(linkController = linkController, onrampCallbacks = onrampCallbacks)
+                factory = OnrampCoordinatorViewModel.Factory(
+                    linkController = linkController,
+                    onrampCallbacks = onrampCallbacks
+                )
             ).get(
                 key = "OnRampCoordinatorViewModel(instance = $linkElementCallbackIdentifier)",
                 modelClass = OnrampCoordinatorViewModel::class.java

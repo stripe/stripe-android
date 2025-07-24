@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
