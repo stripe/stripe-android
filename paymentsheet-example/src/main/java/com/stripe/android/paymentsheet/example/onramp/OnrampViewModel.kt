@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -135,6 +136,19 @@ internal class OnrampViewModel : ViewModel() {
             }
             is OnrampVerificationResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+        }
+    }
+
+    fun onRegisterUserResult(result: OnrampRegisterUserResult) {
+        when (result) {
+            is OnrampRegisterUserResult.Completed -> {
+                _message.value = "Registration successful"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+            is OnrampRegisterUserResult.Failed -> {
+                _message.value = "Registration failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.EmailInput
             }
         }
