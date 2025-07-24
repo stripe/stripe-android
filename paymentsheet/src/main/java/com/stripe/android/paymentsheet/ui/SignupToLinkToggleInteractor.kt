@@ -2,15 +2,10 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
-import androidx.lifecycle.viewModelScope
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -31,22 +26,19 @@ internal interface SignupToLinkToggleInteractor {
 }
 
 internal class DefaultSignupToLinkToggleInteractor(
-    private val arguments: StateFlow<Arguments?>,
+    private val flowControllerState: StateFlow<DefaultFlowController.State?>,
     private val linkAccountHolder: LinkAccountHolder,
-    private val coroutineScope: CoroutineScope,
 ) : SignupToLinkToggleInteractor {
 
     private val _isChecked = MutableStateFlow(false)
 
     override val state: StateFlow<SignupToLinkToggleInteractor.State> = combineAsStateFlow(
-        arguments,
+        flowControllerState,
         _isChecked,
         linkAccountHolder.linkAccountInfo
-    ) { arguments, isChecked, linkAccountInfo ->
-        val shouldDisplay = arguments?.run {
-            paymentMethodMetadata.linkState != null &&
-                linkAccountInfo.account == null
-        } ?: false
+    ) { state, isChecked, linkAccountInfo ->
+        val metadata = state?.paymentSheetState?.paymentMethodMetadata
+        val shouldDisplay = metadata?.linkState != null && linkAccountInfo.account == null
 
         SignupToLinkToggleInteractor.State(
             shouldDisplay = shouldDisplay,
@@ -64,35 +56,13 @@ internal class DefaultSignupToLinkToggleInteractor(
         return _isChecked.value
     }
 
-    data class Arguments(
-        val paymentMethodMetadata: PaymentMethodMetadata,
-        val configuration: CommonConfiguration,
-        val appearance: PaymentSheet.Appearance,
-        val initializationMode: PaymentElementLoader.InitializationMode,
-    )
-
     companion object {
         fun create(
             flowControllerViewModel: FlowControllerViewModel,
         ): SignupToLinkToggleInteractor {
             return DefaultSignupToLinkToggleInteractor(
-                arguments = combineAsStateFlow(
-                    flowControllerViewModel.stateFlow,
-                    flowControllerViewModel.configureRequest,
-                ) { flowControllerState, configureRequest ->
-                    if (flowControllerState != null && configureRequest != null) {
-                        Arguments(
-                            configuration = flowControllerState.paymentSheetState.config,
-                            paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
-                            appearance = configureRequest.configuration.appearance,
-                            initializationMode = configureRequest.initializationMode,
-                        )
-                    } else {
-                        null
-                    }
-                },
+                flowControllerState = flowControllerViewModel.stateFlow,
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
-                coroutineScope = flowControllerViewModel.viewModelScope,
             )
         }
     }
