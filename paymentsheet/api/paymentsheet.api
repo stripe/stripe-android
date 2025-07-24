@@ -1535,6 +1535,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded;
 	public final fun paymentMethodIconMargins (Lcom/stripe/android/paymentsheet/PaymentSheet$Insets;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder;
 	public final fun rowStyle (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$RowStyle;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder;
+	public final fun subtitleFont (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Font;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder;
 	public final fun titleFont (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography$Font;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder;
 }
 

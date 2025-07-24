@@ -178,17 +178,18 @@ internal object AppearanceStore {
                     null
                 }
 
+                val font = PaymentSheet.Typography.Font(
+                    fontFamily = fontFamilyRes,
+                    fontSizeSp = fontSizeSp,
+                    fontWeight = fontWeight,
+                    letterSpacingSp = letterSpacingSp
+                )
+
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
                     .paymentMethodIconMargins(insets)
-                    .titleFont(
-                        PaymentSheet.Typography.Font(
-                            fontFamily = fontFamilyRes,
-                            fontSizeSp = fontSizeSp,
-                            fontWeight = fontWeight,
-                            letterSpacingSp = letterSpacingSp
-                        )
-                    )
+                    .titleFont(font)
+                    .subtitleFont(font)
                     .build()
             }
 

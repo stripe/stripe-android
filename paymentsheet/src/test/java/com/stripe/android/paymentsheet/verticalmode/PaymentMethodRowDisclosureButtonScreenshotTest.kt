@@ -144,7 +144,7 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
 
     @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
-    fun testTitleFont() {
+    fun testFonts() {
         testPaymentMethodRowButton_Disclosure(
             appearance = PaymentSheet.Appearance.Embedded.Builder()
                 .rowStyle(FlatWithDisclosure.default)
@@ -154,6 +154,14 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
                         fontSizeSp = 20f,
                         fontWeight = 30,
                         letterSpacingSp = 10f
+                    )
+                )
+                .subtitleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 12f,
+                        fontWeight = 20,
+                        letterSpacingSp = 5f
                     )
                 )
                 .build()
