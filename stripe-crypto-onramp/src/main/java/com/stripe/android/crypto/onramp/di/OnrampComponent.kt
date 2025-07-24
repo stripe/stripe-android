@@ -21,6 +21,7 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
+        OnrampModule::class
     ]
 )
 internal interface OnrampComponent {
@@ -48,5 +49,6 @@ internal interface OnrampComponent {
         fun onrampCallbacks(onrampCallbacks: OnrampCallbacks): Builder
 
         fun build(): OnrampComponent
+
     }
 }

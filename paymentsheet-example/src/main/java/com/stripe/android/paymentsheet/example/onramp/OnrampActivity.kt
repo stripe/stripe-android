@@ -65,8 +65,8 @@ internal class OnrampActivity : ComponentActivity() {
 
         onrampCoordinator = OnrampCoordinator.Builder(
             callbacks,
-            "pk_test_your_key_here",
-            "test_account_id"
+            publishableKey = "pk_test_your_key_here",
+            stripeAccountId = "test_account_id"
         ).build(this)
 
         val configuration = OnrampConfiguration(

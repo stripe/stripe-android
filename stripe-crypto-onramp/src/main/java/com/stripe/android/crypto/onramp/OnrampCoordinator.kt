@@ -36,7 +36,8 @@ import javax.inject.Inject
 class OnrampCoordinator @Inject internal constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
-    private val onrampCallbacks: OnrampCallbacks
+    private val onrampCallbacks: OnrampCallbacks,
+    private val cryptoApiRepository: CryptoApiRepository
 ) {
 
     /**
@@ -85,8 +86,8 @@ class OnrampCoordinator @Inject internal constructor(
     class Builder(
         private val onrampCallbacks: OnrampCallbacks,
         private val publishableKey: String,
-        private val stripeAccountId: String,
-        ) {
+        private val stripeAccountId: String
+    ) {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.
          *
@@ -142,15 +143,6 @@ class OnrampCoordinator @Inject internal constructor(
                     registerConsumerCallback = { registerCallback(it) },
                 )
             }
-
-            val cryptoApiRepository = CryptoApiRepository(
-                stripeNetworkClient = DefaultStripeNetworkClient(),
-                publishableKeyProvider = { publishableKey },
-                stripeAccountIdProvider = { stripeAccountId },
-                apiVersion = Stripe.API_VERSION,
-                sdkVersion = StripeSdkVersion.VERSION,
-                appInfo = Stripe.appInfo
-            )
 
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,

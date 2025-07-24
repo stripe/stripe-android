@@ -99,7 +99,7 @@ internal class OnrampCoordinatorViewModel(
         when (result) {
             is LinkController.AuthenticationResult.Success ->
                 viewModelScope.launch {
-                    val permissionsResult = requireNotNull(cryptoApiRepository).grantPartnerMerchantPermissions("")
+                    val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions("")
 
                     permissionsResult.fold(
                         onSuccess = {
@@ -129,7 +129,7 @@ internal class OnrampCoordinatorViewModel(
         when (result) {
             is LinkController.RegisterConsumerResult.Success ->
                 viewModelScope.launch {
-                    val permissionsResult = requireNotNull(cryptoApiRepository).grantPartnerMerchantPermissions("")
+                    val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions("")
 
                     permissionsResult.fold(
                         onSuccess = {
