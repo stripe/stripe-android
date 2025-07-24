@@ -27,12 +27,9 @@ fi
 echo "📁 Setting up migration tools..."
 cp -r "$SCRIPT_DIR" "$PROJECT_PATH/migration-rules"
 
-# Copy documentation
-cp "$SCRIPT_DIR/MIGRATION_GUIDE.md" "$PROJECT_PATH/"
-
 # Update the source path in build.gradle to point to the user's project
 echo "⚙️  Configuring migration..."
-sed -i.bak "s|setSource(files(\"/Users/cttsai/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/common/analytics/testfile.kt\"))|setSource(files(\"$PROJECT_PATH\"))|" "$PROJECT_PATH/migration-rules/build.gradle"
+sed -i.bak "s|setSource(files(\"\${projectDir}\"))|setSource(files(\"$PROJECT_PATH\"))|" "$PROJECT_PATH/migration-rules/build.gradle"
 
 # Run the migration
 echo "🔍 Running migration (auto-fixing code)..."
