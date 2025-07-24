@@ -476,6 +476,14 @@ class LinkController @Inject internal constructor(
         fun onRegisterConsumerResult(result: RegisterConsumerResult)
     }
 
+    /**
+     * Information about a Link consumer account.
+     *
+     * @param email The email address associated with the Link account.
+     * @param redactedPhoneNumber The phone number associated with the account, with sensitive digits redacted.
+     * @param sessionState The current session state of the Link account.
+     * @param consumerSessionClientSecret The client secret for the consumer session, if available.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     @Poko
@@ -486,10 +494,18 @@ class LinkController @Inject internal constructor(
         val consumerSessionClientSecret: String?,
     ) : Parcelable
 
+    /**
+     * Represents the current session state of a Link consumer account.
+     */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class SessionState {
+        /** The user is not logged in to their Link account. */
         LoggedOut,
+
+        /** The user is logged in but needs to verify their account (e.g., via SMS). */
         NeedsVerification,
+
+        /** The user is fully logged in and verified. */
         LoggedIn,
     }
 
