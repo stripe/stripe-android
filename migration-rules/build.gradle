@@ -64,8 +64,7 @@ tasks.register('detektMigration', Detekt) {
     parallel = false  // Disable parallel execution to avoid concurrent modifications
     autoCorrect = true
     config.setFrom(files("config/detekt/migration.yml"))
-//    setSource(files("${projectDir}"))
-    setSource(files("/Users/cttsai/stripe/stripe-android/paymentsheet/src/main/java/com/stripe/android/common/analytics/testfile.kt"))
+    setSource(files("${projectDir}"))
     include("**/*.kt")
     exclude("**/build/**", "**/migration-rules/**")
 }

@@ -29,6 +29,13 @@ internal object MigrationConfiguration {
             toPackage = "elements",
             toClass = "CardBrandAcceptance",
             description = "CardBrandAcceptance moved from paymentsheet to elements package"
+        ),
+        ClassMigrationRule(
+            fromPackage = "paymentsheet",
+            fromClass = "PaymentSheet.FlowController",
+            toPackage = "elements",
+            toClass = "FlowController",
+            description = "FlowController moved from paymentsheet to elements package"
         )
     )
 } 
