@@ -50,6 +50,8 @@ constructor(
      */
     var mandateData: MandateDataParams? = null,
 
+    var radarOptions: RadarOptions? = null,
+
     /**
      * Indicates that this should be the default payment method going forward.
      */
@@ -87,6 +89,9 @@ constructor(
                 mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
             }.orEmpty()
         ).plus(paymentMethodParamMap)
+            .plus(
+                radarOptions?.toParamMap().orEmpty()
+            )
     }
 
     private val paymentMethodParamMap: Map<String, Any>

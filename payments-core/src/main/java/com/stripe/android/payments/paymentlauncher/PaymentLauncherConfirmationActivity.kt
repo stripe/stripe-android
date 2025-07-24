@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.hcaptcha.performPassiveHCaptcha
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.uicore.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
@@ -84,6 +85,14 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             statusBarColor = args.statusBarColor,
         )
 
+        viewModel.registerCaptchaFetcher {
+            performPassiveHCaptcha(
+                activity = this,
+                siteKey = "143aadb6-fb60-4ab6-b128-f7fe53426d4a",
+                rqdata = null,
+            )
+        }
+
         when (args) {
             is PaymentLauncherContract.Args.IntentConfirmationArgs -> {
                 viewModel.confirmStripeIntent(args.confirmStripeIntentParams, host)
@@ -111,7 +120,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
      */
     private fun finishWithResult(result: InternalPaymentResult) {
         setResult(
-            Activity.RESULT_OK,
+            RESULT_OK,
             Intent()
                 .putExtras(result.toBundle())
         )

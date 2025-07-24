@@ -40,6 +40,7 @@ constructor(
     private val shopPay: ShopPay? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    val radarOptions: RadarOptions? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
 
@@ -74,6 +75,7 @@ constructor(
         shopPay: ShopPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        radarOptions: RadarOptions? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
         overrideParamMap: Map<String, @RawValue Any>? = null
@@ -96,6 +98,7 @@ constructor(
         shopPay,
         billingDetails,
         allowRedisplay,
+        radarOptions,
         metadata,
         productUsage,
         overrideParamMap
@@ -298,6 +301,8 @@ constructor(
                 metadata?.let {
                     mapOf(PARAM_METADATA to it)
                 }.orEmpty()
+            ).plus(
+                radarOptions?.toParamMap().orEmpty()
             )
 
         return params.plus(

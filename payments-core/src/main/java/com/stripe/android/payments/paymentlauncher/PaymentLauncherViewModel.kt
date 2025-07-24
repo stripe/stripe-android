@@ -21,6 +21,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.RadarOptions
+import com.stripe.android.model.RadarSession
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.paymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -45,6 +47,8 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+
+typealias HcaptchaTokenFetcher = suspend () -> String
 
 /**
  * [ViewModel] for [PaymentLauncherConfirmationActivity].
@@ -80,6 +84,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
 
     internal val internalPaymentResult = MutableStateFlow<InternalPaymentResult?>(null)
 
+    private var getHcaptchaToken: HcaptchaTokenFetcher? = null
+
     /**
      * Registers the calling activity to listen to payment flow results. Should be called in the
      * activity onCreate.
@@ -103,6 +109,10 @@ internal class PaymentLauncherViewModel @Inject constructor(
         )
     }
 
+    internal fun registerCaptchaFetcher(hcaptchaTokenFetcher: HcaptchaTokenFetcher) {
+        this.getHcaptchaToken = hcaptchaTokenFetcher
+    }
+
     /**
      * Confirms a payment intent or setup intent
      */
@@ -124,6 +134,17 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     confirmStripeIntentParams.returnUrl.takeUnless { it.isNullOrBlank() }
                         ?: defaultReturnUrl.value
                 }
+
+//            val hCaptchaToken = requireNotNull(getHcaptchaToken).invoke()
+//
+//            when (confirmStripeIntentParams) {
+//                is ConfirmPaymentIntentParams -> {
+//                    confirmStripeIntentParams.radarOptions = RadarOptions(hCaptchaToken)
+//                }
+//                is ConfirmSetupIntentParams -> {
+//                    confirmStripeIntentParams.radarOptions = RadarOptions(hCaptchaToken)
+//                }
+//            }
 
             confirmIntent(confirmStripeIntentParams, returnUrl).fold(
                 onSuccess = { intent ->

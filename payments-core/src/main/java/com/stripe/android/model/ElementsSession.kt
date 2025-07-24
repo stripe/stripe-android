@@ -58,6 +58,9 @@ data class ElementsSession(
     val allowLinkDefaultOptIn: Boolean
         get() = linkSettings?.linkFlags?.get("link_mobile_disable_default_opt_in") != true
 
+    val enablePassiveCaptcha: Boolean
+        get() = flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -174,6 +177,7 @@ data class ElementsSession(
         ELEMENTS_PREFER_FC_LITE("elements_prefer_fc_lite"),
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
+        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha")
     }
 
     /**

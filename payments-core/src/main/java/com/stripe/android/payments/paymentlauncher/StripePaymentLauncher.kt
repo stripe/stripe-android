@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.ENABLE_PASSIVE_HCAPTCHA
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -28,6 +29,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
     @Assisted(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) private val includePaymentSheetNextHandlers: Boolean,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
+//    @Named(ENABLE_PASSIVE_HCAPTCHA) private val enablePassiveHcaptcha: Boolean,
 ) : PaymentLauncher {
     override fun confirm(params: ConfirmPaymentIntentParams) {
         hostActivityLauncher.launch(

@@ -49,3 +49,9 @@ const val LINEAR_DELAY = "linearDelaySupplier"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val EXPONENTIAL_BACKOFF_DELAY = "exponentialBackoffDelaySupplier"
+
+/**
+ * Name for exponential backoff delay supplier
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val ENABLE_PASSIVE_HCAPTCHA = "enablePassiveHcaptcha"
