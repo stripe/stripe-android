@@ -492,7 +492,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             ?.let { customerEmail ->
                 lookupConsumer(
                     email = customerEmail,
-                    startSession = false,
+                    startSession = true,
                     customerId = config.customerIdForEceDefaultValues
                 )
                     .map { it?.accountStatus }
