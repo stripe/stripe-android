@@ -6,9 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.Stripe
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
@@ -150,21 +147,13 @@ internal class OnrampCoordinatorViewModel(
         }
     }
 
-    class Factory(
+    internal class Factory(
         private val linkController: LinkController,
+        private val cryptoApiRepository: CryptoApiRepository,
         private val onrampCallbacks: OnrampCallbacks
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            val cryptoApiRepository = CryptoApiRepository(
-                stripeNetworkClient = DefaultStripeNetworkClient(),
-                publishableKeyProvider = { "" },
-                stripeAccountIdProvider = { "" },
-                apiVersion = Stripe.API_VERSION,
-                sdkVersion = StripeSdkVersion.VERSION,
-                appInfo = Stripe.appInfo
-            )
-
             return OnrampCoordinatorViewModel(
                 handle = extras.createSavedStateHandle(),
                 linkController = linkController,
