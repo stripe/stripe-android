@@ -2486,6 +2486,7 @@ internal class DefaultFlowControllerTest {
                 isLiveModeProvider = { false },
             ),
             errorReporter = errorReporter,
+            signupForLink = mock(),
             initializedViaCompose = false,
             linkHandler = mock(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
