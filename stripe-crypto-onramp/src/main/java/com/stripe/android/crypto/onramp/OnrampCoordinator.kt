@@ -94,8 +94,7 @@ class OnrampCoordinator @Inject internal constructor(
             return create(
                 viewModelStoreOwner = activity,
                 lifecycleOwner = activity,
-                activityResultRegistryOwner = activity,
-                context = activity.applicationContext
+                activityResultRegistryOwner = activity
             )
         }
 
@@ -109,16 +108,14 @@ class OnrampCoordinator @Inject internal constructor(
                 viewModelStoreOwner = fragment,
                 lifecycleOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
-                    ?: fragment.requireActivity(),
-                context = fragment.requireContext()
+                    ?: fragment.requireActivity()
             )
         }
 
         private fun create(
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
-            activityResultRegistryOwner: ActivityResultRegistryOwner,
-            context: Context
+            activityResultRegistryOwner: ActivityResultRegistryOwner
         ): OnrampCoordinator {
             val linkElementCallbackIdentifier = "OnrampCoordinator"
 
