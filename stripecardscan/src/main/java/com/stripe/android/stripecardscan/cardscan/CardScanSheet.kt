@@ -150,11 +150,25 @@ class CardScanSheet private constructor() {
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
     fun present() {
+        if (!::launcher.isInitialized) {
+            throw IllegalStateException(
+                "CardScanSheet launcher not initialized. " +
+                "CardScanSheet must be created using CardScanSheet.create() method before calling present(). " +
+                "Example: val cardScanSheet = CardScanSheet.create(this, callback)"
+            )
+        }
         present(CardScanConfiguration(elementsSessionId = null))
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun present(configuration: CardScanConfiguration) {
+        if (!::launcher.isInitialized) {
+            throw IllegalStateException(
+                "CardScanSheet launcher not initialized. " +
+                "CardScanSheet must be created using CardScanSheet.create() method before calling present(). " +
+                "Example: val cardScanSheet = CardScanSheet.create(this, callback)"
+            )
+        }
         launcher.launch(CardScanSheetParams(configuration))
     }
 
