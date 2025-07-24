@@ -88,6 +88,8 @@ internal open class FakeLinkAccountManager(
 
     private val signupTurbine = Turbine<SignUpCall>()
     private val mobileSignUpTurbine = Turbine<MobileSignUpCall>()
+    private val signInWithUserInputTurbine = Turbine<UserInput>()
+    private val createCardPaymentDetailsTurbine = Turbine<PaymentMethodCreateParams>()
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
     private val startVerificationTurbine = Turbine<Unit>()
 
@@ -145,8 +147,8 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun signUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -186,6 +188,7 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> {
+        signInWithUserInputTurbine.add(userInput)
         return signInWithUserInputResult
     }
 
@@ -197,6 +200,7 @@ internal open class FakeLinkAccountManager(
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails.New> {
+        createCardPaymentDetailsTurbine.add(paymentMethodCreateParams)
         return createCardPaymentDetailsResult
     }
 
@@ -296,11 +300,21 @@ internal open class FakeLinkAccountManager(
         return logoutCall.awaitItem()
     }
 
+    suspend fun awaitSignInWithUserInputCall(): UserInput {
+        return signInWithUserInputTurbine.awaitItem()
+    }
+
+    suspend fun awaitCreateCardPaymentDetailsCall(): PaymentMethodCreateParams {
+        return createCardPaymentDetailsTurbine.awaitItem()
+    }
+
     fun ensureAllEventsConsumed() {
         lookupTurbine.ensureAllEventsConsumed()
         mobileLookupTurbine.ensureAllEventsConsumed()
         signupTurbine.ensureAllEventsConsumed()
         mobileSignUpTurbine.ensureAllEventsConsumed()
+        signInWithUserInputTurbine.ensureAllEventsConsumed()
+        createCardPaymentDetailsTurbine.ensureAllEventsConsumed()
     }
 
     private fun ConsumerPaymentDetails.toLinkPaymentMethod(): List<LinkPaymentMethod.ConsumerPaymentDetails> =
@@ -327,8 +341,8 @@ internal open class FakeLinkAccountManager(
 
     data class SignUpCall(
         val email: String,
-        val phone: String,
-        val country: String,
+        val phone: String?,
+        val country: String?,
         val name: String?,
         val consentAction: SignUpConsentAction
     )

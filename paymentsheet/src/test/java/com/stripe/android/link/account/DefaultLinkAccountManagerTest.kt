@@ -196,8 +196,8 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun consumerSignUp(
                 actualEmail: String,
-                actualPhone: String,
-                actualCountry: String,
+                actualPhone: String?,
+                actualCountry: String?,
                 actualName: String?,
                 actualConsentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
@@ -239,8 +239,8 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun consumerSignUp(
                 email: String,
-                phone: String,
-                country: String,
+                phone: String?,
+                country: String?,
                 name: String?,
                 consentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
@@ -264,8 +264,8 @@ class DefaultLinkAccountManagerTest {
                 var callCount = 0
                 override suspend fun consumerSignUp(
                     email: String,
-                    phone: String,
-                    country: String,
+                    phone: String?,
+                    country: String?,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
@@ -291,8 +291,8 @@ class DefaultLinkAccountManagerTest {
                 var callCount = 0
                 override suspend fun consumerSignUp(
                     email: String,
-                    phone: String,
-                    country: String,
+                    phone: String?,
+                    country: String?,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
@@ -317,8 +317,8 @@ class DefaultLinkAccountManagerTest {
             var callCount = 0
             override suspend fun consumerSignUp(
                 email: String,
-                phone: String,
-                country: String,
+                phone: String?,
+                country: String?,
                 name: String?,
                 consentAction: ConsumerSignUpConsentAction
             ): Result<ConsumerSessionSignup> {
@@ -344,8 +344,8 @@ class DefaultLinkAccountManagerTest {
                 val consentActions = arrayListOf<ConsumerSignUpConsentAction>()
                 override suspend fun consumerSignUp(
                     email: String,
-                    phone: String,
-                    country: String,
+                    phone: String?,
+                    country: String?,
                     name: String?,
                     consentAction: ConsumerSignUpConsentAction
                 ): Result<ConsumerSessionSignup> {
