@@ -25,13 +25,12 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create {
+        around(IntentsRule())
+    }
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @get:Rule
-    val intentsRule = IntentsRule()
 
     @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
     lateinit var confirmationType: ConfirmationType
