@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
@@ -7,6 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -91,7 +94,8 @@ class OnrampCoordinator @Inject internal constructor(
             return create(
                 viewModelStoreOwner = activity,
                 lifecycleOwner = activity,
-                activityResultRegistryOwner = activity
+                activityResultRegistryOwner = activity,
+                context = activity.applicationContext
             )
         }
 
@@ -105,14 +109,16 @@ class OnrampCoordinator @Inject internal constructor(
                 viewModelStoreOwner = fragment,
                 lifecycleOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
-                    ?: fragment.requireActivity()
+                    ?: fragment.requireActivity(),
+                context = fragment.requireContext()
             )
         }
 
         private fun create(
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
-            activityResultRegistryOwner: ActivityResultRegistryOwner
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
+            context: Context
         ): OnrampCoordinator {
             val linkElementCallbackIdentifier = "OnrampCoordinator"
 
@@ -138,20 +144,10 @@ class OnrampCoordinator @Inject internal constructor(
                 )
             }
 
-            val cryptoApiRepository = CryptoApiRepository(
-                stripeNetworkClient = DefaultStripeNetworkClient(),
-                publishableKeyProvider = { "" },
-                stripeAccountIdProvider = { "" },
-                apiVersion = Stripe.API_VERSION,
-                sdkVersion = StripeSdkVersion.VERSION,
-                appInfo = Stripe.appInfo
-            )
-
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
                 factory = OnrampCoordinatorViewModel.Factory(
                     linkController = linkController,
-                    cryptoApiRepository = cryptoApiRepository,
                     onrampCallbacks = onrampCallbacks
                 )
             ).get(

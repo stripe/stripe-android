@@ -17,5 +17,6 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampConfiguration(
     val publishableKey: String,
+    val stripeAccountId: String,
     val paymentSheetAppearance: PaymentSheet.Appearance
 ) : Parcelable
