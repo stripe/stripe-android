@@ -269,7 +269,6 @@ class LinkController @Inject internal constructor(
     /**
      * Contains information about the current state of the Link controller.
      *
-     * @param isConsumerVerified Whether the Link consumer account is verified. Null if no account is loaded.
      * @param selectedPaymentMethodPreview A preview of the currently selected payment method from Link, if any.
      * @param createdPaymentMethod The [PaymentMethod] created from the selected Link payment method, if any.
      */
@@ -279,10 +278,15 @@ class LinkController @Inject internal constructor(
     class State
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        val isConsumerVerified: Boolean? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val internalLinkAccount: LinkAccount? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
-    ) : Parcelable
+    ) : Parcelable {
+        val isConsumerVerified: Boolean?
+            get() = internalLinkAccount?.sessionState?.let { it == SessionState.LoggedIn }
+    }
 
     /**
      * Result of presenting Link payment methods to the user.
@@ -470,6 +474,23 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface RegisterConsumerCallback {
         fun onRegisterConsumerResult(result: RegisterConsumerResult)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    @Poko
+    class LinkAccount(
+        val email: String,
+        val redactedPhoneNumber: String,
+        val sessionState: SessionState,
+        val consumerSessionClientSecret: String?,
+    ) : Parcelable
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class SessionState {
+        LoggedOut,
+        NeedsVerification,
+        LoggedIn,
     }
 
     /**
