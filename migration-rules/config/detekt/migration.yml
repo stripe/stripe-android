@@ -7,3 +7,5 @@ stripe-v25-migration:
     active: false
   ClassMigration:
     active: true
+  UnusedImportRemoval:
+    active: true
