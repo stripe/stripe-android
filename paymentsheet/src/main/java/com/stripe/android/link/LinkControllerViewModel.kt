@@ -59,15 +59,14 @@ internal class LinkControllerViewModel @Inject constructor(
             LinkController.LinkAccount(
                 email = account.email,
                 redactedPhoneNumber = account.redactedPhoneNumber,
-                sessionState =
-                    when (account.accountStatus.toLoginState()) {
-                        LinkState.LoginState.LoggedOut ->
-                            LinkController.SessionState.LoggedOut
-                        LinkState.LoginState.NeedsVerification ->
-                            LinkController.SessionState.NeedsVerification
-                        LinkState.LoginState.LoggedIn ->
-                            LinkController.SessionState.LoggedIn
-                    },
+                sessionState = when (account.accountStatus.toLoginState()) {
+                    LinkState.LoginState.LoggedOut ->
+                        LinkController.SessionState.LoggedOut
+                    LinkState.LoginState.NeedsVerification ->
+                        LinkController.SessionState.NeedsVerification
+                    LinkState.LoginState.LoggedIn ->
+                        LinkController.SessionState.LoggedIn
+                },
                 consumerSessionClientSecret = account.clientSecret
             )
         }
