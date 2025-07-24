@@ -32,7 +32,6 @@ internal class SignupForLink @Inject constructor(
 
             val billing = paymentSelection?.billingDetails
             val email = billing?.email
-            val phone = billing?.phone
             if (email == null) return
 
             // Attempt Link signup
@@ -41,9 +40,9 @@ internal class SignupForLink @Inject constructor(
 
             val userInput = UserInput.SignUpOptionalPhone(
                 email = email,
-                country = billing.address?.country ?: "US",
-                phone = phone,
-                name = billing.name,
+                country = billing?.address?.country ?: "US",
+                phone = billing?.phone,
+                name = billing?.name,
                 consentAction = SignUpConsentAction.Implied
             )
             logger.debug("Creating Link account with user input: $userInput")
