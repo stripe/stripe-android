@@ -47,7 +47,9 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                 )
             }
             LaunchedEffect(Unit) {
-                linkController.configure(linkControllerConfig)
+                viewModel.onConfigureResult(
+                    result = linkController.configure(linkControllerConfig)
+                )
             }
 
             val linkControllerPlaygroundState by viewModel.linkControllerState.collectAsState()
@@ -82,7 +84,6 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                                 phone = phone,
                                 country = country,
                                 name = name,
-                                consentAction = com.stripe.android.model.ConsumerSignUpConsentAction.Checkbox
                             )
                         },
                         onErrorMessage = { viewModel.status.value = StatusMessage(it) },
