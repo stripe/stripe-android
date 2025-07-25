@@ -340,7 +340,7 @@ class LinkControllerViewModelTest {
     }
 
     @Test
-    fun `onLookupConsumer() on failure emits failure result`() = runTest {
+    fun `onLookupConsumer() on failure emits failure result`() = runTest(dispatcher) {
         val viewModel = createViewModel()
         configure(viewModel)
 
@@ -349,10 +349,8 @@ class LinkControllerViewModelTest {
 
         viewModel.lookupConsumerResultFlow.test {
             viewModel.onLookupConsumer("test@example.com")
-            val result = awaitItem()
-            assertThat(result).isEqualTo(
-                LinkController.LookupConsumerResult.Failed("test@example.com", error)
-            )
+            assertThat(awaitItem())
+                .isEqualTo(LinkController.LookupConsumerResult.Failed("test@example.com", error))
         }
     }
 

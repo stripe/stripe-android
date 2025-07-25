@@ -31,6 +31,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.utils.flatMapCatching
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Job
@@ -115,14 +116,13 @@ internal class LinkControllerViewModel @Inject constructor(
         logger.debug("$tag: updating configuration")
         updateState { State() }
         return linkConfigurationLoader.load(configuration)
-            .mapCatching { config ->
+            .flatMapCatching { config ->
                 val component = linkComponentBuilderProvider.get()
                     .configuration(config)
                     .build()
                 component.linkAttestationCheck.invoke()
                     .toResult()
                     .map { component }
-                    .getOrThrow()
             }
             .fold(
                 onSuccess = { component ->
@@ -336,14 +336,14 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onLookupConsumer(email: String) {
         viewModelScope.launch {
             val result = requireLinkComponent()
-                .map {
-                    val account =
-                        it.linkAuth.lookUp(
-                            email = email,
-                            emailSource = EmailSource.USER_ACTION,
-                            startSession = false
-                        ).toResult().getOrThrow()
-                    account != null
+                .flatMapCatching { component ->
+                    component.linkAuth.lookUp(
+                        email = email,
+                        emailSource = EmailSource.USER_ACTION,
+                        startSession = false
+                    )
+                        .toResult()
+                        .map { it != null }
                 }
                 .fold(
                     onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
@@ -374,14 +374,14 @@ internal class LinkControllerViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val result = requireLinkComponent()
-                .mapCatching {
+                .flatMapCatching {
                     it.linkAuth.signUp(
                         email = email,
                         phoneNumber = phone,
                         country = country,
                         name = name,
                         consentAction = SignUpConsentAction.Implied
-                    ).toResult().getOrThrow()
+                    ).toResult()
                 }
                 .fold(
                     onSuccess = { account ->
