@@ -4,13 +4,15 @@ import androidx.annotation.IntRange
 import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * A representation of a [Card API object](https://stripe.com/docs/api/cards/object).
  */
 @Parcelize
-data class Card
+@Poko
+class Card
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -171,6 +173,55 @@ constructor(
      */
     val tokenizationMethod: TokenizationMethod? = null
 ) : StripeModel, StripePaymentSource {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        expMonth: Int? = this.expMonth,
+        expYear: Int? = this.expYear,
+        name: String? = this.name,
+        addressLine1: String? = this.addressLine1,
+        addressLine1Check: String? = this.addressLine1Check,
+        addressLine2: String? = this.addressLine2,
+        addressCity: String? = this.addressCity,
+        addressState: String? = this.addressState,
+        addressZip: String? = this.addressZip,
+        addressZipCheck: String? = this.addressZipCheck,
+        addressCountry: String? = this.addressCountry,
+        last4: String? = this.last4,
+        brand: CardBrand = this.brand,
+        funding: CardFunding? = this.funding,
+        fingerprint: String? = this.fingerprint,
+        country: String? = this.country,
+        currency: String? = this.currency,
+        customerId: String? = this.customerId,
+        cvcCheck: String? = this.cvcCheck,
+        id: String? = this.id,
+        tokenizationMethod: TokenizationMethod? = this.tokenizationMethod
+    ): Card {
+        return Card(
+            expMonth = expMonth,
+            expYear = expYear,
+            name = name,
+            addressLine1 = addressLine1,
+            addressLine1Check = addressLine1Check,
+            addressLine2 = addressLine2,
+            addressCity = addressCity,
+            addressState = addressState,
+            addressZip = addressZip,
+            addressZipCheck = addressZipCheck,
+            addressCountry = addressCountry,
+            last4 = last4,
+            brand = brand,
+            funding = funding,
+            fingerprint = fingerprint,
+            country = country,
+            currency = currency,
+            customerId = customerId,
+            cvcCheck = cvcCheck,
+            id = id,
+            tokenizationMethod = tokenizationMethod
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

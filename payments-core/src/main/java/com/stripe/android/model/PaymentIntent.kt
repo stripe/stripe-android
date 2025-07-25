@@ -3,9 +3,8 @@ package com.stripe.android.model
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.PaymentIntent.CaptureMethod
-import com.stripe.android.model.PaymentIntent.ConfirmationMethod
 import com.stripe.android.model.parsers.PaymentIntentJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.regex.Pattern
@@ -17,7 +16,8 @@ import java.util.regex.Pattern
  * - [PaymentIntents API Reference](https://stripe.com/docs/api/payment_intents)
  */
 @Parcelize
-data class PaymentIntent
+@Poko
+class PaymentIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -299,7 +299,8 @@ constructor(
      * See [last_payment_error](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-last_payment_error).
      */
     @Parcelize
-    data class Error internal constructor(
+    @Poko
+    class Error internal constructor(
         /**
          * For card errors, the ID of the failed charge.
          */
@@ -360,6 +361,28 @@ constructor(
             }
         }
 
+        internal fun copy(
+            charge: String? = this.charge,
+            code: String? = this.code,
+            declineCode: String? = this.declineCode,
+            docUrl: String? = this.docUrl,
+            message: String? = this.message,
+            param: String? = this.param,
+            paymentMethod: PaymentMethod? = this.paymentMethod,
+            type: Type? = this.type
+        ): Error {
+            return Error(
+                charge = charge,
+                code = code,
+                declineCode = declineCode,
+                docUrl = docUrl,
+                message = message,
+                param = param,
+                paymentMethod = paymentMethod,
+                type = type
+            )
+        }
+
         internal companion object {
             internal const val CODE_AUTHENTICATION_ERROR = "payment_intent_authentication_failure"
         }
@@ -371,7 +394,8 @@ constructor(
      * See [shipping](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-shipping)
      */
     @Parcelize
-    data class Shipping(
+    @Poko
+    class Shipping(
         /**
          * Shipping address.
          *
@@ -494,6 +518,61 @@ constructor(
         internal companion object {
             fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        id: String? = this.id,
+        paymentMethodTypes: List<String> = this.paymentMethodTypes,
+        amount: Long? = this.amount,
+        canceledAt: Long = this.canceledAt,
+        cancellationReason: CancellationReason? = this.cancellationReason,
+        captureMethod: CaptureMethod = this.captureMethod,
+        clientSecret: String? = this.clientSecret,
+        confirmationMethod: ConfirmationMethod = this.confirmationMethod,
+        countryCode: String? = this.countryCode,
+        created: Long = this.created,
+        currency: String? = this.currency,
+        description: String? = this.description,
+        isLiveMode: Boolean = this.isLiveMode,
+        paymentMethod: PaymentMethod? = this.paymentMethod,
+        paymentMethodId: String? = this.paymentMethodId,
+        receiptEmail: String? = this.receiptEmail,
+        status: StripeIntent.Status? = this.status,
+        setupFutureUsage: StripeIntent.Usage? = this.setupFutureUsage,
+        lastPaymentError: Error? = this.lastPaymentError,
+        shipping: Shipping? = this.shipping,
+        unactivatedPaymentMethods: List<String> = this.unactivatedPaymentMethods,
+        linkFundingSources: List<String> = this.linkFundingSources,
+        nextActionData: StripeIntent.NextActionData? = this.nextActionData,
+        paymentMethodOptionsJsonString: String? = this.paymentMethodOptionsJsonString,
+    ): PaymentIntent {
+        return PaymentIntent(
+            id = id,
+            paymentMethodTypes = paymentMethodTypes,
+            amount = amount,
+            canceledAt = canceledAt,
+            cancellationReason = cancellationReason,
+            captureMethod = captureMethod,
+            clientSecret = clientSecret,
+            confirmationMethod = confirmationMethod,
+            countryCode = countryCode,
+            created = created,
+            currency = currency,
+            description = description,
+            isLiveMode = isLiveMode,
+            paymentMethod = paymentMethod,
+            paymentMethodId = paymentMethodId,
+            receiptEmail = receiptEmail,
+            status = status,
+            setupFutureUsage = setupFutureUsage,
+            lastPaymentError = lastPaymentError,
+            shipping = shipping,
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
+        )
     }
 
     companion object {

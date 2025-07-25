@@ -79,7 +79,7 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withBancontact_missingName_shouldFail() {
         val params = PaymentMethodCreateParams.createBancontact(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
         )
 
         val exception = assertFailsWith<InvalidRequestException>(
@@ -121,7 +121,7 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withUSBankAccount_missingEmail_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setEmail(null).build()
         )
         val paymentMethod =
             Stripe(
@@ -135,7 +135,7 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withUSBankAccount_missingName_shouldFail() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT.copy(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
         )
         val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a US Bank Account payment method"
@@ -162,7 +162,7 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withGiropay_missingName_shouldFail() {
         val params = PaymentMethodCreateParams.createGiropay(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
         )
         val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a Giropay payment method"
@@ -187,7 +187,7 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withEps_missingName_shouldFail() {
         val params = PaymentMethodCreateParams.createEps(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
         )
         val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a EPS payment method"
@@ -229,9 +229,8 @@ internal class PaymentMethodEndToEndTest {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createOxxo(
-                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
-                            name = null
-                        )
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null)
+                            .build()
                     )
                 )
         }
@@ -243,9 +242,8 @@ internal class PaymentMethodEndToEndTest {
         ) {
             stripe.createPaymentMethodSynchronous(
                 PaymentMethodCreateParams.createOxxo(
-                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(
-                        email = null
-                    )
+                    billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setEmail(null)
+                        .build()
                 )
             )
         }
@@ -316,7 +314,8 @@ internal class PaymentMethodEndToEndTest {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createAfterpayClearpay(
-                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null)
+                            .build()
                     )
                 )
         }
@@ -330,7 +329,8 @@ internal class PaymentMethodEndToEndTest {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createAfterpayClearpay(
-                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(email = null)
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setEmail(null)
+                            .build()
                     )
                 )
         }
@@ -343,7 +343,8 @@ internal class PaymentMethodEndToEndTest {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createAfterpayClearpay(
-                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
+                        billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setAddress(null)
+                            .build()
                     )
                 )
         ).isNotNull()
@@ -376,7 +377,7 @@ internal class PaymentMethodEndToEndTest {
     @Test
     fun createPaymentMethod_withKlarna_shouldCreateObject() {
         val params = PaymentMethodCreateParams.createKlarna(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy()
+            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
         )
 
         val paymentMethod =
