@@ -19,12 +19,14 @@ import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.wallet.displayName
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Job
@@ -52,6 +54,24 @@ internal class LinkControllerViewModel @Inject constructor(
 
     private val _account = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account }
 
+    private val _internalLinkAccount = _account.mapAsStateFlow {
+        it?.let { account ->
+            LinkController.LinkAccount(
+                email = account.email,
+                redactedPhoneNumber = account.redactedPhoneNumber,
+                sessionState = when (account.accountStatus.toLoginState()) {
+                    LinkState.LoginState.LoggedOut ->
+                        LinkController.SessionState.LoggedOut
+                    LinkState.LoginState.NeedsVerification ->
+                        LinkController.SessionState.NeedsVerification
+                    LinkState.LoginState.LoggedIn ->
+                        LinkController.SessionState.LoggedIn
+                },
+                consumerSessionClientSecret = account.clientSecret
+            )
+        }
+    }
+
     private val _state = MutableStateFlow(State())
 
     private val _presentPaymentMethodsResultFlow =
@@ -77,9 +97,9 @@ internal class LinkControllerViewModel @Inject constructor(
     private var presentJob: Job? = null
 
     fun state(context: Context): StateFlow<LinkController.State> {
-        return combineAsStateFlow(_account, _state) { account, state ->
+        return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
-                isConsumerVerified = account?.isVerified,
+                internalLinkAccount = account,
                 selectedPaymentMethodPreview = state.selectedPaymentMethod?.toPreview(context),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
