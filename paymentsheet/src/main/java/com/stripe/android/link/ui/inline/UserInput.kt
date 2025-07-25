@@ -21,25 +21,11 @@ internal sealed class UserInput : Parcelable {
     @Parcelize
     data class SignUp(
         val email: String,
-        val phone: String,
-        val country: String,
-        val name: String?,
-        val consentAction: SignUpConsentAction
-    ) : UserInput()
-
-    /**
-     * Represents an input that is valid for looking up a link account.
-     *
-     * Intended only for login via the link login toggle.
-     *
-     * @see [com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor]
-     */
-    @Parcelize
-    data class SignUpOptionalPhone(
-        val email: String,
         val phone: String?,
         val country: String?,
         val name: String?,
         val consentAction: SignUpConsentAction
     ) : UserInput()
+
+
 }

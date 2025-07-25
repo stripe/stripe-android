@@ -166,8 +166,8 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun mobileSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         verificationToken: String,
         appId: String,
@@ -349,8 +349,8 @@ internal open class FakeLinkAccountManager(
 
     data class MobileSignUpCall(
         val email: String,
-        val phone: String,
-        val country: String,
+        val phone: String?,
+        val country: String?,
         val name: String?,
         val verificationToken: String,
         val appId: String,

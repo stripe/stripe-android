@@ -157,7 +157,7 @@ class SignupForLinkTest {
         // Given
         setupSuccessfulSignupMocks()
 
-        val expectedUserInput = UserInput.SignUpOptionalPhone(
+        val expectedUserInput = UserInput.SignUp(
             email = testEmail,
             country = testCountry,
             phone = testPhone,
@@ -194,7 +194,7 @@ class SignupForLinkTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        val expectedUserInput = UserInput.SignUpOptionalPhone(
+        val expectedUserInput = UserInput.SignUp(
             email = testEmail,
             country = "US", // Default country
             phone = testPhone,
@@ -257,7 +257,7 @@ class SignupForLinkTest {
         )
         val savedPaymentSelection = PaymentSelection.Saved(paymentMethodWithBillingDetails)
 
-        val expectedUserInput = UserInput.SignUpOptionalPhone(
+        val expectedUserInput = UserInput.SignUp(
             email = testEmail,
             country = testCountry,
             phone = testPhone,
@@ -314,9 +314,9 @@ class SignupForLinkTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        val expectedUserInput = UserInput.SignUpOptionalPhone(
+        val expectedUserInput = UserInput.SignUp(
             email = testEmail,
-            country = "US", // Default
+            country = null,
             phone = null,
             name = null,
             consentAction = SignUpConsentAction.Implied
