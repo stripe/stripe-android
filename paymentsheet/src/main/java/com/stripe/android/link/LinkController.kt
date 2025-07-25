@@ -284,6 +284,9 @@ class LinkController @Inject internal constructor(
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
     ) : Parcelable {
+        /**
+         * Whether the Link consumer account is verified. Null if no account is loaded.
+         */
         val isConsumerVerified: Boolean?
             get() = internalLinkAccount?.sessionState?.let { it == SessionState.LoggedIn }
     }
