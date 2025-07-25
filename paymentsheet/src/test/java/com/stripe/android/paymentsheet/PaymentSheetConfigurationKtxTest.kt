@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import android.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
 import kotlin.test.assertFailsWith
 
@@ -209,7 +210,20 @@ class PaymentSheetConfigurationKtxTest {
                 label = "Merchant, Inc.",
                 buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
             ),
-            primaryButtonColor = ColorStateList.valueOf(Color.BLUE),
+            appearance = PaymentSheet.Appearance(
+                primaryButton = PaymentSheet.PrimaryButton(
+                    colorsLight = PaymentSheet.PrimaryButtonColors(
+                        background = Color.BLUE,
+                        onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                        border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    ),
+                    colorsDark = PaymentSheet.PrimaryButtonColors(
+                        background = Color.BLUE,
+                        onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                        border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    )
+                ),
+            ),
             defaultBillingDetails = PaymentSheet.BillingDetails(
                 name = "Jenny Rosen",
             ),
