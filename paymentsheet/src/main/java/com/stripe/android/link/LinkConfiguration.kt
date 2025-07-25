@@ -54,4 +54,10 @@ internal data class LinkConfiguration(
         val eligible: Boolean,
         val preferredNetworks: List<String>,
     ) : Parcelable
+
+    val enableNewUserSignupAPI: Boolean
+        get() = flags["link_enable_new_user_signup_api"] ?: false
+
+    val newUserSignupInitialValue: Boolean
+        get() = flags["link_new_user_signup_api_initial_value"] ?: false
 }

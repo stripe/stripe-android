@@ -6,6 +6,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.PaymentSheet.LinkSignupOptInState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -28,8 +29,12 @@ internal class SignupForLink @Inject constructor(
             val email = billing?.email
             // Link is disabled
             if (linkConfiguration == null) return
+            // Signup toggle wasn't shown
+            if (signupToLinkToggleInteractor.state == LinkSignupOptInState.Hidden) return
+            // Signup is disabled from backend
+            if (linkConfiguration.enableNewUserSignupAPI.not()) return
             // Signup toggle is off
-            if (!signupToLinkToggleInteractor.toggleValue.value) return
+            if (signupToLinkToggleInteractor.toggleValue.value.not()) return
             // Link account already exists
             if (linkAccountHolder.linkAccountInfo.value.account != null) return
             // No email provided
