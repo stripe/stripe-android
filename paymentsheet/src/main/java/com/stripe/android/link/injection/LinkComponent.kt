@@ -4,6 +4,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import dagger.BindsInstance
@@ -29,6 +30,7 @@ internal abstract class LinkComponent {
     internal abstract val linkAccountManager: LinkAccountManager
     internal abstract val configuration: LinkConfiguration
     internal abstract val linkGate: LinkGate
+    internal abstract val linkAuth: LinkAuth
     internal abstract val linkAttestationCheck: LinkAttestationCheck
     internal abstract val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory
 

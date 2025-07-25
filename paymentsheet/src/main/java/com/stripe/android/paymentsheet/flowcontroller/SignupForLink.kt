@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentSheet.LinkSignupOptInState
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -41,26 +42,35 @@ internal class SignupForLink @Inject constructor(
             if (email == null) return
 
             // Attempt Link signup
-            val linkAccountManager = linkHandler.linkConfigurationCoordinator
-                .getComponent(linkConfiguration).linkAccountManager
+            val linkComponent = linkHandler.linkConfigurationCoordinator
+                .getComponent(linkConfiguration)
+            val linkAuth = linkComponent.linkAuth
+            val linkAccountManager = linkComponent.linkAccountManager
 
-            val userInput = UserInput.SignUpOptionalPhone(
+            val signupResult = linkAuth.signUp(
                 email = email,
-                country = billing.address?.country ?: "US",
-                phone = billing.phone,
+                phoneNumber = billing.phone,
+                country = billing.address?.country,
                 name = billing.name,
                 consentAction = SignUpConsentAction.Implied
             )
 
-            // Create Link account
-            val accountResult = linkAccountManager.signInWithUserInput(userInput)
-            if (accountResult.isSuccess) {
-                eventReporter.onLinkUserSignupSucceeded()
-                createCardPaymentDetailsIfNeeded(paymentSelection, linkAccountManager)
-            } else {
-                val error = accountResult.exceptionOrNull()
-                if (error != null) {
-                    eventReporter.onLinkUserSignupFailed(error)
+            when (signupResult) {
+                is LinkAuthResult.AttestationFailed -> {
+                    eventReporter.onLinkUserSignupFailed(signupResult.error)
+                }
+                is LinkAuthResult.Error -> {
+                    eventReporter.onLinkUserSignupFailed(signupResult.error)
+                }
+                is LinkAuthResult.Success -> {
+                    eventReporter.onLinkUserSignupSucceeded()
+                    createCardPaymentDetailsIfNeeded(paymentSelection, linkAccountManager)
+                }
+                LinkAuthResult.NoLinkAccountFound -> {
+                    eventReporter.onLinkUserSignupFailed(NoLinkAccountFoundException())
+                }
+                is LinkAuthResult.AccountError -> {
+                    eventReporter.onLinkUserSignupFailed(signupResult.error)
                 }
             }
         }.onFailure {

@@ -97,8 +97,8 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun mobileSignUp(
         name: String?,
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
@@ -239,8 +239,8 @@ internal open class FakeLinkRepository : LinkRepository {
     data class MobileSignUpCall(
         val name: String?,
         val email: String,
-        val phoneNumber: String,
-        val country: String,
+        val phoneNumber: String?,
+        val country: String?,
         val consentAction: ConsumerSignUpConsentAction,
         val amount: Long?,
         val currency: String?,

@@ -13,7 +13,6 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.inline.LinkSignupField.Email
 import com.stripe.android.link.ui.inline.LinkSignupField.Name
 import com.stripe.android.link.ui.inline.LinkSignupField.Phone
-import com.stripe.android.link.ui.inline.UserInput.SignUpOptionalPhone
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.uicore.elements.EmailConfig
@@ -291,14 +290,12 @@ internal class InlineSignupViewModel(
         return when (this) {
             is UserInput.SignUp -> email
             is UserInput.SignIn -> email
-            is SignUpOptionalPhone -> email
         }
     }
 
     private fun UserInput.phone(): String? {
         return when (this) {
             is UserInput.SignUp -> phone
-            is SignUpOptionalPhone -> phone
             is UserInput.SignIn -> null
         }
     }
@@ -306,7 +303,6 @@ internal class InlineSignupViewModel(
     private fun UserInput.name(): String? {
         return when (this) {
             is UserInput.SignUp -> name
-            is SignUpOptionalPhone -> name
             is UserInput.SignIn -> null
         }
     }
@@ -314,7 +310,6 @@ internal class InlineSignupViewModel(
     private fun UserInput.country(): String? {
         return when (this) {
             is UserInput.SignUp -> country
-            is SignUpOptionalPhone -> country
             is UserInput.SignIn -> null
         }
     }

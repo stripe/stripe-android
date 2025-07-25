@@ -73,8 +73,8 @@ internal interface LinkRepository {
     suspend fun mobileSignUp(
         name: String?,
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,
