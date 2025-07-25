@@ -3,11 +3,9 @@ package com.stripe.android.paymentsheet.flowcontroller
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
@@ -23,7 +21,6 @@ import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.kotlin.mock
 
 class SignupForLinkTest {
 
@@ -72,7 +69,9 @@ class SignupForLinkTest {
         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
     )
 
-    private val testLinkConfiguration = mock<LinkConfiguration>()
+    private val testLinkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+        flags = mapOf("link_enable_new_user_signup_api" to true)
+    )
 
     @Test
     fun `invoke should return early when signup toggle is disabled`() = runTest {
@@ -91,7 +90,7 @@ class SignupForLinkTest {
     fun `invoke should return early when link account already exists`() = runTest {
         // Given
         signupToLinkToggleInteractor.setSignupToLinkValue(true)
-        val existingAccount = mock<LinkAccount>()
+        val existingAccount = TestFactory.LINK_ACCOUNT
         val accountInfo = LinkAccountUpdate.Value(existingAccount)
         linkAccountHolder.set(accountInfo)
 
@@ -331,6 +330,45 @@ class SignupForLinkTest {
         // Then
         val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
         assertThat(signInCall).isEqualTo(expectedUserInput)
+    }
+
+    @Test
+    fun `invoke should return early when link_enable_new_user_signup_api flag is false`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+
+        val linkConfigurationWithDisabledFlag = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_enable_new_user_signup_api" to false)
+        )
+
+        // When
+        signupForLink(linkConfigurationWithDisabledFlag, testPaymentSelection)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should proceed when link_enable_new_user_signup_api flag is true`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        val linkConfigurationWithEnabledFlag = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_enable_new_user_signup_api" to true)
+        )
+
+        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+
+        // When
+        signupForLink(linkConfigurationWithEnabledFlag, testPaymentSelection)
+
+        // Then
+        // Verify that signup was attempted
+        linkAccountManager.awaitSignInWithUserInputCall()
+        linkAccountManager.awaitCreateCardPaymentDetailsCall()
     }
 
     private fun setupSuccessfulSignupMocks() {

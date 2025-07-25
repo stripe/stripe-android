@@ -30,7 +30,7 @@ internal class SignupForLink @Inject constructor(
             // Link is disabled
             if (linkConfiguration == null) return
             // Signup toggle wasn't shown
-            if (signupToLinkToggleInteractor.state == LinkSignupOptInState.Hidden) return
+            if (signupToLinkToggleInteractor.state.value == LinkSignupOptInState.Hidden) return
             // Signup is disabled from backend
             if (linkConfiguration.enableNewUserSignupAPI.not()) return
             // Signup toggle is off
@@ -46,7 +46,7 @@ internal class SignupForLink @Inject constructor(
 
             val userInput = UserInput.SignUpOptionalPhone(
                 email = email,
-                country = billing.address?.country,
+                country = billing.address?.country ?: "US",
                 phone = billing.phone,
                 name = billing.name,
                 consentAction = SignUpConsentAction.Implied

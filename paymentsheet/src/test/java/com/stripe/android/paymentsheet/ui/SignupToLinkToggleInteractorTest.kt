@@ -57,11 +57,11 @@ class SignupToLinkToggleInteractorTest {
     }
 
     @Test
-    fun `state is Visible when Link available, no account, and ShopPay not available`() = runTest {
+    fun `state is Visible when Link available and no account`() = runTest {
         // Given
         setupLinkAvailable()
         setupNoExistingAccount()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay)) // No ShopPay
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
 
         // When
         val state = interactor.state.value
@@ -71,22 +71,6 @@ class SignupToLinkToggleInteractorTest {
         val visibleState = state as PaymentSheet.LinkSignupOptInState.Visible
         assertThat(visibleState.title).isEqualTo(mockStringProvider.title)
         assertThat(visibleState.description).isEqualTo(mockStringProvider.description)
-    }
-
-    @Test
-    fun `state is Hidden when ShopPay is available`() = runTest {
-        // Given
-        setupLinkAvailable()
-        setupNoExistingAccount()
-        setupWalletButtonsConfiguration(
-            walletTypesToShow = listOf(WalletType.ShopPay, WalletType.GooglePay)
-        ) // ShopPay present
-
-        // When
-        val state = interactor.state.value
-
-        // Then
-        assertThat(state).isEqualTo(PaymentSheet.LinkSignupOptInState.Hidden)
     }
 
     @Test
@@ -132,22 +116,6 @@ class SignupToLinkToggleInteractorTest {
     }
 
     @Test
-    fun `state is Visible when no ShopPay in available wallets and Link available and no account`() = runTest {
-        // Given
-        setupLinkAvailable()
-        setupNoExistingAccount()
-        setupWalletButtonsConfiguration(
-            walletTypesToShow = listOf(WalletType.GooglePay)
-        ) // No ShopPay in available wallets
-
-        // When
-        val state = interactor.state.value
-
-        // Then
-        assertThat(state is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
-    }
-
-    @Test
     fun `state updates when Link account status changes`() = runTest {
         // Given
         setupLinkAvailable()
@@ -171,32 +139,43 @@ class SignupToLinkToggleInteractorTest {
     }
 
     @Test
-    fun `state updates when wallet configuration changes`() = runTest {
+    fun `state is Hidden when link_enable_new_user_signup_api flag is false`() = runTest {
         // Given
-        setupLinkAvailable()
+        setupLinkAvailableWithFlag(enabled = false)
         setupNoExistingAccount()
-
-        // Initially no ShopPay
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
-        assertThat(interactor.state.value is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
-
-        // When ShopPay is added
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay, WalletType.ShopPay))
-
-        // Then
-        assertThat(interactor.state.value).isEqualTo(PaymentSheet.LinkSignupOptInState.Hidden)
-
-        // When ShopPay is removed
         setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
 
+        // When
+        val state = interactor.state.value
+
         // Then
-        assertThat(interactor.state.value is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
+        assertThat(state).isEqualTo(PaymentSheet.LinkSignupOptInState.Hidden)
     }
 
-    // Helper methods
+    @Test
+    fun `state is Visible when link_enable_new_user_signup_api flag is true`() = runTest {
+        // Given
+        setupLinkAvailableWithFlag(enabled = true)
+        setupNoExistingAccount()
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
+
+        // When
+        val state = interactor.state.value
+
+        // Then
+        assertThat(state is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
+    }
+
     private fun setupLinkAvailable() {
+        setupLinkAvailableWithFlag(enabled = true)
+    }
+
+    private fun setupLinkAvailableWithFlag(enabled: Boolean) {
+        val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_enable_new_user_signup_api" to enabled)
+        )
         val linkState = LinkState(
-            configuration = TestFactory.LINK_CONFIGURATION,
+            configuration = linkConfiguration,
             loginState = LinkState.LoginState.LoggedOut,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse
         )
