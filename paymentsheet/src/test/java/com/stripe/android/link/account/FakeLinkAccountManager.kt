@@ -109,7 +109,11 @@ internal open class FakeLinkAccountManager(
         _accountStatus.value = status
     }
 
-    override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+    override suspend fun lookupConsumer(
+        email: String,
+        startSession: Boolean,
+        customerId: String?
+    ): Result<LinkAccount?> {
         lookupTurbine.add(
             item = LookupCall(
                 email = email,
@@ -124,7 +128,8 @@ internal open class FakeLinkAccountManager(
         emailSource: EmailSource,
         verificationToken: String,
         appId: String,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> {
         mobileLookupTurbine.add(
             item = MobileLookupCall(

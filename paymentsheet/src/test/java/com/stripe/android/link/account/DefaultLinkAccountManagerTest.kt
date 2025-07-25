@@ -58,9 +58,9 @@ class DefaultLinkAccountManagerTest {
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email)
+                return super.lookupConsumer(email, customerId)
             }
         }
         assertThat(
@@ -98,6 +98,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.lookupConsumer(
             email = "email",
             startSession = true,
+            customerId = null
         )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
@@ -113,6 +114,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.lookupConsumer(
             email = "email",
             startSession = true,
+            customerId = null
         )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
@@ -160,8 +162,9 @@ class DefaultLinkAccountManagerTest {
 
         accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
             .lookupConsumer(
-                TestFactory.EMAIL,
-                false
+                email = TestFactory.EMAIL,
+                startSession = false,
+                customerId = null
             )
 
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
@@ -171,9 +174,9 @@ class DefaultLinkAccountManagerTest {
     fun `signInWithUserInput sends correct parameters and starts session for existing user`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email)
+                return super.lookupConsumer(email, customerId)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -488,9 +491,9 @@ class DefaultLinkAccountManagerTest {
                 return details
             }
 
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
                 callCount += 1
-                return super.lookupConsumer(email)
+                return super.lookupConsumer(email, customerId)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -566,7 +569,7 @@ class DefaultLinkAccountManagerTest {
         }
         val accountManager = accountManager(linkRepository = linkRepository)
 
-        accountManager.lookupConsumer(TestFactory.EMAIL, false)
+        accountManager.lookupConsumer(TestFactory.EMAIL, false, customerId = null)
 
         assertThat(linkRepository.callCount).isEqualTo(0)
         assertThat(accountManager.linkAccountInfo.value.account).isNull()
@@ -821,7 +824,8 @@ class DefaultLinkAccountManagerTest {
             emailSource = TestFactory.EMAIL_SOURCE,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         val call = linkRepository.awaitMobileLookup()
@@ -850,7 +854,8 @@ class DefaultLinkAccountManagerTest {
             emailSource = TestFactory.EMAIL_SOURCE,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
-            startSession = true
+            startSession = true,
+            customerId = null
         )
 
         linkRepository.awaitMobileLookup()
@@ -879,7 +884,8 @@ class DefaultLinkAccountManagerTest {
             emailSource = TestFactory.EMAIL_SOURCE,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
-            startSession = true
+            startSession = true,
+            customerId = null
         )
 
         linkRepository.awaitMobileLookup()
