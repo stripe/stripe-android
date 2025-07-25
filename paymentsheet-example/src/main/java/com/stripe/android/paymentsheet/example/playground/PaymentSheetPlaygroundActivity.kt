@@ -376,7 +376,6 @@ internal class PaymentSheetPlaygroundActivity :
                 }
             }
             PaymentSheet.LinkSignupOptInState.Hidden -> {
-                Text("not shown.")
                 // Don't display anything when hidden
             }
         }
