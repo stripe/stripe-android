@@ -17,6 +17,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
+import com.stripe.android.link.exceptions.AppAttestationException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.DaggerLinkControllerViewModelComponent
 import com.stripe.android.link.injection.LinkComponent
@@ -118,17 +119,10 @@ internal class LinkControllerViewModel @Inject constructor(
                 val component = linkComponentBuilderProvider.get()
                     .configuration(config)
                     .build()
-                val attestationResult = component.linkAttestationCheck.invoke()
-                when (attestationResult) {
-                    is LinkAttestationCheck.Result.AccountError ->
-                        throw attestationResult.error
-                    is LinkAttestationCheck.Result.AttestationFailed ->
-                        throw attestationResult.error
-                    is LinkAttestationCheck.Result.Error ->
-                        throw attestationResult.error
-                    LinkAttestationCheck.Result.Successful ->
-                        component
-                }
+                component.linkAttestationCheck.invoke()
+                    .toResult()
+                    .map { component }
+                    .getOrThrow()
             }
             .fold(
                 onSuccess = { component ->
@@ -341,26 +335,15 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onLookupConsumer(email: String) {
         viewModelScope.launch {
-            val result = requireLinkComponent().map {
-                it.linkAuth.lookUp(
-                    email = email,
-                    emailSource = EmailSource.USER_ACTION,
-                    startSession = false
-                )
-            }
-                .mapCatching { linkAuthResult ->
-                    when (linkAuthResult) {
-                        is LinkAuthResult.AccountError ->
-                            throw linkAuthResult.error
-                        is LinkAuthResult.AttestationFailed ->
-                            throw linkAuthResult.error
-                        is LinkAuthResult.Error ->
-                            throw linkAuthResult.error
-                        LinkAuthResult.NoLinkAccountFound ->
-                            false
-                        is LinkAuthResult.Success ->
-                            true
-                    }
+            val result = requireLinkComponent()
+                .map {
+                    val account =
+                        it.linkAuth.lookUp(
+                            email = email,
+                            emailSource = EmailSource.USER_ACTION,
+                            startSession = false
+                        ).toResult().getOrThrow()
+                    account != null
                 }
                 .fold(
                     onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
@@ -391,28 +374,14 @@ internal class LinkControllerViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val result = requireLinkComponent()
-                .map {
+                .mapCatching {
                     it.linkAuth.signUp(
                         email = email,
                         phoneNumber = phone,
                         country = country,
                         name = name,
                         consentAction = SignUpConsentAction.Implied
-                    )
-                }
-                .mapCatching { linkAuthResult ->
-                    when (linkAuthResult) {
-                        is LinkAuthResult.AccountError ->
-                            throw linkAuthResult.error
-                        is LinkAuthResult.AttestationFailed ->
-                            throw linkAuthResult.error
-                        is LinkAuthResult.Error ->
-                            throw linkAuthResult.error
-                        LinkAuthResult.NoLinkAccountFound ->
-                            throw IllegalStateException("No Link account found after registration")
-                        is LinkAuthResult.Success ->
-                            linkAuthResult.account
-                    }
+                    ).toResult().getOrThrow()
                 }
                 .fold(
                     onSuccess = { account ->
@@ -513,6 +482,32 @@ internal class LinkControllerViewModel @Inject constructor(
             sublabel = sublabel
         )
     }
+
+    private fun LinkAttestationCheck.Result.toResult(): Result<Unit> =
+        when (this) {
+            is LinkAttestationCheck.Result.AccountError ->
+                Result.failure(error)
+            is LinkAttestationCheck.Result.AttestationFailed ->
+                Result.failure(AppAttestationException(error))
+            is LinkAttestationCheck.Result.Error ->
+                Result.failure(error)
+            LinkAttestationCheck.Result.Successful ->
+                Result.success(Unit)
+        }
+
+    private fun LinkAuthResult.toResult(): Result<LinkAccount?> =
+        when (this) {
+            is LinkAuthResult.AccountError ->
+                Result.failure(error)
+            is LinkAuthResult.AttestationFailed ->
+                Result.failure(AppAttestationException(error))
+            is LinkAuthResult.Error ->
+                Result.failure(error)
+            LinkAuthResult.NoLinkAccountFound ->
+                Result.success(null)
+            is LinkAuthResult.Success ->
+                Result.success(account)
+        }
 
     @VisibleForTesting
     internal fun updateState(block: (State) -> State) {
