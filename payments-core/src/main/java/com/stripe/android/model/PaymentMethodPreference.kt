@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -8,7 +9,8 @@ import kotlinx.parcelize.Parcelize
  * about the behaviors/features of the UI.
  */
 @Parcelize
-data class PaymentMethodPreference(
+@Poko
+class PaymentMethodPreference(
     val intent: StripeIntent,
     val formUI: String? = null
 ) : StripeModel

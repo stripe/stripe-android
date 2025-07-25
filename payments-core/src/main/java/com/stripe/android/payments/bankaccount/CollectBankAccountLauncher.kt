@@ -13,6 +13,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -137,10 +138,11 @@ interface CollectBankAccountLauncher {
 sealed interface CollectBankAccountConfiguration : Parcelable {
 
     @Parcelize
-    data class USBankAccount(
+    @Poko
+    class USBankAccount(
         val name: String,
         val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration
+    ) : CollectBankAccountConfiguration
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
