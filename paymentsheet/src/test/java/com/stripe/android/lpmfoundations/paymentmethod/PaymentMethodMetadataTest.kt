@@ -1963,6 +1963,7 @@ internal class PaymentMethodMetadataTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
+            linkMobileExpressCheckoutElementInlineOtpKillswitch = false,
             customerId = null
         )
     }

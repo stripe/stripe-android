@@ -55,7 +55,13 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             return
         }
 
-        if (linkConfigurationCoordinator.linkGate(linkConfiguration).useInlineOtpInWalletButtons.not()) {
+        if (linkConfiguration.linkMobileExpressCheckoutElementInlineOtpKillswitch) {
+            // If the killswitch is enabled, skip inline OTP verification.
+            updateState { it.copy(verificationState = VerificationState.RenderButton) }
+            return
+        }
+
+        if (linkConfigurationCoordinator.linkGate(linkConfiguration).useNativeLink.not()) {
             // If the feature flag is disabled, do not start Link verification.
             updateState { it.copy(verificationState = VerificationState.RenderButton) }
             return

@@ -527,11 +527,7 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
             PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition,
             WalletButtonsSettingsDefinition,
-            FeatureFlagSettingsDefinition(
-                FeatureFlags.showInlineOtpInWalletButtons,
-                allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList() +
-                    PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
-            ),
+
             ShopPaySettingsDefinition,
             LinkControllerAllowUserEmailEditsSettingsDefinition,
         )

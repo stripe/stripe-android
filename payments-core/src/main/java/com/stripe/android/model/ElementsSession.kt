@@ -61,6 +61,9 @@ data class ElementsSession(
     val linkEnableDisplayableDefaultValuesInEce: Boolean
         get() = linkSettings?.linkEnableDisplayableDefaultValuesInEce ?: false
 
+    val linkMobileExpressCheckoutElementInlineOtpKillswitch: Boolean
+        get() = linkSettings?.linkMobileExpressCheckoutElementInlineOtpKillswitch ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -73,7 +76,8 @@ data class ElementsSession(
         val useAttestationEndpoints: Boolean,
         val suppress2faModal: Boolean,
         val disableLinkRuxInFlowController: Boolean,
-        val linkEnableDisplayableDefaultValuesInEce: Boolean
+        val linkEnableDisplayableDefaultValuesInEce: Boolean,
+        val linkMobileExpressCheckoutElementInlineOtpKillswitch: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
