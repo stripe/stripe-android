@@ -5,9 +5,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -27,7 +28,8 @@ class SignupForLinkTest {
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val signupToLinkToggleInteractor = FakeSignupToLinkToggleInteractor()
     private val linkAccountManager = FakeLinkAccountManager()
-    private val linkComponent = FakeLinkComponent(linkAccountManager = linkAccountManager)
+    private val linkAuth = FakeLinkAuth()
+    private val linkComponent = FakeLinkComponent(linkAccountManager = linkAccountManager, linkAuth = linkAuth)
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component = linkComponent)
     private val linkHandler = LinkHandler(linkConfigurationCoordinator)
 
@@ -83,6 +85,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
         linkAccountManager.ensureAllEventsConsumed()
     }
 
@@ -99,6 +102,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
         linkAccountManager.ensureAllEventsConsumed()
     }
 
@@ -113,6 +117,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
         linkAccountManager.ensureAllEventsConsumed()
     }
 
@@ -135,6 +140,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
         linkAccountManager.ensureAllEventsConsumed()
     }
 
@@ -149,6 +155,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
         linkAccountManager.ensureAllEventsConsumed()
     }
 
@@ -157,7 +164,7 @@ class SignupForLinkTest {
         // Given
         setupSuccessfulSignupMocks()
 
-        val expectedUserInput = UserInput.SignUp(
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
             email = testEmail,
             country = testCountry,
             phone = testPhone,
@@ -165,15 +172,15 @@ class SignupForLinkTest {
             consentAction = SignUpConsentAction.Implied
         )
 
-        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
         linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
 
         // When
         signupForLink(testLinkConfiguration, testPaymentSelection)
 
         // Then
-        val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
-        assertThat(signInCall).isEqualTo(expectedUserInput)
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
 
         val createCardCall = linkAccountManager.awaitCreateCardPaymentDetailsCall()
         assertThat(createCardCall).isEqualTo(testPaymentSelection.paymentMethodCreateParams)
@@ -194,22 +201,22 @@ class SignupForLinkTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        val expectedUserInput = UserInput.SignUp(
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
             email = testEmail,
-            country = "US", // Default country
+            country = null, // Should be null when not provided
             phone = testPhone,
             name = testName,
             consentAction = SignUpConsentAction.Implied
         )
 
-        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
 
         // When
         signupForLink(testLinkConfiguration, paymentSelectionWithoutCountry)
 
         // Then
-        val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
-        assertThat(signInCall).isEqualTo(expectedUserInput)
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
     }
 
     @Test
@@ -218,13 +225,13 @@ class SignupForLinkTest {
         setupSuccessfulSignupMocks()
 
         val error = com.stripe.android.core.exception.APIException(message = "Signup failed")
-        linkAccountManager.signInWithUserInputResult = Result.failure(error)
+        linkAuth.signupResult = LinkAuthResult.Error(error)
 
         // When
         signupForLink(testLinkConfiguration, testPaymentSelection)
 
         // Then
-        linkAccountManager.awaitSignInWithUserInputCall()
+        linkAuth.awaitSignUpCall()
     }
 
     @Test
@@ -232,7 +239,7 @@ class SignupForLinkTest {
         // Given
         setupSuccessfulSignupMocks()
 
-        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
         val error = com.stripe.android.core.exception.APIException(message = "Card creation failed")
         linkAccountManager.createCardPaymentDetailsResult = Result.failure(error)
 
@@ -240,7 +247,7 @@ class SignupForLinkTest {
         signupForLink(testLinkConfiguration, testPaymentSelection)
 
         // Then
-        linkAccountManager.awaitSignInWithUserInputCall()
+        linkAuth.awaitSignUpCall()
         linkAccountManager.awaitCreateCardPaymentDetailsCall()
     }
 
@@ -249,7 +256,7 @@ class SignupForLinkTest {
         // Given
         setupSuccessfulSignupMocks()
 
-        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
 
         // Use TestFactory to create a saved payment method with proper billing details
         val paymentMethodWithBillingDetails = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
@@ -257,7 +264,7 @@ class SignupForLinkTest {
         )
         val savedPaymentSelection = PaymentSelection.Saved(paymentMethodWithBillingDetails)
 
-        val expectedUserInput = UserInput.SignUp(
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
             email = testEmail,
             country = testCountry,
             phone = testPhone,
@@ -269,21 +276,21 @@ class SignupForLinkTest {
         signupForLink(testLinkConfiguration, savedPaymentSelection)
 
         // Then
-        // Should still sign up to Link with user input (since we have email)
-        val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
-        assertThat(signInCall).isEqualTo(expectedUserInput)
+        // Should still sign up to Link (since we have email)
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
 
         // But should NOT create card payment details since it's not a New payment selection
         // No more invocations should be made to createCardPaymentDetails
     }
 
     @Test
-    fun `invoke should handle exceptions during linkAccountManager operations`() = runTest {
+    fun `invoke should handle exceptions during linkAuth operations`() = runTest {
         // Given
         setupSuccessfulSignupMocks()
 
-        // Make the linkAccountManager throw an exception during signInWithUserInput
-        linkAccountManager.signInWithUserInputResult = Result.failure(
+        // Make the linkAuth throw an exception during signUp
+        linkAuth.signupResult = LinkAuthResult.Error(
             com.stripe.android.core.exception.APIException(message = "Network error")
         )
 
@@ -291,7 +298,7 @@ class SignupForLinkTest {
         signupForLink(testLinkConfiguration, testPaymentSelection)
 
         // Then
-        linkAccountManager.awaitSignInWithUserInputCall()
+        linkAuth.awaitSignUpCall()
     }
 
     @Test
@@ -314,7 +321,7 @@ class SignupForLinkTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        val expectedUserInput = UserInput.SignUp(
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
             email = testEmail,
             country = null,
             phone = null,
@@ -322,14 +329,14 @@ class SignupForLinkTest {
             consentAction = SignUpConsentAction.Implied
         )
 
-        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
 
         // When
         signupForLink(testLinkConfiguration, paymentSelectionMinimal)
 
         // Then
-        val signInCall = linkAccountManager.awaitSignInWithUserInputCall()
-        assertThat(signInCall).isEqualTo(expectedUserInput)
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
     }
 
     @Test
@@ -347,6 +354,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
         linkAccountManager.ensureAllEventsConsumed()
     }
 
@@ -359,7 +367,7 @@ class SignupForLinkTest {
             flags = mapOf("link_enable_new_user_signup_api" to true)
         )
 
-        linkAccountManager.signInWithUserInputResult = Result.success(TestFactory.LINK_ACCOUNT)
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
         linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
 
         // When
@@ -367,7 +375,7 @@ class SignupForLinkTest {
 
         // Then
         // Verify that signup was attempted
-        linkAccountManager.awaitSignInWithUserInputCall()
+        linkAuth.awaitSignUpCall()
         linkAccountManager.awaitCreateCardPaymentDetailsCall()
     }
 
