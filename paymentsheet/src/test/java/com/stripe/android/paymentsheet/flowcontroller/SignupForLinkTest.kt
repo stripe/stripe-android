@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.FakeSignupToLinkToggleInteractor
-import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.runTest
@@ -30,7 +29,6 @@ class SignupForLinkTest {
 
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val signupToLinkToggleInteractor = FakeSignupToLinkToggleInteractor()
-    private val logger = FakeLogger()
     private val linkAccountManager = FakeLinkAccountManager()
     private val linkComponent = FakeLinkComponent(linkAccountManager = linkAccountManager)
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component = linkComponent)
@@ -42,7 +40,6 @@ class SignupForLinkTest {
         linkAccountHolder = linkAccountHolder,
         linkHandler = linkHandler,
         signupToLinkToggleInteractor = signupToLinkToggleInteractor,
-        logger = logger,
         eventReporter = eventReporter
     )
 
