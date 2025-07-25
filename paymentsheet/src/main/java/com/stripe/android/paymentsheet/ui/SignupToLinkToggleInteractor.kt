@@ -12,7 +12,6 @@ internal interface SignupToLinkToggleInteractor {
     val state: StateFlow<PaymentSheet.LinkSignupOptInState>
     val toggleValue: MutableStateFlow<Boolean>
 
-    fun handleToggleChange(checked: Boolean)
     fun getSignupToLinkValue(): Boolean
 }
 
@@ -50,10 +49,6 @@ internal class DefaultSignupToLinkToggleInteractor(
         } else {
             PaymentSheet.LinkSignupOptInState.Hidden
         }
-    }
-
-    override fun handleToggleChange(checked: Boolean) {
-        toggleValue.value = checked
     }
 
     override fun getSignupToLinkValue(): Boolean {

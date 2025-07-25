@@ -24,11 +24,6 @@ internal class FakeSignupToLinkToggleInteractor : SignupToLinkToggleInteractor {
 
     private var _signupToLinkValue = false
 
-    override fun handleToggleChange(checked: Boolean) {
-        _signupToLinkValue = checked
-        _toggleValue.value = checked
-    }
-
     override fun getSignupToLinkValue(): Boolean {
         return _signupToLinkValue
     }
