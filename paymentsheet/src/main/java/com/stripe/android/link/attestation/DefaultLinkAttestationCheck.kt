@@ -36,7 +36,7 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                         email = email,
                         emailSource = EmailSource.CUSTOMER_OBJECT,
                         startSession = false,
-                        customerId = linkConfiguration.customerId
+                        customerId = linkConfiguration.customerIdForEceDefaultValues
                     )
                     handleLookupResult(lookupResult)
                 },

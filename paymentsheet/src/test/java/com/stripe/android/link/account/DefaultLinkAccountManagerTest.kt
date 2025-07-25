@@ -162,8 +162,8 @@ class DefaultLinkAccountManagerTest {
 
         accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
             .lookupConsumer(
-                TestFactory.EMAIL,
-                false,
+                email = TestFactory.EMAIL,
+                startSession = false,
                 customerId = null
             )
 

@@ -35,7 +35,7 @@ internal data class LinkConfiguration(
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
-    val customerId: String?
+    private val customerId: String?
 ) : Parcelable {
 
     val customerIdForEceDefaultValues: String?
