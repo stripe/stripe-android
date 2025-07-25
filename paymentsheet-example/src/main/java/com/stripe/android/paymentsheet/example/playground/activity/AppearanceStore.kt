@@ -152,10 +152,8 @@ internal object AppearanceStore {
             val disclosureColor: Int = Color.DarkGray.toArgb(),
             val horizontalPaymentMethodIconMargin: Float? = null,
             val verticalPaymentMethodIconMargin: Float? = null,
-            val fontFamilyRes: Int? = null,
-            val fontSizeSp: Float? = null,
-            val fontWeight: Int? = null,
-            val letterSpacingSp: Float? = null,
+            val titleFont: Typography.Font? = null,
+            val subtitleFont: Typography.Font? = null,
             val disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
         ) : Parcelable {
             enum class Row {
@@ -167,7 +165,7 @@ internal object AppearanceStore {
 
             @OptIn(AppearanceAPIAdditionsPreview::class)
             fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
-                // paymentMethodIconMargins and font will override defaults so only init if set in playground
+                // paymentMethodIconMargins will override defaults so only init if set in playground
                 val insets = if (horizontalPaymentMethodIconMargin != null || verticalPaymentMethodIconMargin != null) {
                     PaymentSheet.Insets(
                         horizontalDp = horizontalPaymentMethodIconMargin ?: 0f,
@@ -177,21 +175,11 @@ internal object AppearanceStore {
                     null
                 }
 
-                val font = if (listOfNotNull(fontWeight, fontFamilyRes, fontSizeSp, letterSpacingSp).isNotEmpty()) {
-                    PaymentSheet.Typography.Font(
-                        fontFamily = fontFamilyRes,
-                        fontSizeSp = fontSizeSp,
-                        fontWeight = fontWeight,
-                        letterSpacingSp = letterSpacingSp
-                    )
-                } else {
-                    null
-                }
-
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())
                     .paymentMethodIconMargins(insets)
-                    .titleFont(font)
+                    .titleFont(titleFont?.build())
+                    .subtitleFont(subtitleFont?.build())
                     .build()
             }
 
@@ -366,13 +354,15 @@ internal object AppearanceStore {
                 )
             }
 
+            @Serializable
+            @Parcelize
             data class Font(
                 @FontRes
                 val fontFamily: Int? = null,
                 val fontSizeSp: Float? = null,
                 val fontWeight: Int? = null,
                 val letterSpacingSp: Float? = null,
-            ) {
+            ) : Parcelable {
                 fun build(): PaymentSheet.Typography.Font = PaymentSheet.Typography.Font(
                     fontFamily = fontFamily,
                     fontSizeSp = fontSizeSp,
