@@ -6,6 +6,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.utils.StripeUrlUtils
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -251,7 +252,8 @@ sealed interface StripeIntent : StripeModel {
          * page or application.
          */
         @Parcelize
-        data class RedirectToUrl(
+        @Poko
+        class RedirectToUrl(
             /**
              * The URL you must redirect your customer to in order to authenticate.
              */
@@ -297,7 +299,8 @@ sealed interface StripeIntent : StripeModel {
          */
         sealed class SdkData : NextActionData() {
             @Parcelize
-            data class Use3DS1(
+            @Poko
+            class Use3DS1(
                 val url: String
             ) : SdkData()
 
@@ -314,7 +317,8 @@ sealed interface StripeIntent : StripeModel {
              * different than the original merchant's key.
              */
             @Parcelize
-            data class Use3DS2(
+            @Poko
+            class Use3DS2(
                 val source: String,
                 val serverName: String,
                 val transactionId: String,
@@ -323,7 +327,8 @@ sealed interface StripeIntent : StripeModel {
                 val publishableKey: String?
             ) : SdkData() {
                 @Parcelize
-                data class DirectoryServerEncryption(
+                @Poko
+                class DirectoryServerEncryption(
                     val directoryServerId: String,
                     val dsCertificateData: String,
                     val rootCertsData: List<String>,
@@ -340,7 +345,8 @@ sealed interface StripeIntent : StripeModel {
         data class WeChatPayRedirect(val weChat: WeChat) : NextActionData()
 
         @Parcelize
-        data class VerifyWithMicrodeposits(
+        @Poko
+        class VerifyWithMicrodeposits(
             val arrivalDate: Long,
             val hostedVerificationUrl: String,
             val microdepositType: MicrodepositType
@@ -353,7 +359,8 @@ sealed interface StripeIntent : StripeModel {
          * Contains the authentication URL for redirecting your customer to Cash App.
          */
         @Parcelize
-        data class CashAppRedirect(
+        @Poko
+        class CashAppRedirect(
             val mobileAuthUrl: String,
         ) : NextActionData()
 
@@ -361,7 +368,8 @@ sealed interface StripeIntent : StripeModel {
          * Contains the authentication URL for redirecting your customer to Swish.
          */
         @Parcelize
-        data class SwishRedirect(
+        @Poko
+        class SwishRedirect(
             val mobileAuthUrl: String,
         ) : NextActionData()
     }
