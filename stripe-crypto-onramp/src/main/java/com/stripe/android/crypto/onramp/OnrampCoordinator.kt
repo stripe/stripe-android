@@ -1,6 +1,5 @@
 package com.stripe.android.crypto.onramp
 
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
@@ -8,17 +7,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.lifecycleScope
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.Stripe
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.di.DaggerOnrampComponent
 import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import javax.inject.Inject
@@ -36,8 +32,7 @@ import javax.inject.Inject
 class OnrampCoordinator @Inject internal constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
-    private val onrampCallbacks: OnrampCallbacks,
-    private val cryptoApiRepository: CryptoApiRepository
+    private val onrampCallbacks: OnrampCallbacks
 ) {
 
     /**
@@ -84,9 +79,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param onrampCallbacks Callbacks for handling asynchronous responses from the coordinator.
      */
     class Builder(
-        private val onrampCallbacks: OnrampCallbacks,
-        private val publishableKey: String,
-        private val stripeAccountId: String
+        private val onrampCallbacks: OnrampCallbacks
     ) {
         /**
          * Constructs an [OnrampCoordinator] for the given parameters.
@@ -148,7 +141,6 @@ class OnrampCoordinator @Inject internal constructor(
                 owner = viewModelStoreOwner,
                 factory = OnrampCoordinatorViewModel.Factory(
                     linkController = linkController,
-                    cryptoApiRepository = cryptoApiRepository,
                     onrampCallbacks = onrampCallbacks
                 )
             ).get(

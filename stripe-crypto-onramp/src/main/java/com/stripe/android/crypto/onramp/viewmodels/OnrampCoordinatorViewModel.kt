@@ -6,13 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.Stripe
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampConfigurationCallback
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -21,6 +19,7 @@ import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel that stores Onramp configuration in a SavedStateHandle for
@@ -30,11 +29,11 @@ import kotlinx.coroutines.launch
  * @property linkController The LinkController to configure.
  *
  */
-internal class OnrampCoordinatorViewModel(
+internal class OnrampCoordinatorViewModel @Inject constructor(
     private val handle: SavedStateHandle,
     private val linkController: LinkController,
-    private val cryptoApiRepository: CryptoApiRepository,
-    private val onrampCallbacks: OnrampCallbacks
+    private val onrampCallbacks: OnrampCallbacks,
+    private val cryptoApiRepository: CryptoApiRepository
 ) : ViewModel() {
 
     /**
@@ -153,17 +152,17 @@ internal class OnrampCoordinatorViewModel(
 
     internal class Factory(
         private val linkController: LinkController,
-        private val cryptoApiRepository: CryptoApiRepository,
         private val onrampCallbacks: OnrampCallbacks
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return OnrampCoordinatorViewModel(
-                handle = extras.createSavedStateHandle(),
-                linkController = linkController,
-                cryptoApiRepository = cryptoApiRepository,
-                onrampCallbacks = onrampCallbacks
-            ) as T
+            return DaggerOnrampCoordinatorViewModelComponent.factory()
+                .build(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    linkController = linkController,
+                    onrampCallbacks = onrampCallbacks
+                )
+                .viewModel as T
         }
     }
 }
