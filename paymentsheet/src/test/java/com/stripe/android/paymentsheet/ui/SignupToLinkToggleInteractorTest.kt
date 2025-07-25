@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.app.Application
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
@@ -12,7 +12,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -26,8 +25,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SignupToLinkToggleInteractorTest {
@@ -35,27 +32,26 @@ class SignupToLinkToggleInteractorTest {
     private val testDispatcher = StandardTestDispatcher()
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val flowControllerState = MutableStateFlow<DefaultFlowController.State?>(null)
-    private val mockApplication = mock<Application>()
 
     private val titleText = "title"
     private val descriptionText = "description"
-    private val termsText = "terms"
+    private val termsText = AnnotatedString("terms")
+
+    private val mockStringProvider = object : SignupToLinkToggleStringProvider {
+        override val title: String = titleText
+        override val description: String = descriptionText
+        override val termsAndConditions: AnnotatedString = termsText
+    }
 
     private val interactor = DefaultSignupToLinkToggleInteractor(
         flowControllerState = flowControllerState,
         linkAccountHolder = linkAccountHolder,
-        application = mockApplication
+        stringProvider = mockStringProvider
     )
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        whenever(mockApplication.getString(R.string.stripe_link_signup_toggle_title))
-            .thenReturn(titleText)
-        whenever(mockApplication.getString(R.string.stripe_link_signup_toggle_description))
-            .thenReturn(descriptionText)
-        whenever(mockApplication.getString(R.string.stripe_sign_up_terms))
-            .thenReturn(termsText)
     }
 
     @After

@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Comp
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.DefaultSignupToLinkToggleInteractor
+import com.stripe.android.paymentsheet.ui.DefaultSignupToLinkToggleStringProvider
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
@@ -122,7 +123,7 @@ internal object FlowControllerModule {
         return DefaultSignupToLinkToggleInteractor(
             flowControllerState = viewModel.stateFlow,
             linkAccountHolder = viewModel.flowControllerStateComponent.linkAccountHolder,
-            application = application,
+            stringProvider = DefaultSignupToLinkToggleStringProvider(application),
         )
     }
 

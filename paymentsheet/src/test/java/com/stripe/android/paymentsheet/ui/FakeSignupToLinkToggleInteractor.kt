@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.AnnotatedString
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,14 +11,9 @@ internal class FakeSignupToLinkToggleInteractor : SignupToLinkToggleInteractor {
         PaymentSheet.LinkSignupOptInState.Visible(
             title = "Save my info for faster checkout with Link",
             description = "Pay faster everywhere Link is accepted.",
-            termsAndConditions = buildAnnotatedString {
-                append(
-                    """
-                    By saving my payment information to Link, I agree to Link's 
-                    <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.
-                    """.trimIndent()
-                )
-            }
+            termsAndConditions = AnnotatedString(
+                "By saving my payment information to Link, I agree to Link's Terms and Privacy Policy."
+            )
         )
     )
 

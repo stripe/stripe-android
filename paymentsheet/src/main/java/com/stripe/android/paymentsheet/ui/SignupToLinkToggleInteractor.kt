@@ -1,13 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.app.Application
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.fromHtml
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.ui.replaceHyperlinks
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,13 +19,8 @@ internal interface SignupToLinkToggleInteractor {
 internal class DefaultSignupToLinkToggleInteractor(
     flowControllerState: StateFlow<DefaultFlowController.State?>,
     linkAccountHolder: LinkAccountHolder,
-    application: Application,
+    private val stringProvider: SignupToLinkToggleStringProvider,
 ) : SignupToLinkToggleInteractor {
-
-    val title = application.getString(R.string.stripe_link_signup_toggle_title)
-    val description = application.getString(R.string.stripe_link_signup_toggle_description)
-    val termsAndConditions = AnnotatedString
-        .fromHtml(application.getString(R.string.stripe_link_sign_up_terms).replaceHyperlinks())
 
     private val _isChecked = MutableStateFlow(false)
 
@@ -53,9 +43,9 @@ internal class DefaultSignupToLinkToggleInteractor(
 
         if (shouldDisplay) {
             PaymentSheet.LinkSignupOptInState.Visible(
-                title = title,
-                description = description,
-                termsAndConditions = termsAndConditions
+                title = stringProvider.title,
+                description = stringProvider.description,
+                termsAndConditions = stringProvider.termsAndConditions
             )
         } else {
             PaymentSheet.LinkSignupOptInState.Hidden
