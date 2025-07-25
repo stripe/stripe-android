@@ -7,6 +7,7 @@ import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.MAX_POLLING_DURATION
 import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_POLLING_DURATION
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
@@ -25,7 +26,8 @@ typealias PaymentMethodCode = String
  * See [PaymentMethodCreateParams] for PaymentMethod creation
  */
 @Parcelize
-data class PaymentMethod
+@Poko
+class PaymentMethod
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -573,7 +575,7 @@ constructor(
         val pollingDuration: Long
 
         @Parcelize
-        data object None : AfterRedirectAction {
+        object None : AfterRedirectAction {
 
             @IgnoredOnParcel
             override val shouldRefreshOrRetrieve: Boolean = false
@@ -583,7 +585,8 @@ constructor(
         }
 
         @Parcelize
-        data class Poll(override val pollingDuration: Long) : AfterRedirectAction {
+        @Poko
+        class Poll(override val pollingDuration: Long) : AfterRedirectAction {
             @IgnoredOnParcel
             override val shouldRefreshOrRetrieve: Boolean = true
         }
@@ -730,7 +733,8 @@ constructor(
      * [billing_details](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details)
      */
     @Parcelize
-    data class BillingDetails @JvmOverloads constructor(
+    @Poko
+    class BillingDetails @JvmOverloads constructor(
         /**
          * Billing address.
          *
@@ -867,7 +871,8 @@ constructor(
      * [card](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card)
      */
     @Parcelize
-    data class Card
+    @Poko
+    class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         /**
@@ -950,13 +955,45 @@ constructor(
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            brand: CardBrand = this.brand,
+            checks: Checks? = this.checks,
+            country: String? = this.country,
+            expiryMonth: Int? = this.expiryMonth,
+            expiryYear: Int? = this.expiryYear,
+            fingerprint: String? = this.fingerprint,
+            funding: String? = this.funding,
+            last4: String? = this.last4,
+            threeDSecureUsage: ThreeDSecureUsage? = this.threeDSecureUsage,
+            wallet: Wallet? = this.wallet,
+            networks: Networks? = this.networks,
+            displayBrand: String? = this.displayBrand
+        ): Card {
+            return Card(
+                brand = brand,
+                checks = checks,
+                country = country,
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
+                fingerprint = fingerprint,
+                funding = funding,
+                last4 = last4,
+                threeDSecureUsage = threeDSecureUsage,
+                wallet = wallet,
+                networks = networks,
+                displayBrand = displayBrand
+            )
+        }
+
         /**
          * Checks on Card address and CVC if provided
          *
          * [card.checks](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-checks)
          */
         @Parcelize
-        data class Checks
+        @Poko
+        class Checks
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
@@ -987,7 +1024,8 @@ constructor(
          * [card.three_d_secure_usage](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card-three_d_secure_usage)
          */
         @Parcelize
-        data class ThreeDSecureUsage
+        @Poko
+        class ThreeDSecureUsage
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         constructor(
             /**
@@ -999,12 +1037,27 @@ constructor(
         ) : StripeModel
 
         @Parcelize
-        data class Networks(
+        @Poko
+        class Networks(
             val available: Set<String> = emptySet(),
             @Deprecated("This field is deprecated and will be removed in a future release.")
             val selectionMandatory: Boolean = false,
             val preferred: String? = null
-        ) : StripeModel
+        ) : StripeModel {
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun copy(
+                available: Set<String> = this.available,
+                selectionMandatory: Boolean = this.selectionMandatory,
+                preferred: String? = this.preferred
+            ): Networks {
+                return Networks(
+                    available = available,
+                    selectionMandatory = selectionMandatory,
+                    preferred = preferred
+                )
+            }
+        }
     }
 
     /**
@@ -1013,8 +1066,9 @@ constructor(
      * [card_present](https://stripe.com/docs/api/payment_methods/object#payment_method_object-card_present)
      */
     @Parcelize
-    data class CardPresent internal constructor(
-        private val ignore: Boolean = true
+    @Poko
+    class CardPresent internal constructor(
+        @Suppress("unused") private val ignore: Boolean = true
     ) : TypeData() {
         override val type: Type get() = Type.CardPresent
 
@@ -1030,7 +1084,8 @@ constructor(
      * [ideal](https://stripe.com/docs/api/payment_methods/object#payment_method_object-ideal)
      */
     @Parcelize
-    data class Ideal internal constructor(
+    @Poko
+    class Ideal internal constructor(
         /**
          * The customer’s bank, if provided. Can be one of `abn_amro`, `asn_bank`, `bunq`,
          * `handelsbanken`, `ing`, `knab`, `moneyou`, `rabobank`, `regiobank`, `sns_bank`,
@@ -1057,7 +1112,8 @@ constructor(
      * To obtain the FPX bank's display name, see [com.stripe.android.view.FpxBank].
      */
     @Parcelize
-    data class Fpx internal constructor(
+    @Poko
+    class Fpx internal constructor(
         @JvmField val bank: String?,
         @JvmField val accountHolderType: String?
     ) : TypeData() {
@@ -1070,7 +1126,8 @@ constructor(
      * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
      */
     @Parcelize
-    data class SepaDebit
+    @Poko
+    class SepaDebit
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         /**
@@ -1109,10 +1166,28 @@ constructor(
         @JvmField val last4: String?
     ) : TypeData() {
         override val type: Type get() = Type.SepaDebit
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            bankCode: String? = this.bankCode,
+            branchCode: String? = this.branchCode,
+            country: String? = this.country,
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4
+        ): SepaDebit {
+            return SepaDebit(
+                bankCode = bankCode,
+                branchCode = branchCode,
+                country = country,
+                fingerprint = fingerprint,
+                last4 = last4
+            )
+        }
     }
 
     @Parcelize
-    data class AuBecsDebit
+    @Poko
+    class AuBecsDebit
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         @JvmField val bsbNumber: String?,
@@ -1120,10 +1195,24 @@ constructor(
         @JvmField val last4: String?
     ) : TypeData() {
         override val type: Type get() = Type.AuBecsDebit
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            bsbNumber: String? = this.bsbNumber,
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4
+        ): AuBecsDebit {
+            return AuBecsDebit(
+                bsbNumber = bsbNumber,
+                fingerprint = fingerprint,
+                last4 = last4
+            )
+        }
     }
 
     @Parcelize
-    data class BacsDebit
+    @Poko
+    class BacsDebit
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         @JvmField val fingerprint: String?,
@@ -1131,24 +1220,40 @@ constructor(
         @JvmField val sortCode: String?
     ) : TypeData() {
         override val type: Type get() = Type.BacsDebit
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4,
+            sortCode: String? = this.sortCode
+        ): BacsDebit {
+            return BacsDebit(
+                fingerprint = fingerprint,
+                last4 = last4,
+                sortCode = sortCode
+            )
+        }
     }
 
     @Parcelize
-    data class Sofort internal constructor(
+    @Poko
+    class Sofort internal constructor(
         @JvmField val country: String?
     ) : TypeData() {
         override val type: Type get() = Type.Sofort
     }
 
     @Parcelize
-    data class Upi internal constructor(
+    @Poko
+    class Upi internal constructor(
         @JvmField val vpa: String?
     ) : TypeData() {
         override val type: Type get() = Type.Upi
     }
 
     @Parcelize
-    data class Netbanking internal constructor(
+    @Poko
+    class Netbanking internal constructor(
         /**
          * The customer’s bank.
          *
@@ -1160,7 +1265,8 @@ constructor(
     }
 
     @Parcelize
-    data class USBankAccount
+    @Poko
+    class USBankAccount
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         /**
@@ -1222,6 +1328,29 @@ constructor(
     ) : TypeData() {
         override val type: Type get() = Type.USBankAccount
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            accountHolderType: USBankAccountHolderType = this.accountHolderType,
+            accountType: USBankAccountType = this.accountType,
+            bankName: String? = this.bankName,
+            fingerprint: String? = this.fingerprint,
+            last4: String? = this.last4,
+            financialConnectionsAccount: String? = this.financialConnectionsAccount,
+            networks: USBankNetworks? = this.networks,
+            routingNumber: String? = this.routingNumber
+        ): USBankAccount {
+            return USBankAccount(
+                accountHolderType = accountHolderType,
+                accountType = accountType,
+                bankName = bankName,
+                fingerprint = fingerprint,
+                last4 = last4,
+                financialConnectionsAccount = financialConnectionsAccount,
+                networks = networks,
+                routingNumber = routingNumber
+            )
+        }
+
         @Parcelize
         enum class USBankAccountHolderType(val value: String) : StripeModel {
             UNKNOWN("unknown"),
@@ -1245,10 +1374,60 @@ constructor(
         }
 
         @Parcelize
-        data class USBankNetworks(
+        @Poko
+        class USBankNetworks(
             val preferred: String?,
             val supported: List<String>
         ) : StripeModel
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        id: String = this.id,
+        created: Long? = this.created,
+        liveMode: Boolean = this.liveMode,
+        code: PaymentMethodCode? = this.code,
+        type: Type? = this.type,
+        billingDetails: BillingDetails? = this.billingDetails,
+        customerId: String? = this.customerId,
+        card: Card? = this.card,
+        cardPresent: CardPresent? = this.cardPresent,
+        fpx: Fpx? = this.fpx,
+        ideal: Ideal? = this.ideal,
+        sepaDebit: SepaDebit? = this.sepaDebit,
+        auBecsDebit: AuBecsDebit? = this.auBecsDebit,
+        bacsDebit: BacsDebit? = this.bacsDebit,
+        sofort: Sofort? = this.sofort,
+        upi: Upi? = this.upi,
+        netbanking: Netbanking? = this.netbanking,
+        usBankAccount: USBankAccount? = this.usBankAccount,
+        linkPaymentDetails: LinkPaymentDetails? = this.linkPaymentDetails,
+        isLinkPassthroughMode: Boolean = this.isLinkPassthroughMode,
+        allowRedisplay: AllowRedisplay? = this.allowRedisplay,
+    ): PaymentMethod {
+        return PaymentMethod(
+            id = id,
+            created = created,
+            liveMode = liveMode,
+            code = code,
+            type = type,
+            billingDetails = billingDetails,
+            customerId = customerId,
+            card = card,
+            cardPresent = cardPresent,
+            fpx = fpx,
+            ideal = ideal,
+            sepaDebit = sepaDebit,
+            auBecsDebit = auBecsDebit,
+            bacsDebit = bacsDebit,
+            sofort = sofort,
+            upi = upi,
+            netbanking = netbanking,
+            usBankAccount = usBankAccount,
+            linkPaymentDetails = linkPaymentDetails,
+            isLinkPassthroughMode = isLinkPassthroughMode,
+            allowRedisplay = allowRedisplay,
+        )
     }
 
     companion object {

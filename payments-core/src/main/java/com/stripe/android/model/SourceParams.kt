@@ -7,6 +7,7 @@ import androidx.annotation.Size
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.model.Source.Companion.asSourceType
 import com.stripe.android.model.Source.SourceType
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import org.json.JSONException
@@ -16,7 +17,8 @@ import org.json.JSONObject
  * Represents a grouping of parameters needed to create a [Source] object on the server.
  */
 @Parcelize
-data class SourceParams internal constructor(
+@Poko
+class SourceParams internal constructor(
     /**
      * The type of the source to create.
      */
@@ -194,7 +196,8 @@ data class SourceParams internal constructor(
     }
 
     @Parcelize
-    internal data class WeChatParams(
+    @Poko
+    internal class WeChatParams(
         private val appId: String? = null,
         private val statementDescriptor: String? = null
     ) : StripeParamsModel, Parcelable {
@@ -225,7 +228,8 @@ data class SourceParams internal constructor(
      * See [owner](https://stripe.com/docs/api/sources/create#create_source-owner).
      */
     @Parcelize
-    data class OwnerParams @JvmOverloads constructor(
+    @Poko
+    class OwnerParams @JvmOverloads constructor(
         internal var address: Address? = null,
         internal var email: String? = null,
         internal var name: String? = null,
@@ -885,7 +889,8 @@ data class SourceParams internal constructor(
     }
 
     @Parcelize
-    internal data class ApiParams(
+    @Poko
+    internal class ApiParams(
         val value: Map<String, Any?> = emptyMap()
     ) : Parcelable {
         internal companion object : Parceler<ApiParams> {
@@ -927,7 +932,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Card(
+        @Poko
+        class Card(
             /**
              * The [number] of this card
              */
@@ -972,7 +978,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Eps(
+        @Poko
+        class Eps(
             var statementDescriptor: String? = null
         ) : TypeData() {
             override val type: String get() = SourceType.EPS
@@ -986,7 +993,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Ideal(
+        @Poko
+        class Ideal(
             var statementDescriptor: String? = null,
             var bank: String? = null
         ) : TypeData() {
@@ -1005,7 +1013,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Masterpass(
+        @Poko
+        class Masterpass(
             var transactionId: String,
             var cartId: String
         ) : TypeData() {
@@ -1027,7 +1036,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Sofort(
+        @Poko
+        class Sofort(
             @Size(2) var country: String,
             var statementDescriptor: String? = null
         ) : TypeData() {
@@ -1046,7 +1056,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class SepaDebit(
+        @Poko
+        class SepaDebit(
             var iban: String
         ) : TypeData() {
             override val type: String get() = SourceType.SEPA_DEBIT
@@ -1060,7 +1071,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class ThreeDSecure(
+        @Poko
+        class ThreeDSecure(
             var cardId: String
         ) : TypeData() {
             override val type: String get() = SourceType.THREE_D_SECURE
@@ -1074,7 +1086,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class VisaCheckout(
+        @Poko
+        class VisaCheckout(
             var callId: String
         ) : TypeData() {
             override val type: String get() = SourceType.CARD
@@ -1093,7 +1106,8 @@ data class SourceParams internal constructor(
         }
 
         @Parcelize
-        data class Bancontact(
+        @Poko
+        class Bancontact(
             var statementDescriptor: String? = null,
             var preferredLanguage: String? = null
         ) : TypeData() {
