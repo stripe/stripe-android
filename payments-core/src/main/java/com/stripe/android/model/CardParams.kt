@@ -1,13 +1,15 @@
 package com.stripe.android.model
 
 import com.stripe.android.CardUtils
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * [Create a card token](https://stripe.com/docs/api/tokens/create_card)
  */
 @Parcelize
-data class CardParams internal constructor(
+@Poko
+class CardParams internal constructor(
     /**
      * The likely [CardBrand] based on the [number].
      */
