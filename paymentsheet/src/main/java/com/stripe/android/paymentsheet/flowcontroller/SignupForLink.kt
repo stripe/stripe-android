@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -18,7 +16,6 @@ internal class SignupForLink @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val linkHandler: LinkHandler,
     private val signupToLinkToggleInteractor: SignupToLinkToggleInteractor,
-    private val logger: Logger,
     private val eventReporter: EventReporter
 ) {
 
@@ -26,14 +23,16 @@ internal class SignupForLink @Inject constructor(
         linkConfiguration: LinkConfiguration?,
         paymentSelection: PaymentSelection?
     ) {
-        try {
-            // Check if we should sign up to Link
-            if (!signupToLinkToggleInteractor.getSignupToLinkValue()) return
-            if (linkAccountHolder.linkAccountInfo.value.account != null) return
-            if (linkConfiguration == null) return
-
+        runCatching {
             val billing = paymentSelection?.billingDetails
             val email = billing?.email
+            // Link is disabled
+            if (linkConfiguration == null) return
+            // Signup toggle is off
+            if (!signupToLinkToggleInteractor.toggleValue.value) return
+            // Link account already exists
+            if (linkAccountHolder.linkAccountInfo.value.account != null) return
+            // No email provided
             if (email == null) return
 
             // Attempt Link signup
@@ -47,25 +46,20 @@ internal class SignupForLink @Inject constructor(
                 name = billing.name,
                 consentAction = SignUpConsentAction.Implied
             )
-            logger.debug("Creating Link account with user input: $userInput")
 
             // Create Link account
             val accountResult = linkAccountManager.signInWithUserInput(userInput)
             if (accountResult.isSuccess) {
-                logger.debug("Link account created successfully")
                 eventReporter.onLinkUserSignupSucceeded()
                 createCardPaymentDetailsIfNeeded(paymentSelection, linkAccountManager)
             } else {
                 val error = accountResult.exceptionOrNull()
-                val errorMessage = error?.message
-                logger.debug("Failed to create Link account: $errorMessage")
                 if (error != null) {
                     eventReporter.onLinkUserSignupFailed(error)
                 }
             }
-        } catch (e: StripeException) {
-            logger.debug("Failed to create Link account: ${e.message}")
-            eventReporter.onLinkUserSignupFailed(e)
+        }.onFailure {
+            eventReporter.onLinkUserSignupFailed(it)
         }
     }
 
@@ -80,13 +74,11 @@ internal class SignupForLink @Inject constructor(
                 paymentMethodCreateParams
             )
             if (cardPaymentDetailsResult.isSuccess) {
-                logger.debug("Card payment details created in Link successfully")
                 eventReporter.onLinkUserPaymentDetailCreationCompleted(error = null)
             } else {
-                val error = cardPaymentDetailsResult.exceptionOrNull()
-                val errorMessage = error?.message
-                logger.debug("Failed to create card payment details: $errorMessage")
-                eventReporter.onLinkUserPaymentDetailCreationCompleted(error = error)
+                eventReporter.onLinkUserPaymentDetailCreationCompleted(
+                    error = cardPaymentDetailsResult.exceptionOrNull()
+                )
             }
         }
     }

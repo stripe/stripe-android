@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -33,14 +34,10 @@ class SignupToLinkToggleInteractorTest {
     private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
     private val flowControllerState = MutableStateFlow<DefaultFlowController.State?>(null)
 
-    private val titleText = "title"
-    private val descriptionText = "description"
-    private val termsText = AnnotatedString("terms")
-
     private val mockStringProvider = object : SignupToLinkToggleStringProvider {
-        override val title: String = titleText
-        override val description: String = descriptionText
-        override val termsAndConditions: AnnotatedString = termsText
+        override val title: String = "title"
+        override val description: String = "description"
+        override val termsAndConditions: AnnotatedString = AnnotatedString("terms")
     }
 
     private val interactor = DefaultSignupToLinkToggleInteractor(
@@ -64,7 +61,7 @@ class SignupToLinkToggleInteractorTest {
         // Given
         setupLinkAvailable()
         setupNoExistingAccount()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay")) // No ShopPay
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay)) // No ShopPay
 
         // When
         val state = interactor.state.value
@@ -72,8 +69,8 @@ class SignupToLinkToggleInteractorTest {
         // Then
         assertThat(state is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
         val visibleState = state as PaymentSheet.LinkSignupOptInState.Visible
-        assertThat(visibleState.title).isEqualTo(titleText)
-        assertThat(visibleState.description).isEqualTo(descriptionText)
+        assertThat(visibleState.title).isEqualTo(mockStringProvider.title)
+        assertThat(visibleState.description).isEqualTo(mockStringProvider.description)
     }
 
     @Test
@@ -81,7 +78,9 @@ class SignupToLinkToggleInteractorTest {
         // Given
         setupLinkAvailable()
         setupNoExistingAccount()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("shop_pay", "google_pay")) // ShopPay present
+        setupWalletButtonsConfiguration(
+            walletTypesToShow = listOf(WalletType.ShopPay, WalletType.GooglePay)
+        ) // ShopPay present
 
         // When
         val state = interactor.state.value
@@ -95,7 +94,7 @@ class SignupToLinkToggleInteractorTest {
         // Given
         setupLinkNotAvailable() // No Link state
         setupNoExistingAccount()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay")) // No ShopPay
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay)) // No ShopPay
 
         // When
         val state = interactor.state.value
@@ -109,7 +108,7 @@ class SignupToLinkToggleInteractorTest {
         // Given
         setupLinkAvailable()
         setupExistingAccount() // Account exists
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay")) // No ShopPay
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay)) // No ShopPay
 
         // When
         val state = interactor.state.value
@@ -123,7 +122,7 @@ class SignupToLinkToggleInteractorTest {
         // Given
         flowControllerState.value = null // No state
         setupNoExistingAccount()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay"))
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
 
         // When
         val state = interactor.state.value
@@ -137,14 +136,14 @@ class SignupToLinkToggleInteractorTest {
         // Given
         setupLinkAvailable()
         setupNoExistingAccount()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay")) // No ShopPay in available wallets
+        setupWalletButtonsConfiguration(
+            walletTypesToShow = listOf(WalletType.GooglePay)
+        ) // No ShopPay in available wallets
 
         // When
         val state = interactor.state.value
 
         // Then
-        // When ShopPay is not in availableWallets, so ShopPay is not considered available
-        // Therefore state should be Visible (Link available + no account + no ShopPay restriction)
         assertThat(state is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
     }
 
@@ -152,7 +151,7 @@ class SignupToLinkToggleInteractorTest {
     fun `state updates when Link account status changes`() = runTest {
         // Given
         setupLinkAvailable()
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay"))
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
 
         // Initially no account
         setupNoExistingAccount()
@@ -178,17 +177,17 @@ class SignupToLinkToggleInteractorTest {
         setupNoExistingAccount()
 
         // Initially no ShopPay
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay"))
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
         assertThat(interactor.state.value is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
 
         // When ShopPay is added
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay", "shop_pay"))
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay, WalletType.ShopPay))
 
         // Then
         assertThat(interactor.state.value).isEqualTo(PaymentSheet.LinkSignupOptInState.Hidden)
 
         // When ShopPay is removed
-        setupWalletButtonsConfiguration(walletTypesToShow = listOf("google_pay"))
+        setupWalletButtonsConfiguration(walletTypesToShow = listOf(WalletType.GooglePay))
 
         // Then
         assertThat(interactor.state.value is PaymentSheet.LinkSignupOptInState.Visible).isTrue()
@@ -199,7 +198,7 @@ class SignupToLinkToggleInteractorTest {
         val linkState = LinkState(
             configuration = TestFactory.LINK_CONFIGURATION,
             loginState = LinkState.LoginState.LoggedOut,
-            signupMode = com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse
         )
 
         // Use PaymentMethodMetadataFactory instead of mocks
@@ -233,25 +232,13 @@ class SignupToLinkToggleInteractorTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
     }
 
-    private fun setupWalletButtonsConfiguration(walletTypesToShow: List<String>) {
-        // Convert wallet type strings to WalletType enum
-        val availableWallets = walletTypesToShow.mapNotNull { walletTypeString ->
-            when (walletTypeString) {
-                "google_pay" -> WalletType.GooglePay
-                "link" -> WalletType.Link
-                "shop_pay" -> WalletType.ShopPay
-                else -> null
-            }
-        }
-
-        // Get the current state to preserve Link state
+    private fun setupWalletButtonsConfiguration(walletTypesToShow: List<WalletType>) {
         val currentState = flowControllerState.value
         val currentLinkState = currentState?.paymentSheetState?.paymentMethodMetadata?.linkState
-
         // Create new PaymentMethodMetadata with updated availableWallets
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkState = currentLinkState,
-            availableWallets = availableWallets
+            availableWallets = walletTypesToShow
         )
 
         val paymentSheetState = createPaymentSheetState(paymentMethodMetadata)
