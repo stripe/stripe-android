@@ -1,12 +1,14 @@
 package com.stripe.android.model
 
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * [Create a bank account token](https://stripe.com/docs/api/tokens/create_bank_account)
  */
 @Parcelize
-data class BankAccountTokenParams @JvmOverloads constructor(
+@Poko
+class BankAccountTokenParams @JvmOverloads constructor(
     /**
      * The country in which the bank account is located.
      *

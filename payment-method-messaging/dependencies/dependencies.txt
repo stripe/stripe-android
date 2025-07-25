@@ -328,6 +328,9 @@
 |    |    |    \--- androidx.appcompat:appcompat-resources:1.7.0 (c)
 |    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
+|    |    +--- dev.drewhamilton.poko:poko-annotations:0.18.2
+|    |    |    \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 |    +--- androidx.databinding:viewbinding:8.8.2
 |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
@@ -886,6 +889,7 @@
 |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 -> 18.4.0 (*)
 |    |    \--- com.google.android.gms:play-services-tasks:18.2.0 (*)
 |    +--- com.google.android.instantapps:instantapps:1.1.0
+|    +--- dev.drewhamilton.poko:poko-annotations:0.18.2 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :payments-ui-core
 |    +--- androidx.databinding:viewbinding:8.8.2 (*)

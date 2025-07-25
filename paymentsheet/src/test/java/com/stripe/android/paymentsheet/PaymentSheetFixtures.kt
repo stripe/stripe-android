@@ -297,11 +297,11 @@ internal object PaymentSheetFixtures {
         ] 
     """.trimIndent()
 
-    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.copy(
-        email = null,
-        name = null,
-        phone = null
-    )
+    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.toBuilder()
+        .setEmail(null)
+        .setName(null)
+        .setPhone(null)
+        .build()
 
     internal fun billingDetailsFormState(
         line1: FormFieldEntry? = FormFieldEntry("1234 Main Street", isComplete = true),
