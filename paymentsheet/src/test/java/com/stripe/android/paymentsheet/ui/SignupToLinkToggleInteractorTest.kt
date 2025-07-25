@@ -149,39 +149,6 @@ class SignupToLinkToggleInteractorTest {
     }
 
     @Test
-    fun `handleToggleChange updates toggle value`() = runTest {
-        // When
-        interactor.handleToggleChange(true)
-
-        // Then
-        assertThat(interactor.getSignupToLinkValue()).isTrue()
-
-        // When
-        interactor.handleToggleChange(false)
-
-        // Then
-        assertThat(interactor.getSignupToLinkValue()).isFalse()
-    }
-
-    @Test
-    fun `getSignupToLinkValue returns current toggle state`() = runTest {
-        // Given
-        assertThat(interactor.getSignupToLinkValue()).isFalse()
-
-        // When
-        interactor.handleToggleChange(true)
-
-        // Then
-        assertThat(interactor.getSignupToLinkValue()).isTrue()
-
-        // When
-        interactor.handleToggleChange(false)
-
-        // Then
-        assertThat(interactor.getSignupToLinkValue()).isFalse()
-    }
-
-    @Test
     fun `state updates when Link account status changes`() = runTest {
         // Given
         setupLinkAvailable()

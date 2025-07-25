@@ -42,9 +42,9 @@ internal class SignupForLink @Inject constructor(
 
             val userInput = UserInput.SignUpOptionalPhone(
                 email = email,
-                country = billing?.address?.country ?: "US",
-                phone = billing?.phone,
-                name = billing?.name,
+                country = billing.address?.country,
+                phone = billing.phone,
+                name = billing.name,
                 consentAction = SignUpConsentAction.Implied
             )
             logger.debug("Creating Link account with user input: $userInput")
@@ -74,7 +74,7 @@ internal class SignupForLink @Inject constructor(
         linkAccountManager: LinkAccountManager
     ) {
         // Create payment method in Link if we have card payment selection
-        if (paymentSelection is PaymentSelection.New) {
+        if (paymentSelection is PaymentSelection.New.Card) {
             val paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams
             val cardPaymentDetailsResult = linkAccountManager.createCardPaymentDetails(
                 paymentMethodCreateParams
