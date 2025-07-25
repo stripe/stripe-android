@@ -145,13 +145,14 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
     @Test
     fun testFonts() {
         testPaymentMethodRowButton_Checkmark(
+            subtitle = "this is a subtitle",
             appearance = PaymentSheet.Appearance.Embedded.Builder()
                 .rowStyle(FlatWithCheckmark.default)
                 .titleFont(
                     PaymentSheet.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 20f,
-                        fontWeight = 30,
+                        fontWeight = 500,
                         letterSpacingSp = 10f
                     )
                 )
@@ -159,7 +160,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                     PaymentSheet.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 12f,
-                        fontWeight = 20,
+                        fontWeight = 200,
                         letterSpacingSp = 5f
                     )
                 )

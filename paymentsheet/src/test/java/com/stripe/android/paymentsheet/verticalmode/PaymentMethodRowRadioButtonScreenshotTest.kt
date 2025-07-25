@@ -157,13 +157,14 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
     @Test
     fun testFonts() {
         testPaymentMethodRowButton_RadioButton(
+            subtitle = "this is a subtitle",
             appearance = PaymentSheet.Appearance.Embedded.Builder()
                 .rowStyle(FlatWithRadio.default)
                 .titleFont(
                     PaymentSheet.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 20f,
-                        fontWeight = 30,
+                        fontWeight = 500,
                         letterSpacingSp = 10f
                     )
                 )
@@ -171,7 +172,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                     PaymentSheet.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 12f,
-                        fontWeight = 20,
+                        fontWeight = 200,
                         letterSpacingSp = 5f
                     )
                 )
