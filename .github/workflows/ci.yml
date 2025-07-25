@@ -64,3 +64,14 @@ jobs:
         run: cd scripts && ruby lokalise/check_untranslated_strings.rb
         env:
           LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
+
+  migration-rules-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/stripe_setup
+
+      - name: Test migration rules
+        run: |
+          cd migration-rules
+          ./gradlew test --no-daemon
