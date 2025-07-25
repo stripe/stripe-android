@@ -3577,7 +3577,6 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Crypto Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Eps Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Fpx Lcom/stripe/android/model/PaymentMethod$Type;
-	public static final field Giropay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field GrabPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Ideal Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Klarna Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3856,9 +3855,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createEps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createEps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createFromGooglePay (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -4156,10 +4152,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createEps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createEps$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createFromGooglePay (Lorg/json/JSONObject;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public final fun createGiropay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
-	public static synthetic fun createGiropay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createGrabPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -5465,7 +5457,6 @@ public abstract interface annotation class com/stripe/android/model/Source$Sourc
 	public static final field CARD Ljava/lang/String;
 	public static final field Companion Lcom/stripe/android/model/Source$SourceType$Companion;
 	public static final field EPS Ljava/lang/String;
-	public static final field GIROPAY Ljava/lang/String;
 	public static final field IDEAL Ljava/lang/String;
 	public static final field KLARNA Ljava/lang/String;
 	public static final field MULTIBANCO Ljava/lang/String;
@@ -5482,7 +5473,6 @@ public final class com/stripe/android/model/Source$SourceType$Companion {
 	public static final field BANCONTACT Ljava/lang/String;
 	public static final field CARD Ljava/lang/String;
 	public static final field EPS Ljava/lang/String;
-	public static final field GIROPAY Ljava/lang/String;
 	public static final field IDEAL Ljava/lang/String;
 	public static final field KLARNA Ljava/lang/String;
 	public static final field MULTIBANCO Ljava/lang/String;
@@ -5738,7 +5728,6 @@ public final class com/stripe/android/model/SourceParams : android/os/Parcelable
 	public static final fun createCardParamsFromGooglePay (Lorg/json/JSONObject;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createCustomParams (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createEPSParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public static final fun createGiropayParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createIdealParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createKlarna (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
 	public static final fun createMasterpassParams (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
@@ -5802,8 +5791,6 @@ public final class com/stripe/android/model/SourceParams$Companion {
 	public final fun createCustomParams (Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public final fun createEPSParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static synthetic fun createEPSParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
-	public final fun createGiropayParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
-	public static synthetic fun createGiropayParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public final fun createIdealParams (JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/SourceParams;
 	public static synthetic fun createIdealParams$default (Lcom/stripe/android/model/SourceParams$Companion;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/SourceParams;
 	public final fun createKlarna (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/KlarnaSourceParams;)Lcom/stripe/android/model/SourceParams;
@@ -5888,14 +5875,6 @@ public final class com/stripe/android/model/SourceParams$TypeData$Eps$Creator : 
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/SourceParams$TypeData$Eps;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/SourceParams$TypeData$Eps;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/model/SourceParams$TypeData$Giropay$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/SourceParams$TypeData$Giropay;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/model/SourceParams$TypeData$Giropay;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
