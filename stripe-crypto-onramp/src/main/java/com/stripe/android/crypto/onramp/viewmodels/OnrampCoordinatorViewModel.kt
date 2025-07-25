@@ -6,13 +6,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationCallback
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
+import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * ViewModel that stores Onramp configuration in a SavedStateHandle for
@@ -22,9 +29,11 @@ import kotlinx.coroutines.launch
  * @property linkController The LinkController to configure.
  *
  */
-internal class OnrampCoordinatorViewModel(
+internal class OnrampCoordinatorViewModel @Inject constructor(
     private val handle: SavedStateHandle,
-    private val linkController: LinkController
+    private val linkController: LinkController,
+    private val onrampCallbacks: OnrampCallbacks,
+    private val cryptoApiRepository: CryptoApiRepository
 ) : ViewModel() {
 
     /**
@@ -38,9 +47,8 @@ internal class OnrampCoordinatorViewModel(
      * Configure the view model and associated types.
      *
      * @param configuration The OnrampConfiguration to apply.
-     * @param callback Callback receiving success or failure.
      */
-    fun configure(configuration: OnrampConfiguration, callback: OnrampConfigurationCallback) {
+    fun configure(configuration: OnrampConfiguration) {
         onRampConfiguration = configuration
 
         viewModelScope.launch {
@@ -48,9 +56,9 @@ internal class OnrampCoordinatorViewModel(
 
             when (val result = linkController.configure(config)) {
                 is LinkController.ConfigureResult.Success ->
-                    callback.onResult(OnrampConfigurationResult.Completed(true))
+                    onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Completed(true))
                 is LinkController.ConfigureResult.Failed ->
-                    callback.onResult(OnrampConfigurationResult.Failed(result.error))
+                    onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Failed(result.error))
             }
         }
     }
@@ -73,15 +81,88 @@ internal class OnrampCoordinatorViewModel(
         )
     }
 
-    class Factory(
-        private val linkController: LinkController // pass into factory
+    internal fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
+        when (result) {
+            is LinkController.LookupConsumerResult.Success ->
+                onrampCallbacks.linkLookupCallback.onResult(
+                    OnrampLinkLookupResult.Completed(result.isConsumer)
+                )
+            is LinkController.LookupConsumerResult.Failed ->
+                onrampCallbacks.linkLookupCallback.onResult(
+                    OnrampLinkLookupResult.Failed(result.error)
+                )
+        }
+    }
+
+    internal fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
+        when (result) {
+            is LinkController.AuthenticationResult.Success ->
+                viewModelScope.launch {
+                    val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions("")
+
+                    permissionsResult.fold(
+                        onSuccess = {
+                            onrampCallbacks.authenticationCallback.onResult(
+                                OnrampVerificationResult.Completed(it.id)
+                            )
+                        },
+                        onFailure = {
+                            onrampCallbacks.authenticationCallback.onResult(
+                                OnrampVerificationResult.Failed(it)
+                            )
+                        }
+                    )
+                }
+            is LinkController.AuthenticationResult.Failed ->
+                onrampCallbacks.authenticationCallback.onResult(
+                    OnrampVerificationResult.Failed(result.error)
+                )
+            is LinkController.AuthenticationResult.Canceled ->
+                onrampCallbacks.authenticationCallback.onResult(
+                    OnrampVerificationResult.Cancelled()
+                )
+        }
+    }
+
+    internal fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
+        when (result) {
+            is LinkController.RegisterConsumerResult.Success ->
+                viewModelScope.launch {
+                    val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions("")
+
+                    permissionsResult.fold(
+                        onSuccess = {
+                            onrampCallbacks.registerUserCallback.onResult(
+                                OnrampRegisterUserResult.Completed(it.id)
+                            )
+                        },
+                        onFailure = {
+                            onrampCallbacks.registerUserCallback.onResult(
+                                OnrampRegisterUserResult.Failed(it)
+                            )
+                        }
+                    )
+                }
+            is LinkController.RegisterConsumerResult.Failed ->
+                onrampCallbacks.registerUserCallback.onResult(
+                    OnrampRegisterUserResult.Failed(result.error)
+                )
+        }
+    }
+
+    internal class Factory(
+        private val linkController: LinkController,
+        private val onrampCallbacks: OnrampCallbacks
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-            return OnrampCoordinatorViewModel(
-                handle = extras.createSavedStateHandle(),
-                linkController = linkController
-            ) as T
+            return DaggerOnrampCoordinatorViewModelComponent.factory()
+                .build(
+                    savedStateHandle = extras.createSavedStateHandle(),
+                    linkController = linkController,
+                    onrampCallbacks = onrampCallbacks
+                )
+                .viewModel as T
         }
     }
 }
