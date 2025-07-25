@@ -12,13 +12,15 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing parameters for [confirming a SetupIntent](https://stripe.com/docs/api/setup_intents/confirm).
  */
 @Parcelize
-data class ConfirmSetupIntentParams
+@Poko
+class ConfirmSetupIntentParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     @get:JvmSynthetic override val clientSecret: String,
@@ -87,6 +89,37 @@ constructor(
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        clientSecret: String = this.clientSecret,
+        paymentMethodId: String? = this.paymentMethodId,
+        paymentMethodCreateParams: PaymentMethodCreateParams? = this.paymentMethodCreateParams,
+        returnUrl: String? = this.returnUrl,
+        useStripeSdk: Boolean = this.useStripeSdk,
+        mandateId: String? = this.mandateId,
+        mandateData: MandateDataParams? = this.mandateData,
+        setAsDefaultPaymentMethod: Boolean? = this.setAsDefaultPaymentMethod,
+        paymentMethodCode: PaymentMethodCode? = this.paymentMethodCode,
+        radarOptions: RadarOptions? = this.radarOptions,
+        clientAttributionMetadata: ClientAttributionMetadata? = this.clientAttributionMetadata,
+        confirmationTokenId: String? = this.confirmationTokenId,
+    ): ConfirmSetupIntentParams {
+        return ConfirmSetupIntentParams(
+            clientSecret = clientSecret,
+            paymentMethodId = paymentMethodId,
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            returnUrl = returnUrl,
+            useStripeSdk = useStripeSdk,
+            mandateId = mandateId,
+            mandateData = mandateData,
+            setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+            paymentMethodCode = paymentMethodCode,
+            radarOptions = radarOptions,
+            clientAttributionMetadata = clientAttributionMetadata,
+            confirmationTokenId = confirmationTokenId,
+        )
     }
 
     override fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmSetupIntentParams {
