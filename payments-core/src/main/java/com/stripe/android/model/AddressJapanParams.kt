@@ -1,10 +1,12 @@
 package com.stripe.android.model
 
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class AddressJapanParams(
+@Poko
+class AddressJapanParams(
     /**
      * City or ward.
      */

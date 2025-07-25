@@ -101,11 +101,11 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() returns true when postal code changes in Automatic mode`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setAddress(
             address = Address(
                 postalCode = "94107",
             )
-        )
+        ).build()
 
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -122,11 +122,11 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() returns true when country changes in Automatic mode`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setAddress(
             address = Address(
                 country = "US"
             )
-        )
+        ).build()
 
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -143,12 +143,12 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() returns false when values are the same in Automatic mode`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setAddress(
             address = Address(
                 postalCode = "94107",
                 country = "US"
             )
-        )
+        ).build()
 
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -241,12 +241,12 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() handles null vs empty string in address fields`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setAddress(
             address = BILLING_DETAILS_FORM_DETAILS.address?.copy(
                 line2 = null,
                 state = null,
             )
-        )
+        ).build()
 
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -414,9 +414,9 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() returns true when name changes`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setName(
             name = "Original Name"
-        )
+        ).build()
 
         val configWithName = BillingDetailsCollectionConfiguration(
             name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -444,9 +444,9 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() returns true when email changes`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setEmail(
             email = "original@example.com"
-        )
+        ).build()
 
         val configWithEmail = BillingDetailsCollectionConfiguration(
             email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -474,9 +474,9 @@ internal class BillingDetailsEntryTest {
 
     @Test
     fun `hasChanged() returns true when phone changes`() {
-        val billingDetails = BILLING_DETAILS_FORM_DETAILS.copy(
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setPhone(
             phone = "+1234567890"
-        )
+        ).build()
 
         val configWithPhone = BillingDetailsCollectionConfiguration(
             phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
