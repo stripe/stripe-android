@@ -4,16 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.StripeCardScanProxy
 import com.stripe.android.ui.core.databinding.StripeActivityCardScanBinding
+import kotlinx.coroutines.launch
 
 internal class CardScanActivity : AppCompatActivity() {
     private val viewBinding by lazy {
         StripeActivityCardScanBinding.inflate(layoutInflater)
     }
+    
+    private lateinit var cardScanProxy: StripeCardScanProxy
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +35,17 @@ internal class CardScanActivity : AppCompatActivity() {
             )
         }
 
-        StripeCardScanProxy.create(
+        // Create the CardScanProxy during onCreate to register ActivityResultLauncher
+        cardScanProxy = StripeCardScanProxy.create(
             this,
             this::onScanFinished,
             ErrorReporter.createFallbackInstance(applicationContext, setOf("CardScan"))
-        ).present(config)
+        )
+        
+        // Defer the present() call to avoid timing issues with ActivityResultLauncher registration
+        lifecycleScope.launch {
+            cardScanProxy.present(config)
+        }
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {
