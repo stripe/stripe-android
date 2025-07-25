@@ -41,9 +41,13 @@ class InlineSignupViewModelTest {
             val linkAccountManager = object : FakeLinkAccountManager() {
                 var counter = 0
 
-                override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
+                override suspend fun lookupConsumer(
+                    email: String,
+                    startSession: Boolean,
+                    customerId: String?
+                ): Result<LinkAccount?> {
                     counter += 1
-                    return super.lookupConsumer(email, startSession)
+                    return super.lookupConsumer(email, startSession, customerId)
                 }
             }
             val viewModel = InlineSignupViewModel(

@@ -167,8 +167,7 @@ internal object AppearanceStore {
 
             @OptIn(AppearanceAPIAdditionsPreview::class)
             fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
-                // paymentMethodIconMargins will override default spacing in PaymentMethodRowButton so we only
-                // want to init them if they were set in the playground
+                // paymentMethodIconMargins and font will override defaults so only init if set in playground
                 val insets = if (horizontalPaymentMethodIconMargin != null || verticalPaymentMethodIconMargin != null) {
                     PaymentSheet.Insets(
                         horizontalDp = horizontalPaymentMethodIconMargin ?: 0f,
@@ -178,12 +177,16 @@ internal object AppearanceStore {
                     null
                 }
 
-                val font = PaymentSheet.Typography.Font(
-                    fontFamily = fontFamilyRes,
-                    fontSizeSp = fontSizeSp,
-                    fontWeight = fontWeight,
-                    letterSpacingSp = letterSpacingSp
-                )
+                val font = if (listOfNotNull(fontWeight, fontFamilyRes, fontSizeSp, letterSpacingSp).isNotEmpty()) {
+                    PaymentSheet.Typography.Font(
+                        fontFamily = fontFamilyRes,
+                        fontSizeSp = fontSizeSp,
+                        fontWeight = fontWeight,
+                        letterSpacingSp = letterSpacingSp
+                    )
+                } else {
+                    null
+                }
 
                 return PaymentSheet.Appearance.Embedded.Builder()
                     .rowStyle(getRow())

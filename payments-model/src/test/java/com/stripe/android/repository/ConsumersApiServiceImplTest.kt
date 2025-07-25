@@ -105,6 +105,7 @@ class ConsumersApiServiceImplTest {
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
             doNotLogConsumerFunnelEvent = false,
+            customerId = null
         )
 
         assertThat(lookup.exists).isTrue()
@@ -134,7 +135,8 @@ class ConsumersApiServiceImplTest {
                 email = email,
                 requestSurface = requestSurface,
                 doNotLogConsumerFunnelEvent = false,
-                requestOptions = DEFAULT_OPTIONS
+                requestOptions = DEFAULT_OPTIONS,
+                customerId = null
             )
         }
     }

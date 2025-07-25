@@ -35,7 +35,12 @@ internal data class LinkConfiguration(
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
     val enableDisplayableDefaultValuesInEce: Boolean,
+    private val customerId: String?
 ) : Parcelable {
+
+    val customerIdForEceDefaultValues: String?
+        get() = if (enableDisplayableDefaultValuesInEce) customerId else null
+
     @Parcelize
     data class CustomerInfo(
         val name: String?,
