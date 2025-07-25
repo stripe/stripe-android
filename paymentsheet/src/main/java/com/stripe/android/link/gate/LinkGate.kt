@@ -11,7 +11,7 @@ internal interface LinkGate {
     val useNativeLink: Boolean
     val useAttestationEndpoints: Boolean
     val suppress2faModal: Boolean
-    val useInlineOtpInWalletButtons: Boolean
+
     val showRuxInFlowController: Boolean
 
     fun interface Factory {

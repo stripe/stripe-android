@@ -750,7 +750,8 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileExpressCheckoutElementInlineOtpKillswitch = false
             )
         )
 
@@ -788,7 +789,8 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileExpressCheckoutElementInlineOtpKillswitch = false
             )
         )
 
@@ -874,7 +876,8 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileExpressCheckoutElementInlineOtpKillswitch = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -906,7 +909,8 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileExpressCheckoutElementInlineOtpKillswitch = false
             )
         )
 
@@ -1426,7 +1430,8 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
-                linkEnableDisplayableDefaultValuesInEce = false
+                linkEnableDisplayableDefaultValuesInEce = false,
+                linkMobileExpressCheckoutElementInlineOtpKillswitch = false
             ),
             linkStore = linkStore,
         )
@@ -3202,7 +3207,8 @@ internal class DefaultPaymentElementLoaderTest {
             useAttestationEndpoints = false,
             suppress2faModal = false,
             disableLinkRuxInFlowController = false,
-            linkEnableDisplayableDefaultValuesInEce = false
+            linkEnableDisplayableDefaultValuesInEce = false,
+            linkMobileExpressCheckoutElementInlineOtpKillswitch = false
         )
     }
 
