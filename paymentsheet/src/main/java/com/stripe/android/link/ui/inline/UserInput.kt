@@ -26,6 +26,4 @@ internal sealed class UserInput : Parcelable {
         val name: String?,
         val consentAction: SignUpConsentAction
     ) : UserInput()
-
-
 }
