@@ -59,8 +59,11 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
@@ -1102,37 +1105,19 @@ private fun EmbeddedPicker(
     }
     Divider()
 
-    FontDropDown(embeddedAppearance.fontFamilyRes) {
+    EmbeddedFontDropDown(embeddedAppearance.titleFont, "titleFont") {
         updateEmbedded(
             embeddedAppearance.copy(
-                fontFamilyRes = it
+                titleFont = it
             )
         )
     }
     Divider()
 
-    IncrementDecrementItem("fontSizeSp", embeddedAppearance.fontSizeSp ?: 0f) {
+    EmbeddedFontDropDown(embeddedAppearance.subtitleFont, "subtitleFont") {
         updateEmbedded(
             embeddedAppearance.copy(
-                fontSizeSp = it
-            )
-        )
-    }
-    Divider()
-
-    IncrementDecrementItem("fontWeight", embeddedAppearance.fontWeight?.toFloat() ?: 0f) {
-        updateEmbedded(
-            embeddedAppearance.copy(
-                fontWeight = it.toInt()
-            )
-        )
-    }
-    Divider()
-
-    IncrementDecrementItem("letterSpacingSp", embeddedAppearance.letterSpacingSp ?: 0f) {
-        updateEmbedded(
-            embeddedAppearance.copy(
-                letterSpacingSp = it
+                subtitleFont = it
             )
         )
     }
@@ -1437,6 +1422,71 @@ private fun FontDropDown(fontResId: Int?, fontSelectedCallback: (Int?) -> Unit) 
                     FontDropDownMenuItem(label = font.value, fontResId = font.key) {
                         expanded = false
                         fontSelectedCallback(font.key)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmbeddedFontDropDown(
+    currentFont: AppearanceStore.State.Typography.Font?,
+    displayText: String,
+    fontSelectedCallback: (AppearanceStore.State.Typography.Font?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = mapOf(
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 12f,
+            fontWeight = 200,
+            letterSpacingSp = 8f,
+        ) to "Small",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 16f,
+            fontWeight = 400,
+            letterSpacingSp = 8f,
+        ) to "Medium",
+        AppearanceStore.State.Typography.Font(
+            fontSizeSp = 24f,
+            fontWeight = 700,
+            letterSpacingSp = 8f,
+        ) to "Large",
+        null to "Default"
+    )
+
+    items[currentFont]?.let {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxSize().padding(all = BASE_PADDING).wrapContentSize(Alignment.TopStart)
+        ) {
+            Text(
+                text = "$displayText: $it",
+                fontSize = BASE_FONT_SIZE,
+                modifier = Modifier.fillMaxWidth().clickable(onClick = { expanded = true })
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items.forEach { font ->
+                    val style = TextStyle(
+                        fontSize = font.key?.fontSizeSp?.sp ?: TextUnit.Unspecified,
+                        fontWeight = font.key?.fontWeight?.let { FontWeight(it) },
+                        fontFamily = font.key?.fontFamily?.let { FontFamily(Font(it)) },
+                        letterSpacing = font.key?.letterSpacingSp?.sp ?: TextUnit.Unspecified,
+                    )
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            fontSelectedCallback(font.key)
+                        },
+                    ) {
+                        Text(
+                            text = font.value,
+                            style = style
+                        )
                     }
                 }
             }
