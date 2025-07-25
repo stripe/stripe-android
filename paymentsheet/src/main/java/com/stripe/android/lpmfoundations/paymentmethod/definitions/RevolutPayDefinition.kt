@@ -35,7 +35,8 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         paymentMethodDefinition = RevolutPayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay_night,
     )
 
     override fun createFormElements(

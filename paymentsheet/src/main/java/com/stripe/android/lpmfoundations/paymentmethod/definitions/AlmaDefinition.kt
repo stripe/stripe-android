@@ -33,6 +33,7 @@ private object AlmaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataS
         paymentMethodDefinition = AlmaDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_alma,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_alma,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_alma_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_alma_night,
     )
 }
