@@ -74,8 +74,8 @@ internal interface LinkAccountManager {
      */
     suspend fun signUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount>
@@ -85,8 +85,8 @@ internal interface LinkAccountManager {
      */
     suspend fun mobileSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         verificationToken: String,
         appId: String,

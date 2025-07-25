@@ -635,6 +635,41 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onLinkUserSignupSucceeded() {
+        fireEvent(
+            PaymentSheetEvent.LinkUserSignupSucceeded(
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onLinkUserSignupFailed(error: Throwable) {
+        fireEvent(
+            PaymentSheetEvent.LinkUserSignupFailed(
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                error = error,
+            )
+        )
+    }
+
+    override fun onLinkUserPaymentDetailCreationCompleted(error: Throwable?) {
+        fireEvent(
+            PaymentSheetEvent.LinkUserPaymentDetailCreationCompleted(
+                isDeferred = isDeferred,
+                isSpt = isSpt,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                error = error,
+            )
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

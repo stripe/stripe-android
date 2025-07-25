@@ -20,6 +20,7 @@
     <ID>LargeClass:CustomerSheetViewModel.kt$CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt$DefaultConfirmationHandlerTest</ID>
+    <ID>LargeClass:DefaultEventReporter.kt$DefaultEventReporter : EventReporter</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultIntentConfirmationInterceptorTest.kt$DefaultIntentConfirmationInterceptorTest</ID>
