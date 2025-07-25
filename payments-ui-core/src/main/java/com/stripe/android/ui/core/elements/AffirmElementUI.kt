@@ -19,7 +19,7 @@ private const val MIN_LUMINANCE_FOR_LIGHT_ICON = 0.5
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun AffirmElementUI(modifier: Modifier = Modifier) {
     val color = MaterialTheme.stripeColors.component
-    val iconRes = if (isSystemInDarkTheme() || color.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON) {
+    val iconRes = if (color.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON) {
         R.drawable.stripe_ic_affirm_logo_night
     } else {
         R.drawable.stripe_ic_affirm_logo_day
