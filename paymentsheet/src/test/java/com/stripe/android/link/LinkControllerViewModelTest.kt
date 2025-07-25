@@ -10,6 +10,8 @@ import com.stripe.android.link.account.FakeLinkAuth
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.link.exceptions.AppAttestationException
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkControllerComponent
@@ -154,6 +156,58 @@ class LinkControllerViewModelTest {
             assertThat(viewModel.configure(createControllerConfig())).isEqualTo(LinkController.ConfigureResult.Success)
             assertThat(awaitItem()).isEqualTo(LinkController.State())
         }
+    }
+
+    @Test
+    fun `configure() fails when attestation check fails with AttestationFailed`() = runTest {
+        val viewModel = createViewModel()
+        val attestationError = Exception("Attestation failed")
+
+        linkAttestationCheck.result = LinkAttestationCheck.Result.AttestationFailed(attestationError)
+
+        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
+        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+
+        val result = viewModel.configure(createControllerConfig())
+
+        assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
+        val failedResult = result as LinkController.ConfigureResult.Failed
+        assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
+        assertThat(failedResult.error.cause).isEqualTo(attestationError)
+    }
+
+    @Test
+    fun `configure() fails when attestation check fails with AccountError`() = runTest {
+        val viewModel = createViewModel()
+        val accountError = Exception("Account error")
+
+        linkAttestationCheck.result = LinkAttestationCheck.Result.AccountError(accountError)
+
+        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
+        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+
+        val result = viewModel.configure(createControllerConfig())
+
+        assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
+        val failedResult = result as LinkController.ConfigureResult.Failed
+        assertThat(failedResult.error).isEqualTo(accountError)
+    }
+
+    @Test
+    fun `configure() fails when attestation check fails with Error`() = runTest {
+        val viewModel = createViewModel()
+        val genericError = Exception("Generic error")
+
+        linkAttestationCheck.result = LinkAttestationCheck.Result.Error(genericError)
+
+        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
+        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+
+        val result = viewModel.configure(createControllerConfig())
+
+        assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
+        val failedResult = result as LinkController.ConfigureResult.Failed
+        assertThat(failedResult.error).isEqualTo(genericError)
     }
 
     @Test
