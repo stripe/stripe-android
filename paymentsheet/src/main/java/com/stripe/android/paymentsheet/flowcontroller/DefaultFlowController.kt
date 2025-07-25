@@ -65,6 +65,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
+import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -102,6 +103,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
+    private val signupToLinkToggleInteractor: SignupToLinkToggleInteractor,
     private val errorReporter: ErrorReporter,
     private val signupForLink: SignupForLink,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
@@ -186,10 +188,10 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override val linkSignupOptInState: StateFlow<PaymentSheet.LinkSignupOptInState> =
-        viewModel.flowControllerStateComponent.signupToLinkToggleInteractor.state
+        signupToLinkToggleInteractor.state
 
     override val linkSignupOptInValue: MutableStateFlow<Boolean> =
-        viewModel.flowControllerStateComponent.signupToLinkToggleInteractor.toggleValue
+        signupToLinkToggleInteractor.toggleValue
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,

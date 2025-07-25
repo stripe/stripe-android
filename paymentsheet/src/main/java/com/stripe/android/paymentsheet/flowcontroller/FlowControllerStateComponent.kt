@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
-import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -45,13 +44,11 @@ import javax.inject.Singleton
     ]
 )
 internal interface FlowControllerStateComponent {
-    val application: Application
     val flowControllerComponentBuilder: FlowControllerComponent.Builder
     val confirmationHandler: ConfirmationHandler
     val linkHandler: LinkHandler
     val errorReporter: ErrorReporter
     val walletButtonsContent: WalletButtonsContent
-    val signupToLinkToggleInteractor: SignupToLinkToggleInteractor
     val linkInlineInteractor: DefaultLinkInlineInteractor
     val linkAccountHolder: LinkAccountHolder
 
