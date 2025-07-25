@@ -11,7 +11,6 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationCallback
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.link.LinkController
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import kotlinx.coroutines.launch
 
 /**
@@ -69,7 +68,6 @@ internal class OnrampCoordinatorViewModel(
             phone = info.phone,
             country = info.country,
             name = info.fullName,
-            consentAction = ConsumerSignUpConsentAction.Implied
         )
     }
 

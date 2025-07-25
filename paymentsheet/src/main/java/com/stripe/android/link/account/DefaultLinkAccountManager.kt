@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
@@ -24,6 +25,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -260,6 +262,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 publishableKey = consumerSessionSignUp.publishableKey,
                 displayablePaymentDetails = null
             )
+        }
+    }
+
+    override suspend fun createPaymentMethod(linkPaymentMethod: LinkPaymentMethod): Result<PaymentMethod> {
+        return runCatching {
+            requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+        }.mapCatching { account ->
+            linkRepository.createPaymentMethod(
+                consumerSessionClientSecret = account.clientSecret,
+                paymentMethod = linkPaymentMethod,
+            ).getOrThrow()
         }
     }
 

@@ -9,7 +9,6 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.link.injection.LinkControllerScope
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
@@ -145,7 +144,6 @@ class LinkController @Inject internal constructor(
      * @param phone The phone number associated with the new account.
      * @param country The country code for the new account, in ISO 3166-1 alpha-2 format.
      * @param name The name of the consumer. Optional, can be null.
-     * @param consentAction How the user provided consent for the Link account.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun registerConsumer(
@@ -153,14 +151,12 @@ class LinkController @Inject internal constructor(
         phone: String,
         country: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
     ) {
         viewModel.onRegisterConsumer(
             email = email,
             phone = phone,
             country = country,
             name = name,
-            consentAction = consentAction
         )
     }
 

@@ -13,6 +13,10 @@ internal class LinkControllerPlaygroundViewModel(
     val status = MutableStateFlow<StatusMessage?>(null)
     val linkControllerState = MutableStateFlow(LinkControllerPlaygroundState())
 
+    fun onConfigureResult(result: LinkController.ConfigureResult) {
+        linkControllerState.update { it.copy(configureResult = result) }
+    }
+
     fun onLinkControllerPresentPaymentMethod(result: LinkController.PresentPaymentMethodsResult) {
         linkControllerState.update { it.copy(presentPaymentMethodsResult = result) }
     }

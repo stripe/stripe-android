@@ -38,7 +38,8 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class
     ],
     subcomponents = [
-        LinkControllerComponent::class
+        LinkControllerComponent::class,
+        LinkComponent::class,
     ]
 )
 internal interface LinkControllerModule {
