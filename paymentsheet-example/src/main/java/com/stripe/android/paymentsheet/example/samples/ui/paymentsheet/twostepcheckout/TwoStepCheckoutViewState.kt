@@ -68,10 +68,7 @@ data class TwoStepCheckoutViewState(
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
-                        willDisplayExternally = true,
-                        walletsToShow = listOf("google_pay", "link", "shop_pay") // Explicitly include Link
-                    )
+                    PaymentSheet.WalletButtonsConfiguration()
                 )
                 .link(
                     PaymentSheet.LinkConfiguration(
