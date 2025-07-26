@@ -175,21 +175,8 @@ internal class TwoStepCheckoutViewModel(
         }
     }
 
-    fun updateInlineOtpEnabled(enabled: Boolean) {
-        _state.update {
-            it.copy(enableInlineOtp = enabled)
-        }
-    }
-
     fun completeConfiguration() {
-        val currentState = _state.value
-
-        // Set feature flag based on toggle state
-        FeatureFlags.showInlineOtpInWalletButtons.setEnabled(currentState.enableInlineOtp)
-
-        _state.update {
-            it.copy(showConfiguration = false)
-        }
+        _state.update { it.copy(showConfiguration = false) }
 
         // Now prepare checkout with the configured settings
         viewModelScope.launch(Dispatchers.IO) {
