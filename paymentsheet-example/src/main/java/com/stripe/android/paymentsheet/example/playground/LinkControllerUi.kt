@@ -244,6 +244,7 @@ private fun StatusBox(
                 }
             }
 
+        add("Configure result" to (playgroundState.configureResult?.toString() ?: ""))
         add("Consumer lookup" to lookupText)
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
@@ -288,6 +289,7 @@ private fun StatusBox(
 
 @Composable
 private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = listOf(
+    (configureResult as? LinkController.ConfigureResult.Failed)?.error,
     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
