@@ -163,10 +163,7 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         val attestationError = Exception("Attestation failed")
 
-        linkAttestationCheck.result = LinkAttestationCheck.Result.AttestationFailed(attestationError)
-
-        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
-        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        configureWithAttestation(viewModel, LinkAttestationCheck.Result.AttestationFailed(attestationError))
 
         val result = viewModel.configure(createControllerConfig())
 
@@ -181,10 +178,7 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         val accountError = Exception("Account error")
 
-        linkAttestationCheck.result = LinkAttestationCheck.Result.AccountError(accountError)
-
-        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
-        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        configureWithAttestation(viewModel, LinkAttestationCheck.Result.AccountError(accountError))
 
         val result = viewModel.configure(createControllerConfig())
 
@@ -198,10 +192,7 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
         val genericError = Exception("Generic error")
 
-        linkAttestationCheck.result = LinkAttestationCheck.Result.Error(genericError)
-
-        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
-        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        configureWithAttestation(viewModel, LinkAttestationCheck.Result.Error(genericError))
 
         val result = viewModel.configure(createControllerConfig())
 
@@ -260,13 +251,7 @@ class LinkControllerViewModelTest {
         signIn()
 
         viewModel.updateState {
-            it.copy(
-                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-                    collectedCvc = "123",
-                    billingPhone = null
-                )
-            )
+            it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -290,13 +275,7 @@ class LinkControllerViewModelTest {
         signIn()
 
         viewModel.updateState {
-            it.copy(
-                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-                    collectedCvc = "123",
-                    billingPhone = null
-                )
-            )
+            it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         val error = Exception("Error")
@@ -322,13 +301,7 @@ class LinkControllerViewModelTest {
         signIn()
 
         viewModel.updateState {
-            it.copy(
-                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-                    collectedCvc = "123",
-                    billingPhone = null
-                )
-            )
+            it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         linkAccountManager.sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
@@ -354,13 +327,7 @@ class LinkControllerViewModelTest {
         signIn()
 
         viewModel.updateState {
-            it.copy(
-                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-                    collectedCvc = "123",
-                    billingPhone = null
-                )
-            )
+            it.copy(selectedPaymentMethod = createTestPaymentMethod())
         }
 
         val error = Exception("Error")
@@ -409,6 +376,26 @@ class LinkControllerViewModelTest {
     }
 
     @Test
+    fun `onLookupConsumer() on attestation failure emits failure result with AppAttestationException`() =
+        runTest(dispatcher) {
+            val viewModel = createViewModel()
+            configure(viewModel)
+
+            val attestationError = Exception("Attestation failed")
+            linkAuth.lookupResult = LinkAuthResult.AttestationFailed(attestationError)
+
+            viewModel.lookupConsumerResultFlow.test {
+                viewModel.onLookupConsumer("test@example.com")
+                val result = awaitItem()
+                assertThat(result).isInstanceOf(LinkController.LookupConsumerResult.Failed::class.java)
+                val failedResult = result as LinkController.LookupConsumerResult.Failed
+                assertThat(failedResult.email).isEqualTo("test@example.com")
+                assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
+                assertThat(failedResult.error.cause).isEqualTo(attestationError)
+            }
+        }
+
+    @Test
     fun `onPresentPaymentMethods() launches Link with correct arguments`() = runTest {
         val viewModel = createViewModel()
         configure(viewModel)
@@ -454,11 +441,7 @@ class LinkControllerViewModelTest {
 
         viewModel.updateState {
             it.copy(
-                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-                    collectedCvc = "123",
-                    billingPhone = null
-                ),
+                selectedPaymentMethod = createTestPaymentMethod(),
                 createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
         }
@@ -561,11 +544,7 @@ class LinkControllerViewModelTest {
         // First call onPresentPaymentMethods to set up the launch mode
         viewModel.onPresentPaymentMethods(FakeActivityResultLauncher(), "test@example.com")
 
-        val linkPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            collectedCvc = "123",
-            billingPhone = null
-        )
+        val linkPaymentMethod = createTestPaymentMethod()
         viewModel.presentPaymentMethodsResultFlow.test {
             viewModel.onLinkActivityResult(
                 LinkActivityResult.Completed(
@@ -863,17 +842,8 @@ class LinkControllerViewModelTest {
         val expectedAccount = TestFactory.LINK_ACCOUNT
         linkAuth.signupResult = LinkAuthResult.Success(expectedAccount)
 
-        val email = "test@example.com"
-        val phone = "1234567890"
-        val country = "US"
-        val name = "Test User"
         viewModel.registerConsumerResultFlow.test {
-            viewModel.onRegisterConsumer(
-                email = email,
-                phone = phone,
-                country = country,
-                name = name
-            )
+            viewModel.registerConsumerWith()
 
             val result = awaitItem()
             assertThat(result).isEqualTo(LinkController.RegisterConsumerResult.Success)
@@ -890,25 +860,38 @@ class LinkControllerViewModelTest {
         configure(viewModel)
         signIn()
 
-        val email = "test@example.com"
-        val phone = "1234567890"
-        val country = "US"
-        val name = "Test User"
         val error = Exception("Registration failed")
-
         linkAuth.signupResult = LinkAuthResult.Error(error)
 
         viewModel.registerConsumerResultFlow.test {
-            viewModel.onRegisterConsumer(
-                email = email,
-                phone = phone,
-                country = country,
-                name = name
-            )
+            viewModel.registerConsumerWith()
 
             val result = awaitItem()
             assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
             assertThat((result as LinkController.RegisterConsumerResult.Failed).error).isEqualTo(error)
+        }
+
+        // Verify that the account was cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
+    }
+
+    @Test
+    fun `onRegisterConsumer() on attestation failure emits failure result with AppAttestationException`() = runTest {
+        val viewModel = createViewModel()
+        configure(viewModel)
+        signIn()
+
+        val attestationError = Exception("Attestation failed")
+        linkAuth.signupResult = LinkAuthResult.AttestationFailed(attestationError)
+
+        viewModel.registerConsumerResultFlow.test {
+            viewModel.registerConsumerWith()
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
+            val failedResult = result as LinkController.RegisterConsumerResult.Failed
+            assertThat(failedResult.error).isInstanceOf(AppAttestationException::class.java)
+            assertThat(failedResult.error.cause).isEqualTo(attestationError)
         }
 
         // Verify that the account was cleared
@@ -927,11 +910,7 @@ class LinkControllerViewModelTest {
         signIn()
 
         // Set up some saved payment data
-        val selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            collectedCvc = "123",
-            billingPhone = null
-        )
+        val selectedPaymentMethod = createTestPaymentMethod()
         val createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         viewModel.updateState {
             it.copy(
@@ -995,5 +974,44 @@ class LinkControllerViewModelTest {
 
     private fun signIn() {
         linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+    }
+
+    private fun createTestPaymentMethod(
+        cvc: String = "123",
+        billingPhone: String? = null
+    ): LinkPaymentMethod.ConsumerPaymentDetails {
+        return LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = cvc,
+            billingPhone = billingPhone
+        )
+    }
+
+    private suspend fun configureWithAttestation(
+        viewModel: LinkControllerViewModel,
+        attestationResult: LinkAttestationCheck.Result = LinkAttestationCheck.Result.Successful
+    ) {
+        linkAttestationCheck.result = attestationResult
+        val loadedConfiguration = LinkTestUtils.createLinkConfiguration()
+        linkConfigurationLoader.linkConfigurationResult = Result.success(loadedConfiguration)
+        viewModel.configure(createControllerConfig())
+    }
+
+    private data class ConsumerRegistrationParams(
+        val email: String = "test@example.com",
+        val phone: String = "1234567890",
+        val country: String = "US",
+        val name: String = "Test User"
+    )
+
+    private fun LinkControllerViewModel.registerConsumerWith(
+        params: ConsumerRegistrationParams = ConsumerRegistrationParams()
+    ) {
+        onRegisterConsumer(
+            email = params.email,
+            phone = params.phone,
+            country = params.country,
+            name = params.name
+        )
     }
 }
