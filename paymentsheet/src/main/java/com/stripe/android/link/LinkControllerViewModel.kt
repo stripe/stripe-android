@@ -340,7 +340,8 @@ internal class LinkControllerViewModel @Inject constructor(
                     component.linkAuth.lookUp(
                         email = email,
                         emailSource = EmailSource.USER_ACTION,
-                        startSession = false
+                        startSession = false,
+                        customerId = null,
                     )
                         .toResult()
                         .map { it != null }
