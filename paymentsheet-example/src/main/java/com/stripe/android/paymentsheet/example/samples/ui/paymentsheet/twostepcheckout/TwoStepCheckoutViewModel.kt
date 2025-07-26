@@ -47,7 +47,7 @@ internal class TwoStepCheckoutViewModel(
     init {
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
         FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
-        // Don't prepare checkout automatically anymore - wait for configuration
+        FeatureFlags.showInlineOtpInWalletButtons.setEnabled(true)
     }
 
     fun statusDisplayed() {
