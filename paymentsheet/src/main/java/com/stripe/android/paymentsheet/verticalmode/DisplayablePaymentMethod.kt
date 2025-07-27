@@ -11,7 +11,7 @@ internal data class DisplayablePaymentMethod(
     val syntheticCode: String = code,
     val displayName: ResolvableString,
     @DrawableRes private val iconResource: Int,
-    @DrawableRes val iconResourceNight: Int? = null,
+    @DrawableRes private val iconResourceNight: Int? = null,
     val lightThemeIconUrl: String?,
     val darkThemeIconUrl: String?,
     val iconRequiresTinting: Boolean,

@@ -10,7 +10,7 @@ internal data class FormHeaderInformation(
     val displayName: ResolvableString,
     val shouldShowIcon: Boolean,
     @DrawableRes private val iconResource: Int,
-    @DrawableRes val iconResourceNight: Int? = null,
+    @DrawableRes private val iconResourceNight: Int?,
     val lightThemeIconUrl: String?,
     val darkThemeIconUrl: String?,
     val iconRequiresTinting: Boolean,
