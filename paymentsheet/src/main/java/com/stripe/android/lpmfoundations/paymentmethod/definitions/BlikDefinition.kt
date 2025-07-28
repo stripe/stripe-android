@@ -33,6 +33,7 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = BlikDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_blik,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_blik,
+        iconResourceNight = null
     )
 
     override fun createFormElements(
