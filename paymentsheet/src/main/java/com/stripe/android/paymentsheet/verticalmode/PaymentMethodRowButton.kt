@@ -378,15 +378,11 @@ private fun TitleContent(
     appearance: Appearance.Embedded,
 ) {
     val titleColor = appearance.style.getTitleTextColor()
-    val textStyle = if (appearance.titleFont != null) {
-        appearance.titleFont.toTextStyle()
-    } else {
-        MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium)
-    }
     Column {
         Text(
             text = title,
-            style = textStyle,
+            style = appearance.titleFont?.toTextStyle()
+                ?: MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
             color = if (isEnabled) titleColor else titleColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -401,7 +397,8 @@ private fun TitleContent(
             val subtitleTextColor = appearance.style.getSubtitleTextColor()
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
+                style = appearance.subtitleFont?.toTextStyle()
+                    ?: MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
                 color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
             )
         }

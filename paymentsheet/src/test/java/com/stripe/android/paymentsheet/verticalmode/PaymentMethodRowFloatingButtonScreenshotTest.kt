@@ -179,16 +179,25 @@ internal class PaymentMethodRowFloatingButtonScreenshotTest {
 
     @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
-    fun testTitleFont() {
+    fun testFonts() {
         testPaymentMethodRowButton_FloatingButton(
+            subtitle = "this is a subtitle",
             appearance = PaymentSheet.Appearance.Embedded.Builder()
                 .rowStyle(FloatingButton.default)
                 .titleFont(
                     PaymentSheet.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 20f,
-                        fontWeight = 30,
+                        fontWeight = 500,
                         letterSpacingSp = 10f
+                    )
+                )
+                .subtitleFont(
+                    PaymentSheet.Typography.Font(
+                        fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
+                        fontSizeSp = 12f,
+                        fontWeight = 200,
+                        letterSpacingSp = 5f
                     )
                 )
                 .build()
