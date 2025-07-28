@@ -31,10 +31,13 @@ internal class OnrampController @Inject constructor(
             presentPaymentMethodsCallback = { /* No-op for now */ },
             lookupConsumerCallback = viewModel::handleConsumerLookupResult,
             createPaymentMethodCallback = { /* No-op for now */ },
-            authenticationCallback = viewModel::handleAuthenticationResult,
-            registerConsumerCallback = viewModel::handleRegisterNewUserResult,
+            authenticationCallback = ::handleAuthenticationResult,
+            registerConsumerCallback = ::handleRegisterNewUserResult,
         )
     }
+
+    private val sessionClientSecret: String?
+        get() = linkController.state.value.internalLinkAccount?.consumerSessionClientSecret
 
     init {
         check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
@@ -71,5 +74,13 @@ internal class OnrampController @Inject constructor(
             name = info.fullName,
             consentAction = ConsumerSignUpConsentAction.Implied
         )
+    }
+
+    private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
+        viewModel.handleAuthenticationResult(result, sessionClientSecret)
+    }
+
+    private fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
+        viewModel.handleRegisterNewUserResult(result, sessionClientSecret)
     }
 }

@@ -88,24 +88,30 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
+    internal fun handleAuthenticationResult(result: LinkController.AuthenticationResult, secret: String?) {
         when (result) {
             is LinkController.AuthenticationResult.Success ->
                 viewModelScope.launch {
-                    val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions("")
+                    secret?.let {
+                        val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions(secret)
 
-                    permissionsResult.fold(
-                        onSuccess = {
-                            onrampCallbacks.authenticationCallback.onResult(
-                                OnrampVerificationResult.Completed(it.id)
-                            )
-                        },
-                        onFailure = {
-                            onrampCallbacks.authenticationCallback.onResult(
-                                OnrampVerificationResult.Failed(it)
-                            )
-                        }
-                    )
+                        permissionsResult.fold(
+                            onSuccess = {
+                                onrampCallbacks.authenticationCallback.onResult(
+                                    OnrampVerificationResult.Completed(it.id)
+                                )
+                            },
+                            onFailure = {
+                                onrampCallbacks.authenticationCallback.onResult(
+                                    OnrampVerificationResult.Failed(it)
+                                )
+                            }
+                        )
+                    } ?: run {
+                        onrampCallbacks.authenticationCallback.onResult(
+                            OnrampVerificationResult.Failed(IllegalStateException("Missing consumer secret"))
+                        )
+                    }
                 }
             is LinkController.AuthenticationResult.Failed ->
                 onrampCallbacks.authenticationCallback.onResult(
@@ -118,24 +124,30 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
+    internal fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult, secret: String?) {
         when (result) {
             is LinkController.RegisterConsumerResult.Success ->
                 viewModelScope.launch {
-                    val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions("")
+                    secret?.let {
+                        val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions(secret)
 
-                    permissionsResult.fold(
-                        onSuccess = {
-                            onrampCallbacks.registerUserCallback.onResult(
-                                OnrampRegisterUserResult.Completed(it.id)
-                            )
-                        },
-                        onFailure = {
-                            onrampCallbacks.registerUserCallback.onResult(
-                                OnrampRegisterUserResult.Failed(it)
-                            )
-                        }
-                    )
+                        permissionsResult.fold(
+                            onSuccess = {
+                                onrampCallbacks.registerUserCallback.onResult(
+                                    OnrampRegisterUserResult.Completed(it.id)
+                                )
+                            },
+                            onFailure = {
+                                onrampCallbacks.registerUserCallback.onResult(
+                                    OnrampRegisterUserResult.Failed(it)
+                                )
+                            }
+                        )
+                    } ?: run {
+                        onrampCallbacks.registerUserCallback.onResult(
+                            OnrampRegisterUserResult.Failed(IllegalArgumentException("Missing consumer secret"))
+                        )
+                    }
                 }
             is LinkController.RegisterConsumerResult.Failed ->
                 onrampCallbacks.registerUserCallback.onResult(
