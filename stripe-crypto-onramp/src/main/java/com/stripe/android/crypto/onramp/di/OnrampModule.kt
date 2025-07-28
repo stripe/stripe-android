@@ -9,7 +9,6 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.core.version.StripeSdkVersion
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
