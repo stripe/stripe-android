@@ -30,6 +30,7 @@ import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
+import androidx.test.runner.AndroidJUnitRunner
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
@@ -87,7 +88,7 @@ import kotlin.time.Duration.Companion.seconds
 internal class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
-) {
+) : AndroidJUnitRunner() {
     @Volatile
     private var resultCountDownLatch: CountDownLatch? = null
 
