@@ -382,6 +382,7 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
+            afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
         Affirm(
             "affirm",
