@@ -3,6 +3,7 @@ import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -38,7 +39,7 @@ internal class OnrampModule {
         PaymentConfiguration.getInstance(appContext).stripeAccountId
     }
 
-    @Provides fun provideApiVersion(): String = StripeSdkVersion.VERSION
+    @Provides fun provideApiVersion(): String = ApiVersion.get().code
 
     @Provides fun provideAppInfo(): AppInfo? = Stripe.appInfo
 }
