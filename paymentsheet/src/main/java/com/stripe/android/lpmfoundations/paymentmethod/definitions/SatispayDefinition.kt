@@ -34,7 +34,8 @@ private object SatispayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedD
         paymentMethodDefinition = SatispayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_satispay,
-        iconResource = R.drawable.stripe_ic_paymentsheet_pm_satispay,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_satispay_day,
+        iconResourceNight = R.drawable.stripe_ic_paymentsheet_pm_satispay_night,
     )
 
     override fun createFormElements(

@@ -784,6 +784,7 @@ internal class PaymentMethodMetadataTest {
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = null,
             iconResource = 0,
+            iconResourceNight = 0,
             iconRequiresTinting = false,
         )
 
@@ -975,6 +976,7 @@ internal class PaymentMethodMetadataTest {
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = "example_url",
             iconResource = 0,
+            iconResourceNight = 0,
             iconRequiresTinting = false,
         )
 
@@ -1962,7 +1964,8 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
-            enableDisplayableDefaultValuesInEce = false
+            enableDisplayableDefaultValuesInEce = false,
+            customerId = null
         )
     }
 

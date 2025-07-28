@@ -248,7 +248,11 @@ internal class InlineSignupViewModel(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
-        linkAccountManager.lookupConsumer(email, startSession = false).fold(
+        linkAccountManager.lookupConsumer(
+            email = email,
+            startSession = false,
+            customerId = null
+        ).fold(
             onSuccess = {
                 if (it != null) {
                     _viewState.update { oldState ->

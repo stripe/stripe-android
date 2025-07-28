@@ -17,10 +17,9 @@ import org.junit.Test
 
 internal class AddressElementTest {
     @get:Rule
-    val rules = TestRules.create()
-
-    @get:Rule
-    val activityRule = ActivityScenarioRule(AddressElementExampleActivity::class.java)
+    val rules = TestRules.create {
+        around(ActivityScenarioRule(AddressElementExampleActivity::class.java))
+    }
 
     @Test
     fun testAddressElement() {

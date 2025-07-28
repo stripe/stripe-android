@@ -34,6 +34,7 @@ private object FpxUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSp
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_fpx,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_fpx,
+        iconResourceNight = null,
         iconRequiresTinting = false,
     )
 }

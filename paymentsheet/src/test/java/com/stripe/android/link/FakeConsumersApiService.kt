@@ -59,7 +59,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         email: String,
         requestSurface: String,
         doNotLogConsumerFunnelEvent: Boolean,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerId: String?
     ): ConsumerSessionLookup {
         lookupCalls.add(
             LookupCall(
@@ -78,7 +79,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         verificationToken: String,
         appId: String,
         requestOptions: ApiRequest.Options,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): ConsumerSessionLookup {
         mobileLookupCalls.add(
             MobileLookupCall(

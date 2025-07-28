@@ -35,6 +35,7 @@ private object CashAppPayUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(

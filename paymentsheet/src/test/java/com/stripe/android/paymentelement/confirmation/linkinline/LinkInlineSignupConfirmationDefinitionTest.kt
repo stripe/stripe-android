@@ -698,7 +698,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 defaultBillingDetails = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 allowUserEmailEdits = true,
-                enableDisplayableDefaultValuesInEce = false
+                enableDisplayableDefaultValuesInEce = false,
+                customerId = null
             ),
             userInput = userInput,
         )

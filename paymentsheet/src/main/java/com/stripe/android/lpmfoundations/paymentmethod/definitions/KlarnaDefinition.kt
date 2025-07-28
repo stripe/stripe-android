@@ -36,6 +36,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+        iconResourceNight = null,
         subtitle = R.string.stripe_klarna_pay_later.resolvableString
     )
 

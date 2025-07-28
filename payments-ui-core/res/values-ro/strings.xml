@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">Prin confirmarea plății cu PayPal, permiteți %s să vă taxeze contul PayPal pentru plățile viitoare în conformitate cu termenii acesteia.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Prin confirmarea plății cu RevolutPay, permiteți %s să vă taxeze contul RevolutPay pentru plățile viitoare în conformitate cu termenii acesteia.</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">Continuând, autorizați %1$s să vă debiteze automat soldul Satispay în mod periodic, în conformitate cu planul dvs. de achiziție sau de abonament.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Salvează pentru plăți viitoare %s</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

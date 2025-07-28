@@ -63,22 +63,41 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.state(application).test {
-            assertThat(awaitItem().isConsumerVerified).isNull()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isNull()
+                assertThat(internalLinkAccount).isNull()
+            }
 
             linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
-            assertThat(awaitItem().isConsumerVerified).isTrue()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isTrue()
+                assertThat(internalLinkAccount).isEqualTo(
+                    LinkController.LinkAccount(
+                        email = TestFactory.LINK_ACCOUNT.email,
+                        redactedPhoneNumber = TestFactory.LINK_ACCOUNT.redactedPhoneNumber,
+                        sessionState = LinkController.SessionState.LoggedIn,
+                        consumerSessionClientSecret = TestFactory.LINK_ACCOUNT.clientSecret,
+                    )
+                )
+            }
 
             val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
                 verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
             )
             linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(unverifiedSession)))
 
-            assertThat(awaitItem().isConsumerVerified).isFalse()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isFalse()
+                assertThat(internalLinkAccount?.sessionState).isEqualTo(LinkController.SessionState.NeedsVerification)
+            }
 
             linkAccountHolder.set(LinkAccountUpdate.Value(null))
 
-            assertThat(awaitItem().isConsumerVerified).isNull()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isNull()
+                assertThat(internalLinkAccount).isNull()
+            }
         }
     }
 

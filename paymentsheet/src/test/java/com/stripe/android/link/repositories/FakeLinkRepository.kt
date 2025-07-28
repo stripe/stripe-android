@@ -43,7 +43,10 @@ internal open class FakeLinkRepository : LinkRepository {
     private val mobileLookupCalls = Turbine<MobileLookupCall>()
     private val mobileSignUpCalls = Turbine<MobileSignUpCall>()
 
-    override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+    override suspend fun lookupConsumer(
+        email: String,
+        customerId: String?
+    ): Result<ConsumerSessionLookup> {
         lookupConsumerCalls.add(
             item = LookupCall(
                 email = email
@@ -52,7 +55,9 @@ internal open class FakeLinkRepository : LinkRepository {
         return lookupConsumerResult
     }
 
-    override suspend fun lookupConsumerWithoutBackendLoggingForExposure(email: String): Result<ConsumerSessionLookup> {
+    override suspend fun lookupConsumerWithoutBackendLoggingForExposure(
+        email: String
+    ): Result<ConsumerSessionLookup> {
         lookupConsumerWithoutBackendLoggingCalls.add(
             item = LookupCall(
                 email = email
@@ -66,7 +71,8 @@ internal open class FakeLinkRepository : LinkRepository {
         emailSource: EmailSource,
         verificationToken: String,
         appId: String,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): Result<ConsumerSessionLookup> {
         mobileLookupCalls.add(
             item = MobileLookupCall(

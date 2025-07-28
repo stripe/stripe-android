@@ -49,7 +49,8 @@ interface ConsumersApiService {
         email: String,
         requestSurface: String,
         doNotLogConsumerFunnelEvent: Boolean,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerId: String?
     ): ConsumerSessionLookup
 
     suspend fun mobileLookupConsumerSession(
@@ -59,7 +60,8 @@ interface ConsumersApiService {
         verificationToken: String,
         appId: String,
         requestOptions: ApiRequest.Options,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): ConsumerSessionLookup
 
     suspend fun startConsumerVerification(
@@ -179,7 +181,8 @@ class ConsumersApiServiceImpl(
         email: String,
         requestSurface: String,
         doNotLogConsumerFunnelEvent: Boolean,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerId: String?
     ): ConsumerSessionLookup {
         val avoidConsumerLoggingParams: Map<String, Boolean> = if (doNotLogConsumerFunnelEvent) {
             mapOf("do_not_log_consumer_funnel_event" to true)
@@ -194,8 +197,9 @@ class ConsumersApiServiceImpl(
                 requestOptions,
                 mapOf(
                     "request_surface" to requestSurface,
-                    "email_address" to email.lowercase()
-                ) + avoidConsumerLoggingParams
+                    "email_address" to email.lowercase(),
+                    "customer_id" to customerId
+                ).filterValues { it != null } + avoidConsumerLoggingParams
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -211,7 +215,8 @@ class ConsumersApiServiceImpl(
         verificationToken: String,
         appId: String,
         requestOptions: ApiRequest.Options,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -225,8 +230,9 @@ class ConsumersApiServiceImpl(
                     "android_verification_token" to verificationToken,
                     "session_id" to sessionId,
                     "email_source" to emailSource.backendValue,
-                    "app_id" to appId
-                )
+                    "app_id" to appId,
+                    "customer_id" to customerId
+                ).filterValues { it != null }
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )

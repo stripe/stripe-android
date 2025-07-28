@@ -73,7 +73,7 @@ class LinkApiRepositoryTest {
         val consumersApiService = FakeConsumersApiService()
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer(TestFactory.EMAIL)
+        val result = linkRepository.lookupConsumer(TestFactory.EMAIL, customerId = null)
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
         assertThat(consumersApiService.lookupCalls.size).isEqualTo(1)
@@ -92,14 +92,15 @@ class LinkApiRepositoryTest {
                 email: String,
                 requestSurface: String,
                 doNotLogConsumerFunnelEvent: Boolean,
-                requestOptions: ApiRequest.Options
+                requestOptions: ApiRequest.Options,
+                customerId: String?
             ): ConsumerSessionLookup {
                 throw error
             }
         }
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer("email")
+        val result = linkRepository.lookupConsumer("email", customerId = null)
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
@@ -114,7 +115,8 @@ class LinkApiRepositoryTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
-            emailSource = TestFactory.EMAIL_SOURCE
+            emailSource = TestFactory.EMAIL_SOURCE,
+            customerId = null
         )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
@@ -141,7 +143,8 @@ class LinkApiRepositoryTest {
                 verificationToken: String,
                 appId: String,
                 requestOptions: ApiRequest.Options,
-                sessionId: String
+                sessionId: String,
+                customerId: String?
             ): ConsumerSessionLookup {
                 throw error
             }
@@ -153,7 +156,8 @@ class LinkApiRepositoryTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
-            emailSource = TestFactory.EMAIL_SOURCE
+            emailSource = TestFactory.EMAIL_SOURCE,
+            customerId = null
         )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))

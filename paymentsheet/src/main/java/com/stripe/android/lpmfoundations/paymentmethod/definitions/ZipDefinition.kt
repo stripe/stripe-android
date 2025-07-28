@@ -34,5 +34,6 @@ private object ZipUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSp
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_zip,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_zip,
+        iconResourceNight = null,
     )
 }

@@ -224,7 +224,8 @@ internal object TestFactory {
         disableRuxInFlowController = false,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = true,
-        enableDisplayableDefaultValuesInEce = false
+        enableDisplayableDefaultValuesInEce = false,
+        customerId = null
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

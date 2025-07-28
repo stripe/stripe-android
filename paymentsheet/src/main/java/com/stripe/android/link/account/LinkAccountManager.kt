@@ -42,12 +42,13 @@ internal interface LinkAccountManager {
      * Optionally starts a user session, by storing the cookie for the account and starting a
      * verification if needed.
      *
-     * When the [email] parameter is null, will try to fetch the account for the currently stored
-     * cookie.
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
         email: String,
         startSession: Boolean = true,
+        customerId: String?
     ): Result<LinkAccount?>
 
     /**
@@ -55,6 +56,9 @@ internal interface LinkAccountManager {
      *
      * Optionally starts a user session, by storing the cookie for the account and starting a
      * verification if needed.
+     *
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
      */
     suspend fun mobileLookupConsumer(
         email: String,
@@ -62,6 +66,7 @@ internal interface LinkAccountManager {
         verificationToken: String,
         appId: String,
         startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?>
 
     /**

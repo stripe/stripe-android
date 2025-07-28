@@ -34,6 +34,7 @@ private object OxxoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataS
         code = OxxoDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
+        iconResourceNight = null,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
         iconRequiresTinting = false,

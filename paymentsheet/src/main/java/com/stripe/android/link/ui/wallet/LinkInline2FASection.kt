@@ -133,7 +133,7 @@ private fun PaymentDetailsDisplay(
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(modifier = Modifier.size(16.dp)) {
+        Box(modifier = Modifier.size(20.dp)) {
             when (paymentUI.paymentType) {
                 is DefaultPaymentUI.PaymentType.Card -> Image(
                     painter = painterResource(paymentUI.paymentType.iconRes),

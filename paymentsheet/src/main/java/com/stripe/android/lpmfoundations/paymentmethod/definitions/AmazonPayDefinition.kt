@@ -36,6 +36,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_amazon_pay,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(
