@@ -63,9 +63,7 @@ internal class OnrampActivity : ComponentActivity() {
             registerUserCallback = viewModel::onRegisterUserResult
         )
 
-        onrampCoordinator = OnrampCoordinator.Builder(
-            callbacks
-        ).build(this)
+        onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
 
         val configuration = OnrampConfiguration(
             paymentSheetAppearance = PaymentSheet.Appearance()
