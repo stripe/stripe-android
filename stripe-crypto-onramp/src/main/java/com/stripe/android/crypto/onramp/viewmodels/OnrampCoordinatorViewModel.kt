@@ -26,7 +26,8 @@ import javax.inject.Inject
  * process death restoration.
  *
  * @property handle SavedStateHandle backing persistent state.
- * @property linkController The LinkController to configure.
+ * @property onrampCallbacks Callbacks that are called when actions complete .
+ * @property cryptoApiRepository The api repository to use to make crypto network calls.
  *
  */
 internal class OnrampCoordinatorViewModel @Inject constructor(
@@ -44,14 +45,18 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
 
     private val _configurationFlow =
         MutableSharedFlow<LinkController.Configuration>(replay = 1)
-    val configurationFlow = _configurationFlow.asSharedFlow()
+
+    /**
+     * A flow that receives the built configuration model when `[configure]` is called.
+     */
+    internal val configurationFlow = _configurationFlow.asSharedFlow()
 
     /**
      * Configure the view model and associated types.
      *
      * @param configuration The OnrampConfiguration to apply.
      */
-    fun configure(configuration: OnrampConfiguration) {
+    internal fun configure(configuration: OnrampConfiguration) {
         onRampConfiguration = configuration
 
         viewModelScope.launch {

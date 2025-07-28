@@ -14,7 +14,7 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module
-class OnrampModule {
+internal class OnrampModule {
     @Provides
     fun provideStripeNetworkClient(): StripeNetworkClient = DefaultStripeNetworkClient()
 
