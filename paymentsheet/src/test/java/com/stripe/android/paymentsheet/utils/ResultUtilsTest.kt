@@ -7,8 +7,7 @@ class ResultUtilsTest {
     @Test
     fun testFlatMapCatching() {
         val success = Result.success(42)
-        val failureError = RuntimeException()
-        val failure = Result.failure<String>(failureError)
+        val failure = Result.failure<String>(RuntimeException())
         run {
             assertThat(success.flatMapCatching { Result.success(it.toString()) })
                 .isEqualTo(Result.success("42"))
