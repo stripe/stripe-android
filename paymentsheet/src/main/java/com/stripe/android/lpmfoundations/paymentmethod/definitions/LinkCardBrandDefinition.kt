@@ -36,6 +36,7 @@ private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Simple {
             syntheticCode = "link_card_brand",
             displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_instant_debits,
             iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank,
+            iconResourceNight = null,
             outlinedIconResource = R.drawable.stripe_ic_paymentsheet_pm_bank_outlined,
             iconRequiresTinting = true,
             lightThemeIconUrl = null,

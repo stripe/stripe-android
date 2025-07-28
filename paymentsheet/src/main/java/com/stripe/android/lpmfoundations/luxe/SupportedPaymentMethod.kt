@@ -30,7 +30,8 @@ internal data class SupportedPaymentMethod(
     /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
     @DrawableRes val iconResource: Int,
 
-    @DrawableRes val iconResourceNight: Int? = null,
+    /** This describes the image in the LPM selector when the luminance of `Colors.component` is less than 0.5. */
+    @DrawableRes val iconResourceNight: Int?,
 
     /** An optional light theme icon url if it's supported. */
     val lightThemeIconUrl: String?,
@@ -52,7 +53,7 @@ internal data class SupportedPaymentMethod(
         sharedDataSpec: SharedDataSpec? = null,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
-        @DrawableRes iconResourceNight: Int? = null,
+        @DrawableRes iconResourceNight: Int?,
         iconRequiresTinting: Boolean = false,
         subtitle: ResolvableString? = null,
         @DrawableRes outlinedIconResource: Int? = null,
@@ -73,7 +74,7 @@ internal data class SupportedPaymentMethod(
         syntheticCode: PaymentMethodCode = code,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
-        @DrawableRes iconResourceNight: Int? = null,
+        @DrawableRes iconResourceNight: Int?,
         iconRequiresTinting: Boolean = false,
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
