@@ -10,6 +10,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
+import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -129,7 +130,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
             didSendNewCode = false,
             isDialog = true,
             requestFocus = false,
-            errorMessage = null
+            errorMessage = null,
+            defaultPayment = displayablePaymentDetails?.toDefaultPaymentUI(
+                linkConfiguration.enableDisplayableDefaultValuesInEce
+            )
         )
     )
 

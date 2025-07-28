@@ -1,6 +1,5 @@
 package com.stripe.android.link.account
 
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -22,6 +21,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerShippingAddresses
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -75,8 +75,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun lookupConsumer(
         email: String,
         startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email)
+        linkRepository.lookupConsumer(email, customerId)
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
@@ -91,14 +92,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
         emailSource: EmailSource,
         verificationToken: String,
         appId: String,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): Result<LinkAccount?> {
         return linkRepository.mobileLookupConsumer(
             verificationToken = verificationToken,
             appId = appId,
             email = email,
             sessionId = config.elementsSessionId,
-            emailSource = emailSource
+            emailSource = emailSource,
+            customerId = customerId
         ).onFailure { error ->
             linkEventsReporter.onAccountLookupFailure(error)
         }.map { consumerSessionLookup ->
@@ -125,7 +128,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         userInput: UserInput
     ): Result<LinkAccount> =
         when (userInput) {
-            is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
+            is UserInput.SignIn -> lookupConsumer(
+                email = userInput.email,
+                startSession = true,
+                customerId = config.customerIdForEceDefaultValues
+            ).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
             is UserInput.SignUp -> signUpIfValidSessionState(
@@ -223,6 +230,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 setAccount(
                     consumerSession = consumerSessionSignup.consumerSession,
                     publishableKey = consumerSessionSignup.publishableKey,
+                    displayablePaymentDetails = null
                 )
             }
 
@@ -250,13 +258,14 @@ internal class DefaultLinkAccountManager @Inject constructor(
             setAccount(
                 consumerSession = consumerSessionSignUp.consumerSession,
                 publishableKey = consumerSessionSignUp.publishableKey,
+                displayablePaymentDetails = null
             )
         }
     }
 
     override suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> {
+    ): Result<LinkPaymentDetails.New> {
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
         return if (linkAccountValue != null) {
             linkAccountValue.let { account ->
@@ -267,19 +276,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                     consumerSessionClientSecret = account.clientSecret,
                     consumerPublishableKey = account.consumerPublishableKey.takeIf { !config.passthroughModeEnabled },
                     active = config.passthroughModeEnabled,
-                ).mapCatching {
-                    if (config.passthroughModeEnabled) {
-                        linkRepository.shareCardPaymentDetails(
-                            id = it.paymentDetails.id,
-                            last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                            consumerSessionClientSecret = account.clientSecret,
-                            paymentMethodCreateParams = paymentMethodCreateParams,
-                            allowRedisplay = paymentMethodCreateParams.allowRedisplay,
-                        ).getOrThrow()
-                    } else {
-                        it
-                    }
-                }.onSuccess {
+                ).onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
             }
@@ -288,6 +285,22 @@ internal class DefaultLinkAccountManager @Inject constructor(
             Result.failure(
                 IllegalStateException("A non-null Link account is needed to create payment details")
             )
+        }
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        cardPaymentDetails: LinkPaymentDetails.New
+    ): Result<LinkPaymentDetails.Saved> {
+        return runCatching {
+            requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+        }.mapCatching { account ->
+            val paymentDetails = cardPaymentDetails.paymentDetails
+            val paymentMethodCreateParams = cardPaymentDetails.originalParams
+            linkRepository.shareCardPaymentDetails(
+                id = paymentDetails.id,
+                consumerSessionClientSecret = account.clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+            ).getOrThrow()
         }
     }
 
@@ -331,12 +344,21 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private suspend fun setAccount(
         consumerSession: ConsumerSession,
         publishableKey: String?,
+        displayablePaymentDetails: DisplayablePaymentDetails?,
     ): LinkAccount {
         val currentAccount = linkAccountHolder.linkAccountInfo.value.account
         val newConsumerPublishableKey = publishableKey
             ?: currentAccount?.consumerPublishableKey
                 ?.takeIf { currentAccount.email == consumerSession.emailAddress }
-        val newAccount = LinkAccount(consumerSession, newConsumerPublishableKey)
+        val newPaymentDetails = displayablePaymentDetails
+            ?: currentAccount?.displayablePaymentDetails
+                ?.takeIf { currentAccount.email == consumerSession.emailAddress }
+
+        val newAccount = LinkAccount(
+            consumerSession = consumerSession,
+            consumerPublishableKey = newConsumerPublishableKey,
+            displayablePaymentDetails = newPaymentDetails
+        )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))
         }
@@ -349,12 +371,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
     ): LinkAccount? {
         return lookup.consumerSession?.let { consumerSession ->
             if (startSession) {
-                setAccountNullable(
+                setAccount(
                     consumerSession = consumerSession,
                     publishableKey = lookup.publishableKey,
+                    displayablePaymentDetails = lookup.displayablePaymentDetails,
                 )
             } else {
-                LinkAccount(consumerSession, lookup.publishableKey)
+                LinkAccount(
+                    consumerSession = consumerSession,
+                    consumerPublishableKey = lookup.publishableKey,
+                    displayablePaymentDetails = lookup.displayablePaymentDetails
+                )
             }
         }
     }
@@ -370,7 +397,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
             .onFailure {
                 linkEventsReporter.on2FAStartFailure()
             }.map { consumerSession ->
-                setAccount(consumerSession, null)
+                setAccount(
+                    consumerSession = consumerSession,
+                    publishableKey = null,
+                    displayablePaymentDetails = null
+                )
             }
     }
 
@@ -387,7 +418,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
             }.onFailure {
                 linkEventsReporter.on2FAFailure()
             }.map { consumerSession ->
-                setAccount(consumerSession, null)
+                setAccount(
+                    consumerSession = consumerSession,
+                    publishableKey = null,
+                    displayablePaymentDetails = null
+                )
             }
     }
 
@@ -444,23 +479,6 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    @VisibleForTesting
-    internal suspend fun setAccountNullable(
-        consumerSession: ConsumerSession?,
-        publishableKey: String?,
-    ): LinkAccount? {
-        return consumerSession?.let {
-            setAccount(consumerSession = it, publishableKey = publishableKey)
-        } ?: run {
-            withContext(Dispatchers.Main.immediate) {
-                linkAccountHolder.set(LinkAccountUpdate.Value(account = null))
-                _consumerState.value = null
-            }
-            cachedShippingAddresses = null
-            null
-        }
-    }
-
     private suspend fun getAccountStatus(
         linkAccount: LinkAccount?,
         canLookupCustomerEmail: Boolean
@@ -472,7 +490,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         // Look up the customer email if possible.
         return config.customerInfo.email?.takeIf { canLookupCustomerEmail }
             ?.let { customerEmail ->
-                lookupConsumer(customerEmail)
+                lookupConsumer(
+                    email = customerEmail,
+                    startSession = true,
+                    customerId = config.customerIdForEceDefaultValues
+                )
                     .map { it?.accountStatus }
                     .getOrElse { AccountStatus.Error }
             }

@@ -53,6 +53,7 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = false
                         )
                     )
@@ -69,6 +70,7 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = false
                         )
                     )
@@ -85,6 +87,7 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = false
                         )
                     )
@@ -101,6 +104,7 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = null,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = false
                         )
                     )
@@ -117,6 +121,7 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = false
                         )
                     )
@@ -133,6 +138,7 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = true
                         )
                     )
@@ -149,6 +155,7 @@ internal class VerificationScreenshotTest(
                             errorMessage = null,
                             isSendingNewCode = false,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = true
                         )
                     )
@@ -165,6 +172,7 @@ internal class VerificationScreenshotTest(
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,
                             didSendNewCode = false,
+                            defaultPayment = null,
                             isDialog = true
                         )
                     )

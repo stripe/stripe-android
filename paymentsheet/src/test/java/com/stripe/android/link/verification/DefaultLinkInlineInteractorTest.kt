@@ -203,6 +203,7 @@ class DefaultLinkInlineInteractorTest {
             requestFocus = false,
             isDialog = true,
             isSendingNewCode = false,
+            defaultPayment = null,
             didSendNewCode = false
         )
 
@@ -244,6 +245,7 @@ class DefaultLinkInlineInteractorTest {
             requestFocus = false,
             isDialog = true,
             isSendingNewCode = false,
+            defaultPayment = null,
             didSendNewCode = false
         )
 
@@ -289,6 +291,7 @@ class DefaultLinkInlineInteractorTest {
             requestFocus = false,
             isDialog = true,
             isSendingNewCode = false,
+            defaultPayment = null,
             didSendNewCode = false
         )
 
@@ -343,6 +346,7 @@ class DefaultLinkInlineInteractorTest {
             requestFocus = false,
             isDialog = true,
             isSendingNewCode = false,
+            defaultPayment = null,
             didSendNewCode = false
         )
 
@@ -387,6 +391,7 @@ class DefaultLinkInlineInteractorTest {
             requestFocus = false,
             isDialog = true,
             isSendingNewCode = false,
+            defaultPayment = null,
             didSendNewCode = false
         )
 
@@ -430,6 +435,7 @@ class DefaultLinkInlineInteractorTest {
             requestFocus = false,
             isDialog = true,
             isSendingNewCode = false,
+            defaultPayment = null,
             didSendNewCode = false
         )
 

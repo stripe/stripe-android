@@ -35,7 +35,8 @@ internal class DefaultLinkAttestationCheck @Inject constructor(
                     val lookupResult = linkAuth.lookUp(
                         email = email,
                         emailSource = EmailSource.CUSTOMER_OBJECT,
-                        startSession = false
+                        startSession = false,
+                        customerId = linkConfiguration.customerIdForEceDefaultValues
                     )
                     handleLookupResult(lookupResult)
                 },

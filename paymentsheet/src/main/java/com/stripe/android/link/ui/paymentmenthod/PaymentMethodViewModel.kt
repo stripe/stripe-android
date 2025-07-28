@@ -91,12 +91,22 @@ internal class PaymentMethodViewModel @Inject constructor(
 
             dismissalCoordinator.withDismissalDisabled {
                 linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
+                    .mapCatching { linkPaymentDetails ->
+                        val shouldShare = configuration.passthroughModeEnabled &&
+                            (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)
+                                ?.sharePaymentDetailsImmediatelyAfterCreation != false
+                        if (shouldShare) {
+                            linkAccountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+                        } else {
+                            linkPaymentDetails
+                        }
+                    }
                     .fold(
                         onSuccess = { linkPaymentDetails ->
                             val params = paymentMethodCreateParams.toParamMap()
                             val cardMap = params["card"] as? Map<*, *>?
                             val billingDetailsMap = params["billing_details"] as? Map<*, *>?
-                            performConfirmation(
+                            attemptCompletion(
                                 paymentDetails = linkPaymentDetails,
                                 cvc = cardMap?.get("cvc") as? String?,
                                 billingPhone = billingDetailsMap?.get("phone") as? String?
@@ -120,7 +130,7 @@ internal class PaymentMethodViewModel @Inject constructor(
         }
     }
 
-    private suspend fun performConfirmation(
+    private suspend fun attemptCompletion(
         paymentDetails: LinkPaymentDetails,
         cvc: String?,
         billingPhone: String?

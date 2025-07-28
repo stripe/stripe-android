@@ -249,7 +249,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = true
+            startSession = true,
+            customerId = null
         )
 
         val accountManagerCall = linkAccountManager.awaitMobileLookupCall()
@@ -289,7 +290,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         integrityRequestManager.awaitRequestTokenCall()
@@ -328,7 +330,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         integrityRequestManager.awaitRequestTokenCall()
@@ -361,7 +364,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         integrityRequestManager.awaitRequestTokenCall()
@@ -388,7 +392,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         val accountManagerCall = linkAccountManager.awaitLookupCall()
@@ -419,7 +424,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = true
+            startSession = true,
+            customerId = null
         )
 
         val accountManagerCall = linkAccountManager.awaitLookupCall()
@@ -448,7 +454,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         val accountManagerCall = linkAccountManager.awaitMobileLookupCall()
@@ -481,7 +488,8 @@ internal class DefaultLinkAuthTest {
         val result = linkAuth.lookUp(
             email = TestFactory.CUSTOMER_EMAIL,
             emailSource = TestFactory.EMAIL_SOURCE,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         integrityRequestManager.awaitRequestTokenCall()

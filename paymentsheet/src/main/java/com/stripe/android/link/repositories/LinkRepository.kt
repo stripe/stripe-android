@@ -26,9 +26,13 @@ internal interface LinkRepository {
 
     /**
      * Check if the email already has a link account.
+     *
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
      */
     suspend fun lookupConsumer(
         email: String,
+        customerId: String?
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -40,12 +44,19 @@ internal interface LinkRepository {
         email: String
     ): Result<ConsumerSessionLookup>
 
+    /**
+     * Performs a consumer lookup with mobile attestation verification.
+     *
+     * @param customerId Optional customer ID to associate with the lookup. When provided, enables
+     *                   retrieval of displayable payment details.
+     */
     suspend fun mobileLookupConsumer(
         email: String,
         emailSource: EmailSource,
         verificationToken: String,
         appId: String,
-        sessionId: String
+        sessionId: String,
+        customerId: String?
     ): Result<ConsumerSessionLookup>
 
     /**
@@ -93,10 +104,8 @@ internal interface LinkRepository {
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
-        last4: String,
         consumerSessionClientSecret: String,
-        allowRedisplay: PaymentMethod.AllowRedisplay?,
-    ): Result<LinkPaymentDetails>
+    ): Result<LinkPaymentDetails.Saved>
 
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,

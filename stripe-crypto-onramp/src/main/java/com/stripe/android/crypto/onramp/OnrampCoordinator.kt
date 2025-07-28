@@ -13,6 +13,7 @@ import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
@@ -59,9 +60,8 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param info The LinkInfo for the new user.
      */
-    @Suppress("UnusedParameter")
     fun registerNewLinkUser(info: LinkUserInfo) {
-        TODO("Not yet implemented")
+        viewModel.registerNewUser(info)
     }
 
     /**
@@ -129,7 +129,7 @@ class OnrampCoordinator @Inject internal constructor(
                     lookupConsumerCallback = { handleConsumerLookupResult(it) },
                     createPaymentMethodCallback = { /* No-op for now */ },
                     authenticationCallback = { handleAuthenticationResult(it) },
-                    registerConsumerCallback = { /* No-op for now */ },
+                    registerConsumerCallback = { handleRegisterNewUserResult(it) },
                 )
             }
 
@@ -186,6 +186,19 @@ class OnrampCoordinator @Inject internal constructor(
                 is LinkController.AuthenticationResult.Canceled ->
                     onrampCallbacks.authenticationCallback.onResult(
                         OnrampVerificationResult.Cancelled()
+                    )
+            }
+        }
+
+        private fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
+            when (result) {
+                is LinkController.RegisterConsumerResult.Success ->
+                    onrampCallbacks.registerUserCallback.onResult(
+                        OnrampRegisterUserResult.Completed(customerId = "temporary-id")
+                    )
+                is LinkController.RegisterConsumerResult.Failed ->
+                    onrampCallbacks.registerUserCallback.onResult(
+                        OnrampRegisterUserResult.Failed(result.error)
                     )
             }
         }

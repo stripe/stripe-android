@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.TestFactory
@@ -24,21 +25,17 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.LinkAccountSession
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 @Suppress("LargeClass")
@@ -46,15 +43,8 @@ class DefaultLinkAccountManagerTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
 
-    @Before
-    fun before() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @After
-    fun cleanup() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val coroutineRule = CoroutineTestRule(dispatcher)
 
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
@@ -68,9 +58,9 @@ class DefaultLinkAccountManagerTest {
     fun `When customerEmail is set in arguments then it is looked up`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email)
+                return super.lookupConsumer(email, customerId)
             }
         }
         assertThat(
@@ -108,6 +98,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.lookupConsumer(
             email = "email",
             startSession = true,
+            customerId = null
         )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
@@ -123,6 +114,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.lookupConsumer(
             email = "email",
             startSession = true,
+            customerId = null
         )
 
         assertThat(accountManager.consumerPublishableKey).isEqualTo(TestFactory.PUBLISHABLE_KEY)
@@ -170,8 +162,9 @@ class DefaultLinkAccountManagerTest {
 
         accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
             .lookupConsumer(
-                TestFactory.EMAIL,
-                false
+                email = TestFactory.EMAIL,
+                startSession = false,
+                customerId = null
             )
 
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
@@ -181,9 +174,9 @@ class DefaultLinkAccountManagerTest {
     fun `signInWithUserInput sends correct parameters and starts session for existing user`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var callCount = 0
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
                 if (email == TestFactory.EMAIL) callCount += 1
-                return super.lookupConsumer(email)
+                return super.lookupConsumer(email, customerId)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -498,9 +491,9 @@ class DefaultLinkAccountManagerTest {
                 return details
             }
 
-            override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+            override suspend fun lookupConsumer(email: String, customerId: String?): Result<ConsumerSessionLookup> {
                 callCount += 1
-                return super.lookupConsumer(email)
+                return super.lookupConsumer(email, customerId)
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
@@ -517,59 +510,47 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `createCardPaymentDetails makes correct calls in passthrough mode`() = runSuspendTest {
+    fun `shareCardPaymentDetails makes correct calls`() = runSuspendTest {
+        val newPaymentDetails = LinkPaymentDetails.New(
+            paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails,
+            paymentMethodCreateParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentMethodCreateParams,
+            originalParams = PaymentMethodCreateParams.create(
+                card = PaymentMethodCreateParamsFixtures.CARD,
+            )
+        )
         val linkRepository = object : FakeLinkRepository() {
-            var createCardPaymentDetailsCallCount = 0
             var shareCardPaymentDetailsCallCount = 0
-            override suspend fun createCardPaymentDetails(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
-                userEmail: String,
-                stripeIntent: StripeIntent,
-                consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
-                active: Boolean
-            ): Result<LinkPaymentDetails.New> {
-                createCardPaymentDetailsCallCount += 1
-                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
-            }
-
             override suspend fun shareCardPaymentDetails(
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
-                last4: String,
-                consumerSessionClientSecret: String,
-                allowRedisplay: PaymentMethod.AllowRedisplay?,
-            ): Result<LinkPaymentDetails.New> {
-                val paymentDetailsMatch = paymentMethodCreateParams == TestFactory.PAYMENT_METHOD_CREATE_PARAMS &&
-                    id == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id &&
-                    last4 == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.last4
+                consumerSessionClientSecret: String
+            ): Result<LinkPaymentDetails.Saved> {
+                val paymentDetailsMatch = paymentMethodCreateParams == newPaymentDetails.originalParams &&
+                    id == newPaymentDetails.paymentDetails.id
                 if (paymentDetailsMatch && consumerSessionClientSecret == TestFactory.CLIENT_SECRET) {
                     shareCardPaymentDetailsCallCount += 1
                 }
                 return super.shareCardPaymentDetails(
-                    paymentMethodCreateParams,
-                    id,
-                    last4,
-                    consumerSessionClientSecret,
-                    allowRedisplay,
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    id = id,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
                 )
             }
         }
-        val accountManager = accountManager(passthroughModeEnabled = true, linkRepository = linkRepository)
+        val accountManager = accountManager(linkRepository = linkRepository)
 
         accountManager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,
             startSession = true,
         )
 
-        val result = accountManager.createCardPaymentDetails(TestFactory.PAYMENT_METHOD_CREATE_PARAMS)
+        val result = accountManager.shareCardPaymentDetails(newPaymentDetails)
 
         assertThat(result.isSuccess).isTrue()
         val linkPaymentDetails = result.getOrThrow()
         assertThat(linkPaymentDetails.paymentDetails.id)
-            .isEqualTo(TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id)
+            .isEqualTo(TestFactory.LINK_SAVED_PAYMENT_DETAILS.paymentDetails.id)
 
-        assertThat(linkRepository.createCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(linkRepository.shareCardPaymentDetailsCallCount).isEqualTo(1)
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
     }
@@ -588,7 +569,7 @@ class DefaultLinkAccountManagerTest {
         }
         val accountManager = accountManager(linkRepository = linkRepository)
 
-        accountManager.lookupConsumer(TestFactory.EMAIL, false)
+        accountManager.lookupConsumer(TestFactory.EMAIL, false, customerId = null)
 
         assertThat(linkRepository.callCount).isEqualTo(0)
         assertThat(accountManager.linkAccountInfo.value.account).isNull()
@@ -603,7 +584,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
         accountManager.startVerification()
 
@@ -626,7 +607,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         accountManager.startVerification()
 
@@ -648,7 +629,7 @@ class DefaultLinkAccountManagerTest {
         }
 
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
         accountManager.startVerification()
 
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
@@ -660,7 +641,7 @@ class DefaultLinkAccountManagerTest {
         val accountManager = accountManager(
             linkRepository = linkRepository,
         )
-        accountManager.setAccountNullable(null, null)
+        accountManager.setTestAccount(null, null)
 
         val result = accountManager.confirmVerification("123")
 
@@ -687,7 +668,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
         linkRepository.confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
 
@@ -719,7 +700,7 @@ class DefaultLinkAccountManagerTest {
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, null)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
         val result = accountManager.confirmVerification("123")
 
@@ -744,7 +725,7 @@ class DefaultLinkAccountManagerTest {
         }
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.listPaymentDetails(setOf("card"))
 
@@ -767,7 +748,7 @@ class DefaultLinkAccountManagerTest {
         }
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.listPaymentDetails(setOf("card"))
 
@@ -781,7 +762,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = FakeLinkRepository()
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         linkRepository.deletePaymentDetailsResult = Result.failure(error)
 
@@ -793,7 +774,7 @@ class DefaultLinkAccountManagerTest {
     @Test
     fun `deletePaymentDetails returns success when repository call succeeds`() = runSuspendTest {
         val accountManager = accountManager()
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         val result = accountManager.deletePaymentDetails("id")
 
@@ -806,7 +787,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = FakeLinkRepository()
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         linkRepository.updatePaymentDetailsResult = Result.failure(error)
 
@@ -822,7 +803,7 @@ class DefaultLinkAccountManagerTest {
         val linkRepository = FakeLinkRepository()
 
         val accountManager = accountManager(linkRepository = linkRepository)
-        accountManager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
 
         linkRepository.updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
 
@@ -843,7 +824,8 @@ class DefaultLinkAccountManagerTest {
             emailSource = TestFactory.EMAIL_SOURCE,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
-            startSession = false
+            startSession = false,
+            customerId = null
         )
 
         val call = linkRepository.awaitMobileLookup()
@@ -872,7 +854,8 @@ class DefaultLinkAccountManagerTest {
             emailSource = TestFactory.EMAIL_SOURCE,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
-            startSession = true
+            startSession = true,
+            customerId = null
         )
 
         linkRepository.awaitMobileLookup()
@@ -901,7 +884,8 @@ class DefaultLinkAccountManagerTest {
             emailSource = TestFactory.EMAIL_SOURCE,
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
-            startSession = true
+            startSession = true,
+            customerId = null
         )
 
         linkRepository.awaitMobileLookup()
@@ -1018,22 +1002,6 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `allow_redisplay equals null when sharing card payment details in passthrough mode`() =
-        allowRedisplayTest(expectedAllowRedisplay = null)
-
-    @Test
-    fun `allow_redisplay equals UNSPECIFIED when sharing card payment details in passthrough mode`() =
-        allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED)
-
-    @Test
-    fun `allow_redisplay equals LIMITED when sharing card payment details in passthrough mode`() =
-        allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED)
-
-    @Test
-    fun `allow_redisplay equals ALWAYS when sharing card payment details in passthrough mode`() =
-        allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS)
-
-    @Test
     fun `accountStatus Flow performs customer email lookup when allowUserEmailEdits is true and no previous logout`() =
         accountStatusFlowTest(
             customerEmail = TestFactory.CUSTOMER_EMAIL,
@@ -1114,52 +1082,6 @@ class DefaultLinkAccountManagerTest {
         )
     }
 
-    private fun allowRedisplayTest(
-        expectedAllowRedisplay: PaymentMethod.AllowRedisplay?,
-    ) = runTest {
-        var actualAllowRedisplay: PaymentMethod.AllowRedisplay? = null
-
-        val linkRepository = object : FakeLinkRepository() {
-            override suspend fun createCardPaymentDetails(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
-                userEmail: String,
-                stripeIntent: StripeIntent,
-                consumerSessionClientSecret: String,
-                consumerPublishableKey: String?,
-                active: Boolean
-            ): Result<LinkPaymentDetails.New> {
-                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
-            }
-
-            override suspend fun shareCardPaymentDetails(
-                paymentMethodCreateParams: PaymentMethodCreateParams,
-                id: String,
-                last4: String,
-                consumerSessionClientSecret: String,
-                allowRedisplay: PaymentMethod.AllowRedisplay?,
-            ): Result<LinkPaymentDetails.New> {
-                actualAllowRedisplay = allowRedisplay
-
-                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
-            }
-        }
-
-        val manager = accountManager(
-            passthroughModeEnabled = true,
-            linkRepository = linkRepository
-        )
-
-        manager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
-        manager.createCardPaymentDetails(
-            paymentMethodCreateParams = PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParamsFixtures.CARD,
-                allowRedisplay = expectedAllowRedisplay,
-            )
-        )
-
-        assertThat(actualAllowRedisplay).isEqualTo(expectedAllowRedisplay)
-    }
-
     private fun accountStatusFlowTest(
         customerEmail: String?,
         allowUserEmailEdits: Boolean,
@@ -1180,6 +1102,24 @@ class DefaultLinkAccountManagerTest {
         if (expectedLookupEmail != null) {
             val lookupCall = linkRepository.awaitLookup()
             assertThat(lookupCall.email).isEqualTo(expectedLookupEmail)
+        }
+    }
+
+    private suspend fun DefaultLinkAccountManager.setTestAccount(
+        consumerSession: ConsumerSession?,
+        publishableKey: String? = null
+    ) {
+        if (consumerSession != null) {
+            val lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = consumerSession,
+                publishableKey = publishableKey
+            )
+            setLinkAccountFromLookupResult(lookup, startSession = true)
+        } else {
+            // To clear account for testing, we create a new LinkAccountHolder and set it to null
+            val testLinkAccountHolder = LinkAccountHolder(SavedStateHandle())
+            testLinkAccountHolder.set(LinkAccountUpdate.Value(account = null))
         }
     }
 }

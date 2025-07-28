@@ -123,6 +123,7 @@ fun VerificationDialogPreview() {
                     requestFocus = false,
                     redactedPhoneNumber = "(...)",
                     email = "email@email.com",
+                    defaultPayment = null,
                     isDialog = true
                 ),
                 otpElement = OTPSpec.transform(),

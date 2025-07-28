@@ -137,7 +137,7 @@ internal class DefaultPaymentElementLoaderTest {
                 config = config.asCommonConfiguration(),
                 customer = CustomerState(
                     id = config.customer!!.id,
-                    ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
+                    ephemeralKeySecret = config.customer.ephemeralKeySecret,
                     customerSessionClientSecret = null,
                     paymentMethods = PAYMENT_METHODS,
                     defaultPaymentMethodId = null,
@@ -749,7 +749,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                disableLinkRuxInFlowController = false
+                disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false
             )
         )
 
@@ -786,7 +787,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                disableLinkRuxInFlowController = false
+                disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false
             )
         )
 
@@ -871,7 +873,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                disableLinkRuxInFlowController = false
+                disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -902,7 +905,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                disableLinkRuxInFlowController = false
+                disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false
             )
         )
 
@@ -1422,6 +1426,7 @@ internal class DefaultPaymentElementLoaderTest {
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
                 disableLinkRuxInFlowController = false,
+                linkEnableDisplayableDefaultValuesInEce = false
             ),
             linkStore = linkStore,
         )
@@ -3196,7 +3201,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkConsumerIncentive = null,
             useAttestationEndpoints = false,
             suppress2faModal = false,
-            disableLinkRuxInFlowController = false
+            disableLinkRuxInFlowController = false,
+            linkEnableDisplayableDefaultValuesInEce = false
         )
     }
 

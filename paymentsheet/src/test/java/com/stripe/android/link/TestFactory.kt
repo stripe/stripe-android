@@ -99,7 +99,7 @@ internal object TestFactory {
     )
 
     val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
-        id = "pm_123",
+        id = "csmrpd_123",
         last4 = "4242",
         expiryYear = 2999,
         expiryMonth = 12,
@@ -121,7 +121,7 @@ internal object TestFactory {
     )
 
     val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
-        id = "pm_124",
+        id = "csmrpd_124",
         last4 = "4242",
         isDefault = false,
         bankName = "Stripe Test Bank",
@@ -132,8 +132,9 @@ internal object TestFactory {
     )
 
     val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(
-        id = "pm_125",
+        id = "csmrpd_125",
         last4 = "4242",
+        paymentMethodId = "pm_123"
     )
 
     val LINK_ACCOUNT_SESSION = LinkAccountSession(
@@ -153,7 +154,7 @@ internal object TestFactory {
     )
 
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
-        paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
+        paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
     )
 
@@ -222,7 +223,9 @@ internal object TestFactory {
         allowDefaultOptIn = false,
         disableRuxInFlowController = false,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
-        allowUserEmailEdits = true
+        allowUserEmailEdits = true,
+        enableDisplayableDefaultValuesInEce = false,
+        customerId = null
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
