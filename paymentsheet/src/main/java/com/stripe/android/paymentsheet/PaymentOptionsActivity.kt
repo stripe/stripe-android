@@ -21,7 +21,7 @@ import kotlinx.coroutines.flow.filterNotNull
 /**
  * An `Activity` for selecting a payment option.
  */
-internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>() {
+internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivityResult>() {
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory = PaymentOptionsViewModel.Factory {
@@ -62,7 +62,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
                 )
 
                 LaunchedEffect(Unit) {
-                    viewModel.paymentOptionResult.filterNotNull().collect { sheetResult ->
+                    viewModel.paymentOptionsActivityResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
                         viewModel.navigationHandler.closeScreens()
@@ -86,7 +86,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         return starterArgs
     }
 
-    override fun setActivityResult(result: PaymentOptionResult) {
+    override fun setActivityResult(result: PaymentOptionsActivityResult) {
         setResult(
             result.resultCode,
             Intent().putExtras(result.toBundle()),
