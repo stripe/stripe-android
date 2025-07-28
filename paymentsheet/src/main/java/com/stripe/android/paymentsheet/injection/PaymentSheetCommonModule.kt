@@ -14,6 +14,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
@@ -31,7 +32,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -165,7 +165,7 @@ internal abstract class PaymentSheetCommonModule {
         fun providePrefsRepositoryFactory(
             appContext: Context,
             @IOContext workContext: CoroutineContext
-        ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
+        ): (CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
             DefaultPrefsRepository(
                 appContext,
                 customerConfig?.id,

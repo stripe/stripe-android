@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -227,7 +228,7 @@ class PaymentSheetCustomerSessionTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_1",
                     ),
@@ -243,7 +244,7 @@ class PaymentSheetCustomerSessionTest {
                 setupIntentClientSecret = "seti_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_1",
                     ),

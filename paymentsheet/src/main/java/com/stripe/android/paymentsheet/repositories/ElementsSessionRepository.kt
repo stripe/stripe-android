@@ -6,6 +6,7 @@ import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -27,7 +28,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
+        customer: CustomerConfiguration?,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
@@ -55,7 +56,7 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
+        customer: CustomerConfiguration?,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
@@ -122,7 +123,7 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 }
 
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
-    customer: PaymentSheet.CustomerConfiguration?,
+    customer: CustomerConfiguration?,
     customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
@@ -195,13 +196,13 @@ private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionP
     }
 }
 
-private val PaymentSheet.CustomerConfiguration.customerSessionClientSecret: String?
+private val CustomerConfiguration.customerSessionClientSecret: String?
     get() = when (accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> null
     }
 
-private val PaymentSheet.CustomerConfiguration.legacyCustomerEphemeralKey: String?
+private val CustomerConfiguration.legacyCustomerEphemeralKey: String?
     get() = when (accessType) {
         is PaymentSheet.CustomerAccessType.CustomerSession -> null
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> accessType.ephemeralKeySecret

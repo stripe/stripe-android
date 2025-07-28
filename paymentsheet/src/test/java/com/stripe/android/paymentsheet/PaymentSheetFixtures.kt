@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -52,7 +53,7 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_WITH_EVERYTHING = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        customer = PaymentSheet.CustomerConfiguration(
+        customer = CustomerConfiguration(
             "customer_id",
             "ek_123"
         ),
@@ -97,7 +98,7 @@ internal object PaymentSheetFixtures {
 
     const val DEFAULT_EPHEMERAL_KEY = "ek_6bpdbs8volf6ods1y6tf8oy9p9g64ehr"
 
-    private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
+    private val defaultCustomerConfig = CustomerConfiguration(
         id = "customer_id",
         ephemeralKeySecret = DEFAULT_EPHEMERAL_KEY
     )

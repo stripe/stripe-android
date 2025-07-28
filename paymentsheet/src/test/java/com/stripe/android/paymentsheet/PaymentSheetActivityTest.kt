@@ -38,6 +38,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
@@ -1015,7 +1016,7 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `Handles invalid arguments correctly`() {
-        val invalidCustomerConfig = PaymentSheet.CustomerConfiguration(
+        val invalidCustomerConfig = CustomerConfiguration(
             id = "",
             ephemeralKeySecret = "",
         )

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -203,7 +204,7 @@ internal class PaymentSheetDeferredTest {
                     )
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .customer(CustomerConfiguration("cus_foobar", "ek_test_foobar"))
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )
@@ -288,7 +289,7 @@ internal class PaymentSheetDeferredTest {
                     )
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .customer(PaymentSheet.CustomerConfiguration("cus_foobar", "ek_test_foobar"))
+                    .customer(CustomerConfiguration("cus_foobar", "ek_test_foobar"))
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .build(),
             )

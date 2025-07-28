@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
@@ -205,7 +206,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
             .allowsDelayedPaymentMethods(true)
             .customer(
-                PaymentSheet.CustomerConfiguration(
+                CustomerConfiguration(
                     id = requireNotNull(customerId),
                     ephemeralKeySecret = requireNotNull(ephemeralKey),
                 )

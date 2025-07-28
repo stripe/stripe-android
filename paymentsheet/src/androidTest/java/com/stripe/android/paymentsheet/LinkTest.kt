@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -166,7 +167,7 @@ internal class LinkTest {
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     ),
@@ -453,7 +454,7 @@ internal class LinkTest {
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     ),
@@ -1105,7 +1106,7 @@ internal class LinkTest {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_654321",
                 ),

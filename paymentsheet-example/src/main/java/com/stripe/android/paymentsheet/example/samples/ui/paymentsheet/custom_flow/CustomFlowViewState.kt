@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow
 
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -22,7 +23,7 @@ data class CustomFlowViewState(
 
     data class PaymentInfo(
         val clientSecret: String,
-        val customerConfiguration: PaymentSheet.CustomerConfiguration?,
+        val customerConfiguration: CustomerConfiguration?,
     ) {
 
         val paymentSheetConfig: PaymentSheet.Configuration

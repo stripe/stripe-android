@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.samples.model
 
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
@@ -40,7 +41,7 @@ data class CartState(
     }
 
     fun makeCustomerConfig() = if (customerId != null && customerEphemeralKeySecret != null) {
-        PaymentSheet.CustomerConfiguration(
+        CustomerConfiguration(
             id = customerId,
             ephemeralKeySecret = customerEphemeralKeySecret
         )

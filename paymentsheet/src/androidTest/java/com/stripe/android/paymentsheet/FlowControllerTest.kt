@@ -19,6 +19,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -882,7 +883,7 @@ internal class FlowControllerTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -950,7 +951,7 @@ internal class FlowControllerTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customer(
-                        PaymentSheet.CustomerConfiguration(
+                        CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )
@@ -1108,7 +1109,7 @@ internal class FlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .customer(
-                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "cuss_123",
                     )
@@ -1185,7 +1186,7 @@ internal class FlowControllerTest {
                     merchantDisplayName = "Example, Inc."
                 )
                     .customer(
-                        PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        CustomerConfiguration.createWithCustomerSession(
                             id = "cus_1",
                             clientSecret = "cuss_123",
                         )

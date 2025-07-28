@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
@@ -132,7 +133,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
 
         embeddedContentPage.clickViewMore()
@@ -171,7 +172,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule.setupV1PaymentMethodsResponse(card1)
 
         testContext.configure {
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
         }
 
         embeddedContentPage.clickOnLpm("cashapp")
@@ -212,7 +213,7 @@ internal class EmbeddedPaymentElementTest {
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
             testContext.configure {
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             }
 
@@ -292,7 +293,7 @@ internal class EmbeddedPaymentElementTest {
 
         testContext.configure {
             customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_123",
                 )

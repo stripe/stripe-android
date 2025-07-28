@@ -14,6 +14,7 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -28,7 +29,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateA
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -176,7 +176,7 @@ internal interface EmbeddedPaymentElementViewModelModule {
         fun providePrefsRepositoryFactory(
             appContext: Context,
             @IOContext workContext: CoroutineContext
-        ): (PaymentSheet.CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
+        ): (CustomerConfiguration?) -> PrefsRepository = { customerConfig ->
             DefaultPrefsRepository(
                 appContext,
                 customerConfig?.id,

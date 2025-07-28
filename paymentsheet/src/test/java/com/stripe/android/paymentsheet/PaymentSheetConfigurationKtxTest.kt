@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import kotlin.test.assertFailsWith
@@ -13,7 +14,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when ephemeral key secret is blank`() {
         val configWithBlankEphemeralKeySecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration(
+                CustomerConfiguration(
                     id = "cus_1",
                     ephemeralKeySecret = "   "
                 )
@@ -33,7 +34,7 @@ class PaymentSheetConfigurationKtxTest {
     private fun getConfig(eKey: String): CommonConfiguration {
         return configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration(
+                CustomerConfiguration(
                     id = "cus_1",
                     ephemeralKeySecret = eKey
                 ),
@@ -70,7 +71,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when customer client secret key is secret is blank`() {
         val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "   "
                 ),
@@ -90,7 +91,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
         val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "ek_12345"
                 ),
@@ -110,7 +111,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
         val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()
             .customer(
-                PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "total_12345"
                 ),
@@ -197,7 +198,7 @@ class PaymentSheetConfigurationKtxTest {
     private companion object {
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "1",
                 ephemeralKeySecret = "ek_123",
             ),

@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
@@ -49,7 +50,7 @@ internal sealed interface PlaygroundState : Parcelable {
         override val snapshot: PlaygroundSettings.Snapshot,
         val amount: Long,
         val paymentMethodTypes: List<String>,
-        val customerConfig: PaymentSheet.CustomerConfiguration?,
+        val customerConfig: CustomerConfiguration?,
         val clientSecret: String,
         private val defaultEndpoint: String,
     ) : PlaygroundState {

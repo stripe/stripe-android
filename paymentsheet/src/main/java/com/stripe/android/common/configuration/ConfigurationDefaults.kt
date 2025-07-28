@@ -1,6 +1,7 @@
 package com.stripe.android.common.configuration
 
 import android.content.res.ColorStateList
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
@@ -14,7 +15,7 @@ internal object ConfigurationDefaults {
     val billingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration()
-    val customer: PaymentSheet.CustomerConfiguration? = null
+    val customer: CustomerConfiguration? = null
     val googlePay: PaymentSheet.GooglePayConfiguration? = null
     val link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration()
     const val googlePayEnabled: Boolean = false

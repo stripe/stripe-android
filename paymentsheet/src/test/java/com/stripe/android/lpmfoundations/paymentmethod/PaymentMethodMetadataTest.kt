@@ -6,6 +6,7 @@ import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
@@ -2007,7 +2008,7 @@ internal class PaymentMethodMetadataTest {
         allowsPaymentMethodsRequiringShippingAddress = false,
         paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
+        customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
         defaultBillingDetails = defaultBillingDetails,
         shippingDetails = shippingDetails,
         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),

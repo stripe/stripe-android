@@ -5,6 +5,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -256,7 +257,7 @@ class PaymentSheetEventTest {
         val event = createInitEvent(
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     )
@@ -275,7 +276,7 @@ class PaymentSheetEventTest {
         val event = createInitEvent(
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "ek_123",
                     )

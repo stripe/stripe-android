@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -474,7 +475,7 @@ class ConfirmationHandlerOptionKtxTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
                     .asCommonConfiguration()
                     .copy(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        customer = CustomerConfiguration.createWithCustomerSession(
                             id = "",
                             clientSecret = "css_test_123"
                         ),

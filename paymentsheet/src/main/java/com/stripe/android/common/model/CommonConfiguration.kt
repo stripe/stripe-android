@@ -3,6 +3,7 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -13,7 +14,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
-    val customer: PaymentSheet.CustomerConfiguration?,
+    val customer: CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
     val link: PaymentSheet.LinkConfiguration,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,

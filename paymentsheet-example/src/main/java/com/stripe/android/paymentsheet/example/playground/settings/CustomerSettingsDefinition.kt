@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -69,7 +70,7 @@ internal object CustomerSettingsDefinition :
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationBuilder.customer(
-            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            CustomerConfiguration.createWithCustomerSession(
                 id = playgroundState.customerId,
                 clientSecret = playgroundState.customerSessionClientSecret
             )
