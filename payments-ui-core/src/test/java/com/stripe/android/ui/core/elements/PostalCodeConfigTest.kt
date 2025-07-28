@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.PostalCodeConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import org.junit.Test
+import com.stripe.android.uicore.R as UiCoreR
 
 class PostalCodeConfigTest {
     @Test
@@ -105,7 +106,8 @@ class PostalCodeConfigTest {
     fun `invalid US postal codes emit error`() {
         with(createConfigForCountry("US")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("1234").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("1234").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_zip_incomplete)
             Truth.assertThat(determineStateForInput("12345").getError()).isNull()
         }
     }
@@ -115,7 +117,10 @@ class PostalCodeConfigTest {
         with(createConfigForCountry("CA")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
             Truth.assertThat(determineStateForInput("1N8E8R").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("141124").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("A0A").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
+            Truth.assertThat(determineStateForInput("141124").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
     }
 
@@ -123,10 +128,14 @@ class PostalCodeConfigTest {
     fun `invalid GB postal codes emit error`() {
         with(createConfigForCountry("GB")) {
             Truth.assertThat(determineStateForInput("").getError()).isNull()
-            Truth.assertThat(determineStateForInput("N18E").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("4C1A 1BB").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("12345").getError()).isNotNull()
-            Truth.assertThat(determineStateForInput("141124").getError()).isNotNull()
+            Truth.assertThat(determineStateForInput("N18E").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_incomplete)
+            Truth.assertThat(determineStateForInput("4C1A 1BB").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
+            Truth.assertThat(determineStateForInput("12345").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
+            Truth.assertThat(determineStateForInput("141124").getError()?.errorMessage)
+                .isEqualTo(UiCoreR.string.stripe_address_postal_code_invalid)
         }
     }
 
