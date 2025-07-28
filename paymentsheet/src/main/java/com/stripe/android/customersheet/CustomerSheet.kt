@@ -14,10 +14,10 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -40,12 +40,11 @@ class CustomerSheet internal constructor(
     private val callback: CustomerSheetResultCallback,
     private val statusBarColor: () -> Int?,
 ) {
-    private val customerSheetActivityLauncher =
-        activityResultRegistryOwner.activityResultRegistry.register(
-            "CustomerSheet",
-            CustomerSheetContract(),
-            ::onCustomerSheetResult,
-        )
+    private val customerSheetActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
+        "CustomerSheet",
+        CustomerSheetContract(),
+        ::onCustomerSheetResult,
+    )
 
     private val viewModel = ViewModelProvider(
         owner = viewModelStoreOwner,
@@ -53,14 +52,12 @@ class CustomerSheet internal constructor(
     )[CustomerSheetConfigViewModel::class.java]
 
     init {
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    customerSheetActivityLauncher.unregister()
-                    super.onDestroy(owner)
-                }
+        lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                customerSheetActivityLauncher.unregister()
+                super.onDestroy(owner)
             }
-        )
+        })
     }
 
     /**
@@ -123,12 +120,11 @@ class CustomerSheet internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
-        val request = viewModel.configureRequest
-            ?: return CustomerSheetResult.Failed(
-                IllegalStateException(
-                    "Must call `configure` first before attempting to fetch the saved payment option!"
-                )
+        val request = viewModel.configureRequest ?: return CustomerSheetResult.Failed(
+            IllegalStateException(
+                "Must call `configure` first before attempting to fetch the saved payment option!"
             )
+        )
 
         return coroutineScope {
             val savedSelectionDeferred = async {
@@ -152,14 +148,11 @@ class CustomerSheet internal constructor(
                 }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
             }
 
-            selection.fold(
-                onSuccess = {
-                    CustomerSheetResult.Selected(it)
-                },
-                onFailure = { cause ->
-                    CustomerSheetResult.Failed(cause)
-                }
-            )
+            selection.fold(onSuccess = {
+                CustomerSheetResult.Selected(it)
+            }, onFailure = { cause ->
+                CustomerSheetResult.Failed(cause)
+            })
         }
     }
 

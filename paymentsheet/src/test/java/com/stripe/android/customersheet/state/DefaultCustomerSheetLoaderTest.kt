@@ -17,6 +17,7 @@ import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSour
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.data.FakeCustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -29,7 +30,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -513,8 +513,8 @@ internal class DefaultCustomerSheetLoaderTest {
 
         val config = CustomerSheet.Configuration(
             merchantDisplayName = "Example",
-            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
-                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+            cardBrandAcceptance = CardBrandAcceptance.disallowed(
+                listOf(CardBrandAcceptance.BrandCategory.Visa)
             )
         )
 

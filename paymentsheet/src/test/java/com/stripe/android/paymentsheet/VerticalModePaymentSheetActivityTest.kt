@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
@@ -437,10 +438,10 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        cardBrandAcceptance = CardBrandAcceptance.disallowed(
             listOf(
 
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                CardBrandAcceptance.BrandCategory.Amex
             )
         ),
         networkSetup = {
@@ -467,10 +468,10 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Displayed saved payment method is correct when a card brand is disallowed`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        cardBrandAcceptance = CardBrandAcceptance.disallowed(
             listOf(
 
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+                CardBrandAcceptance.BrandCategory.Visa
             )
         ),
         customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
@@ -486,10 +487,10 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `Disallowed brands are disabled in the CBC dropdown`() = runTest(
-        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+        cardBrandAcceptance = CardBrandAcceptance.disallowed(
             listOf(
 
-                PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+                CardBrandAcceptance.BrandCategory.Visa
             )
         ),
         customer = CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
@@ -525,7 +526,7 @@ internal class VerticalModePaymentSheetActivityTest {
         primaryButtonLabel: String? = null,
         customer: CustomerConfiguration? = null,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+        cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
         test: () -> Unit,

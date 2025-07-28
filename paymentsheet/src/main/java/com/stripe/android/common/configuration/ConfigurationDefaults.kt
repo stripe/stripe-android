@@ -1,6 +1,7 @@
 package com.stripe.android.common.configuration
 
 import android.content.res.ColorStateList
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -27,7 +28,7 @@ internal object ConfigurationDefaults {
     val shippingDetails: AddressDetails? = null
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
-    val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+    val cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.All
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
     val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.toBrandCategory
 import com.stripe.android.model.CardBrand
@@ -13,7 +14,7 @@ class PaymentSheetCardBrandFilterTest {
 
     @Test
     fun testIsAccepted_allBrandsAccepted() {
-        val filter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.All)
+        val filter = PaymentSheetCardBrandFilter(CardBrandAcceptance.All)
 
         for (brand in CardBrand.entries) {
             assertThat(filter.isAccepted(brand)).isTrue()
@@ -23,11 +24,11 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun testIsAccepted_allowedBrands() {
         val allowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Visa,
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard
+            CardBrandAcceptance.BrandCategory.Visa,
+            CardBrandAcceptance.BrandCategory.Mastercard
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
+            CardBrandAcceptance.Allowed(allowedBrands)
         )
 
         for (brand in CardBrand.entries) {
@@ -43,11 +44,11 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun testIsAccepted_disallowedBrands() {
         val disallowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Amex,
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Discover
+            CardBrandAcceptance.BrandCategory.Amex,
+            CardBrandAcceptance.BrandCategory.Discover
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Disallowed(disallowedBrands)
+            CardBrandAcceptance.Disallowed(disallowedBrands)
         )
 
         for (brand in CardBrand.entries) {
@@ -63,10 +64,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun testIsAccepted_unknownBrandCategory() {
         val allowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            CardBrandAcceptance.BrandCategory.Visa
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
+            CardBrandAcceptance.Allowed(allowedBrands)
         )
 
         for (brand in CardBrand.entries) {
@@ -79,10 +80,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun testIsAccepted_allowsBrandWithNullCategory_whenDisallowed() {
         val disallowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            CardBrandAcceptance.BrandCategory.Visa
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Disallowed(disallowedBrands)
+            CardBrandAcceptance.Disallowed(disallowedBrands)
         )
 
         for (brand in CardBrand.entries) {
@@ -94,7 +95,7 @@ class PaymentSheetCardBrandFilterTest {
 
     @Test
     fun `isAccepted(paymentMethod) returns true for non-card payment methods`() {
-        val filter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.All)
+        val filter = PaymentSheetCardBrandFilter(CardBrandAcceptance.All)
 
         val nonCardPaymentMethod = PaymentMethodFactory.usBankAccount()
 
@@ -104,10 +105,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun `isAccepted(paymentMethod) accepts card with allowed brand`() {
         val allowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            CardBrandAcceptance.BrandCategory.Visa
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
+            CardBrandAcceptance.Allowed(allowedBrands)
         )
 
         val visaCard = PaymentMethodFactory.card(id = "pm_visa").update(
@@ -122,10 +123,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun `isAccepted(paymentMethod) rejects card with disallowed brand`() {
         val disallowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+            CardBrandAcceptance.BrandCategory.Amex
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Disallowed(disallowedBrands)
+            CardBrandAcceptance.Disallowed(disallowedBrands)
         )
 
         val amexCard = PaymentMethodFactory.card(id = "pm_amex").update(
@@ -140,10 +141,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun `isAccepted(paymentMethod) handles unknown brand gracefully`() {
         val allowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            CardBrandAcceptance.BrandCategory.Visa
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
+            CardBrandAcceptance.Allowed(allowedBrands)
         )
 
         val unknownBrandCard = PaymentMethodFactory.card(id = "pm_unknown").update(
@@ -158,10 +159,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun `isAccepted(paymentMethod) uses displayBrand when available`() {
         val allowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard
+            CardBrandAcceptance.BrandCategory.Mastercard
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
+            CardBrandAcceptance.Allowed(allowedBrands)
         )
 
         val cardWithDisplayBrand = PaymentMethodFactory.card(id = "pm_mastercard").copy(
@@ -177,10 +178,10 @@ class PaymentSheetCardBrandFilterTest {
     @Test
     fun `isAccepted(paymentMethod) falls back to brand when displayBrand is null`() {
         val allowedBrands = listOf(
-            PaymentSheet.CardBrandAcceptance.BrandCategory.Visa
+            CardBrandAcceptance.BrandCategory.Visa
         )
         val filter = PaymentSheetCardBrandFilter(
-            PaymentSheet.CardBrandAcceptance.Allowed(allowedBrands)
+            CardBrandAcceptance.Allowed(allowedBrands)
         )
 
         val cardWithoutDisplayBrand = PaymentMethodFactory.card(id = "pm_visa").copy(
@@ -195,7 +196,7 @@ class PaymentSheetCardBrandFilterTest {
 
     @Test
     fun `isAccepted(paymentMethod) defaults to Unknown when both brand and displayBrand are null`() {
-        val filter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.All)
+        val filter = PaymentSheetCardBrandFilter(CardBrandAcceptance.All)
 
         val cardWithNoBrand = PaymentMethodFactory.card(id = "pm_no_brand").copy(
             card = PaymentMethod.Card(

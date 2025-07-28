@@ -1,6 +1,7 @@
 package com.stripe.android.common.analytics
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -103,8 +104,8 @@ internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): String
     }
 }
 
-internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
-    return this !is PaymentSheet.CardBrandAcceptance.All
+internal fun CardBrandAcceptance.toAnalyticsValue(): Boolean {
+    return this !is CardBrandAcceptance.All
 }
 
 internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {

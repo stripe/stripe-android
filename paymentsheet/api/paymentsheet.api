@@ -131,7 +131,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration$
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
-	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public final fun cardBrandAcceptance (Lcom/stripe/android/elements/CardBrandAcceptance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun googlePayEnabled (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun headerTextForSelectionScreen (Ljava/lang/String;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
@@ -270,6 +270,65 @@ public final class com/stripe/android/customersheet/PaymentOptionSelection$Payme
 
 public abstract interface class com/stripe/android/customersheet/SetupIntentClientSecretProvider {
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/elements/CardBrandAcceptance : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/CardBrandAcceptance$Companion;
+	public static final fun all ()Lcom/stripe/android/elements/CardBrandAcceptance;
+	public static final fun allowed (Ljava/util/List;)Lcom/stripe/android/elements/CardBrandAcceptance;
+	public static final fun disallowed (Ljava/util/List;)Lcom/stripe/android/elements/CardBrandAcceptance;
+}
+
+public final class com/stripe/android/elements/CardBrandAcceptance$All$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/CardBrandAcceptance$All;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/CardBrandAcceptance$All;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/CardBrandAcceptance$Allowed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/CardBrandAcceptance$Allowed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/CardBrandAcceptance$Allowed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/CardBrandAcceptance$BrandCategory : java/lang/Enum, android/os/Parcelable {
+	public static final field Amex Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Discover Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public static final field Mastercard Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public static final field Visa Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public final fun describeContents ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public static fun values ()[Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/elements/CardBrandAcceptance$BrandCategory$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/CardBrandAcceptance$BrandCategory;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/CardBrandAcceptance$Companion {
+	public final fun all ()Lcom/stripe/android/elements/CardBrandAcceptance;
+	public final fun allowed (Ljava/util/List;)Lcom/stripe/android/elements/CardBrandAcceptance;
+	public final fun disallowed (Ljava/util/List;)Lcom/stripe/android/elements/CardBrandAcceptance;
+}
+
+public final class com/stripe/android/elements/CardBrandAcceptance$Disallowed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/CardBrandAcceptance$Disallowed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/CardBrandAcceptance$Disallowed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/elements/CustomerConfiguration : android/os/Parcelable {
@@ -937,7 +996,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;
-	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun cardBrandAcceptance (Lcom/stripe/android/elements/CardBrandAcceptance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun customer (Lcom/stripe/android/elements/CustomerConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
@@ -1884,65 +1943,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 	public final fun preparePaymentMethodHandler (Lcom/stripe/android/paymentelement/PreparePaymentMethodHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 }
 
-public abstract class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance : android/os/Parcelable {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Companion;
-	public static final fun all ()Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
-	public static final fun allowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
-	public static final fun disallowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$All$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$All;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$All;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Allowed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Allowed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Allowed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory : java/lang/Enum, android/os/Parcelable {
-	public static final field Amex Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Discover Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public static final field Mastercard Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public static final field Visa Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public final fun describeContents ()I
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$BrandCategory;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Companion {
-	public final fun all ()Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
-	public final fun allowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
-	public final fun disallowed (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Disallowed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Disallowed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance$Disallowed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentsheet/PaymentSheet$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -2053,7 +2053,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
-	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun cardBrandAcceptance (Lcom/stripe/android/elements/CardBrandAcceptance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customer (Lcom/stripe/android/elements/CustomerConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
