@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.model.OnrampConfigurationCallback
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -158,6 +158,7 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return DaggerOnrampCoordinatorViewModelComponent.factory()
                 .build(
+                    application = extras.requireApplication(),
                     savedStateHandle = extras.createSavedStateHandle(),
                     linkController = linkController,
                     onrampCallbacks = onrampCallbacks

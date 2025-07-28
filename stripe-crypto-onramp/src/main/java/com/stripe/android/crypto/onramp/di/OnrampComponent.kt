@@ -49,6 +49,5 @@ internal interface OnrampComponent {
         fun onrampCallbacks(onrampCallbacks: OnrampCallbacks): Builder
 
         fun build(): OnrampComponent
-
     }
 }

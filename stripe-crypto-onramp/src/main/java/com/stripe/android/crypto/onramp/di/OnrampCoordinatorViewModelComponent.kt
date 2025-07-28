@@ -1,11 +1,10 @@
 package com.stripe.android.crypto.onramp.di
 
-import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
-import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -22,6 +21,7 @@ internal interface OnrampCoordinatorViewModelComponent {
     @Component.Factory
     interface Factory {
         fun build(
+            @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance linkController: LinkController,
             @BindsInstance onrampCallbacks: OnrampCallbacks
