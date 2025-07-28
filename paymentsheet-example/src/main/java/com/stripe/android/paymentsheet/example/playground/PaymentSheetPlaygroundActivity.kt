@@ -10,11 +10,15 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,8 +27,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
@@ -72,6 +82,7 @@ import kotlinx.coroutines.withContext
     ExperimentalCustomPaymentMethodsApi::class,
     WalletButtonsPreview::class,
 )
+@Suppress("LargeClass")
 internal class PaymentSheetPlaygroundActivity :
     AppCompatActivity(),
     ConfirmCustomPaymentMethodCallback,
@@ -325,6 +336,52 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
+    private fun LinkSignupToggle(flowController: PaymentSheet.FlowController) {
+        val linkSignupOptInState by flowController.linkSignupOptInState.collectAsState()
+        val isChecked by flowController.linkSignupOptInValue.collectAsState()
+
+        when (val state = linkSignupOptInState) {
+            is PaymentSheet.LinkSignupOptInState.Visible -> {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = state.title,
+                            style = MaterialTheme.typography.body1
+                        )
+                        Text(
+                            text = state.description,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                        LinkText(
+                            text = state.termsAndConditions,
+                            style = MaterialTheme.typography.caption,
+                            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                    Switch(
+                        checked = isChecked,
+                        onCheckedChange = { checked ->
+                            flowController.linkSignupOptInValue.value = checked
+                        }
+                    )
+                }
+            }
+            PaymentSheet.LinkSignupOptInState.Hidden -> {
+                // Don't display anything when hidden
+            }
+        }
+    }
+
+    @Composable
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
         Button(
             onClick = {
@@ -449,6 +506,8 @@ internal class PaymentSheetPlaygroundActivity :
         if (playgroundState.snapshot[WalletButtonsSettingsDefinition] != WalletButtonsPlaygroundType.Disabled) {
             flowController.WalletButtons()
         }
+
+        LinkSignupToggle(flowController = flowController)
 
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
@@ -690,6 +749,34 @@ internal class PaymentSheetPlaygroundActivity :
                 .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
+}
+
+@Composable
+private fun LinkText(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    style: TextStyle = MaterialTheme.typography.body1,
+) {
+    val styledText = remember(text) {
+        buildAnnotatedString {
+            append(text)
+            text.getLinkAnnotations(0, text.length)
+                .forEach { annotation ->
+                    addStyle(
+                        style = SpanStyle(textDecoration = TextDecoration.Underline),
+                        start = annotation.start,
+                        end = annotation.end
+                    )
+                }
+        }
+    }
+
+    Text(
+        text = styledText,
+        style = style.copy(color = color),
+        modifier = modifier
+    )
 }
 
 const val RELOAD_TEST_TAG = "RELOAD"

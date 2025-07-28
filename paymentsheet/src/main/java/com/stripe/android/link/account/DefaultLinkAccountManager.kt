@@ -171,8 +171,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
      */
     private suspend fun signUpIfValidSessionState(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -220,8 +220,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun signUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
@@ -236,8 +236,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun mobileSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         verificationToken: String,
         appId: String,

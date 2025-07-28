@@ -1,0 +1,386 @@
+package com.stripe.android.paymentsheet.flowcontroller
+
+import androidx.lifecycle.SavedStateHandle
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.FakeLinkAuth
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.account.LinkAuthResult
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.FakeSignupToLinkToggleInteractor
+import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
+
+class SignupForLinkTest {
+
+    private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+    private val signupToLinkToggleInteractor = FakeSignupToLinkToggleInteractor()
+    private val linkAccountManager = FakeLinkAccountManager()
+    private val linkAuth = FakeLinkAuth()
+    private val linkComponent = FakeLinkComponent(linkAccountManager = linkAccountManager, linkAuth = linkAuth)
+    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(component = linkComponent)
+    private val linkHandler = LinkHandler(linkConfigurationCoordinator)
+
+    private val eventReporter = FakeEventReporter()
+
+    private val signupForLink = SignupForLink(
+        linkAccountHolder = linkAccountHolder,
+        linkHandler = linkHandler,
+        signupToLinkToggleInteractor = signupToLinkToggleInteractor,
+        eventReporter = eventReporter
+    )
+
+    private val testEmail = "test@example.com"
+    private val testPhone = "+1234567890"
+    private val testName = "John Doe"
+    private val testCountry = "US"
+
+    private val testAddress = Address(
+        line1 = "123 Main St",
+        line2 = null,
+        city = "San Francisco",
+        state = "CA",
+        postalCode = "94105",
+        country = testCountry
+    )
+
+    private val testBillingDetails = PaymentMethod.BillingDetails(
+        address = testAddress,
+        email = testEmail,
+        name = testName,
+        phone = testPhone
+    )
+
+    private val testPaymentSelection = PaymentSelection.New.Card(
+        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+            billingDetails = testBillingDetails
+        ),
+        brand = CardBrand.Visa,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+    )
+
+    private val testLinkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+        flags = mapOf("link_enable_new_user_signup_api" to true)
+    )
+
+    @Test
+    fun `invoke should return early when signup toggle is disabled`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(false)
+
+        // When
+        signupForLink(testLinkConfiguration, testPaymentSelection)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should return early when link account already exists`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        val existingAccount = TestFactory.LINK_ACCOUNT
+        val accountInfo = LinkAccountUpdate.Value(existingAccount)
+        linkAccountHolder.set(accountInfo)
+
+        // When
+        signupForLink(testLinkConfiguration, testPaymentSelection)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should return early when linkConfiguration is null`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+
+        // When
+        signupForLink(null, testPaymentSelection)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should return early when email is null`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+
+        val paymentSelectionWithoutEmail = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                billingDetails = testBillingDetails.copy(email = null)
+            ),
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        // When
+        signupForLink(testLinkConfiguration, paymentSelectionWithoutEmail)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should return early when paymentSelection is null`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+
+        // When
+        signupForLink(testLinkConfiguration, null)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should successfully sign up to Link and create card payment details`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
+            email = testEmail,
+            country = testCountry,
+            phone = testPhone,
+            name = testName,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+
+        // When
+        signupForLink(testLinkConfiguration, testPaymentSelection)
+
+        // Then
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
+
+        val createCardCall = linkAccountManager.awaitCreateCardPaymentDetailsCall()
+        assertThat(createCardCall).isEqualTo(testPaymentSelection.paymentMethodCreateParams)
+    }
+
+    @Test
+    fun `invoke should use default country US when billing address country is null`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        val paymentSelectionWithoutCountry = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                billingDetails = testBillingDetails.copy(
+                    address = testAddress.copy(country = null)
+                )
+            ),
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
+            email = testEmail,
+            country = null, // Should be null when not provided
+            phone = testPhone,
+            name = testName,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+
+        // When
+        signupForLink(testLinkConfiguration, paymentSelectionWithoutCountry)
+
+        // Then
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
+    }
+
+    @Test
+    fun `invoke should handle signup failure gracefully`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        val error = com.stripe.android.core.exception.APIException(message = "Signup failed")
+        linkAuth.signupResult = LinkAuthResult.Error(error)
+
+        // When
+        signupForLink(testLinkConfiguration, testPaymentSelection)
+
+        // Then
+        linkAuth.awaitSignUpCall()
+    }
+
+    @Test
+    fun `invoke should handle card payment details creation failure gracefully`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+        val error = com.stripe.android.core.exception.APIException(message = "Card creation failed")
+        linkAccountManager.createCardPaymentDetailsResult = Result.failure(error)
+
+        // When
+        signupForLink(testLinkConfiguration, testPaymentSelection)
+
+        // Then
+        linkAuth.awaitSignUpCall()
+        linkAccountManager.awaitCreateCardPaymentDetailsCall()
+    }
+
+    @Test
+    fun `invoke should not create card payment details for non-New payment selections`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+
+        // Use TestFactory to create a saved payment method with proper billing details
+        val paymentMethodWithBillingDetails = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            billingDetails = testBillingDetails
+        )
+        val savedPaymentSelection = PaymentSelection.Saved(paymentMethodWithBillingDetails)
+
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
+            email = testEmail,
+            country = testCountry,
+            phone = testPhone,
+            name = testName,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        // When
+        signupForLink(testLinkConfiguration, savedPaymentSelection)
+
+        // Then
+        // Should still sign up to Link (since we have email)
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
+
+        // But should NOT create card payment details since it's not a New payment selection
+        // No more invocations should be made to createCardPaymentDetails
+    }
+
+    @Test
+    fun `invoke should handle exceptions during linkAuth operations`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        // Make the linkAuth throw an exception during signUp
+        linkAuth.signupResult = LinkAuthResult.Error(
+            com.stripe.android.core.exception.APIException(message = "Network error")
+        )
+
+        // When
+        signupForLink(testLinkConfiguration, testPaymentSelection)
+
+        // Then
+        linkAuth.awaitSignUpCall()
+    }
+
+    @Test
+    fun `invoke should work with minimal billing details`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        val minimalBillingDetails = PaymentMethod.BillingDetails(
+            email = testEmail,
+            address = null,
+            name = null,
+            phone = null
+        )
+
+        val paymentSelectionMinimal = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                billingDetails = minimalBillingDetails
+            ),
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+        )
+
+        val expectedSignUpCall = FakeLinkAuth.SignUpCall(
+            email = testEmail,
+            country = null,
+            phone = null,
+            name = null,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+
+        // When
+        signupForLink(testLinkConfiguration, paymentSelectionMinimal)
+
+        // Then
+        val signUpCall = linkAuth.awaitSignUpCall()
+        assertThat(signUpCall).isEqualTo(expectedSignUpCall)
+    }
+
+    @Test
+    fun `invoke should return early when link_enable_new_user_signup_api flag is false`() = runTest {
+        // Given
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+
+        val linkConfigurationWithDisabledFlag = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_enable_new_user_signup_api" to false)
+        )
+
+        // When
+        signupForLink(linkConfigurationWithDisabledFlag, testPaymentSelection)
+
+        // Then
+        // Verify that signup was not attempted
+        linkAuth.ensureAllItemsConsumed()
+        linkAccountManager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `invoke should proceed when link_enable_new_user_signup_api flag is true`() = runTest {
+        // Given
+        setupSuccessfulSignupMocks()
+
+        val linkConfigurationWithEnabledFlag = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_enable_new_user_signup_api" to true)
+        )
+
+        linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+
+        // When
+        signupForLink(linkConfigurationWithEnabledFlag, testPaymentSelection)
+
+        // Then
+        // Verify that signup was attempted
+        linkAuth.awaitSignUpCall()
+        linkAccountManager.awaitCreateCardPaymentDetailsCall()
+    }
+
+    private fun setupSuccessfulSignupMocks() {
+        signupToLinkToggleInteractor.setSignupToLinkValue(true)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+    }
+}

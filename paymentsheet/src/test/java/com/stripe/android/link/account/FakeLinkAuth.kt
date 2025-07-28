@@ -15,8 +15,8 @@ internal class FakeLinkAuth : LinkAuth {
 
     override suspend fun signUp(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult {
@@ -65,8 +65,8 @@ internal class FakeLinkAuth : LinkAuth {
 
     data class SignUpCall(
         val email: String,
-        val phone: String,
-        val country: String,
+        val phone: String?,
+        val country: String?,
         val name: String?,
         val consentAction: SignUpConsentAction
     )

@@ -65,10 +65,13 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
+import com.stripe.android.paymentsheet.ui.SignupToLinkToggleInteractor
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -100,7 +103,9 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
+    private val signupToLinkToggleInteractor: SignupToLinkToggleInteractor,
     private val errorReporter: ErrorReporter,
+    private val signupForLink: SignupForLink,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : PaymentSheet.FlowController {
@@ -181,6 +186,12 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun WalletButtons() {
         viewModel.flowControllerStateComponent.walletButtonsContent.Content()
     }
+
+    override val linkSignupOptInState: StateFlow<PaymentSheet.LinkSignupOptInState> =
+        signupToLinkToggleInteractor.state
+
+    override val linkSignupOptInValue: MutableStateFlow<Boolean> =
+        signupToLinkToggleInteractor.toggleValue
 
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
@@ -501,6 +512,11 @@ internal class DefaultFlowController @Inject internal constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
     ) {
         viewModelScope.launch {
+            signupForLink(
+                linkConfiguration = state.linkConfiguration,
+                paymentSelection = paymentSelection
+            )
+
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,

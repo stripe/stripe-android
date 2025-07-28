@@ -118,8 +118,8 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun consumerSignUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
@@ -143,8 +143,8 @@ internal class LinkApiRepository @Inject constructor(
     override suspend fun mobileSignUp(
         name: String?,
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         consentAction: ConsumerSignUpConsentAction,
         amount: Long?,
         currency: String?,

@@ -6,8 +6,8 @@ import java.util.Locale
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 data class SignUpParams(
     val email: String,
-    val phoneNumber: String,
-    val country: String,
+    val phoneNumber: String?,
+    val country: String?,
     val name: String?,
     val locale: Locale?,
     val amount: Long?,
@@ -21,9 +21,6 @@ data class SignUpParams(
     fun toParamMap(): Map<String, *> {
         val params = mutableMapOf(
             "email_address" to email.lowercase(),
-            "phone_number" to phoneNumber,
-            "country" to country,
-            "country_inferring_method" to "PHONE_NUMBER",
             "amount" to amount,
             "currency" to currency,
             "consent_action" to consentAction.value,
@@ -32,6 +29,15 @@ data class SignUpParams(
 
         locale?.let {
             params["locale"] = it.toLanguageTag()
+        }
+
+        phoneNumber?.takeIf { it.isNotBlank() }?.let {
+            params["phone_number"] = it
+            params["country_inferring_method"] = "PHONE_NUMBER"
+        }
+
+        country?.takeIf { it.isNotBlank() }?.let {
+            params["country"] = it
         }
 
         name?.takeIf { it.isNotBlank() }?.let {

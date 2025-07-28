@@ -251,6 +251,21 @@ internal interface EventReporter {
      */
     fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
 
+    /**
+     * Link user signup via API has succeeded.
+     */
+    fun onLinkUserSignupSucceeded()
+
+    /**
+     * Link user signup via API has failed.
+     */
+    fun onLinkUserSignupFailed(error: Throwable)
+
+    /**
+     * Link user payment detail creation via API has completed (success or failure).
+     */
+    fun onLinkUserPaymentDetailCreationCompleted(error: Throwable?)
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom"),

@@ -22,8 +22,8 @@ internal class DefaultLinkAuth @Inject constructor(
 ) : LinkAuth {
     override suspend fun signUp(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult {
@@ -72,8 +72,8 @@ internal class DefaultLinkAuth @Inject constructor(
 
     private suspend fun mobileSignUp(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {

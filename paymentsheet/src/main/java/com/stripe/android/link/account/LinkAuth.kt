@@ -6,8 +6,8 @@ import com.stripe.android.model.EmailSource
 internal interface LinkAuth {
     suspend fun signUp(
         email: String,
-        phoneNumber: String,
-        country: String,
+        phoneNumber: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult
