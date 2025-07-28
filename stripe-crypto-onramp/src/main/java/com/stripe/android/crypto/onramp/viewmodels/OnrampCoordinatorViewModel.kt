@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
-import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -17,7 +16,8 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
-import com.stripe.android.model.ConsumerSignUpConsentAction
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,7 +31,6 @@ import javax.inject.Inject
  */
 internal class OnrampCoordinatorViewModel @Inject constructor(
     private val handle: SavedStateHandle,
-    private val linkController: LinkController,
     private val onrampCallbacks: OnrampCallbacks,
     private val cryptoApiRepository: CryptoApiRepository
 ) : ViewModel() {
@@ -42,6 +41,10 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
     private var onRampConfiguration: OnrampConfiguration?
         get() = handle["configuration"]
         set(value) = handle.set("configuration", value)
+
+    private val _configurationFlow =
+        MutableSharedFlow<LinkController.Configuration>(replay = 1)
+    val configurationFlow = _configurationFlow.asSharedFlow()
 
     /**
      * Configure the view model and associated types.
@@ -54,31 +57,17 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         viewModelScope.launch {
             val config = LinkController.Configuration.Builder(merchantDisplayName = "").build()
 
-            when (val result = linkController.configure(config)) {
-                is LinkController.ConfigureResult.Success ->
-                    onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Completed(true))
-                is LinkController.ConfigureResult.Failed ->
-                    onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Failed(result.error))
-            }
+            _configurationFlow.emit(config)
         }
     }
 
-    fun isLinkUser(email: String) {
-        linkController.lookupConsumer(email)
-    }
-
-    fun authenticateExistingUser(email: String) {
-        linkController.authenticateExistingConsumer(email)
-    }
-
-    fun registerNewUser(info: LinkUserInfo) {
-        linkController.registerConsumer(
-            email = info.email,
-            phone = info.phone,
-            country = info.country,
-            name = info.fullName,
-            consentAction = ConsumerSignUpConsentAction.Implied
-        )
+    internal fun onLinkControllerConfigureResult(result: LinkController.ConfigureResult) {
+        when (result) {
+            is LinkController.ConfigureResult.Success ->
+                onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Completed(true))
+            is LinkController.ConfigureResult.Failed ->
+                onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Failed(result.error))
+        }
     }
 
     internal fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
@@ -151,7 +140,6 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
     }
 
     internal class Factory(
-        private val linkController: LinkController,
         private val onrampCallbacks: OnrampCallbacks
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -160,7 +148,6 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
                 .build(
                     application = extras.requireApplication(),
                     savedStateHandle = extras.createSavedStateHandle(),
-                    linkController = linkController,
                     onrampCallbacks = onrampCallbacks
                 )
                 .viewModel as T

@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
-import com.stripe.android.link.LinkController
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
@@ -23,7 +22,6 @@ internal interface OnrampCoordinatorViewModelComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance linkController: LinkController,
             @BindsInstance onrampCallbacks: OnrampCallbacks
         ): OnrampCoordinatorViewModelComponent
     }
