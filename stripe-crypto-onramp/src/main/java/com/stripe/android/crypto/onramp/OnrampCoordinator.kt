@@ -135,6 +135,7 @@ class OnrampCoordinator @Inject internal constructor(
                     .onRampCoordinatorViewModel(viewModel)
                     .linkElementCallbackIdentifier(linkElementCallbackIdentifier)
                     .activityResultRegistryOwner(activityResultRegistryOwner)
+                    .lifecycleOwner(lifecycleOwner)
                     .onrampCallbacks(onrampCallbacks)
                     .build()
 
