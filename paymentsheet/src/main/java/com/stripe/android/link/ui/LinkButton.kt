@@ -3,6 +3,8 @@
 package com.stripe.android.link.ui
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -10,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -29,8 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.invisibleToUser
@@ -48,11 +53,11 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
+import com.stripe.android.link.ui.wallet.BankIcon
 import com.stripe.android.link.ui.wallet.DefaultPaymentUI
 import com.stripe.android.link.ui.wallet.toDefaultPaymentUI
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.StripeTheme
 
@@ -188,12 +193,7 @@ private fun PaymentDetailsButtonContent(
     ) {
         LinkIconAndDivider()
 
-        PaymentMethodIconFromResource(
-            iconRes = paymentUI.paymentIconRes,
-            colorFilter = null,
-            alignment = Alignment.Center,
-            modifier = Modifier.size(24.dp)
-        )
+        PaymentDetailsDisplay(paymentUI = paymentUI)
 
         Spacer(modifier = Modifier.width(4.dp))
 
@@ -206,6 +206,25 @@ private fun PaymentDetailsButtonContent(
             modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
             maxLines = 1
         )
+    }
+}
+
+@Composable
+private fun PaymentDetailsDisplay(
+    paymentUI: DefaultPaymentUI
+) {
+    Box(modifier = Modifier.size(20.dp)) {
+        when (paymentUI.paymentType) {
+            is DefaultPaymentUI.PaymentType.Card -> Image(
+                painter = painterResource(paymentUI.paymentType.iconRes),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+            is DefaultPaymentUI.PaymentType.BankAccount -> BankIcon(
+                bankIconCode = paymentUI.paymentType.bankIconCode
+            )
+        }
     }
 }
 
