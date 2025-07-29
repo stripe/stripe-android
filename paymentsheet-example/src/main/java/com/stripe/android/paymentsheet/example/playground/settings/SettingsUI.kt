@@ -22,31 +22,75 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-internal fun SettingsUi(playgroundSettings: PlaygroundSettings) {
+internal fun SettingsUi(
+    playgroundSettings: PlaygroundSettings,
+    searchQuery: String,
+) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
     val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
+    val filteredDefinitions = remember(displayableDefinitions, searchQuery) {
+        displayableDefinitions.filter { it.displayName.matchesQuery(searchQuery) }
+    }
 
     Column(
         modifier = Modifier.padding(bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Row {
-            IntegrationTypeConfigurableSetting(
-                configurationData,
-                playgroundSettings::updateConfigurationData
-            )
+        if (IntegrationTypeSettingName.matchesQuery(searchQuery)) {
+            Row {
+                IntegrationTypeConfigurableSetting(
+                    configurationData,
+                    playgroundSettings::updateConfigurationData
+                )
+            }
         }
 
-        for (settingDefinition in displayableDefinitions) {
-            Row {
+        if (filteredDefinitions.isEmpty()) {
+            Text("No matching settings found")
+        } else {
+            for (settingDefinition in filteredDefinitions) {
                 Setting(settingDefinition, playgroundSettings)
             }
         }
     }
+}
+
+private val WordBoundaryRegex by lazy(LazyThreadSafetyMode.NONE) { "\\s+".toRegex() }
+
+/**
+ * Returns true if the string matches the query.
+ */
+private fun String.matchesQuery(query: String): Boolean {
+    if (query.isBlank()) {
+        return true
+    }
+
+    val words = this.trim().split(WordBoundaryRegex)
+    val queryWords = query.trim().split(WordBoundaryRegex)
+    return queryWords.all { queryWord ->
+        words.any { word -> word.startsWith(queryWord, ignoreCase = true) }
+    }
+}
+
+@Preview
+@Composable
+private fun SettingsUiPreview() {
+    PlaygroundTheme(
+        content = {
+            SettingsUi(
+                playgroundSettings = PlaygroundSettings.createFromDefaults(),
+                searchQuery = "",
+            )
+        },
+        bottomBarContent = {},
+        topBarContent = {}
+    )
 }
 
 @Composable
@@ -56,7 +100,7 @@ private fun <T> Setting(
 ) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
 
-    val options = remember(configurationData) {
+    val options = remember(settingDefinition, configurationData) {
         settingDefinition.createOptions(configurationData)
     }
 
@@ -101,13 +145,15 @@ private fun <T> Setting(
     }
 }
 
+private const val IntegrationTypeSettingName = "Integration Type"
+
 @Composable
 private fun IntegrationTypeConfigurableSetting(
     configurationData: PlaygroundConfigurationData,
     updateConfigurationData: (updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData) -> Unit
 ) {
     DropdownSetting(
-        name = "Integration Type",
+        name = IntegrationTypeSettingName,
         options = listOf(
             PlaygroundSettingDefinition.Displayable.Option(
                 name = "Payment Sheet",
@@ -175,7 +221,9 @@ private fun <T> RadioButtonSetting(
             )
         }
 
-        val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
+        val selectedOption = remember(options, value) {
+            options.firstOrNull { it.value == value }
+        }
 
         Row {
             options.forEach { option ->
@@ -220,7 +268,9 @@ internal fun <T> DropdownSetting(
     onOptionChanged: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
+    val selectedOption = remember(options, value) {
+        options.firstOrNull { it.value == value }
+    }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
