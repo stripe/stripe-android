@@ -301,13 +301,13 @@ internal class PaymentOptionsActivityTest {
                 .appearance(
                     Appearance(
                         primaryButton = Appearance.PrimaryButton(
-                            colorsLight = Appearance.PrimaryButtonColors(
+                            colorsLight = Appearance.PrimaryButton.Colors(
                                 background = Color.Magenta,
                                 onBackground = Color.Magenta,
                                 border = Color.Magenta
                             ),
-                            shape = Appearance.PrimaryButtonShape(),
-                            typography = Appearance.PrimaryButtonTypography()
+                            shape = Appearance.PrimaryButton.Shape(),
+                            typography = Appearance.PrimaryButton.Typography()
                         )
                     )
                 ).build(),

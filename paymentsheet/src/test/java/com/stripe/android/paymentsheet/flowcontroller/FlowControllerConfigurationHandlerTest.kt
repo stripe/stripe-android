@@ -95,7 +95,7 @@ class FlowControllerConfigurationHandlerTest {
                 Appearance.Builder()
                     .primaryButton(
                         Appearance.PrimaryButton(
-                            shape = Appearance.PrimaryButtonShape(
+                            shape = Appearance.PrimaryButton.Shape(
                                 heightDp = 80f
                             )
                         )

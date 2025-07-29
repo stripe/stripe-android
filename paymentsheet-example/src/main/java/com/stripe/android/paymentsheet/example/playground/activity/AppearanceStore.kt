@@ -416,10 +416,11 @@ internal object AppearanceStore {
             val fontResId: Int? = null,
             val fontSizeSp: Float? = null,
         ) {
-            fun build(): Appearance.PrimaryButtonTypography = Appearance.PrimaryButtonTypography(
-                fontResId = fontResId,
-                fontSizeSp = fontSizeSp,
-            )
+            fun build(): Appearance.PrimaryButton.Typography =
+                Appearance.PrimaryButton.Typography(
+                    fontResId = fontResId,
+                    fontSizeSp = fontSizeSp,
+                )
         }
 
         data class PrimaryButtonColors(
@@ -434,7 +435,7 @@ internal object AppearanceStore {
             @ColorInt
             val onSuccessBackgroundColor: Int = onBackground,
         ) {
-            fun build(): Appearance.PrimaryButtonColors = Appearance.PrimaryButtonColors(
+            fun build(): Appearance.PrimaryButton.Colors = Appearance.PrimaryButton.Colors(
                 background = background,
                 onBackground = onBackground,
                 border = border,
@@ -448,7 +449,7 @@ internal object AppearanceStore {
             val borderStrokeWidthDp: Float? = null,
             val heightDp: Float? = null
         ) {
-            fun build(): Appearance.PrimaryButtonShape = Appearance.PrimaryButtonShape(
+            fun build(): Appearance.PrimaryButton.Shape = Appearance.PrimaryButton.Shape(
                 cornerRadiusDp = cornerRadiusDp,
                 borderStrokeWidthDp = borderStrokeWidthDp,
                 heightDp = heightDp,

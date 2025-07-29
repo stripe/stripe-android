@@ -30,8 +30,8 @@ internal fun Appearance.toAnalyticsMap(isEmbedded: Boolean = false): Map<String,
     val primaryButtonConfig = primaryButton
 
     val primaryButtonConfigMap = mapOf(
-        FIELD_COLORS_LIGHT to (primaryButton.colorsLight != Appearance.PrimaryButtonColors.defaultLight),
-        FIELD_COLORS_DARK to (primaryButton.colorsDark != Appearance.PrimaryButtonColors.defaultDark),
+        FIELD_COLORS_LIGHT to (primaryButton.colorsLight != Appearance.PrimaryButton.Colors.defaultLight),
+        FIELD_COLORS_DARK to (primaryButton.colorsDark != Appearance.PrimaryButton.Colors.defaultDark),
         FIELD_CORNER_RADIUS to (primaryButtonConfig.shape.cornerRadiusDp != null),
         FIELD_BORDER_WIDTH to (primaryButtonConfig.shape.borderStrokeWidthDp != null),
         FIELD_FONT to (primaryButtonConfig.typography.fontResId != null)

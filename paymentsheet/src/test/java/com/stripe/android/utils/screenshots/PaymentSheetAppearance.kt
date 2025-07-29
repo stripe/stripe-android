@@ -61,7 +61,7 @@ enum class PaymentSheetAppearance(val appearance: Appearance) : PaparazziConfigO
                 borderStrokeWidthDp = 4.0f
             ),
             primaryButton = Appearance.PrimaryButton(
-                shape = Appearance.PrimaryButtonShape(
+                shape = Appearance.PrimaryButton.Shape(
                     heightDp = 96f
                 )
             ),

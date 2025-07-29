@@ -81,13 +81,17 @@ internal object PaymentSheetFixtures {
                 fontResId = 0
             ),
             primaryButton = Appearance.PrimaryButton(
-                colorsLight = Appearance.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                colorsDark = Appearance.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                shape = Appearance.PrimaryButtonShape(
+                colorsLight = Appearance.PrimaryButton.Colors(
+                    background = 0,
+                    onBackground = 0,
+                    border = 0
+                ),
+                colorsDark = Appearance.PrimaryButton.Colors(background = 0, onBackground = 0, border = 0),
+                shape = Appearance.PrimaryButton.Shape(
                     cornerRadiusDp = 0.0f,
                     borderStrokeWidthDp = 20.0f
                 ),
-                typography = Appearance.PrimaryButtonTypography(
+                typography = Appearance.PrimaryButton.Typography(
                     fontResId = 0
                 )
             )

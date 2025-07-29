@@ -1202,179 +1202,181 @@ constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
-        val colorsLight: PrimaryButtonColors = PrimaryButtonColors.defaultLight,
+        val colorsLight: Colors = Colors.defaultLight,
         /**
          * Describes the colors used while the system is in dark mode.
          */
-        val colorsDark: PrimaryButtonColors = PrimaryButtonColors.defaultDark,
+        val colorsDark: Colors = Colors.defaultDark,
         /**
          * Describes the shape of the primary button.
          */
-        val shape: PrimaryButtonShape = PrimaryButtonShape(),
+        val shape: Shape = Shape(),
         /**
          * Describes the typography of the primary button.
          */
-        val typography: PrimaryButtonTypography = PrimaryButtonTypography()
-    ) : Parcelable
-
-    @Parcelize
-    data class PrimaryButtonColors(
-        /**
-         * The background color of the primary button.
-         * Note: If 'null', {@link Colors#primary} is used.
-         */
-        @ColorInt
-        val background: Int?,
-        /**
-         * The color of the text and icon in the primary button.
-         */
-        @ColorInt
-        val onBackground: Int,
-        /**
-         * The border color of the primary button.
-         */
-        @ColorInt
-        val border: Int,
-        /**
-         * The background color for the primary button when in a success state. Defaults
-         * to base green background color.
-         */
-        @ColorInt
-        val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
-        /**
-         * The success color for the primary button text when in a success state. Defaults
-         * to `onBackground`.
-         */
-        @ColorInt
-        val onSuccessBackgroundColor: Int = onBackground,
+        val typography: Typography = Typography()
     ) : Parcelable {
-        constructor(
-            background: Int?,
-            onBackground: Int,
-            border: Int
-        ) : this(
-            background = background,
-            onBackground = onBackground,
-            border = border,
-            successBackgroundColor = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
-            onSuccessBackgroundColor = onBackground,
-        )
-
-        constructor(
-            background: Color?,
-            onBackground: Color,
-            border: Color
-        ) : this(
-            background = background?.toArgb(),
-            onBackground = onBackground.toArgb(),
-            border = border.toArgb(),
-        )
-
-        constructor(
-            background: Color?,
-            onBackground: Color,
-            border: Color,
-            successBackgroundColor: Color = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
-            onSuccessBackgroundColor: Color = onBackground,
-        ) : this(
-            background = background?.toArgb(),
-            onBackground = onBackground.toArgb(),
-            border = border.toArgb(),
-            successBackgroundColor = successBackgroundColor.toArgb(),
-            onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
-        )
-
-        companion object {
-            val defaultLight = PrimaryButtonColors(
-                background = null,
-                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
-                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
-                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+        @Parcelize
+        data class Colors(
+            /**
+             * The background color of the primary button.
+             * Note: If 'null', {@link Colors#primary} is used.
+             */
+            @ColorInt
+            val background: Int?,
+            /**
+             * The color of the text and icon in the primary button.
+             */
+            @ColorInt
+            val onBackground: Int,
+            /**
+             * The border color of the primary button.
+             */
+            @ColorInt
+            val border: Int,
+            /**
+             * The background color for the primary button when in a success state. Defaults
+             * to base green background color.
+             */
+            @ColorInt
+            val successBackgroundColor: Int = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+            /**
+             * The success color for the primary button text when in a success state. Defaults
+             * to `onBackground`.
+             */
+            @ColorInt
+            val onSuccessBackgroundColor: Int = onBackground,
+        ) : Parcelable {
+            constructor(
+                background: Int?,
+                onBackground: Int,
+                border: Int
+            ) : this(
+                background = background,
+                onBackground = onBackground,
+                border = border,
+                successBackgroundColor = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR.toArgb(),
+                onSuccessBackgroundColor = onBackground,
             )
-            val defaultDark = PrimaryButtonColors(
-                background = null,
-                onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
-                border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
-                successBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
-                onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+
+            constructor(
+                background: Color?,
+                onBackground: Color,
+                border: Color
+            ) : this(
+                background = background?.toArgb(),
+                onBackground = onBackground.toArgb(),
+                border = border.toArgb(),
+            )
+
+            constructor(
+                background: Color?,
+                onBackground: Color,
+                border: Color,
+                successBackgroundColor: Color = PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR,
+                onSuccessBackgroundColor: Color = onBackground,
+            ) : this(
+                background = background?.toArgb(),
+                onBackground = onBackground.toArgb(),
+                border = border.toArgb(),
+                successBackgroundColor = successBackgroundColor.toArgb(),
+                onSuccessBackgroundColor = onSuccessBackgroundColor.toArgb(),
+            )
+
+            companion object {
+                val defaultLight = Colors(
+                    background = null,
+                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                    border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
+                    successBackgroundColor =
+                    StripeThemeDefaults.primaryButtonStyle.colorsLight.successBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
+                )
+                val defaultDark = Colors(
+                    background = null,
+                    onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                    border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),
+                    successBackgroundColor =
+                    StripeThemeDefaults.primaryButtonStyle.colorsDark.successBackground.toArgb(),
+                    onSuccessBackgroundColor = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
+                )
+            }
+        }
+
+        @Parcelize
+        data class Shape(
+            /**
+             * The corner radius of the primary button.
+             * Note: If 'null', {@link Shapes#cornerRadiusDp} is used.
+             */
+            val cornerRadiusDp: Float? = null,
+            /**
+             * The border width of the primary button.
+             * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
+             */
+            val borderStrokeWidthDp: Float? = null,
+            /**
+             * The height of the primary button.
+             * Note: If 'null', the default height is 48dp.
+             */
+            val heightDp: Float? = null
+        ) : Parcelable {
+            @Deprecated("Use @DimenRes constructor")
+            constructor(
+                context: Context,
+                cornerRadiusDp: Int? = null,
+                borderStrokeWidthDp: Int? = null
+            ) : this(
+                cornerRadiusDp = cornerRadiusDp?.let {
+                    context.getRawValueFromDimenResource(it)
+                },
+                borderStrokeWidthDp = borderStrokeWidthDp?.let {
+                    context.getRawValueFromDimenResource(it)
+                }
+            )
+
+            constructor(
+                context: Context,
+                @DimenRes cornerRadiusRes: Int? = null,
+                @DimenRes borderStrokeWidthRes: Int? = null,
+                @DimenRes heightRes: Int? = null
+            ) : this(
+                cornerRadiusDp = cornerRadiusRes?.let {
+                    context.getRawValueFromDimenResource(it)
+                },
+                borderStrokeWidthDp = borderStrokeWidthRes?.let {
+                    context.getRawValueFromDimenResource(it)
+                },
+                heightDp = heightRes?.let {
+                    context.getRawValueFromDimenResource(it)
+                }
             )
         }
-    }
 
-    @Parcelize
-    data class PrimaryButtonShape(
-        /**
-         * The corner radius of the primary button.
-         * Note: If 'null', {@link Shapes#cornerRadiusDp} is used.
-         */
-        val cornerRadiusDp: Float? = null,
-        /**
-         * The border width of the primary button.
-         * Note: If 'null', {@link Shapes#borderStrokeWidthDp} is used.
-         */
-        val borderStrokeWidthDp: Float? = null,
-        /**
-         * The height of the primary button.
-         * Note: If 'null', the default height is 48dp.
-         */
-        val heightDp: Float? = null
-    ) : Parcelable {
-        @Deprecated("Use @DimenRes constructor")
-        constructor(
-            context: Context,
-            cornerRadiusDp: Int? = null,
-            borderStrokeWidthDp: Int? = null
-        ) : this(
-            cornerRadiusDp = cornerRadiusDp?.let {
-                context.getRawValueFromDimenResource(it)
-            },
-            borderStrokeWidthDp = borderStrokeWidthDp?.let {
-                context.getRawValueFromDimenResource(it)
-            }
-        )
+        @Parcelize
+        data class Typography(
+            /**
+             * The font used in the primary button.
+             * Note: If 'null', Appearance.Typography.fontResId is used.
+             */
+            @FontRes
+            val fontResId: Int? = null,
 
-        constructor(
-            context: Context,
-            @DimenRes cornerRadiusRes: Int? = null,
-            @DimenRes borderStrokeWidthRes: Int? = null,
-            @DimenRes heightRes: Int? = null
-        ) : this(
-            cornerRadiusDp = cornerRadiusRes?.let {
-                context.getRawValueFromDimenResource(it)
-            },
-            borderStrokeWidthDp = borderStrokeWidthRes?.let {
-                context.getRawValueFromDimenResource(it)
-            },
-            heightDp = heightRes?.let {
-                context.getRawValueFromDimenResource(it)
-            }
-        )
-    }
-
-    @Parcelize
-    data class PrimaryButtonTypography(
-        /**
-         * The font used in the primary button.
-         * Note: If 'null', Appearance.Typography.fontResId is used.
-         */
-        @FontRes
-        val fontResId: Int? = null,
-
-        /**
-         * The font size in the primary button.
-         * Note: If 'null', {@link Typography#sizeScaleFactor} is used.
-         */
-        val fontSizeSp: Float? = null
-    ) : Parcelable {
-        constructor(
-            context: Context,
-            fontResId: Int? = null,
-            fontSizeSp: Int
-        ) : this(
-            fontResId = fontResId,
-            fontSizeSp = context.getRawValueFromDimenResource(fontSizeSp)
-        )
+            /**
+             * The font size in the primary button.
+             * Note: If 'null', {@link Typography#sizeScaleFactor} is used.
+             */
+            val fontSizeSp: Float? = null
+        ) : Parcelable {
+            constructor(
+                context: Context,
+                fontResId: Int? = null,
+                fontSizeSp: Int
+            ) : this(
+                fontResId = fontResId,
+                fontSizeSp = context.getRawValueFromDimenResource(fontSizeSp)
+            )
+        }
     }
 
     @Parcelize

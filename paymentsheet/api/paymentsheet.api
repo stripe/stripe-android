@@ -516,37 +516,29 @@ public final class com/stripe/android/elements/Appearance$PrimaryButton : androi
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;)V
-	public synthetic fun <init> (Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
-	public final fun component2 ()Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
-	public final fun component3 ()Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;
-	public final fun component4 ()Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;
-	public final fun copy (Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;)Lcom/stripe/android/elements/Appearance$PrimaryButton;
-	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButton;Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;ILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButton;
+	public fun <init> (Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;)V
+	public synthetic fun <init> (Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
+	public final fun component2 ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
+	public final fun component3 ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;
+	public final fun component4 ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;
+	public final fun copy (Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;)Lcom/stripe/android/elements/Appearance$PrimaryButton;
+	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButton;Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;ILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButton;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getColorsDark ()Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
-	public final fun getColorsLight ()Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
-	public final fun getShape ()Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;
-	public final fun getTypography ()Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;
+	public final fun getColorsDark ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
+	public final fun getColorsLight ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
+	public final fun getShape ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;
+	public final fun getTypography ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButton$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButton;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButton;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/elements/Appearance$PrimaryButtonColors : android/os/Parcelable {
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/elements/Appearance$PrimaryButtonColors$Companion;
+	public static final field Companion Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors$Companion;
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJJILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJJJLkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (Landroidx/compose/ui/graphics/Color;JJLkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -558,8 +550,8 @@ public final class com/stripe/android/elements/Appearance$PrimaryButtonColors : 
 	public final fun component3 ()I
 	public final fun component4 ()I
 	public final fun component5 ()I
-	public final fun copy (Ljava/lang/Integer;IIII)Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
-	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;Ljava/lang/Integer;IIIIILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
+	public final fun copy (Ljava/lang/Integer;IIII)Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
+	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;Ljava/lang/Integer;IIIIILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBackground ()Ljava/lang/Integer;
@@ -572,20 +564,28 @@ public final class com/stripe/android/elements/Appearance$PrimaryButtonColors : 
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButtonColors$Companion {
-	public final fun getDefaultDark ()Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
-	public final fun getDefaultLight ()Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Colors$Companion {
+	public final fun getDefaultDark ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
+	public final fun getDefaultLight ()Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButtonColors$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Colors$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButtonColors;
+	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButton$Colors;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButtonShape : android/os/Parcelable {
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButton;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButton;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Shape : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
@@ -598,8 +598,8 @@ public final class com/stripe/android/elements/Appearance$PrimaryButtonShape : a
 	public final fun component1 ()Ljava/lang/Float;
 	public final fun component2 ()Ljava/lang/Float;
 	public final fun component3 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;
-	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;
+	public final fun copy (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;
+	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBorderStrokeWidthDp ()Ljava/lang/Float;
@@ -610,15 +610,15 @@ public final class com/stripe/android/elements/Appearance$PrimaryButtonShape : a
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButtonShape$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Shape$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButtonShape;
+	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButton$Shape;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButtonTypography : android/os/Parcelable {
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Typography : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
@@ -628,8 +628,8 @@ public final class com/stripe/android/elements/Appearance$PrimaryButtonTypograph
 	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component2 ()Ljava/lang/Float;
-	public final fun copy (Ljava/lang/Integer;Ljava/lang/Float;)Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;
-	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;Ljava/lang/Integer;Ljava/lang/Float;ILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;
+	public final fun copy (Ljava/lang/Integer;Ljava/lang/Float;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;
+	public static synthetic fun copy$default (Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;Ljava/lang/Integer;Ljava/lang/Float;ILjava/lang/Object;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getFontResId ()Ljava/lang/Integer;
@@ -639,11 +639,11 @@ public final class com/stripe/android/elements/Appearance$PrimaryButtonTypograph
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
-public final class com/stripe/android/elements/Appearance$PrimaryButtonTypography$Creator : android/os/Parcelable$Creator {
+public final class com/stripe/android/elements/Appearance$PrimaryButton$Typography$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButtonTypography;
+	public final fun newArray (I)[Lcom/stripe/android/elements/Appearance$PrimaryButton$Typography;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
