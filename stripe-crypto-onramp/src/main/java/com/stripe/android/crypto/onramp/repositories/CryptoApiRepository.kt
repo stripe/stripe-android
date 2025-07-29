@@ -89,7 +89,7 @@ internal class CryptoApiRepository @Inject internal constructor(
         val request = apiRequestFactory.createPost(
             url = url,
             options = buildRequestOptions(),
-            params = paramsJson.toMap()
+            params = paramsJson.toMap(),
         )
 
         return runCatching {

@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
@@ -21,6 +22,7 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
+        OnrampModule::class
     ]
 )
 internal interface OnrampComponent {
@@ -30,6 +32,9 @@ internal interface OnrampComponent {
     interface Builder {
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
 
         @BindsInstance
         fun onRampCoordinatorViewModel(viewModel: OnrampCoordinatorViewModel): Builder

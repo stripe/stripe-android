@@ -66,9 +66,9 @@ internal class OnrampActivity : ComponentActivity() {
         onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
 
         val configuration = OnrampConfiguration(
-            publishableKey = "pk_test_your_key_here",
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
+
         onrampCoordinator.configure(configuration)
 
         setContent {
