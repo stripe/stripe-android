@@ -13,6 +13,9 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * A controller responsible for interacting with, and handling responses from, a [LinkController].
+ */
 internal class OnrampLinkController @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val lifecycleOwner: LifecycleOwner,
