@@ -507,11 +507,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
             hasCustomerConfiguration = configuration.customer != null,
         )
-        val hasUsedLink = linkStore.hasUsedLink()
+        val hasUsedLink = false // || linkStore.hasUsedLink()
 
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
+        val allowLinkDefaultOptIn = true || elementsSession.allowLinkDefaultOptIn
+        val disableSignup = !allowLinkDefaultOptIn && linkSignUpDisabled
+        val linkSignupMode = if (hasUsedLink || disableSignup) {
             null
-        } else if (isSaveForFutureUseValueChangeable) {
+        } else if (isSaveForFutureUseValueChangeable && allowLinkDefaultOptIn.not()) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse

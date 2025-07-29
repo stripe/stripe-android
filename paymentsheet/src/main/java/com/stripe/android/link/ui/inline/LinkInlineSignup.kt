@@ -101,6 +101,7 @@ internal fun LinkInlineSignup(
         expanded = viewState.isExpanded,
         requiresNameCollection = viewModel.requiresNameCollection,
         allowsDefaultOptIn = viewState.allowsDefaultOptIn,
+        linkSignUpOptInFeatureEnabled = viewState.linkSignUpOptInFeatureEnabled,
         didAskToChangeSignupDetails = viewState.didAskToChangeSignupDetails,
         errorMessage = errorMessage?.resolve(),
         toggleExpanded = viewModel::toggleExpanded,
@@ -122,6 +123,7 @@ internal fun LinkInlineSignup(
     expanded: Boolean,
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
+    linkSignUpOptInFeatureEnabled: Boolean,
     didAskToChangeSignupDetails: Boolean,
     errorMessage: String?,
     toggleExpanded: () -> Unit,
@@ -133,20 +135,20 @@ internal fun LinkInlineSignup(
     val bringFullSignUpIntoViewRequester = remember { BringIntoViewRequester() }
 
     LaunchedEffect(expanded) {
-        if (expanded && !allowsDefaultOptIn) {
+        if (expanded && !allowsDefaultOptIn && !linkSignUpOptInFeatureEnabled) {
             emailFocusRequester.requestFocus()
         }
     }
 
     val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
-    val shape = if (allowsDefaultOptIn) {
+    val shape = if (allowsDefaultOptIn || linkSignUpOptInFeatureEnabled) {
         // We render the content inline for default opt-in. A large corner radius would cut into the content.
         RectangleShape
     } else {
         MaterialTheme.stripeShapes.roundedCornerShape
     }
 
-    val boxModifier = if (allowsDefaultOptIn) {
+    val boxModifier = if (allowsDefaultOptIn || linkSignUpOptInFeatureEnabled) {
         modifier
     } else {
         modifier
@@ -183,24 +185,27 @@ internal fun LinkInlineSignup(
                 enabled = enabled,
                 contentAlpha = contentAlpha,
                 defaultOptIn = allowsDefaultOptIn,
+                linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
                 toggleExpanded = toggleExpanded
             )
 
-            LinkFields(
-                expanded = expanded,
-                enabled = enabled,
-                signUpState = signUpState,
-                requiresNameCollection = requiresNameCollection,
-                allowsDefaultOptIn = allowsDefaultOptIn,
-                didAskToChangeSignupDetails = didAskToChangeSignupDetails,
-                errorMessage = errorMessage,
-                sectionController = sectionController,
-                emailController = emailController,
-                phoneNumberController = phoneNumberController,
-                nameController = nameController,
-                emailFocusRequester = emailFocusRequester,
-                changeSignupDetails = changeSignupDetails,
-            )
+            if (linkSignUpOptInFeatureEnabled.not()) {
+                LinkFields(
+                    expanded = expanded,
+                    enabled = enabled,
+                    signUpState = signUpState,
+                    requiresNameCollection = requiresNameCollection,
+                    allowsDefaultOptIn = allowsDefaultOptIn,
+                    didAskToChangeSignupDetails = didAskToChangeSignupDetails,
+                    errorMessage = errorMessage,
+                    sectionController = sectionController,
+                    emailController = emailController,
+                    phoneNumberController = phoneNumberController,
+                    nameController = nameController,
+                    emailFocusRequester = emailFocusRequester,
+                    changeSignupDetails = changeSignupDetails,
+                )
+            }
         }
     }
 }
@@ -213,24 +218,27 @@ private fun LinkCheckbox(
     contentAlpha: Float,
     defaultOptIn: Boolean,
     toggleExpanded: () -> Unit,
+    linkSignUpOptInFeatureEnabled: Boolean,
 ) {
-    val label = if (defaultOptIn) {
+    val simplifiedCheckbox = linkSignUpOptInFeatureEnabled || defaultOptIn
+
+    val label = if (simplifiedCheckbox) {
         stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
     } else {
         stringResource(id = R.string.stripe_inline_sign_up_header)
     }
 
-    val sublabel = if (!defaultOptIn) {
+    val sublabel = if (!simplifiedCheckbox) {
         stringResource(R.string.stripe_sign_up_message, merchantName)
     } else {
         null
     }
 
     Row(
-        verticalAlignment = if (defaultOptIn) Alignment.CenterVertically else Alignment.Top,
+        verticalAlignment = if (simplifiedCheckbox) Alignment.CenterVertically else Alignment.Top,
         modifier = Modifier
             .clickable(enabled = enabled) { toggleExpanded() }
-            .padding(if (defaultOptIn) 0.dp else 16.dp)
+            .padding(if (simplifiedCheckbox) 0.dp else 16.dp)
     ) {
         Checkbox(
             checked = expanded,
@@ -391,6 +399,7 @@ private fun Preview() {
                 expanded = true,
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = false,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -416,6 +425,33 @@ private fun PreviewDOI() {
                 expanded = true,
                 requiresNameCollection = true,
                 allowsDefaultOptIn = true,
+                linkSignUpOptInFeatureEnabled = false,
+                didAskToChangeSignupDetails = false,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewSignInFeature() {
+    DefaultLinkTheme {
+        Surface {
+            LinkInlineSignup(
+                merchantName = "Example, Inc.",
+                sectionController = SectionController(null, emptyList()),
+                emailController = EmailConfig.createController(""),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+                nameController = NameConfig.createController("My Name"),
+                signUpState = InputtingRemainingFields,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = false,
+                allowsDefaultOptIn = false,
+                linkSignUpOptInFeatureEnabled = true,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},

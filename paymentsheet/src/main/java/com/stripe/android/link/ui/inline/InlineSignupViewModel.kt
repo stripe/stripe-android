@@ -225,11 +225,16 @@ internal class InlineSignupViewModel(
         name: String?
     ): UserInput? {
         val signUpMode = initialViewState.signupMode
+        val meetsPhoneNumberCriteria = initialViewState.linkSignUpOptInFeatureEnabled || phoneNumber != null
 
-        return if (email != null && phoneNumber != null && signUpMode != null) {
+        return if (email != null && meetsPhoneNumberCriteria && signUpMode != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
             val country = phoneController.getCountryCode()
-
+            logger.info(
+                "Mapping user input to UserInput.SignUp: " +
+                    "email=$email, phoneNumber=$phoneNumber, country=$country, name=$name, " +
+                    "isNameValid=$isNameValid"
+            )
             UserInput.SignUp(
                 email = email,
                 phone = phoneNumber,

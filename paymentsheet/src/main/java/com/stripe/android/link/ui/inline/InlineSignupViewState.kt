@@ -23,6 +23,7 @@ constructor(
     val fields: List<LinkSignupField>,
     val prefillEligibleFields: Set<LinkSignupField>,
     val allowsDefaultOptIn: Boolean,
+    val linkSignUpOptInFeatureEnabled: Boolean,
     val didAskToChangeSignupDetails: Boolean = false,
     internal val isExpanded: Boolean = false,
     internal val apiFailed: Boolean = false,
@@ -30,10 +31,10 @@ constructor(
 ) {
 
     val isShowingPhoneFirst: Boolean
-        get() = fields.first() == LinkSignupField.Phone
+        get() = fields.firstOrNull() == LinkSignupField.Phone
 
     val isShowingEmailFirst: Boolean
-        get() = fields.first() == LinkSignupField.Email
+        get() = fields.firstOrNull() == LinkSignupField.Email
 
     /**
      * Whether the view is active and the payment should be processed through Link.
@@ -103,6 +104,11 @@ constructor(
                 config.stripeIntent.countryCode == "US" &&
                 signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
 
+            val linkSignUpOptInFeatureEnabled = true
+//            val linkSignUpOptInFeatureEnabled = config.linkSignUpOptInFeatureEnabled &&
+//                !config.customerInfo.email.isNullOrBlank() &&
+//                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
+
             val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()
 
             val signupState = if (allowsDefaultOptIn && missingDataForDefaultOptIn) {
@@ -119,6 +125,7 @@ constructor(
                 prefillEligibleFields = prefillEligibleFields,
                 isExpanded = isExpanded || allowsDefaultOptIn,
                 allowsDefaultOptIn = allowsDefaultOptIn,
+                linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
                 signUpState = signupState,
             )
         }
