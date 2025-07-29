@@ -17,7 +17,7 @@ internal class CustomerSheetContract :
 
     override fun parseResult(resultCode: Int, intent: Intent?): InternalCustomerSheetResult {
         return InternalCustomerSheetResult.fromIntent(intent) ?: InternalCustomerSheetResult.Error(
-            IllegalArgumentException("Failed to retrieve a CustomerSheetResult")
+            IllegalArgumentException("Failed to retrieve a CustomerSheet.Result")
         )
     }
 

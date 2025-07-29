@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 internal sealed class InternalCustomerSheetResult : Parcelable {
     abstract fun toPublicResult(
         paymentOptionFactory: PaymentOptionFactory,
-    ): CustomerSheetResult
+    ): CustomerSheet.Result
 
     /**
      * The customer selected a payment method
@@ -24,8 +24,8 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
-        ): CustomerSheetResult {
-            return CustomerSheetResult.Selected(
+        ): CustomerSheet.Result {
+            return CustomerSheet.Result.Selected(
                 selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
             )
         }
@@ -40,8 +40,8 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
-        ): CustomerSheetResult {
-            return CustomerSheetResult.Canceled(
+        ): CustomerSheet.Result {
+            return CustomerSheet.Result.Canceled(
                 selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
             )
         }
@@ -56,8 +56,8 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
-        ): CustomerSheetResult {
-            return CustomerSheetResult.Failed(exception)
+        ): CustomerSheet.Result {
+            return CustomerSheet.Result.Failed(exception)
         }
     }
 

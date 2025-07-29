@@ -247,7 +247,7 @@ class CustomerSheetTest {
             CustomerAdapter.Result.success(null),
         paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
             CustomerAdapter.Result.success(listOf()),
-        test: (result: CustomerSheetResult) -> Unit,
+        test: (result: CustomerSheet.Result) -> Unit,
     ) {
         runTestActivityTest {
             val customerSheet = CustomerSheet.create(
@@ -293,12 +293,12 @@ class CustomerSheetTest {
         return this as PaymentOptionSelection.PaymentMethod
     }
 
-    private fun CustomerSheetResult.asSelected(): CustomerSheetResult.Selected {
-        return this as CustomerSheetResult.Selected
+    private fun CustomerSheet.Result.asSelected(): CustomerSheet.Result.Selected {
+        return this as CustomerSheet.Result.Selected
     }
 
-    private fun CustomerSheetResult.asFailed(): CustomerSheetResult.Failed {
-        return this as CustomerSheetResult.Failed
+    private fun CustomerSheet.Result.asFailed(): CustomerSheet.Result.Failed {
+        return this as CustomerSheet.Result.Failed
     }
 
     private class Scenario(

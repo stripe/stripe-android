@@ -27,7 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.customersheet.CustomerSheet.Result
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CustomerSessionApiPreview
@@ -655,11 +655,11 @@ internal class PaymentSheetPlaygroundActivity :
 
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
-    ): Result<PaymentOption?> = withContext(Dispatchers.IO) {
+    ): kotlin.Result<PaymentOption?> = withContext(Dispatchers.IO) {
         when (val result = customerSheet.retrievePaymentOptionSelection()) {
-            is CustomerSheetResult.Selected -> Result.success(result.selection?.paymentOption)
-            is CustomerSheetResult.Failed -> Result.failure(result.exception)
-            is CustomerSheetResult.Canceled -> Result.success(null)
+            is CustomerSheet.Result.Selected -> kotlin.Result.success(result.selection?.paymentOption)
+            is CustomerSheet.Result.Failed -> kotlin.Result.failure(result.exception)
+            is CustomerSheet.Result.Canceled -> kotlin.Result.success(null)
         }
     }
 

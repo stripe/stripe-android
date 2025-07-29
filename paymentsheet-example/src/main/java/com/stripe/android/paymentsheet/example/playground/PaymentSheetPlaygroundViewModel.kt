@@ -18,7 +18,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.address.AddressLauncher
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
@@ -279,8 +278,10 @@ internal class PaymentSheetPlaygroundViewModel(
                     .awaitModel(CreateSetupIntentResponse.serializer())
 
                 return when (apiResponse) {
-                    is Result.Failure -> kotlin.Result.failure(apiResponse.getException())
-                    is Result.Success -> kotlin.Result.success(apiResponse.value.clientSecret)
+                    is Result.Failure ->
+                        kotlin.Result.failure(apiResponse.getException())
+                    is Result.Success ->
+                        kotlin.Result.success(apiResponse.value.clientSecret)
                 }
             }
         }
@@ -468,19 +469,19 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onCustomerSheetCallback(result: CustomerSheetResult) {
+    fun onCustomerSheetCallback(result: CustomerSheet.Result) {
         val statusMessage = when (result) {
-            is CustomerSheetResult.Canceled -> {
+            is CustomerSheet.Result.Canceled -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 "Canceled"
             }
-            is CustomerSheetResult.Selected -> {
+            is CustomerSheet.Result.Selected -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 null
             }
-            is CustomerSheetResult.Failed -> "An error occurred: ${result.exception.message}"
+            is CustomerSheet.Result.Failed -> "An error occurred: ${result.exception.message}"
         }
 
         statusMessage?.let { message ->

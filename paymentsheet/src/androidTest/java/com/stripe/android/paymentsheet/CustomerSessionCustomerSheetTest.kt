@@ -8,7 +8,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.customersheet.CustomerSheet.Result
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -369,11 +369,11 @@ internal class CustomerSessionCustomerSheetTest {
     private fun verifySelected(
         expectedLast4: String,
         expectedBrand: CardBrand,
-        result: CustomerSheetResult
+        result: CustomerSheet.Result
     ) {
-        assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+        assertThat(result).isInstanceOf(CustomerSheet.Result.Selected::class.java)
 
-        val selected = result as CustomerSheetResult.Selected
+        val selected = result as CustomerSheet.Result.Selected
 
         assertThat(selected.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
 

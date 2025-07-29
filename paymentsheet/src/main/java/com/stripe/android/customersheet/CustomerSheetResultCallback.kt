@@ -5,5 +5,5 @@ package com.stripe.android.customersheet
  * selection, the sheet is canceled, or an error occurred.
  */
 fun interface CustomerSheetResultCallback {
-    fun onCustomerSheetResult(result: CustomerSheetResult)
+    fun onCustomerSheetResult(result: CustomerSheet.Result)
 }

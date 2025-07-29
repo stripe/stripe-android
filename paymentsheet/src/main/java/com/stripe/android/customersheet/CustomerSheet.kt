@@ -1,10 +1,12 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.core.app.ActivityOptionsCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -20,10 +22,12 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.AnimationConstants
+import com.stripe.android.view.ActivityStarter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -81,7 +85,7 @@ class CustomerSheet internal constructor(
     fun present() {
         val request = viewModel.configureRequest ?: run {
             callback.onCustomerSheetResult(
-                CustomerSheetResult.Failed(
+                Result.Failed(
                     IllegalStateException(
                         "Must call `configure` first before attempting to present `CustomerSheet`!"
                     )
@@ -121,8 +125,8 @@ class CustomerSheet internal constructor(
      * Retrieves the customer's saved payment option selection or null if the customer does not have
      * a persisted payment option selection.
      */
-    suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
-        val request = viewModel.configureRequest ?: return CustomerSheetResult.Failed(
+    suspend fun retrievePaymentOptionSelection(): Result {
+        val request = viewModel.configureRequest ?: return Result.Failed(
             IllegalStateException(
                 "Must call `configure` first before attempting to fetch the saved payment option!"
             )
@@ -151,9 +155,9 @@ class CustomerSheet internal constructor(
             }
 
             selection.fold(onSuccess = {
-                CustomerSheetResult.Selected(it)
+                Result.Selected(it)
             }, onFailure = { cause ->
-                CustomerSheetResult.Failed(cause)
+                Result.Failed(cause)
             })
         }
     }
@@ -421,8 +425,8 @@ class CustomerSheet internal constructor(
          * Creates an [IntentConfiguration] that is used when configuring the intent used when
          * displaying saved payment methods to a customer.
          */
-        open suspend fun intentConfiguration(): Result<IntentConfiguration> {
-            return Result.success(IntentConfiguration.Builder().build())
+        open suspend fun intentConfiguration(): kotlin.Result<IntentConfiguration> {
+            return kotlin.Result.success(IntentConfiguration.Builder().build())
         }
 
         /**
@@ -432,13 +436,13 @@ class CustomerSheet internal constructor(
          * @param customerId the Stripe identifier of the customer. This will be equivalent to
          *    the customer identifier passed through with the [CustomerSessionClientSecret].
          */
-        abstract suspend fun provideSetupIntentClientSecret(customerId: String): Result<String>
+        abstract suspend fun provideSetupIntentClientSecret(customerId: String): kotlin.Result<String>
 
         /**
          * Provides the [CustomerSessionClientSecret] that will be claimed and used to access a
          * customer's saved payment methods.
          */
-        abstract suspend fun providesCustomerSessionClientSecret(): Result<CustomerSessionClientSecret>
+        abstract suspend fun providesCustomerSessionClientSecret(): kotlin.Result<CustomerSessionClientSecret>
     }
 
     companion object {
@@ -448,7 +452,7 @@ class CustomerSheet internal constructor(
          *
          * @param activity The [ComponentActivity] that is presenting [CustomerSheet].
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
-         * @param callback called when a [CustomerSheetResult] is available.
+         * @param callback called when a [Result] is available.
          */
         @JvmStatic
         fun create(
@@ -472,7 +476,7 @@ class CustomerSheet internal constructor(
          *
          * @param activity The [ComponentActivity] that is presenting [CustomerSheet].
          * @param customerSessionProvider provider for providing customer session elements
-         * @param callback called when a [CustomerSheetResult] is available.
+         * @param callback called when a [Result] is available.
          */
         @CustomerSessionApiPreview
         @JvmStatic
@@ -497,7 +501,7 @@ class CustomerSheet internal constructor(
          *
          * @param fragment The [Fragment] that is presenting [CustomerSheet].
          * @param customerAdapter The bridge to communicate with your server to manage a customer.
-         * @param callback called when a [CustomerSheetResult] is available.
+         * @param callback called when a [Result] is available.
          */
         @JvmStatic
         fun create(
@@ -522,7 +526,7 @@ class CustomerSheet internal constructor(
          *
          * @param fragment The [Fragment] that is presenting [CustomerSheet].
          * @param customerSessionProvider provider for providing customer session elements
-         * @param callback called when a [CustomerSheetResult] is available.
+         * @param callback called when a [Result] is available.
          */
         @CustomerSessionApiPreview
         @JvmStatic
@@ -598,4 +602,60 @@ class CustomerSheet internal constructor(
             }
         }
     }
+
+    sealed class Result {
+        /**
+         * The customer selected a payment method
+         * @param selection the [PaymentOptionSelection] the customer selected from the [CustomerSheet]
+         */
+        class Selected internal constructor(
+            val selection: PaymentOptionSelection?
+        ) : Result()
+
+        /**
+         * The customer canceled the sheet
+         */
+        class Canceled internal constructor(
+            val selection: PaymentOptionSelection?
+        ) : Result()
+
+        /**
+         * An error occurred when presenting the sheet
+         */
+        class Failed internal constructor(
+            val exception: Throwable
+        ) : Result()
+
+        internal companion object {
+            private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
+        }
+
+        internal fun toBundle(): Bundle {
+            return bundleOf(EXTRA_RESULT to this)
+        }
+    }
+}
+
+/**
+ * The customer's payment option selection
+ * @param paymentOption, contains the drawable and label to display
+ */
+sealed class PaymentOptionSelection private constructor(
+    open val paymentOption: PaymentOption
+) {
+
+    /**
+     * A Stripe payment method was selected.
+     */
+    class PaymentMethod internal constructor(
+        val paymentMethod: com.stripe.android.model.PaymentMethod,
+        override val paymentOption: PaymentOption,
+    ) : PaymentOptionSelection(paymentOption)
+
+    /**
+     * Google Pay is the selected payment option.
+     */
+    class GooglePay internal constructor(
+        override val paymentOption: PaymentOption,
+    ) : PaymentOptionSelection(paymentOption)
 }
