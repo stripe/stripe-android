@@ -202,6 +202,7 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
         updateState { it.copy(currentLaunchMode = null) }
+        updateStateOnAccountUpdate(result.linkAccountUpdate)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
@@ -211,8 +212,6 @@ internal class LinkControllerViewModel @Inject constructor(
             else ->
                 logger.warning("$tag: unexpected result for launch mode: $currentLaunchMode")
         }
-
-        updateStateOnAccountUpdate(result.linkAccountUpdate)
     }
 
     private fun updateStateOnNewEmail(email: String?) {
