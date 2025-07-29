@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
 import androidx.navigation.NavHostController
+import com.stripe.android.elements.AddressDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.parcelize.Parcelize

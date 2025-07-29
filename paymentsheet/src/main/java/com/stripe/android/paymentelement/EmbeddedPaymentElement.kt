@@ -16,6 +16,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
@@ -39,7 +40,6 @@ import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDa
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter

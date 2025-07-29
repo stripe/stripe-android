@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.model
 
 import android.content.Context
 import com.stripe.android.elements.Address
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.elements.AddressDetails
 import javax.inject.Inject
 
 internal class PaymentOptionFactory @Inject constructor(

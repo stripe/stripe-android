@@ -13,6 +13,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
@@ -37,7 +38,6 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode

@@ -9,12 +9,12 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter

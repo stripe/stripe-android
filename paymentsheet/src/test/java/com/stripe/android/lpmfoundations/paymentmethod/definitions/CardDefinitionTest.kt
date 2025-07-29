@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -16,7 +17,6 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.elements.CardBillingAddressElement

@@ -4,11 +4,11 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.GooglePayConfiguration
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import kotlin.test.assertFailsWith
 

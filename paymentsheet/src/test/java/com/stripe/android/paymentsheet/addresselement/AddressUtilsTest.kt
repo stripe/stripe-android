@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

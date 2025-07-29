@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -39,7 +40,6 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings

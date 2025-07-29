@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
@@ -47,7 +48,6 @@ import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl

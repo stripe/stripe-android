@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.epms
 
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -8,7 +9,6 @@ import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory

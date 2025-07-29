@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.toIdentifierMap
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor

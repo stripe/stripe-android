@@ -1,5 +1,6 @@
 package com.stripe.android.common.model
 
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
@@ -8,7 +9,6 @@ import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object CommonConfigurationFactory {
     fun create(

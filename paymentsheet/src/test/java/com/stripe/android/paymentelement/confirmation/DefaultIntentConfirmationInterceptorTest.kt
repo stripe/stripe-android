@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
@@ -30,7 +31,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter

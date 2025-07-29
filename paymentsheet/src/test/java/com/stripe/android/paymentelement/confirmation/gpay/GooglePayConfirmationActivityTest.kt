@@ -15,6 +15,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
@@ -31,7 +32,6 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory

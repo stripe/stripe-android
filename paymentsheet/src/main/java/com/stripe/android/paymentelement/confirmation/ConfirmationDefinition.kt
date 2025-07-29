@@ -3,10 +3,10 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 

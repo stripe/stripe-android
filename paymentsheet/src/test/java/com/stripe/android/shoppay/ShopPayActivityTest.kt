@@ -15,6 +15,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -25,7 +26,6 @@ import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.ShopPayHandlers
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEShippingAddressData

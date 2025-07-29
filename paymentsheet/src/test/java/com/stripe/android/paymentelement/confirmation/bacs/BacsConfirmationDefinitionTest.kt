@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.bacs
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
@@ -17,7 +18,6 @@ import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult

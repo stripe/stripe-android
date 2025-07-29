@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
@@ -29,7 +30,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils

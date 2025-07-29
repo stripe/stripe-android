@@ -1,7 +1,6 @@
-package com.stripe.android.paymentsheet.addresselement
+package com.stripe.android.elements
 
 import android.os.Parcelable
-import com.stripe.android.elements.BillingDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.uicore.elements.IdentifierSpec

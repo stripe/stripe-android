@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview

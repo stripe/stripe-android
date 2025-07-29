@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
