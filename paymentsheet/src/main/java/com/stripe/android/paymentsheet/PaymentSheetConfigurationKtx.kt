@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.IconStyle
@@ -123,7 +124,7 @@ internal fun Appearance.parseAppearance() {
     }
 }
 
-internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>
+internal val WalletButtonsConfiguration.allowedWalletTypes: List<WalletType>
     get() = if (walletsToShow.isEmpty()) {
         WalletType.entries
     } else {

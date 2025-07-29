@@ -20,6 +20,7 @@ import com.stripe.android.elements.Address
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -1456,7 +1457,7 @@ internal class DefaultFlowControllerTest {
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("google_pay", "shop_pay")
                     )
@@ -1495,7 +1496,7 @@ internal class DefaultFlowControllerTest {
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("link", "shop_pay")
                     )
@@ -1534,7 +1535,7 @@ internal class DefaultFlowControllerTest {
                     )
                 )
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("link", "google_pay")
                     )

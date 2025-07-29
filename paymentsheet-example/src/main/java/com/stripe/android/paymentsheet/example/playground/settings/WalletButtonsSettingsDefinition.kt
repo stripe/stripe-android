@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -56,17 +57,17 @@ internal object WalletButtonsSettingsDefinition :
     ) {
         val configuration = when (value) {
             WalletButtonsPlaygroundType.Disabled -> {
-                PaymentSheet.WalletButtonsConfiguration(
+                WalletButtonsConfiguration(
                     willDisplayExternally = false
                 )
             }
             WalletButtonsPlaygroundType.Enabled -> {
-                PaymentSheet.WalletButtonsConfiguration(
+                WalletButtonsConfiguration(
                     willDisplayExternally = true
                 )
             }
             WalletButtonsPlaygroundType.EnabledWithOnlyLink -> {
-                PaymentSheet.WalletButtonsConfiguration(
+                WalletButtonsConfiguration(
                     willDisplayExternally = true,
                     walletsToShow = listOf("link")
                 )
