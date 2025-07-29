@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -29,7 +30,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -677,7 +677,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             name = getName(),
             phoneNumber = getPhone(),
             address = getAddress().run {
-                PaymentSheet.Address(
+                Address(
                     line1 = line1,
                     line2 = line2,
                     city = city,

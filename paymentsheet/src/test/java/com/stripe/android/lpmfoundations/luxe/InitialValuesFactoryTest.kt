@@ -6,13 +6,12 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 
 class InitialValuesFactoryTest {
     private val billingDetails = BillingDetails(
-        PaymentSheet.Address(
+        com.stripe.android.elements.Address(
             line1 = "123 Main Street",
             line2 = "APt 1",
             city = "Dublin",

@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
 
@@ -18,7 +17,7 @@ data class AddressDetails(
     /**
      * The customer's address
      */
-    val address: PaymentSheet.Address? = null,
+    val address: com.stripe.android.elements.Address? = null,
 
     /**
      * The customer's phone number, without formatting e.g. "5551234567"

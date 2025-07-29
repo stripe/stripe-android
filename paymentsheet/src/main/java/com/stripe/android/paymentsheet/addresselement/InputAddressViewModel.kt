@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.BillingDetails
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -148,7 +148,7 @@ internal class InputAddressViewModel @Inject constructor(
 
         return AddressDetails(
             name = formValues[IdentifierSpec.Name]?.value,
-            address = PaymentSheet.Address(
+            address = Address(
                 city = formValues[IdentifierSpec.City]?.value,
                 country = formValues[IdentifierSpec.Country]?.value,
                 line1 = formValues[IdentifierSpec.Line1]?.value,
@@ -168,7 +168,7 @@ internal class InputAddressViewModel @Inject constructor(
         dismissWithAddress(
             AddressDetails(
                 name = completedFormValues?.get(IdentifierSpec.Name)?.value,
-                address = PaymentSheet.Address(
+                address = Address(
                     city = completedFormValues?.get(IdentifierSpec.City)?.value,
                     country = completedFormValues?.get(IdentifierSpec.Country)?.value,
                     line1 = completedFormValues?.get(IdentifierSpec.Line1)?.value,

@@ -27,7 +27,6 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
@@ -468,7 +467,7 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
 
 internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): BillingDetails {
     return BillingDetails(
-        address = PaymentSheet.Address(
+        address = com.stripe.android.elements.Address(
             city = address?.city,
             country = address?.country,
             line1 = address?.line1,

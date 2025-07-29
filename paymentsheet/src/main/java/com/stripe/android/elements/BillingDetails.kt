@@ -1,7 +1,6 @@
 package com.stripe.android.elements
 
 import android.os.Parcelable
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -9,7 +8,7 @@ data class BillingDetails(
     /**
      * The customer's billing address.
      */
-    val address: PaymentSheet.Address? = null,
+    val address: Address? = null,
     /**
      * The customer's email.
      * The value set is displayed in the payment sheet as-is.
@@ -38,13 +37,13 @@ data class BillingDetails(
      * [BillingDetails] builder for cleaner object creation from Java.
      */
     class Builder {
-        private var address: PaymentSheet.Address? = null
+        private var address: Address? = null
         private var email: String? = null
         private var name: String? = null
         private var phone: String? = null
 
-        fun address(address: PaymentSheet.Address?) = apply { this.address = address }
-        fun address(addressBuilder: PaymentSheet.Address.Builder) =
+        fun address(address: Address?) = apply { this.address = address }
+        fun address(addressBuilder: Address.Builder) =
             apply { this.address = addressBuilder.build() }
 
         fun email(email: String?) = apply { this.email = email }

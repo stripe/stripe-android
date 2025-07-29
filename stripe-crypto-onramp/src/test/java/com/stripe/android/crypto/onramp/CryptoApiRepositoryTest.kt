@@ -10,7 +10,7 @@ import com.stripe.android.crypto.onramp.model.DateOfBirth
 import com.stripe.android.crypto.onramp.model.IdType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -93,7 +93,7 @@ class CryptoApiRepositoryTest {
                     idNumber = "999-88-7777",
                     idType = IdType.SOCIAL_SECURITY_NUMBER,
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
-                    address = PaymentSheet.Address(city = "Orlando", state = "FL"),
+                    address = Address(city = "Orlando", state = "FL"),
                     nationalities = listOf("TestNationality"),
                     birthCountry = "US",
                     birthCity = "Chicago"

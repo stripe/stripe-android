@@ -16,6 +16,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
@@ -586,7 +587,7 @@ internal class PaymentSheetViewModelTest {
     fun `checkout() with shipping should confirm new payment methods`() = confirmationTest {
         val stripeIntent = PAYMENT_INTENT
         val shippingAddress = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 country = "US"
             ),
             name = "Test Name"

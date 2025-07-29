@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.addresselement
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Address
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -29,7 +29,7 @@ class AddressFormControllerTest {
         ),
         launcherConfig = AddressLauncher.Configuration(
             address = AddressDetails(
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Apple Street",
                 )
             )

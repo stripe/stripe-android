@@ -6,6 +6,7 @@ import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
@@ -1029,9 +1030,9 @@ internal class PaymentMethodMetadataTest {
     fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
         val defaultBillingDetails = BillingDetails(
-            address = PaymentSheet.Address(line1 = "123 Apple Street")
+            address = Address(line1 = "123 Apple Street")
         )
-        val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
+        val shippingDetails = AddressDetails(address = Address(line1 = "123 Pear Street"))
         val cardBrandAcceptance = CardBrandAcceptance.allowed(
             listOf(CardBrandAcceptance.BrandCategory.Amex)
         )
@@ -1162,7 +1163,7 @@ internal class PaymentMethodMetadataTest {
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
         val defaultBillingDetails = BillingDetails(
-            address = PaymentSheet.Address(line1 = "123 Apple Street")
+            address = Address(line1 = "123 Apple Street")
         )
         val cardBrandAcceptance = CardBrandAcceptance.allowed(
             listOf(CardBrandAcceptance.BrandCategory.Amex)

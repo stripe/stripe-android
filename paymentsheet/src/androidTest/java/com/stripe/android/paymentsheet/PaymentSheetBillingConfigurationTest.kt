@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
@@ -79,7 +80,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             postalCode = "94111",
                             country = "US",
                         ),
@@ -156,7 +157,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             postalCode = "94111",
                             country = "US",
                         ),
@@ -218,7 +219,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
-                        address = PaymentSheet.Address(
+                        address = Address(
                             postalCode = "94111",
                             country = "US",
                             state = "CA",
@@ -278,7 +279,7 @@ internal class PaymentSheetBillingConfigurationTest {
                     name = "Jenny Rosen",
                     email = "foo@bar.com",
                     phone = "+13105551234",
-                    address = PaymentSheet.Address(
+                    address = Address(
                         postalCode = "94111",
                         country = "US",
                         state = "CA",

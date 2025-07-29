@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
@@ -268,7 +269,7 @@ internal object PaymentSheetFixtures {
             PaymentMethod.Type.Bancontact.code,
             merchantName = "Merchant, Inc.",
             billingDetails = BillingDetails(
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = null,
                     city = "San Francisco",

@@ -16,7 +16,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -141,7 +140,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
             AddressDetails(
                 name = "Jenny Rosen",
                 phoneNumber = "+15555555555",
-                address = PaymentSheet.Address(
+                address = com.stripe.android.elements.Address(
                     line1 = "123 Main St",
                     line2 = null,
                     city = "San Francisco",
@@ -173,7 +172,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
             name = "Jenny Rosen",
             email = "foo@bar.com",
             phone = "+13105551234",
-            address = PaymentSheet.Address(
+            address = com.stripe.android.elements.Address(
                 postalCode = "94111",
                 country = "US",
             ),

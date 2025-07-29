@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.DaggerAutocompleteViewModelFactoryComponent
@@ -119,7 +119,7 @@ internal class AutocompleteViewModel @Inject constructor(
                     _event.emit(
                         Event.GoBack(
                             addressDetails = AddressDetails(
-                                address = PaymentSheet.Address(
+                                address = Address(
                                     city = address.city,
                                     country = address.country,
                                     line1 = address.line1,
@@ -151,7 +151,7 @@ internal class AutocompleteViewModel @Inject constructor(
                 Event.EnterManually(
                     if (queryFlow.value.isNotBlank()) {
                         AddressDetails(
-                            address = PaymentSheet.Address(
+                            address = Address(
                                 line1 = queryFlow.value,
                             )
                         )

@@ -5,7 +5,7 @@ import android.text.SpannableString
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -105,7 +105,7 @@ class AutocompleteViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.GoBack(
                     addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
+                        address = Address(
                             city = "South San Francisco",
                             country = "US",
                             line1 = "123 King Street",
@@ -169,7 +169,7 @@ class AutocompleteViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 AutocompleteViewModel.Event.EnterManually(
                     addressDetails = AddressDetails(
-                        address = PaymentSheet.Address(
+                        address = Address(
                             line1 = "Some query"
                         )
                     )

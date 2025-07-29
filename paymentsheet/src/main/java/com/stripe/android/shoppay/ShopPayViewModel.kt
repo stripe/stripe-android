@@ -24,7 +24,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
@@ -124,7 +123,7 @@ internal class ShopPayViewModel @Inject constructor(
                     AddressDetails(
                         name = shippingAddressData.name,
                         address = shippingAddressData.address?.let { address ->
-                            PaymentSheet.Address(
+                            com.stripe.android.elements.Address(
                                 city = address.city,
                                 country = address.country,
                                 line1 = address.line1,

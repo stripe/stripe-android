@@ -12,7 +12,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.runner.RunWith
@@ -281,7 +280,7 @@ class PaymentOptionFactoryTest {
 
         assertThat(paymentOption.billingDetails).isEqualTo(
             BillingDetails(
-                address = PaymentSheet.Address(
+                address = com.stripe.android.elements.Address(
                     city = null,
                     country = null,
                     line1 = null,
@@ -324,7 +323,7 @@ class PaymentOptionFactoryTest {
         )
 
         val PAYMENT_SHEET_BILLING_DETAILS = BillingDetails(
-            address = PaymentSheet.Address(
+            address = com.stripe.android.elements.Address(
                 city = "San Francisco",
                 country = "US",
                 line1 = "123 Main St",
