@@ -46,6 +46,8 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
     private val _configurationFlow =
         MutableSharedFlow<LinkController.Configuration>(replay = 1)
 
+    private var linkControllerState: LinkController.State? = null
+
     /**
      * A flow that receives the built configuration model when `[configure]` is called.
      */
@@ -56,7 +58,7 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
      *
      * @param configuration The OnrampConfiguration to apply.
      */
-    internal fun configure(configuration: OnrampConfiguration) {
+    fun configure(configuration: OnrampConfiguration) {
         onRampConfiguration = configuration
 
         viewModelScope.launch {
@@ -66,7 +68,7 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal fun onLinkControllerConfigureResult(result: LinkController.ConfigureResult) {
+    fun onLinkControllerConfigureResult(result: LinkController.ConfigureResult) {
         when (result) {
             is LinkController.ConfigureResult.Success ->
                 onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Completed(true))
@@ -75,7 +77,11 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
+    fun onLinkControllerState(state: LinkController.State) {
+        linkControllerState = state
+    }
+
+    fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
         when (result) {
             is LinkController.LookupConsumerResult.Success ->
                 onrampCallbacks.linkLookupCallback.onResult(
@@ -88,11 +94,11 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal fun handleAuthenticationResult(result: LinkController.AuthenticationResult, secret: String?) {
+    fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
         when (result) {
             is LinkController.AuthenticationResult.Success ->
                 viewModelScope.launch {
-                    secret?.let {
+                    linkControllerState?.internalLinkAccount?.consumerSessionClientSecret?.let { secret ->
                         val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions(secret)
 
                         permissionsResult.fold(
@@ -124,11 +130,11 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult, secret: String?) {
+    fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
         when (result) {
             is LinkController.RegisterConsumerResult.Success ->
                 viewModelScope.launch {
-                    secret?.let {
+                    linkControllerState?.internalLinkAccount?.consumerSessionClientSecret?.let { secret ->
                         val permissionsResult = cryptoApiRepository.grantPartnerMerchantPermissions(secret)
 
                         permissionsResult.fold(
@@ -156,7 +162,7 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         }
     }
 
-    internal class Factory(
+    class Factory(
         private val onrampCallbacks: OnrampCallbacks
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")

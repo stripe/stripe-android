@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp
 
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -17,30 +16,20 @@ import javax.inject.Inject
  * A controller responsible for interacting with, and handling responses from, a [LinkController].
  */
 internal class OnrampLinkController @Inject constructor(
+    private val activity: ComponentActivity,
     private val viewModel: OnrampCoordinatorViewModel,
-    private val lifecycleOwner: LifecycleOwner,
-    private val activityResultRegistryOwner: ActivityResultRegistryOwner
+    private val lifecycleOwner: LifecycleOwner
 ) {
     private val linkController: LinkController by lazy {
-        // Resolve the hosting activity, fail fast if incorrect type
-        val activity: ComponentActivity =
-            (activityResultRegistryOwner as? ComponentActivity)
-                ?: throw IllegalStateException(
-                    "Expected a ComponentActivity, got ${activityResultRegistryOwner::class}"
-                )
-
         LinkController.create(
             activity = activity,
             presentPaymentMethodsCallback = { /* No-op for now */ },
             lookupConsumerCallback = viewModel::handleConsumerLookupResult,
             createPaymentMethodCallback = { /* No-op for now */ },
-            authenticationCallback = ::handleAuthenticationResult,
-            registerConsumerCallback = ::handleRegisterNewUserResult,
+            authenticationCallback = viewModel::handleAuthenticationResult,
+            registerConsumerCallback = viewModel::handleRegisterNewUserResult,
         )
     }
-
-    private val sessionClientSecret: String?
-        get() = linkController.state.value.internalLinkAccount?.consumerSessionClientSecret
 
     init {
         check(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.INITIALIZED))
@@ -50,6 +39,11 @@ internal class OnrampLinkController @Inject constructor(
                 launch {
                     viewModel.configurationFlow
                         .collect(::configureLinkController)
+                }
+
+                launch {
+                    linkController.state
+                        .collect(viewModel::onLinkControllerState)
                 }
             }
         }
@@ -77,13 +71,5 @@ internal class OnrampLinkController @Inject constructor(
             name = info.fullName,
             consentAction = ConsumerSignUpConsentAction.Implied
         )
-    }
-
-    private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {
-        viewModel.handleAuthenticationResult(result, sessionClientSecret)
-    }
-
-    private fun handleRegisterNewUserResult(result: LinkController.RegisterConsumerResult) {
-        viewModel.handleRegisterNewUserResult(result, sessionClientSecret)
     }
 }
