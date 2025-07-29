@@ -43,10 +43,12 @@ internal data class WalletsState(
             isSetupIntent: Boolean
         ): WalletsState? {
             val link = if (isLinkAvailable == true) {
+                // non-ECE link buttons don't support default payment details.
                 Link(
                     state = LinkButtonState.create(
                         linkEmail = linkEmail,
-                        paymentDetails = null
+                        paymentDetails = null,
+                        enableDefaultValues = false
                     )
                 )
             } else {

@@ -155,8 +155,10 @@ internal class DefaultWalletButtonsInteractor(
                         walletsAllowedByMerchant.contains(WalletType.GooglePay)
                     }
                     WalletType.Link -> {
+                        val linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration
                         WalletButton.Link(
                             state = LinkButtonState.create(
+                                enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
                                 linkEmail = arguments.linkEmail,
                                 paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
                             )
