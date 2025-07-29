@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
