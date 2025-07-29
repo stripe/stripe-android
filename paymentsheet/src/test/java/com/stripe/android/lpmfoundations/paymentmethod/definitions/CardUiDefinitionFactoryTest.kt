@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.elements.Appearance
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -352,8 +353,8 @@ class CardUiDefinitionFactoryTest {
 
     @OptIn(AppearanceAPIAdditionsPreview::class)
     private data object CustomSpacingAppearance : PaparazziConfigOption {
-        private val appearance = PaymentSheet.Appearance.Builder()
-            .sectionSpacing(PaymentSheet.Spacing(spacingDp = 50f))
+        private val appearance = Appearance.Builder()
+            .sectionSpacing(Appearance.Spacing(spacingDp = 50f))
             .build()
 
         override fun initialize() {
@@ -367,9 +368,9 @@ class CardUiDefinitionFactoryTest {
 
     @OptIn(AppearanceAPIAdditionsPreview::class)
     private data object CustomTextInsetsAppearance : PaparazziConfigOption {
-        private val appearance = PaymentSheet.Appearance.Builder()
+        private val appearance = Appearance.Builder()
             .textFieldInsets(
-                PaymentSheet.Insets(
+                Appearance.Insets(
                     startDp = 24f,
                     endDp = 20f,
                     topDp = 28f,

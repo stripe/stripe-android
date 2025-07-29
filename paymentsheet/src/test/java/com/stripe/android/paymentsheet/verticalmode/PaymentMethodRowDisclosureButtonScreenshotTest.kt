@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -98,7 +98,7 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
             )
             .build()
         testPaymentMethodRowButton_Disclosure(
-            appearance = PaymentSheet.Appearance.Embedded(style),
+            appearance = Appearance.Embedded(style),
             trailingContent = {
                 Text("View more")
             },
@@ -133,10 +133,10 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_Disclosure(
-            appearance = PaymentSheet.Appearance.Embedded.Builder()
+            appearance = Appearance.Embedded.Builder()
                 .rowStyle(FlatWithDisclosure.default)
                 .paymentMethodIconMargins(
-                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                    Appearance.Insets(10f, 10f, 10f, 10f)
                 )
                 .build()
         )
@@ -147,10 +147,10 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
     fun testFonts() {
         testPaymentMethodRowButton_Disclosure(
             subtitle = "this is a subtitle",
-            appearance = PaymentSheet.Appearance.Embedded.Builder()
+            appearance = Appearance.Embedded.Builder()
                 .rowStyle(FlatWithDisclosure.default)
                 .titleFont(
-                    PaymentSheet.Typography.Font(
+                    Appearance.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 20f,
                         fontWeight = 500,
@@ -158,7 +158,7 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
                     )
                 )
                 .subtitleFont(
-                    PaymentSheet.Typography.Font(
+                    Appearance.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 12f,
                         fontWeight = 200,
@@ -173,7 +173,7 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
     @Test
     fun testDisclosureIcon() {
         testPaymentMethodRowButton_Disclosure(
-            appearance = PaymentSheet.Appearance.Embedded.Builder()
+            appearance = Appearance.Embedded.Builder()
                 .rowStyle(
                     rowStyle = FlatWithDisclosure.Builder()
                         .disclosureIconRes(com.stripe.android.paymentsheet.R.drawable.stripe_ic_paymentsheet_add_dark)
@@ -189,7 +189,7 @@ internal class PaymentMethodRowDisclosureButtonScreenshotTest {
         iconContent: @Composable RowScope.() -> Unit = {
             DefaultPaymentMethodRowIcon()
         },
-        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithDisclosure.default),
+        appearance: Appearance.Embedded = Appearance.Embedded(FlatWithDisclosure.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,

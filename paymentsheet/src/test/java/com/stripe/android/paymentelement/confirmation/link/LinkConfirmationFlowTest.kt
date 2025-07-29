@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.link
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.TestFactory
@@ -11,7 +12,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator.Parameters
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -146,7 +146,7 @@ class LinkConfirmationFlowTest {
             ),
             shippingDetails = null,
             intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance()
+            appearance = Appearance()
         )
 
         private val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(

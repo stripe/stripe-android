@@ -14,6 +14,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -172,7 +173,7 @@ class CustomerSheet internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
          */
-        val appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance,
+        val appearance: Appearance = ConfigurationDefaults.appearance,
 
         /**
          * Whether [CustomerSheet] displays Google Pay as a payment option.
@@ -248,7 +249,7 @@ class CustomerSheet internal constructor(
         }
 
         class Builder internal constructor(private val merchantDisplayName: String) {
-            private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
+            private var appearance: Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
             private var headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen
             private var defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails
@@ -260,7 +261,7 @@ class CustomerSheet internal constructor(
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
-            fun appearance(appearance: PaymentSheet.Appearance) = apply {
+            fun appearance(appearance: Appearance) = apply {
                 this.appearance = appearance
             }
 

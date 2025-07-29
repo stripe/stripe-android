@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.data.CustomerSheetSession
+import com.stripe.android.elements.Appearance
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
@@ -26,25 +27,25 @@ internal object CustomerSheetFixtures {
         .defaultBillingDetails(PaymentSheet.BillingDetails(name = "Skyler"))
         .headerTextForSelectionScreen("Select a payment method!")
         .appearance(
-            PaymentSheet.Appearance(
-                colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color(0)),
-                colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color(0)),
-                shapes = PaymentSheet.Shapes(
+            Appearance(
+                colorsLight = Appearance.Colors.configureDefaultLight(primary = Color(0)),
+                colorsDark = Appearance.Colors.configureDefaultDark(primary = Color(0)),
+                shapes = Appearance.Shapes(
                     cornerRadiusDp = 0.0f,
                     borderStrokeWidthDp = 0.0f
                 ),
-                typography = PaymentSheet.Typography(
+                typography = Appearance.Typography(
                     sizeScaleFactor = 1.1f,
                     fontResId = 0
                 ),
-                primaryButton = PaymentSheet.PrimaryButton(
-                    colorsLight = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                    colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                    shape = PaymentSheet.PrimaryButtonShape(
+                primaryButton = Appearance.PrimaryButton(
+                    colorsLight = Appearance.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                    colorsDark = Appearance.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                    shape = Appearance.PrimaryButtonShape(
                         cornerRadiusDp = 0.0f,
                         borderStrokeWidthDp = 20.0f
                     ),
-                    typography = PaymentSheet.PrimaryButtonTypography(
+                    typography = Appearance.PrimaryButtonTypography(
                         fontResId = 0
                     )
                 )

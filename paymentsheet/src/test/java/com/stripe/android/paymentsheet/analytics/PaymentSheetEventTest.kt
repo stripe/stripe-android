@@ -5,6 +5,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
@@ -295,9 +296,9 @@ class PaymentSheetEventTest {
     fun `Init event with embedded appearance should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
             .appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                Appearance(
+                    embeddedAppearance = Appearance.Embedded(
+                        style = Appearance.Embedded.RowStyle.FlatWithCheckmark.default
                     )
                 )
             )
@@ -355,9 +356,9 @@ class PaymentSheetEventTest {
     fun `Init event with embedded should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
             .appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                Appearance(
+                    embeddedAppearance = Appearance.Embedded(
+                        style = Appearance.Embedded.RowStyle.FlatWithCheckmark.default
                     )
                 )
             )
@@ -415,9 +416,9 @@ class PaymentSheetEventTest {
     fun `Init event with embedded immediateRowSelectionBehavior should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
             .appearance(
-                PaymentSheet.Appearance(
-                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                Appearance(
+                    embeddedAppearance = Appearance.Embedded(
+                        style = Appearance.Embedded.RowStyle.FlatWithCheckmark.default
                     )
                 )
             )

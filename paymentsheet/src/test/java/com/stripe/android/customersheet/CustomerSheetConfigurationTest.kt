@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import junit.framework.TestCase.fail
@@ -14,8 +15,8 @@ class CustomerSheetConfigurationTest {
     fun `Builder returns a configuration`() {
         val googlePayEnabled = true
         val merchantDisplayName = "Test"
-        val appearance = PaymentSheet.Appearance.Builder()
-            .typography(PaymentSheet.Typography.default)
+        val appearance = Appearance.Builder()
+            .typography(Appearance.Typography.default)
             .build()
         val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always

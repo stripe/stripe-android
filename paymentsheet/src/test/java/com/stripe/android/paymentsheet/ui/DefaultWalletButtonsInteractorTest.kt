@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfigurationFactory
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -707,7 +708,7 @@ class DefaultWalletButtonsInteractorTest {
         availableWallets: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
         allowedWalletTypes: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
         linkEmail: String? = null,
-        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        appearance: Appearance = Appearance(),
         googlePay: PaymentSheet.GooglePayConfiguration? = null,
         linkState: LinkState? = null,
         cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),

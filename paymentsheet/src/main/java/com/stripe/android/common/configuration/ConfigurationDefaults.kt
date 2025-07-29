@@ -1,6 +1,7 @@
 package com.stripe.android.common.configuration
 
 import android.content.res.ColorStateList
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
@@ -12,7 +13,7 @@ internal object ConfigurationDefaults {
     const val allowsDelayedPaymentMethods: Boolean = false
     const val allowsPaymentMethodsRequiringShippingAddress: Boolean = false
     const val allowsRemovalOfLastSavedPaymentMethod: Boolean = true
-    val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+    val appearance: Appearance = Appearance()
     val billingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration()

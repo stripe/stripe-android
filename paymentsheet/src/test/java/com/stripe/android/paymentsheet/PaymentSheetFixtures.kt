@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
@@ -66,25 +67,25 @@ internal object PaymentSheetFixtures {
         allowsPaymentMethodsRequiringShippingAddress = true,
         allowsRemovalOfLastSavedPaymentMethod = false,
         paymentMethodOrder = listOf("klarna", "afterpay", "card"),
-        appearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color(0)),
-            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = Color(0)),
-            shapes = PaymentSheet.Shapes(
+        appearance = Appearance(
+            colorsLight = Appearance.Colors.configureDefaultLight(primary = Color(0)),
+            colorsDark = Appearance.Colors.configureDefaultDark(primary = Color(0)),
+            shapes = Appearance.Shapes(
                 cornerRadiusDp = 0.0f,
                 borderStrokeWidthDp = 0.0f
             ),
-            typography = PaymentSheet.Typography(
+            typography = Appearance.Typography(
                 sizeScaleFactor = 1.1f,
                 fontResId = 0
             ),
-            primaryButton = PaymentSheet.PrimaryButton(
-                colorsLight = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
-                shape = PaymentSheet.PrimaryButtonShape(
+            primaryButton = Appearance.PrimaryButton(
+                colorsLight = Appearance.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                colorsDark = Appearance.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                shape = Appearance.PrimaryButtonShape(
                     cornerRadiusDp = 0.0f,
                     borderStrokeWidthDp = 20.0f
                 ),
-                typography = PaymentSheet.PrimaryButtonTypography(
+                typography = Appearance.PrimaryButtonTypography(
                     fontResId = 0
                 )
             )

@@ -17,9 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.screenshottesting.FontSize
@@ -112,7 +112,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             trailingContent = {
                 TrailingContent()
             },
-            appearance = PaymentSheet.Appearance.Embedded(style),
+            appearance = Appearance.Embedded(style),
         )
     }
 
@@ -144,10 +144,10 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
     @Test
     fun testIconMargins() {
         testPaymentMethodRowButton_RadioButton(
-            appearance = PaymentSheet.Appearance.Embedded.Builder()
+            appearance = Appearance.Embedded.Builder()
                 .rowStyle(FlatWithRadio.default)
                 .paymentMethodIconMargins(
-                    PaymentSheet.Insets(10f, 10f, 10f, 10f)
+                    Appearance.Insets(10f, 10f, 10f, 10f)
                 )
                 .build()
         )
@@ -158,10 +158,10 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
     fun testFonts() {
         testPaymentMethodRowButton_RadioButton(
             subtitle = "this is a subtitle",
-            appearance = PaymentSheet.Appearance.Embedded.Builder()
+            appearance = Appearance.Embedded.Builder()
                 .rowStyle(FlatWithRadio.default)
                 .titleFont(
-                    PaymentSheet.Typography.Font(
+                    Appearance.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 20f,
                         fontWeight = 500,
@@ -169,7 +169,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                     )
                 )
                 .subtitleFont(
-                    PaymentSheet.Typography.Font(
+                    Appearance.Typography.Font(
                         fontFamily = com.stripe.android.paymentsheet.R.font.cursive,
                         fontSizeSp = 12f,
                         fontWeight = 200,
@@ -204,7 +204,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
         isEnabled: Boolean = true,
         isSelected: Boolean = false,
         iconContent: @Composable RowScope.() -> Unit = { DefaultPaymentMethodRowIcon() },
-        appearance: PaymentSheet.Appearance.Embedded = PaymentSheet.Appearance.Embedded(FlatWithRadio.default),
+        appearance: Appearance.Embedded = Appearance.Embedded(FlatWithRadio.default),
         trailingContent: @Composable RowScope.() -> Unit = {},
         title: String = "**** 4242",
         subtitle: String? = null,

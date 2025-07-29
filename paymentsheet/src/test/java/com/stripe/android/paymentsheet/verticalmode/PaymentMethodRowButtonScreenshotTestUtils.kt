@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
@@ -31,7 +31,7 @@ internal fun testPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     iconContent: @Composable RowScope.() -> Unit,
-    appearance: PaymentSheet.Appearance.Embedded,
+    appearance: Appearance.Embedded,
     trailingContent: @Composable RowScope.() -> Unit,
     title: String,
     subtitle: String?,

@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
@@ -81,7 +82,7 @@ class AddressLauncher internal constructor(
     /** Configuration for [AddressLauncher] **/
     @Parcelize
     data class Configuration internal constructor(
-        val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        val appearance: Appearance = Appearance(),
         val address: AddressDetails? = null,
         val allowedCountries: Set<String> = emptySet(),
         val buttonTitle: String? = null,
@@ -96,7 +97,7 @@ class AddressLauncher internal constructor(
             /**
              * Configuration for the look and feel of the UI
              */
-            appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+            appearance: Appearance = Appearance(),
 
             /**
              * The values to pre-populate shipping address fields with.
@@ -153,7 +154,7 @@ class AddressLauncher internal constructor(
          * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder {
-            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var appearance: Appearance = Appearance()
             private var address: AddressDetails? = null
             private var allowedCountries: Set<String> = emptySet()
             private var buttonTitle: String? = null
@@ -163,7 +164,7 @@ class AddressLauncher internal constructor(
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
             private var billingAddress: PaymentSheet.BillingDetails? = null
 
-            fun appearance(appearance: PaymentSheet.Appearance) =
+            fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
             fun address(address: AddressDetails?) =

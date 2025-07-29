@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.stripe.android.elements.Appearance
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.FormInsets
@@ -19,8 +20,9 @@ import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 
+@Suppress("LongMethod")
 @OptIn(AppearanceAPIAdditionsPreview::class)
-internal fun PaymentSheet.Appearance.parseAppearance() {
+internal fun Appearance.parseAppearance() {
     StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(
         component = Color(colorsLight.component),
         componentBorder = Color(colorsLight.componentBorder),
@@ -116,8 +118,8 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     )
 
     StripeTheme.iconStyle = when (iconStyle) {
-        PaymentSheet.IconStyle.Filled -> IconStyle.Filled
-        PaymentSheet.IconStyle.Outlined -> IconStyle.Outlined
+        Appearance.IconStyle.Filled -> IconStyle.Filled
+        Appearance.IconStyle.Outlined -> IconStyle.Outlined
     }
 }
 
@@ -131,7 +133,7 @@ internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<Wa
     }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
-internal fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
+internal fun Appearance.Typography.Font.toTextStyle(): TextStyle {
     return TextStyle(
         fontSize = fontSizeSp?.sp ?: TextUnit.Unspecified,
         fontWeight = fontWeight?.let { FontWeight(it) },

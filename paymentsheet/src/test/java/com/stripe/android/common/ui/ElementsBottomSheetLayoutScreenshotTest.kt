@@ -6,8 +6,8 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -48,13 +48,13 @@ class ElementsBottomSheetLayoutScreenshotTest {
         }
     }
 
-    private enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
-        DefaultAppearance(appearance = PaymentSheet.Appearance()),
+    private enum class PaymentSheetAppearance(val appearance: Appearance) : PaparazziConfigOption {
+        DefaultAppearance(appearance = Appearance()),
 
         @OptIn(AppearanceAPIAdditionsPreview::class)
         AppearanceWithCustomRadiusForBottomSheet(
-            appearance = PaymentSheet.Appearance(
-                shapes = PaymentSheet.Shapes(
+            appearance = Appearance(
+                shapes = Appearance.Shapes(
                     cornerRadiusDp = DefaultAppearance.appearance.shapes.cornerRadiusDp,
                     borderStrokeWidthDp = DefaultAppearance.appearance.shapes.borderStrokeWidthDp,
                     bottomSheetCornerRadiusDp = 50f,

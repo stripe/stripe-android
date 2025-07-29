@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -65,7 +66,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onInit(
         commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
+        appearance: Appearance,
         primaryButtonColor: Boolean?,
         configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean,

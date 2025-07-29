@@ -1,12 +1,12 @@
 package com.stripe.android.paymentelement.confirmation.bacs
 
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -65,7 +65,7 @@ class BacsConfirmationFlowTest {
                 clientSecret = "pi_123_secret_123"
             ),
             shippingDetails = null,
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
         )
     }
 }

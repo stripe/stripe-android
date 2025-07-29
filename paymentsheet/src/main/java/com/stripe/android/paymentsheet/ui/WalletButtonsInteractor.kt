@@ -7,6 +7,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.Appearance
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -262,7 +263,7 @@ internal class DefaultWalletButtonsInteractor(
         val linkEmail: String?,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val configuration: CommonConfiguration,
-        val appearance: PaymentSheet.Appearance,
+        val appearance: Appearance,
         val initializationMode: PaymentElementLoader.InitializationMode,
         val walletsAllowedByMerchant: List<WalletType>,
     )

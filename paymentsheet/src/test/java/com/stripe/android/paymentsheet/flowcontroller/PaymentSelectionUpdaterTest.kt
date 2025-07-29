@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -350,8 +351,8 @@ class PaymentSelectionUpdaterTest {
                 )
             ).primaryButtonColor(ColorStateList.valueOf(Color.BLACK))
             .appearance(
-                PaymentSheet.Appearance(
-                    colorsLight = PaymentSheet.Colors.defaultDark
+                Appearance(
+                    colorsLight = Appearance.Colors.defaultDark
                 )
             )
             .build()

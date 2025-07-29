@@ -16,6 +16,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
@@ -225,7 +226,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val shippingDetails: AddressDetails?,
         internal val allowsDelayedPaymentMethods: Boolean,
         internal val allowsPaymentMethodsRequiringShippingAddress: Boolean,
-        internal val appearance: PaymentSheet.Appearance,
+        internal val appearance: Appearance,
         internal val primaryButtonLabel: String?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val preferredNetworks: List<CardBrand>,
@@ -252,7 +253,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
                 ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
-            private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
+            private var appearance: Appearance = ConfigurationDefaults.appearance
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
@@ -338,7 +339,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             /**
              * Describes the appearance of the embedded payment element.
              */
-            fun appearance(appearance: PaymentSheet.Appearance) =
+            fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
             /**

@@ -9,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
@@ -91,10 +92,10 @@ class FlowControllerConfigurationHandlerTest {
 
         val configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
             .appearance(
-                PaymentSheet.Appearance.Builder()
+                Appearance.Builder()
                     .primaryButton(
-                        PaymentSheet.PrimaryButton(
-                            shape = PaymentSheet.PrimaryButtonShape(
+                        Appearance.PrimaryButton(
+                            shape = Appearance.PrimaryButtonShape(
                                 heightDp = 80f
                             )
                         )

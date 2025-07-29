@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance.Embedded
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance

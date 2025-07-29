@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -17,8 +18,8 @@ class DefaultAutocompleteLauncherTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
 
-    private val appearance = PaymentSheet.Appearance.Builder()
-        .colorsLight(PaymentSheet.Colors.defaultDark)
+    private val appearance = Appearance.Builder()
+        .colorsLight(Appearance.Colors.defaultDark)
         .build()
 
     private val addressDetails = AddressDetails(
@@ -122,8 +123,8 @@ class DefaultAutocompleteLauncherTest {
 
     @Test
     fun `launch passes PE context with custom appearance to contract args`() = test {
-        val customAppearance = PaymentSheet.Appearance(
-            colorsLight = PaymentSheet.Colors.configureDefaultLight(
+        val customAppearance = Appearance(
+            colorsLight = Appearance.Colors.configureDefaultLight(
                 primary = Color.Red
             )
         )
