@@ -14,8 +14,8 @@ import com.stripe.android.customersheet.data.CustomerSessionIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSessionPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSessionSavedSelectionDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 @RunWith(AndroidJUnit4::class)
 class CustomerSheetHacksTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()

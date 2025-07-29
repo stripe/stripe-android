@@ -7,9 +7,9 @@ import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.rememberCustomerSheet
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.elements.CustomerSessionApiPreview
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 internal class CustomerSheetTestFactory(
     private val integrationType: IntegrationType,
     private val customerSheetTestType: CustomerSheetTestType,

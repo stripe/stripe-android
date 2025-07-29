@@ -1,7 +1,6 @@
 package com.stripe.android.elements
 
 import android.os.Parcelable
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet.CustomerAccessType
 import kotlinx.parcelize.Parcelize
 
@@ -31,7 +30,7 @@ data class CustomerConfiguration internal constructor(
     )
 
     companion object {
-        @ExperimentalCustomerSessionApi
+        @CustomerSessionApiPreview
         fun createWithCustomerSession(
             id: String,
             clientSecret: String

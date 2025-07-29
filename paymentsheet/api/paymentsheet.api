@@ -1095,6 +1095,9 @@ public final class com/stripe/android/elements/CustomerConfiguration$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/elements/CustomerSessionApiPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/elements/payment/IntentConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field COMPLETE_WITHOUT_CONFIRMING_INTENT Ljava/lang/String;
@@ -2301,9 +2304,6 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : 
 }
 
 public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalCustomerSessionApi : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {

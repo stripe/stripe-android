@@ -14,14 +14,14 @@ import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSourc
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.data.injection.DaggerCustomerAdapterDataSourceComponent
 import com.stripe.android.customersheet.data.injection.DaggerCustomerSessionDataSourceComponent
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.elements.CustomerSessionApiPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * This objects holds references to objects that need to be shared across Activity boundaries
  * but can't be serialized, or objects that can't be injected where they are used.
  */
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 internal object CustomerSheetHacks {
     private val _initializationDataSource = MutableStateFlow<CustomerSheetInitializationDataSource?>(null)
     val initializationDataSource: Single<CustomerSheetInitializationDataSource>

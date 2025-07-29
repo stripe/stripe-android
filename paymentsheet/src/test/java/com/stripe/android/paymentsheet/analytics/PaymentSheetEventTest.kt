@@ -7,6 +7,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
@@ -19,7 +20,6 @@ import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECT
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -273,7 +273,7 @@ class PaymentSheetEventTest {
         assertThat(config).containsEntry("customer_access_provider", "legacy")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `Init with customer session enabled customer has expected keys`() {
         val event = createInitEvent(

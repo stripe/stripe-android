@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -221,7 +222,7 @@ class PaymentSheetCustomerSessionTest {
         page.clickOnSaveForFutureUsage()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private fun PaymentSheetTestRunnerContext.presentWithPaymentIntent() {
         presentPaymentSheet {
             presentWithPaymentIntent(
@@ -237,7 +238,7 @@ class PaymentSheetCustomerSessionTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private fun PaymentSheetTestRunnerContext.presentWithSetupIntent() {
         presentPaymentSheet {
             presentWithSetupIntent(

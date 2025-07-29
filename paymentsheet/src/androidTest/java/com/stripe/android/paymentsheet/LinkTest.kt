@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
@@ -1075,7 +1076,7 @@ internal class LinkTest {
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
         networkRule = networkRule,
