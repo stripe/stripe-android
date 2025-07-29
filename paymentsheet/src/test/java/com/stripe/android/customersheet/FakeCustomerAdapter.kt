@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodUpdateParams

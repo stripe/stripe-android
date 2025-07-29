@@ -3,10 +3,10 @@ package com.stripe.android.customersheet.data
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.map
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior

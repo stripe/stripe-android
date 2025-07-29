@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerAdapter
 
 internal fun <T> CustomerAdapter.Result<T>.toCustomerSheetDataResult(): CustomerSheetDataResult<T> {
     return when (this) {
