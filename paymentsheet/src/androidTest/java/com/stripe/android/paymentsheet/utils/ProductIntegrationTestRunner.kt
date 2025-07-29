@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
@@ -92,7 +93,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
     fun launch(
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            paymentMethodLayout = PaymentMethodLayout.Horizontal,
         ),
         isDeferredIntent: Boolean = false
     )

@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -332,7 +333,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                             id = "cus_1",
                             clientSecret = "cuss_1",
                         ),
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        paymentMethodLayout = PaymentMethodLayout.Horizontal,
                         allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodConfig,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
                     ),

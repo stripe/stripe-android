@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -543,7 +544,7 @@ internal class VerticalModePaymentSheetActivityTest {
                     config = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                         .customer(customer)
                         .allowsDelayedPaymentMethods(true)
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .cardBrandAcceptance(cardBrandAcceptance)
                         .apply {
                             if (primaryButtonLabel != null) {

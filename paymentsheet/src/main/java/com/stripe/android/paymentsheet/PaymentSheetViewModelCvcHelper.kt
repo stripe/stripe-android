@@ -1,18 +1,19 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
 internal fun PaymentSheetViewModel.shouldLaunchCvcRecollectionScreen(selection: PaymentSelection.Saved): Boolean {
     return requiresCvcRecollection(selection) {
-        config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal &&
+        config.paymentMethodLayout != PaymentMethodLayout.Horizontal &&
             navigationHandler.currentScreen.value !is PaymentSheetScreen.CvcRecollection
     }
 }
 
 internal fun PaymentSheetViewModel.shouldAttachCvc(selection: PaymentSelection.Saved): Boolean {
     return requiresCvcRecollection(selection) {
-        config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal
+        config.paymentMethodLayout == PaymentMethodLayout.Horizontal
     }
 }
 

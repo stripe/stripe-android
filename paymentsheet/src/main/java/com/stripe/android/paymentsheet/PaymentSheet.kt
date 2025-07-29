@@ -24,6 +24,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
@@ -816,8 +817,8 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * The layout of payment methods in PaymentSheet. Defaults to [PaymentSheet.PaymentMethodLayout.Horizontal].
-             * @see [PaymentSheet.PaymentMethodLayout] for the list of available layouts.
+             * The layout of payment methods in PaymentSheet. Defaults to [PaymentMethodLayout.Horizontal].
+             * @see [PaymentMethodLayout] for the list of available layouts.
              */
             fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
                 this.paymentMethodLayout = paymentMethodLayout
@@ -942,28 +943,6 @@ class PaymentSheet internal constructor(
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
                 shopPayConfiguration?.let { shopPayConfiguration(it) }
             }
-    }
-
-    /**
-     * Defines the layout orientations available for displaying payment methods in PaymentSheet.
-     */
-    enum class PaymentMethodLayout {
-        /**
-         * Payment methods are arranged horizontally.
-         * Users can swipe left or right to navigate through different payment methods.
-         */
-        Horizontal,
-
-        /**
-         * Payment methods are arranged vertically.
-         * Users can scroll up or down to navigate through different payment methods.
-         */
-        Vertical,
-
-        /**
-         * This lets Stripe choose the best layout for payment methods in the sheet.
-         */
-        Automatic
     }
 
     @Parcelize

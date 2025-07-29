@@ -3,9 +3,9 @@ package com.stripe.android.common.configuration
 import android.content.res.ColorStateList
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object ConfigurationDefaults {

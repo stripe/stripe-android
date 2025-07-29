@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -87,7 +88,7 @@ internal class CustomPaymentMethodsTest {
             context.launch(
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(listOf(customPaymentMethod))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )
@@ -164,7 +165,7 @@ internal class CustomPaymentMethodsTest {
                             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )
@@ -234,7 +235,7 @@ internal class CustomPaymentMethodsTest {
                             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )
