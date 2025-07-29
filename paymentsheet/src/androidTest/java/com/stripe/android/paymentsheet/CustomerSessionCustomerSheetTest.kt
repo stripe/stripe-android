@@ -369,11 +369,11 @@ internal class CustomerSessionCustomerSheetTest {
     private fun verifySelected(
         expectedLast4: String,
         expectedBrand: CardBrand,
-        result: CustomerSheet.Result
+        result: Result
     ) {
-        assertThat(result).isInstanceOf(CustomerSheet.Result.Selected::class.java)
+        assertThat(result).isInstanceOf(Result.Selected::class.java)
 
-        val selected = result as CustomerSheet.Result.Selected
+        val selected = result as Result.Selected
 
         assertThat(selected.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
 

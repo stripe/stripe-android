@@ -39,7 +39,7 @@ internal class CustomerSheetAnalyticsTest {
         integrationType = IntegrationType.Compose,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
         resultCallback = { result ->
-            assertThat(result).isInstanceOf(CustomerSheet.Result.Selected::class.java)
+            assertThat(result).isInstanceOf(Result.Selected::class.java)
         }
     ) { context ->
         networkRule.enqueue(
