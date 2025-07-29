@@ -13,7 +13,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal class OnrampController @Inject constructor(
+internal class OnrampLinkController @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner

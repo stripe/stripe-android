@@ -27,7 +27,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCoordinator @Inject internal constructor(
     private val viewModel: OnrampCoordinatorViewModel,
-    private val onrampController: OnrampController,
+    private val onrampLinkController: OnrampLinkController,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val onrampCallbacks: OnrampCallbacks
 ) {
@@ -49,7 +49,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param email The email address to look up.
      */
     fun isLinkUser(email: String) {
-        onrampController.isLinkUser(email)
+        onrampLinkController.isLinkUser(email)
     }
 
     /**
@@ -58,7 +58,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param info The LinkInfo for the new user.
      */
     fun registerNewLinkUser(info: LinkUserInfo) {
-        onrampController.registerNewUser(info)
+        onrampLinkController.registerNewUser(info)
     }
 
     /**
@@ -67,7 +67,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param email The email address of the existing user.
      */
     fun authenticateExistingLinkUser(email: String) {
-        onrampController.authenticateExistingUser(email)
+        onrampLinkController.authenticateExistingUser(email)
     }
 
     /**
