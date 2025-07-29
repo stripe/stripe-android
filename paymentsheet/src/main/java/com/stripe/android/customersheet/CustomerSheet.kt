@@ -10,10 +10,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodApiPreview
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
@@ -238,7 +238,7 @@ class CustomerSheet internal constructor(
         )
 
         fun newBuilder(): Builder {
-            @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+            @OptIn(AllowsRemovalOfLastSavedPaymentMethodApiPreview::class)
             return Builder(merchantDisplayName)
                 .appearance(appearance)
                 .googlePayEnabled(googlePayEnabled)
@@ -290,7 +290,7 @@ class CustomerSheet internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            @AllowsRemovalOfLastSavedPaymentMethodApiPreview
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
             }
