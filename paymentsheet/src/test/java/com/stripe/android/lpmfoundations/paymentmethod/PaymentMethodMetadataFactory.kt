@@ -4,6 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -36,7 +37,7 @@ internal object PaymentMethodMetadataFactory {
         displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-        linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
+        linkConfiguration: LinkConfiguration = LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkState? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,

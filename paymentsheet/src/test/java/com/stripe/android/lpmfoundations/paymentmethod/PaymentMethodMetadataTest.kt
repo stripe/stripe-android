@@ -1141,7 +1141,7 @@ internal class PaymentMethodMetadataTest {
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
-            linkConfiguration = PaymentSheet.LinkConfiguration(),
+            linkConfiguration = com.stripe.android.elements.payment.LinkConfiguration(),
             linkMode = null,
             linkState = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
@@ -1218,7 +1218,7 @@ internal class PaymentMethodMetadataTest {
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            linkConfiguration = PaymentSheet.LinkConfiguration(),
+            linkConfiguration = com.stripe.android.elements.payment.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
             linkState = null,

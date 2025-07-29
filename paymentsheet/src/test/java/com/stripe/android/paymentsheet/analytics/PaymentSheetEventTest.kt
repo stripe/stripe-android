@@ -9,6 +9,7 @@ import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -1971,7 +1972,7 @@ class PaymentSheetEventTest {
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
         financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        linkDisplay: LinkConfiguration.Display = LinkConfiguration.Display.Automatic,
         paymentMethodOptionsSetupfutureUsage: Boolean = false,
         setupFutureUsage: StripeIntent.Usage? = null
     ): PaymentSheetEvent.LoadSucceeded {

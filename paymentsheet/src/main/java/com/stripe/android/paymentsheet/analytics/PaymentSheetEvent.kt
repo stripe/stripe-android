@@ -9,6 +9,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -95,7 +96,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val isSpt: Boolean,
         override val googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        linkDisplay: LinkConfiguration.Display,
         financialConnectionsAvailability: FinancialConnectionsAvailability?,
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,

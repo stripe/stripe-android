@@ -12,6 +12,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -22,7 +23,6 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorFinished
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorStarted
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -108,7 +108,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkEnabled: Boolean,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        linkDisplay: LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         financialConnectionsAvailability: FinancialConnectionsAvailability?,

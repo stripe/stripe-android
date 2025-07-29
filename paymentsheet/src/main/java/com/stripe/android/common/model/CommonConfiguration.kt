@@ -7,6 +7,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -19,7 +20,7 @@ internal data class CommonConfiguration(
     val merchantDisplayName: String,
     val customer: CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
-    val link: PaymentSheet.LinkConfiguration,
+    val link: LinkConfiguration,
     val defaultBillingDetails: BillingDetails?,
     val shippingDetails: AddressDetails?,
     val allowsDelayedPaymentMethods: Boolean,
@@ -199,8 +200,8 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
-    link = PaymentSheet.LinkConfiguration(
-        display = PaymentSheet.LinkConfiguration.Display.Automatic,
+    link = LinkConfiguration(
+        display = LinkConfiguration.Display.Automatic,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
     ),

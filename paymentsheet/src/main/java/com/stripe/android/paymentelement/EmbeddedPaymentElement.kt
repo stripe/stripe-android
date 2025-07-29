@@ -22,6 +22,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -238,7 +239,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val cardBrandAcceptance: CardBrandAcceptance,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
-        internal val link: PaymentSheet.LinkConfiguration,
+        internal val link: LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
@@ -269,7 +270,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
-            private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+            private var link: LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
 
             /**
@@ -456,7 +457,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             /**
              * Configuration related to Link.
              */
-            fun link(link: PaymentSheet.LinkConfiguration): Builder = apply {
+            fun link(link: LinkConfiguration): Builder = apply {
                 this.link = link
             }
 
