@@ -2,7 +2,7 @@ package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.OnrampContinuations
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import dagger.BindsInstance
 import dagger.Component
@@ -22,7 +22,7 @@ internal interface OnrampCoordinatorViewModelComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance onrampCallbacks: OnrampCallbacks
+            @BindsInstance continuations: OnrampContinuations
         ): OnrampCoordinatorViewModelComponent
     }
 }

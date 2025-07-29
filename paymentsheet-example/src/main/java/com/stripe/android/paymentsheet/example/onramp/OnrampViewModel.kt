@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.onramp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
@@ -10,6 +11,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 internal class OnrampViewModel : ViewModel() {
 
@@ -21,7 +23,7 @@ internal class OnrampViewModel : ViewModel() {
 
     private var currentEmail: String = ""
 
-    fun checkIfLinkUser(email: String, onCheckUser: (String) -> Unit) {
+    fun checkIfLinkUser(email: String, onCheckUser: suspend (String) -> Unit) {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
             return
@@ -29,7 +31,15 @@ internal class OnrampViewModel : ViewModel() {
 
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
-        onCheckUser(currentEmail)
+        
+        viewModelScope.launch {
+            try {
+                onCheckUser(currentEmail)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                _message.value = "Lookup failed: ${e.message}"
+                _uiState.value = OnrampUiState.EmailInput
+            }
+        }
     }
 
     fun registerNewUser(
@@ -37,7 +47,7 @@ internal class OnrampViewModel : ViewModel() {
         phone: String,
         country: String,
         fullName: String?,
-        onRegister: (LinkUserInfo) -> Unit
+        onRegister: suspend (LinkUserInfo) -> Unit
     ) {
         if (email.isBlank() || phone.isBlank() || country.isBlank()) {
             _message.value = "Please fill in all required fields"
@@ -52,30 +62,31 @@ internal class OnrampViewModel : ViewModel() {
             fullName = fullName?.trim()?.takeIf { it.isNotEmpty() }
         )
 
-        try {
-            onRegister(userInfo)
-            _message.value = "Registration attempted (not yet implemented)"
-            _uiState.value = OnrampUiState.EmailInput
-        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
-            _message.value = "Registration failed: ${e.message}"
-            _uiState.value = OnrampUiState.Registration(email)
+        viewModelScope.launch {
+            try {
+                onRegister(userInfo)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                _message.value = "Registration failed: ${e.message}"
+                _uiState.value = OnrampUiState.Registration(email)
+            }
         }
     }
 
-    fun authenticateUser(email: String, onAuthenticate: (String) -> Unit) {
+    fun authenticateUser(email: String, onAuthenticate: suspend (String) -> Unit) {
         if (email.isBlank()) {
             _message.value = "Email is required for authentication"
             return
         }
 
         _uiState.value = OnrampUiState.Loading
-        try {
-            onAuthenticate(email.trim())
-            _message.value = "Authentication attempted"
-            _uiState.value = OnrampUiState.EmailInput
-        } catch (@Suppress("TooGenericExceptionCaught") e: RuntimeException) {
-            _message.value = "Authentication failed: ${e.message}"
-            _uiState.value = OnrampUiState.Authentication(email)
+        
+        viewModelScope.launch {
+            try {
+                onAuthenticate(email.trim())
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                _message.value = "Authentication failed: ${e.message}"
+                _uiState.value = OnrampUiState.Authentication(email)
+            }
         }
     }
 
@@ -128,11 +139,12 @@ internal class OnrampViewModel : ViewModel() {
     fun onAuthenticationResult(result: OnrampVerificationResult) {
         when (result) {
             is OnrampVerificationResult.Completed -> {
-                _message.value = "Authentication successful"
+                _message.value = "Authentication successful - Customer ID: ${result.customerId}"
                 _uiState.value = OnrampUiState.EmailInput
             }
             is OnrampVerificationResult.Cancelled -> {
                 _message.value = "Authentication cancelled, please try again"
+                _uiState.value = OnrampUiState.EmailInput
             }
             is OnrampVerificationResult.Failed -> {
                 _message.value = "Authentication failed: ${result.error.message}"
@@ -144,7 +156,7 @@ internal class OnrampViewModel : ViewModel() {
     fun onRegisterUserResult(result: OnrampRegisterUserResult) {
         when (result) {
             is OnrampRegisterUserResult.Completed -> {
-                _message.value = "Registration successful"
+                _message.value = "Registration successful - Customer ID: ${result.customerId}"
                 _uiState.value = OnrampUiState.EmailInput
             }
             is OnrampRegisterUserResult.Failed -> {

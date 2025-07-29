@@ -7,6 +7,10 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampContinuations
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
+import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
+import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -18,6 +22,7 @@ import javax.inject.Inject
  */
 internal class OnrampLinkController @Inject constructor(
     private val viewModel: OnrampCoordinatorViewModel,
+    private val continuations: OnrampContinuations,
     private val lifecycleOwner: LifecycleOwner,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner
 ) {
@@ -61,15 +66,17 @@ internal class OnrampLinkController @Inject constructor(
         viewModel.onLinkControllerConfigureResult(result)
     }
 
-    fun isLinkUser(email: String) {
+    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
         linkController.lookupConsumer(email)
+        return continuations.awaitLookup()
     }
 
-    fun authenticateExistingUser(email: String) {
+    suspend fun authenticateExistingUser(email: String): OnrampVerificationResult {
         linkController.authenticateExistingConsumer(email)
+        return continuations.awaitAuthentication()
     }
 
-    fun registerNewUser(info: LinkUserInfo) {
+    suspend fun registerNewUser(info: LinkUserInfo): OnrampRegisterUserResult {
         linkController.registerConsumer(
             email = info.email,
             phone = info.phone,
@@ -77,6 +84,7 @@ internal class OnrampLinkController @Inject constructor(
             name = info.fullName,
             consentAction = ConsumerSignUpConsentAction.Implied
         )
+        return continuations.awaitRegistration()
     }
 
     private fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {

@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelComponent
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
+import com.stripe.android.crypto.onramp.model.OnrampContinuations
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
@@ -26,13 +26,13 @@ import javax.inject.Inject
  * process death restoration.
  *
  * @property handle SavedStateHandle backing persistent state.
- * @property onrampCallbacks Callbacks that are called when actions complete .
+ * @property continuations Manager for handling async operation continuations.
  * @property cryptoApiRepository The api repository to use to make crypto network calls.
  *
  */
 internal class OnrampCoordinatorViewModel @Inject constructor(
     private val handle: SavedStateHandle,
-    private val onrampCallbacks: OnrampCallbacks,
+    private val continuations: OnrampContinuations,
     private val cryptoApiRepository: CryptoApiRepository
 ) : ViewModel() {
 
@@ -55,36 +55,34 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
      * Configure the view model and associated types.
      *
      * @param configuration The OnrampConfiguration to apply.
+     * @return The result of the configuration operation.
      */
-    internal fun configure(configuration: OnrampConfiguration) {
+    internal suspend fun configure(configuration: OnrampConfiguration): OnrampConfigurationResult {
         onRampConfiguration = configuration
 
         viewModelScope.launch {
             val config = LinkController.Configuration.Builder(merchantDisplayName = "").build()
-
             _configurationFlow.emit(config)
         }
+
+        return continuations.awaitConfiguration()
     }
 
     internal fun onLinkControllerConfigureResult(result: LinkController.ConfigureResult) {
         when (result) {
             is LinkController.ConfigureResult.Success ->
-                onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Completed(true))
+                continuations.completeConfiguration(OnrampConfigurationResult.Completed(true))
             is LinkController.ConfigureResult.Failed ->
-                onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Failed(result.error))
+                continuations.completeConfiguration(OnrampConfigurationResult.Failed(result.error))
         }
     }
 
     internal fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
         when (result) {
             is LinkController.LookupConsumerResult.Success ->
-                onrampCallbacks.linkLookupCallback.onResult(
-                    OnrampLinkLookupResult.Completed(result.isConsumer)
-                )
+                continuations.completeLookup(OnrampLinkLookupResult.Completed(result.isConsumer))
             is LinkController.LookupConsumerResult.Failed ->
-                onrampCallbacks.linkLookupCallback.onResult(
-                    OnrampLinkLookupResult.Failed(result.error)
-                )
+                continuations.completeLookup(OnrampLinkLookupResult.Failed(result.error))
         }
     }
 
@@ -97,30 +95,22 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
 
                         permissionsResult.fold(
                             onSuccess = {
-                                onrampCallbacks.authenticationCallback.onResult(
-                                    OnrampVerificationResult.Completed(it.id)
-                                )
+                                continuations.completeAuthentication(OnrampVerificationResult.Completed(it.id))
                             },
                             onFailure = {
-                                onrampCallbacks.authenticationCallback.onResult(
-                                    OnrampVerificationResult.Failed(it)
-                                )
+                                continuations.completeAuthentication(OnrampVerificationResult.Failed(it))
                             }
                         )
                     } ?: run {
-                        onrampCallbacks.authenticationCallback.onResult(
+                        continuations.completeAuthentication(
                             OnrampVerificationResult.Failed(IllegalStateException("Missing consumer secret"))
                         )
                     }
                 }
             is LinkController.AuthenticationResult.Failed ->
-                onrampCallbacks.authenticationCallback.onResult(
-                    OnrampVerificationResult.Failed(result.error)
-                )
+                continuations.completeAuthentication(OnrampVerificationResult.Failed(result.error))
             is LinkController.AuthenticationResult.Canceled ->
-                onrampCallbacks.authenticationCallback.onResult(
-                    OnrampVerificationResult.Cancelled()
-                )
+                continuations.completeAuthentication(OnrampVerificationResult.Cancelled())
         }
     }
 
@@ -133,31 +123,25 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
 
                         permissionsResult.fold(
                             onSuccess = {
-                                onrampCallbacks.registerUserCallback.onResult(
-                                    OnrampRegisterUserResult.Completed(it.id)
-                                )
+                                continuations.completeRegistration(OnrampRegisterUserResult.Completed(it.id))
                             },
                             onFailure = {
-                                onrampCallbacks.registerUserCallback.onResult(
-                                    OnrampRegisterUserResult.Failed(it)
-                                )
+                                continuations.completeRegistration(OnrampRegisterUserResult.Failed(it))
                             }
                         )
                     } ?: run {
-                        onrampCallbacks.registerUserCallback.onResult(
+                        continuations.completeRegistration(
                             OnrampRegisterUserResult.Failed(IllegalArgumentException("Missing consumer secret"))
                         )
                     }
                 }
             is LinkController.RegisterConsumerResult.Failed ->
-                onrampCallbacks.registerUserCallback.onResult(
-                    OnrampRegisterUserResult.Failed(result.error)
-                )
+                continuations.completeRegistration(OnrampRegisterUserResult.Failed(result.error))
         }
     }
 
     internal class Factory(
-        private val onrampCallbacks: OnrampCallbacks
+        private val continuations: OnrampContinuations
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -165,7 +149,7 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
                 .build(
                     application = extras.requireApplication(),
                     savedStateHandle = extras.createSavedStateHandle(),
-                    onrampCallbacks = onrampCallbacks
+                    continuations = continuations
                 )
                 .viewModel as T
         }

@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,13 +33,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
+import kotlinx.coroutines.launch
 
 internal class OnrampActivity : ComponentActivity() {
 
@@ -55,29 +57,23 @@ internal class OnrampActivity : ComponentActivity() {
         // Force Link native (this will go through attestation in live).
         FeatureFlags.nativeLinkEnabled.setEnabled(true)
 
-        // Create callbacks to handle async responses
-        val callbacks = OnrampCallbacks(
-            configurationCallback = viewModel::onConfigurationResult,
-            linkLookupCallback = viewModel::onLookupResult,
-            authenticationCallback = viewModel::onAuthenticationResult,
-            registerUserCallback = viewModel::onRegisterUserResult
-        )
-
-        onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
+        onrampCoordinator = OnrampCoordinator.Builder().build(this)
 
         val configuration = OnrampConfiguration(
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
 
-        onrampCoordinator.configure(configuration)
+        // Configure the coordinator using suspend function
+        lifecycleScope.launch {
+            val result = onrampCoordinator.configure(configuration)
+            viewModel.onConfigurationResult(result)
+        }
 
         setContent {
             PaymentSheetExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onCheckUser = { email -> onrampCoordinator.isLinkUser(email) },
-                    onRegisterUser = { userInfo -> onrampCoordinator.registerNewLinkUser(userInfo) },
-                    onAuthenticateUser = { email -> onrampCoordinator.authenticateExistingLinkUser(email) }
+                    onrampCoordinator = onrampCoordinator
                 )
             }
         }
@@ -87,13 +83,12 @@ internal class OnrampActivity : ComponentActivity() {
 @Composable
 internal fun OnrampScreen(
     viewModel: OnrampViewModel,
-    onCheckUser: (String) -> Unit,
-    onRegisterUser: (LinkUserInfo) -> Unit,
-    onAuthenticateUser: (String) -> Unit
+    onrampCoordinator: OnrampCoordinator
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     // Show toast messages
     LaunchedEffect(message) {
@@ -118,7 +113,12 @@ internal fun OnrampScreen(
             is OnrampUiState.EmailInput -> {
                 EmailInputScreen(
                     onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email, onCheckUser)
+                        viewModel.checkIfLinkUser(email) { emailToCheck ->
+                            coroutineScope.launch {
+                                val result = onrampCoordinator.isLinkUser(emailToCheck)
+                                viewModel.onLookupResult(result)
+                            }
+                        }
                     }
                 )
             }
@@ -129,7 +129,12 @@ internal fun OnrampScreen(
                 RegistrationScreen(
                     initialEmail = currentState.email,
                     onRegister = { email, phone, country, fullName ->
-                        viewModel.registerNewUser(email, phone, country, fullName, onRegisterUser)
+                        viewModel.registerNewUser(email, phone, country, fullName) { userInfo ->
+                            coroutineScope.launch {
+                                val result = onrampCoordinator.registerNewLinkUser(userInfo)
+                                viewModel.onRegisterUserResult(result)
+                            }
+                        }
                     },
                     onBack = {
                         viewModel.onBackToEmailInput()
@@ -140,7 +145,12 @@ internal fun OnrampScreen(
                 AuthenticationScreen(
                     email = currentState.email,
                     onAuthenticate = { email ->
-                        viewModel.authenticateUser(email, onAuthenticateUser)
+                        viewModel.authenticateUser(email) { emailToAuth ->
+                            coroutineScope.launch {
+                                val result = onrampCoordinator.authenticateExistingLinkUser(emailToAuth)
+                                viewModel.onAuthenticationResult(result)
+                            }
+                        }
                     },
                     onBack = {
                         viewModel.onBackToEmailInput()
