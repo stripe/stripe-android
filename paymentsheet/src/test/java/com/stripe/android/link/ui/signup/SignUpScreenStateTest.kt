@@ -101,7 +101,8 @@ class SignUpScreenStateTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
-            enableDisplayableDefaultValuesInEce = false
+            enableDisplayableDefaultValuesInEce = false,
+            customerId = null
         )
     }
 

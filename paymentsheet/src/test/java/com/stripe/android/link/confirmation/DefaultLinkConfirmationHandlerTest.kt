@@ -455,7 +455,7 @@ internal class DefaultLinkConfirmationHandlerTest {
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.Saved
-        assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.id)
+        assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.paymentMethodId)
 
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)

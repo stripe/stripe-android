@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.DimenRes
+import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -1296,9 +1297,22 @@ class PaymentSheet internal constructor(
 
         @Parcelize
         @Poko
-        class Embedded(
-            internal val style: RowStyle
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        class Embedded internal constructor(
+            internal val style: RowStyle,
+            internal val paymentMethodIconMargins: Insets?,
+            internal val titleFont: Typography.Font?,
+            internal val subtitleFont: Typography.Font?,
         ) : Parcelable {
+
+            constructor(
+                style: RowStyle
+            ) : this(
+                style = style,
+                paymentMethodIconMargins = null,
+                titleFont = null,
+                subtitleFont = null
+            )
 
             internal companion object {
                 val default = Embedded(
@@ -1315,51 +1329,14 @@ class PaymentSheet internal constructor(
                 @Parcelize
                 @Poko
                 class FlatWithRadio(
-                    /**
-                     * The thickness of the separator line between rows.
-                     */
                     internal val separatorThicknessDp: Float,
-
-                    /**
-                     * The start inset of the separator line between rows.
-                     */
                     internal val startSeparatorInsetDp: Float,
-
-                    /**
-                     * The end inset of the separator line between rows.
-                     */
                     internal val endSeparatorInsetDp: Float,
-
-                    /**
-                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
-                     */
                     internal val topSeparatorEnabled: Boolean,
-
-                    /**
-                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
-                     * Element.
-                     */
                     internal val bottomSeparatorEnabled: Boolean,
-
-                    /**
-                     * Additional vertical insets applied to a payment method row.
-                     * - Note: Increasing this value increases the height of each row.
-                     */
                     internal val additionalVerticalInsetsDp: Float,
-
-                    /**
-                     * Horizontal insets applied to a payment method row.
-                     */
                     internal val horizontalInsetsDp: Float,
-
-                    /**
-                     * Describes the colors used while the system is in light mode.
-                     */
                     internal val colorsLight: Colors,
-
-                    /**
-                     * Describes the colors used while the system is in dark mode.
-                     */
                     internal val colorsDark: Colors
                 ) : RowStyle() {
                     constructor(
@@ -1453,38 +1430,67 @@ class PaymentSheet internal constructor(
                             unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
                         )
 
+                        /**
+                         * The thickness of the separator line between rows.
+                         */
                         fun separatorThicknessDp(thickness: Float) = apply {
                             this.separatorThicknessDp = thickness
                         }
 
+                        /**
+                         * The start inset of the separator line between rows.
+                         */
                         fun startSeparatorInsetDp(inset: Float) = apply {
                             this.startSeparatorInsetDp = inset
                         }
 
+                        /**
+                         * The end inset of the separator line between rows.
+                         */
                         fun endSeparatorInsetDp(inset: Float) = apply {
                             this.endSeparatorInsetDp = inset
                         }
 
+                        /**
+                         * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                         */
                         fun topSeparatorEnabled(enabled: Boolean) = apply {
                             this.topSeparatorEnabled = enabled
                         }
 
+                        /**
+                         * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
+                         * Element.
+                         */
                         fun bottomSeparatorEnabled(enabled: Boolean) = apply {
                             this.bottomSeparatorEnabled = enabled
                         }
 
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
                         fun additionalVerticalInsetsDp(insets: Float) = apply {
                             this.additionalVerticalInsetsDp = insets
                         }
 
+                        /**
+                         * Horizontal insets applied to a payment method row.
+                         */
                         fun horizontalInsetsDp(insets: Float) = apply {
                             this.horizontalInsetsDp = insets
                         }
 
+                        /**
+                         * Describes the colors used while the system is in light mode.
+                         */
                         fun colorsLight(colors: Colors) = apply {
                             this.colorsLight = colors
                         }
 
+                        /**
+                         * Describes the colors used while the system is in dark mode.
+                         */
                         fun colorsDark(colors: Colors) = apply {
                             this.colorsDark = colors
                         }
@@ -1508,56 +1514,15 @@ class PaymentSheet internal constructor(
                 @Parcelize
                 @Poko
                 class FlatWithCheckmark(
-                    /**
-                     * The thickness of the separator line between rows.
-                     */
                     internal val separatorThicknessDp: Float,
-
-                    /**
-                     * The start inset of the separator line between rows.
-                     */
                     internal val startSeparatorInsetDp: Float,
-
-                    /**
-                     * The end inset of the separator line between rows.
-                     */
                     internal val endSeparatorInsetDp: Float,
-
-                    /**
-                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
-                     */
                     internal val topSeparatorEnabled: Boolean,
-
-                    /**
-                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
-                     * Element.
-                     */
                     internal val bottomSeparatorEnabled: Boolean,
-
-                    /**
-                     * Inset of the checkmark from the end of the row
-                     */
                     internal val checkmarkInsetDp: Float,
-
-                    /**
-                     * Additional vertical insets applied to a payment method row.
-                     * - Note: Increasing this value increases the height of each row.
-                     */
                     internal val additionalVerticalInsetsDp: Float,
-
-                    /**
-                     * Horizontal insets applied to a payment method row.
-                     */
                     internal val horizontalInsetsDp: Float,
-
-                    /**
-                     * Describes the colors used while the system is in light mode.
-                     */
                     internal val colorsLight: Colors,
-
-                    /**
-                     * Describes the colors used while the system is in dark mode.
-                     */
                     internal val colorsDark: Colors
                 ) : RowStyle() {
                     constructor(
@@ -1645,42 +1610,74 @@ class PaymentSheet internal constructor(
                             checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb(),
                         )
 
+                        /**
+                         * The thickness of the separator line between rows.
+                         */
                         fun separatorThicknessDp(thickness: Float) = apply {
                             this.separatorThicknessDp = thickness
                         }
 
+                        /**
+                         * The start inset of the separator line between rows.
+                         */
                         fun startSeparatorInsetDp(inset: Float) = apply {
                             this.startSeparatorInsetDp = inset
                         }
 
+                        /**
+                         * The end inset of the separator line between rows.
+                         */
                         fun endSeparatorInsetDp(inset: Float) = apply {
                             this.endSeparatorInsetDp = inset
                         }
 
+                        /**
+                         * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                         */
                         fun topSeparatorEnabled(enabled: Boolean) = apply {
                             this.topSeparatorEnabled = enabled
                         }
 
+                        /**
+                         * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
+                         * Element.
+                         */
                         fun bottomSeparatorEnabled(enabled: Boolean) = apply {
                             this.bottomSeparatorEnabled = enabled
                         }
 
-                        fun checkmarkInsetsDp(insets: Float) = apply {
+                        /**
+                         * Inset of the checkmark from the end of the row.
+                         */
+                        fun checkmarkInsetDp(insets: Float) = apply {
                             this.checkmarkInsetDp = insets
                         }
 
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
                         fun additionalVerticalInsetsDp(insets: Float) = apply {
                             this.additionalVerticalInsetsDp = insets
                         }
 
+                        /**
+                         * Horizontal insets applied to a payment method row.
+                         */
                         fun horizontalInsetsDp(insets: Float) = apply {
                             this.horizontalInsetsDp = insets
                         }
 
+                        /**
+                         * Describes the colors used while the system is in light mode.
+                         */
                         fun colorsLight(colors: Colors) = apply {
                             this.colorsLight = colors
                         }
 
+                        /**
+                         * Describes the colors used while the system is in dark mode.
+                         */
                         fun colorsDark(colors: Colors) = apply {
                             this.colorsDark = colors
                         }
@@ -1705,14 +1702,7 @@ class PaymentSheet internal constructor(
                 @Parcelize
                 @Poko
                 class FloatingButton(
-                    /**
-                     * The spacing between payment method rows
-                     */
                     internal val spacingDp: Float,
-                    /**
-                     * Additional vertical insets applied to a payment method row.
-                     * - Note: Increasing this value increases the height of each row.
-                     */
                     internal val additionalInsetsDp: Float,
                 ) : RowStyle() {
                     constructor(
@@ -1738,10 +1728,17 @@ class PaymentSheet internal constructor(
                         private var spacingDp = StripeThemeDefaults.floating.spacing
                         private var additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
 
+                        /**
+                         * The spacing between payment method rows.
+                         */
                         fun spacingDp(spacing: Float) = apply {
                             this.spacingDp = spacing
                         }
 
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
                         fun additionalInsetsDp(insets: Float) = apply {
                             this.additionalInsetsDp = insets
                         }
@@ -1757,53 +1754,18 @@ class PaymentSheet internal constructor(
 
                 @Parcelize
                 @Poko
-                class FlatWithChevron(
-                    /**
-                     * The thickness of the separator line between rows.
-                     */
+                class FlatWithDisclosure internal constructor(
                     internal val separatorThicknessDp: Float,
-
-                    /**
-                     * The start inset of the separator line between rows.
-                     */
                     internal val startSeparatorInsetDp: Float,
-
-                    /**
-                     * The end inset of the separator line between rows.
-                     */
                     internal val endSeparatorInsetDp: Float,
-
-                    /**
-                     * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
-                     */
                     internal val topSeparatorEnabled: Boolean,
-
-                    /**
-                     * Additional vertical insets applied to a payment method row.
-                     * - Note: Increasing this value increases the height of each row.
-                     */
                     internal val additionalVerticalInsetsDp: Float,
-
-                    /**
-                     * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
-                     * Element.
-                     */
                     internal val bottomSeparatorEnabled: Boolean,
-
-                    /**
-                     * Horizontal insets applied to a payment method row.
-                     */
                     internal val horizontalInsetsDp: Float,
-
-                    /**
-                     * Describes the colors used while the system is in light mode.
-                     */
                     internal val colorsLight: Colors,
-
-                    /**
-                     * Describes the colors used while the system is in dark mode.
-                     */
-                    internal val colorsDark: Colors
+                    internal val colorsDark: Colors,
+                    @DrawableRes
+                    internal val disclosureIconRes: Int
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1825,7 +1787,8 @@ class PaymentSheet internal constructor(
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsRes),
                         horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsRes),
                         colorsLight = colorsLight,
-                        colorsDark = colorsDark
+                        colorsDark = colorsDark,
+                        disclosureIconRes = R.drawable.stripe_ic_chevron_right
                     )
 
                     @Parcelize
@@ -1838,10 +1801,10 @@ class PaymentSheet internal constructor(
                         internal val separatorColor: Int,
 
                         /**
-                         * The color of the chevron.
+                         * The color of the disclosure icon.
                          */
                         @ColorInt
-                        internal val chevronColor: Int,
+                        internal val disclosureColor: Int,
                     ) : Parcelable
 
                     override fun hasSeparators() = true
@@ -1849,7 +1812,7 @@ class PaymentSheet internal constructor(
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val default = FlatWithChevron(
+                        val default = FlatWithDisclosure(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
@@ -1858,13 +1821,15 @@ class PaymentSheet internal constructor(
                             additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
                             horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
                             colorsLight = Colors(
-                                separatorColor = StripeThemeDefaults.chevronColorsLight.separatorColor.toArgb(),
-                                chevronColor = StripeThemeDefaults.chevronColorsLight.chevronColor.toArgb()
+                                separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                                disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                             ),
                             colorsDark = Colors(
-                                separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
-                                chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
-                            )
+                                separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                                disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
+
+                            ),
+                            disclosureIconRes = R.drawable.stripe_ic_chevron_right
                         )
                     }
 
@@ -1878,52 +1843,92 @@ class PaymentSheet internal constructor(
                             .additionalVerticalInsetsDp
                         private var horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
                         private var colorsLight = Colors(
-                            separatorColor = StripeThemeDefaults.chevronColorsLight.separatorColor.toArgb(),
-                            chevronColor = StripeThemeDefaults.chevronColorsLight.chevronColor.toArgb()
+                            separatorColor = StripeThemeDefaults.disclosureColorsLight.separatorColor.toArgb(),
+                            disclosureColor = StripeThemeDefaults.disclosureColorsLight.disclosureColor.toArgb()
                         )
                         private var colorsDark = Colors(
-                            separatorColor = StripeThemeDefaults.chevronColorsDark.separatorColor.toArgb(),
-                            chevronColor = StripeThemeDefaults.chevronColorsDark.chevronColor.toArgb()
+                            separatorColor = StripeThemeDefaults.disclosureColorsDark.separatorColor.toArgb(),
+                            disclosureColor = StripeThemeDefaults.disclosureColorsDark.disclosureColor.toArgb()
                         )
+                        private var disclosureIconRes: Int = R.drawable.stripe_ic_chevron_right
 
+                        /**
+                         * The thickness of the separator line between rows.
+                         */
                         fun separatorThicknessDp(thickness: Float) = apply {
                             this.separatorThicknessDp = thickness
                         }
 
+                        /**
+                         * The start inset of the separator line between rows.
+                         */
                         fun startSeparatorInsetDp(inset: Float) = apply {
                             this.startSeparatorInsetDp = inset
                         }
 
+                        /**
+                         * The end inset of the separator line between rows.
+                         */
                         fun endSeparatorInsetDp(inset: Float) = apply {
                             this.endSeparatorInsetDp = inset
                         }
 
+                        /**
+                         * Determines if the top separator is visible at the top of the Embedded Mobile Payment Element.
+                         */
                         fun topSeparatorEnabled(enabled: Boolean) = apply {
                             this.topSeparatorEnabled = enabled
                         }
 
+                        /**
+                         * Determines if the bottom separator is visible at the bottom of the Embedded Mobile Payment
+                         * Element.
+                         */
                         fun bottomSeparatorEnabled(enabled: Boolean) = apply {
                             this.bottomSeparatorEnabled = enabled
                         }
 
+                        /**
+                         * Additional vertical insets applied to a payment method row.
+                         * - Note: Increasing this value increases the height of each row.
+                         */
                         fun additionalVerticalInsetsDp(insets: Float) = apply {
                             this.additionalVerticalInsetsDp = insets
                         }
 
+                        /**
+                         * Horizontal insets applied to a payment method row.
+                         */
                         fun horizontalInsetsDp(insets: Float) = apply {
                             this.horizontalInsetsDp = insets
                         }
 
+                        /**
+                         * Describes the colors used while the system is in light mode.
+                         */
                         fun colorsLight(colors: Colors) = apply {
                             this.colorsLight = colors
                         }
 
+                        /**
+                         * Describes the colors used while the system is in dark mode.
+                         */
                         fun colorsDark(colors: Colors) = apply {
                             this.colorsDark = colors
                         }
 
-                        fun build(): FlatWithChevron {
-                            return FlatWithChevron(
+                        /**
+                         * The drawable displayed on the end of the row - typically, a chevron. This should be
+                         * a resource ID value.
+                         * - Note: If not set, uses a default chevron.
+                         */
+                        @AppearanceAPIAdditionsPreview
+                        fun disclosureIconRes(@DrawableRes iconRes: Int) = apply {
+                            this.disclosureIconRes = iconRes
+                        }
+
+                        fun build(): FlatWithDisclosure {
+                            return FlatWithDisclosure(
                                 separatorThicknessDp = separatorThicknessDp,
                                 startSeparatorInsetDp = startSeparatorInsetDp,
                                 endSeparatorInsetDp = endSeparatorInsetDp,
@@ -1932,23 +1937,46 @@ class PaymentSheet internal constructor(
                                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
                                 horizontalInsetsDp = horizontalInsetsDp,
                                 colorsLight = colorsLight,
-                                colorsDark = colorsDark
+                                colorsDark = colorsDark,
+                                disclosureIconRes = disclosureIconRes
                             )
                         }
                     }
                 }
             }
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
             class Builder {
                 private var rowStyle: RowStyle = default.style
+                private var paymentMethodIconMargins: Insets? = null
+                private var titleFont: Typography.Font? = null
+                private var subtitleFont: Typography.Font? = null
 
                 fun rowStyle(rowStyle: RowStyle) = apply {
                     this.rowStyle = rowStyle
                 }
 
+                @AppearanceAPIAdditionsPreview
+                fun paymentMethodIconMargins(margins: Insets?) = apply {
+                    this.paymentMethodIconMargins = margins
+                }
+
+                @AppearanceAPIAdditionsPreview
+                fun titleFont(font: Typography.Font?) = apply {
+                    this.titleFont = font
+                }
+
+                @AppearanceAPIAdditionsPreview
+                fun subtitleFont(font: Typography.Font?) = apply {
+                    this.subtitleFont = font
+                }
+
                 fun build(): Embedded {
                     return Embedded(
                         style = rowStyle,
+                        paymentMethodIconMargins = paymentMethodIconMargins,
+                        titleFont = titleFont,
+                        subtitleFont = subtitleFont
                     )
                 }
             }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement.Absolute.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -33,7 +35,6 @@ import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -132,12 +133,19 @@ private fun PaymentDetailsDisplay(
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        PaymentMethodIconFromResource(
-            iconRes = paymentUI.paymentIconRes,
-            colorFilter = null,
-            alignment = Alignment.Center,
-            modifier = Modifier.size(16.dp)
-        )
+        Box(modifier = Modifier.size(20.dp)) {
+            when (paymentUI.paymentType) {
+                is DefaultPaymentUI.PaymentType.Card -> Image(
+                    painter = painterResource(paymentUI.paymentType.iconRes),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
+                is DefaultPaymentUI.PaymentType.BankAccount -> BankIcon(
+                    bankIconCode = paymentUI.paymentType.bankIconCode
+                )
+            }
+        }
         Text(
             text = paymentUI.last4,
             style = LinkTheme.typography.detailEmphasized,
@@ -221,6 +229,69 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
         didSendNewCode = false,
         redactedPhoneNumber = "***-***-1234",
         email = "user@example.com",
+        defaultPayment = null,
+        isDialog = false
+    )
+
+    LinkInline2FASection(
+        verificationState = verificationState,
+        otpElement = otpElement,
+        onResend = {}
+    )
+}
+
+@Preview(name = "Default state", showBackground = true)
+@Composable
+private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
+    val otpElement = OTPElement(
+        identifier = IdentifierSpec.Generic("otp"),
+        controller = OTPController()
+    )
+
+    val verificationState = VerificationViewState(
+        isProcessing = false,
+        requestFocus = true,
+        errorMessage = null,
+        isSendingNewCode = false,
+        didSendNewCode = false,
+        redactedPhoneNumber = "***-***-1234",
+        email = "user@example.com",
+        defaultPayment = DisplayablePaymentDetails(
+            defaultCardBrand = "mastercard",
+            defaultPaymentType = "CARD",
+            last4 = "1234",
+        ).toDefaultPaymentUI(true),
+        isDialog = false
+    )
+
+    LinkInline2FASection(
+        verificationState = verificationState,
+        otpElement = otpElement,
+        onResend = {}
+    )
+}
+
+@Preview(name = "Default state", showBackground = true)
+@Composable
+private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
+    val otpElement = OTPElement(
+        identifier = IdentifierSpec.Generic("otp"),
+        controller = OTPController()
+    )
+
+    val verificationState = VerificationViewState(
+        isProcessing = false,
+        requestFocus = true,
+        errorMessage = null,
+        isSendingNewCode = false,
+        didSendNewCode = false,
+        redactedPhoneNumber = "***-***-1234",
+        email = "user@example.com",
+        defaultPayment = DisplayablePaymentDetails(
+            defaultCardBrand = null,
+            defaultPaymentType = "BANK_ACCOUNT",
+            last4 = "1234",
+        ).toDefaultPaymentUI(true),
         isDialog = false
     )
 
@@ -249,6 +320,7 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
         didSendNewCode = false,
         redactedPhoneNumber = "***-***-1234",
         email = "user@example.com",
+        defaultPayment = null,
         isDialog = false
     )
 
@@ -281,6 +353,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         didSendNewCode = false,
         redactedPhoneNumber = "***-***-1234",
         email = "user@example.com",
+        defaultPayment = null,
         isDialog = false
     )
 
@@ -288,71 +361,5 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         verificationState = verificationState,
         otpElement = otpElement,
         onResend = { }
-    )
-}
-
-@Preview(name = "With card", showBackground = true)
-@Composable
-private fun LinkEmbeddedOtpSectionWithCardPreview() {
-    val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
-        controller = OTPController()
-    )
-
-    val paymentUI = DisplayablePaymentDetails(
-        defaultCardBrand = "visa",
-        last4 = "4242",
-        defaultPaymentType = "CARD",
-    ).toDefaultPaymentUI(true)
-
-    val verificationState = VerificationViewState(
-        isProcessing = false,
-        requestFocus = true,
-        errorMessage = null,
-        isSendingNewCode = false,
-        didSendNewCode = false,
-        redactedPhoneNumber = "***-***-1234",
-        email = "user@example.com",
-        isDialog = false,
-        defaultPayment = paymentUI
-    )
-
-    LinkInline2FASection(
-        verificationState = verificationState,
-        otpElement = otpElement,
-        onResend = {}
-    )
-}
-
-@Preview(name = "With bank", showBackground = true)
-@Composable
-private fun LinkEmbeddedOtpSectionWithBankPreview() {
-    val otpElement = OTPElement(
-        identifier = IdentifierSpec.Generic("otp"),
-        controller = OTPController()
-    )
-
-    val paymentUI = DisplayablePaymentDetails(
-        defaultCardBrand = null,
-        last4 = "4242",
-        defaultPaymentType = "BANK_ACCOUNT",
-    ).toDefaultPaymentUI(true)
-
-    val verificationState = VerificationViewState(
-        isProcessing = false,
-        requestFocus = true,
-        errorMessage = null,
-        isSendingNewCode = false,
-        didSendNewCode = false,
-        redactedPhoneNumber = "***-***-1234",
-        email = "user@example.com",
-        isDialog = false,
-        defaultPayment = paymentUI
-    )
-
-    LinkInline2FASection(
-        verificationState = verificationState,
-        otpElement = otpElement,
-        onResend = {}
     )
 }

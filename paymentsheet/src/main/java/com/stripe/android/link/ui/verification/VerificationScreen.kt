@@ -42,6 +42,7 @@ fun VerificationPreview() {
                     requestFocus = false,
                     redactedPhoneNumber = "(...)",
                     email = "email@email.com",
+                    defaultPayment = null,
                     isDialog = false
                 ),
                 otpElement = OTPSpec.transform(),

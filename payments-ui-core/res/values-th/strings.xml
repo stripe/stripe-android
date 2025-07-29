@@ -99,6 +99,8 @@
   <string name="stripe_paypal_mandate">การยืนยันการการชำระเงินด้วย PayPal หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี PayPal ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">การยืนยันการการชำระเงินด้วย RevolutPay หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี RevolutPay ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
+  <!-- Satispay mandate text -->
+  <string name="stripe_satispay_mandate">การดำเนินการต่อแปลว่าคุณอนุญาตให้ %1$s หักเงินจากยอดเงิน Satispay ของคุณโดยอัตโนมัติตามระยะเวลาที่กำหนดตามแผนการซื้อหรือการสมัครสมาชิกของคุณ</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">บันทึกไว้เพื่อชำระเงินด้วย %s ในอนาคต</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->

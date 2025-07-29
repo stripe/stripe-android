@@ -220,18 +220,10 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     fun `'action' should return 'Launch' after successful sign-in & attach`() = test(
         attachNewCardToAccountResult = Result.success(
             LinkPaymentDetails.Saved(
-                paymentDetails = ConsumerPaymentDetails.Card(
-                    id = "pm_1",
+                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                    id = "csmrpd_123",
                     last4 = "4242",
-                    isDefault = false,
-                    expiryYear = 2030,
-                    expiryMonth = 4,
-                    brand = CardBrand.Visa,
-                    cvcCheck = CvcCheck.Pass,
-                    networks = emptyList(),
-                    funding = "CREDIT",
-                    nickname = null,
-                    billingAddress = null,
+                    paymentMethodId = "pm_1",
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             )
@@ -486,18 +478,10 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         actionTest(
             attachNewCardToAccountResult = Result.success(
                 LinkPaymentDetails.Saved(
-                    paymentDetails = ConsumerPaymentDetails.Card(
-                        id = "pm_1",
+                    paymentDetails = ConsumerPaymentDetails.Passthrough(
+                        id = "csmrpd_123",
                         last4 = "4242",
-                        isDefault = false,
-                        expiryYear = 2030,
-                        expiryMonth = 4,
-                        brand = CardBrand.Visa,
-                        cvcCheck = CvcCheck.Pass,
-                        networks = emptyList(),
-                        funding = "CREDIT",
-                        nickname = null,
-                        billingAddress = null,
+                        paymentMethodId = "pm_1",
                     ),
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 )
@@ -714,7 +698,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 defaultBillingDetails = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 allowUserEmailEdits = true,
-                enableDisplayableDefaultValuesInEce = false
+                enableDisplayableDefaultValuesInEce = false,
+                customerId = null
             ),
             userInput = userInput,
         )

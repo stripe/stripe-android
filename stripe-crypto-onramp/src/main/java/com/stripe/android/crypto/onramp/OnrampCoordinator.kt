@@ -12,9 +12,7 @@ import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
-import com.stripe.android.link.LinkController
 import javax.inject.Inject
 
 /**
@@ -29,6 +27,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OnrampCoordinator @Inject internal constructor(
     private val viewModel: OnrampCoordinatorViewModel,
+    private val onrampLinkController: OnrampLinkController,
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val onrampCallbacks: OnrampCallbacks
 ) {
@@ -41,7 +40,7 @@ class OnrampCoordinator @Inject internal constructor(
     fun configure(
         configuration: OnrampConfiguration,
     ) {
-        viewModel.configure(configuration, onrampCallbacks.configurationCallback)
+        viewModel.configure(configuration)
     }
 
     /**
@@ -50,7 +49,7 @@ class OnrampCoordinator @Inject internal constructor(
      * @param email The email address to look up.
      */
     fun isLinkUser(email: String) {
-        viewModel.isLinkUser(email)
+        onrampLinkController.isLinkUser(email)
     }
 
     /**
@@ -58,9 +57,8 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param info The LinkInfo for the new user.
      */
-    @Suppress("UnusedParameter")
     fun registerNewLinkUser(info: LinkUserInfo) {
-        TODO("Not yet implemented")
+        onrampLinkController.registerNewUser(info)
     }
 
     /**
@@ -68,19 +66,8 @@ class OnrampCoordinator @Inject internal constructor(
      *
      * @param email The email address of the existing user.
      */
-    @Suppress("UnusedParameter")
     fun authenticateExistingLinkUser(email: String) {
-        TODO("Not yet implemented")
-    }
-
-    /**
-     * Present UI to authenticate a Link user.
-     *
-     * @param email The email address to authenticate.
-     */
-    @Suppress("UnusedParameter")
-    fun presentForAuthentication(email: String) {
-        TODO("Not yet implemented")
+        onrampLinkController.authenticateExistingUser(email)
     }
 
     /**
@@ -125,37 +112,11 @@ class OnrampCoordinator @Inject internal constructor(
         ): OnrampCoordinator {
             val linkElementCallbackIdentifier = "OnrampCoordinator"
 
-            val linkController: LinkController by lazy {
-                // Resolve the hosting activity, fail fast if incorrect type
-                val activity: ComponentActivity =
-                    (activityResultRegistryOwner as? ComponentActivity)
-                        ?: throw IllegalStateException(
-                            "Expected a ComponentActivity, got ${activityResultRegistryOwner::class}"
-                        )
-
-                LinkController.create(
-                    activity = activity,
-                    presentPaymentMethodsCallback = { /* No-op for now */ },
-                    lookupConsumerCallback = { result ->
-                        when (result) {
-                            is LinkController.LookupConsumerResult.Success ->
-                                onrampCallbacks.linkLookupCallback.onResult(
-                                    OnrampLinkLookupResult.Completed(result.isConsumer)
-                                )
-                            is LinkController.LookupConsumerResult.Failed ->
-                                onrampCallbacks.linkLookupCallback.onResult(
-                                    OnrampLinkLookupResult.Failed(result.error)
-                                )
-                        }
-                    },
-                    createPaymentMethodCallback = { /* No-op for now */ },
-                    authenticationCallback = { /* No-op for now */ }
-                )
-            }
-
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = OnrampCoordinatorViewModel.Factory(linkController = linkController)
+                factory = OnrampCoordinatorViewModel.Factory(
+                    onrampCallbacks = onrampCallbacks
+                )
             ).get(
                 key = "OnRampCoordinatorViewModel(instance = $linkElementCallbackIdentifier)",
                 modelClass = OnrampCoordinatorViewModel::class.java
@@ -174,6 +135,7 @@ class OnrampCoordinator @Inject internal constructor(
                     .onRampCoordinatorViewModel(viewModel)
                     .linkElementCallbackIdentifier(linkElementCallbackIdentifier)
                     .activityResultRegistryOwner(activityResultRegistryOwner)
+                    .lifecycleOwner(lifecycleOwner)
                     .onrampCallbacks(onrampCallbacks)
                     .build()
 

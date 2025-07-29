@@ -22,6 +22,7 @@ internal interface LinkControllerComponent {
             @BindsInstance lookupConsumerCallback: LinkController.LookupConsumerCallback,
             @BindsInstance createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
             @BindsInstance authenticationCallback: LinkController.AuthenticationCallback,
+            @BindsInstance registerConsumerCallback: LinkController.RegisterConsumerCallback,
         ): LinkControllerComponent
     }
 }

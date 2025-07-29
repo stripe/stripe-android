@@ -58,15 +58,17 @@ internal class OnrampActivity : ComponentActivity() {
         // Create callbacks to handle async responses
         val callbacks = OnrampCallbacks(
             configurationCallback = viewModel::onConfigurationResult,
-            linkLookupCallback = viewModel::onLookupResult
+            linkLookupCallback = viewModel::onLookupResult,
+            authenticationCallback = viewModel::onAuthenticationResult,
+            registerUserCallback = viewModel::onRegisterUserResult
         )
 
         onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
 
         val configuration = OnrampConfiguration(
-            publishableKey = "pk_test_your_key_here",
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
+
         onrampCoordinator.configure(configuration)
 
         setContent {

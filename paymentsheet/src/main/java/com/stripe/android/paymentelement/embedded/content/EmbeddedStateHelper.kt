@@ -51,7 +51,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         selectionHolder.set(state.confirmationState.selection)
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
-            rowStyle = state.confirmationState.configuration.appearance.embeddedAppearance.style,
+            appearance = state.confirmationState.configuration.appearance.embeddedAppearance,
             embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
         )
     }
@@ -70,6 +70,13 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
                 "Using RowSelectionBehavior.ImmediateAction with FormSheetAction.Confirm is not supported " +
                     "when Google Pay or a customer configuration is provided. " +
                     "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
+            )
+        }
+        if (configuration.embeddedViewDisplaysMandateText && isRowSelectionImmediateAction) {
+            throw IllegalArgumentException(
+                "Your integration must set `embeddedViewDisplaysMandateText` to false and display the mandate " +
+                    "(`embeddedPaymentElement.paymentOption.mandateText`) to customer near your buy button " +
+                    "and/or before confirmation when `RowSelectionBehavior = ImmediateAction`"
             )
         }
     }

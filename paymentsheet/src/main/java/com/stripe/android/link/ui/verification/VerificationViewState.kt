@@ -17,5 +17,5 @@ internal data class VerificationViewState(
     val redactedPhoneNumber: String,
     val email: String,
     val isDialog: Boolean,
-    val defaultPayment: DefaultPaymentUI? = null
+    val defaultPayment: DefaultPaymentUI?
 ) : Parcelable

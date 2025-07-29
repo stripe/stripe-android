@@ -277,7 +277,7 @@ internal class PaymentMethodLayoutUITest(
                         interactor = interactor,
                         embeddedViewDisplaysMandateText = true,
                         modifier = modifier,
-                        rowStyle = Embedded.RowStyle.FloatingButton.default,
+                        appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     )
                 }
             )

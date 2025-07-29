@@ -8,7 +8,7 @@ import com.stripe.android.model.DisplayablePaymentDetails
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DisplayablePaymentDetailsJsonParser : ModelJsonParser<DisplayablePaymentDetails> {
+object DisplayablePaymentDetailsJsonParser : ModelJsonParser<DisplayablePaymentDetails> {
     override fun parse(json: JSONObject): DisplayablePaymentDetails {
         return DisplayablePaymentDetails(
             defaultCardBrand = optString(json, FIELD_DEFAULT_CARD_BRAND),
@@ -18,10 +18,8 @@ class DisplayablePaymentDetailsJsonParser : ModelJsonParser<DisplayablePaymentDe
         )
     }
 
-    private companion object {
-        private const val FIELD_DEFAULT_CARD_BRAND = "default_card_brand"
-        private const val FIELD_DEFAULT_PAYMENT_TYPE = "default_payment_type"
-        private const val FIELD_LAST_4 = "last_4"
-        private const val FIELD_NUMBER_OF_SAVED_PAYMENT_DETAILS = "number_of_saved_payment_details"
-    }
+    private const val FIELD_DEFAULT_CARD_BRAND = "default_card_brand"
+    private const val FIELD_DEFAULT_PAYMENT_TYPE = "default_payment_type"
+    private const val FIELD_LAST_4 = "last_4"
+    private const val FIELD_NUMBER_OF_SAVED_PAYMENT_DETAILS = "number_of_saved_payment_details"
 }

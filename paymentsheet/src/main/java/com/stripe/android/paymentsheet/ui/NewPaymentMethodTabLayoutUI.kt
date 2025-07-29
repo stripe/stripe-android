@@ -4,7 +4,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.lazy.LazyListState
@@ -21,8 +20,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
-import com.stripe.android.uicore.IconStyle
-import com.stripe.android.uicore.LocalIconStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -75,22 +72,13 @@ internal fun NewPaymentMethodTabLayoutUI(
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
-                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
-                    item.darkThemeIconUrl
-                } else {
-                    item.lightThemeIconUrl
-                }
                 NewPaymentMethodTab(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
-                    iconRes = if (LocalIconStyle.current == IconStyle.Filled) {
-                        item.iconResource
-                    } else {
-                        item.outlinedIconResource ?: item.iconResource
-                    },
-                    iconUrl = iconUrl,
+                    iconRes = item.icon(),
+                    iconUrl = item.iconUrl(),
                     imageLoader = imageLoader,
                     title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,

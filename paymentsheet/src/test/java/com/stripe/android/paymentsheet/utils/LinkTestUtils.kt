@@ -18,17 +18,10 @@ import org.mockito.kotlin.mock
 
 internal object LinkTestUtils {
     val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
-        paymentDetails = ConsumerPaymentDetails.Card(
-            id = "pm_123",
+        paymentDetails = ConsumerPaymentDetails.Passthrough(
+            id = "csmrpd_123",
             last4 = "4242",
-            expiryYear = 2024,
-            expiryMonth = 4,
-            brand = CardBrand.DinersClub,
-            cvcCheck = CvcCheck.Fail,
-            isDefault = false,
-            networks = emptyList(),
-            funding = "CREDIT",
-            nickname = null,
+            paymentMethodId = "pm_123",
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
                 line1 = null,
@@ -98,7 +91,8 @@ internal object LinkTestUtils {
             defaultBillingDetails = null,
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
-            enableDisplayableDefaultValuesInEce = false
+            enableDisplayableDefaultValuesInEce = false,
+            customerId = null
         )
     }
 }

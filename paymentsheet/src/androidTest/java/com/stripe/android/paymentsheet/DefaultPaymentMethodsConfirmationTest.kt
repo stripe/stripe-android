@@ -26,13 +26,12 @@ import org.junit.runner.RunWith
 internal class DefaultPaymentMethodsConfirmationTest {
 
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create {
+        around(IntentsRule())
+    }
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
-
-    @get:Rule
-    val intentsRule = IntentsRule()
 
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType

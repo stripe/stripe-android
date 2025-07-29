@@ -372,6 +372,7 @@ private fun Preview() {
                         didSendNewCode = false,
                         redactedPhoneNumber = "(•••) ••• ••55",
                         email = "email@email.com",
+                        defaultPayment = null,
                         isDialog = true,
                     ),
                     otpElement = OTPElement(

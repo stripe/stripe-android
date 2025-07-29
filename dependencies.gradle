@@ -67,10 +67,8 @@ ext.versions = [
         retrofit                    : '2.11.0',
         robolectric                 : '4.15.1',
         sentryGradlePlugin          : '5.4.0',
-        shot                        : '6.1.0',
         showkase                    : '1.0.0-beta18',
-        tensorflowLite              : '2.11.0',
-        tensorflowLiteSupport       : '0.4.3',
+        litert                      : '1.4.0',
         testParameterInjector       : '1.18',
         truth                       : '1.4.4',
         turbine                     : '1.2.0',
@@ -92,7 +90,6 @@ ext.buildLibs = [
         kotlinSerializationPlugin   : "org.jetbrains.kotlin:kotlin-serialization:${versions.kotlin}",
         paparazzi                   : "app.cash.paparazzi:paparazzi-gradle-plugin:${versions.paparazzi}",
         poko                        : "dev.drewhamilton.poko:poko-compiler-plugin:${versions.poko}",
-        shot                        : "com.karumi:shot:${versions.shot}",
 ]
 
 ext.configs = [
@@ -198,8 +195,8 @@ ext.libs = [
         showkase                            : "com.airbnb.android:showkase:${versions.showkase}",
         showkaseAnnotation                  : "com.airbnb.android:showkase-annotation:${versions.showkase}",
         showkaseProcessor                   : "com.airbnb.android:showkase-processor:${versions.showkase}",
-        tensorflowLite                      : "org.tensorflow:tensorflow-lite:${versions.tensorflowLite}",
-        tensorflowLiteSupport               : "org.tensorflow:tensorflow-lite-support:${versions.tensorflowLiteSupport}",
+        litert                              : "com.google.ai.edge.litert:litert:${versions.litert}",
+        litertSupport                       : "com.google.ai.edge.litert:litert-support:${versions.litert}",
         tensorflowLitePlayServices          : "com.google.android.gms:play-services-tflite-java:${versions.playServicesTfLite}",
         tensorflowLitePlayServicesSupport   : "com.google.android.gms:play-services-tflite-support:${versions.playServicesTfLite}",
         zxing                               : "com.google.zxing:core:${versions.zxing}",

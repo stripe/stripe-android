@@ -37,6 +37,7 @@ private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(

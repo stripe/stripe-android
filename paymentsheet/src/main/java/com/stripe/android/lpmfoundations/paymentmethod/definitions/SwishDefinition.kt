@@ -31,6 +31,7 @@ private object SwishUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = SwishDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,
+        iconResourceNight = null,
     )
 
     override fun createFormElements(

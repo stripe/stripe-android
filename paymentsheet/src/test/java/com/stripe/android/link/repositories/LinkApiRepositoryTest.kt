@@ -73,7 +73,7 @@ class LinkApiRepositoryTest {
         val consumersApiService = FakeConsumersApiService()
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer(TestFactory.EMAIL)
+        val result = linkRepository.lookupConsumer(TestFactory.EMAIL, customerId = null)
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
         assertThat(consumersApiService.lookupCalls.size).isEqualTo(1)
@@ -92,14 +92,15 @@ class LinkApiRepositoryTest {
                 email: String,
                 requestSurface: String,
                 doNotLogConsumerFunnelEvent: Boolean,
-                requestOptions: ApiRequest.Options
+                requestOptions: ApiRequest.Options,
+                customerId: String?
             ): ConsumerSessionLookup {
                 throw error
             }
         }
         val linkRepository = linkRepository(consumersApiService)
 
-        val result = linkRepository.lookupConsumer("email")
+        val result = linkRepository.lookupConsumer("email", customerId = null)
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
     }
@@ -114,7 +115,8 @@ class LinkApiRepositoryTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
-            emailSource = TestFactory.EMAIL_SOURCE
+            emailSource = TestFactory.EMAIL_SOURCE,
+            customerId = null
         )
 
         assertThat(result).isEqualTo(Result.success(TestFactory.CONSUMER_SESSION_LOOKUP))
@@ -141,7 +143,8 @@ class LinkApiRepositoryTest {
                 verificationToken: String,
                 appId: String,
                 requestOptions: ApiRequest.Options,
-                sessionId: String
+                sessionId: String,
+                customerId: String?
             ): ConsumerSessionLookup {
                 throw error
             }
@@ -153,7 +156,8 @@ class LinkApiRepositoryTest {
             verificationToken = TestFactory.VERIFICATION_TOKEN,
             appId = TestFactory.APP_ID,
             sessionId = TestFactory.SESSION_ID,
-            emailSource = TestFactory.EMAIL_SOURCE
+            emailSource = TestFactory.EMAIL_SOURCE,
+            customerId = null
         )
 
         assertThat(result).isEqualTo(Result.failure<ConsumerSessionLookup>(error))
@@ -473,7 +477,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
-        val id = "csmrpd*AYq4D_sXdAAAAOQ0"
+        val paymentDetailsId = "csmrpd*AYq4D_sXdAAAAOQ0"
 
         whenever(
             stripeRepository.sharePaymentDetails(
@@ -487,9 +491,7 @@ class LinkApiRepositoryTest {
         val result = linkRepository.shareCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
-            id = id,
-            last4 = "4242",
-            allowRedisplay = null,
+            id = paymentDetailsId,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -497,12 +499,18 @@ class LinkApiRepositoryTest {
 
         verify(stripeRepository).sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionSecret,
-            id = id,
+            id = paymentDetailsId,
             extraParams = mapOf("payment_method_options" to mapOf("card" to mapOf("cvc" to "123"))),
             requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
-            .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
+            .isEqualTo(
+                ConsumerPaymentDetails.Passthrough(
+                    id = paymentDetailsId,
+                    last4 = cardPaymentMethodCreateParams.cardLast4().orEmpty(),
+                    paymentMethodId = "pm_123"
+                )
+            )
         assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
             .isEqualTo(
                 PaymentMethodCreateParams.createLink(
@@ -530,8 +538,6 @@ class LinkApiRepositoryTest {
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
-            last4 = "4242",
-            allowRedisplay = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
@@ -768,11 +774,9 @@ class LinkApiRepositoryTest {
         ).thenReturn(Result.success("pm_123"))
 
         val result = linkRepository.shareCardPaymentDetails(
-            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            paymentMethodCreateParams = cardPaymentMethodCreateParams.copy(allowRedisplay = allowRedisplay),
             consumerSessionClientSecret = "consumer_session_secret",
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
-            last4 = "4242",
-            allowRedisplay = allowRedisplay,
         )
 
         assertThat(result).isNotNull()

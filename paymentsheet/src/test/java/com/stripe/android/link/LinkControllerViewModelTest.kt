@@ -11,6 +11,7 @@ import com.stripe.android.link.injection.LinkControllerComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.FakeLinkRepository
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -62,22 +63,41 @@ class LinkControllerViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.state(application).test {
-            assertThat(awaitItem().isConsumerVerified).isNull()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isNull()
+                assertThat(internalLinkAccount).isNull()
+            }
 
             linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
-            assertThat(awaitItem().isConsumerVerified).isTrue()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isTrue()
+                assertThat(internalLinkAccount).isEqualTo(
+                    LinkController.LinkAccount(
+                        email = TestFactory.LINK_ACCOUNT.email,
+                        redactedPhoneNumber = TestFactory.LINK_ACCOUNT.redactedPhoneNumber,
+                        sessionState = LinkController.SessionState.LoggedIn,
+                        consumerSessionClientSecret = TestFactory.LINK_ACCOUNT.clientSecret,
+                    )
+                )
+            }
 
             val unverifiedSession = TestFactory.CONSUMER_SESSION.copy(
                 verificationSessions = listOf(TestFactory.VERIFICATION_STARTED_SESSION)
             )
             linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(unverifiedSession)))
 
-            assertThat(awaitItem().isConsumerVerified).isFalse()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isFalse()
+                assertThat(internalLinkAccount?.sessionState).isEqualTo(LinkController.SessionState.NeedsVerification)
+            }
 
             linkAccountHolder.set(LinkAccountUpdate.Value(null))
 
-            assertThat(awaitItem().isConsumerVerified).isNull()
+            awaitItem().run {
+                assertThat(isConsumerVerified).isNull()
+                assertThat(internalLinkAccount).isNull()
+            }
         }
     }
 
@@ -359,7 +379,13 @@ class LinkControllerViewModelTest {
         val args = call.input
         assertThat(args.startWithVerificationDialog).isTrue()
         assertThat(args.linkAccountInfo.account).isNull()
-        assertThat(args.launchMode).isEqualTo(LinkLaunchMode.PaymentMethodSelection(null))
+        assertThat(args.launchMode)
+            .isEqualTo(
+                LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = null,
+                    sharePaymentDetailsImmediatelyAfterCreation = false
+                )
+            )
 
         val state = viewModel.state(application).first()
         assertThat(state.isConsumerVerified).isNull()
@@ -536,39 +562,6 @@ class LinkControllerViewModelTest {
             assertThat(result).isInstanceOf(LinkController.PresentPaymentMethodsResult.Failed::class.java)
             assertThat((result as LinkController.PresentPaymentMethodsResult.Failed).error).isEqualTo(error)
         }
-    }
-
-    @Test
-    fun `onLinkActivityResult() updates to different account without clearing state`() = runTest {
-        val viewModel = createViewModel()
-        configure(viewModel)
-        signIn()
-
-        val selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            collectedCvc = "123",
-            billingPhone = null
-        )
-        viewModel.updateState {
-            it.copy(selectedPaymentMethod = selectedPaymentMethod)
-        }
-
-        val anotherAccount = LinkAccount(
-            TestFactory.CONSUMER_SESSION.copy(emailAddress = "another@stripe.com")
-        )
-        viewModel.onLinkActivityResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.Value(anotherAccount)
-            )
-        )
-
-        viewModel.state(application).test {
-            val finalState = awaitItem()
-            assertThat(finalState.isConsumerVerified).isTrue()
-            assertThat(finalState.selectedPaymentMethodPreview).isNotNull()
-        }
-        assertThat(linkAccountHolder.linkAccountInfo.first().account).isEqualTo(anotherAccount)
     }
 
     @Test
@@ -819,6 +812,74 @@ class LinkControllerViewModelTest {
         // Verify that the launcher was called with null account
         val call = launcher.calls.awaitItem()
         assertThat(call.input.linkAccountInfo.account).isNull()
+    }
+
+    @Test
+    fun `onRegisterConsumer() on success emits success result and updates account`() = runTest {
+        val viewModel = createViewModel()
+
+        val email = "test@example.com"
+        val phone = "1234567890"
+        val country = "US"
+        val name = "Test User"
+        val consentAction = ConsumerSignUpConsentAction.Checkbox
+
+        linkRepository.consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
+
+        viewModel.registerConsumerResultFlow.test {
+            viewModel.onRegisterConsumer(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = consentAction
+            )
+
+            val result = awaitItem()
+            assertThat(result).isEqualTo(LinkController.RegisterConsumerResult.Success)
+        }
+
+        // Verify that the account was updated
+        val account = linkAccountHolder.linkAccountInfo.value.account
+        val expectedAccount = TestFactory.CONSUMER_SESSION_SIGN_UP.let {
+            LinkAccount(
+                consumerSession = it.consumerSession,
+                consumerPublishableKey = it.publishableKey,
+            )
+        }
+        assertThat(account).isEqualTo(expectedAccount)
+    }
+
+    @Test
+    fun `onRegisterConsumer() on failure emits failure result and clears account`() = runTest {
+        val viewModel = createViewModel()
+        signIn()
+
+        val email = "test@example.com"
+        val phone = "1234567890"
+        val country = "US"
+        val name = "Test User"
+        val consentAction = ConsumerSignUpConsentAction.Checkbox
+        val error = Exception("Registration failed")
+
+        linkRepository.consumerSignUpResult = Result.failure(error)
+
+        viewModel.registerConsumerResultFlow.test {
+            viewModel.onRegisterConsumer(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = consentAction
+            )
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.RegisterConsumerResult.Failed::class.java)
+            assertThat((result as LinkController.RegisterConsumerResult.Failed).error).isEqualTo(error)
+        }
+
+        // Verify that the account was cleared
+        assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
     }
 
     private suspend fun testAuthenticationClearsSavedPaymentData(

@@ -36,7 +36,8 @@ internal class FakeLinkAuth : LinkAuth {
     override suspend fun lookUp(
         email: String,
         emailSource: EmailSource,
-        startSession: Boolean
+        startSession: Boolean,
+        customerId: String?
     ): LinkAuthResult {
         lookupTurbine.add(
             item = LookupCall(

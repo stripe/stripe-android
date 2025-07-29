@@ -1,15 +1,17 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.uicore.IconStyle
+import com.stripe.android.paymentsheet.ui.IconHelper
 
 internal data class DisplayablePaymentMethod(
     val code: PaymentMethodCode,
     val syntheticCode: String = code,
     val displayName: ResolvableString,
     @DrawableRes private val iconResource: Int,
+    @DrawableRes private val iconResourceNight: Int?,
     val lightThemeIconUrl: String?,
     val darkThemeIconUrl: String?,
     val iconRequiresTinting: Boolean,
@@ -18,8 +20,10 @@ internal data class DisplayablePaymentMethod(
     val onClick: () -> Unit,
     @DrawableRes private val outlinedIconResource: Int? = null,
 ) {
-    fun icon(style: IconStyle) = when (style) {
-        IconStyle.Filled -> iconResource
-        IconStyle.Outlined -> outlinedIconResource ?: iconResource
-    }
+    @Composable
+    @DrawableRes
+    fun icon() = IconHelper.icon(iconResource, iconResourceNight, outlinedIconResource)
+
+    @Composable
+    fun iconUrl() = IconHelper.iconUrl(lightThemeIconUrl, darkThemeIconUrl)
 }

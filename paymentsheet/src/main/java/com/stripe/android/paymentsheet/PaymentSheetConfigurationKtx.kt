@@ -131,7 +131,7 @@ internal val PaymentSheet.WalletButtonsConfiguration.allowedWalletTypes: List<Wa
     }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
-private fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
+internal fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
     return TextStyle(
         fontSize = fontSizeSp?.sp ?: TextUnit.Unspecified,
         fontWeight = fontWeight?.let { FontWeight(it) },
