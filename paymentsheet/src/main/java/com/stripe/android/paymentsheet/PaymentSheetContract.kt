@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.injection.InjectorKey
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.model.ClientSecret
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
@@ -54,7 +55,7 @@ class PaymentSheetContract :
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
 
-        val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config?.googlePay
+        val googlePayConfig: GooglePayConfiguration? get() = config?.googlePay
 
         internal fun toV2(context: Context): PaymentSheetContractV2.Args {
             return PaymentSheetContractV2.Args(

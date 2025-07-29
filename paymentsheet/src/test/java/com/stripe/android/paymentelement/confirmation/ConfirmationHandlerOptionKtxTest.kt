@@ -9,6 +9,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -233,8 +234,8 @@ class ConfirmationHandlerOptionKtxTest {
             PaymentSelection.GooglePay.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .googlePay(
-                        PaymentSheet.GooglePayConfiguration(
-                            environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        GooglePayConfiguration(
+                            environment = GooglePayConfiguration.Environment.Production,
                             countryCode = "US",
                             currencyCode = "USD",
                             amount = 5000,
@@ -248,7 +249,7 @@ class ConfirmationHandlerOptionKtxTest {
         ).isEqualTo(
             GooglePayConfirmationOption(
                 config = GooglePayConfirmationOption.Config(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    environment = GooglePayConfiguration.Environment.Production,
                     merchantName = "Merchant, Inc.",
                     merchantCountryCode = "US",
                     merchantCurrencyCode = "USD",

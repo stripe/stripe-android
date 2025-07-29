@@ -18,6 +18,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -1449,8 +1450,8 @@ internal class DefaultFlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
@@ -1488,8 +1489,8 @@ internal class DefaultFlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
@@ -1527,8 +1528,8 @@ internal class DefaultFlowControllerTest {
                 merchantDisplayName = "Example, Inc."
             )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
@@ -1879,8 +1880,8 @@ internal class DefaultFlowControllerTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = "My merchant",
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            googlePay = GooglePayConfiguration(
+                environment = GooglePayConfiguration.Environment.Test,
                 countryCode = "CA",
                 currencyCode = "CAD",
                 amount = expectedAmount,
@@ -1904,7 +1905,7 @@ internal class DefaultFlowControllerTest {
         assertThat(arguments.confirmationOption).isEqualTo(
             GooglePayConfirmationOption(
                 config = GooglePayConfirmationOption.Config(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    environment = GooglePayConfiguration.Environment.Test,
                     merchantCountryCode = "CA",
                     merchantCurrencyCode = "CAD",
                     customAmount = expectedAmount,

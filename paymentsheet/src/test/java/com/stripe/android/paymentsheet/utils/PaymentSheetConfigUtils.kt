@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.utils
 
-import com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration.ButtonType
-import com.stripe.android.paymentsheet.PaymentSheet.GooglePayConfiguration.Environment
+import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration.ButtonType
+import com.stripe.android.elements.payment.GooglePayConfiguration.Environment
 
 fun GooglePayConfiguration.prefillCreate(
     environment: Environment = this.environment,
