@@ -8,16 +8,16 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal object AddressElementActivityContract :
-    ActivityResultContract<AddressElementActivityContract.Args, AddressLauncherResult>() {
+    ActivityResultContract<AddressElementActivityContract.Args, AddressLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
         return Intent(context, AddressElementActivity::class.java).putExtra(EXTRA_ARGS, input)
     }
 
     @Suppress("DEPRECATION")
-    override fun parseResult(resultCode: Int, intent: Intent?): AddressLauncherResult =
+    override fun parseResult(resultCode: Int, intent: Intent?): AddressLauncher.Result =
         intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.addressOptionsResult
-            ?: AddressLauncherResult.Canceled
+            ?: AddressLauncher.Result.Canceled
 
     /**
      * Arguments for launching [AddressElementActivity] to collect an address.
@@ -41,7 +41,7 @@ internal object AddressElementActivityContract :
 
     @Parcelize
     data class Result(
-        val addressOptionsResult: AddressLauncherResult
+        val addressOptionsResult: AddressLauncher.Result
     ) : ActivityStarter.Result {
         override fun toBundle() = bundleOf(EXTRA_RESULT to this)
     }

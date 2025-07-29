@@ -194,7 +194,7 @@ internal class InputAddressViewModel @Inject constructor(
             )
         }
         navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
+            AddressLauncher.Result.Succeeded(addressDetails)
         )
     }
 

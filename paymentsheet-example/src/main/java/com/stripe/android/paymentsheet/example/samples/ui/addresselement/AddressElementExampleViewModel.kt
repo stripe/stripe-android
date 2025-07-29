@@ -7,7 +7,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.example.samples.networking.ExamplePublishableKeyResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.coroutines.Dispatchers
@@ -31,12 +31,12 @@ internal class AddressElementExampleViewModel(
         }
     }
 
-    fun handleResult(result: AddressLauncherResult) {
+    fun handleResult(result: AddressLauncher.Result) {
         when (result) {
-            is AddressLauncherResult.Canceled -> {
+            is AddressLauncher.Result.Canceled -> {
                 // Nothing to do here
             }
-            is AddressLauncherResult.Succeeded -> {
+            is AddressLauncher.Result.Succeeded -> {
                 _state.update {
                     (it as AddressElementExampleViewState.Content).copy(
                         address = result.address,

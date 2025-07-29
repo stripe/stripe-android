@@ -7,7 +7,6 @@ import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
@@ -286,7 +285,7 @@ class InputAddressViewModelTest {
             ),
         )
 
-    @OptIn(AddressElementSameAsBillingPreview::class)
+    @OptIn(AddressLauncher.AddressElementSameAsBillingPreview::class)
     @Test
     fun `'Shipping same as billing' should work as expected when only billing provided`() = runTest {
         val viewModel = createViewModel(
@@ -444,7 +443,7 @@ class InputAddressViewModelTest {
         }
     }
 
-    @OptIn(AddressElementSameAsBillingPreview::class)
+    @OptIn(AddressLauncher.AddressElementSameAsBillingPreview::class)
     @Test
     fun `'Shipping same as billing' should work as expected with both billing & shipping`() = runTest {
         val viewModel = createViewModel(
@@ -537,7 +536,7 @@ class InputAddressViewModelTest {
         }
     }
 
-    @OptIn(AddressElementSameAsBillingPreview::class)
+    @OptIn(AddressLauncher.AddressElementSameAsBillingPreview::class)
     private fun billingSameAsShippingInitialValueTest(
         address: AddressDetails?,
         allowedCountries: Set<String>,

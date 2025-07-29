@@ -29,7 +29,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
+import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
@@ -600,13 +600,13 @@ internal class PaymentSheetPlaygroundViewModel(
         return createIntentResult
     }
 
-    fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
+    fun onAddressLauncherResult(addressLauncherResult: AddressLauncher.Result) {
         when (addressLauncherResult) {
-            AddressLauncherResult.Canceled -> {
+            AddressLauncher.Result.Canceled -> {
                 status.value = StatusMessage("Canceled")
             }
 
-            is AddressLauncherResult.Succeeded -> {
+            is AddressLauncher.Result.Succeeded -> {
                 val addressDetails = addressLauncherResult.address
                 playgroundSettingsFlow.value?.set(ShippingAddressSettingsDefinition, addressDetails)
                 flowControllerState.update { it?.copy(addressDetails = addressDetails) }

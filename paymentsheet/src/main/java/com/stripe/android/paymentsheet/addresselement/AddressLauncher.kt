@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import android.app.Activity
 import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -13,7 +14,6 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
-import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.parcelize.Parcelize
@@ -33,7 +33,7 @@ class AddressLauncher internal constructor(
      */
     constructor(
         activity: ComponentActivity,
-        callback: AddressLauncherResultCallback
+        callback: Callback
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
@@ -51,7 +51,7 @@ class AddressLauncher internal constructor(
      */
     constructor(
         fragment: Fragment,
-        callback: AddressLauncherResultCallback
+        callback: Callback
     ) : this(
         application = fragment.requireActivity().application,
         activityResultLauncher = fragment.registerForActivityResult(
@@ -236,6 +236,39 @@ class AddressLauncher internal constructor(
             REQUIRED
         }
     }
+
+    sealed class Result : Parcelable {
+
+        internal abstract val resultCode: Int
+
+        @Parcelize
+        data class Succeeded(
+            val address: AddressDetails
+        ) : Result() {
+            override val resultCode: Int
+                get() = Activity.RESULT_OK
+        }
+
+        @Parcelize
+        object Canceled : Result() {
+            override val resultCode: Int
+                get() = Activity.RESULT_CANCELED
+        }
+    }
+
+    /**
+     * Callback that is invoked when a [Result] is available.
+     */
+    fun interface Callback {
+        fun onAddressLauncherResult(addressLauncherResult: Result)
+    }
+
+    @RequiresOptIn(
+        level = RequiresOptIn.Level.ERROR,
+        message = "This API is under construction. It can be changed or removed at any time (use at your own risk)."
+    )
+    @Retention(AnnotationRetention.BINARY)
+    annotation class AddressElementSameAsBillingPreview
 }
 
 /**
@@ -244,7 +277,7 @@ class AddressLauncher internal constructor(
  */
 @Composable
 fun rememberAddressLauncher(
-    callback: AddressLauncherResultCallback
+    callback: AddressLauncher.Callback
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
         contract = AddressElementActivityContract,
