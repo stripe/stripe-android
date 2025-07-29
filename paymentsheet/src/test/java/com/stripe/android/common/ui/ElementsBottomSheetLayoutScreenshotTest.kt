@@ -7,7 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.elements.Appearance
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule

@@ -962,6 +962,9 @@ public final class com/stripe/android/elements/Appearance$Typography$Font$Creato
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/elements/AppearanceAPIAdditionsPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/elements/BillingDetails : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -1860,9 +1863,6 @@ public final class com/stripe/android/paymentelement/AnalyticEvent$TappedConfirm
 
 public abstract interface class com/stripe/android/paymentelement/AnalyticEventCallback {
 	public abstract fun onEvent (Lcom/stripe/android/paymentelement/AnalyticEvent;)V
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/AppearanceAPIAdditionsPreview : java/lang/annotation/Annotation {
 }
 
 public abstract interface class com/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback {

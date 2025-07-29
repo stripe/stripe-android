@@ -10,8 +10,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.PrimaryButtonColors
