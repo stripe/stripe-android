@@ -51,8 +51,12 @@ internal fun SettingsUi(
             }
         }
 
-        for (settingDefinition in filteredDefinitions) {
-            Setting(settingDefinition, playgroundSettings)
+        if (filteredDefinitions.isEmpty()) {
+            Text("No matching settings found")
+        } else {
+            for (settingDefinition in filteredDefinitions) {
+                Setting(settingDefinition, playgroundSettings)
+            }
         }
     }
 }
