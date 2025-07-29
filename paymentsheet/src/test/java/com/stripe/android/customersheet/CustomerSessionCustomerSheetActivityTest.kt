@@ -15,6 +15,7 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule

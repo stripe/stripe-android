@@ -17,9 +17,9 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.address.AddressLauncher
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentMethod

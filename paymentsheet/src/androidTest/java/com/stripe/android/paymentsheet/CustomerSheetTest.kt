@@ -3,9 +3,8 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheet.Result
-import com.stripe.android.customersheet.PaymentOptionSelection
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.PaymentOptionSelection
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.testBodyFromFile

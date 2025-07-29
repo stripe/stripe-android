@@ -1,5 +1,7 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.elements.customersheet.CustomerSheet
+
 /**
  * Callback to be used when you use [CustomerSheet], called when a customer makes a payment method
  * selection, the sheet is canceled, or an error occurred.

@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.customersheet.CustomerSheet.Result
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.query

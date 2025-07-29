@@ -2,8 +2,8 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.ElementsSession
 import kotlinx.parcelize.Parcelize
 

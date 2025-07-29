@@ -5,7 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.link.account.LinkStore

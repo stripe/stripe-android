@@ -8,8 +8,8 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.customersheet.CustomerSheet.Result
-import com.stripe.android.customersheet.PaymentOptionSelection
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
+import com.stripe.android.elements.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart

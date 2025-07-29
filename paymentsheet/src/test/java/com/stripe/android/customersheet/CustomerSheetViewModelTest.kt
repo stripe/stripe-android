@@ -20,6 +20,7 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand

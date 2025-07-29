@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.example.playground
 import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement

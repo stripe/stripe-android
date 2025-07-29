@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.CardBrand
 import junit.framework.TestCase.fail
 import org.junit.Test

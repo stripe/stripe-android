@@ -26,13 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheet.Result
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.address.AddressLauncher
 import com.stripe.android.elements.address.rememberAddressLauncher
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
