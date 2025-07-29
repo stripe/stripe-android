@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.model.StripeJsonUtils
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
@@ -17,7 +18,7 @@ internal object DeferredIntentValidator {
      */
     fun validate(
         stripeIntent: StripeIntent,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         allowsManualConfirmation: Boolean,
     ): StripeIntent {
         val params = intentConfiguration.toDeferredIntentParams()

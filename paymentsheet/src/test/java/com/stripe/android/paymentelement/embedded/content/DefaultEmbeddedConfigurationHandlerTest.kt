@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -12,7 +13,6 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -30,8 +30,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
     fun validationFailureReturnsFailureResult() = runScenario {
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("").build(),
         )
@@ -45,8 +45,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         sheetStateHolder.sheetIsOpen = true
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = configuration,
         )
@@ -59,16 +59,16 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
             arguments = DefaultEmbeddedConfigurationHandler.Arguments(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(currency = "USD"),
                 ),
                 configuration = configuration.asCommonConfiguration(),
             ),
             resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
         )
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = configuration,
         )
@@ -81,8 +81,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = configuration,
         )
@@ -95,8 +95,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
 
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Setup(currency = "USD"),
         )
 
         val state1 = handler.configure(
@@ -119,8 +119,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             .build()
         loader.emit(loader.createSuccess(configuration2.asCommonConfiguration()))
 
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Setup(currency = "USD"),
         )
 
         val state1 = handler.configure(
@@ -151,14 +151,14 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         )
 
         val state1 = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = configuration,
         ).getOrThrow()
         val state2 = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "EUR"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "EUR"),
             ),
             configuration = configuration,
         ).getOrThrow()
@@ -170,16 +170,16 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
             arguments = DefaultEmbeddedConfigurationHandler.Arguments(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(currency = "USD"),
                 ),
                 configuration = configuration.asCommonConfiguration(),
             ),
             resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
         )
         val result = handler.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Setup(currency = "USD"),
             ),
             configuration = configuration,
         )
@@ -189,8 +189,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
     @Test
     fun `results are saved in saved state handle`() = runScenario {
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Setup(currency = "USD"),
         )
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         val loaderResult = loader.createSuccess(configuration.asCommonConfiguration())
@@ -215,8 +215,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
     @Test
     fun `results are not saved in saved state handle on failure`() = runScenario {
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Setup(currency = "USD"),
         )
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(Result.failure(IllegalStateException("Bad data")))
@@ -233,8 +233,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
     fun `parallel calls to configure with the same arguments results in a single call to the loader`() = runScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Setup(currency = "USD"),
         )
         val countDownLatch = CountDownLatch(2)
         val testDispatcher = UnconfinedTestDispatcher()
@@ -270,8 +270,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
         val first = testScope.backgroundScope.async(Dispatchers.IO) {
             handler.configure(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD"),
                 ),
                 configuration = configuration,
             ).getOrThrow()
@@ -281,8 +281,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
 
         val second = testScope.backgroundScope.async(Dispatchers.IO) {
             handler.configure(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(currency = "USD"),
                 ),
                 configuration = configuration,
             ).getOrThrow()

@@ -6,6 +6,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -609,8 +610,8 @@ class PaymentSheetEventTest {
     fun `LoadSucceeded initialization mode is correct for deferred setup intents`() {
         val event = createLoadSucceededEvent(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup()
                 )
             )
         )
@@ -622,8 +623,8 @@ class PaymentSheetEventTest {
     fun `LoadSucceeded initialization mode is correct for deferred payment intents`() {
         val event = createLoadSucceededEvent(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 50,
                         currency = "usd",
                     )

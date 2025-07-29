@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.cvcrecollection
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.wallets.Wallet
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
@@ -83,8 +83,8 @@ class CvcRecollectionHandlerTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             optionsParams = null,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -115,8 +115,8 @@ class CvcRecollectionHandlerTest {
             paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             optionsParams = null,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -138,8 +138,8 @@ class CvcRecollectionHandlerTest {
             paymentMethod = paymentMethod,
             optionsParams = null,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -157,8 +157,8 @@ class CvcRecollectionHandlerTest {
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -187,8 +187,8 @@ class CvcRecollectionHandlerTest {
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -206,8 +206,8 @@ class CvcRecollectionHandlerTest {
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -225,8 +225,8 @@ class CvcRecollectionHandlerTest {
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(),
                     requireCvcRecollection = true
                 )
             )

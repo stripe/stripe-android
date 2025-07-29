@@ -20,6 +20,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -269,11 +270,11 @@ internal class FlowControllerTest {
 
             testContext.configureFlowController {
                 configureWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 5099,
                             currency = "usd",
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
                         )
                     ),
                     configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -551,8 +552,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -623,8 +624,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -695,8 +696,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -737,7 +738,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                CreateIntentResult.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         },
         resultCallback = ::assertCompleted,
@@ -751,8 +752,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 2000,
                         currency = "usd"
                     )
@@ -812,8 +813,8 @@ internal class FlowControllerTest {
 
         testContext.configureFlowController {
             configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         // This currency is different from USD in the created intent, which
                         // will cause the validator to fail this transaction.
                         amount = 5099,

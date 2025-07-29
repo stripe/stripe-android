@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -125,8 +126,8 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             selection = PaymentSelection.GooglePay,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5000,
                         currency = "USD",
                     ),

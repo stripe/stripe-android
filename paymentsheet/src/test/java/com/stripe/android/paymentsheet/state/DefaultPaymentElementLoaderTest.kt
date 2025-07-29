@@ -9,6 +9,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -1144,8 +1145,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Returns failure if configuring deferred intent with negative amounts`() = runTest {
         assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
             PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = -1099,
                         currency = "USD"
                     ),
@@ -1158,8 +1159,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Returns failure if configuring deferred intent with zero amounts`() = runTest {
         assertFailsWith<IllegalArgumentException>("Payment IntentConfiguration requires a positive amount.") {
             PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 0,
                         currency = "USD"
                     ),
@@ -1239,8 +1240,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
                 ),
@@ -1298,8 +1299,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -1325,8 +1326,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -2644,8 +2645,8 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 100L,
                     currency = "usd"
                 ),
@@ -2687,8 +2688,8 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 100L,
                     currency = "usd"
                 ),

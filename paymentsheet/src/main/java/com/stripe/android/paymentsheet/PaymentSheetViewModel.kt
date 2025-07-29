@@ -19,6 +19,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -734,7 +735,7 @@ private val PaymentElementLoader.InitializationMode.isProcessingPayment: Boolean
         is PaymentElementLoader.InitializationMode.PaymentIntent -> true
         is PaymentElementLoader.InitializationMode.SetupIntent -> false
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
-            intentConfiguration.mode is PaymentSheet.IntentConfiguration.Mode.Payment
+            intentConfiguration.mode is IntentConfiguration.Mode.Payment
         }
     }
 

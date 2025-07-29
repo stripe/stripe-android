@@ -6,9 +6,9 @@ import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -22,7 +22,7 @@ import javax.inject.Provider
 
 internal interface EmbeddedConfigurationHandler {
     suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State>
 }
@@ -47,8 +47,9 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     @Volatile
     private var inFlightRequest: InFlightRequest? = null
 
+    @Suppress("LongMethod")
     override suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
         val targetConfiguration = configuration.asCommonConfiguration()
@@ -136,7 +137,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
 
     @Parcelize
     data class Arguments(
-        val intentConfiguration: PaymentSheet.IntentConfiguration,
+        val intentConfiguration: IntentConfiguration,
         val configuration: CommonConfiguration,
     ) : Parcelable
 

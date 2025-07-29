@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.data
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -66,7 +67,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             "us_bank_account",
             "sepa_debit"
         )
-        assertThat(intentConfiguration.mode).isInstanceOf<PaymentSheet.IntentConfiguration.Mode.Setup>()
+        assertThat(intentConfiguration.mode).isInstanceOf<IntentConfiguration.Mode.Setup>()
 
         val customer = lastParams?.customer
         assertThat(customer?.id).isEqualTo("cus_1")

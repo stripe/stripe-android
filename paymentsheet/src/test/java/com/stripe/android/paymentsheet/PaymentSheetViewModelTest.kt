@@ -17,6 +17,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -2993,8 +2994,8 @@ internal class PaymentSheetViewModelTest {
     fun `On complete payment launcher result with PI config but no SFU, should not save payment selection`() =
         selectionSavedTest(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD"
                     )
@@ -3007,11 +3008,11 @@ internal class PaymentSheetViewModelTest {
     fun `On complete payment launcher result with DI (PI+SFU), should save payment selection`() =
         selectionSavedTest(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
                     )
                 )
             )
@@ -3021,8 +3022,8 @@ internal class PaymentSheetViewModelTest {
     fun `On complete payment launcher result with DI (SI), should save payment selection`() =
         selectionSavedTest(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(
                         currency = "USD"
                     )
                 )
@@ -3722,8 +3723,8 @@ internal class PaymentSheetViewModelTest {
     ): PaymentSheetViewModel {
         val deferredIntent = paymentIntent.copy(id = null, clientSecret = null)
 
-        val intentConfig = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 12345, currency = "usd"),
+        val intentConfig = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(amount = 12345, currency = "usd"),
         )
 
         return createViewModel(

@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
@@ -37,10 +37,10 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
     SETUP("setup") {
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
-        ): PaymentSheet.IntentConfiguration.Mode {
-            return PaymentSheet.IntentConfiguration.Mode.Setup(
+        ): IntentConfiguration.Mode {
+            return IntentConfiguration.Mode.Setup(
                 currency = playgroundState.currencyCode.value,
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession,
             )
         }
     },
@@ -48,8 +48,8 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
         @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
-        ): PaymentSheet.IntentConfiguration.Mode {
-            return PaymentSheet.IntentConfiguration.Mode.Payment(
+        ): IntentConfiguration.Mode {
+            return IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
                 currency = playgroundState.currencyCode.value,
                 paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
@@ -59,16 +59,16 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
     PAYMENT_WITH_SETUP("payment_with_setup") {
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
-        ): PaymentSheet.IntentConfiguration.Mode {
-            return PaymentSheet.IntentConfiguration.Mode.Payment(
+        ): IntentConfiguration.Mode {
+            return IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
                 currency = playgroundState.currencyCode.value,
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession,
             )
         }
     };
 
     abstract fun intentConfigurationMode(
         playgroundState: PlaygroundState.Payment
-    ): PaymentSheet.IntentConfiguration.Mode
+    ): IntentConfiguration.Mode
 }

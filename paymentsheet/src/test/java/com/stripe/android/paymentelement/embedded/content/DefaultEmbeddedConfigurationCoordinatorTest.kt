@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -12,7 +13,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -59,8 +59,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                IntentConfiguration(
+                    IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
                 configuration = defaultConfiguration,
             )
@@ -91,8 +91,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                IntentConfiguration(
+                    IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
                 configuration = defaultConfiguration,
             )
@@ -112,8 +112,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                IntentConfiguration(
+                    IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
                 configuration = defaultConfiguration,
             )
@@ -125,8 +125,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
         val secondConfigureResult = testScope.async {
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                IntentConfiguration(
+                    IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
                 configuration = defaultConfiguration,
             )
@@ -147,8 +147,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                IntentConfiguration(
+                    IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
                 configuration = defaultConfiguration,
             )
@@ -173,8 +173,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
             assertThat(
                 configurationCoordinator.configure(
-                    PaymentSheet.IntentConfiguration(
-                        PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                    IntentConfiguration(
+                        IntentConfiguration.Mode.Payment(5000, "USD"),
                     ),
                     configuration = defaultConfiguration,
                 )
@@ -190,8 +190,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         configurationHandler.emit(Result.failure(exception))
         assertThat(
             configurationCoordinator.configure(
-                PaymentSheet.IntentConfiguration(
-                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                IntentConfiguration(
+                    IntentConfiguration.Mode.Payment(5000, "USD"),
                 ),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
             )
@@ -255,7 +255,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         }
 
         override suspend fun configure(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
+            intentConfiguration: IntentConfiguration,
             configuration: EmbeddedPaymentElement.Configuration
         ): Result<PaymentElementLoader.State> {
             return turbine.awaitItem()

@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -62,12 +63,12 @@ internal class PreparePaymentMethodTest {
 
             context.presentPaymentSheet {
                 presentWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 5000L,
                             currency = "USD",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_123",
                             externalId = "external_123",
                         )
@@ -121,12 +122,12 @@ internal class PreparePaymentMethodTest {
 
             context.configureFlowController {
                 configureWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 5000L,
                             currency = "USD",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_456",
                             externalId = "external_456",
                         )
@@ -191,12 +192,12 @@ internal class PreparePaymentMethodTest {
             )
 
             context.embeddedPaymentElement.configure(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                         amount = 5000L,
                         currency = "USD",
                     ),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    sellerDetails = IntentConfiguration.SellerDetails(
                         networkId = "network_789",
                         externalId = "external_789",
                     )

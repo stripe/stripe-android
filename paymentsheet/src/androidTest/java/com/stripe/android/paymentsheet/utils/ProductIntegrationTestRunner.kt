@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
@@ -107,8 +108,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
             context.presentPaymentSheet {
                 if (isDeferredIntent) {
                     presentWithIntentConfiguration(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        intentConfiguration = IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 5099,
                                 currency = "usd"
                             )
@@ -139,8 +140,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
             context.configureFlowController {
                 if (isDeferredIntent) {
                     configureWithIntentConfiguration(
-                        PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 5099,
                                 currency = "usd",
                             )

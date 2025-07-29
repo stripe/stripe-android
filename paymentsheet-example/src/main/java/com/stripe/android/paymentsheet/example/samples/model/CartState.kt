@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.model
 
 import com.stripe.android.elements.CustomerConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleUpdateResponse
 
@@ -87,12 +87,12 @@ internal fun CartState.updateWithResponse(
     )
 }
 
-internal fun CartState.toIntentConfiguration(): PaymentSheet.IntentConfiguration {
-    return PaymentSheet.IntentConfiguration(
-        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+internal fun CartState.toIntentConfiguration(): IntentConfiguration {
+    return IntentConfiguration(
+        mode = IntentConfiguration.Mode.Payment(
             amount = total ?: 0L,
             currency = "usd",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
+            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession.takeIf {
                 isSubscription
             },
         )
