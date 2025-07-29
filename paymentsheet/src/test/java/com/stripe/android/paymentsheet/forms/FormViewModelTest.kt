@@ -4,6 +4,8 @@ import androidx.annotation.StringRes
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
@@ -430,7 +432,7 @@ internal class FormViewModelTest {
     fun `Test default values are filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
@@ -443,7 +445,7 @@ internal class FormViewModelTest {
                     postalCode = "94111"
                 ),
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             )
         )
@@ -474,7 +476,7 @@ internal class FormViewModelTest {
     fun `Test only provided default values are filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 address = PaymentSheet.Address(
@@ -482,7 +484,7 @@ internal class FormViewModelTest {
                     postalCode = "94111"
                 ),
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             )
         )
@@ -508,7 +510,7 @@ internal class FormViewModelTest {
     fun `Test default values are not filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
@@ -521,7 +523,7 @@ internal class FormViewModelTest {
                     postalCode = "94111"
                 ),
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = false,
             )
         )
@@ -539,18 +541,18 @@ internal class FormViewModelTest {
     @Test
     fun `Test phone country changes with AddressElement country`() =
         runBlocking {
-            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             )
 
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 PaymentMethod.Type.Card.code,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                billingDetails = PaymentSheet.BillingDetails(),
+                billingDetails = BillingDetails(),
             )
 
             val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
@@ -591,18 +593,18 @@ internal class FormViewModelTest {
     @Test
     fun `Test phone country changes with standalone CountryElement`() =
         runBlocking {
-            val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             )
 
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 PaymentMethod.Type.Sofort.code,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                billingDetails = PaymentSheet.BillingDetails(),
+                billingDetails = BillingDetails(),
             )
             val addressElements = AddressSpec(hideCountry = true)
                 .transform(

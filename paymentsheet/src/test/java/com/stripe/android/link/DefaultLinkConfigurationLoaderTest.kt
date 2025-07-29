@@ -2,10 +2,11 @@ package com.stripe.android.link
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeLogger
@@ -97,10 +98,10 @@ internal class DefaultLinkConfigurationLoaderTest {
         )
 
         val defaultBillingDetails =
-            PaymentSheet.BillingDetails(email = "foo@bar.com")
+            BillingDetails(email = "foo@bar.com")
         val billingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            BillingDetailsCollectionConfiguration(
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             )
         val controllerConfig = LinkController.Configuration.Builder(TestFactory.MERCHANT_NAME)
             .defaultBillingDetails(defaultBillingDetails)

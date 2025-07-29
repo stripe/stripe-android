@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -15,7 +17,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_PAYMENT_METHOD_METADATA_KEY
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
@@ -267,7 +268,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         storePreviousChooseState(
             configuration = defaultConfiguration.copy(
-                defaultBillingDetails = PaymentSheet.BillingDetails(email = "jaynewstrom@example.com")
+                defaultBillingDetails = BillingDetails(email = "jaynewstrom@example.com")
             )
         )
         val selection = chooser.choose(
@@ -291,8 +292,8 @@ internal class DefaultEmbeddedSelectionChooserTest {
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp"),
                 ),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 ),
             ),
             paymentMethods = emptyList(),

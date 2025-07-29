@@ -17,6 +17,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
@@ -222,13 +224,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val merchantDisplayName: String,
         internal val customer: CustomerConfiguration?,
         internal val googlePay: PaymentSheet.GooglePayConfiguration?,
-        internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
+        internal val defaultBillingDetails: BillingDetails?,
         internal val shippingDetails: AddressDetails?,
         internal val allowsDelayedPaymentMethods: Boolean,
         internal val allowsPaymentMethodsRequiringShippingAddress: Boolean,
         internal val appearance: Appearance,
         internal val primaryButtonLabel: String?,
-        internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        internal val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
         internal val preferredNetworks: List<CardBrand>,
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean,
         internal val paymentMethodOrder: List<String>,
@@ -248,7 +250,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         ) {
             private var customer: CustomerConfiguration? = ConfigurationDefaults.customer
             private var googlePay: PaymentSheet.GooglePayConfiguration? = ConfigurationDefaults.googlePay
-            private var defaultBillingDetails: PaymentSheet.BillingDetails? = ConfigurationDefaults.billingDetails
+            private var defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
             private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
@@ -292,7 +294,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * these values will be attached to the payment method even if they are not collected by
              * the UI.
              */
-            fun defaultBillingDetails(defaultBillingDetails: PaymentSheet.BillingDetails?) =
+            fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
             /**
@@ -357,7 +359,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * you **must** provide an appropriate value as part of [defaultBillingDetails].
              */
             fun billingDetailsCollectionConfiguration(
-                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
             ) = apply {
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }
@@ -540,7 +542,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         /**
          * The billing details associated with the customer's desired payment method.
          */
-        val billingDetails: PaymentSheet.BillingDetails?,
+        val billingDetails: BillingDetails?,
 
         /**
          * A string representation of the customer's desired payment method:

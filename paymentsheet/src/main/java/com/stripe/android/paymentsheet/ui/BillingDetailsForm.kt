@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Stable
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.toInternal
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.EmailElement

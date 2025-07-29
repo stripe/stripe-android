@@ -2,13 +2,14 @@ package com.stripe.android.link.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import org.junit.Test
 
 class LinkBillingDetailsUtilsTest {
@@ -31,7 +32,7 @@ class LinkBillingDetailsUtilsTest {
         )
     )
 
-    private val defaultBillingDetails = PaymentSheet.BillingDetails(
+    private val defaultBillingDetails = BillingDetails(
         name = testName,
         email = "merchant@example.com",
         phone = "+0987654321",
@@ -47,7 +48,7 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `effectiveBillingDetails with no collection requirements preserves default values`() {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 name = CollectionMode.Never,
                 email = CollectionMode.Never,
                 phone = CollectionMode.Never,
@@ -67,7 +68,7 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `effectiveBillingDetails supplements email when required and missing`() {
         val configurationWithoutEmail = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
             defaultBillingDetails = defaultBillingDetails.copy(email = null)
@@ -81,7 +82,7 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `effectiveBillingDetails preserves default email when required and present`() {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
             defaultBillingDetails = defaultBillingDetails
@@ -95,7 +96,7 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `effectiveBillingDetails supplements phone when required and missing`() {
         val configurationWithoutPhone = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 phone = CollectionMode.Always
             ),
             defaultBillingDetails = defaultBillingDetails.copy(phone = null)
@@ -109,7 +110,7 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `effectiveBillingDetails preserves default phone when required and present`() {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 phone = CollectionMode.Always
             ),
             defaultBillingDetails = defaultBillingDetails
@@ -123,11 +124,11 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `effectiveBillingDetails does not supplement when not required`() {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 phone = CollectionMode.Never
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails()
+            defaultBillingDetails = BillingDetails()
         )
 
         val result = effectiveBillingDetails(configuration, linkAccount)
@@ -149,7 +150,7 @@ class LinkBillingDetailsUtilsTest {
                 administrativeArea = "CA"
             )
         )
-        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val configuration = BillingDetailsCollectionConfiguration(
             address = AddressCollectionMode.Full
         )
 
@@ -171,7 +172,7 @@ class LinkBillingDetailsUtilsTest {
                 administrativeArea = "CA"
             )
         )
-        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val configuration = BillingDetailsCollectionConfiguration(
             address = AddressCollectionMode.Full
         )
 
@@ -193,7 +194,7 @@ class LinkBillingDetailsUtilsTest {
                 administrativeArea = "CA"
             )
         )
-        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val configuration = BillingDetailsCollectionConfiguration(
             address = AddressCollectionMode.Full
         )
 
@@ -205,7 +206,7 @@ class LinkBillingDetailsUtilsTest {
     @Test
     fun `ConsumerPaymentDetails Card does not support when phone required but missing from Link account`() {
         val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
-        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val configuration = BillingDetailsCollectionConfiguration(
             phone = CollectionMode.Always
         )
         val linkAccountWithoutPhone = LinkAccount(
@@ -231,7 +232,7 @@ class LinkBillingDetailsUtilsTest {
                 name = null
             )
         )
-        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val configuration = BillingDetailsCollectionConfiguration(
             name = CollectionMode.Always
         )
 
@@ -266,10 +267,10 @@ class LinkBillingDetailsUtilsTest {
         )
 
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
                 address = PaymentSheet.Address(
@@ -305,10 +306,10 @@ class LinkBillingDetailsUtilsTest {
         )
 
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
                 address = PaymentSheet.Address(
@@ -348,10 +349,10 @@ class LinkBillingDetailsUtilsTest {
         )
 
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
                 address = PaymentSheet.Address(

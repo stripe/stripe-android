@@ -7,6 +7,8 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -73,7 +75,7 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
@@ -82,11 +84,11 @@ internal class PaymentSheetBillingConfigurationTest {
                             country = "US",
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = true,
                     ),
                     paymentMethodLayout = PaymentMethodLayout.Horizontal,
@@ -150,7 +152,7 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
@@ -159,8 +161,8 @@ internal class PaymentSheetBillingConfigurationTest {
                             country = "US",
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = false,
                     ),
                     paymentMethodLayout = PaymentMethodLayout.Horizontal,
@@ -212,7 +214,7 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
@@ -225,8 +227,8 @@ internal class PaymentSheetBillingConfigurationTest {
                             line2 = null,
                         ),
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                         attachDefaultsToPaymentMethod = false,
                     ),
                     paymentMethodLayout = PaymentMethodLayout.Horizontal,
@@ -272,7 +274,7 @@ internal class PaymentSheetBillingConfigurationTest {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                defaultBillingDetails = PaymentSheet.BillingDetails(
+                defaultBillingDetails = BillingDetails(
                     name = "Jenny Rosen",
                     email = "foo@bar.com",
                     phone = "+13105551234",
@@ -285,8 +287,8 @@ internal class PaymentSheetBillingConfigurationTest {
                         line2 = "Unit #123",
                     ),
                 ),
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     attachDefaultsToPaymentMethod = true,
                 ),
                 paymentMethodLayout = layoutType.paymentMethodLayout,

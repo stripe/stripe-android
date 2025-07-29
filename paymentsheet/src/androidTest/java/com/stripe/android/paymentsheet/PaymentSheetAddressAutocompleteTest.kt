@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import android.text.SpannableString
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -50,8 +52,8 @@ class PaymentSheetAddressAutocompleteTest {
                 paymentIntentClientSecret = "pi_123_secret_123",
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                     .billingDetailsCollectionConfiguration(
-                        PaymentSheet.BillingDetailsCollectionConfiguration(
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                        BillingDetailsCollectionConfiguration(
+                            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                             attachDefaultsToPaymentMethod = true,
                         ),
                     )
@@ -86,13 +88,13 @@ class PaymentSheetAddressAutocompleteTest {
                 paymentIntentClientSecret = "pi_123_secret_123",
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                     .billingDetailsCollectionConfiguration(
-                        PaymentSheet.BillingDetailsCollectionConfiguration(
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                        BillingDetailsCollectionConfiguration(
+                            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                             attachDefaultsToPaymentMethod = true,
                         ),
                     )
                     .defaultBillingDetails(
-                        PaymentSheet.BillingDetails(
+                        BillingDetails(
                             address = PaymentSheet.Address(
                                 line1 = "123 Coffee Street",
                                 city = "Chicago",

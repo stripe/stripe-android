@@ -2,10 +2,10 @@ package com.stripe.android.common.analytics
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
 
@@ -76,7 +76,7 @@ internal fun Appearance.Embedded.RowStyle.toAnalyticsValue(): String {
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
+internal fun BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
     return mapOf(
         FIELD_ATTACH_DEFAULTS to attachDefaultsToPaymentMethod,
         FIELD_COLLECT_NAME to name.name,

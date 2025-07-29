@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
@@ -689,7 +690,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Populates Link configuration correctly from billing details`() = runTest {
         val loader = createPaymentElementLoader()
 
-        val billingDetails = PaymentSheet.BillingDetails(
+        val billingDetails = BillingDetails(
             address = PaymentSheet.Address(country = "CA"),
             name = "Till",
         )
@@ -1036,7 +1037,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Uses shipping address phone number if checkbox is selected`() = runTest {
         val loader = createPaymentElementLoader()
 
-        val billingDetails = PaymentSheet.BillingDetails(phone = "123-456-7890")
+        val billingDetails = BillingDetails(phone = "123-456-7890")
 
         val shippingDetails = AddressDetails(
             address = PaymentSheet.Address(country = "US"),
@@ -3314,7 +3315,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayEnabled: Boolean = true,
         allowsDelayedPaymentMethods: Boolean = false,
         shippingDetails: AddressDetails? = null,
-        defaultBillingDetails: PaymentSheet.BillingDetails? = null,
+        defaultBillingDetails: BillingDetails? = null,
     ): PaymentSheet.Configuration {
         return PaymentSheet.Configuration(
             merchantDisplayName = "Merchant",

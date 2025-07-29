@@ -15,10 +15,11 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -187,20 +188,20 @@ class CustomerSheet internal constructor(
 
         /**
          * [CustomerSheet] pre-populates fields with the values provided. If
-         * [PaymentSheet.BillingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod]
+         * [BillingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod]
          * is true, these values will be attached to the payment method even if they are not
          * collected by the [CustomerSheet] UI.
          */
-        val defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails,
+        val defaultBillingDetails: BillingDetails = ConfigurationDefaults.billingDetails,
 
         /**
          * Describes how billing details should be collected. All values default to
-         * [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic].
-         * If [PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never] is
+         * [BillingDetailsCollectionConfiguration.CollectionMode.Automatic].
+         * If [BillingDetailsCollectionConfiguration.CollectionMode.Never] is
          * used for a required field for the Payment Method used while adding this payment method
          * you must provide an appropriate value as part of [defaultBillingDetails].
          */
-        val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+        val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             ConfigurationDefaults.billingDetailsCollectionConfiguration,
 
         /**
@@ -252,8 +253,8 @@ class CustomerSheet internal constructor(
             private var appearance: Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
             private var headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen
-            private var defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails
-            private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            private var defaultBillingDetails: BillingDetails = ConfigurationDefaults.billingDetails
+            private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
@@ -273,12 +274,12 @@ class CustomerSheet internal constructor(
                 this.headerTextForSelectionScreen = headerTextForSelectionScreen
             }
 
-            fun defaultBillingDetails(details: PaymentSheet.BillingDetails) = apply {
+            fun defaultBillingDetails(details: BillingDetails) = apply {
                 this.defaultBillingDetails = details
             }
 
             fun billingDetailsCollectionConfiguration(
-                configuration: PaymentSheet.BillingDetailsCollectionConfiguration
+                configuration: BillingDetailsCollectionConfiguration
             ) = apply {
                 this.billingDetailsCollectionConfiguration = configuration
             }

@@ -1,8 +1,9 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
-import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
 internal class CommonConfigurationTest {
@@ -28,7 +29,7 @@ internal class CommonConfigurationTest {
         assertThat(configuration.containsVolatileDifferences(configWithCardBrandAcceptanceChanges)).isTrue()
 
         val configWithBillingDetailsChanges = configuration.copy(
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Richards",
             ),
         )
@@ -36,8 +37,8 @@ internal class CommonConfigurationTest {
         assertThat(configuration.containsVolatileDifferences(configWithBillingDetailsChanges)).isTrue()
 
         val configWithBillingConfigChanges = configuration.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
             ),
         )
 

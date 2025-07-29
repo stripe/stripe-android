@@ -91,11 +91,11 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     )
                 )
             )
@@ -256,11 +256,11 @@ class CardUiDefinitionFactoryTest {
                     productUsage = emptySet(),
                 ),
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
             )
@@ -288,8 +288,8 @@ class CardUiDefinitionFactoryTest {
                     productUsage = emptySet(),
                 ),
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
                 autocompleteAddressInteractorFactory = {
@@ -334,8 +334,8 @@ class CardUiDefinitionFactoryTest {
                     productUsage = emptySet(),
                 ),
                 metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
                 autocompleteAddressInteractorFactory = {

@@ -1,6 +1,6 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
@@ -10,8 +10,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal enum class ContactInformationCollectionMode {
     Name {
         override fun collectionMode(
-            configuration: PaymentSheet.BillingDetailsCollectionConfiguration
-        ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = configuration.name
+            configuration: BillingDetailsCollectionConfiguration
+        ): BillingDetailsCollectionConfiguration.CollectionMode = configuration.name
 
         override fun formElement(
             initialValues: Map<IdentifierSpec, String?>
@@ -19,8 +19,8 @@ internal enum class ContactInformationCollectionMode {
     },
     Phone {
         override fun collectionMode(
-            configuration: PaymentSheet.BillingDetailsCollectionConfiguration
-        ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = configuration.phone
+            configuration: BillingDetailsCollectionConfiguration
+        ): BillingDetailsCollectionConfiguration.CollectionMode = configuration.phone
 
         override fun formElement(
             initialValues: Map<IdentifierSpec, String?>
@@ -28,8 +28,8 @@ internal enum class ContactInformationCollectionMode {
     },
     Email {
         override fun collectionMode(
-            configuration: PaymentSheet.BillingDetailsCollectionConfiguration
-        ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode = configuration.email
+            configuration: BillingDetailsCollectionConfiguration
+        ): BillingDetailsCollectionConfiguration.CollectionMode = configuration.email
 
         override fun formElement(
             initialValues: Map<IdentifierSpec, String?>
@@ -37,18 +37,18 @@ internal enum class ContactInformationCollectionMode {
     };
 
     abstract fun collectionMode(
-        configuration: PaymentSheet.BillingDetailsCollectionConfiguration
-    ): PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+        configuration: BillingDetailsCollectionConfiguration
+    ): BillingDetailsCollectionConfiguration.CollectionMode
 
     abstract fun formElement(initialValues: Map<IdentifierSpec, String?>): FormElement
 
-    fun isAllowed(configuration: PaymentSheet.BillingDetailsCollectionConfiguration): Boolean {
+    fun isAllowed(configuration: BillingDetailsCollectionConfiguration): Boolean {
         val collectionMode = collectionMode(configuration = configuration)
-        return collectionMode != PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+        return collectionMode != BillingDetailsCollectionConfiguration.CollectionMode.Never
     }
 
-    fun isRequired(configuration: PaymentSheet.BillingDetailsCollectionConfiguration): Boolean {
+    fun isRequired(configuration: BillingDetailsCollectionConfiguration): Boolean {
         val collectionMode = collectionMode(configuration = configuration)
-        return collectionMode == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        return collectionMode == BillingDetailsCollectionConfiguration.CollectionMode.Always
     }
 }

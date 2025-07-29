@@ -1,6 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
 import com.stripe.android.model.Address
@@ -13,8 +16,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Lite
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
@@ -294,7 +295,7 @@ internal class AddPaymentMethodRequirementTest {
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = true,
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            defaultBillingDetails = BillingDetails(),
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()
@@ -309,7 +310,7 @@ internal class AddPaymentMethodRequirementTest {
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = false,
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 email = "a_totally_valid_email@email.com",
             ),
         )
@@ -326,7 +327,7 @@ internal class AddPaymentMethodRequirementTest {
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = true,
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 email = "a_totally_valid_email@email.com",
             ),
         )

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import kotlinx.coroutines.CoroutineScope
 
 internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.Factory {
@@ -12,7 +12,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         cardEditConfiguration: CardEditConfiguration?,
         requiresModification: Boolean,
         payload: EditCardPayload,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
         onBrandChoiceChanged: CardBrandCallback,
         onCardUpdateParamsChanged: CardUpdateParamsCallback
     ): EditCardDetailsInteractor {

@@ -7,6 +7,8 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
@@ -18,7 +20,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -62,7 +63,7 @@ internal object PaymentSheetFixtures {
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
         primaryButtonColor = ColorStateList.valueOf(Color.Black.toArgb()),
-        defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
+        defaultBillingDetails = BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
         allowsRemovalOfLastSavedPaymentMethod = false,
@@ -90,11 +91,11 @@ internal object PaymentSheetFixtures {
                 )
             )
         ),
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = AddressCollectionMode.Full,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
     )
@@ -158,11 +159,11 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = AddressCollectionMode.Full,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
     )
@@ -266,7 +267,7 @@ internal object PaymentSheetFixtures {
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             merchantName = "Merchant, Inc.",
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 address = PaymentSheet.Address(
                     line1 = "123 Main Street",
                     line2 = null,

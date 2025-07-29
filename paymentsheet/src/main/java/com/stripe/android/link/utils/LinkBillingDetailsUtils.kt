@@ -1,12 +1,13 @@
 package com.stripe.android.link.utils
 
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.PaymentDetails
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 
 /**
  * Returns the effective billing details, which refers to billing details that have been
@@ -16,10 +17,10 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal fun effectiveBillingDetails(
     configuration: LinkConfiguration,
     linkAccount: LinkAccount,
-): PaymentSheet.BillingDetails {
+): BillingDetails {
     val billingConfig = configuration.billingDetailsCollectionConfiguration
     val defaultBillingDetails = configuration.defaultBillingDetails
-        ?: PaymentSheet.BillingDetails()
+        ?: BillingDetails()
     return defaultBillingDetails.copy(
         email = defaultBillingDetails.email
             ?: linkAccount.email.takeIf { billingConfig.collectsEmail },
@@ -33,7 +34,7 @@ internal fun effectiveBillingDetails(
  * Returns true if the payment method has all required billing details based on the configuration.
  */
 internal fun PaymentDetails.supports(
-    billingDetailsConfig: PaymentSheet.BillingDetailsCollectionConfiguration,
+    billingDetailsConfig: BillingDetailsCollectionConfiguration,
     linkAccount: LinkAccount
 ): Boolean = when (this) {
     is ConsumerPaymentDetails.BankAccount,
@@ -95,7 +96,7 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
     }
 }
 
-private fun PaymentSheet.BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.BillingAddress? {
+private fun BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.BillingAddress? {
     val billingAddress = address ?: return null
     return ConsumerPaymentDetails.BillingAddress(
         name = name,

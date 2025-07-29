@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -102,8 +102,8 @@ internal class BillingDetailsCollectionScreenshotTest {
         testBillingDetailsCollectionScreenShot(
             bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
             formArgs = createFormArguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                 ),
             ),
         )
@@ -114,8 +114,8 @@ internal class BillingDetailsCollectionScreenshotTest {
         testBillingDetailsCollectionScreenShot(
             bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
             formArgs = createFormArguments(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                 ),
             ),
             nameControllerInitialValue = "John Doe",
@@ -168,8 +168,8 @@ internal class BillingDetailsCollectionScreenshotTest {
     }
 
     private fun createFormArguments(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
     ): FormArguments {
         return FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,

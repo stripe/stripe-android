@@ -5,6 +5,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -802,10 +804,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = paymentMethodTypes
             ),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",

@@ -7,6 +7,10 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -27,8 +31,6 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResp
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
@@ -66,7 +68,7 @@ class USBankAccountFormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = CUSTOMER_NAME,
                 email = CUSTOMER_EMAIL
             ),
@@ -332,7 +334,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
                         phone = CUSTOMER_PHONE,
@@ -362,13 +364,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
                         phone = CUSTOMER_PHONE,
                         address = CUSTOMER_ADDRESS,
                     ),
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                         phone = CollectionMode.Always,
                         address = AddressCollectionMode.Full,
                     ),
@@ -445,13 +447,13 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                             phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = true,
                             name = CollectionMode.Never,
                             email = CollectionMode.Never,
@@ -480,13 +482,13 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                             phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = false,
                             name = CollectionMode.Always,
                             email = CollectionMode.Always,
@@ -512,13 +514,13 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                             phone = CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = false,
                             name = CollectionMode.Automatic,
                             email = CollectionMode.Automatic,
@@ -544,11 +546,11 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                         ),
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                             attachDefaultsToPaymentMethod = true,
                             name = CollectionMode.Always,
                             email = CollectionMode.Always,
@@ -570,7 +572,7 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Test phone country changes with country`() = runTest(UnconfinedTestDispatcher()) {
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = CollectionMode.Always,
             email = CollectionMode.Always,
             phone = CollectionMode.Always,
@@ -629,7 +631,7 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Produces correct lastTextFieldIdentifier when collecting phone number`() = runTest {
-        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val billingDetailsConfig = BillingDetailsCollectionConfiguration(
             name = CollectionMode.Automatic,
             email = CollectionMode.Automatic,
             phone = CollectionMode.Always,
@@ -652,7 +654,7 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Produces correct lastTextFieldIdentifier when collecting address`() = runTest {
-        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val billingDetailsConfig = BillingDetailsCollectionConfiguration(
             name = CollectionMode.Automatic,
             email = CollectionMode.Automatic,
             phone = CollectionMode.Always,
@@ -664,7 +666,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
@@ -680,7 +682,7 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Produces correct lastTextFieldIdentifier when only address`() = runTest {
-        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val billingDetailsConfig = BillingDetailsCollectionConfiguration(
             name = CollectionMode.Never,
             email = CollectionMode.Never,
             phone = CollectionMode.Never,
@@ -692,7 +694,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
@@ -708,7 +710,7 @@ class USBankAccountFormViewModelTest {
 
     @Test
     fun `Produces correct lastTextFieldIdentifier when collecting no fields`() = runTest {
-        val billingDetailsConfig = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val billingDetailsConfig = BillingDetailsCollectionConfiguration(
             name = CollectionMode.Never,
             email = CollectionMode.Never,
             phone = CollectionMode.Never,
@@ -720,7 +722,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
@@ -1583,14 +1585,14 @@ class USBankAccountFormViewModelTest {
         collectAddress: Boolean,
         attachDefaultsToPaymentMethod: Boolean,
     ): USBankAccountFormViewModel.Args {
-        val billingDetails = PaymentSheet.BillingDetails(
+        val billingDetails = BillingDetails(
             name = CUSTOMER_NAME,
             email = CUSTOMER_EMAIL,
             phone = CUSTOMER_PHONE,
             address = CUSTOMER_ADDRESS,
         )
 
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
             name = if (collectName) CollectionMode.Always else CollectionMode.Never,
             email = if (collectEmail) CollectionMode.Always else CollectionMode.Never,
             phone = if (collectPhone) CollectionMode.Always else CollectionMode.Never,

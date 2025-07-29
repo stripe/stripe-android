@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -158,11 +159,11 @@ internal class CustomPaymentMethodsTest {
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(listOf(customPaymentMethod))
                     .billingDetailsCollectionConfiguration(
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                         )
                     )
                     .paymentMethodLayout(PaymentMethodLayout.Horizontal)
@@ -228,11 +229,11 @@ internal class CustomPaymentMethodsTest {
                 configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
                     .customPaymentMethods(listOf(customPaymentMethod))
                     .billingDetailsCollectionConfiguration(
-                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                            name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                         )
                     )
                     .paymentMethodLayout(PaymentMethodLayout.Horizontal)

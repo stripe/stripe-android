@@ -39,7 +39,6 @@ import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
@@ -695,7 +694,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkMode = LinkMode.LinkPaymentMethod,
                 allowDefaultOptIn = false,
                 disableRuxInFlowController = false,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 defaultBillingDetails = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = true,
                 allowUserEmailEdits = true,

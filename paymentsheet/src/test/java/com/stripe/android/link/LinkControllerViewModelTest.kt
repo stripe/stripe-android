@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkControllerComponent
@@ -15,7 +17,6 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -452,7 +453,7 @@ class LinkControllerViewModelTest {
     @Test
     fun `onPresentPaymentMethods() with null email uses existing customer info`() = runTest {
         val viewModel = createViewModel()
-        val billingDetails = PaymentSheet.BillingDetails(
+        val billingDetails = BillingDetails(
             address = null,
             email = TestFactory.CUSTOMER_EMAIL,
             name = TestFactory.CUSTOMER_NAME,
@@ -942,8 +943,8 @@ class LinkControllerViewModelTest {
     private suspend fun configure(
         viewModel: LinkControllerViewModel,
         passthroughModeEnabled: Boolean = false,
-        defaultBillingDetails: Optional<PaymentSheet.BillingDetails>? = null,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
+        defaultBillingDetails: Optional<BillingDetails>? = null,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration? = null,
     ) {
         val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,

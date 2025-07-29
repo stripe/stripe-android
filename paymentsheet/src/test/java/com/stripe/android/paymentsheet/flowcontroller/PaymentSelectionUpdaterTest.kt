@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -388,7 +389,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.GooglePay
 
         val newConfig = defaultPaymentSheetConfiguration.newBuilder()
-            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "hi-jay@example.com"))
+            .defaultBillingDetails(BillingDetails(email = "hi-jay@example.com"))
             .build()
         val newState = mockPaymentSheetStateWithPaymentIntent(
             config = newConfig

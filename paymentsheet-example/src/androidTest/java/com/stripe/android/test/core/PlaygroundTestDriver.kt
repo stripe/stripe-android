@@ -35,6 +35,7 @@ import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -1146,7 +1147,7 @@ internal class PlaygroundTestDriver(
 
                 val collectionMode = testParameters.playgroundSettingsSnapshot[CollectAddressSettingsDefinition]
 
-                if (collectionMode != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
+                if (collectionMode != BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
                     composeTestRule.waitUntil {
                         composeTestRule.onAllNodesWithText("Country or region")
                             .fetchSemanticsNodes()

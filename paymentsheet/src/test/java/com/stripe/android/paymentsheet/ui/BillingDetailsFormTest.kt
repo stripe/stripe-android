@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

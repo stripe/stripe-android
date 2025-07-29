@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -36,7 +37,7 @@ data class AddressDetails(
 }
 
 internal fun AddressDetails.toIdentifierMap(
-    billingDetails: PaymentSheet.BillingDetails? = null
+    billingDetails: BillingDetails? = null
 ): Map<IdentifierSpec, String?> {
     return if (billingDetails == null || !billingDetails.isFilledOut()) {
         mapOf(

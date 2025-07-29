@@ -4,11 +4,12 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 
 internal object CustomerSheetFixtures {
@@ -24,7 +25,7 @@ internal object CustomerSheetFixtures {
     @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
     val CONFIG_WITH_EVERYTHING = CustomerSheet.Configuration
         .builder(merchantDisplayName = "Merchant, Inc")
-        .defaultBillingDetails(PaymentSheet.BillingDetails(name = "Skyler"))
+        .defaultBillingDetails(BillingDetails(name = "Skyler"))
         .headerTextForSelectionScreen("Select a payment method!")
         .appearance(
             Appearance(
@@ -52,11 +53,11 @@ internal object CustomerSheetFixtures {
             )
         )
         .billingDetailsCollectionConfiguration(
-            PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = true,
             )
         )

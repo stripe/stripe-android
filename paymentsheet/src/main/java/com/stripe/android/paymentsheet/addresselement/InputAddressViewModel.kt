@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
@@ -241,7 +242,7 @@ internal class InputAddressViewModel @Inject constructor(
         } ?: false
     }
 
-    private fun PaymentSheet.BillingDetails.toAddressDetails(): AddressDetails {
+    private fun BillingDetails.toAddressDetails(): AddressDetails {
         return AddressDetails(
             name = name,
             phoneNumber = phone,

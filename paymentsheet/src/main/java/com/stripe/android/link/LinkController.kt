@@ -8,11 +8,12 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.link.injection.LinkControllerScope
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -174,8 +175,8 @@ class LinkController @Inject internal constructor(
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val cardBrandAcceptance: CardBrandAcceptance,
-        internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
-        internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        internal val defaultBillingDetails: BillingDetails?,
+        internal val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
     ) : Parcelable {
 
@@ -193,9 +194,9 @@ class LinkController @Inject internal constructor(
         ) {
             private var cardBrandAcceptance: CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
-            private var defaultBillingDetails: PaymentSheet.BillingDetails? =
+            private var defaultBillingDetails: BillingDetails? =
                 ConfigurationDefaults.billingDetails
-            private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var allowUserEmailEdits: Boolean = true
 
@@ -220,7 +221,7 @@ class LinkController @Inject internal constructor(
              * these values will be attached to the payment method even if they are not collected by
              * the PaymentSheet UI.
              */
-            fun defaultBillingDetails(defaultBillingDetails: PaymentSheet.BillingDetails?) =
+            fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
             /**
@@ -230,7 +231,7 @@ class LinkController @Inject internal constructor(
              * you **must** provide an appropriate value as part of [defaultBillingDetails].
              */
             fun billingDetailsCollectionConfiguration(
-                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
             ) = apply {
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }

@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -30,7 +30,7 @@ internal object PlaceholderHelper {
         specs: List<FormItemSpec>,
         placeholderOverrideList: List<IdentifierSpec>,
         requiresMandate: Boolean,
-        configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        configuration: BillingDetailsCollectionConfiguration,
     ): List<FormItemSpec> {
         val billingDetailsPlaceholders = mutableListOf(
             PlaceholderField.Name,
@@ -114,12 +114,13 @@ internal object PlaceholderHelper {
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     @VisibleForTesting
     internal fun specForPlaceholderField(
         field: PlaceholderField,
         placeholderOverrideList: List<IdentifierSpec>,
         requiresMandate: Boolean,
-        configuration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        configuration: BillingDetailsCollectionConfiguration,
     ) = when (field) {
         PlaceholderField.Name -> NameSpec().takeIf {
             configuration.name == CollectionMode.Always ||

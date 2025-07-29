@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
@@ -211,15 +212,15 @@ class PaymentSheetConfigurationKtxTest {
                 buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
             ),
             primaryButtonColor = ColorStateList.valueOf(Color.BLUE),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Rosen",
             ),
             shippingDetails = AddressDetails(
                 name = "Jenny Rosen",
             ),
             primaryButtonLabel = "Buy",
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             ),
         )
     }

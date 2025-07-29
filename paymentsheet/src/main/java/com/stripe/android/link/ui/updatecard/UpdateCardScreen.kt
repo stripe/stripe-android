@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
@@ -25,7 +26,6 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
 import com.stripe.android.paymentsheet.ui.CardEditConfiguration

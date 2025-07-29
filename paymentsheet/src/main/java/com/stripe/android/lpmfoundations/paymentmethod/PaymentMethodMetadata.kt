@@ -5,6 +5,8 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.effectiveBillingDetails
@@ -45,7 +47,7 @@ internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = fals
 @Parcelize
 internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val allowsLinkInSavedPaymentMethods: Boolean,
@@ -53,7 +55,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val defaultBillingDetails: BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
