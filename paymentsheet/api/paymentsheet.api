@@ -1184,6 +1184,9 @@ public final class com/stripe/android/elements/CustomerConfiguration$Creator : a
 public abstract interface annotation class com/stripe/android/elements/CustomerSessionApiPreview : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/stripe/android/elements/payment/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/elements/payment/GooglePayConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -2504,9 +2507,6 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Failure : 
 public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : com/stripe/android/paymentsheet/CreateIntentResult {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
-}
-
-public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalPaymentSheetDecouplingApi : java/lang/annotation/Annotation {

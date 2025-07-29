@@ -5,7 +5,6 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
