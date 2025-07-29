@@ -399,3 +399,28 @@ private fun Preview() {
         }
     }
 }
+
+@Preview
+@Composable
+private fun PreviewDOI() {
+    DefaultLinkTheme {
+        Surface {
+            LinkInlineSignup(
+                merchantName = "Example, Inc.",
+                sectionController = SectionController(null, emptyList()),
+                emailController = EmailConfig.createController(""),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+                nameController = NameConfig.createController("My Name"),
+                signUpState = InputtingRemainingFields,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = true,
+                allowsDefaultOptIn = true,
+                didAskToChangeSignupDetails = false,
+                errorMessage = null,
+                toggleExpanded = {},
+                changeSignupDetails = {},
+            )
+        }
+    }
+}

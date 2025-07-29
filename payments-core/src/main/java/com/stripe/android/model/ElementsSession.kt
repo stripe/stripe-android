@@ -65,6 +65,9 @@ data class ElementsSession(
     val passiveCaptchaParams: PassiveCaptchaParams?
         get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
 
+    val linkSignUpOptInFeatureEnabled: Boolean
+        get() = linkSettings?.linkSignUpOptInFeatureEnabled ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -77,7 +80,8 @@ data class ElementsSession(
         val useAttestationEndpoints: Boolean,
         val suppress2faModal: Boolean,
         val disableLinkRuxInFlowController: Boolean,
-        val linkEnableDisplayableDefaultValuesInEce: Boolean
+        val linkEnableDisplayableDefaultValuesInEce: Boolean,
+        val linkSignUpOptInFeatureEnabled: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
