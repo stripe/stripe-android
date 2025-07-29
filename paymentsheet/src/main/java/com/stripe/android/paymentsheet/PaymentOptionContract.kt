@@ -10,7 +10,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
 internal class PaymentOptionContract :
-    ActivityResultContract<PaymentOptionContract.Args, PaymentOptionResult?>() {
+    ActivityResultContract<PaymentOptionContract.Args, PaymentOptionsActivityResult?>() {
     override fun createIntent(
         context: Context,
         input: Args
@@ -22,8 +22,8 @@ internal class PaymentOptionContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): PaymentOptionResult? {
-        return PaymentOptionResult.fromIntent(intent)
+    ): PaymentOptionsActivityResult? {
+        return PaymentOptionsActivityResult.fromIntent(intent)
     }
 
     @Parcelize
