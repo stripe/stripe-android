@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.addresselement
+package com.stripe.android.elements.address
 
 import android.app.Activity
 import android.app.Application
@@ -14,7 +14,9 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
+import com.stripe.android.elements.address.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.parcelize.Parcelize
 

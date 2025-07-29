@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.elements.address.AddressLauncher
 import kotlinx.coroutines.flow.Flow
 
 internal class TestAddressElementNavigator private constructor() : AddressElementNavigator {

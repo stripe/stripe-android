@@ -7,7 +7,7 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher
+import com.stripe.android.elements.address.AddressLauncher
 import com.stripe.android.paymentsheet.example.samples.networking.ExamplePublishableKeyResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.coroutines.Dispatchers

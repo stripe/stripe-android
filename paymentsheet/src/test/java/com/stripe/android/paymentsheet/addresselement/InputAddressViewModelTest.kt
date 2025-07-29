@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.address.AddressLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -285,6 +286,7 @@ class InputAddressViewModelTest {
             ),
         )
 
+    @Suppress("LongMethod")
     @OptIn(AddressLauncher.AddressElementSameAsBillingPreview::class)
     @Test
     fun `'Shipping same as billing' should work as expected when only billing provided`() = runTest {
@@ -443,6 +445,7 @@ class InputAddressViewModelTest {
         }
     }
 
+    @Suppress("LongMethod")
     @OptIn(AddressLauncher.AddressElementSameAsBillingPreview::class)
     @Test
     fun `'Shipping same as billing' should work as expected with both billing & shipping`() = runTest {
