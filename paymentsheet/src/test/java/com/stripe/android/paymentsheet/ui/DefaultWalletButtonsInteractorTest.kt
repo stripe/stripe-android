@@ -677,7 +677,7 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
-    fun `when linkEnableDisplayableDefaultValuesInEce is true, should not use payment details in the button`() =
+    fun `when linkEnableDisplayableDefaultValuesInEce is true, should use payment details in the button`() =
         runTest {
             val paymentDetails = DisplayablePaymentDetails(
                 defaultCardBrand = "VISA",
@@ -716,9 +716,8 @@ class DefaultWalletButtonsInteractorTest {
                 assertThat(state.walletButtons).hasSize(1)
                 val button = state.walletButtons.first().asLinkWalletButton()
 
-                // Should show email since we for now don't want to show default card details in the ECE button
-                val buttonState = button.state as LinkButtonState.Email
-                assertThat(buttonState.email).isEqualTo("test@example.com")
+                val buttonState = button.state as LinkButtonState.DefaultPayment
+                assertThat(buttonState.paymentUI.last4).isEqualTo("4242")
             }
         }
 
