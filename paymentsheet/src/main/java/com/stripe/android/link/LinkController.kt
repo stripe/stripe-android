@@ -9,6 +9,7 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.link.injection.LinkControllerScope
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -176,6 +177,7 @@ class LinkController @Inject internal constructor(
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
+        internal val linkAppearance: LinkAppearance? = null
     ) : Parcelable {
 
         /**
@@ -188,7 +190,8 @@ class LinkController @Inject internal constructor(
             /**
              * Your customer-facing business name.
              */
-            private val merchantDisplayName: String
+            private val merchantDisplayName: String,
+            private val appearance: LinkAppearance? = null
         ) {
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
@@ -255,6 +258,7 @@ class LinkController @Inject internal constructor(
                 cardBrandAcceptance = cardBrandAcceptance,
                 defaultBillingDetails = defaultBillingDetails,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                linkAppearance = appearance
             )
         }
 

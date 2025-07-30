@@ -62,7 +62,10 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         onRampConfiguration = configuration
 
         viewModelScope.launch {
-            val config = LinkController.Configuration.Builder(merchantDisplayName = "").build()
+            val config = LinkController.Configuration.Builder(
+                merchantDisplayName = "",
+                appearance = configuration.appearance
+            ).build()
 
             _configurationFlow.emit(config)
         }

@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,7 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 internal class OnrampActivity : ComponentActivity() {
@@ -66,7 +67,14 @@ internal class OnrampActivity : ComponentActivity() {
         onrampCoordinator = OnrampCoordinator.Builder(callbacks).build(this)
 
         val configuration = OnrampConfiguration(
-            paymentSheetAppearance = PaymentSheet.Appearance()
+            appearance = LinkAppearance(
+                lightColors = LinkAppearance.Colors(
+                    primary = Color.Blue
+                ),
+                darkColors = LinkAppearance.Colors(
+                    primary = Color.Red
+                )
+            )
         )
 
         onrampCoordinator.configure(configuration)

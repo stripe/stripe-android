@@ -58,7 +58,7 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
-    private val linkConfiguration: LinkConfiguration,
+    val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,

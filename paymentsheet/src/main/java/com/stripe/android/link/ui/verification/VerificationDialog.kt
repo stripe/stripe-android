@@ -9,6 +9,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,7 +20,9 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkAppearanceTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
@@ -29,6 +32,7 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun VerificationDialog(
     modifier: Modifier,
     linkAccount: LinkAccount,
+    linkAppearance: LinkAppearance?,
     onVerificationSucceeded: () -> Unit,
     onDismissClicked: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
@@ -50,6 +54,7 @@ internal fun VerificationDialog(
         modifier = modifier,
         state = state,
         otpElement = viewModel.otpElement,
+        linkAppearance = linkAppearance,
         onBack = viewModel::onBack,
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode,
@@ -63,6 +68,7 @@ internal fun VerificationDialogBody(
     modifier: Modifier = Modifier,
     state: VerificationViewState,
     otpElement: OTPElement,
+    linkAppearance: LinkAppearance?,
     onBack: () -> Unit,
     onFocusRequested: () -> Unit,
     didShowCodeSentNotification: () -> Unit,
@@ -82,7 +88,8 @@ internal fun VerificationDialogBody(
             // because the default dim amount is too dark for the dialog
             val dim = if (isSystemInDarkTheme()) DIM_DARK_THEME else DIM_LIGHT_THEME
             (LocalView.current.parent as? DialogWindowProvider)?.window?.setDimAmount(dim)
-            DefaultLinkTheme {
+
+            LinkAppearanceTheme(appearance = linkAppearance) {
                 Surface(
                     modifier = Modifier.width(360.dp),
                     shape = RoundedCornerShape(24.dp),
@@ -125,6 +132,12 @@ fun VerificationDialogPreview() {
                     email = "email@email.com",
                     defaultPayment = null,
                     isDialog = true
+                ),
+                linkAppearance = LinkAppearance(
+                    lightColors = LinkAppearance.Colors(primary = Color.Blue),
+                    darkColors = LinkAppearance.Colors(primary = Color.Red),
+                    style = LinkAppearance.Style.ALWAYS_LIGHT,
+                    primaryButton = LinkAppearance.PrimaryButton()
                 ),
                 otpElement = OTPSpec.transform(),
                 onBack = {},

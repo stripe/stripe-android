@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.model.LinkAppearance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -29,6 +30,7 @@ internal data class CommonConfiguration(
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
+    val linkAppearance: LinkAppearance? = null
 ) : Parcelable {
 
     fun validate(isLiveMode: Boolean) {
@@ -202,6 +204,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
     ),
     shopPayConfiguration = null,
     googlePlacesApiKey = null,
+    linkAppearance = linkAppearance
 )
 
 private fun String.isEKClientSecretValid(): Boolean {
