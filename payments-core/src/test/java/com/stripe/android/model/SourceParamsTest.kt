@@ -634,59 +634,6 @@ class SourceParamsTest {
     }
 
     @Test
-    fun createSofortParams_hasExpectedFields() {
-        val params = SourceParams.createSofortParams(
-            AMOUNT,
-            RETURN_URL,
-            "UK",
-            "a thing you bought"
-        )
-
-        assertThat(params.type)
-            .isEqualTo(Source.SourceType.SOFORT)
-        assertThat(params.currency)
-            .isEqualTo("eur")
-        assertThat(params.amount)
-            .isEqualTo(AMOUNT)
-        assertThat(params.returnUrl)
-            .isEqualTo(RETURN_URL)
-
-        assertThat(
-            requireNotNull(params.typeData)
-        ).isEqualTo(
-            SourceParams.TypeData.Sofort(
-                "UK",
-                "a thing you bought"
-            )
-        )
-    }
-
-    @Test
-    fun createSofortParams_toParamMap_createsExpectedMap() {
-        val params = SourceParams.createSofortParams(
-            AMOUNT,
-            RETURN_URL,
-            "UK",
-            "a thing you bought"
-        )
-
-        assertThat(
-            params.toParamMap()
-        ).isEqualTo(
-            mapOf(
-                "type" to Source.SourceType.SOFORT,
-                "currency" to Source.EURO,
-                "amount" to AMOUNT,
-                "redirect" to mapOf("return_url" to RETURN_URL),
-                Source.SourceType.SOFORT to mapOf(
-                    "country" to "UK",
-                    "statement_descriptor" to "a thing you bought"
-                )
-            )
-        )
-    }
-
-    @Test
     fun createThreeDSecureParams_hasExpectedFields() {
         val params = SourceParams.createThreeDSecureParams(
             AMOUNT,

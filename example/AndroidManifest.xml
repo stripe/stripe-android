@@ -54,7 +54,6 @@
         <activity android:name=".activity.BecsDebitPaymentMethodActivity" />
         <activity android:name=".activity.BacsDebitPaymentMethodActivity" />
         <activity android:name=".activity.MultibancoActivity" />
-        <activity android:name=".activity.SofortPaymentMethodActivity" />
         <activity android:name=".activity.IDEALPaymentMethodActivity" />
         <activity android:name=".activity.UpiPaymentActivity" />
         <activity android:name=".activity.UpiWaitingActivity" />

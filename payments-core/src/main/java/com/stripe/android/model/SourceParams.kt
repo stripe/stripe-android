@@ -769,35 +769,6 @@ class SourceParams internal constructor(
         }
 
         /**
-         * Create SOFORT Source params.
-         *
-         * @param amount A positive integer in the smallest currency unit representing the amount to
-         * charge the customer (e.g., 1099 for a €10.99 payment).
-         * @param returnUrl The URL the customer should be redirected to after the authorization
-         * process.
-         * @param country The ISO-3166 2-letter country code of the customer’s bank.
-         * @param statementDescriptor A custom statement descriptor for the payment (optional).
-         * @return a [SourceParams] object that can be used to create a SOFORT source
-         *
-         * @see [SOFORT Payments with Sources](https://stripe.com/docs/sources/sofort)
-         */
-        @JvmStatic
-        fun createSofortParams(
-            @IntRange(from = 0) amount: Long,
-            returnUrl: String,
-            @Size(2) country: String,
-            statementDescriptor: String? = null
-        ): SourceParams {
-            return SourceParams(
-                SourceType.SOFORT,
-                typeData = TypeData.Sofort(country, statementDescriptor),
-                currency = Source.EURO,
-                amount = amount,
-                returnUrl = returnUrl
-            )
-        }
-
-        /**
          * Create 3D Secure Source params.
          *
          * @param amount A positive integer in the smallest currency unit representing the amount to
@@ -1032,26 +1003,6 @@ class SourceParams internal constructor(
                 private const val PARAM_CART_ID = "cart_id"
                 private const val PARAM_MASTERPASS = "masterpass"
                 private const val PARAM_TRANSACTION_ID = "transaction_id"
-            }
-        }
-
-        @Parcelize
-        @Poko
-        class Sofort(
-            @Size(2) var country: String,
-            var statementDescriptor: String? = null
-        ) : TypeData() {
-            override val type: String get() = SourceType.SOFORT
-
-            override val params: List<Pair<String, String?>>
-                get() = listOf(
-                    PARAM_COUNTRY to country,
-                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor
-                )
-
-            private companion object {
-                private const val PARAM_COUNTRY = "country"
-                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
             }
         }
 

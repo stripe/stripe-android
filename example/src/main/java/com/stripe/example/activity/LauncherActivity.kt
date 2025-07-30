@@ -106,10 +106,6 @@ class LauncherActivity : AppCompatActivity() {
                 MultibancoActivity::class.java
             ),
             Item(
-                activity.getString(R.string.sofort_example),
-                SofortPaymentMethodActivity::class.java
-            ),
-            Item(
                 "iDEAL Payment Example",
                 IDEALPaymentMethodActivity::class.java
             ),
