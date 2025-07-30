@@ -173,6 +173,9 @@ internal class ElementsSessionJsonParser(
         val linkEnableDisplayableDefaultValuesInEce = json?.optBoolean(
             FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE
         ) == true
+        val linkMobileExpressCheckoutElementInlineOtpKillswitch = json?.optBoolean(
+            FIELD_LINK_MOBILE_EXPRESS_CHECKOUT_ELEMENT_INLINE_OTP_KILLSWITCH
+        ) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
@@ -199,7 +202,8 @@ internal class ElementsSessionJsonParser(
             useAttestationEndpoints = useLinkAttestationEndpoints,
             suppress2faModal = suppressLink2faModal,
             disableLinkRuxInFlowController = disableLinkRuxInFlowController,
-            linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce
+            linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
+            linkMobileExpressCheckoutElementInlineOtpKillswitch = linkMobileExpressCheckoutElementInlineOtpKillswitch
         )
     }
 
@@ -451,6 +455,8 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
         private const val FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE =
             "link_enable_displayable_default_values_in_ece"
+        private const val FIELD_LINK_MOBILE_EXPRESS_CHECKOUT_ELEMENT_INLINE_OTP_KILLSWITCH =
+            "link_mobile_express_checkout_element_inline_otp_killswitch"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"

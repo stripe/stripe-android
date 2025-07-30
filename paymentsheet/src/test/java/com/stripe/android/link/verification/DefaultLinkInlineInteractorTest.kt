@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
@@ -23,7 +22,6 @@ import com.stripe.android.paymentsheet.state.LinkState.LoginState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfiguration
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,19 +53,13 @@ class DefaultLinkInlineInteractorTest {
         linkGate = linkGate
     )
 
-    @get:Rule
-    val showOTPFlagRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.showInlineOtpInWalletButtons,
-        isEnabled = true
-    )
-
     private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
     val rule: TestRule = CoroutineTestRule(testDispatcher)
 
     init {
-        linkGate.setUseInlineOtpInWalletButtons(true)
+        linkGate.setUseNativeLink(true)
     }
 
     @Test
@@ -91,6 +83,40 @@ class DefaultLinkInlineInteractorTest {
 
             assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
         }
+    }
+
+    @Test
+    fun `when killswitch is enabled, should render button regardless of account status`() = runTest(testDispatcher) {
+        // Setup account that would normally need verification
+        linkAccountManager.setLinkAccount(
+            LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification))
+        )
+
+        // Create configuration with killswitch enabled
+        val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            linkMobileExpressCheckoutElementInlineOtpKillswitch = true
+        )
+
+        val metadata = createPaymentMethodMetadata(
+            linkState = LinkState(
+                loginState = LoginState.NeedsVerification,
+                configuration = linkConfiguration,
+                signupMode = null
+            )
+        )
+        val interactor = createInteractor()
+
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(Loading)
+
+            interactor.setup(paymentMethodMetadata = metadata)
+
+            // Should render button instead of starting verification, even though account needs verification
+            assertThat(awaitItem().verificationState).isEqualTo(VerificationState.RenderButton)
+        }
+
+        // Verify that startVerification was NOT called
+        linkAccountManager.ensureAllEventsConsumed()
     }
 
     @Test

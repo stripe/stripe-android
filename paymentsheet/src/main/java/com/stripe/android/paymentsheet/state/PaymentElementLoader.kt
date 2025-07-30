@@ -594,6 +594,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             suppress2faModal = elementsSession.suppressLink2faModal,
             disableRuxInFlowController = elementsSession.disableRuxInFlowController,
             enableDisplayableDefaultValuesInEce = elementsSession.linkEnableDisplayableDefaultValuesInEce,
+            linkMobileExpressCheckoutElementInlineOtpKillswitch = elementsSession
+                .linkMobileExpressCheckoutElementInlineOtpKillswitch,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
