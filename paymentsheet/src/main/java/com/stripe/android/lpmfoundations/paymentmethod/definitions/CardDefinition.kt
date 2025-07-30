@@ -6,7 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
@@ -148,7 +147,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
             if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
                 add(
-                    createCardMandateElement(
+                    MandateTextElement(
+                        identifier = IdentifierSpec.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
                         signupMode = signupMode,
                         canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
@@ -156,65 +156,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     )
                 )
             }
-        }
-    }
-
-    private fun createCardMandateElement(
-        merchantName: String,
-        signupMode: LinkSignupMode?,
-        canChangeSaveForFutureUse: Boolean,
-        linkSignupStateFlow: StateFlow<InlineSignupViewState?>
-    ): FormElement {
-        val topPadding = when {
-            signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
-            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
-            canChangeSaveForFutureUse -> 6.dp
-            else -> 2.dp
-        }
-
-        return MandateTextElement(
-            identifier = IdentifierSpec.Generic("card_mandate"),
-            merchantName = merchantName,
-            topPadding = topPadding,
-            linkSignupStateFlow = linkSignupStateFlow
-        )
-    }
-
-    private class MandateTextElement(
-        identifier: IdentifierSpec,
-        private val merchantName: String,
-        private val topPadding: Dp,
-        private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>
-    ) : RenderableFormElement(
-        allowsUserInteraction = false,
-        identifier = identifier
-    ) {
-        override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<IdentifierSpec, FormFieldEntry>>())
-
-        @Composable
-        override fun ComposeUI(enabled: Boolean) {
-            val linkState by linkSignupStateFlow.collectAsState()
-            Mandate(
-                mandateText = when {
-                    // save for future usage only terms when Link sign-up toggle feature enabled
-                    linkState?.linkSignUpOptInFeatureEnabled == false ->
-                        stringResource(
-                            id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-                            formatArgs = arrayOf(merchantName)
-                        ).replaceHyperlinks()
-                    // save for future usage + link signup toggle terms
-                    linkState?.isExpanded == true -> stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
-                        formatArgs = arrayOf(merchantName)
-                    ).replaceHyperlinks()
-                    // save for future usage terms when Link sign-up toggle feature disabled
-                    else -> stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
-                        formatArgs = arrayOf(merchantName)
-                    )
-                },
-                modifier = Modifier.padding(top = topPadding)
-            )
         }
     }
 
@@ -329,4 +270,50 @@ private fun contactInformationElement(
         label = resolvableString(PaymentsUiCoreR.string.stripe_contact_information),
         sectionFieldElements = elements,
     )
+}
+
+private class MandateTextElement(
+    identifier: IdentifierSpec,
+    signupMode: LinkSignupMode?,
+    canChangeSaveForFutureUse: Boolean,
+    private val merchantName: String,
+    private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>,
+) : RenderableFormElement(
+    allowsUserInteraction = false,
+    identifier = identifier
+) {
+    override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<IdentifierSpec, FormFieldEntry>>())
+
+    private val topPadding = when {
+        signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+        signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+        canChangeSaveForFutureUse -> 6.dp
+        else -> 2.dp
+    }
+
+    @Composable
+    override fun ComposeUI(enabled: Boolean) {
+        val linkState by linkSignupStateFlow.collectAsState()
+        Mandate(
+            mandateText = when {
+                // save for future usage only terms when Link sign-up toggle feature enabled
+                linkState?.linkSignUpOptInFeatureEnabled == false ->
+                    stringResource(
+                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        formatArgs = arrayOf(merchantName)
+                    ).replaceHyperlinks()
+                // save for future usage + link signup toggle terms
+                linkState?.isExpanded == true -> stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
+                    formatArgs = arrayOf(merchantName)
+                ).replaceHyperlinks()
+                // save for future usage terms when Link sign-up toggle feature disabled
+                else -> stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                    formatArgs = arrayOf(merchantName)
+                )
+            },
+            modifier = Modifier.padding(top = topPadding)
+        )
+    }
 }

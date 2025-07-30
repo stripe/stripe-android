@@ -113,6 +113,7 @@ internal class CustomerSheetScreenshotTest {
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = {},
                 autocompleteAddressInteractorFactory = null,
+                linkInlineHandler = null
             )
         ) ?: listOf(),
         formArguments = FormArguments(

@@ -31,10 +31,10 @@ constructor(
 ) {
 
     val isShowingPhoneFirst: Boolean
-        get() = fields.firstOrNull() == LinkSignupField.Phone
+        get() = fields.first() == LinkSignupField.Phone
 
     val isShowingEmailFirst: Boolean
-        get() = fields.firstOrNull() == LinkSignupField.Email
+        get() = fields.first() == LinkSignupField.Email
 
     /**
      * Whether the view is active and the payment should be processed through Link.

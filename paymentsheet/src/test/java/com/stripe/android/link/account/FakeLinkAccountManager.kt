@@ -149,8 +149,8 @@ internal open class FakeLinkAccountManager(
 
     override suspend fun signUp(
         email: String,
-        phone: String,
-        country: String,
+        phone: String?,
+        country: String?,
         name: String?,
         consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
@@ -337,8 +337,8 @@ internal open class FakeLinkAccountManager(
 
     data class SignUpCall(
         val email: String,
-        val phone: String,
-        val country: String,
+        val phone: String?,
+        val country: String?,
         val name: String?,
         val consentAction: SignUpConsentAction
     )
