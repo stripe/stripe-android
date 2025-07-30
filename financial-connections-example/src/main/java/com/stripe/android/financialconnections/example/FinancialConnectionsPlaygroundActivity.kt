@@ -67,7 +67,6 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
@@ -112,9 +111,11 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val state by viewModel.state.collectAsState()
         val viewEffect by viewModel.viewEffect.collectAsState(null)
 
-        val paymentSheet = rememberPaymentSheet {
-            viewModel.onPaymentSheetResult(it)
-        }
+        val paymentSheet = remember {
+            PaymentSheet.Builder {
+                viewModel.onPaymentSheetResult(it)
+            }
+        }.build()
         val financialConnectionsSheetForData = rememberFinancialConnectionsSheet(
             viewModel::onFinancialConnectionsSheetResult
         )

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -21,7 +22,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
-import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 internal class CompleteFlowActivity : AppCompatActivity() {
 
@@ -37,9 +37,11 @@ internal class CompleteFlowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val paymentSheet = rememberPaymentSheet(
-                paymentResultCallback = viewModel::handlePaymentSheetResult,
-            )
+            val paymentSheet = remember(viewModel::handlePaymentSheetResult) {
+                PaymentSheet.Builder(
+                    resultCallback = viewModel::handlePaymentSheetResult
+                )
+            }.build()
 
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()
