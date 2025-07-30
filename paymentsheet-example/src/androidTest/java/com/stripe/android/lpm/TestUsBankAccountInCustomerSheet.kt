@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethod
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -33,6 +34,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     )
 
     @Test
+    @Ignore("Disabled until networking is removed from CustomerSheet")
     fun testUSBankAccount() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = false,
@@ -43,6 +45,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore("Disabled until networking is removed from CustomerSheet")
     fun testUSBankAccountLite() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
@@ -57,6 +60,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore("Disabled until networking is removed from CustomerSheet")
     fun testUSBankAccountWithCustomerSession() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = false,
@@ -69,6 +73,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore("Disabled until networking is removed from CustomerSheet")
     fun testUSBankAccountLiteWithCustomerSession() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
