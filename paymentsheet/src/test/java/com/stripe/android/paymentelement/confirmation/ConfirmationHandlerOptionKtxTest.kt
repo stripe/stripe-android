@@ -617,7 +617,8 @@ class ConfirmationHandlerOptionKtxTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
-            customerId = null
+            customerId = null,
+            enablePaymentSelectionHint = false,
         )
     }
 }

@@ -124,7 +124,7 @@ internal class LinkControllerViewModel @Inject constructor(
     fun onPresentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
-        hint: String?,
+        hint: String? = null,
     ) {
         present(
             launcher = launcher,

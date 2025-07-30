@@ -935,6 +935,30 @@ class WalletViewModelTest {
         assertThat(completedResult?.shippingAddress).isNull()
     }
 
+    @Test
+    fun `paymentSelectionHint is present based on enablePaymentSelectionHint`() = runTest(dispatcher) {
+        val hint = "Select your payment method"
+        listOf(
+            false to null,
+            true to hint,
+        ).forEach { (enableHint, expectedHint) ->
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                enablePaymentSelectionHint = enableHint
+            )
+
+            val viewModel = createViewModel(
+                configuration = configuration,
+                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = null,
+                    hint = hint
+                )
+            )
+
+            assertThat(viewModel.uiState.value.paymentSelectionHint)
+                .isEqualTo(expectedHint)
+        }
+    }
+
     private fun createViewModel(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT,
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
