@@ -39,15 +39,6 @@ constructor(
     private val useStripeSdk: Boolean = false,
 
     /**
-     * Payment-method-specific configuration for this SetupIntent.
-     *
-     * See [payment_method_options](
-     *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
-     * ).
-     */
-    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
-
-    /**
      * ID of the mandate to be used for this payment.
      */
     var mandateId: String? = null,
@@ -65,7 +56,16 @@ constructor(
     internal val setAsDefaultPaymentMethod: Boolean? = null,
 
     internal val paymentMethodCode: PaymentMethodCode? = paymentMethodCreateParams?.code,
-) : ConfirmStripeIntentParams {
+
+    /**
+     * Payment-method-specific configuration for this SetupIntent.
+     *
+     * See [payment_method_options](
+     *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
+     * ).
+     */
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+    ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
