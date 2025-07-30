@@ -29,6 +29,9 @@ class LinkController @Inject internal constructor(
 ) {
     val state: StateFlow<State> = viewModel.state(activity)
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    var paymentSelectionHint: String? = null
+
     /**
      * Configure the controller with a [Configuration].
      *
@@ -57,7 +60,8 @@ class LinkController @Inject internal constructor(
     fun presentPaymentMethods(email: String?) {
         viewModel.onPresentPaymentMethods(
             launcher = linkControllerCoordinator.linkActivityResultLauncher,
-            email = email
+            email = email,
+            hint = paymentSelectionHint,
         )
     }
 

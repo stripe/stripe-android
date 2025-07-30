@@ -123,7 +123,8 @@ internal class LinkControllerViewModel @Inject constructor(
 
     fun onPresentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
-        email: String?
+        email: String?,
+        hint: String?,
     ) {
         present(
             launcher = launcher,
@@ -137,6 +138,7 @@ internal class LinkControllerViewModel @Inject constructor(
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     sharePaymentDetailsImmediatelyAfterCreation = false,
+                    hint = hint,
                 )
             }
         )

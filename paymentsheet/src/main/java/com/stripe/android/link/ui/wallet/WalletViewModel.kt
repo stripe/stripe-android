@@ -79,7 +79,7 @@ internal class WalletViewModel @Inject constructor(
             selectedItemId = null,
             cardBrandFilter = configuration.cardBrandFilter,
             collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.collectMissingBillingDetailsForExistingPaymentMethods,
+                configuration.collectMissingBillingDetailsForExistingPaymentMethods,
             isProcessing = false,
             hasCompleted = false,
             // initially expand the wallet if a payment method is preselected.
@@ -87,6 +87,7 @@ internal class WalletViewModel @Inject constructor(
             primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = getAddPaymentMethodOptions(),
+            paymentSelectionHint = linkLaunchMode.paymentSelectionHint,
         )
     )
 
@@ -97,6 +98,10 @@ internal class WalletViewModel @Inject constructor(
             is LinkLaunchMode.PaymentMethodSelection -> selectedPayment?.id
             is LinkLaunchMode.Authentication -> null
         }
+
+    private val LinkLaunchMode.paymentSelectionHint: String?
+        get() = (this as? LinkLaunchMode.PaymentMethodSelection)?.hint
+            ?.takeIf { configuration.enablePaymentSelectionHint }
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
