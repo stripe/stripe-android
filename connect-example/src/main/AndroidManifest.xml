@@ -21,5 +21,9 @@
             android:name=".ui.features.payouts.PayoutsExampleActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".ui.features.payments.PaymentsExampleActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 </manifest>

@@ -55,6 +55,7 @@ import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButto
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
+import com.stripe.android.connect.example.ui.features.payments.PaymentsExampleActivity
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
@@ -149,6 +150,9 @@ fun ComponentPickerContent(
                             MenuItem.Payouts -> {
                                 context.startActivity(Intent(context, PayoutsExampleActivity::class.java))
                             }
+                            MenuItem.Payments -> {
+                                context.startActivity(Intent(context, PaymentsExampleActivity::class.java))
+                            }
                         }
                     },
                 )
@@ -159,7 +163,7 @@ fun ComponentPickerContent(
 
 @Composable
 private fun ComponentPickerList(onMenuItemClick: (MenuItem) -> Unit) {
-    val items = remember { listOf(MenuItem.AccountOnboarding, MenuItem.Payouts) }
+    val items = remember { listOf(MenuItem.AccountOnboarding, MenuItem.Payouts, MenuItem.Payments) }
     LazyColumn {
         items(items) { menuItem ->
             MenuRowItem(menuItem, onMenuItemClick)
@@ -229,6 +233,11 @@ private enum class MenuItem(
     Payouts(
         title = R.string.payouts,
         subtitle = R.string.payouts_menu_subtitle,
+        isBeta = true,
+    ),
+    Payments(
+        title = R.string.payments,
+        subtitle = R.string.payments_menu_subtitle,
         isBeta = true,
     ),
 }
