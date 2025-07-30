@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.stripe.android.connect.AccountOnboardingListener
+import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Success
@@ -136,11 +137,23 @@ fun ComponentPickerContent(
                     }
                 }
 
+                val payoutsController = remember(embeddedComponentManager) {
+                    val controller = embeddedComponentManager.createPayoutsController(
+                        activity = context,
+                        title = "Payouts",
+                    )
+                    controller
+                }
+
                 ComponentPickerList(
                     onMenuItemClick = { menuItem ->
                         when (menuItem) {
                             MenuItem.AccountOnboarding -> {
                                 onboardingController.show()
+                            }
+                            MenuItem.Payouts -> {
+                                println("payouts clicked")
+                                payoutsController.show()
                             }
                         }
                     },
@@ -152,7 +165,7 @@ fun ComponentPickerContent(
 
 @Composable
 private fun ComponentPickerList(onMenuItemClick: (MenuItem) -> Unit) {
-    val items = remember { listOf(MenuItem.AccountOnboarding) }
+    val items = remember { listOf(MenuItem.AccountOnboarding, MenuItem.Payouts) }
     LazyColumn {
         items(items) { menuItem ->
             MenuRowItem(menuItem, onMenuItemClick)
@@ -217,6 +230,11 @@ private enum class MenuItem(
     AccountOnboarding(
         title = R.string.account_onboarding,
         subtitle = R.string.account_onboarding_menu_subtitle,
+        isBeta = true,
+    ),
+    Payouts(
+        title = R.string.payouts,
+        subtitle = R.string.payouts_menu_subtitle,
         isBeta = true,
     ),
 }

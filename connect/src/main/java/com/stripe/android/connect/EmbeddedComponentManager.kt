@@ -71,6 +71,24 @@ class EmbeddedComponentManager @JvmOverloads constructor(
     }
 
     /**
+     * Returns a controller for presenting the Payouts component full screen.
+     *
+     * @param activity The [FragmentActivity] to present the component in.
+     * @param title Optional title to display in the toolbar.
+     */
+    @JvmOverloads
+    fun createPayoutsController(
+        activity: FragmentActivity,
+        title: String? = null,
+    ): PayoutsController {
+        return PayoutsController(
+            activity = activity,
+            embeddedComponentManager = this,
+            title = title,
+        )
+    }
+
+    /**
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
      *
      * @param context The [Context] to use for creating the view.
