@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.di
 
 import android.app.Application
+import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.injection.CoreCommonModule
@@ -35,6 +36,9 @@ internal interface OnrampComponent {
 
         @BindsInstance
         fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
+
+        @BindsInstance
+        fun componentActivity(activity: ComponentActivity): Builder
 
         @BindsInstance
         fun onRampCoordinatorViewModel(viewModel: OnrampCoordinatorViewModel): Builder

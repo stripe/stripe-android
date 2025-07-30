@@ -122,16 +122,18 @@ class OnrampCoordinator @Inject internal constructor(
                 modelClass = OnrampCoordinatorViewModel::class.java
             )
 
-            val application = when (lifecycleOwner) {
-                is Fragment -> lifecycleOwner.requireActivity().application
-                is ComponentActivity -> lifecycleOwner.application
-                else -> throw IllegalArgumentException("LifecycleOwner must be an Activity or Fragment")
+            val componentActivity: ComponentActivity = when {
+                lifecycleOwner is ComponentActivity -> lifecycleOwner
+                lifecycleOwner is Fragment -> lifecycleOwner.requireActivity()
+                activityResultRegistryOwner is ComponentActivity -> activityResultRegistryOwner
+                else -> throw IllegalStateException("Expected a ComponentActivity")
             }
 
             val onrampComponent: OnrampComponent =
                 DaggerOnrampComponent
                     .builder()
-                    .application(application)
+                    .application(componentActivity.application)
+                    .componentActivity(componentActivity)
                     .onRampCoordinatorViewModel(viewModel)
                     .linkElementCallbackIdentifier(linkElementCallbackIdentifier)
                     .activityResultRegistryOwner(activityResultRegistryOwner)
