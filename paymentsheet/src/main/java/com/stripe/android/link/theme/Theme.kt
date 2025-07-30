@@ -1,12 +1,15 @@
 package com.stripe.android.link.theme
 
+import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.model.LinkAppearance
 
@@ -85,10 +88,25 @@ internal fun LinkAppearanceTheme(
             textBrand = overrides.primary
         )
 
+        val baseContext = LocalContext.current
+
+        val styleContext = remember(baseContext, isDark) {
+            val config = Configuration(baseContext.resources.configuration).apply {
+                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or
+                    if (isDark) {
+                        Configuration.UI_MODE_NIGHT_YES
+                    } else {
+                        Configuration.UI_MODE_NIGHT_NO
+                    }
+            }
+            baseContext.createConfigurationContext(config)
+        }
+
         CompositionLocalProvider(
             LocalLinkColors provides resolvedColors,
             LocalLinkTypography provides linkTypography,
-            LocalLinkShapes provides LinkShapes
+            LocalLinkShapes provides LinkShapes,
+            LocalContext provides styleContext
         ) {
             MaterialTheme(
                 colors = resolvedColors.toMaterialColors(!isDark),

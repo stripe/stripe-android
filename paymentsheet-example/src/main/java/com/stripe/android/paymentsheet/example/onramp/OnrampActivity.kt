@@ -73,7 +73,9 @@ internal class OnrampActivity : ComponentActivity() {
                 ),
                 darkColors = LinkAppearance.Colors(
                     primary = Color.Red
-                )
+                ),
+                style = LinkAppearance.Style.AUTOMATIC,
+                primaryButton = LinkAppearance.PrimaryButton()
             )
         )
 

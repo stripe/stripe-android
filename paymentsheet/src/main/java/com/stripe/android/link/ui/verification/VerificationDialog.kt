@@ -133,12 +133,7 @@ fun VerificationDialogPreview() {
                     defaultPayment = null,
                     isDialog = true
                 ),
-                linkAppearance = LinkAppearance(
-                    lightColors = LinkAppearance.Colors(primary = Color.Blue),
-                    darkColors = LinkAppearance.Colors(primary = Color.Red),
-                    style = LinkAppearance.Style.ALWAYS_LIGHT,
-                    primaryButton = LinkAppearance.PrimaryButton()
-                ),
+                linkAppearance = null,
                 otpElement = OTPSpec.transform(),
                 onBack = {},
                 onChangeEmailClick = {},
