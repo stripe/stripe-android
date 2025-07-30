@@ -35,7 +35,7 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `init and present should return expected PaymentResult`() {
-        val testRegistry = FakeActivityResultRegistry(PaymentSheetResult.Completed)
+        val testRegistry = FakeActivityResultRegistry(PaymentSheetResult.Completed())
 
         with(
             launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
@@ -53,7 +53,7 @@ class DefaultPaymentSheetLauncherTest {
 
                 moveToState(Lifecycle.State.RESUMED)
                 launcher.present(mode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_fake"))
-                assertThat(results).containsExactly(PaymentSheetResult.Completed)
+                assertThat(results).containsExactly(PaymentSheetResult.Completed())
             }
         }
     }

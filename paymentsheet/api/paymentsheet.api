@@ -2939,35 +2939,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheetComposeKt {
 	public static final fun rememberPaymentSheet (Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheetContract : androidx/activity/result/contract/ActivityResultContract {
-	public static final field $stable I
-	public static final field EXTRA_ARGS Ljava/lang/String;
-	public fun <init> ()V
-	public fun createIntent (Landroid/content/Context;Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;)Landroid/content/Intent;
-	public synthetic fun createIntent (Landroid/content/Context;Ljava/lang/Object;)Landroid/content/Intent;
-	public fun parseResult (ILandroid/content/Intent;)Lcom/stripe/android/paymentsheet/PaymentSheetResult;
-	public synthetic fun parseResult (ILandroid/content/Intent;)Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheetContract$Args : com/stripe/android/view/ActivityStarter$Args {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args$Companion;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getGooglePayConfig ()Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheetContract$Args$Companion {
-	public final fun createPaymentIntentArgs (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
-	public static synthetic fun createPaymentIntentArgs$default (Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args$Companion;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
-	public final fun createSetupIntentArgs (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;)Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
-	public static synthetic fun createSetupIntentArgs$default (Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args$Companion;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
-}
-
 public final class com/stripe/android/paymentsheet/PaymentSheetContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetContract$Args;
@@ -2984,22 +2955,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheetContract$Result$C
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheetContractV2$Args$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Args;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Args;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheetContractV2$Result$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Result;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheetContractV2$Result;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public abstract class com/stripe/android/paymentsheet/PaymentSheetResult : android/os/Parcelable {
 	public static final field $stable I
 }
@@ -3007,7 +2962,7 @@ public abstract class com/stripe/android/paymentsheet/PaymentSheetResult : andro
 public final class com/stripe/android/paymentsheet/PaymentSheetResult$Canceled : com/stripe/android/paymentsheet/PaymentSheetResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Canceled;
+	public fun <init> ()V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -3026,7 +2981,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Canceled$C
 public final class com/stripe/android/paymentsheet/PaymentSheetResult$Completed : com/stripe/android/paymentsheet/PaymentSheetResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Completed;
+	public fun <init> ()V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -3045,10 +3000,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Completed$
 public final class com/stripe/android/paymentsheet/PaymentSheetResult$Failed : com/stripe/android/paymentsheet/PaymentSheetResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/PaymentSheetResult$Failed;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getError ()Ljava/lang/Throwable;
@@ -3363,8 +3314,11 @@ public abstract class com/stripe/android/paymentsheet/addresselement/AddressLaun
 public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled : com/stripe/android/paymentsheet/addresselement/AddressLauncherResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Canceled;
+	public fun <init> ()V
 	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -3379,10 +3333,6 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressLaunche
 public final class com/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded : com/stripe/android/paymentsheet/addresselement/AddressLauncherResult {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
-	public final fun component1 ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
-	public final fun copy (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;
-	public static synthetic fun copy$default (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ILjava/lang/Object;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult$Succeeded;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddress ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;

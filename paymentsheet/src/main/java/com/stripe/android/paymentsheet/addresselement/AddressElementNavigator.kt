@@ -21,7 +21,7 @@ internal interface AddressElementNavigator {
 
     fun <T : Any?> getResultFlow(key: String): Flow<T>?
 
-    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled)
+    fun dismiss(result: AddressLauncherResult = AddressLauncherResult.Canceled())
 
     fun onBack()
 

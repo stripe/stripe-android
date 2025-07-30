@@ -18,7 +18,7 @@ internal class AddressElementActivityTest {
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             val result = AddressElementActivityContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isEqualTo(AddressLauncherResult.Canceled)
+            assertThat(result).isEqualTo(AddressLauncherResult.Canceled())
         }
     }
 }

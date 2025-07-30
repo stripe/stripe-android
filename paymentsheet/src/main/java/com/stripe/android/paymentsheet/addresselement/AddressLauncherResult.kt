@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Activity
 import android.os.Parcelable
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 sealed class AddressLauncherResult : Parcelable {
@@ -9,7 +10,8 @@ sealed class AddressLauncherResult : Parcelable {
     internal abstract val resultCode: Int
 
     @Parcelize
-    data class Succeeded(
+    @Poko
+    class Succeeded internal constructor(
         val address: AddressDetails
     ) : AddressLauncherResult() {
         override val resultCode: Int
@@ -17,7 +19,10 @@ sealed class AddressLauncherResult : Parcelable {
     }
 
     @Parcelize
-    object Canceled : AddressLauncherResult() {
+    @Poko
+    class Canceled internal constructor(
+        @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+    ) : AddressLauncherResult() {
         override val resultCode: Int
             get() = Activity.RESULT_CANCELED
     }
