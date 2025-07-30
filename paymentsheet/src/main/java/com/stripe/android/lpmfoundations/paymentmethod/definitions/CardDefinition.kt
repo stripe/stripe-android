@@ -194,12 +194,20 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 linkState?.linkSignUpOptInFeatureEnabled == true
             Mandate(
                 mandateText = when {
-                    shouldShowCombinedLinkTerms -> stringResource(
-                        id = PaymentSheetR.string.stripe_sign_up_terms,
+                    // save for future usage only terms
+                    linkState?.linkSignUpOptInFeatureEnabled == false ->
+                        stringResource(
+                            id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                            formatArgs = arrayOf(merchantName)
+                        ).replaceHyperlinks()
+                    // save for future usage + link signup toggle terms
+                    linkState?.isExpanded == true -> stringResource(
+                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
                         formatArgs = arrayOf(merchantName)
                     ).replaceHyperlinks()
+                    // save for future usage terms for toggle-off merchants
                     else -> stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
                         formatArgs = arrayOf(merchantName)
                     )
                 },

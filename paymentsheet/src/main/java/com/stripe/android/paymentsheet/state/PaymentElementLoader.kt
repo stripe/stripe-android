@@ -507,7 +507,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
             hasCustomerConfiguration = configuration.customer != null,
         )
-        val hasUsedLink = false // TODO reveet.
+        val hasUsedLink = false // TODO revert.
 
         val disableSignup = elementsSession.allowLinkDefaultOptIn.not() && linkSignUpDisabled
         val linkSignupMode = if (hasUsedLink || disableSignup) {
