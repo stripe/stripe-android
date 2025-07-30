@@ -40,9 +40,7 @@ import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
@@ -91,9 +89,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
-        
-        val linkSignupStateFlow = MutableStateFlow<InlineSignupViewState?>(null)
-
         return buildList {
             addContactInformationElement(
                 arguments = arguments,
@@ -138,10 +133,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         configuration = metadata.linkState.configuration,
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
                         initialLinkUserInput = arguments.initialLinkUserInput,
-                        onLinkInlineSignupStateChanged = { viewState ->
-                            linkSignupStateFlow.value = viewState
-                            arguments.onLinkInlineSignupStateChanged(viewState)
-                        }
+                        onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
                     )
                 )
 
@@ -151,16 +143,12 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             }
 
             if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
-                val isSimplifiedCheckoutMode = metadata.linkState?.configuration
-                    ?.linkSignUpOptInFeatureEnabled == true
-                    
                 add(
                     createCardMandateElement(
-                        metadata.merchantName,
-                        signupMode,
-                        canChangeSaveForFutureUsage,
-                        isSimplifiedCheckoutMode,
-                        linkSignupStateFlow
+                        merchantName = metadata.merchantName,
+                        signupMode = signupMode,
+                        canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
+                        linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
                     )
                 )
             }
@@ -171,7 +159,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         merchantName: String,
         signupMode: LinkSignupMode?,
         canChangeSaveForFutureUse: Boolean,
-        isSimplifiedCheckoutMode: Boolean,
         linkSignupStateFlow: StateFlow<InlineSignupViewState?>
     ): FormElement {
         val topPadding = when {
@@ -181,22 +168,19 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             else -> 2.dp
         }
 
-        return CardMandateTextElement(
+        return MandateTextElement(
             identifier = IdentifierSpec.Generic("card_mandate"),
             merchantName = merchantName,
             topPadding = topPadding,
-            linkSignupStateFlow = if (isSimplifiedCheckoutMode) linkSignupStateFlow else null
+            linkSignupStateFlow = linkSignupStateFlow
         )
     }
 
-    /**
-     * A mandate element that can show either static or dynamic text based on Link checkbox state
-     */
-    private class CardMandateTextElement(
+    private class MandateTextElement(
         identifier: IdentifierSpec,
         private val merchantName: String,
         private val topPadding: Dp,
-        private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>?
+        private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>
     ) : RenderableFormElement(
         allowsUserInteraction = false,
         identifier = identifier
@@ -205,30 +189,20 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
         @Composable
         override fun ComposeUI(enabled: Boolean) {
-            val mandateText = if (linkSignupStateFlow != null) {
-                // Dynamic mode: observe Link state and change text accordingly
-                val linkState by linkSignupStateFlow.collectAsState()
-                if (linkState?.isExpanded == true) {
-                    stringResource(
-                        PaymentSheetR.string.stripe_sign_up_terms,
-                        merchantName
-                    ).replaceHyperlinks()
-                } else {
-                    stringResource(
-                        PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-                        merchantName
-                    )
-                }
-            } else {
-                // Static mode: always show regular mandate
-                stringResource(
-                    PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-                    merchantName
-                )
-            }
-
+            val linkState by linkSignupStateFlow.collectAsState()
+            val shouldShowCombinedLinkTerms = linkState?.isExpanded == true &&
+                linkState?.linkSignUpOptInFeatureEnabled == true
             Mandate(
-                mandateText = mandateText,
+                mandateText = when {
+                    shouldShowCombinedLinkTerms -> stringResource(
+                        id = PaymentSheetR.string.stripe_sign_up_terms,
+                        formatArgs = arrayOf(merchantName)
+                    ).replaceHyperlinks()
+                    else -> stringResource(
+                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        formatArgs = arrayOf(merchantName)
+                    )
+                },
                 modifier = Modifier.padding(top = topPadding)
             )
         }
