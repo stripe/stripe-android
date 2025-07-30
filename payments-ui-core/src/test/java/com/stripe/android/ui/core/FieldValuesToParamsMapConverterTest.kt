@@ -95,16 +95,16 @@ class FieldValuesToParamsMapConverterTest {
                         true
                     )
                 ),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
-                clientAttributionMetadata = null
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
+                clientAttributionMetadata = null,
             )
 
         assertThat(
             paymentMethodParams.toParamMap().toString()
         ).isEqualTo(
             "{" +
-                "type=sofort, " +
+                "type=paypal, " +
                 "billing_details={" +
                 "name=joe, " +
                 "email=joe@gmail.com, " +
@@ -127,8 +127,8 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
                 clientAttributionMetadata = ClientAttributionMetadata(
                     elementsSessionConfigId = "elements_session_123",
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
@@ -144,9 +144,9 @@ class FieldValuesToParamsMapConverterTest {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
-                PaymentMethod.Type.Sofort.code,
-                PaymentMethod.Type.Sofort.requiresMandate,
-                clientAttributionMetadata = null
+                PaymentMethod.Type.PayPal.code,
+                PaymentMethod.Type.PayPal.requiresMandate,
+                clientAttributionMetadata = null,
             )
 
         assertThat(paymentMethodParams.billingDetails).isNull()
