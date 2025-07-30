@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.content.res.ColorStateList
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -57,7 +55,6 @@ internal object PaymentSheetFixtures {
             "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
-        primaryButtonColor = ColorStateList.valueOf(Color.Black.toArgb()),
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
