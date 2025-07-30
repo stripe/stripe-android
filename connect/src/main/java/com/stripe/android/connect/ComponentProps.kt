@@ -20,4 +20,4 @@ internal fun Any.toComponentPropsJsonObject(): JsonObject {
  * Empty props.
  */
 @Parcelize
-internal data object EmptyProps : Parcelable
+data object EmptyProps : Parcelable
