@@ -156,8 +156,7 @@ class LinkFormElementTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
-            customerId = null,
-            enablePaymentSelectionHint = false,
+            customerId = null
         )
     }
 

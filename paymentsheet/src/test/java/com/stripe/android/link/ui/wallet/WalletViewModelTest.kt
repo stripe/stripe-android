@@ -943,7 +943,7 @@ class WalletViewModelTest {
             true to hint,
         ).forEach { (enableHint, expectedHint) ->
             val configuration = TestFactory.LINK_CONFIGURATION.copy(
-                enablePaymentSelectionHint = enableHint
+                flags = mapOf("link_mobile_enable_payment_selection_hint" to enableHint)
             )
 
             val viewModel = createViewModel(

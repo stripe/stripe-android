@@ -1965,8 +1965,7 @@ internal class PaymentMethodMetadataTest {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
-            customerId = null,
-            enablePaymentSelectionHint = false,
+            customerId = null
         )
     }
 

@@ -103,8 +103,8 @@ internal class WalletViewModel @Inject constructor(
     private val LinkLaunchMode.paymentSelectionHint: String?
         get() = (this as? LinkLaunchMode.PaymentMethodSelection)?.hint
             ?.takeIf {
-                FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled ||
-                    configuration.enablePaymentSelectionHint
+                configuration.enableLinkPaymentSelectionHint ||
+                    FeatureFlags.forceEnableLinkPaymentSelectionHint.isEnabled
             }
 
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
