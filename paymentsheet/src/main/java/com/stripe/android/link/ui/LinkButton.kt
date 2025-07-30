@@ -213,7 +213,7 @@ private fun PaymentDetailsButtonContent(
 private fun PaymentDetailsDisplay(
     paymentUI: DefaultPaymentUI
 ) {
-    Box(modifier = Modifier.size(20.dp)) {
+    Box(modifier = Modifier.size(24.dp)) {
         when (paymentUI.paymentType) {
             is DefaultPaymentUI.PaymentType.Card -> Image(
                 painter = painterResource(paymentUI.paymentType.iconRes),
