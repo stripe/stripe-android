@@ -90,16 +90,6 @@ class PaymentIntentTest {
     }
 
     @Test
-    fun getNextActionData_whenUseStripeSdkWith3ds1() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
-        assertThat(paymentIntent.nextActionData)
-            .isInstanceOf(StripeIntent.NextActionData.SdkData.Use3DS1::class.java)
-        val sdkData = paymentIntent.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS1
-        assertThat(sdkData.url)
-            .isNotEmpty()
-    }
-
-    @Test
     fun getNextActionData_whenRedirectToUrl() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
         assertThat(paymentIntent.nextActionData)

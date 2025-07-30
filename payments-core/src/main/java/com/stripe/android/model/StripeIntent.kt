@@ -296,11 +296,6 @@ sealed interface StripeIntent : StripeModel {
          * to change and is only intended to be used by the Stripe SDK.
          */
         sealed class SdkData : NextActionData() {
-            @Parcelize
-            data class Use3DS1(
-                val url: String
-            ) : SdkData()
-
             /**
              * Contains all parameters needed to perform a 3DS2 authentication.
              *
