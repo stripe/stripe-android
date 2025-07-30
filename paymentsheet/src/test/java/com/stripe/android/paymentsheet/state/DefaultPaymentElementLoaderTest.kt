@@ -421,7 +421,9 @@ internal class DefaultPaymentElementLoaderTest {
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(allowsDelayedPaymentMethods = false),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                    .allowsDelayedPaymentMethods(false)
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),

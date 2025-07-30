@@ -1386,7 +1386,7 @@ constructor(
         allowRedisplay: AllowRedisplay? = this.allowRedisplay,
     ): PaymentMethod {
         return PaymentMethod(
-            id = id,
+            id = requireNotNull(id) { "PaymentMethod id was null" },
             created = created,
             liveMode = liveMode,
             code = code,

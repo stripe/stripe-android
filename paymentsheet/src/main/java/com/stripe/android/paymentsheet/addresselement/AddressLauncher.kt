@@ -81,7 +81,7 @@ class AddressLauncher internal constructor(
     /** Configuration for [AddressLauncher] **/
     @Parcelize
     @Poko
-    class Configuration internal constructor(
+    class Configuration @JvmOverloads constructor(
         internal val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         internal val address: AddressDetails? = null,
         internal val allowedCountries: Set<String> = emptySet(),
@@ -90,7 +90,7 @@ class AddressLauncher internal constructor(
         internal val title: String? = null,
         internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-        internal val billingAddress: PaymentSheet.BillingDetails?,
+        internal val billingAddress: PaymentSheet.BillingDetails? = null,
     ) : Parcelable {
 
         /**
