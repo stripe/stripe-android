@@ -629,36 +629,6 @@ data class SourceParams internal constructor(
         }
 
         /**
-         * Create Giropay Source params.
-         *
-         * @param amount A positive integer in the smallest currency unit representing the amount to
-         * charge the customer (e.g., 1099 for a €10.99 payment).
-         * @param name The full name of the account holder.
-         * @param returnUrl The URL the customer should be redirected to after the authorization
-         * process.
-         * @param statementDescriptor A custom statement descriptor for the payment (optional).
-         * @return a [SourceParams] object that can be used to create a Giropay source
-         *
-         * @see [Giropay Payments with Sources](https://stripe.com/docs/sources/giropay)
-         */
-        @JvmStatic
-        fun createGiropayParams(
-            @IntRange(from = 0) amount: Long,
-            name: String,
-            returnUrl: String,
-            statementDescriptor: String? = null
-        ): SourceParams {
-            return SourceParams(
-                SourceType.GIROPAY,
-                typeData = TypeData.Giropay(statementDescriptor),
-                currency = Source.EURO,
-                amount = amount,
-                owner = OwnerParams(name = name),
-                returnUrl = returnUrl
-            )
-        }
-
-        /**
          * Create iDEAL Source params.
          *
          * @param amount A positive integer in the smallest currency unit representing the amount to
@@ -1009,22 +979,6 @@ data class SourceParams internal constructor(
 
             override val params: List<Pair<String, String?>>
                 get() = listOf(PARAM_STATEMENT_DESCRIPTOR to statementDescriptor)
-
-            private companion object {
-                private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"
-            }
-        }
-
-        @Parcelize
-        data class Giropay(
-            var statementDescriptor: String? = null
-        ) : TypeData() {
-            override val type: String get() = SourceType.GIROPAY
-
-            override val params: List<Pair<String, String?>>
-                get() = listOf(
-                    PARAM_STATEMENT_DESCRIPTOR to statementDescriptor
-                )
 
             private companion object {
                 private const val PARAM_STATEMENT_DESCRIPTOR = "statement_descriptor"

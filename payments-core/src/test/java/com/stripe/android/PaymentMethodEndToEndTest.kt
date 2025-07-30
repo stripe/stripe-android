@@ -150,31 +150,6 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withGiropay_shouldCreateObject() {
-        val params = PaymentMethodCreateParamsFixtures.GIROPAY
-        val paymentMethod =
-            Stripe(context, ApiKeyFixtures.GIROPAY_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod.type)
-            .isEqualTo(PaymentMethod.Type.Giropay)
-    }
-
-    @Test
-    fun createPaymentMethod_withGiropay_missingName_shouldFail() {
-        val params = PaymentMethodCreateParams.createGiropay(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(name = null)
-        )
-        val exception = assertFailsWith<InvalidRequestException>(
-            "A name is required to create a Giropay payment method"
-        ) {
-            Stripe(context, ApiKeyFixtures.GIROPAY_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-        assertThat(exception.message)
-            .isEqualTo("Missing required param: billing_details[name].")
-    }
-
-    @Test
     fun createPaymentMethod_withEps_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.EPS
         val paymentMethod =

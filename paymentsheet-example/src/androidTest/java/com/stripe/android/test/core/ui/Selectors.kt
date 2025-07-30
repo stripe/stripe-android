@@ -192,7 +192,7 @@ internal class Selectors(
                 device = device
             ) {
                 override fun click() {
-                    // Afterpay, giropay and some other authorization test pages
+                    // Afterpay and some other authorization test pages
                     // have their authorization class name of TextView instead of button,
                     // in other cases such as bancontact and ideal the authorize class prevents
                     // it from finding the button.  More investigation into why is needed.
