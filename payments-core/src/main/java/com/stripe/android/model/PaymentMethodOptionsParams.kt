@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 sealed class PaymentMethodOptionsParams(
@@ -24,7 +25,8 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Card
+    @Poko
+    class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
         var cvc: String? = null,
@@ -53,6 +55,21 @@ sealed class PaymentMethodOptionsParams(
             )
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun copy(
+            cvc: String? = this.cvc,
+            network: String? = this.network,
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage,
+            moto: Boolean? = this.moto
+        ): Card {
+            return Card(
+                cvc = cvc,
+                network = network,
+                setupFutureUsage = setupFutureUsage,
+                moto = moto
+            )
+        }
+
         private companion object {
             private const val PARAM_CVC = "cvc"
             private const val PARAM_NETWORK = "network"
@@ -63,7 +80,8 @@ sealed class PaymentMethodOptionsParams(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class Link(
+    @Poko
+    class Link(
         val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Link) {
 
@@ -79,7 +97,8 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Blik(
+    @Poko
+    class Blik(
         var code: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Blik) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
@@ -111,7 +130,8 @@ sealed class PaymentMethodOptionsParams(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Konbini(
+    @Poko
+    class Konbini(
         private val confirmationNumber: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.Konbini) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
@@ -126,7 +146,8 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class WeChatPay(
+    @Poko
+    class WeChatPay(
         var appId: String
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
         override fun createTypeParams(): List<Pair<String, Any?>> {
@@ -151,7 +172,8 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class USBankAccount(
+    @Poko
+    class USBankAccount(
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
     ) : PaymentMethodOptionsParams(PaymentMethod.Type.USBankAccount) {
         override fun createTypeParams(): List<Pair<String, Any?>> {

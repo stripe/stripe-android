@@ -25,6 +25,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -206,7 +207,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     }
 
     @Parcelize
-    data class Config @JvmOverloads constructor(
+    @Poko
+    class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
         val merchantCountryCode: String,
         val merchantName: String,
@@ -244,7 +246,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     }
 
     @Parcelize
-    data class BillingAddressConfig @JvmOverloads constructor(
+    @Poko
+    class BillingAddressConfig @JvmOverloads constructor(
         val isRequired: Boolean = false,
 
         /**
@@ -280,7 +283,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * @param paymentMethod The resulting payment method.
          */
         @Parcelize
-        data class Completed(
+        @Poko
+        class Completed(
             val paymentMethod: PaymentMethod
         ) : Result()
 
@@ -291,7 +295,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * @param errorCode The failure [ErrorCode].
          */
         @Parcelize
-        data class Failed(
+        @Poko
+        class Failed(
             val error: Throwable,
             @ErrorCode val errorCode: Int
         ) : Result()

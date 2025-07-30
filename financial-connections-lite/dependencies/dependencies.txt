@@ -291,6 +291,9 @@
 |    |    |    \--- androidx.appcompat:appcompat-resources:1.7.0 (c)
 |    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
+|    |    +--- dev.drewhamilton.poko:poko-annotations:0.18.2
+|    |    |    \--- dev.drewhamilton.poko:poko-annotations-jvm:0.18.2
+|    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    +--- androidx.activity:activity-ktx:1.9.3

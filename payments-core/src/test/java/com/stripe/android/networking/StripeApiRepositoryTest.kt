@@ -57,6 +57,7 @@ import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.model.StripeFileFixtures
 import com.stripe.android.model.TokenFixtures
 import com.stripe.android.model.VerificationMethodParam
+import com.stripe.android.model.copy
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
