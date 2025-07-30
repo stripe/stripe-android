@@ -84,7 +84,7 @@ internal class StripePaymentControllerTest {
 
     @Test
     fun getRequestCode_withIntents_correctCodeReturned() {
-        assertThat(StripePaymentController.getRequestCode(PaymentIntentFixtures.PI_REQUIRES_3DS1))
+        assertThat(StripePaymentController.getRequestCode(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD))
             .isEqualTo(StripePaymentController.PAYMENT_REQUEST_CODE)
         assertThat(StripePaymentController.getRequestCode(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT))
             .isEqualTo(StripePaymentController.SETUP_REQUEST_CODE)
@@ -106,7 +106,7 @@ internal class StripePaymentControllerTest {
     fun handlePaymentResult_whenSourceShouldBeCanceled_onlyCallsCancelIntentOnce() =
         runTest {
             // use a PaymentIntent in `requires_action` state
-            val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_3DS1
+            val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_REDIRECT
 
             val clientSecret = paymentIntent.clientSecret.orEmpty()
             stripeRepository.retrievePaymentIntentResponse = paymentIntent
