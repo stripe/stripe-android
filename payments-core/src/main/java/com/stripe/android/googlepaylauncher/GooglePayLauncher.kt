@@ -30,7 +30,7 @@ import java.util.Locale
  * A drop-in class that presents a Google Pay sheet to collect customer payment details and use it
  * to confirm a [PaymentIntent] or [SetupIntent]. When successful, will return [Result.Completed].
  *
- * Use [GooglePayLauncherContract] for Jetpack Compose integrations.
+ * Use [rememberGooglePayLauncher] for Jetpack Compose integrations.
  *
  * See the [Google Pay integration guide](https://stripe.com/docs/google-pay) for more details.
  */
@@ -318,30 +318,6 @@ class GooglePayLauncher internal constructor(
     companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
         internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
-
-        /**
-         * Create a [GooglePayLauncher] used for Jetpack Compose.
-         *
-         * This API uses Compose specific API [rememberLauncherForActivityResult] to register a
-         * [ActivityResultLauncher] into current activity, it should be called as part of Compose
-         * initialization path.
-         * The GooglePayLauncher created is remembered across recompositions. Recomposition will
-         * always return the value produced by composition.
-         */
-        @Deprecated(
-            message = "Use rememberGooglePayLauncher() instead",
-            replaceWith = ReplaceWith(
-                expression = "rememberGooglePayLauncher(config, readyCallback, resultCallback)",
-            ),
-        )
-        @Composable
-        fun rememberLauncher(
-            config: Config,
-            readyCallback: ReadyCallback,
-            resultCallback: ResultCallback
-        ): GooglePayLauncher {
-            return rememberGooglePayLauncher(config, readyCallback, resultCallback)
-        }
     }
 }
 
