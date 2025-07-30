@@ -712,7 +712,7 @@ class PaymentSheet internal constructor(
 
         /**
          * If true, allows payment methods that do not move money at the end of the checkout.
-         * Defaults to false.
+         * Defaults to true.
          *
          * Some payment methods can't guarantee you will receive funds from your customer at the end
          * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
@@ -841,7 +841,7 @@ class PaymentSheet internal constructor(
 
             /**
              * If true, allows payment methods that do not move money at the end of the checkout.
-             * Defaults to false.
+             * Defaults to true.
              *
              * Some payment methods can't guarantee you will receive funds from your customer at the end
              * of the checkout because they take time to settle (eg. most bank debits, like SEPA or ACH)
