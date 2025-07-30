@@ -72,7 +72,7 @@ internal fun LinkTerms(
     )
 }
 
-private fun String.replaceHyperlinks() = this.replace(
+internal fun String.replaceHyperlinks() = this.replace(
     "<terms>",
     "<a href=\"https://link.co/terms\">"
 ).replace("</terms>", "</a>").replace(

@@ -104,10 +104,8 @@ constructor(
                 config.stripeIntent.countryCode == "US" &&
                 signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
 
-            val linkSignUpOptInFeatureEnabled = true
-//            val linkSignUpOptInFeatureEnabled = config.linkSignUpOptInFeatureEnabled &&
-//                !config.customerInfo.email.isNullOrBlank() &&
-//                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
+            val linkSignUpOptInFeatureEnabled = config.linkSignUpOptInFeatureEnabled
+                && !config.customerInfo.email.isNullOrBlank()
 
             val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()
 

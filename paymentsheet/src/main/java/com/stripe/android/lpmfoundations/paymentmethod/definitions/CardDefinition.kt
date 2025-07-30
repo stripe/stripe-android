@@ -1,9 +1,18 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.replaceHyperlinks
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.addSavePaymentOptionElements
@@ -20,7 +29,8 @@ import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
-import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.Mandate
+import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -29,6 +39,11 @@ import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
@@ -76,6 +91,9 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
+        
+        val linkSignupStateFlow = MutableStateFlow<InlineSignupViewState?>(null)
+
         return buildList {
             addContactInformationElement(
                 arguments = arguments,
@@ -120,7 +138,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         configuration = metadata.linkState.configuration,
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
                         initialLinkUserInput = arguments.initialLinkUserInput,
-                        onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                        onLinkInlineSignupStateChanged = { viewState ->
+                            linkSignupStateFlow.value = viewState
+                            arguments.onLinkInlineSignupStateChanged(viewState)
+                        }
                     )
                 )
 
@@ -130,7 +151,18 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             }
 
             if (metadata.hasIntentToSetup(CardDefinition.type.code)) {
-                add(createCardMandateElement(metadata.merchantName, signupMode, canChangeSaveForFutureUsage))
+                val isSimplifiedCheckoutMode = metadata.linkState?.configuration
+                    ?.linkSignUpOptInFeatureEnabled == true
+                    
+                add(
+                    createCardMandateElement(
+                        metadata.merchantName,
+                        signupMode,
+                        canChangeSaveForFutureUsage,
+                        isSimplifiedCheckoutMode,
+                        linkSignupStateFlow
+                    )
+                )
             }
         }
     }
@@ -139,18 +171,67 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         merchantName: String,
         signupMode: LinkSignupMode?,
         canChangeSaveForFutureUse: Boolean,
-    ): MandateTextElement {
-        return MandateTextElement(
+        isSimplifiedCheckoutMode: Boolean,
+        linkSignupStateFlow: StateFlow<InlineSignupViewState?>
+    ): FormElement {
+        val topPadding = when {
+            signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+            canChangeSaveForFutureUse -> 6.dp
+            else -> 2.dp
+        }
+
+        return CardMandateTextElement(
             identifier = IdentifierSpec.Generic("card_mandate"),
-            stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-            topPadding = when {
-                signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
-                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
-                canChangeSaveForFutureUse -> 6.dp
-                else -> 2.dp
-            },
-            args = listOf(merchantName),
+            merchantName = merchantName,
+            topPadding = topPadding,
+            linkSignupStateFlow = if (isSimplifiedCheckoutMode) linkSignupStateFlow else null
         )
+    }
+
+    /**
+     * A mandate element that can show either static or dynamic text based on Link checkbox state
+     */
+    private class CardMandateTextElement(
+        identifier: IdentifierSpec,
+        private val merchantName: String,
+        private val topPadding: Dp,
+        private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>?
+    ) : RenderableFormElement(
+        allowsUserInteraction = false,
+        identifier = identifier
+    ) {
+        override fun getFormFieldValueFlow() = stateFlowOf(emptyList<Pair<IdentifierSpec, FormFieldEntry>>())
+
+        @Composable
+        override fun ComposeUI(enabled: Boolean) {
+            val mandateText = if (linkSignupStateFlow != null) {
+                // Dynamic mode: observe Link state and change text accordingly
+                val linkState by linkSignupStateFlow.collectAsState()
+                if (linkState?.isExpanded == true) {
+                    stringResource(
+                        PaymentSheetR.string.stripe_sign_up_terms,
+                        merchantName
+                    ).replaceHyperlinks()
+                } else {
+                    stringResource(
+                        PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        merchantName
+                    )
+                }
+            } else {
+                // Static mode: always show regular mandate
+                stringResource(
+                    PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                    merchantName
+                )
+            }
+
+            Mandate(
+                mandateText = mandateText,
+                modifier = Modifier.padding(top = topPadding)
+            )
+        }
     }
 
     private fun MutableList<FormElement>.addContactInformationElement(

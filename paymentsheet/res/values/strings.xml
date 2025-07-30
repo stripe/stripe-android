@@ -109,6 +109,7 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Card details cannot be changed.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">By providing your card information, you allow %s to charge your card for future payments in accordance with their terms.</string>
+  <string name="stripe_paymentsheet_card_mandate_with_link">By providing your card information, you allow %s to charge your card for future payments in accordance with their terms. By continuing, you agree to save your payment info to Link, according to the Link <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.</string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Card was not updated. Please try again.</string>
   <!-- Title shown above a carousel containing available payment methods -->
