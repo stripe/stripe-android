@@ -5,10 +5,12 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class AddressDetails(
+@Poko
+class AddressDetails(
     /**
      * The customer's full name
      */
