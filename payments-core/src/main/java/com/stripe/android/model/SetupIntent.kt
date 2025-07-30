@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.SetupIntentJsonParser
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import java.util.regex.Pattern
@@ -16,7 +17,8 @@ import java.util.regex.Pattern
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
-data class SetupIntent
+@Poko
+class SetupIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     /**
@@ -175,7 +177,8 @@ constructor(
      * See [last_setup_error](https://stripe.com/docs/api/setup_intents/object#setup_intent_object-last_setup_error).
      */
     @Parcelize
-    data class Error internal constructor(
+    @Poko
+    class Error internal constructor(
 
         /**
          * For some errors that could be handled programmatically, a short string indicating the
@@ -234,6 +237,26 @@ constructor(
             }
         }
 
+        internal fun copy(
+            code: String? = this.code,
+            declineCode: String? = this.declineCode,
+            docUrl: String? = this.docUrl,
+            message: String? = this.message,
+            param: String? = this.param,
+            paymentMethod: PaymentMethod? = this.paymentMethod,
+            type: Type? = this.type
+        ): Error {
+            return Error(
+                code = code,
+                declineCode = declineCode,
+                docUrl = docUrl,
+                message = message,
+                param = param,
+                paymentMethod = paymentMethod,
+                type = type
+            )
+        }
+
         internal companion object {
             internal const val CODE_AUTHENTICATION_ERROR = "setup_intent_authentication_failure"
         }
@@ -270,6 +293,47 @@ constructor(
                 return entries.firstOrNull { it.code == code }
             }
         }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        id: String? = this.id,
+        cancellationReason: CancellationReason? = this.cancellationReason,
+        created: Long = this.created,
+        countryCode: String? = this.countryCode,
+        clientSecret: String? = this.clientSecret,
+        description: String? = this.description,
+        isLiveMode: Boolean = this.isLiveMode,
+        paymentMethod: PaymentMethod? = this.paymentMethod,
+        paymentMethodId: String? = this.paymentMethodId,
+        paymentMethodTypes: List<String> = this.paymentMethodTypes,
+        status: StripeIntent.Status? = this.status,
+        usage: StripeIntent.Usage? = this.usage,
+        lastSetupError: Error? = this.lastSetupError,
+        unactivatedPaymentMethods: List<String> = this.unactivatedPaymentMethods,
+        linkFundingSources: List<String> = this.linkFundingSources,
+        nextActionData: StripeIntent.NextActionData? = this.nextActionData,
+        paymentMethodOptionsJsonString: String? = this.paymentMethodOptionsJsonString,
+    ): SetupIntent {
+        return SetupIntent(
+            id = id,
+            cancellationReason = cancellationReason,
+            created = created,
+            countryCode = countryCode,
+            clientSecret = clientSecret,
+            description = description,
+            isLiveMode = isLiveMode,
+            paymentMethod = paymentMethod,
+            paymentMethodId = paymentMethodId,
+            paymentMethodTypes = paymentMethodTypes,
+            status = status,
+            usage = usage,
+            lastSetupError = lastSetupError,
+            unactivatedPaymentMethods = unactivatedPaymentMethods,
+            linkFundingSources = linkFundingSources,
+            nextActionData = nextActionData,
+            paymentMethodOptionsJsonString = paymentMethodOptionsJsonString,
+        )
     }
 
     companion object {

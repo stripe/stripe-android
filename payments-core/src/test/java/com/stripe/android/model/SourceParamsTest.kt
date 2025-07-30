@@ -390,93 +390,6 @@ class SourceParamsTest {
     }
 
     @Test
-    fun createGiropayParams_hasExpectedFields() {
-        val params = SourceParams.createGiropayParams(
-            AMOUNT,
-            "Stripe",
-            RETURN_URL,
-            "stripe descriptor"
-        )
-
-        assertThat(params.type)
-            .isEqualTo(Source.SourceType.GIROPAY)
-        assertThat(params.currency)
-            .isEqualTo("eur")
-        assertThat(params.amount)
-            .isEqualTo(AMOUNT)
-
-        assertThat(
-            requireNotNull(params.owner)
-        ).isEqualTo(
-            SourceParams.OwnerParams(
-                name = "Stripe"
-            )
-        )
-
-        assertThat(params.returnUrl)
-            .isEqualTo(RETURN_URL)
-
-        assertThat(
-            requireNotNull(params.typeData)
-        ).isEqualTo(
-            SourceParams.TypeData.Giropay("stripe descriptor")
-        )
-    }
-
-    @Test
-    fun createGiropayParams_toParamMap_createsExpectedMap() {
-        val params = SourceParams.createGiropayParams(
-            AMOUNT,
-            "Stripe",
-            RETURN_URL,
-            "stripe descriptor"
-        )
-
-        assertThat(
-            params.toParamMap()
-        ).isEqualTo(
-            mapOf(
-                "type" to Source.SourceType.GIROPAY,
-                "currency" to Source.EURO,
-                "amount" to AMOUNT,
-                "owner" to mapOf(
-                    "name" to "Stripe"
-                ),
-                "redirect" to mapOf(
-                    "return_url" to RETURN_URL
-                ),
-                Source.SourceType.GIROPAY to mapOf(
-                    "statement_descriptor" to "stripe descriptor"
-                )
-            )
-        )
-    }
-
-    @Test
-    fun createGiropayParams_withNullStatementDescriptor_hasExpectedFieldsButNoApiParams() {
-        assertThat(
-            SourceParams.createGiropayParams(
-                AMOUNT,
-                "Stripe",
-                RETURN_URL,
-                null
-            ).toParamMap()
-        ).isEqualTo(
-            mapOf(
-                "type" to "giropay",
-                "currency" to "eur",
-                "amount" to AMOUNT,
-                "owner" to mapOf(
-                    "name" to "Stripe"
-                ),
-                "redirect" to mapOf(
-                    "return_url" to RETURN_URL
-                )
-            )
-        )
-    }
-
-    @Test
     fun createIdealParams_hasExpectedFields() {
         val params = SourceParams.createIdealParams(
             AMOUNT,
@@ -863,8 +776,6 @@ class SourceParamsTest {
 
     @Test
     fun createCustomParamsWithSourceTypeParameters_toParamMap_createsExpectedMap() {
-        // Using the Giropay constructor to add some free params and expected values,
-        // including a source type params
         val dogecoin = "dogecoin"
 
         val dogecoinParams = mapOf("statement_descriptor" to "stripe descriptor")

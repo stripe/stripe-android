@@ -11,13 +11,15 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMEN
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
+import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
  * Model representing parameters for [confirming a PaymentIntent](https://stripe.com/docs/api/payment_intents/confirm).
  */
 @Parcelize
-data class ConfirmPaymentIntentParams
+@Poko
+class ConfirmPaymentIntentParams
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
@@ -134,6 +136,45 @@ constructor(
 
     override fun shouldUseStripeSdk(): Boolean {
         return useStripeSdk
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun copy(
+        paymentMethodCreateParams: PaymentMethodCreateParams? = this.paymentMethodCreateParams,
+        paymentMethodId: String? = this.paymentMethodId,
+        sourceParams: SourceParams? = this.sourceParams,
+        sourceId: String? = this.sourceId,
+        clientSecret: String = this.clientSecret,
+        returnUrl: String? = this.returnUrl,
+        savePaymentMethod: Boolean? = this.savePaymentMethod,
+        useStripeSdk: Boolean = this.useStripeSdk,
+        paymentMethodOptions: PaymentMethodOptionsParams? = this.paymentMethodOptions,
+        mandateId: String? = this.mandateId,
+        mandateData: MandateDataParams? = this.mandateData,
+        setupFutureUsage: SetupFutureUsage? = this.setupFutureUsage,
+        shipping: Shipping? = this.shipping,
+        receiptEmail: String? = this.receiptEmail,
+        setAsDefaultPaymentMethod: Boolean? = this.setAsDefaultPaymentMethod,
+        paymentMethodCode: PaymentMethodCode? = this.paymentMethodCode,
+    ): ConfirmPaymentIntentParams {
+        return ConfirmPaymentIntentParams(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            paymentMethodId = paymentMethodId,
+            sourceParams = sourceParams,
+            sourceId = sourceId,
+            clientSecret = clientSecret,
+            returnUrl = returnUrl,
+            savePaymentMethod = savePaymentMethod,
+            useStripeSdk = useStripeSdk,
+            paymentMethodOptions = paymentMethodOptions,
+            mandateId = mandateId,
+            mandateData = mandateData,
+            setupFutureUsage = setupFutureUsage,
+            shipping = shipping,
+            receiptEmail = receiptEmail,
+            setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+            paymentMethodCode = paymentMethodCode,
+        )
     }
 
     override fun withShouldUseStripeSdk(shouldUseStripeSdk: Boolean): ConfirmPaymentIntentParams {
@@ -264,7 +305,8 @@ constructor(
      * [shipping](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping)
      */
     @Parcelize
-    data class Shipping @JvmOverloads constructor(
+    @Poko
+    class Shipping @JvmOverloads constructor(
         /**
          * [shipping.address](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-shipping-address)
          *

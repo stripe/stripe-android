@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -26,8 +27,9 @@ internal class PaymentElementBuilderTest {
         testWithActivity { activity ->
             val createIntentCallback = newCreateIntentCallback()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet(activity, createIntentCallback, newPaymentSheetResultCallback())
+            val paymentSheet =
+                PaymentSheet.Builder(newPaymentSheetResultCallback()).createIntentCallback(createIntentCallback)
+                    .build(activity)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -41,8 +43,9 @@ internal class PaymentElementBuilderTest {
         testWithFragment { fragment ->
             val createIntentCallback = newCreateIntentCallback()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet(fragment, createIntentCallback, newPaymentSheetResultCallback())
+            val paymentSheet =
+                PaymentSheet.Builder(newPaymentSheetResultCallback()).createIntentCallback(createIntentCallback)
+                    .build(fragment)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -56,12 +59,9 @@ internal class PaymentElementBuilderTest {
         testWithActivity { activity ->
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet(
-                activity = activity,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                callback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = PaymentSheet.Builder(resultCallback = newPaymentSheetResultCallback())
+                .externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(activity = activity)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -76,12 +76,9 @@ internal class PaymentElementBuilderTest {
         testWithFragment { fragment ->
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet(
-                fragment = fragment,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                callback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = PaymentSheet.Builder(resultCallback = newPaymentSheetResultCallback())
+                .externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(fragment = fragment)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -97,13 +94,10 @@ internal class PaymentElementBuilderTest {
             val createIntentCallback = newCreateIntentCallback()
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet(
-                activity = activity,
-                createIntentCallback = createIntentCallback,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = PaymentSheet.Builder(resultCallback = newPaymentSheetResultCallback())
+                .createIntentCallback(callback = createIntentCallback)
+                .externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(activity = activity)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -120,13 +114,10 @@ internal class PaymentElementBuilderTest {
             val createIntentCallback = newCreateIntentCallback()
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet(
-                fragment = fragment,
-                createIntentCallback = createIntentCallback,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = PaymentSheet.Builder(resultCallback = newPaymentSheetResultCallback())
+                .createIntentCallback(callback = createIntentCallback)
+                .externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(fragment = fragment)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -141,13 +132,10 @@ internal class PaymentElementBuilderTest {
         testWithActivity { activity ->
             val createIntentCallback = newCreateIntentCallback()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet.FlowController.create(
-                activity = activity,
-                createIntentCallback = createIntentCallback,
-                paymentOptionCallback = newPaymentOptionCallback(),
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = FlowController.Builder(
+                resultCallback = newPaymentSheetResultCallback(),
+                paymentOptionCallback = newPaymentOptionCallback()
+            ).createIntentCallback(callback = createIntentCallback).build(activity = activity)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -161,13 +149,10 @@ internal class PaymentElementBuilderTest {
         testWithFragment { fragment ->
             val createIntentCallback = newCreateIntentCallback()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet.FlowController.create(
-                fragment = fragment,
-                createIntentCallback = createIntentCallback,
-                paymentOptionCallback = newPaymentOptionCallback(),
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = FlowController.Builder(
+                resultCallback = newPaymentSheetResultCallback(),
+                paymentOptionCallback = newPaymentOptionCallback()
+            ).createIntentCallback(callback = createIntentCallback).build(fragment = fragment)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -181,13 +166,11 @@ internal class PaymentElementBuilderTest {
         testWithActivity { activity ->
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet.FlowController.create(
-                activity = activity,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                paymentOptionCallback = newPaymentOptionCallback(),
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = FlowController.Builder(
+                resultCallback = newPaymentSheetResultCallback(),
+                paymentOptionCallback = newPaymentOptionCallback()
+            ).externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(activity = activity)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -202,13 +185,11 @@ internal class PaymentElementBuilderTest {
         testWithFragment { fragment ->
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet.FlowController.create(
-                fragment = fragment,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                paymentOptionCallback = newPaymentOptionCallback(),
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = FlowController.Builder(
+                resultCallback = newPaymentSheetResultCallback(),
+                paymentOptionCallback = newPaymentOptionCallback()
+            ).externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(fragment = fragment)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -224,14 +205,12 @@ internal class PaymentElementBuilderTest {
             val createIntentCallback = newCreateIntentCallback()
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet.FlowController.create(
-                activity = activity,
-                createIntentCallback = createIntentCallback,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                paymentOptionCallback = newPaymentOptionCallback(),
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = FlowController.Builder(
+                resultCallback = newPaymentSheetResultCallback(),
+                paymentOptionCallback = newPaymentOptionCallback()
+            ).createIntentCallback(callback = createIntentCallback)
+                .externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(activity = activity)
 
             assertThat(paymentSheet).isNotNull()
 
@@ -248,14 +227,12 @@ internal class PaymentElementBuilderTest {
             val createIntentCallback = newCreateIntentCallback()
             val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-            @Suppress("Deprecation")
-            val paymentSheet = PaymentSheet.FlowController.create(
-                fragment = fragment,
-                createIntentCallback = createIntentCallback,
-                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                paymentOptionCallback = newPaymentOptionCallback(),
-                paymentResultCallback = newPaymentSheetResultCallback(),
-            )
+            val paymentSheet = FlowController.Builder(
+                resultCallback = newPaymentSheetResultCallback(),
+                paymentOptionCallback = newPaymentOptionCallback()
+            ).createIntentCallback(callback = createIntentCallback)
+                .externalPaymentMethodConfirmHandler(handler = externalPaymentMethodConfirmHandler)
+                .build(fragment = fragment)
 
             assertThat(paymentSheet).isNotNull()
 
