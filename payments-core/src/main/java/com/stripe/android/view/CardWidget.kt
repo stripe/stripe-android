@@ -2,15 +2,9 @@ package com.stripe.android.view
 
 import android.text.TextWatcher
 import androidx.annotation.IntRange
-import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
 
 internal interface CardWidget {
-    /**
-     * A [CardParams] representing the card details and postal code if all fields are valid;
-     * otherwise `null`
-     */
-    val cardParams: CardParams?
 
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;

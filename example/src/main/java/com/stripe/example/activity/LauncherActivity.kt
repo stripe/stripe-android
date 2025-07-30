@@ -45,16 +45,8 @@ class LauncherActivity : AppCompatActivity() {
                 CardBrandChoiceExampleActivity::class.java
             ),
             Item(
-                activity.getString(R.string.create_card_token),
-                CreateCardTokenActivity::class.java
-            ),
-            Item(
                 activity.getString(R.string.create_card_payment_method),
                 CreateCardPaymentMethodActivity::class.java
-            ),
-            Item(
-                activity.getString(R.string.create_card_source),
-                CreateCardSourceActivity::class.java
             ),
             Item(
                 activity.getString(R.string.googlepaylauncher_example),
