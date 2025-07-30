@@ -100,14 +100,7 @@ constructor(
                 }
             }
 
-            val allowsDefaultOptIn = config.allowDefaultOptIn &&
-                config.stripeIntent.countryCode == "US" &&
-                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
-
-            val linkSignUpOptInFeatureEnabled = config.linkSignUpOptInFeatureEnabled &&
-                config.customerInfo.email.isNullOrBlank().not() &&
-                signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
-
+            val allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode)
             val missingDataForDefaultOptIn = initialEmail.isNullOrBlank() || initialPhone.isNullOrBlank()
 
             val signupState = if (allowsDefaultOptIn && missingDataForDefaultOptIn) {
@@ -123,11 +116,27 @@ constructor(
                 fields = fields,
                 prefillEligibleFields = prefillEligibleFields,
                 isExpanded = isExpanded || allowsDefaultOptIn,
-                allowsDefaultOptIn = allowsDefaultOptIn,
-                linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+                allowsDefaultOptIn = allowsDefaultOptIn(config, signupMode),
+                linkSignUpOptInFeatureEnabled = linkSignupOptInFeatureEnabled(config, signupMode),
                 signUpState = signupState,
             )
         }
+
+        private fun allowsDefaultOptIn(
+            config: LinkConfiguration,
+            signupMode: LinkSignupMode
+        ): Boolean = config.allowDefaultOptIn &&
+            config.stripeIntent.countryCode == "US" &&
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
+
+        private fun linkSignupOptInFeatureEnabled(
+            config: LinkConfiguration,
+            signupMode: LinkSignupMode
+        ): Boolean = config.linkSignUpOptInFeatureEnabled &&
+            config.stripeIntent.countryCode == "US" &&
+            // We only allow the opt-in feature if the user has provided an email address.
+            config.customerInfo.email.isNullOrBlank().not() &&
+            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
     }
 }
 

@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -133,34 +134,17 @@ internal fun LinkInlineSignup(
     val scope = rememberCoroutineScope()
     val emailFocusRequester = remember { FocusRequester() }
     val bringFullSignUpIntoViewRequester = remember { BringIntoViewRequester() }
+    val simplifiedCheckbox = linkSignUpOptInFeatureEnabled || allowsDefaultOptIn
 
     LaunchedEffect(expanded) {
-        if (expanded && !allowsDefaultOptIn && !linkSignUpOptInFeatureEnabled) {
+        if (expanded && !simplifiedCheckbox) {
             emailFocusRequester.requestFocus()
         }
     }
 
     val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
-    val shape = if (allowsDefaultOptIn || linkSignUpOptInFeatureEnabled) {
-        // We render the content inline for default opt-in. A large corner radius would cut into the content.
-        RectangleShape
-    } else {
-        MaterialTheme.stripeShapes.roundedCornerShape
-    }
-
-    val boxModifier = if (allowsDefaultOptIn || linkSignUpOptInFeatureEnabled) {
-        modifier
-    } else {
-        modifier
-            .border(
-                border = MaterialTheme.getBorderStroke(isSelected = false),
-                shape = shape,
-            )
-            .background(
-                color = MaterialTheme.stripeColors.component,
-                shape = shape,
-            )
-    }
+    val shape = boxShape(simplifiedCheckbox)
+    val boxModifier = modifier.applyBorders(simplifiedCheckbox, shape)
 
     Box(
         modifier = boxModifier
@@ -184,8 +168,7 @@ internal fun LinkInlineSignup(
                 expanded = expanded,
                 enabled = enabled,
                 contentAlpha = contentAlpha,
-                defaultOptIn = allowsDefaultOptIn,
-                linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+                simplifiedCheckbox = simplifiedCheckbox,
                 toggleExpanded = toggleExpanded
             )
 
@@ -211,17 +194,39 @@ internal fun LinkInlineSignup(
 }
 
 @Composable
+private fun Modifier.applyBorders(
+    simplifiedCheckbox: Boolean,
+    shape: Shape
+): Modifier = if (simplifiedCheckbox) {
+    this
+} else {
+    border(
+        border = MaterialTheme.getBorderStroke(isSelected = false),
+        shape = shape,
+    )
+        .background(
+            color = MaterialTheme.stripeColors.component,
+            shape = shape,
+        )
+}
+
+@Composable
+private fun boxShape(simplifiedCheckbox: Boolean): Shape = if (simplifiedCheckbox) {
+    // We render the content inline for default opt-in. A large corner radius would cut into the content.
+    RectangleShape
+} else {
+    MaterialTheme.stripeShapes.roundedCornerShape
+}
+
+@Composable
 private fun LinkCheckbox(
     merchantName: String,
     expanded: Boolean,
     enabled: Boolean,
     contentAlpha: Float,
-    defaultOptIn: Boolean,
+    simplifiedCheckbox: Boolean,
     toggleExpanded: () -> Unit,
-    linkSignUpOptInFeatureEnabled: Boolean,
 ) {
-    val simplifiedCheckbox = linkSignUpOptInFeatureEnabled || defaultOptIn
-
     val label = if (simplifiedCheckbox) {
         stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
     } else {

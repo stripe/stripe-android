@@ -507,15 +507,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
             hasCustomerConfiguration = configuration.customer != null,
         )
-        val hasUsedLink = false // TODO revert.
+        val hasUsedLink = linkStore.hasUsedLink()
+        val signupToggleEnabled = elementsSession.linkSignUpOptInFeatureEnabled
 
-        val disableSignup = elementsSession.allowLinkDefaultOptIn.not() && linkSignUpDisabled
-        val linkSignupMode = if (hasUsedLink || disableSignup) {
-            null
-        } else if (isSaveForFutureUseValueChangeable) {
-            LinkSignupMode.AlongsideSaveForFutureUse
-        } else {
-            LinkSignupMode.InsteadOfSaveForFutureUse
+        val linkSignupMode = when {
+            // If signup toggle enabled, we show a future usage + link combined toggle
+            signupToggleEnabled -> LinkSignupMode.InsteadOfSaveForFutureUse
+            // If inline signup is disabled or user has used Link, we don't show inline signup
+            linkSignUpDisabled || hasUsedLink -> null
+            // If inline signup and save for future use, we show it alongside save for future use
+            isSaveForFutureUseValueChangeable -> LinkSignupMode.AlongsideSaveForFutureUse
+            // If inline signup and save for future usage is not displayed, only show link signup
+            else -> LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
         return LinkState(

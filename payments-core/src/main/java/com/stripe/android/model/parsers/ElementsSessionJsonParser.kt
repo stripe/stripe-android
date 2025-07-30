@@ -179,9 +179,7 @@ internal class ElementsSessionJsonParser(
             FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE
         ) == true
 
-        // TODO change!
-        // val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
-        val linkSignUpOptInFeatureEnabled = true
+        val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }

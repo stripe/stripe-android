@@ -117,7 +117,11 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 metadata = metadata
             )
 
-            if (canChangeSaveForFutureUsage) {
+            val linkSignupOptInEnabled =
+                metadata.linkState?.configuration?.linkSignUpOptInFeatureEnabled == false
+
+            // sign up opt in combines save for future usage and link signup acceptance
+            if (canChangeSaveForFutureUsage && linkSignupOptInEnabled) {
                 addSavePaymentOptionElements(
                     metadata = metadata,
                     arguments = arguments,
@@ -190,11 +194,9 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         @Composable
         override fun ComposeUI(enabled: Boolean) {
             val linkState by linkSignupStateFlow.collectAsState()
-            val shouldShowCombinedLinkTerms = linkState?.isExpanded == true &&
-                linkState?.linkSignUpOptInFeatureEnabled == true
             Mandate(
                 mandateText = when {
-                    // save for future usage only terms
+                    // save for future usage only terms when Link sign-up toggle feature enabled
                     linkState?.linkSignUpOptInFeatureEnabled == false ->
                         stringResource(
                             id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
@@ -205,7 +207,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                         id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
                         formatArgs = arrayOf(merchantName)
                     ).replaceHyperlinks()
-                    // save for future usage terms for toggle-off merchants
+                    // save for future usage terms when Link sign-up toggle feature disabled
                     else -> stringResource(
                         id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
                         formatArgs = arrayOf(merchantName)
