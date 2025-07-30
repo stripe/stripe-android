@@ -32,7 +32,7 @@ constructor(
      *
      * [id](https://stripe.com/docs/api/payment_methods/object#payment_method_object-id)
      */
-    @JvmField val id: String?,
+    @JvmField val id: String,
 
     /**
      * Time at which the object was created. Measured in seconds since the Unix epoch.
@@ -681,7 +681,7 @@ constructor(
 
         fun build(): PaymentMethod {
             return PaymentMethod(
-                id = id,
+                id = requireNotNull(id) { "PaymentMethod id was null" },
                 created = created,
                 liveMode = liveMode,
                 type = type,

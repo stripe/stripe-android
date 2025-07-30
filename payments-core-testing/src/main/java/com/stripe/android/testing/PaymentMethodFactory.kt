@@ -59,7 +59,7 @@ object PaymentMethodFactory {
         return card(id = id)
     }
 
-    fun card(id: String?): PaymentMethod {
+    fun card(id: String): PaymentMethod {
         return PaymentMethod(
             id = id,
             created = 123456789L,
