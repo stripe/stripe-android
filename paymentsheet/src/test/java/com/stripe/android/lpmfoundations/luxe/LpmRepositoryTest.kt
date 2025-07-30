@@ -63,7 +63,6 @@ class LpmRepositoryTest {
             PaymentIntentFactory.create(
                 paymentMethodTypes = listOf(
                     "bancontact",
-                    "sofort",
                     "ideal",
                     "sepa_debit",
                     "p24",
@@ -85,7 +84,7 @@ class LpmRepositoryTest {
                   }
                 ]
             """.trimIndent()
-        ).verifyContainsTypes("sofort", "ideal", "bancontact", "p24", "eps", "giropay")
+        ).verifyContainsTypes("ideal", "bancontact", "p24", "eps", "giropay")
     }
 
     @Test

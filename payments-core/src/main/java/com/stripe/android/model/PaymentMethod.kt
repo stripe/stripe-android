@@ -128,13 +128,6 @@ constructor(
      */
     @JvmField val bacsDebit: BacsDebit? = null,
 
-    /**
-     * If this is a `sofort` PaymentMethod, this hash contains details about the SOFORT payment method.
-     *
-     * [sofort](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sofort)
-     */
-    @JvmField val sofort: Sofort? = null,
-
     @JvmField val upi: Upi? = null,
 
     @JvmField val netbanking: Netbanking? = null,
@@ -178,7 +171,6 @@ constructor(
             Type.SepaDebit -> sepaDebit != null
             Type.AuBecsDebit -> auBecsDebit != null
             Type.BacsDebit -> bacsDebit != null
-            Type.Sofort -> sofort != null
             Type.USBankAccount -> usBankAccount != null
             else -> true
         }
@@ -255,14 +247,6 @@ constructor(
             isVoucher = false,
             requiresMandate = true,
             requiresMandateForPaymentIntent = true,
-            hasDelayedSettlement = true,
-        ),
-        Sofort(
-            "sofort",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = true,
-            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
         Upi(
@@ -623,7 +607,6 @@ constructor(
         private var sepaDebit: SepaDebit? = null
         private var auBecsDebit: AuBecsDebit? = null
         private var bacsDebit: BacsDebit? = null
-        private var sofort: Sofort? = null
         private var netbanking: Netbanking? = null
         private var usBankAccount: USBankAccount? = null
         private var upi: Upi? = null
@@ -688,10 +671,6 @@ constructor(
             this.bacsDebit = bacsDebit
         }
 
-        fun setSofort(sofort: Sofort?): Builder = apply {
-            this.sofort = sofort
-        }
-
         fun setNetbanking(netbanking: Netbanking?): Builder = apply {
             this.netbanking = netbanking
         }
@@ -725,7 +704,6 @@ constructor(
                 sepaDebit = sepaDebit,
                 auBecsDebit = auBecsDebit,
                 bacsDebit = bacsDebit,
-                sofort = sofort,
                 netbanking = netbanking,
                 usBankAccount = usBankAccount
             )
@@ -1139,13 +1117,6 @@ constructor(
         @JvmField val sortCode: String?
     ) : TypeData() {
         override val type: Type get() = Type.BacsDebit
-    }
-
-    @Parcelize
-    data class Sofort internal constructor(
-        @JvmField val country: String?
-    ) : TypeData() {
-        override val type: Type get() = Type.Sofort
     }
 
     @Parcelize
