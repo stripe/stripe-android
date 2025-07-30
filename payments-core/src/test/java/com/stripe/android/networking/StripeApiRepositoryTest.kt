@@ -812,8 +812,6 @@ internal class StripeApiRepositoryTest {
                 ConfirmSetupIntentParams.createWithoutPaymentMethod(
                     clientSecret
                 )
-
-
             create().confirmSetupIntent(
                 confirmSetupIntentParams = confirmSetupIntentParams,
                 options = ApiRequest.Options(apiKey)

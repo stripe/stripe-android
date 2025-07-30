@@ -418,8 +418,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         }
     }
-
-
     private suspend fun confirmSetupIntentInternal(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
         options: ApiRequest.Options,

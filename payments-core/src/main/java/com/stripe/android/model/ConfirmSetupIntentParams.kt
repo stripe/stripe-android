@@ -41,9 +41,11 @@ constructor(
     /**
      * Payment-method-specific configuration for this SetupIntent.
      *
-     * See [payment_method_options](https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options).
+     * See [payment_method_options](
+     *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
+     * ).
      */
-    var paymentMethodOptions: PaymentMethodOptionsParams? = null,
+    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
 
     /**
      * ID of the mandate to be used for this payment.
@@ -271,8 +273,7 @@ constructor(
                 paymentMethodId = paymentMethodId,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card(
                     moto = true,
-                    setupFutureUsage =
-                        (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
+                    setupFutureUsage = (paymentMethodOptions as? PaymentMethodOptionsParams.Card)?.setupFutureUsage
                 ),
                 useStripeSdk = true,
                 paymentMethodCode = PaymentMethod.Type.Card.code,
