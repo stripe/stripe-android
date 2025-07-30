@@ -20,8 +20,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -43,7 +42,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -93,8 +91,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -116,7 +113,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -162,8 +158,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -185,7 +180,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -231,8 +225,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -254,7 +247,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -298,8 +290,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -321,7 +312,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -365,8 +355,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "setup_intent": {
               "id": "seti_1JTDqGIyGgrkZxL7reCXkpr5",
@@ -383,8 +372,7 @@ internal object ElementsSessionFixtures {
                 "sepa_debit",
                 "ideal",
                 "bancontact",
-                "card",
-                "sofort"
+                "card"
               ],
               "status": "requires_payment_method",
               "usage": "off_session"
@@ -414,8 +402,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "setup_intent": {
               "id": "seti_1JTDqGIyGgrkZxL7reCXkpr5",
@@ -432,8 +419,7 @@ internal object ElementsSessionFixtures {
                 "sepa_debit",
                 "ideal",
                 "bancontact",
-                "card",
-                "sofort"
+                "card"
               ],
               "status": "requires_payment_method",
               "usage": "off_session"
@@ -475,8 +461,7 @@ internal object ElementsSessionFixtures {
                   "card",
                   "ideal",
                   "sepa_debit",
-                  "bancontact",
-                  "sofort"
+                  "bancontact"
                 ],
                 "payment_intent": {
                   "id": "pi_123",
@@ -498,7 +483,6 @@ internal object ElementsSessionFixtures {
                     "bancontact",
                     "card",
                     "sepa_debit",
-                    "sofort",
                     "ideal"
                   ],
                   "receipt_email": null,
@@ -630,8 +614,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_123",
@@ -653,7 +636,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -763,8 +745,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -786,7 +767,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -834,8 +814,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -857,7 +836,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -910,8 +888,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -933,7 +910,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -986,8 +962,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "setup_intent": {
               "id": "seti_1JTDqGIyGgrkZxL7reCXkpr5",
@@ -1004,8 +979,7 @@ internal object ElementsSessionFixtures {
                 "sepa_debit",
                 "ideal",
                 "bancontact",
-                "card",
-                "sofort"
+                "card"
               ],
               "status": "requires_payment_method",
               "usage": "off_session"
@@ -1042,8 +1016,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -1065,7 +1038,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
@@ -1119,8 +1091,7 @@ internal object ElementsSessionFixtures {
               "card",
               "ideal",
               "sepa_debit",
-              "bancontact",
-              "sofort"
+              "bancontact"
             ],
             "payment_intent": {
               "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
@@ -1142,7 +1113,6 @@ internal object ElementsSessionFixtures {
                 "bancontact",
                 "card",
                 "sepa_debit",
-                "sofort",
                 "ideal"
               ],
               "receipt_email": null,
