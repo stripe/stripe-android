@@ -54,8 +54,8 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
-import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
 import com.stripe.android.connect.example.ui.features.payments.PaymentsExampleActivity
+import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 

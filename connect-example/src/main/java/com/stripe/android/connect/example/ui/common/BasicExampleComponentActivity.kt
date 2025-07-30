@@ -167,4 +167,4 @@ abstract class BasicExampleComponentActivity : BaseActivity() {
 private object BasicComponentExampleDestination {
     const val Component = "Component"
     const val Settings = "Settings"
-} 
+}

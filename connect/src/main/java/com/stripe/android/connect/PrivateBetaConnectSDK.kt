@@ -7,4 +7,4 @@ package com.stripe.android.connect
 @RequiresOptIn(message = "The Stripe Connect SDK is in private beta. It may be changed in the future without notice.")
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-annotation class PrivateBetaConnectSDK 
+annotation class PrivateBetaConnectSDK

@@ -51,4 +51,4 @@ class PaymentsView internal constructor(
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface PaymentsListener : StripeEmbeddedComponentListener 
+interface PaymentsListener : StripeEmbeddedComponentListener
