@@ -1,5 +1,6 @@
-package com.stripe.android.paymentelement
+package com.stripe.android.elements.payment
 
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import dev.drewhamilton.poko.Poko
 
 /**

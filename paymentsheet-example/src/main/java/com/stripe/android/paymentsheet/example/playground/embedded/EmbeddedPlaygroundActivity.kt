@@ -28,11 +28,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEventCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
-import com.stripe.android.elements.payment.CreateIntentCallback.Result
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.AnalyticEvent
-import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi

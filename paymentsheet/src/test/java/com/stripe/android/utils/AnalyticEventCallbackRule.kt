@@ -2,8 +2,8 @@ package com.stripe.android.utils
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentelement.AnalyticEvent
-import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description

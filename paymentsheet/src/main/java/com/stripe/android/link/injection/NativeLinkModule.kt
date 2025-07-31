@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.elements.payment.AnalyticEventCallback
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
@@ -38,7 +39,6 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
