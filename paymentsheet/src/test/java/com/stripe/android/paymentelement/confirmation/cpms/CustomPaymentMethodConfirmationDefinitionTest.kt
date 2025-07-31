@@ -4,10 +4,10 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler

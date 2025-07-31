@@ -6,11 +6,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.BundleCompat
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.CustomPaymentMethodResult
 import com.stripe.android.elements.payment.CustomPaymentMethodResultHandler
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 

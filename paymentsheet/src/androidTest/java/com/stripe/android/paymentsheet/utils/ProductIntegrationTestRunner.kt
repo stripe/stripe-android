@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet

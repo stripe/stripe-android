@@ -23,6 +23,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.AnalyticEventCallback
+import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration

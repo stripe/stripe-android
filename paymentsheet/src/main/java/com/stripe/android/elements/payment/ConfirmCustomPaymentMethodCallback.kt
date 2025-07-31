@@ -1,7 +1,7 @@
-package com.stripe.android.paymentelement
+package com.stripe.android.elements.payment
 
-import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 
 /**
  * Handler to be used to confirm payment with a custom payment method.
