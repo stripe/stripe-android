@@ -6,6 +6,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.effectiveBillingDetails
@@ -53,7 +54,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val defaultBillingDetails: BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,

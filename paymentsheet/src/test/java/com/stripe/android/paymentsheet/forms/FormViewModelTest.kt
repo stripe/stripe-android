@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
@@ -431,7 +432,7 @@ internal class FormViewModelTest {
     fun `Test default values are filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
@@ -475,7 +476,7 @@ internal class FormViewModelTest {
     fun `Test only provided default values are filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 address = Address(
@@ -509,7 +510,7 @@ internal class FormViewModelTest {
     fun `Test default values are not filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
@@ -551,7 +552,7 @@ internal class FormViewModelTest {
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 PaymentMethod.Type.Card.code,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                billingDetails = PaymentSheet.BillingDetails(),
+                billingDetails = BillingDetails(),
             )
 
             val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
@@ -603,7 +604,7 @@ internal class FormViewModelTest {
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 PaymentMethod.Type.Sofort.code,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                billingDetails = PaymentSheet.BillingDetails(),
+                billingDetails = BillingDetails(),
             )
             val addressElements = AddressSpec(hideCountry = true)
                 .transform(

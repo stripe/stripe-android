@@ -14,6 +14,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -197,7 +198,7 @@ class CustomerSheet internal constructor(
          * is true, these values will be attached to the payment method even if they are not
          * collected by the [CustomerSheet] UI.
          */
-        val defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails,
+        val defaultBillingDetails: BillingDetails = ConfigurationDefaults.billingDetails,
 
         /**
          * Describes how billing details should be collected. All values default to
@@ -258,7 +259,7 @@ class CustomerSheet internal constructor(
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
             private var headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen
-            private var defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails
+            private var defaultBillingDetails: BillingDetails = ConfigurationDefaults.billingDetails
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
@@ -279,7 +280,7 @@ class CustomerSheet internal constructor(
                 this.headerTextForSelectionScreen = headerTextForSelectionScreen
             }
 
-            fun defaultBillingDetails(details: PaymentSheet.BillingDetails) = apply {
+            fun defaultBillingDetails(details: BillingDetails) = apply {
                 this.defaultBillingDetails = details
             }
 

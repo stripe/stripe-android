@@ -4,6 +4,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -39,7 +40,7 @@ internal object PaymentMethodMetadataFactory {
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkState? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-        defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
+        defaultBillingDetails: BillingDetails = BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
         elementsSessionId: String = "session_1234",

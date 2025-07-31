@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -91,7 +92,7 @@ class AddressLauncher internal constructor(
         internal val title: String? = null,
         internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-        internal val billingAddress: PaymentSheet.BillingDetails? = null,
+        internal val billingAddress: BillingDetails? = null,
     ) : Parcelable {
 
         /**
@@ -106,7 +107,7 @@ class AddressLauncher internal constructor(
             private var title: String? = null
             private var googlePlacesApiKey: String? = null
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
-            private var billingAddress: PaymentSheet.BillingDetails? = null
+            private var billingAddress: BillingDetails? = null
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -133,7 +134,7 @@ class AddressLauncher internal constructor(
                 apply { this.autocompleteCountries = autocompleteCountries }
 
             @AddressElementSameAsBillingPreview
-            fun billingAddress(billingAddress: PaymentSheet.BillingDetails?) =
+            fun billingAddress(billingAddress: BillingDetails?) =
                 apply { this.billingAddress = billingAddress }
 
             fun build() = Configuration(

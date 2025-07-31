@@ -5,9 +5,9 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
@@ -179,7 +179,7 @@ class InputAddressViewModelTest {
     @Test
     fun `If default address country not in allowed countries, state should be 'Hide'`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
                 address = Address(
                     country = "CA"
@@ -202,7 +202,7 @@ class InputAddressViewModelTest {
     @Test
     fun `If default address supported in allowed countries & checkbox enabled, state should be 'Show' & checked`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
                 address = Address(
                     line1 = "123 Apple Street",
@@ -222,7 +222,7 @@ class InputAddressViewModelTest {
     @Test
     fun `If default address has no country & checkbox enabled, state should be 'Show' & checked`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
                 address = Address(
                     line1 = "123 Apple Street",
@@ -240,7 +240,7 @@ class InputAddressViewModelTest {
     @Test
     fun `If empty allowed countries, state should be 'Show' & checked since default countries are used`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
                 address = Address(
                     line1 = "123 Apple Street",
@@ -260,7 +260,7 @@ class InputAddressViewModelTest {
     @Test
     fun `If shipping address provided with billing, state should be 'Show' but not checked`() =
         billingSameAsShippingInitialValueTest(
-            billingAddress = PaymentSheet.BillingDetails(
+            billingAddress = BillingDetails(
                 name = "John Doe",
                 address = Address(
                     line1 = "123 Apple Street",
@@ -293,7 +293,7 @@ class InputAddressViewModelTest {
             config = AddressLauncher.Configuration.Builder()
                 .allowedCountries(setOf("US"))
                 .billingAddress(
-                    PaymentSheet.BillingDetails(
+                    BillingDetails(
                         name = "John Doe",
                         address = Address(
                             line1 = "123 Apple Street",
@@ -463,7 +463,7 @@ class InputAddressViewModelTest {
                     )
                 )
                 .billingAddress(
-                    PaymentSheet.BillingDetails(
+                    BillingDetails(
                         name = "John Doe",
                         address = Address(
                             line1 = "123 Apple Street",
@@ -541,7 +541,7 @@ class InputAddressViewModelTest {
     private fun billingSameAsShippingInitialValueTest(
         address: AddressDetails?,
         allowedCountries: Set<String>,
-        billingAddress: PaymentSheet.BillingDetails?,
+        billingAddress: BillingDetails?,
         expectedShippingSameAsBillingState: InputAddressViewModel.ShippingSameAsBillingState,
     ) = runTest {
         val viewModel = createViewModel(

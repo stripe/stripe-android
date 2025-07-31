@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.exceptions.MissingConfigurationException
 import com.stripe.android.link.injection.LinkControllerComponent
@@ -452,7 +453,7 @@ class LinkControllerViewModelTest {
     @Test
     fun `onPresentPaymentMethods() with null email uses existing customer info`() = runTest {
         val viewModel = createViewModel()
-        val billingDetails = PaymentSheet.BillingDetails(
+        val billingDetails = BillingDetails(
             address = null,
             email = TestFactory.CUSTOMER_EMAIL,
             name = TestFactory.CUSTOMER_NAME,
@@ -942,7 +943,7 @@ class LinkControllerViewModelTest {
     private suspend fun configure(
         viewModel: LinkControllerViewModel,
         passthroughModeEnabled: Boolean = false,
-        defaultBillingDetails: Optional<PaymentSheet.BillingDetails>? = null,
+        defaultBillingDetails: Optional<BillingDetails>? = null,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
     ) {
         val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(

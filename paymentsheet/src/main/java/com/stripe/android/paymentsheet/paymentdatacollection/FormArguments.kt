@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -13,7 +14,7 @@ internal data class FormArguments(
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
     val amount: Amount? = null,
-    val billingDetails: PaymentSheet.BillingDetails? = null,
+    val billingDetails: BillingDetails? = null,
     val shippingDetails: AddressDetails? = null,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val hasIntentToSetup: Boolean,

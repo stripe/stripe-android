@@ -5,9 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
@@ -40,7 +40,7 @@ class PaymentOption internal constructor(
     /**
      * The billing details associated with the customer's desired payment method.
      */
-    val billingDetails: PaymentSheet.BillingDetails?,
+    val billingDetails: BillingDetails?,
     private val _shippingDetails: AddressDetails?,
     private val _labels: Labels,
 

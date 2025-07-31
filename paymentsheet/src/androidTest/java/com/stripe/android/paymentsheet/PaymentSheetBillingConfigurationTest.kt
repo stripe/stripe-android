@@ -8,6 +8,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -73,7 +74,7 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
@@ -150,7 +151,7 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
@@ -212,7 +213,7 @@ internal class PaymentSheetBillingConfigurationTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
+                    defaultBillingDetails = BillingDetails(
                         name = "Jenny Rosen",
                         email = "foo@bar.com",
                         phone = "+13105551234",
@@ -272,7 +273,7 @@ internal class PaymentSheetBillingConfigurationTest {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                defaultBillingDetails = PaymentSheet.BillingDetails(
+                defaultBillingDetails = BillingDetails(
                     name = "Jenny Rosen",
                     email = "foo@bar.com",
                     phone = "+13105551234",

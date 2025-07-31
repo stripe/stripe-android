@@ -1,6 +1,7 @@
 package com.stripe.android.common.model
 
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
@@ -11,7 +12,7 @@ internal object CommonConfigurationFactory {
         merchantDisplayName: String = "Example, Inc.",
         customer: CustomerConfiguration? = null,
         googlePay: PaymentSheet.GooglePayConfiguration? = null,
-        defaultBillingDetails: PaymentSheet.BillingDetails? = null,
+        defaultBillingDetails: BillingDetails? = null,
         shippingDetails: AddressDetails? = null,
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = true,

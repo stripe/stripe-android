@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -167,7 +168,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     }
 
     companion object {
-        private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(
+        private val paymentSheetBillingDetails = BillingDetails(
             name = "Jenny Rosen",
             email = "foo@bar.com",
             phone = "+13105551234",

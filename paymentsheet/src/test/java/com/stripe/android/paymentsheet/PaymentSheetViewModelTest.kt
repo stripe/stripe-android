@@ -18,6 +18,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -1752,7 +1753,7 @@ internal class PaymentSheetViewModelTest {
                     currencyCode = "usd",
                 ),
                 hasIntentToSetup = true,
-                billingDetails = PaymentSheet.BillingDetails(),
+                billingDetails = BillingDetails(),
             )
         )
     }

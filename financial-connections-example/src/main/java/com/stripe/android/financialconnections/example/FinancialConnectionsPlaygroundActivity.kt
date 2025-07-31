@@ -49,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
@@ -213,7 +214,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 )
             )
             .defaultBillingDetails(
-                PaymentSheet.BillingDetails(
+                BillingDetails(
                     email = email.takeIf { it.isNotBlank() },
                 )
             )

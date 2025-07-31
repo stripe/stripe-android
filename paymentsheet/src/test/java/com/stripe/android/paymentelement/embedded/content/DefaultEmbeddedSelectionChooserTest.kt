@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -267,7 +268,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         storePreviousChooseState(
             configuration = defaultConfiguration.copy(
-                defaultBillingDetails = PaymentSheet.BillingDetails(email = "jaynewstrom@example.com")
+                defaultBillingDetails = BillingDetails(email = "jaynewstrom@example.com")
             )
         )
         val selection = chooser.choose(

@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
@@ -97,7 +98,7 @@ internal class DefaultLinkConfigurationLoaderTest {
         )
 
         val defaultBillingDetails =
-            PaymentSheet.BillingDetails(email = "foo@bar.com")
+            BillingDetails(email = "foo@bar.com")
         val billingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,

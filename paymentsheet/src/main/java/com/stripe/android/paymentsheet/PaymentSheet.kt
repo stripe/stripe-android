@@ -20,8 +20,8 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -2342,56 +2342,6 @@ class PaymentSheet internal constructor(
                 endDp = StripeThemeDefaults.textFieldInsets.end,
                 bottomDp = StripeThemeDefaults.textFieldInsets.bottom,
             )
-        }
-    }
-
-    @Parcelize
-    @Poko
-    class BillingDetails(
-        /**
-         * The customer's billing address.
-         */
-        internal val address: Address? = null,
-        /**
-         * The customer's email.
-         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
-         */
-        internal val email: String? = null,
-        /**
-         * The customer's full name.
-         * The value set is displayed in the payment sheet as-is. Depending on the payment method, the customer may be required to edit this value.
-         */
-        internal val name: String? = null,
-        /**
-         * The customer's phone number without formatting e.g. 5551234567
-         */
-        internal val phone: String? = null
-    ) : Parcelable {
-        internal fun isFilledOut(): Boolean {
-            return address != null ||
-                email != null ||
-                name != null ||
-                phone != null
-        }
-
-        /**
-         * [BillingDetails] builder for cleaner object creation from Java.
-         */
-        class Builder {
-            private var address: Address? = null
-            private var email: String? = null
-            private var name: String? = null
-            private var phone: String? = null
-
-            fun address(address: Address?) = apply { this.address = address }
-            fun address(addressBuilder: Address.Builder) =
-                apply { this.address = addressBuilder.build() }
-
-            fun email(email: String?) = apply { this.email = email }
-            fun name(name: String?) = apply { this.name = name }
-            fun phone(phone: String?) = apply { this.phone = phone }
-
-            fun build() = BillingDetails(address, email, name, phone)
         }
     }
 

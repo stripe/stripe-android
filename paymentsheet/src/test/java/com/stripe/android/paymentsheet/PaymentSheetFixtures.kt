@@ -5,6 +5,7 @@ import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -57,7 +58,7 @@ internal object PaymentSheetFixtures {
             "ek_123"
         ),
         googlePay = ConfigFixtures.GOOGLE_PAY,
-        defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
+        defaultBillingDetails = BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
         allowsRemovalOfLastSavedPaymentMethod = false,
@@ -261,7 +262,7 @@ internal object PaymentSheetFixtures {
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             merchantName = "Merchant, Inc.",
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 address = Address(
                     line1 = "123 Main Street",
                     line2 = null,

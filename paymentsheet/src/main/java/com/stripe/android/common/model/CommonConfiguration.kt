@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkController
@@ -18,7 +19,7 @@ internal data class CommonConfiguration(
     val customer: CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
     val link: PaymentSheet.LinkConfiguration,
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val defaultBillingDetails: BillingDetails?,
     val shippingDetails: AddressDetails?,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
@@ -230,7 +231,7 @@ private fun CommonConfiguration.toVolatileConfiguration(): VolatileCommonConfigu
 }
 
 private data class VolatileCommonConfiguration(
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val defaultBillingDetails: BillingDetails?,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val cardBrandAcceptance: CardBrandAcceptance,
 )

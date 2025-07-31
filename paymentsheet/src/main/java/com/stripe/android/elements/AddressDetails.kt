@@ -3,7 +3,6 @@ package com.stripe.android.elements
 import android.os.Parcelable
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -38,7 +37,7 @@ class AddressDetails(
 }
 
 internal fun AddressDetails.toIdentifierMap(
-    billingDetails: PaymentSheet.BillingDetails? = null
+    billingDetails: BillingDetails? = null
 ): Map<IdentifierSpec, String?> {
     return if (billingDetails == null || !billingDetails.isFilledOut()) {
         mapOf(

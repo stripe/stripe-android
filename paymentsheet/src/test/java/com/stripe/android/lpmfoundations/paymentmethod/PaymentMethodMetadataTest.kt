@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkConfiguration
@@ -1028,7 +1029,7 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
-        val defaultBillingDetails = PaymentSheet.BillingDetails(
+        val defaultBillingDetails = BillingDetails(
             address = Address(line1 = "123 Apple Street")
         )
         val shippingDetails = AddressDetails(address = Address(line1 = "123 Pear Street"))
@@ -1161,7 +1162,7 @@ internal class PaymentMethodMetadataTest {
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
-        val defaultBillingDetails = PaymentSheet.BillingDetails(
+        val defaultBillingDetails = BillingDetails(
             address = Address(line1 = "123 Apple Street")
         )
         val cardBrandAcceptance = CardBrandAcceptance.allowed(
@@ -1892,7 +1893,7 @@ internal class PaymentMethodMetadataTest {
         }
 
         val configuration = createPaymentSheetConfiguration(
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            defaultBillingDetails = BillingDetails(),
             shippingDetails = AddressDetails(),
             billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
             customPaymentMethods = listOf(),
@@ -1987,7 +1988,7 @@ internal class PaymentMethodMetadataTest {
 
     private fun createCustomerSheetConfiguration(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        defaultBillingDetails: PaymentSheet.BillingDetails,
+        defaultBillingDetails: BillingDetails,
         cardBrandAcceptance: CardBrandAcceptance
     ) = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
         .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
@@ -1999,7 +2000,7 @@ internal class PaymentMethodMetadataTest {
 
     private fun createPaymentSheetConfiguration(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        defaultBillingDetails: PaymentSheet.BillingDetails,
+        defaultBillingDetails: BillingDetails,
         shippingDetails: AddressDetails,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         cardBrandAcceptance: CardBrandAcceptance,

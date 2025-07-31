@@ -1,6 +1,7 @@
 package com.stripe.android.link.utils
 
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -16,10 +17,10 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal fun effectiveBillingDetails(
     configuration: LinkConfiguration,
     linkAccount: LinkAccount,
-): PaymentSheet.BillingDetails {
+): BillingDetails {
     val billingConfig = configuration.billingDetailsCollectionConfiguration
     val defaultBillingDetails = configuration.defaultBillingDetails
-    return PaymentSheet.BillingDetails(
+    return BillingDetails(
         email = defaultBillingDetails?.email
             ?: linkAccount.email.takeIf { billingConfig.collectsEmail },
         phone = defaultBillingDetails?.phone
@@ -96,7 +97,7 @@ internal fun PaymentDetails.withEffectiveBillingDetails(
     }
 }
 
-private fun PaymentSheet.BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.BillingAddress? {
+private fun BillingDetails.toConsumerBillingAddress(): ConsumerPaymentDetails.BillingAddress? {
     val billingAddress = address ?: return null
     return ConsumerPaymentDetails.BillingAddress(
         name = name,

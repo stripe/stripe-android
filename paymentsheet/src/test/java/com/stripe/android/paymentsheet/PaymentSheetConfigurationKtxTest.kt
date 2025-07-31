@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
@@ -225,7 +226,7 @@ class PaymentSheetConfigurationKtxTest {
                     )
                 ),
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Rosen",
             ),
             shippingDetails = AddressDetails(

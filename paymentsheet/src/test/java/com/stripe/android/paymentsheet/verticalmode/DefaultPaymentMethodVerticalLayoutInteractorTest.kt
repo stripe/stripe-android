@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -806,7 +807,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 attachDefaultsToPaymentMethod = true,
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",

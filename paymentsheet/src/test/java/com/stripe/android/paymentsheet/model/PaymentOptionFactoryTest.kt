@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
@@ -11,7 +12,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
 import org.junit.runner.RunWith
@@ -279,7 +279,7 @@ class PaymentOptionFactoryTest {
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(
-            PaymentSheet.BillingDetails(
+            BillingDetails(
                 address = com.stripe.android.elements.Address(
                     city = null,
                     country = null,
@@ -322,7 +322,7 @@ class PaymentOptionFactoryTest {
             phone = "+15555555555"
         )
 
-        val PAYMENT_SHEET_BILLING_DETAILS = PaymentSheet.BillingDetails(
+        val PAYMENT_SHEET_BILLING_DETAILS = BillingDetails(
             address = com.stripe.android.elements.Address(
                 city = "San Francisco",
                 country = "US",

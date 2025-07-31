@@ -3,6 +3,7 @@ package com.stripe.android.link.utils
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -40,7 +41,7 @@ class LinkBillingDetailsUtilsTest {
         country = "US"
     )
 
-    private val defaultBillingDetails = PaymentSheet.BillingDetails(
+    private val defaultBillingDetails = BillingDetails(
         name = testName,
         email = "merchant@example.com",
         phone = "+0987654321",
@@ -73,7 +74,7 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = testName,
                 phone = "+0987654321",
                 address = defaultAddress,
@@ -105,7 +106,7 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 phone = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = testName,
                 email = "merchant@example.com",
                 address = defaultAddress,
@@ -138,7 +139,7 @@ class LinkBillingDetailsUtilsTest {
                 email = CollectionMode.Never,
                 phone = CollectionMode.Never
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails()
+            defaultBillingDetails = BillingDetails()
         )
 
         val result = effectiveBillingDetails(configuration, linkAccount)
@@ -280,7 +281,7 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
                 address = Address(
@@ -319,7 +320,7 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
                 address = Address(
@@ -362,7 +363,7 @@ class LinkBillingDetailsUtilsTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Always
             ),
-            defaultBillingDetails = PaymentSheet.BillingDetails(
+            defaultBillingDetails = BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
                 address = Address(

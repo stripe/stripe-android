@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.link.injection.LinkControllerScope
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -174,7 +175,7 @@ class LinkController @Inject internal constructor(
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val cardBrandAcceptance: CardBrandAcceptance,
-        internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
+        internal val defaultBillingDetails: BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
     ) : Parcelable {
@@ -193,7 +194,7 @@ class LinkController @Inject internal constructor(
         ) {
             private var cardBrandAcceptance: CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
-            private var defaultBillingDetails: PaymentSheet.BillingDetails? =
+            private var defaultBillingDetails: BillingDetails? =
                 ConfigurationDefaults.billingDetails
             private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
                 ConfigurationDefaults.billingDetailsCollectionConfiguration
@@ -220,7 +221,7 @@ class LinkController @Inject internal constructor(
              * these values will be attached to the payment method even if they are not collected by
              * the PaymentSheet UI.
              */
-            fun defaultBillingDetails(defaultBillingDetails: PaymentSheet.BillingDetails?) =
+            fun defaultBillingDetails(defaultBillingDetails: BillingDetails?) =
                 apply { this.defaultBillingDetails = defaultBillingDetails }
 
             /**

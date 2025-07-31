@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -66,7 +67,7 @@ class USBankAccountFormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
-            billingDetails = PaymentSheet.BillingDetails(
+            billingDetails = BillingDetails(
                 name = CUSTOMER_NAME,
                 email = CUSTOMER_EMAIL
             ),
@@ -332,7 +333,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
                         phone = CUSTOMER_PHONE,
@@ -362,7 +363,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
                         phone = CUSTOMER_PHONE,
@@ -445,7 +446,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                             phone = CUSTOMER_PHONE,
@@ -480,7 +481,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                             phone = CUSTOMER_PHONE,
@@ -512,7 +513,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                             phone = CUSTOMER_PHONE,
@@ -544,7 +545,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel(
                 defaultArgs.copy(
                     formArgs = defaultArgs.formArgs.copy(
-                        billingDetails = PaymentSheet.BillingDetails(
+                        billingDetails = BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
                         ),
@@ -664,7 +665,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
@@ -692,7 +693,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
@@ -720,7 +721,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
-                    billingDetails = PaymentSheet.BillingDetails(
+                    billingDetails = BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
@@ -1583,7 +1584,7 @@ class USBankAccountFormViewModelTest {
         collectAddress: Boolean,
         attachDefaultsToPaymentMethod: Boolean,
     ): USBankAccountFormViewModel.Args {
-        val billingDetails = PaymentSheet.BillingDetails(
+        val billingDetails = BillingDetails(
             name = CUSTOMER_NAME,
             email = CUSTOMER_EMAIL,
             phone = CUSTOMER_PHONE,

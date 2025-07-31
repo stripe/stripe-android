@@ -1,16 +1,16 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 
 class InitialValuesFactoryTest {
-    private val billingDetails = PaymentSheet.BillingDetails(
+    private val billingDetails = BillingDetails(
         com.stripe.android.elements.Address(
             line1 = "123 Main Street",
             line2 = "APt 1",

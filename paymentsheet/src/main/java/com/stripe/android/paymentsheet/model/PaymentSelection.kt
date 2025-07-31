@@ -12,6 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.BillingDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -26,7 +27,6 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
@@ -465,8 +465,8 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.ShopPay -> null
     }
 
-internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
-    return PaymentSheet.BillingDetails(
+internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): BillingDetails {
+    return BillingDetails(
         address = com.stripe.android.elements.Address(
             city = address?.city,
             country = address?.country,
