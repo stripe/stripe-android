@@ -18,7 +18,6 @@ import kotlinx.parcelize.TypeParceler
  * @param primaryButton Configuration for primary button styling (corner radius, height).
  *
  */
-
 @Poko
 @Parcelize
 class LinkAppearance(
@@ -46,10 +45,24 @@ class LinkAppearance(
         }
     }
 
+    /**
+     * The light/dark mode style of the appearance..
+     */
     @Parcelize
     enum class Style : Parcelable {
+        /**
+         * Automatic based on system preference
+         */
         AUTOMATIC,
+
+        /**
+         * Always light mode
+         */
         ALWAYS_LIGHT,
+
+        /**
+         * Always dark mode
+         */
         ALWAYS_DARK
     }
 
