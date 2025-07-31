@@ -92,7 +92,8 @@ internal object LinkTestUtils {
             collectMissingBillingDetailsForExistingPaymentMethods = true,
             allowUserEmailEdits = true,
             enableDisplayableDefaultValuesInEce = false,
-            customerId = null
+            customerId = null,
+            linkAppearance = null
         )
     }
 }
