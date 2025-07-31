@@ -24,11 +24,7 @@ internal class OnrampViewModel : ViewModel() {
     val message: StateFlow<String?> = _message.asStateFlow()
 
     private var currentEmail: String = ""
-
-    /**
-     * Configure the onramp with the provided coordinator and configuration.
-     * Uses WeakReference to prevent memory leaks.
-     */
+    
     fun configure(coordinator: OnrampCoordinator, configuration: OnrampConfiguration) {
         viewModelScope.launch {
             try {
@@ -41,10 +37,6 @@ internal class OnrampViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Check if the given email corresponds to an existing Link user.
-     * Uses suspend function to avoid callback complexity.
-     */
     fun checkIfLinkUser(email: String, coordinator: OnrampCoordinator) {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
