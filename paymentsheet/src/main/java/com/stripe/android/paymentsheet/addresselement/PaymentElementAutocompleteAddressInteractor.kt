@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.elements.toIdentifierMap
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 
 internal class PaymentElementAutocompleteAddressInteractor(

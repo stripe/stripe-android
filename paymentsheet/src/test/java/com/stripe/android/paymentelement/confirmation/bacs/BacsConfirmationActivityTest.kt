@@ -13,6 +13,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -25,7 +26,6 @@ import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader

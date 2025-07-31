@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -31,7 +32,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull

@@ -4,6 +4,7 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.isInstanceOf
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement

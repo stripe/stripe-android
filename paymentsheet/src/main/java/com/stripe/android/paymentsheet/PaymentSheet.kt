@@ -21,6 +21,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -44,7 +45,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode

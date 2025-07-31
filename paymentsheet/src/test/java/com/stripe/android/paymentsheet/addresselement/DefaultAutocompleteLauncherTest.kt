@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentsheet.PaymentSheet

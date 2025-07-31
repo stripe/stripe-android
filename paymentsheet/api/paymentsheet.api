@@ -311,6 +311,36 @@ public final class com/stripe/android/elements/Address$Creator : android/os/Parc
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/elements/AddressDetails : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/elements/AddressDetails$Companion;
+	public static final field KEY Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAddress ()Lcom/stripe/android/elements/Address;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPhoneNumber ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isCheckboxSelected ()Ljava/lang/Boolean;
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/elements/AddressDetails$Companion {
+}
+
+public final class com/stripe/android/elements/AddressDetails$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/AddressDetails;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/AddressDetails;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract class com/stripe/android/elements/CardBrandAcceptance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/elements/CardBrandAcceptance$Companion;
@@ -1044,7 +1074,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
-	public final fun shippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun shippingDetails (Lcom/stripe/android/elements/AddressDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Creator : android/os/Parcelable$Creator {
@@ -1086,7 +1116,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Paym
 	public final fun getLabel ()Ljava/lang/String;
 	public final fun getMandateText ()Landroidx/compose/ui/text/AnnotatedString;
 	public final fun getPaymentMethodType ()Ljava/lang/String;
-	public final fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun getShippingDetails ()Lcom/stripe/android/elements/AddressDetails;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -1153,7 +1183,7 @@ public abstract interface annotation class com/stripe/android/paymentelement/Pay
 }
 
 public abstract interface class com/stripe/android/paymentelement/PreparePaymentMethodHandler {
-	public abstract fun onPreparePaymentMethod (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun onPreparePaymentMethod (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/elements/AddressDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/ShopPayPreview : java/lang/annotation/Annotation {
@@ -1918,14 +1948,14 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration : 
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;)V
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)V
 	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Z)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZ)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;Z)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZ)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/CustomerConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;Lcom/stripe/android/elements/AddressDetails;ZZLcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -1955,7 +1985,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
-	public final fun shippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun shippingDetails (Lcom/stripe/android/elements/AddressDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun shopPayConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$ShopPayConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun walletButtons (Lcom/stripe/android/paymentsheet/PaymentSheet$WalletButtonsConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 }
@@ -1999,9 +2029,9 @@ public abstract interface class com/stripe/android/paymentsheet/PaymentSheet$Flo
 	public abstract fun configureWithSetupIntent (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$ConfigCallback;)V
 	public abstract fun confirm ()V
 	public abstract fun getPaymentOption ()Lcom/stripe/android/paymentsheet/model/PaymentOption;
-	public abstract fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public abstract fun getShippingDetails ()Lcom/stripe/android/elements/AddressDetails;
 	public abstract fun presentPaymentOptions ()V
-	public abstract fun setShippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
+	public abstract fun setShippingDetails (Lcom/stripe/android/elements/AddressDetails;)V
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder {
@@ -2894,36 +2924,6 @@ public final class com/stripe/android/paymentsheet/ShopPayHandlers$ShippingRateU
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentsheet/addresselement/AddressDetails : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/paymentsheet/addresselement/AddressDetails$Companion;
-	public static final field KEY Ljava/lang/String;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAddress ()Lcom/stripe/android/elements/Address;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getPhoneNumber ()Ljava/lang/String;
-	public fun hashCode ()I
-	public final fun isCheckboxSelected ()Ljava/lang/Boolean;
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressDetails$Companion {
-}
-
-public final class com/stripe/android/paymentsheet/addresselement/AddressDetails$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/addresselement/AddressElementActivityContract$Args;
@@ -3011,15 +3011,15 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressLaunche
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
-	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)V
+	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;Lcom/stripe/android/elements/AddressDetails;Ljava/util/Set;Ljava/lang/String;Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -3031,7 +3031,7 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressLaunche
 	public static final field $stable I
 	public fun <init> ()V
 	public final fun additionalFields (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$AdditionalFieldsConfiguration;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
-	public final fun address (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
+	public final fun address (Lcom/stripe/android/elements/AddressDetails;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
 	public final fun allowedCountries (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
 	public final fun autocompleteCountries (Ljava/util/Set;)Lcom/stripe/android/paymentsheet/addresselement/AddressLauncher$Configuration$Builder;
@@ -3082,7 +3082,7 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressLaunche
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAddress ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun getAddress ()Lcom/stripe/android/elements/AddressDetails;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
@@ -3230,7 +3230,7 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public final fun getLabel ()Ljava/lang/String;
 	public final fun getLabels ()Lcom/stripe/android/paymentsheet/model/PaymentOption$Labels;
 	public final fun getPaymentMethodType ()Ljava/lang/String;
-	public final fun getShippingDetails ()Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;
+	public final fun getShippingDetails ()Lcom/stripe/android/elements/AddressDetails;
 	public fun hashCode ()I
 	public final fun icon ()Landroid/graphics/drawable/Drawable;
 	public fun toString ()Ljava/lang/String;

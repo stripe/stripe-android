@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -10,7 +11,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection

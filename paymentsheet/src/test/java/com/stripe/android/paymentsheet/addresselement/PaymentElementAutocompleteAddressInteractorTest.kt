@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CompletableDeferred

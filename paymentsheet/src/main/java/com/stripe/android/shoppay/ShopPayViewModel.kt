@@ -18,13 +18,13 @@ import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.ShopPayActivity.Companion.getArgs
 import com.stripe.android.shoppay.bridge.ShopPayBridgeHandler

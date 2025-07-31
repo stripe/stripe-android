@@ -3,13 +3,13 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -10,7 +11,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader

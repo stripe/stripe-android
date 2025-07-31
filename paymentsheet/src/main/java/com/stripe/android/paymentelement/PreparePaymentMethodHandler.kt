@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 @SharedPaymentTokenSessionPreview
 fun interface PreparePaymentMethodHandler {

@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.effectiveBillingDetails
@@ -24,7 +25,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive

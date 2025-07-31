@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.addresselement
+package com.stripe.android.elements
 
 import android.os.Parcelable
 import com.stripe.android.model.Address

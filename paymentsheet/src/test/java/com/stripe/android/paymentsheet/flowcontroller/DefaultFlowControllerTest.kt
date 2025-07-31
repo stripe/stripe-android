@@ -17,6 +17,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -70,7 +71,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALL
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError

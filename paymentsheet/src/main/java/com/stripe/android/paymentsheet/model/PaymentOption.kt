@@ -4,10 +4,10 @@ import android.graphics.drawable.Drawable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 

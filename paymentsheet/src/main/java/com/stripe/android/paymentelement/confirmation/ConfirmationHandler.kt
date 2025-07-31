@@ -4,10 +4,10 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow

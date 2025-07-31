@@ -1,11 +1,11 @@
 package com.stripe.android.common.configuration
 
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object ConfigurationDefaults {
     const val allowsDelayedPaymentMethods: Boolean = true

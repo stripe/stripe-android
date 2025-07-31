@@ -17,6 +17,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -69,7 +70,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter

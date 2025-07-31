@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Activity
 import android.os.Parcelable
+import com.stripe.android.elements.AddressDetails
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 

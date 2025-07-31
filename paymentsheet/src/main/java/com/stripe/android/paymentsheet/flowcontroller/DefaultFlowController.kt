@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -52,7 +53,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.allowedWalletTypes
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError

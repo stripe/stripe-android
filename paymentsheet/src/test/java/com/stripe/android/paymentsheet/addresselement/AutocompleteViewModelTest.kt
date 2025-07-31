@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
+import com.stripe.android.elements.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
