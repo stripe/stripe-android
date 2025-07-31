@@ -1490,6 +1490,10 @@ public final class com/stripe/android/elements/payment/EmbeddedPaymentElement$St
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/elements/payment/EmbeddedPaymentElementKtxKt {
+	public static final fun rememberEmbeddedPaymentElement (Lcom/stripe/android/elements/payment/EmbeddedPaymentElement$Builder;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/elements/payment/EmbeddedPaymentElement;
+}
+
 public abstract interface class com/stripe/android/elements/payment/FlowController {
 	public static final field Companion Lcom/stripe/android/elements/payment/FlowController$Companion;
 	public abstract fun WalletButtons (Landroidx/compose/runtime/Composer;I)V
@@ -2397,10 +2401,6 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentSheetC
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentSheetCardBrandFilter;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/EmbeddedPaymentElementKtxKt {
-	public static final fun rememberEmbeddedPaymentElement (Lcom/stripe/android/elements/payment/EmbeddedPaymentElement$Builder;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/elements/payment/EmbeddedPaymentElement;
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalAnalyticEventCallbackApi : java/lang/annotation/Annotation {
