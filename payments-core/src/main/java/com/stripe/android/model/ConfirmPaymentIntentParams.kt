@@ -121,6 +121,8 @@ constructor(
      */
     var receiptEmail: String? = null,
 
+    var radarOptions: RadarOptions? = null,
+
     /**
      * Indicates that this should be the default payment method going forward.
      */
@@ -181,6 +183,8 @@ constructor(
             receiptEmail?.let {
                 mapOf(PARAM_RECEIPT_EMAIL to it)
             }.orEmpty()
+        ).plus(
+            radarOptions?.toParamMap().orEmpty()
         )
     }
 
