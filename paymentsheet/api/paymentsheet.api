@@ -1184,6 +1184,9 @@ public abstract interface class com/stripe/android/elements/customersheet/SetupI
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/elements/payment/AddressAutocompletePreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface class com/stripe/android/elements/payment/CreateIntentCallback {
 	public abstract fun onCreateIntent (Lcom/stripe/android/model/PaymentMethod;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -1948,9 +1951,6 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentSheetC
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentSheetCardBrandFilter;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/AddressAutocompletePreview : java/lang/annotation/Annotation {
 }
 
 public abstract class com/stripe/android/paymentelement/AnalyticEvent {

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-import com.stripe.android.paymentelement.AddressAutocompletePreview
+import com.stripe.android.elements.payment.AddressAutocompletePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState

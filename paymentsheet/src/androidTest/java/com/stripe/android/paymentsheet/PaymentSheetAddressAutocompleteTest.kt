@@ -10,7 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.AddressAutocompletePreview
+import com.stripe.android.elements.payment.AddressAutocompletePreview
 import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
