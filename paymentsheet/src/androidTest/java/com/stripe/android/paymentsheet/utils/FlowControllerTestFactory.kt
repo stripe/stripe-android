@@ -3,19 +3,19 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import app.cash.turbine.Turbine
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal class FlowControllerTestFactory(
     callConfirmOnPaymentOptionCallback: Boolean,
-    builder: PaymentSheet.FlowController.Builder.() -> Unit,
+    builder: FlowController.Builder.() -> Unit,
     configureCallbackTurbine: Turbine<PaymentOption?>,
     resultCallback: PaymentSheetResultCallback,
 ) {
     // Needs to be lateinit in order to reference in `paymentOptionCallback`
-    private lateinit var flowController: PaymentSheet.FlowController
-    private val flowControllerBuilder = PaymentSheet.FlowController.Builder(
+    private lateinit var flowController: FlowController
+    private val flowControllerBuilder = FlowController.Builder(
             resultCallback = resultCallback,
             paymentOptionCallback = { paymentOption ->
                 configureCallbackTurbine.add(paymentOption)
@@ -27,13 +27,13 @@ internal class FlowControllerTestFactory(
             builder()
         }
 
-    fun make(activity: ComponentActivity): PaymentSheet.FlowController {
+    fun make(activity: ComponentActivity): FlowController {
         flowController = flowControllerBuilder.build(activity)
         return flowController
     }
 
     @Composable
-    fun make(): PaymentSheet.FlowController {
+    fun make(): FlowController {
         flowController = flowControllerBuilder.build()
         return flowController
     }

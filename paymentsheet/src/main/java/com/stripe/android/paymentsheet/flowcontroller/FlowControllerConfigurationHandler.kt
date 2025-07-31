@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -45,7 +46,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
         initializedViaCompose: Boolean,
-        callback: PaymentSheet.FlowController.ConfigCallback,
+        callback: FlowController.ConfigCallback,
     ) {
         val oldJob = job.getAndSet(
             scope.launch {
@@ -64,7 +65,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
         initializedViaCompose: Boolean,
-        callback: PaymentSheet.FlowController.ConfigCallback,
+        callback: FlowController.ConfigCallback,
     ) {
         suspend fun onConfigured(error: Throwable? = null) {
             withContext(uiContext) {

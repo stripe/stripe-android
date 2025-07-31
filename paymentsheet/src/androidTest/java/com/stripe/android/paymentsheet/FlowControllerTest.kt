@@ -38,7 +38,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.PaymentSheet.FlowController
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -413,7 +413,7 @@ internal class FlowControllerTest {
 
         val paymentOptionCallbackCountDownLatch = CountDownLatch(1)
         val scenario = ActivityScenario.launch(MainActivity::class.java)
-        lateinit var flowController: PaymentSheet.FlowController
+        lateinit var flowController: FlowController
 
         fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
@@ -480,7 +480,7 @@ internal class FlowControllerTest {
     @Test
     fun testCallsElementsSessionsForSeparateConfiguredClientSecrets() {
         val scenario = ActivityScenario.launch(MainActivity::class.java)
-        lateinit var flowController: PaymentSheet.FlowController
+        lateinit var flowController: FlowController
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {

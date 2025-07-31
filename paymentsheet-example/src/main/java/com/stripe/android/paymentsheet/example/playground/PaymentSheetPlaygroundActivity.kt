@@ -58,6 +58,7 @@ import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.rememberAddressLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -166,7 +167,7 @@ internal class PaymentSheetPlaygroundActivity :
             }
                 .build()
             val flowController = remember {
-                PaymentSheet.FlowController.Builder(
+                FlowController.Builder(
                     viewModel::onPaymentSheetResult,
                     viewModel::onPaymentOptionSelected
                 )
@@ -392,7 +393,7 @@ internal class PaymentSheetPlaygroundActivity :
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         customerSheet: CustomerSheet,
         addressLauncher: AddressLauncher
     ) {
@@ -466,7 +467,7 @@ internal class PaymentSheetPlaygroundActivity :
 
     @Composable
     fun FlowControllerUi(
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         playgroundState: PlaygroundState.Payment,
     ) {
         LaunchedEffect(playgroundState) {
@@ -675,7 +676,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     private fun configureFlowController(
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         playgroundState: PlaygroundState.Payment,
     ) {
         if (playgroundState.initializationType == InitializationType.Normal) {

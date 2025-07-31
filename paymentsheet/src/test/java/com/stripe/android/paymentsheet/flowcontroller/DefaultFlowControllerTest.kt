@@ -19,6 +19,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
@@ -2293,7 +2294,7 @@ internal class DefaultFlowControllerTest {
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
         shouldSave: Boolean = true,
-        configure: (PaymentSheet.FlowController) -> Unit
+        configure: (FlowController) -> Unit
     ) = confirmationTest {
         val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
         val flowController = createFlowController()
@@ -2587,7 +2588,7 @@ internal class DefaultFlowControllerTest {
     }
 }
 
-private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
+private suspend fun FlowController.configureExpectingSuccess(
     clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
     configuration: PaymentSheet.Configuration? = null,
 ) {
@@ -2601,7 +2602,7 @@ private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
     assertThat(configureTurbine.awaitItem()).isNull()
 }
 
-private suspend fun PaymentSheet.FlowController.configureExpectingError(
+private suspend fun FlowController.configureExpectingError(
     clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
     configuration: PaymentSheet.Configuration? = null,
 ) {

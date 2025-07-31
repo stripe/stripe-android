@@ -7,6 +7,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
@@ -77,7 +78,7 @@ internal class ProductIntegrationBuilder {
         }
     }
 
-    fun applyToFlowControllerBuilder(builder: PaymentSheet.FlowController.Builder) {
+    fun applyToFlowControllerBuilder(builder: FlowController.Builder) {
         createIntentCallback?.let {
             builder.createIntentCallback(it)
         }

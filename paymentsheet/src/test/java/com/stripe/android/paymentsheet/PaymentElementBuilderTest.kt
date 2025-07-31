@@ -9,8 +9,8 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentsheet.PaymentSheet.FlowController
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -267,7 +267,7 @@ internal class PaymentElementBuilderTest {
         val createIntentCallback = newCreateIntentCallback()
         val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-        val flowController = PaymentSheet.FlowController.Builder(
+        val flowController = FlowController.Builder(
             resultCallback = newPaymentSheetResultCallback(),
             paymentOptionCallback = newPaymentOptionCallback(),
         )
@@ -308,7 +308,7 @@ internal class PaymentElementBuilderTest {
         val createIntentCallback = newCreateIntentCallback()
         val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
 
-        val flowController = PaymentSheet.FlowController.Builder(
+        val flowController = FlowController.Builder(
             resultCallback = newPaymentSheetResultCallback(),
             paymentOptionCallback = newPaymentOptionCallback(),
         )

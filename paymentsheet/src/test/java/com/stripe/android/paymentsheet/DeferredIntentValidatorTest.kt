@@ -134,7 +134,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent confirmationMethod (Manual) can only " +
-                "be used with PaymentSheet.FlowController."
+                "be used with FlowController."
         )
     }
 

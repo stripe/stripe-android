@@ -62,7 +62,7 @@ import kotlin.coroutines.CoroutineContext
 
 /**
  * Loads the information necessary to display [PaymentSheet], either directly or via
- * [PaymentSheet.FlowController].
+ * [FlowController].
  */
 internal interface PaymentElementLoader {
 

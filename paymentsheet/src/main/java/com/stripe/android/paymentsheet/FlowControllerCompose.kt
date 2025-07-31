@@ -7,6 +7,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
@@ -17,7 +18,7 @@ internal fun internalRememberPaymentSheetFlowController(
     callbacks: PaymentElementCallbacks,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet.FlowController {
+): FlowController {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
     }
@@ -25,17 +26,17 @@ internal fun internalRememberPaymentSheetFlowController(
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
-        "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
+        "FlowController must be created with access to a ViewModelStoreOwner"
     }
 
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
-        "PaymentSheet.FlowController must be created with access to a ActivityResultRegistryOwner"
+        "FlowController must be created with access to a ActivityResultRegistryOwner"
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val activity = rememberActivity {
-        "PaymentSheet.FlowController must be created in the context of an Activity"
+        "FlowController must be created in the context of an Activity"
     }
 
     return remember(paymentOptionCallback, paymentResultCallback) {

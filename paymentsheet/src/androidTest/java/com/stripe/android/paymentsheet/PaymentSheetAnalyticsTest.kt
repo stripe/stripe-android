@@ -521,7 +521,7 @@ internal class PaymentSheetAnalyticsTest {
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
-            productUsage = setOf("PaymentSheet.FlowController"),
+            productUsage = setOf("FlowController"),
             *requestMatchers
         )
     }

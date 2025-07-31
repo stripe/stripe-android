@@ -48,7 +48,7 @@ internal object DeferredIntentValidator {
                 // could fail.
                 require(stripeIntent.confirmationMethod != Manual || allowsManualConfirmation) {
                     "Your PaymentIntent confirmationMethod (${stripeIntent.confirmationMethod}) " +
-                        "can only be used with PaymentSheet.FlowController."
+                        "can only be used with FlowController."
                 }
 
                 require(

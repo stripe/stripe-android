@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.snackbar.Snackbar
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
@@ -48,7 +48,7 @@ internal class CustomFlowActivity : AppCompatActivity() {
                 viewModel::handlePaymentOptionChanged,
                 viewModel::handlePaymentSheetResult
             ) {
-                PaymentSheet.FlowController.Builder(
+                FlowController.Builder(
                     resultCallback = viewModel::handlePaymentSheetResult,
                     paymentOptionCallback = viewModel::handlePaymentOptionChanged
                 )
@@ -113,7 +113,7 @@ internal class CustomFlowActivity : AppCompatActivity() {
     }
 
     private fun configureFlowController(
-        flowController: PaymentSheet.FlowController,
+        flowController: FlowController,
         paymentInfo: CustomFlowViewState.PaymentInfo,
     ) {
         flowController.configureWithPaymentIntent(

@@ -20,6 +20,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -106,7 +107,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-) : PaymentSheet.FlowController {
+) : FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
 
@@ -188,7 +189,7 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun configureWithPaymentIntent(
         paymentIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.PaymentIntent(paymentIntentClientSecret),
@@ -200,7 +201,7 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun configureWithSetupIntent(
         setupIntentClientSecret: String,
         configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.SetupIntent(setupIntentClientSecret),
@@ -212,7 +213,7 @@ internal class DefaultFlowController @Inject internal constructor(
     override fun configureWithIntentConfiguration(
         intentConfiguration: IntentConfiguration,
         configuration: PaymentSheet.Configuration?,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        callback: FlowController.ConfigCallback
     ) {
         configure(
             mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
@@ -224,7 +225,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun configure(
         mode: PaymentElementLoader.InitializationMode,
         configuration: PaymentSheet.Configuration,
-        callback: PaymentSheet.FlowController.ConfigCallback
+        callback: FlowController.ConfigCallback
     ) {
         configurationHandler.configure(
             scope = viewModelScope,
@@ -782,7 +783,7 @@ internal class DefaultFlowController @Inject internal constructor(
             paymentElementCallbackIdentifier: String,
             initializedViaCompose: Boolean,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
-        ): PaymentSheet.FlowController {
+        ): FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
                 factory = FlowControllerViewModel.Factory(statusBarColor(), paymentElementCallbackIdentifier),

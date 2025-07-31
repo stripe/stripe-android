@@ -10,9 +10,9 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
 import kotlinx.coroutines.test.runTest
@@ -21,13 +21,13 @@ import java.util.concurrent.TimeUnit
 
 internal class FlowControllerTestRunnerContext(
     val scenario: ActivityScenario<MainActivity>,
-    val flowController: PaymentSheet.FlowController,
+    val flowController: FlowController,
     val configureCallbackTurbine: Turbine<PaymentOption?>,
     private val countDownLatch: CountDownLatch,
 ) {
 
     fun configureFlowController(
-        block: PaymentSheet.FlowController.() -> Unit,
+        block: FlowController.() -> Unit,
     ) {
         val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
@@ -59,7 +59,7 @@ internal fun runFlowControllerTest(
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     showWalletButtons: Boolean = false,
-    builder: PaymentSheet.FlowController.Builder.() -> Unit = {},
+    builder: FlowController.Builder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
@@ -84,7 +84,7 @@ internal fun runFlowControllerTest(
             LinkStore(it.applicationContext).clear()
         }
 
-        var flowController: PaymentSheet.FlowController? = null
+        var flowController: FlowController? = null
 
         scenario.onActivity { activity ->
             when (integrationType) {
@@ -192,8 +192,8 @@ internal fun runMultipleFlowControllerInstancesTest(
             LinkStore(it.applicationContext).clear()
         }
 
-        lateinit var firstFlowController: PaymentSheet.FlowController
-        lateinit var secondFlowController: PaymentSheet.FlowController
+        lateinit var firstFlowController: FlowController
+        lateinit var secondFlowController: FlowController
 
         scenario.onActivity { activity ->
             activity.setContent {
