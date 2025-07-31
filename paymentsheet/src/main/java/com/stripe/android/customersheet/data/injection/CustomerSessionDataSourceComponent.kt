@@ -11,13 +11,13 @@ import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetDataCommonModule
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 @Singleton
 @Component(
     modules = [

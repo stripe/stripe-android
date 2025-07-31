@@ -5,9 +5,9 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -31,7 +31,7 @@ internal data class CustomerSessionElementsSession(
     val ephemeralKey: CachedCustomerEphemeralKey,
 )
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 @Singleton
 internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val elementsSessionRepository: ElementsSessionRepository,

@@ -9,13 +9,13 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -240,7 +240,7 @@ internal class ElementsSessionRepositoryTest {
         assertThat(session.getOrNull()?.stripeIntent?.paymentMethodTypes).isEqualTo(expectedPaymentMethodTypes)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `Verify customer session client secret is passed to 'StripeRepository'`() = runTest {
         whenever(
@@ -291,7 +291,7 @@ internal class ElementsSessionRepositoryTest {
         )
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `Verify legacy customer ephemeral key is passed to 'StripeRepository'`() = runTest {
         whenever(

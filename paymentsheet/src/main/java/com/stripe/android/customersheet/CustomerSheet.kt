@@ -18,8 +18,8 @@ import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -357,14 +357,14 @@ class CustomerSheet internal constructor(
      * [IntentConfiguration] contains the details necessary for configuring and creating an intent
      * to attach payment methods with.
      */
-    @ExperimentalCustomerSessionApi
+    @CustomerSessionApiPreview
     class IntentConfiguration internal constructor(
         internal val paymentMethodTypes: List<String>,
     ) {
         /**
          * Builder for creating a [IntentConfiguration]
          */
-        @ExperimentalCustomerSessionApi
+        @CustomerSessionApiPreview
         class Builder {
             private var paymentMethodTypes = listOf<String>()
 
@@ -393,12 +393,12 @@ class CustomerSheet internal constructor(
      * customer session. This will be used to securely access a customer's saved payment methods.
      */
     @Poko
-    @ExperimentalCustomerSessionApi
+    @CustomerSessionApiPreview
     class CustomerSessionClientSecret internal constructor(
         internal val customerId: String,
         internal val clientSecret: String
     ) {
-        @ExperimentalCustomerSessionApi
+        @CustomerSessionApiPreview
         companion object {
             /**
              * Creates an instance of a [CustomerSessionClientSecret]
@@ -422,7 +422,7 @@ class CustomerSheet internal constructor(
     /**
      * [CustomerSessionProvider] provides the necessary functions
      */
-    @ExperimentalCustomerSessionApi
+    @CustomerSessionApiPreview
     abstract class CustomerSessionProvider {
         /**
          * Creates an [IntentConfiguration] that is used when configuring the intent used when
@@ -481,7 +481,7 @@ class CustomerSheet internal constructor(
          * @param customerSessionProvider provider for providing customer session elements
          * @param callback called when a [CustomerSheetResult] is available.
          */
-        @ExperimentalCustomerSessionApi
+        @CustomerSessionApiPreview
         @JvmStatic
         fun create(
             activity: ComponentActivity,
@@ -531,7 +531,7 @@ class CustomerSheet internal constructor(
          * @param customerSessionProvider provider for providing customer session elements
          * @param callback called when a [CustomerSheetResult] is available.
          */
-        @ExperimentalCustomerSessionApi
+        @CustomerSessionApiPreview
         @JvmStatic
         fun create(
             fragment: Fragment,

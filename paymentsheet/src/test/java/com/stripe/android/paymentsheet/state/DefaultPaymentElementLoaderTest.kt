@@ -12,6 +12,7 @@ import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -41,7 +42,6 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ConfigFixtures
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1675,7 +1675,7 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When customer session configuration is provided, should pass it to 'ElementsSessionRepository'`() = runTest {
         val repository = FakeElementsSessionRepository(
@@ -1712,7 +1712,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'CustomerSession' config is provided, should use payment methods from elements_session and not fetch`() =
         runTest {
@@ -1766,7 +1766,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
         runTest {
@@ -1811,7 +1811,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
         runTest {
@@ -1856,7 +1856,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
         runTest {
@@ -1901,7 +1901,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
         runTest {
@@ -1977,7 +1977,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in test mode, should report error and return error`() =
         runTest {
@@ -2017,7 +2017,7 @@ internal class DefaultPaymentElementLoaderTest {
                 )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When 'CustomerSession' config is provided but no customer object was returned in live mode, should report error and continue with loading without customer`() =
         runTest {
@@ -2097,7 +2097,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession', move last-used customer payment method to the front of the list`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
@@ -2142,7 +2142,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession', payment methods should be filtered by supported saved payment methods`() =
         runTest {
@@ -2185,7 +2185,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .containsExactlyElementsIn(expectedPaymentMethods)
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
         runTest {
@@ -2241,7 +2241,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession' & has a default saved Stripe payment method, should call 'ElementsSessionRepository' with default id`() =
         runTest {
@@ -2278,7 +2278,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo("pm_1234321")
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession' & has a default Google Pay payment method, should not call 'ElementsSessionRepository' with default id`() =
         runTest {
@@ -2786,7 +2786,7 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
         }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `When using 'CustomerSession', last PM permission should be true if server & config value is true`() =
         removeLastPaymentMethodTest(
@@ -3371,7 +3371,7 @@ internal class DefaultPaymentElementLoaderTest {
         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
     )
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
         lastUsedPaymentMethod: PaymentMethod?,
         defaultPaymentMethod: PaymentMethod?,

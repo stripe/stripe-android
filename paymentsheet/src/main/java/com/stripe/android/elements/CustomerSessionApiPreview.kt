@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.elements
 
 @RequiresOptIn(message = "Customer session support is beta. It may be changed in the future without notice.")
 @Retention(AnnotationRetention.BINARY)
@@ -7,4 +7,4 @@ package com.stripe.android.paymentsheet
     AnnotationTarget.FUNCTION,
     AnnotationTarget.PROPERTY
 )
-annotation class ExperimentalCustomerSessionApi
+annotation class CustomerSessionApiPreview

@@ -16,6 +16,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -37,7 +38,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(CustomerSessionApiPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerSessionPaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()

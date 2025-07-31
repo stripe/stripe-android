@@ -14,7 +14,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
@@ -247,7 +247,7 @@ internal class EmbeddedPaymentElementTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun testWalletButtonsShown() = runEmbeddedPaymentElementTest(
         networkRule = networkRule,

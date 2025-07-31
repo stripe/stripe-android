@@ -20,6 +20,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -1060,7 +1061,7 @@ internal class FlowControllerTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun testWalletButtonsShown() = runFlowControllerTest(
         networkRule = networkRule,
@@ -1133,7 +1134,7 @@ internal class FlowControllerTest {
         testContext.markTestSucceeded()
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class, WalletButtonsPreview::class)
+    @OptIn(CustomerSessionApiPreview::class, WalletButtonsPreview::class)
     @Test
     fun testWalletsShownInExpectedScreensWhenFilteringWalletButtons() = runFlowControllerTest(
         networkRule = networkRule,

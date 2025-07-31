@@ -9,6 +9,7 @@ import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
 import kotlin.test.assertFailsWith
@@ -70,7 +71,7 @@ class PaymentSheetConfigurationKtxTest {
         assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
         val configWithBlankCustomerSessionClientSecret = configuration.newBuilder()
@@ -90,7 +91,7 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `'validate' should fail when provided argument has an ephemeral key secret format`() {
         val configWithEphemeralKeySecretAsCustomerSessionClientSecret = configuration.newBuilder()
@@ -110,7 +111,7 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(CustomerSessionApiPreview::class)
     @Test
     fun `'validate' should fail when provided argument is not a recognized customer session client secret format`() {
         val configWithInvalidCustomerSessionClientSecret = configuration.newBuilder()

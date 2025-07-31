@@ -1034,6 +1034,9 @@ public final class com/stripe/android/elements/CustomerConfiguration$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/elements/CustomerSessionApiPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/link/LinkAccountUpdate$None$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkAccountUpdate$None;
@@ -2062,9 +2065,6 @@ public final class com/stripe/android/paymentsheet/CreateIntentResult$Success : 
 }
 
 public abstract interface annotation class com/stripe/android/paymentsheet/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class com/stripe/android/paymentsheet/ExperimentalCustomerSessionApi : java/lang/annotation/Annotation {
 }
 
 public abstract interface class com/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler {
