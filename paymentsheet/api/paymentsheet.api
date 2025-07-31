@@ -1538,6 +1538,9 @@ public final class com/stripe/android/elements/payment/PaymentMethodLayout : jav
 	public static fun values ()[Lcom/stripe/android/elements/payment/PaymentMethodLayout;
 }
 
+public abstract interface annotation class com/stripe/android/elements/payment/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface class com/stripe/android/elements/payment/PreparePaymentMethodHandler {
 	public abstract fun onPreparePaymentMethod (Lcom/stripe/android/model/PaymentMethod;Lcom/stripe/android/elements/AddressDetails;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -2235,9 +2238,6 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElementKtxKt
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalAnalyticEventCallbackApi : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/PaymentMethodOptionsSetupFutureUsagePreview : java/lang/annotation/Annotation {
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/ShopPayPreview : java/lang/annotation/Annotation {

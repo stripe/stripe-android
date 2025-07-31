@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 
 internal fun IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {

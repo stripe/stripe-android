@@ -6,9 +6,9 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse

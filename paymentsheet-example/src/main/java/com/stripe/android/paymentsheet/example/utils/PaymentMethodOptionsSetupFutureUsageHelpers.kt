@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.example.utils
 
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 
 @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
 internal fun getPMOSFUFromStringMap(
