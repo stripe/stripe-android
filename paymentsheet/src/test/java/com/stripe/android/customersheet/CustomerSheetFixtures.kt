@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet
 
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
@@ -22,7 +22,7 @@ internal object CustomerSheetFixtures {
         .googlePayEnabled(googlePayEnabled = true)
         .build()
 
-    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @OptIn(AllowsRemovalOfLastSavedPaymentMethodPreview::class)
     val CONFIG_WITH_EVERYTHING = CustomerSheet.Configuration
         .builder(merchantDisplayName = "Merchant, Inc")
         .defaultBillingDetails(BillingDetails(name = "Skyler"))

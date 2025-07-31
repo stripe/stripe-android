@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.isInstanceOf
@@ -256,7 +256,7 @@ class CustomerSessionInitializationDataSourceTest {
         assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isEqualTo(expected)
     }
 
-    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    @OptIn(AllowsRemovalOfLastSavedPaymentMethodPreview::class)
     private fun createConfiguration(
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
     ): CustomerSheet.Configuration {

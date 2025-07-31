@@ -8,7 +8,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
-import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
@@ -738,7 +738,7 @@ class PaymentSheet internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            @AllowsRemovalOfLastSavedPaymentMethodPreview
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
             }
@@ -870,7 +870,7 @@ class PaymentSheet internal constructor(
         }
 
         @OptIn(
-            ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
+            AllowsRemovalOfLastSavedPaymentMethodPreview::class,
             ExperimentalCustomPaymentMethodsApi::class,
             WalletButtonsPreview::class,
             ShopPayPreview::class

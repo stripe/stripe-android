@@ -12,7 +12,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
@@ -378,7 +378,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            @AllowsRemovalOfLastSavedPaymentMethodPreview
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
             }
