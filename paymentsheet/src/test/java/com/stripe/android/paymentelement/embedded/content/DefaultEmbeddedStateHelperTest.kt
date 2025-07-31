@@ -8,12 +8,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.Appearance.Embedded
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder

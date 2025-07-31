@@ -2,8 +2,8 @@ package com.stripe.android.paymentelement.embedded.content
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.model.darkThemeIconUrl

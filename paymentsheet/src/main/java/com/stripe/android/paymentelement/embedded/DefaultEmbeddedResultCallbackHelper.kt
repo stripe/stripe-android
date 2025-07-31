@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
 import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import javax.inject.Inject

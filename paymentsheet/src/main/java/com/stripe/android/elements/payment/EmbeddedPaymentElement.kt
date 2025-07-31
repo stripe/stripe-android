@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement
+package com.stripe.android.elements.payment
 
 import android.app.Activity
 import android.graphics.drawable.Drawable
@@ -22,17 +22,13 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
-import com.stripe.android.elements.payment.AnalyticEventCallback
-import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.elements.payment.CreateIntentCallback
-import com.stripe.android.elements.payment.CustomPaymentMethod
-import com.stripe.android.elements.payment.GooglePayConfiguration
-import com.stripe.android.elements.payment.IntentConfiguration
-import com.stripe.android.elements.payment.LinkConfiguration
-import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper

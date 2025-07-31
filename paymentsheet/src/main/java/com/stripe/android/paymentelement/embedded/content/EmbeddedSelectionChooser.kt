@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper

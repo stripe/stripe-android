@@ -8,6 +8,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
@@ -16,7 +17,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.analyticsValue
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability

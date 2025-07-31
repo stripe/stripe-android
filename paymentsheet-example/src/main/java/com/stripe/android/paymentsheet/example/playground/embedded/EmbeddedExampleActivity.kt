@@ -23,8 +23,8 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.IntentConfiguration
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest

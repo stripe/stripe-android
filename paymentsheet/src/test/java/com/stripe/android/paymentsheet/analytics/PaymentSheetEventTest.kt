@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
@@ -19,7 +20,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures

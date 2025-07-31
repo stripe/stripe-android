@@ -58,10 +58,10 @@ import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.elements.rememberAddressLauncher
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview

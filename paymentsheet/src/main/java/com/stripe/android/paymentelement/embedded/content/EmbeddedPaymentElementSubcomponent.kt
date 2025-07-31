@@ -5,7 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import dagger.Binds

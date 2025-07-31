@@ -1,9 +1,9 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal object EmbeddedConfirmationStateFixtures {

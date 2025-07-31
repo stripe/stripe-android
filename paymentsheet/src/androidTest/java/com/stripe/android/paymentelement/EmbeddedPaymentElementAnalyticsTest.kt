@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.AnalyticEvent
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host

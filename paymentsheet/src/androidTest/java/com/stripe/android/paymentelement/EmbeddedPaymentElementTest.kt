@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails

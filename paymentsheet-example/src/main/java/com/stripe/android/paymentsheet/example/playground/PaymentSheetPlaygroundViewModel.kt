@@ -22,9 +22,9 @@ import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.AnalyticEvent
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentSheetResult

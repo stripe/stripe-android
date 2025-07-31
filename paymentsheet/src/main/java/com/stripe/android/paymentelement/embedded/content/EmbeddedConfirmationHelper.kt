@@ -4,7 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper

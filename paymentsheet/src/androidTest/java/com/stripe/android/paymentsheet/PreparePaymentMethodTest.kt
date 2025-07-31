@@ -12,7 +12,7 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.Address
 import com.stripe.android.paymentelement.assertCompleted

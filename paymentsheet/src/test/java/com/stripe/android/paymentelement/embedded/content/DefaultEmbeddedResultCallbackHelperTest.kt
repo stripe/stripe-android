@@ -4,8 +4,8 @@ import android.os.Bundle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import kotlinx.coroutines.test.runTest
