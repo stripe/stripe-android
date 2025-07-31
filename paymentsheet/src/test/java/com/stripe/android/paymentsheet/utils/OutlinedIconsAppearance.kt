@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.stripe.android.elements.Appearance
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance

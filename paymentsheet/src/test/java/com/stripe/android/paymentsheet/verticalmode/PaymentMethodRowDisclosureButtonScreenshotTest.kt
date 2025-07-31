@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.Appearance.Embedded.RowStyle.FlatWithDisclosure
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance

@@ -9,7 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.elements.Appearance
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults

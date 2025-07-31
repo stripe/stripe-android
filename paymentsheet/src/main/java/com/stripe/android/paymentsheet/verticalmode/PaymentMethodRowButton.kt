@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.Appearance.Embedded.RowStyle
-import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.elements.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
