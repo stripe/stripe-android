@@ -55,7 +55,8 @@ internal class FakeCustomerSessionElementsSessionManager(
                 cardBrandChoice = null,
                 elementsSessionId = "session_1234",
                 flags = emptyMap(),
-                experimentsData = null
+                experimentsData = null,
+                passiveCaptcha = null
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

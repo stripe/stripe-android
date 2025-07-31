@@ -1334,7 +1334,8 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             flags = emptyMap(),
             orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
-            experimentsData = null
+            experimentsData = null,
+            passiveCaptcha = null
         )
     }
 
