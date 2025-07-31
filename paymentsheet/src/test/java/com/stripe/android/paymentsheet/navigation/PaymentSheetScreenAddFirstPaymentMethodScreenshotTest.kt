@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -127,10 +127,10 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     }
 
     private data object CustomPrimaryButtonHeightAppearance : PaparazziConfigOption {
-        val appearance = PaymentSheet.Appearance.Builder()
+        val appearance = Appearance.Builder()
             .primaryButton(
-                PaymentSheet.PrimaryButton(
-                    shape = PaymentSheet.PrimaryButtonShape(
+                Appearance.PrimaryButton(
+                    shape = Appearance.PrimaryButton.Shape(
                         heightDp = 80f,
                     )
                 )

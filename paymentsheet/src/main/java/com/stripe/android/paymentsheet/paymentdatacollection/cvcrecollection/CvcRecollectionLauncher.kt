@@ -1,12 +1,12 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 
 internal interface CvcRecollectionLauncher {
     fun launch(
         data: CvcRecollectionData,
-        appearance: PaymentSheet.Appearance,
+        appearance: Appearance,
         isLiveMode: Boolean
     )
 }
@@ -14,7 +14,7 @@ internal interface CvcRecollectionLauncher {
 internal class DefaultCvcRecollectionLauncher(
     private val activityResultLauncher: ActivityResultLauncher<CvcRecollectionContract.Args>
 ) : CvcRecollectionLauncher {
-    override fun launch(data: CvcRecollectionData, appearance: PaymentSheet.Appearance, isLiveMode: Boolean) {
+    override fun launch(data: CvcRecollectionData, appearance: Appearance, isLiveMode: Boolean) {
         activityResultLauncher.launch(
             CvcRecollectionContract.Args(
                 lastFour = data.lastFour ?: "",

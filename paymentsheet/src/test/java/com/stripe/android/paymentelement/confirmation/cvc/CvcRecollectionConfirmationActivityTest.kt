@@ -14,6 +14,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ExtendedPaymentElementConfirmationTestActivity
@@ -23,7 +24,6 @@ import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -196,7 +196,7 @@ internal class CvcRecollectionConfirmationActivityTest {
             ),
             shippingDetails = AddressDetails(),
             intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
         )
 
         const val CVC_RECOLLECTION_ACTIVITY_NAME =

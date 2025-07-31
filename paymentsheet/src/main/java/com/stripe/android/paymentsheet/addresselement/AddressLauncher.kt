@@ -11,9 +11,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -84,7 +84,7 @@ class AddressLauncher internal constructor(
     @Parcelize
     @Poko
     class Configuration @JvmOverloads constructor(
-        internal val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        internal val appearance: Appearance = Appearance(),
         internal val address: AddressDetails? = null,
         internal val allowedCountries: Set<String> = emptySet(),
         internal val buttonTitle: String? = null,
@@ -99,7 +99,7 @@ class AddressLauncher internal constructor(
          * [Configuration] builder for cleaner object creation from Java.
          */
         class Builder {
-            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
+            private var appearance: Appearance = Appearance()
             private var address: AddressDetails? = null
             private var allowedCountries: Set<String> = emptySet()
             private var buttonTitle: String? = null
@@ -109,7 +109,7 @@ class AddressLauncher internal constructor(
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
             private var billingAddress: BillingDetails? = null
 
-            fun appearance(appearance: PaymentSheet.Appearance) =
+            fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
 
             fun address(address: AddressDetails?) =

@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.Appearance.Embedded
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -14,7 +16,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
@@ -35,7 +36,7 @@ internal class DefaultEmbeddedStateHelperTest {
     fun `setting state correctly sets appearance`() = testScenario {
         setState {
             appearance(
-                PaymentSheet.Appearance(
+                Appearance(
                     embeddedAppearance = Embedded(
                         Embedded.RowStyle.FlatWithRadio.default
                     )
@@ -56,7 +57,7 @@ internal class DefaultEmbeddedStateHelperTest {
 
         setState {
             appearance(
-                PaymentSheet.Appearance(
+                Appearance(
                     colorsLight = PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight,
                 )
             )
@@ -70,7 +71,7 @@ internal class DefaultEmbeddedStateHelperTest {
             )
 
         // Reset appearance
-        PaymentSheet.Appearance().parseAppearance()
+        Appearance().parseAppearance()
         embeddedContentHelper.dataLoadedTurbine.awaitItem()
     }
 

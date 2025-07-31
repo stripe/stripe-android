@@ -27,6 +27,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
@@ -297,15 +298,15 @@ internal class PaymentOptionsActivityTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                 .appearance(
-                    PaymentSheet.Appearance(
-                        primaryButton = PaymentSheet.PrimaryButton(
-                            colorsLight = PaymentSheet.PrimaryButtonColors(
+                    Appearance(
+                        primaryButton = Appearance.PrimaryButton(
+                            colorsLight = Appearance.PrimaryButton.Colors(
                                 background = Color.Magenta,
                                 onBackground = Color.Magenta,
                                 border = Color.Magenta
                             ),
-                            shape = PaymentSheet.PrimaryButtonShape(),
-                            typography = PaymentSheet.PrimaryButtonTypography()
+                            shape = Appearance.PrimaryButton.Shape(),
+                            typography = Appearance.PrimaryButton.Typography()
                         )
                     )
                 ).build(),

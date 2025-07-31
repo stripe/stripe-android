@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
@@ -213,14 +214,14 @@ class PaymentSheetConfigurationKtxTest {
                 label = "Merchant, Inc.",
                 buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
             ),
-            appearance = PaymentSheet.Appearance(
-                primaryButton = PaymentSheet.PrimaryButton(
-                    colorsLight = PaymentSheet.PrimaryButtonColors(
+            appearance = Appearance(
+                primaryButton = Appearance.PrimaryButton(
+                    colorsLight = Appearance.PrimaryButton.Colors(
                         background = Color.BLUE,
                         onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
                         border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
                     ),
-                    colorsDark = PaymentSheet.PrimaryButtonColors(
+                    colorsDark = Appearance.PrimaryButton.Colors(
                         background = Color.BLUE,
                         onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                         border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),

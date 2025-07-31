@@ -9,12 +9,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.uicore.StripeTheme
@@ -107,7 +107,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
 
     @Parcelize
     data class PaymentElement(
-        val appearance: PaymentSheet.Appearance
+        val appearance: Appearance
     ) : AutocompleteAppearanceContext {
         override val backgroundColor: Color
             @Composable

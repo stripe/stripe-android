@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.cpms
 import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -244,8 +245,8 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            appearance = PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
+            appearance = Appearance.Builder()
+                .colorsDark(Appearance.Colors.defaultLight)
                 .build(),
             shippingDetails = null,
         )

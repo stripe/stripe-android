@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -351,15 +352,15 @@ class PaymentSelectionUpdaterTest {
                     buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
                 )
             ).appearance(
-                PaymentSheet.Appearance(
-                    colorsLight = PaymentSheet.Colors.defaultDark,
-                    primaryButton = PaymentSheet.PrimaryButton(
-                        colorsLight = PaymentSheet.PrimaryButtonColors(
+                Appearance(
+                    colorsLight = Appearance.Colors.defaultDark,
+                    primaryButton = Appearance.PrimaryButton(
+                        colorsLight = Appearance.PrimaryButton.Colors(
                             background = Color.BLACK,
                             onBackground = StripeThemeDefaults.primaryButtonStyle.colorsLight.onBackground.toArgb(),
                             border = StripeThemeDefaults.primaryButtonStyle.colorsLight.border.toArgb(),
                         ),
-                        colorsDark = PaymentSheet.PrimaryButtonColors(
+                        colorsDark = Appearance.PrimaryButton.Colors(
                             background = Color.BLACK,
                             onBackground = StripeThemeDefaults.primaryButtonStyle.colorsDark.onBackground.toArgb(),
                             border = StripeThemeDefaults.primaryButtonStyle.colorsDark.border.toArgb(),

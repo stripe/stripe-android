@@ -16,6 +16,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -302,7 +303,7 @@ internal class GooglePayConfirmationActivityTest {
             ),
             shippingDetails = AddressDetails(),
             intent = PAYMENT_INTENT,
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
         )
 
         const val GOOGLE_PAY_ACTIVITY_NAME =

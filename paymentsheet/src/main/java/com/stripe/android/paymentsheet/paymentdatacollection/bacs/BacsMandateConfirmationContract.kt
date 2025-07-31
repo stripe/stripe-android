@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import kotlinx.parcelize.Parcelize
 
 internal class BacsMandateConfirmationContract :
@@ -29,7 +29,7 @@ internal class BacsMandateConfirmationContract :
         val nameOnAccount: String,
         val sortCode: String,
         val accountNumber: String,
-        val appearance: PaymentSheet.Appearance
+        val appearance: Appearance
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

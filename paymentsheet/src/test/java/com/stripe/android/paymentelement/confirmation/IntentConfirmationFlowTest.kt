@@ -5,6 +5,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -326,7 +327,7 @@ internal class IntentConfirmationFlowTest {
                 name = "John Doe",
                 phoneNumber = "1234567890"
             ),
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
         )
     }
 
@@ -374,7 +375,7 @@ internal class IntentConfirmationFlowTest {
                 name = "John Doe",
                 phoneNumber = "1234567890"
             ),
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
         )
     }
 }

@@ -8,8 +8,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -39,8 +39,8 @@ internal object AppearanceStore {
         val iconStyle: IconStyle = IconStyle.Filled,
     ) {
         @OptIn(AppearanceAPIAdditionsPreview::class)
-        fun toPaymentSheetAppearance(): PaymentSheet.Appearance {
-            return PaymentSheet.Appearance.Builder()
+        fun toPaymentSheetAppearance(): Appearance {
+            return Appearance.Builder()
                 .colorsLight(colorsLight.build())
                 .colorsDark(colorsDark.build())
                 .shapes(shapes.build())
@@ -67,7 +67,7 @@ internal object AppearanceStore {
 
         @OptIn(AppearanceAPIAdditionsPreview::class)
         sealed interface SectionSpacing : Parcelable {
-            fun getPaymentSheetSpacing(): PaymentSheet.Spacing?
+            fun getPaymentSheetSpacing(): Appearance.Spacing?
 
             @Serializable
             @Parcelize
@@ -80,8 +80,8 @@ internal object AppearanceStore {
             data class Custom(
                 val spacingDp: Float = 8f,
             ) : SectionSpacing {
-                override fun getPaymentSheetSpacing(): PaymentSheet.Spacing {
-                    return PaymentSheet.Spacing(
+                override fun getPaymentSheetSpacing(): Appearance.Spacing {
+                    return Appearance.Spacing(
                         spacingDp = spacingDp
                     )
                 }
@@ -89,7 +89,7 @@ internal object AppearanceStore {
         }
 
         sealed interface Insets : Parcelable {
-            fun getPaymentSheetInsets(): PaymentSheet.Insets?
+            fun getPaymentSheetInsets(): Appearance.Insets?
 
             @Serializable
             @Parcelize
@@ -105,8 +105,8 @@ internal object AppearanceStore {
                 val end: Float,
                 val bottom: Float
             ) : Insets {
-                override fun getPaymentSheetInsets(): PaymentSheet.Insets {
-                    return PaymentSheet.Insets(
+                override fun getPaymentSheetInsets(): Appearance.Insets {
+                    return Appearance.Insets(
                         startDp = start,
                         endDp = end,
                         topDp = top,
@@ -164,10 +164,10 @@ internal object AppearanceStore {
             }
 
             @OptIn(AppearanceAPIAdditionsPreview::class)
-            fun getEmbeddedAppearance(): PaymentSheet.Appearance.Embedded {
+            fun getEmbeddedAppearance(): Appearance.Embedded {
                 // paymentMethodIconMargins will override defaults so only init if set in playground
                 val insets = if (horizontalPaymentMethodIconMargin != null || verticalPaymentMethodIconMargin != null) {
-                    PaymentSheet.Insets(
+                    Appearance.Insets(
                         horizontalDp = horizontalPaymentMethodIconMargin ?: 0f,
                         verticalDp = verticalPaymentMethodIconMargin ?: 0f
                     )
@@ -175,7 +175,7 @@ internal object AppearanceStore {
                     null
                 }
 
-                return PaymentSheet.Appearance.Embedded.Builder()
+                return Appearance.Embedded.Builder()
                     .rowStyle(getRow())
                     .paymentMethodIconMargins(insets)
                     .titleFont(titleFont?.build())
@@ -185,9 +185,9 @@ internal object AppearanceStore {
 
             @OptIn(AppearanceAPIAdditionsPreview::class)
             @Suppress("LongMethod")
-            private fun getRow(): PaymentSheet.Appearance.Embedded.RowStyle {
+            private fun getRow(): Appearance.Embedded.RowStyle {
                 return when (embeddedRowStyle) {
-                    Row.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Builder()
+                    Row.FlatWithRadio -> Appearance.Embedded.RowStyle.FlatWithRadio.Builder()
                         .separatorThicknessDp(separatorThicknessDp)
                         .startSeparatorInsetDp(startSeparatorInset)
                         .endSeparatorInsetDp(endSeparatorInset)
@@ -196,21 +196,21 @@ internal object AppearanceStore {
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                            Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
                                 separatorColor = separatorColor,
                                 selectedColor = selectedColor,
                                 unselectedColor = unselectedColor
                             )
                         )
                         .colorsDark(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                            Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
                                 separatorColor = Color(0x40FFFFFF).toArgb(),
                                 selectedColor = Color(0xFF0074D4).toArgb(),
                                 unselectedColor = Color(0x40FFFFFF).toArgb(),
                             )
                         )
                         .build()
-                    Row.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Builder()
+                    Row.FlatWithCheckmark -> Appearance.Embedded.RowStyle.FlatWithCheckmark.Builder()
                         .separatorThicknessDp(separatorThicknessDp)
                         .startSeparatorInsetDp(startSeparatorInset)
                         .endSeparatorInsetDp(endSeparatorInset)
@@ -220,19 +220,19 @@ internal object AppearanceStore {
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                            Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
                                 separatorColor = separatorColor,
                                 checkmarkColor = checkmarkColor
                             )
                         )
                         .colorsDark(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                            Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
                                 separatorColor = Color(0x40FFFFFF).toArgb(),
                                 checkmarkColor = Color(0xFF0074D4).toArgb()
                             )
                         )
                         .build()
-                    Row.FlatWithDisclosure -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Builder()
+                    Row.FlatWithDisclosure -> Appearance.Embedded.RowStyle.FlatWithDisclosure.Builder()
                         .separatorThicknessDp(separatorThicknessDp)
                         .startSeparatorInsetDp(startSeparatorInset)
                         .endSeparatorInsetDp(endSeparatorInset)
@@ -241,20 +241,20 @@ internal object AppearanceStore {
                         .additionalVerticalInsetsDp(additionalVerticalInsetsDp)
                         .horizontalInsetsDp(horizontalInsetsDp)
                         .colorsLight(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
+                            Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
                                 separatorColor = separatorColor,
                                 disclosureColor = disclosureColor
                             )
                         )
                         .colorsDark(
-                            PaymentSheet.Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
+                            Appearance.Embedded.RowStyle.FlatWithDisclosure.Colors(
                                 separatorColor = Color(0x40FFFFFF).toArgb(),
                                 disclosureColor = Color.LightGray.toArgb()
                             )
                         )
                         .disclosureIconRes(disclosureIconRes)
                         .build()
-                    Row.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder()
+                    Row.FloatingButton -> Appearance.Embedded.RowStyle.FloatingButton.Builder()
                         .spacingDp(floatingButtonSpacingDp)
                         .additionalInsetsDp(additionalVerticalInsetsDp)
                         .build()
@@ -267,10 +267,10 @@ internal object AppearanceStore {
             Filled,
             Outlined;
 
-            fun toPaymentSheetIconStyle(): PaymentSheet.IconStyle {
+            fun toPaymentSheetIconStyle(): Appearance.IconStyle {
                 return when (this) {
-                    Filled -> PaymentSheet.IconStyle.Filled
-                    Outlined -> PaymentSheet.IconStyle.Outlined
+                    Filled -> Appearance.IconStyle.Filled
+                    Outlined -> Appearance.IconStyle.Outlined
                 }
             }
         }
@@ -288,7 +288,7 @@ internal object AppearanceStore {
             @ColorInt val appBarIcon: Int,
             @ColorInt val error: Int,
         ) {
-            fun build(): PaymentSheet.Colors = PaymentSheet.Colors(
+            fun build(): Appearance.Colors = Appearance.Colors(
                 primary = primary,
                 surface = surface,
                 component = component,
@@ -340,7 +340,7 @@ internal object AppearanceStore {
             val fontResId: Int? = StripeThemeDefaults.typography.fontFamily,
             val custom: Custom = Custom(),
         ) {
-            fun build(): PaymentSheet.Typography = PaymentSheet.Typography(
+            fun build(): Appearance.Typography = Appearance.Typography(
                 sizeScaleFactor = sizeScaleFactor,
                 fontResId = fontResId,
                 custom = custom.build()
@@ -349,7 +349,7 @@ internal object AppearanceStore {
             data class Custom(
                 val h1: Font? = null,
             ) {
-                fun build(): PaymentSheet.Typography.Custom = PaymentSheet.Typography.Custom(
+                fun build(): Appearance.Typography.Custom = Appearance.Typography.Custom(
                     h1 = h1?.build()
                 )
             }
@@ -363,7 +363,7 @@ internal object AppearanceStore {
                 val fontWeight: Int? = null,
                 val letterSpacingSp: Float? = null,
             ) : Parcelable {
-                fun build(): PaymentSheet.Typography.Font = PaymentSheet.Typography.Font(
+                fun build(): Appearance.Typography.Font = Appearance.Typography.Font(
                     fontFamily = fontFamily,
                     fontSizeSp = fontSizeSp,
                     fontWeight = fontWeight,
@@ -378,7 +378,7 @@ internal object AppearanceStore {
             val bottomSheetCornerRadiusDp: Float = cornerRadiusDp,
         ) {
             @OptIn(AppearanceAPIAdditionsPreview::class)
-            fun build(): PaymentSheet.Shapes = PaymentSheet.Shapes(
+            fun build(): Appearance.Shapes = Appearance.Shapes(
                 cornerRadiusDp = cornerRadiusDp,
                 borderStrokeWidthDp = borderStrokeWidthDp,
                 bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp,
@@ -403,7 +403,7 @@ internal object AppearanceStore {
             val shape: PrimaryButtonShape = PrimaryButtonShape(),
             val typography: PrimaryButtonTypography = PrimaryButtonTypography(),
         ) {
-            fun build(): PaymentSheet.PrimaryButton = PaymentSheet.PrimaryButton(
+            fun build(): Appearance.PrimaryButton = Appearance.PrimaryButton(
                 colorsLight = colorsLight.build(),
                 colorsDark = colorsDark.build(),
                 shape = shape.build(),
@@ -416,10 +416,11 @@ internal object AppearanceStore {
             val fontResId: Int? = null,
             val fontSizeSp: Float? = null,
         ) {
-            fun build(): PaymentSheet.PrimaryButtonTypography = PaymentSheet.PrimaryButtonTypography(
-                fontResId = fontResId,
-                fontSizeSp = fontSizeSp,
-            )
+            fun build(): Appearance.PrimaryButton.Typography =
+                Appearance.PrimaryButton.Typography(
+                    fontResId = fontResId,
+                    fontSizeSp = fontSizeSp,
+                )
         }
 
         data class PrimaryButtonColors(
@@ -434,7 +435,7 @@ internal object AppearanceStore {
             @ColorInt
             val onSuccessBackgroundColor: Int = onBackground,
         ) {
-            fun build(): PaymentSheet.PrimaryButtonColors = PaymentSheet.PrimaryButtonColors(
+            fun build(): Appearance.PrimaryButton.Colors = Appearance.PrimaryButton.Colors(
                 background = background,
                 onBackground = onBackground,
                 border = border,
@@ -448,7 +449,7 @@ internal object AppearanceStore {
             val borderStrokeWidthDp: Float? = null,
             val heightDp: Float? = null
         ) {
-            fun build(): PaymentSheet.PrimaryButtonShape = PaymentSheet.PrimaryButtonShape(
+            fun build(): Appearance.PrimaryButton.Shape = Appearance.PrimaryButton.Shape(
                 cornerRadiusDp = cornerRadiusDp,
                 borderStrokeWidthDp = borderStrokeWidthDp,
                 heightDp = heightDp,

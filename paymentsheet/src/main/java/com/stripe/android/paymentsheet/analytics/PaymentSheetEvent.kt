@@ -7,6 +7,7 @@ import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -175,7 +176,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class Init(
         private val mode: EventReporter.Mode,
         private val configuration: CommonConfiguration,
-        private val appearance: PaymentSheet.Appearance,
+        private val appearance: Appearance,
         private val primaryButtonColor: Boolean?,
         private val configurationSpecificPayload: ConfigurationSpecificPayload,
         override val linkEnabled: Boolean,

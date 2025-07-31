@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract.EXTRA_ARGS
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,8 +17,8 @@ class AutocompleteContractTest {
     @Test
     fun `on create intent with PE context, should have expected extras`() = testCreateIntent(
         appearanceContext = AutocompleteAppearanceContext.PaymentElement(
-            PaymentSheet.Appearance.Builder()
-                .colorsDark(PaymentSheet.Colors.defaultLight)
+            Appearance.Builder()
+                .colorsDark(Appearance.Colors.defaultLight)
                 .build()
         ),
     )

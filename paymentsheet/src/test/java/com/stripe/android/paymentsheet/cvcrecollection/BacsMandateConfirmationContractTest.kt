@@ -4,7 +4,7 @@ import android.content.Intent
 import androidx.core.os.BundleCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Appearance
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
@@ -23,7 +23,7 @@ class BacsMandateConfirmationContractTest {
             email = "",
             nameOnAccount = "",
             accountNumber = "",
-            appearance = PaymentSheet.Appearance(),
+            appearance = Appearance(),
             sortCode = ""
         )
 

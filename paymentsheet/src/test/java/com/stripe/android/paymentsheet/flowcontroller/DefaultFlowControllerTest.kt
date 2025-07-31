@@ -18,6 +18,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -1917,8 +1918,8 @@ internal class DefaultFlowControllerTest {
     fun `Confirms Bacs with correct confirmation option`() = confirmationTest {
         val flowController = createFlowController()
 
-        val appearance = PaymentSheet.Appearance.Builder()
-            .colorsDark(PaymentSheet.Colors.defaultLight)
+        val appearance = Appearance.Builder()
+            .colorsDark(Appearance.Colors.defaultLight)
             .build()
 
         flowController.configureExpectingSuccess(

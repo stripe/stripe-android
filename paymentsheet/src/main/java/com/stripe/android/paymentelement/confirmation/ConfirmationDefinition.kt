@@ -4,9 +4,9 @@ import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
@@ -132,7 +132,7 @@ internal interface ConfirmationDefinition<
          * The user-defined appearance values that can be passed to confirmation flows in order to style themselves
          * based on the user's appearance value choices (ie. CVC recollection sheet or Bacs mandate sheet).
          */
-        val appearance: PaymentSheet.Appearance,
+        val appearance: Appearance,
         /**
          * The mode that the Payment Element was initialized with (PaymentIntent, SetupIntent, DeferredIntent).
          */

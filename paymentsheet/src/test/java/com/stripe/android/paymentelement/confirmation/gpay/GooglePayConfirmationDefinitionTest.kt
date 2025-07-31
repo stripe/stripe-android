@@ -6,6 +6,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -627,8 +628,8 @@ class GooglePayConfirmationDefinitionTest {
 
         private val PAYMENT_INTENT = PaymentIntentFactory.create()
 
-        private val APPEARANCE = PaymentSheet.Appearance.Builder()
-            .colorsDark(PaymentSheet.Colors.defaultLight)
+        private val APPEARANCE = Appearance.Builder()
+            .colorsDark(Appearance.Colors.defaultLight)
             .build()
 
         private val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

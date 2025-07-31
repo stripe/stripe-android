@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Appearance
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalMode
 import com.stripe.android.paymentsheet.parseAppearance
@@ -207,7 +207,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     private data class AdditionalPaddingAppearance(
         val verticalModeRowPadding: Float,
     ) : PaparazziConfigOption {
-        val appearance = PaymentSheet.Appearance.Builder()
+        val appearance = Appearance.Builder()
             .verticalModeRowPadding(verticalModeRowPadding)
             .build()
 

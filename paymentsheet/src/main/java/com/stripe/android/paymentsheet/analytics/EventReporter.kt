@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.elements.Appearance
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -22,7 +23,7 @@ internal interface EventReporter {
      */
     fun onInit(
         commonConfiguration: CommonConfiguration,
-        appearance: PaymentSheet.Appearance,
+        appearance: Appearance,
         primaryButtonColor: Boolean?,
         configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean,
