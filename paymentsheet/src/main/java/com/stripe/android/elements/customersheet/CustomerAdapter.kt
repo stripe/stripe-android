@@ -1,4 +1,4 @@
-package com.stripe.android.customersheet
+package com.stripe.android.elements.customersheet
 
 import android.content.Context
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent

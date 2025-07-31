@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.customersheet
 
-import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.PaymentOptionSelection
+import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 
 sealed class CustomerSheetExampleViewState {
     object Loading : CustomerSheetExampleViewState()

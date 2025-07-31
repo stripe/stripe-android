@@ -13,13 +13,12 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent

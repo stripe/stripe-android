@@ -1,10 +1,10 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
+import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior

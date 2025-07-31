@@ -6,8 +6,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.elements.customersheet.CustomerAdapter
+import com.stripe.android.elements.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.elements.customersheet.CustomerEphemeralKey
+import com.stripe.android.elements.customersheet.CustomerEphemeralKeyProvider
+import com.stripe.android.elements.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
