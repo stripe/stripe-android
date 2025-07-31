@@ -1,13 +1,12 @@
-package com.stripe.android.customersheet
+package com.stripe.android.elements.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.elements.CustomerSessionApiPreview
-import com.stripe.android.elements.customersheet.CustomerAdapter
-import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.customersheet.CustomerSheet.ResultCallback
 import com.stripe.android.utils.rememberActivity
 

@@ -12,11 +12,6 @@ public final class com/stripe/android/common/ui/ComposableSingletons$InlineConte
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/customersheet/CustomerSheetComposeKt {
-	public static final fun rememberCustomerSheet (Lcom/stripe/android/elements/customersheet/CustomerAdapter;Lcom/stripe/android/elements/customersheet/CustomerSheet$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/elements/customersheet/CustomerSheet;
-	public static final fun rememberCustomerSheet (Lcom/stripe/android/elements/customersheet/CustomerSheet$CustomerSessionProvider;Lcom/stripe/android/elements/customersheet/CustomerSheet$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/elements/customersheet/CustomerSheet;
-}
-
 public final class com/stripe/android/customersheet/CustomerSheetConfigureRequest$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/customersheet/CustomerSheetConfigureRequest;
@@ -1161,6 +1156,11 @@ public final class com/stripe/android/elements/customersheet/CustomerSheet$Resul
 
 public abstract interface class com/stripe/android/elements/customersheet/CustomerSheet$ResultCallback {
 	public abstract fun onCustomerSheetResult (Lcom/stripe/android/elements/customersheet/CustomerSheet$Result;)V
+}
+
+public final class com/stripe/android/elements/customersheet/CustomerSheetComposeKt {
+	public static final fun rememberCustomerSheet (Lcom/stripe/android/elements/customersheet/CustomerAdapter;Lcom/stripe/android/elements/customersheet/CustomerSheet$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/elements/customersheet/CustomerSheet;
+	public static final fun rememberCustomerSheet (Lcom/stripe/android/elements/customersheet/CustomerSheet$CustomerSessionProvider;Lcom/stripe/android/elements/customersheet/CustomerSheet$ResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/elements/customersheet/CustomerSheet;
 }
 
 public abstract class com/stripe/android/elements/customersheet/PaymentOptionSelection {

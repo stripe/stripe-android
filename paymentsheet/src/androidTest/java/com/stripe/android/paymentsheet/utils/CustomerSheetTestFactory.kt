@@ -6,7 +6,7 @@ import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.customersheet.CustomerSheet.ResultCallback
-import com.stripe.android.customersheet.rememberCustomerSheet
+import com.stripe.android.elements.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.CustomerSessionApiPreview
 
 @OptIn(CustomerSessionApiPreview::class)

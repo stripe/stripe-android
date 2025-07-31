@@ -51,11 +51,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.rememberAddressLauncher
