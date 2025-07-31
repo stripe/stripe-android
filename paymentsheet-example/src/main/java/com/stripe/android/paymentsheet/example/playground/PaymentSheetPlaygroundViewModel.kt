@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
@@ -29,7 +30,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
@@ -229,12 +229,12 @@ internal class PaymentSheetPlaygroundViewModel(
                     .awaitModel(CustomerEphemeralKeyResponse.serializer())
 
                 return when (apiResponse) {
-                    is Result.Failure -> {
+                    is com.github.kittinunf.result.Result.Failure -> {
                         val exception = apiResponse.getException()
 
                         kotlin.Result.failure(exception)
                     }
-                    is Result.Success -> {
+                    is com.github.kittinunf.result.Result.Success -> {
                         val response = apiResponse.value
 
                         // Init PaymentConfiguration with the publishable key returned from the backend,
@@ -279,8 +279,9 @@ internal class PaymentSheetPlaygroundViewModel(
                     .awaitModel(CreateSetupIntentResponse.serializer())
 
                 return when (apiResponse) {
-                    is Result.Failure -> kotlin.Result.failure(apiResponse.getException())
-                    is Result.Success -> kotlin.Result.success(apiResponse.value.clientSecret)
+                    is com.github.kittinunf.result.Result.Failure -> kotlin.Result.failure(apiResponse.getException())
+                    is com.github.kittinunf.result.Result.Success ->
+                        kotlin.Result.success(apiResponse.value.clientSecret)
                 }
             }
         }
@@ -296,7 +297,7 @@ internal class PaymentSheetPlaygroundViewModel(
             .awaitModel(CustomerEphemeralKeyResponse.serializer())
 
         return when (apiResponse) {
-            is Result.Failure -> {
+            is com.github.kittinunf.result.Result.Failure -> {
                 val exception = apiResponse.getException()
 
                 CustomerAdapter.Result.failure(
@@ -304,7 +305,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     displayMessage = "Failed to fetch ephemeral key:\n${exception.message}"
                 )
             }
-            is Result.Success -> {
+            is com.github.kittinunf.result.Result.Success -> {
                 val response = apiResponse.value
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
@@ -357,7 +358,7 @@ internal class PaymentSheetPlaygroundViewModel(
             .awaitModel(CreateSetupIntentResponse.serializer())
 
         return when (apiResponse) {
-            is Result.Failure -> {
+            is com.github.kittinunf.result.Result.Failure -> {
                 val exception = apiResponse.getException()
 
                 CustomerAdapter.Result.failure(
@@ -365,7 +366,8 @@ internal class PaymentSheetPlaygroundViewModel(
                     displayMessage = "Failed to fetch setup intent secret:\n${exception.message}"
                 )
             }
-            is Result.Success -> CustomerAdapter.Result.success(apiResponse.value.clientSecret)
+            is com.github.kittinunf.result.Result.Success ->
+                CustomerAdapter.Result.success(apiResponse.value.clientSecret)
         }
     }
 
@@ -575,7 +577,7 @@ internal class PaymentSheetPlaygroundViewModel(
             .suspendable()
             .awaitModel(ConfirmIntentResponse.serializer())
         val createIntentResult = when (result) {
-            is Result.Failure -> {
+            is com.github.kittinunf.result.Result.Failure -> {
                 val message = "Creating intent failed:\n${result.getException().message}"
                 status.value = StatusMessage(message)
 
@@ -591,7 +593,7 @@ internal class PaymentSheetPlaygroundViewModel(
                 )
             }
 
-            is Result.Success -> {
+            is com.github.kittinunf.result.Result.Success -> {
                 CreateIntentResult.Success(
                     clientSecret = result.value.clientSecret,
                 )
@@ -600,13 +602,13 @@ internal class PaymentSheetPlaygroundViewModel(
         return createIntentResult
     }
 
-    fun onAddressLauncherResult(addressLauncherResult: AddressLauncherResult) {
+    fun onAddressLauncherResult(addressLauncherResult: AddressLauncher.Result) {
         when (addressLauncherResult) {
-            is AddressLauncherResult.Canceled -> {
+            is AddressLauncher.Result.Canceled -> {
                 status.value = StatusMessage("Canceled")
             }
 
-            is AddressLauncherResult.Succeeded -> {
+            is AddressLauncher.Result.Succeeded -> {
                 val addressDetails = addressLauncherResult.address
                 playgroundSettingsFlow.value?.set(ShippingAddressSettingsDefinition, addressDetails)
                 flowControllerState.update { it?.copy(addressDetails = addressDetails) }

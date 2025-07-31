@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet.addresselement
+package com.stripe.android.elements
 
+import android.app.Activity
 import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
@@ -10,10 +11,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.elements.AddressDetails
-import com.stripe.android.elements.Appearance
-import com.stripe.android.elements.BillingDetails
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
+import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
@@ -33,7 +33,7 @@ class AddressLauncher internal constructor(
      */
     constructor(
         activity: ComponentActivity,
-        callback: AddressLauncherResultCallback
+        callback: ResultCallback
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
@@ -51,7 +51,7 @@ class AddressLauncher internal constructor(
      */
     constructor(
         fragment: Fragment,
-        callback: AddressLauncherResultCallback
+        callback: ResultCallback
     ) : this(
         application = fragment.requireActivity().application,
         activityResultLauncher = fragment.registerForActivityResult(
@@ -181,6 +181,36 @@ class AddressLauncher internal constructor(
             REQUIRED
         }
     }
+
+    sealed class Result : Parcelable {
+
+        internal abstract val resultCode: Int
+
+        @Parcelize
+        @Poko
+        class Succeeded internal constructor(
+            val address: AddressDetails
+        ) : Result() {
+            override val resultCode: Int
+                get() = Activity.RESULT_OK
+        }
+
+        @Parcelize
+        @Poko
+        class Canceled internal constructor(
+            @Suppress("unused") private val irrelevantValueForGeneratedCode: Boolean = true
+        ) : Result() {
+            override val resultCode: Int
+                get() = Activity.RESULT_CANCELED
+        }
+    }
+
+    /**
+     * Callback that is invoked when a [AddressLauncher.Result] is available.
+     */
+    fun interface ResultCallback {
+        fun onAddressLauncherResult(addressLauncherResult: AddressLauncher.Result)
+    }
 }
 
 /**
@@ -189,7 +219,7 @@ class AddressLauncher internal constructor(
  */
 @Composable
 fun rememberAddressLauncher(
-    callback: AddressLauncherResultCallback
+    callback: AddressLauncher.ResultCallback
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
         contract = AddressElementActivityContract,

@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.toIdentifierMap
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -194,7 +195,7 @@ internal class InputAddressViewModel @Inject constructor(
             )
         }
         navigator.dismiss(
-            AddressLauncherResult.Succeeded(addressDetails)
+            AddressLauncher.Result.Succeeded(addressDetails)
         )
     }
 

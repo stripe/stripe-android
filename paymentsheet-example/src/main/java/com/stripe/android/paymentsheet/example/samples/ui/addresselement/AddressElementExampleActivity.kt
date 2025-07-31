@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.elements.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
+import com.stripe.android.elements.AddressLauncher
+import com.stripe.android.elements.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.Settings
 

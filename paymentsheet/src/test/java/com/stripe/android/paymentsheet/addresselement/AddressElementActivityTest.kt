@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.AddressLauncher
+import com.stripe.android.elements.AddressLauncher.Result
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -18,7 +20,7 @@ internal class AddressElementActivityTest {
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             val result = AddressElementActivityContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isEqualTo(AddressLauncherResult.Canceled())
+            assertThat(result).isEqualTo(AddressLauncher.Result.Canceled())
         }
     }
 }
