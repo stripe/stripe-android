@@ -11,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkController.AuthenticationResult
 import com.stripe.android.link.account.LinkAccountHolder
@@ -31,7 +32,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.utils.flatMapCatching
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Job

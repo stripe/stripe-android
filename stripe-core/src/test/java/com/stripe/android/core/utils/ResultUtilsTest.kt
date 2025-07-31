@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.utils
+package com.stripe.android.core.utils
 
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
