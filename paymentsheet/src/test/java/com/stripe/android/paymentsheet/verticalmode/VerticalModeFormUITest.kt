@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -17,7 +18,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
@@ -169,7 +169,7 @@ internal class VerticalModeFormUITest {
                 amount = Amount(1000, "USD"),
                 billingDetails = null,
                 shippingDetails = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 hasIntentToSetup = false,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
@@ -198,7 +198,7 @@ internal class VerticalModeFormUITest {
                 amount = Amount(1000, "USD"),
                 billingDetails = null,
                 shippingDetails = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 hasIntentToSetup = false,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
@@ -231,7 +231,7 @@ internal class VerticalModeFormUITest {
                 amount = Amount(1000, "USD"),
                 billingDetails = null,
                 shippingDetails = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 hasIntentToSetup = false,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),

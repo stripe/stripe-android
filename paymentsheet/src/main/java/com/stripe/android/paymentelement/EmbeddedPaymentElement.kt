@@ -18,6 +18,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
@@ -227,7 +228,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val allowsPaymentMethodsRequiringShippingAddress: Boolean,
         internal val appearance: PaymentSheet.Appearance,
         internal val primaryButtonLabel: String?,
-        internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        internal val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
         internal val preferredNetworks: List<CardBrand>,
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean,
         internal val paymentMethodOrder: List<String>,
@@ -356,7 +357,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * you **must** provide an appropriate value as part of [defaultBillingDetails].
              */
             fun billingDetailsCollectionConfiguration(
-                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
             ) = apply {
                 this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
             }

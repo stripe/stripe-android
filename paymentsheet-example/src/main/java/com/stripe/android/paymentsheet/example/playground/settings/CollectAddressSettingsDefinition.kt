@@ -5,7 +5,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode as CollectionMode
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode as CollectionMode
 
 internal object CollectAddressSettingsDefinition :
     PlaygroundSettingDefinition<CollectionMode>,

@@ -5,9 +5,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmptyFormElement
@@ -30,11 +30,11 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns all required billing fields`() {
         val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
         val formElements = FormElementsBuilder(arguments).build()
@@ -65,11 +65,11 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns no billing fields if specified as never`() {
         val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             )
         )
         val formElements = FormElementsBuilder(arguments)
@@ -103,8 +103,8 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns no billing address fields if ignored`() {
         val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
         val formElements = FormElementsBuilder(arguments)
@@ -118,10 +118,10 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns no contact information fields if ignored`() {
         val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         )
         val formElements = FormElementsBuilder(arguments)
@@ -135,8 +135,8 @@ class FormElementsBuilderTest {
     @Test
     fun `build should return AutocompleteAddressElement if factory is provided`() = runTest {
         val arguments = arguments(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
             autocompleteAddressInteractorFactory = {
                 TestAutocompleteAddressInteractor.noOp()
@@ -155,8 +155,8 @@ class FormElementsBuilderTest {
     }
 
     private fun arguments(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()

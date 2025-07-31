@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import junit.framework.TestCase.fail
@@ -18,8 +19,8 @@ class CustomerSheetConfigurationTest {
         val appearance = PaymentSheet.Appearance.Builder()
             .typography(PaymentSheet.Typography.default)
             .build()
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        val billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            name = BillingDetailsCollectionConfiguration.CollectionMode.Always
         )
         val defaultBillingDetails = BillingDetails(
             name = "Test"

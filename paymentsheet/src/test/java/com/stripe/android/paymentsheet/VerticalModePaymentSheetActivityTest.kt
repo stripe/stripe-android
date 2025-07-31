@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
@@ -136,8 +137,8 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `When the payment intent only has one LPM it launches directly into the form`() = runTest(
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+            email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
         ),
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
@@ -525,7 +526,7 @@ internal class VerticalModePaymentSheetActivityTest {
     private fun runTest(
         primaryButtonLabel: String? = null,
         customer: CustomerConfiguration? = null,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration? = null,
         cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },

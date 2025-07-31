@@ -2,12 +2,12 @@ package com.stripe.android.link.utils
 
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.PaymentDetails
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 
 /**
  * Returns the effective billing details, which refers to billing details that have been
@@ -35,7 +35,7 @@ internal fun effectiveBillingDetails(
  * Returns true if the payment method has all required billing details based on the configuration.
  */
 internal fun PaymentDetails.supports(
-    billingDetailsConfig: PaymentSheet.BillingDetailsCollectionConfiguration,
+    billingDetailsConfig: BillingDetailsCollectionConfiguration,
     linkAccount: LinkAccount
 ): Boolean = when (this) {
     is ConsumerPaymentDetails.BankAccount,

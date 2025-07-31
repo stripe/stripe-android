@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.BillingDetails
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
@@ -112,8 +112,8 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
                     name = "CustomerSheet Testing"
                 )
             ).billingDetailsCollectionConfiguration(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                BillingDetailsCollectionConfiguration(
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always
                 )
             )
             .googlePayEnabled(true)

@@ -6,6 +6,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -343,10 +344,10 @@ class GooglePayConfirmationDefinitionTest {
                     merchantName = "Another merchant Inc.",
                     merchantCountryCode = "CA",
                     environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                     ),
                     cardBrandFilter = FakeCardBrandFilter,
                 )
@@ -366,7 +367,7 @@ class GooglePayConfirmationDefinitionTest {
         runLaunchParametersTest(
             confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                    billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 )
             ),
             merchantNameShouldBe = "Test merchant Inc.",
@@ -617,8 +618,8 @@ class GooglePayConfirmationDefinitionTest {
                 merchantCurrencyCode = "CA",
                 customAmount = 1099,
                 customLabel = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             )

@@ -19,6 +19,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -2531,9 +2532,9 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
                 .billingDetailsCollectionConfiguration(
-                    PaymentSheet.BillingDetailsCollectionConfiguration(
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    BillingDetailsCollectionConfiguration(
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
                     )
                 )
                 .build()
@@ -2566,8 +2567,8 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
                 .billingDetailsCollectionConfiguration(
-                    PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     )
                 )
                 .build()
@@ -2593,9 +2594,9 @@ internal class PaymentSheetViewModelTest {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.newBuilder()
                 .billingDetailsCollectionConfiguration(
-                    PaymentSheet.BillingDetailsCollectionConfiguration(
-                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                    BillingDetailsCollectionConfiguration(
+                        phone = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        email = BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
                     )
                 )
                 .googlePay(
@@ -2628,8 +2629,8 @@ internal class PaymentSheetViewModelTest {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.newBuilder()
                 .billingDetailsCollectionConfiguration(
-                    PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    BillingDetailsCollectionConfiguration(
+                        address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                     )
                 )
                 .googlePay(

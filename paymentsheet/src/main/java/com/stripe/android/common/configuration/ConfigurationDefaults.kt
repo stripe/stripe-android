@@ -2,6 +2,7 @@ package com.stripe.android.common.configuration
 
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
@@ -14,8 +15,8 @@ internal object ConfigurationDefaults {
     const val allowsRemovalOfLastSavedPaymentMethod: Boolean = true
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
     val billingDetails: BillingDetails = BillingDetails()
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-        PaymentSheet.BillingDetailsCollectionConfiguration()
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+        BillingDetailsCollectionConfiguration()
     val customer: CustomerConfiguration? = null
     val googlePay: PaymentSheet.GooglePayConfiguration? = null
     val link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration()

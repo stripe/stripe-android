@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.paymentdatacollection
 
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -18,8 +18,8 @@ internal data class FormArguments(
     val shippingDetails: AddressDetails? = null,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val hasIntentToSetup: Boolean,
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-        PaymentSheet.BillingDetailsCollectionConfiguration(),
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+        BillingDetailsCollectionConfiguration(),
 ) {
     val defaultFormValues by lazy {
         mutableMapOf<IdentifierSpec, String>().apply {

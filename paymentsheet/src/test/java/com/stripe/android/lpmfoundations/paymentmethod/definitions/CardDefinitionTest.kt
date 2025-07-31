@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -15,7 +16,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.state.LinkState
@@ -38,8 +38,8 @@ class CardDefinitionTest {
     fun `createFormElements returns minimal set of fields`() {
         val formElements = CardDefinition.formElements(
             PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 )
             )
         )
@@ -59,11 +59,11 @@ class CardDefinitionTest {
     fun `createFormElements returns requested billing details fields`() {
         val formElements = CardDefinition.formElements(
             PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    name = BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 )
             )
         )
@@ -291,8 +291,8 @@ class CardDefinitionTest {
     fun `createFormElements should have autocomplete element if factory is used`() {
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 )
             ),
             autocompleteAddressInteractorFactory = {
@@ -356,8 +356,8 @@ class CardDefinitionTest {
     ): List<FormElement> {
         return CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 ),
                 hasCustomerConfiguration = true,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,

@@ -15,16 +15,15 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -2342,138 +2341,6 @@ class PaymentSheet internal constructor(
                 endDp = StripeThemeDefaults.textFieldInsets.end,
                 bottomDp = StripeThemeDefaults.textFieldInsets.bottom,
             )
-        }
-    }
-
-    /**
-     * Configuration for how billing details are collected during checkout.
-     */
-    @Parcelize
-    @Poko
-    class BillingDetailsCollectionConfiguration(
-        /**
-         * How to collect the name field.
-         */
-        internal val name: CollectionMode = CollectionMode.Automatic,
-
-        /**
-         * How to collect the phone field.
-         */
-        internal val phone: CollectionMode = CollectionMode.Automatic,
-
-        /**
-         * How to collect the email field.
-         */
-        internal val email: CollectionMode = CollectionMode.Automatic,
-
-        /**
-         * How to collect the billing address.
-         */
-        internal val address: AddressCollectionMode = AddressCollectionMode.Automatic,
-
-        /**
-         * Whether the values included in [PaymentSheet.Configuration.defaultBillingDetails]
-         * should be attached to the payment method, this includes fields that aren't displayed in the form.
-         *
-         * If `false` (the default), those values will only be used to prefill the corresponding fields in the form.
-         */
-        internal val attachDefaultsToPaymentMethod: Boolean = false,
-    ) : Parcelable {
-
-        internal val collectsName: Boolean
-            get() = name == CollectionMode.Always
-
-        internal val collectsEmail: Boolean
-            get() = email == CollectionMode.Always
-
-        internal val collectsPhone: Boolean
-            get() = phone == CollectionMode.Always
-
-        internal val collectsAnything: Boolean
-            get() = name == CollectionMode.Always ||
-                phone == CollectionMode.Always ||
-                email == CollectionMode.Always ||
-                address == AddressCollectionMode.Full
-
-        private val collectsFullAddress: Boolean
-            get() = address == AddressCollectionMode.Full
-
-        internal fun toBillingAddressParameters(): GooglePayJsonFactory.BillingAddressParameters {
-            val format = when (address) {
-                AddressCollectionMode.Never,
-                AddressCollectionMode.Automatic -> {
-                    GooglePayJsonFactory.BillingAddressParameters.Format.Min
-                }
-                AddressCollectionMode.Full -> {
-                    GooglePayJsonFactory.BillingAddressParameters.Format.Full
-                }
-            }
-
-            return GooglePayJsonFactory.BillingAddressParameters(
-                isRequired = collectsFullAddress || collectsPhone,
-                format = format,
-                isPhoneNumberRequired = collectsPhone,
-            )
-        }
-
-        internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
-            val format = when (address) {
-                AddressCollectionMode.Never,
-                AddressCollectionMode.Automatic -> {
-                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Min
-                }
-                AddressCollectionMode.Full -> {
-                    GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full
-                }
-            }
-
-            return GooglePayPaymentMethodLauncher.BillingAddressConfig(
-                isRequired = collectsFullAddress || collectsPhone,
-                format = format,
-                isPhoneNumberRequired = collectsPhone,
-            )
-        }
-
-        /**
-         * Billing details fields collection options.
-         */
-        enum class CollectionMode {
-            /**
-             * The field will be collected depending on the Payment Method's requirements.
-             */
-            Automatic,
-
-            /**
-             * The field will never be collected.
-             * If this field is required by the Payment Method, you must provide it as part of `defaultBillingDetails`.
-             */
-            Never,
-
-            /**
-             * The field will always be collected, even if it isn't required for the Payment Method.
-             */
-            Always,
-        }
-
-        /**
-         * Billing address collection options.
-         */
-        enum class AddressCollectionMode {
-            /**
-             * Only the fields required by the Payment Method will be collected, this may be none.
-             */
-            Automatic,
-
-            /**
-             * Address will never be collected.
-             * If the Payment Method requires a billing address, you must provide it as part of `defaultBillingDetails`.
-             */
-            Never,
-
-            /**
-             * Collect the full billing address, regardless of the Payment Method requirements.
-             */
-            Full,
         }
     }
 

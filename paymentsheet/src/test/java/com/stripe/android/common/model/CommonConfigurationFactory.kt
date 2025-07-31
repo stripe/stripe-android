@@ -2,6 +2,7 @@ package com.stripe.android.common.model
 
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
@@ -16,8 +17,8 @@ internal object CommonConfigurationFactory {
         shippingDetails: AddressDetails? = null,
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = true,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration(),
         preferredNetworks: List<CardBrand> = emptyList(),
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),

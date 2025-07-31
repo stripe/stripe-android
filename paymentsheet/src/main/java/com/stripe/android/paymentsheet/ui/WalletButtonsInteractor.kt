@@ -7,6 +7,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
@@ -84,7 +85,7 @@ internal interface WalletButtonsInteractor {
         ) : WalletButton {
             constructor(
                 buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
-                billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+                billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
                 allowCreditCards: Boolean,
                 cardBrandFilter: CardBrandFilter,
             ) : this(

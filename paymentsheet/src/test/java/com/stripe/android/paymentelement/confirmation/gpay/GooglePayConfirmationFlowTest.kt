@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -105,8 +106,8 @@ class GooglePayConfirmationFlowTest {
                 merchantCurrencyCode = "CA",
                 customAmount = 1099,
                 customLabel = null,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                    address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 ),
                 cardBrandFilter = DefaultCardBrandFilter,
             )
