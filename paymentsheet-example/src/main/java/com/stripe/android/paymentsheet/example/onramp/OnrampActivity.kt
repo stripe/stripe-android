@@ -37,21 +37,13 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupCallback
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserCallback
-import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
-import com.stripe.android.crypto.onramp.model.OnrampVerificationCallback
-import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import java.lang.ref.WeakReference
 
 internal class OnrampActivity : ComponentActivity() {
 
     private lateinit var onrampCoordinator: OnrampCoordinator
 
-    // Create ViewModel using standard pattern
     private val viewModel: OnrampViewModel by viewModels {
         OnrampViewModel.Factory()
     }
@@ -65,7 +57,6 @@ internal class OnrampActivity : ComponentActivity() {
 
         // Create callbacks to handle async responses
         val callbacks = OnrampCallbacks(
-            linkLookupCallback = viewModel::onLookupResult,
             authenticationCallback = viewModel::onAuthenticationResult,
             registerUserCallback = viewModel::onRegisterUserResult
         )
@@ -82,7 +73,7 @@ internal class OnrampActivity : ComponentActivity() {
             PaymentSheetExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onCheckUser = { email -> onrampCoordinator.isLinkUser(email) },
+                    onCheckUser = { email -> viewModel.checkIfLinkUser(email, onrampCoordinator) },
                     onRegisterUser = { userInfo -> onrampCoordinator.registerNewLinkUser(userInfo) },
                     onAuthenticateUser = { email -> onrampCoordinator.authenticateExistingLinkUser(email) }
                 )
@@ -124,9 +115,7 @@ internal fun OnrampScreen(
         when (val currentState = uiState) {
             is OnrampUiState.EmailInput -> {
                 EmailInputScreen(
-                    onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email, onCheckUser)
-                    }
+                    onCheckUser = onCheckUser
                 )
             }
             is OnrampUiState.Loading -> {

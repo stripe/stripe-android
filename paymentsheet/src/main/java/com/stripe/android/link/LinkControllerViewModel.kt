@@ -78,10 +78,6 @@ internal class LinkControllerViewModel @Inject constructor(
         MutableSharedFlow<LinkController.PresentPaymentMethodsResult>(replay = 1)
     val presentPaymentMethodsResultFlow = _presentPaymentMethodsResultFlow.asSharedFlow()
 
-    private val _lookupConsumerResultFlow =
-        MutableSharedFlow<LinkController.LookupConsumerResult>(replay = 1)
-    val lookupConsumerResultFlow = _lookupConsumerResultFlow.asSharedFlow()
-
     private val _createPaymentMethodResultFlow =
         MutableSharedFlow<LinkController.CreatePaymentMethodResult>(replay = 1)
     val createPaymentMethodResultFlow = _createPaymentMethodResultFlow.asSharedFlow()
@@ -320,19 +316,16 @@ internal class LinkControllerViewModel @Inject constructor(
         }
     }
 
-    fun onLookupConsumer(email: String) {
-        viewModelScope.launch {
-            val result = linkRepository.lookupConsumer(
-                email = email,
-                customerId = null
+    suspend fun lookupConsumer(email: String): LinkController.LookupConsumerResult {
+        return linkRepository.lookupConsumer(
+            email = email,
+            customerId = null
+        )
+            .map { it.exists }
+            .fold(
+                onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
+                onFailure = { LinkController.LookupConsumerResult.Failed(email, it) }
             )
-                .map { it.exists }
-                .fold(
-                    onSuccess = { LinkController.LookupConsumerResult.Success(email, it) },
-                    onFailure = { LinkController.LookupConsumerResult.Failed(email, it) }
-                )
-            _lookupConsumerResultFlow.emit(result)
-        }
     }
 
     fun onCreatePaymentMethod() {

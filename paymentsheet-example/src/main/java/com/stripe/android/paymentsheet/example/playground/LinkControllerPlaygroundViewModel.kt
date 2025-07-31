@@ -2,9 +2,11 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.LinkController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 internal class LinkControllerPlaygroundViewModel(
     application: Application,
@@ -17,10 +19,6 @@ internal class LinkControllerPlaygroundViewModel(
         linkControllerState.update { it.copy(presentPaymentMethodsResult = result) }
     }
 
-    fun onLinkControllerLookupConsumer(result: LinkController.LookupConsumerResult) {
-        linkControllerState.update { it.copy(lookupConsumerResult = result) }
-    }
-
     fun onLinkControllerCreatePaymentMethod(result: LinkController.CreatePaymentMethodResult) {
         linkControllerState.update { it.copy(createPaymentMethodResult = result) }
     }
@@ -31,5 +29,12 @@ internal class LinkControllerPlaygroundViewModel(
 
     fun onRegisterConsumer(result: LinkController.RegisterConsumerResult) {
         linkControllerState.update { it.copy(registerConsumerResult = result) }
+    }
+
+    fun lookupConsumer(email: String, linkController: LinkController) {
+        viewModelScope.launch {
+            val result = linkController.lookupConsumer(email)
+            linkControllerState.update { it.copy(lookupConsumerResult = result) }
+        }
     }
 }

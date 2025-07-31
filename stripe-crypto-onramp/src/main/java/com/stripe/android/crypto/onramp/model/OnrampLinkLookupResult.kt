@@ -1,12 +1,5 @@
 package com.stripe.android.crypto.onramp.model
 
-fun interface OnrampLinkLookupCallback {
-    fun onResult(result: OnrampLinkLookupResult)
-}
-
-/**
- * Result of an OnRamp Link user lookup operation.
- */
 sealed interface OnrampLinkLookupResult {
     /**
      * Link user lookup was successful.

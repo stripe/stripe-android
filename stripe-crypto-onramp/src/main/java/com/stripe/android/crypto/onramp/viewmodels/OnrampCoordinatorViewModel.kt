@@ -11,13 +11,10 @@ import com.stripe.android.crypto.onramp.di.DaggerOnrampCoordinatorViewModelCompo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
-import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
 import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -65,19 +62,6 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
 
     fun onLinkControllerState(state: LinkController.State) {
         linkControllerState = state
-    }
-
-    fun handleConsumerLookupResult(result: LinkController.LookupConsumerResult) {
-        when (result) {
-            is LinkController.LookupConsumerResult.Success ->
-                onrampCallbacks.linkLookupCallback.onResult(
-                    OnrampLinkLookupResult.Completed(result.isConsumer)
-                )
-            is LinkController.LookupConsumerResult.Failed ->
-                onrampCallbacks.linkLookupCallback.onResult(
-                    OnrampLinkLookupResult.Failed(result.error)
-                )
-        }
     }
 
     fun handleAuthenticationResult(result: LinkController.AuthenticationResult) {

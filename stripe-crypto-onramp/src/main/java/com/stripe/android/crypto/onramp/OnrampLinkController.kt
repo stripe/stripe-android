@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -24,7 +25,6 @@ internal class OnrampLinkController @Inject constructor(
         LinkController.create(
             activity = activity,
             presentPaymentMethodsCallback = { /* No-op for now */ },
-            lookupConsumerCallback = viewModel::handleConsumerLookupResult,
             createPaymentMethodCallback = { /* No-op for now */ },
             authenticationCallback = viewModel::handleAuthenticationResult,
             registerConsumerCallback = viewModel::handleRegisterNewUserResult,
@@ -51,8 +51,14 @@ internal class OnrampLinkController @Inject constructor(
         return linkController.configure(linkControllerConfiguration)
     }
 
-    fun isLinkUser(email: String) {
-        linkController.lookupConsumer(email)
+    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
+        val result = linkController.lookupConsumer(email)
+        return when (result) {
+            is LinkController.LookupConsumerResult.Success ->
+                OnrampLinkLookupResult.Completed(result.isConsumer)
+            is LinkController.LookupConsumerResult.Failed ->
+                OnrampLinkLookupResult.Failed(result.error)
+        }
     }
 
     fun authenticateExistingUser(email: String) {

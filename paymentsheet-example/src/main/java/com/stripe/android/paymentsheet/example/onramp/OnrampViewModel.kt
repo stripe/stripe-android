@@ -25,7 +25,27 @@ internal class OnrampViewModel : ViewModel() {
 
     private var currentEmail: String = ""
 
-    fun checkIfLinkUser(email: String, onCheckUser: (String) -> Unit) {
+    /**
+     * Configure the onramp with the provided coordinator and configuration.
+     * Uses WeakReference to prevent memory leaks.
+     */
+    fun configure(coordinator: OnrampCoordinator, configuration: OnrampConfiguration) {
+        viewModelScope.launch {
+            try {
+                val result = coordinator.configure(configuration)
+                onConfigurationResult(result)
+            } catch (e: Exception) {
+                _message.value = "Configuration failed: ${e.message}"
+                _uiState.value = OnrampUiState.EmailInput // Allow user to try anyway
+            }
+        }
+    }
+
+    /**
+     * Check if the given email corresponds to an existing Link user.
+     * Uses suspend function to avoid callback complexity.
+     */
+    fun checkIfLinkUser(email: String, coordinator: OnrampCoordinator) {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
             return
@@ -33,7 +53,25 @@ internal class OnrampViewModel : ViewModel() {
 
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
-        onCheckUser(currentEmail)
+
+        viewModelScope.launch {
+            val result = coordinator.isLinkUser(currentEmail)
+            when (result) {
+                is OnrampLinkLookupResult.Completed -> {
+                    if (result.isLinkUser) {
+                        _message.value = "User exists in Link. Please authenticate:"
+                        _uiState.value = OnrampUiState.Authentication(currentEmail)
+                    } else {
+                        _message.value = "User does not exist in Link. Please register:"
+                        _uiState.value = OnrampUiState.Registration(currentEmail)
+                    }
+                }
+                is OnrampLinkLookupResult.Failed -> {
+                    _message.value = "Lookup failed: ${result.error.message}"
+                    _uiState.value = OnrampUiState.EmailInput
+                }
+            }
+        }
     }
 
     fun registerNewUser(
@@ -91,21 +129,21 @@ internal class OnrampViewModel : ViewModel() {
         _message.value = null
     }
 
-    // Handle lookup result
-    fun onLookupResult(result: OnrampLinkLookupResult) {
+    // Handle configuration result
+    fun onConfigurationResult(result: OnrampConfigurationResult) {
         when (result) {
-            is OnrampLinkLookupResult.Completed -> {
-                if (result.isLinkUser) {
-                    _message.value = "User exists in Link. Please authenticate:"
-                    _uiState.value = OnrampUiState.Authentication(currentEmail)
+            is OnrampConfigurationResult.Completed -> {
+                if (result.success) {
+                    _message.value = "Configuration successful"
+                    _uiState.value = OnrampUiState.EmailInput
                 } else {
-                    _message.value = "User does not exist in Link. Please register:"
-                    _uiState.value = OnrampUiState.Registration(currentEmail)
+                    _message.value = "Configuration failed"
+                    _uiState.value = OnrampUiState.EmailInput // Still allow user to try
                 }
             }
-            is OnrampLinkLookupResult.Failed -> {
-                _message.value = "Lookup failed: ${result.error.message}"
-                _uiState.value = OnrampUiState.EmailInput
+            is OnrampConfigurationResult.Failed -> {
+                _message.value = "Configuration failed: ${result.error.message}"
+                _uiState.value = OnrampUiState.EmailInput // Still allow user to try
             }
         }
     }
@@ -142,27 +180,6 @@ internal class OnrampViewModel : ViewModel() {
     // Update registration state with email
     fun showRegistrationForEmail(email: String) {
         _uiState.value = OnrampUiState.Registration(email)
-    }
-
-    fun configure(onrampCoordinator: OnrampCoordinator, configuration: OnrampConfiguration) {
-        viewModelScope.launch {
-            val result = onrampCoordinator.configure(configuration)
-            when (result) {
-                is OnrampConfigurationResult.Completed -> {
-                    if (result.success) {
-                        _message.value = "Configuration successful"
-                        _uiState.value = OnrampUiState.EmailInput
-                    } else {
-                        _message.value = "Configuration failed"
-                        _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-                    }
-                }
-                is OnrampConfigurationResult.Failed -> {
-                    _message.value = "Configuration failed: ${result.error.message}"
-                    _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-                }
-            }
-        }
     }
 
     class Factory : ViewModelProvider.Factory {

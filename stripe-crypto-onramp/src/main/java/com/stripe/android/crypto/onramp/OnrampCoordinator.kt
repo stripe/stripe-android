@@ -13,6 +13,7 @@ import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
+import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import javax.inject.Inject
 
@@ -50,9 +51,10 @@ class OnrampCoordinator @Inject internal constructor(
      * Check if the given email corresponds to an existing Link user.
      *
      * @param email The email address to look up.
+     * @return An [OnrampLinkLookupResult] indicating whether the user exists in Link.
      */
-    fun isLinkUser(email: String) {
-        onrampLinkController.isLinkUser(email)
+    suspend fun isLinkUser(email: String): OnrampLinkLookupResult {
+        return onrampLinkController.isLinkUser(email)
     }
 
     /**
