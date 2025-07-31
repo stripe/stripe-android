@@ -19,7 +19,7 @@ import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 import com.stripe.android.elements.customersheet.CustomerSheet
-import com.stripe.android.elements.customersheet.CustomerSheet.Result
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentMethod
@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
@@ -469,7 +468,7 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onCustomerSheetCallback(result: Result) {
+    fun onCustomerSheetCallback(result: CustomerSheet.Result) {
         val statusMessage = when (result) {
             is CustomerSheet.Result.Canceled -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
@@ -491,15 +490,15 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private suspend fun createIntent(playgroundState: PlaygroundState): CreateIntentResult {
+    private suspend fun createIntent(playgroundState: PlaygroundState): CreateIntentCallback.Result {
         val playgroundSettingsSnapshot = playgroundState.snapshot
         return PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
             onSuccess = { state ->
                 val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                CreateIntentResult.Success(clientSecret)
+                CreateIntentCallback.Result.Success(clientSecret)
             },
             onFailure = { exception ->
-                CreateIntentResult.Failure(IllegalStateException(exception))
+                CreateIntentCallback.Result.Failure(IllegalStateException(exception))
             },
         )
     }
@@ -507,8 +506,8 @@ internal class PaymentSheetPlaygroundViewModel(
     suspend fun createIntentCallback(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentResult {
-        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentResult.Failure(
+    ): CreateIntentCallback.Result {
+        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentCallback.Result.Failure(
             cause = IllegalStateException("No payment playground state"),
             displayMessage = "No payment playground state"
         )
@@ -529,7 +528,7 @@ internal class PaymentSheetPlaygroundViewModel(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
         playgroundState: PlaygroundState.Payment,
-    ): CreateIntentResult {
+    ): CreateIntentCallback.Result {
         return when (playgroundState.initializationType) {
             InitializationType.Normal -> {
                 error("createAndConfirmIntent should not be called when initialization type is Normal")
@@ -549,7 +548,7 @@ internal class PaymentSheetPlaygroundViewModel(
             }
 
             InitializationType.DeferredMultiprocessor -> {
-                CreateIntentResult.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                CreateIntentCallback.Result.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         }
     }
@@ -558,7 +557,7 @@ internal class PaymentSheetPlaygroundViewModel(
         paymentMethodId: String,
         shouldSavePaymentMethod: Boolean,
         playgroundState: PlaygroundState.Payment,
-    ): CreateIntentResult {
+    ): CreateIntentCallback.Result {
         // Note: This is not how you'd do this in a real application. You wouldn't have a client
         // secret available at this point, but you'd call your backend to create (and optionally
         // confirm) a payment or setup intent.
@@ -586,14 +585,14 @@ internal class PaymentSheetPlaygroundViewModel(
                     ConfirmIntentEndpointException()
                 }
 
-                CreateIntentResult.Failure(
+                CreateIntentCallback.Result.Failure(
                     cause = error,
                     displayMessage = message
                 )
             }
 
             is com.github.kittinunf.result.Result.Success -> {
-                CreateIntentResult.Success(
+                CreateIntentCallback.Result.Success(
                     clientSecret = result.value.clientSecret,
                 )
             }

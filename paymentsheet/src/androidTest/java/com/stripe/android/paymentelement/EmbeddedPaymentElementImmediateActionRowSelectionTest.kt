@@ -3,12 +3,12 @@ package com.stripe.android.paymentelement
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
@@ -330,7 +330,7 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             networkRule = networkRule,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
+                CreateIntentCallback.Result.Success("pi_example_secret_12345")
             },
             builder = {
                 rowSelectionBehavior =

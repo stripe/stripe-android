@@ -16,7 +16,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch

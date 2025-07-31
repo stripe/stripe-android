@@ -7,8 +7,8 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
@@ -92,7 +92,7 @@ internal class ServerSideConfirmationCustomFlowViewModel(
     suspend fun createAndConfirmIntent(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentResult = withContext(Dispatchers.IO) {
+    ): CreateIntentCallback.Result = withContext(Dispatchers.IO) {
         val request = state.value.cartState.toCreateIntentRequest(
             paymentMethodId = paymentMethod.id!!,
             shouldSavePaymentMethod = shouldSavePaymentMethod,
@@ -110,13 +110,13 @@ internal class ServerSideConfirmationCustomFlowViewModel(
 
         when (apiResult) {
             is ApiResult.Success -> {
-                CreateIntentResult.Success(apiResult.value.clientSecret)
+                CreateIntentCallback.Result.Success(apiResult.value.clientSecret)
             }
             is ApiResult.Failure -> {
                 val error = ExampleCreateAndConfirmErrorResponse.deserialize(
                     apiResult.error.response
                 ).error
-                CreateIntentResult.Failure(
+                CreateIntentCallback.Result.Failure(
                     cause = RuntimeException(error),
                     displayMessage = error,
                 )

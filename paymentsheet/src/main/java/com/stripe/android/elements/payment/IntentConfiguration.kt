@@ -229,7 +229,7 @@ class IntentConfiguration internal constructor(
     companion object {
 
         /**
-         * Pass this as the client secret into [CreateIntentResult.Success] to force
+         * Pass this as the client secret into [CreateIntentCallback.Result.Success] to force
          * [PaymentSheet] to show success, dismiss the sheet without confirming the intent, and
          * return [PaymentSheetResult.Completed].
          *

@@ -11,6 +11,8 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.CreateIntentCallback.Result
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -28,8 +30,6 @@ import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -421,7 +421,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams,
-    ): Result<PaymentMethod> {
+    ): kotlin.Result<PaymentMethod> {
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,
             options = requestOptions,
@@ -493,7 +493,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         )
 
         return when (result) {
-            is CreateIntentResult.Success -> {
+            is CreateIntentCallback.Result.Success -> {
                 if (result.clientSecret == IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT) {
                     NextStep.Complete(isForceSuccess = true)
                 } else {
@@ -508,7 +508,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 }
             }
 
-            is CreateIntentResult.Failure -> {
+            is CreateIntentCallback.Result.Failure -> {
                 NextStep.Fail(
                     cause = CreateIntentCallbackFailureException(result.cause),
                     message = result.displayMessage?.resolvableString
@@ -568,7 +568,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         }
     }
 
-    private suspend fun retrieveStripeIntent(clientSecret: String): Result<StripeIntent> {
+    private suspend fun retrieveStripeIntent(clientSecret: String): kotlin.Result<StripeIntent> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
             options = requestOptions,

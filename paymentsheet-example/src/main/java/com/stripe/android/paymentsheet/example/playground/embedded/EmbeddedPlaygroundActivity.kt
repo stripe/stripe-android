@@ -28,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.CreateIntentCallback.Result
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
@@ -37,7 +39,6 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -106,10 +107,10 @@ internal class EmbeddedPlaygroundActivity :
                 PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
                     onSuccess = { state ->
                         val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                        CreateIntentResult.Success(clientSecret)
+                        CreateIntentCallback.Result.Success(clientSecret)
                     },
                     onFailure = { exception ->
-                        CreateIntentResult.Failure(IllegalStateException(exception))
+                        CreateIntentCallback.Result.Failure(IllegalStateException(exception))
                     },
                 )
             },

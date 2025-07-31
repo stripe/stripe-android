@@ -9,7 +9,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet

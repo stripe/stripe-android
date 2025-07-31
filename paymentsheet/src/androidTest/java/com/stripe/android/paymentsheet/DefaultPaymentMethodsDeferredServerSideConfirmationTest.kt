@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
@@ -35,7 +36,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
         networkRule = networkRule,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+                CreateIntentCallback.Result.Success(clientSecret = "pi_example_secret_example")
             }
         },
         integrationType = integrationType,
@@ -101,7 +102,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
         networkRule = networkRule,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+                CreateIntentCallback.Result.Success(clientSecret = "pi_example_secret_example")
             }
         },
         integrationType = integrationType,

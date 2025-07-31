@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.elements.payment
 
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -27,18 +27,18 @@ fun interface CreateIntentCallback {
     suspend fun onCreateIntent(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
-    ): CreateIntentResult
-}
+    ): Result
 
-/**
- * Represents the result of a [CreateIntentCallback].
- */
-sealed interface CreateIntentResult {
+    /**
+     * Represents the result of a [CreateIntentCallback].
+     */
+    sealed interface Result {
 
-    class Success(internal val clientSecret: String) : CreateIntentResult
+        class Success(internal val clientSecret: String) : Result
 
-    class Failure @JvmOverloads constructor(
-        internal val cause: Exception,
-        internal val displayMessage: String? = null,
-    ) : CreateIntentResult
+        class Failure @JvmOverloads constructor(
+            internal val cause: Exception,
+            internal val displayMessage: String? = null,
+        ) : Result
+    }
 }

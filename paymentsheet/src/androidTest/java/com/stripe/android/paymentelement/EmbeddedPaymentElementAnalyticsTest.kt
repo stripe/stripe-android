@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -13,7 +14,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -55,7 +55,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
         builder = {
@@ -152,7 +152,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
         builder = {
@@ -221,7 +221,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
         builder = {
@@ -272,7 +272,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         builder = {
             analyticEventCallback(analyticEventRule)

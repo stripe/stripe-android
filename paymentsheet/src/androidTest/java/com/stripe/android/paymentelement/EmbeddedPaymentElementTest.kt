@@ -13,8 +13,8 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
@@ -53,7 +53,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -83,7 +83,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -119,7 +119,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -158,7 +158,7 @@ internal class EmbeddedPaymentElementTest {
         networkRule = networkRule,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -199,7 +199,7 @@ internal class EmbeddedPaymentElementTest {
             networkRule = networkRule,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
+                CreateIntentCallback.Result.Success("pi_example_secret_12345")
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -228,7 +228,7 @@ internal class EmbeddedPaymentElementTest {
             networkRule = networkRule,
             createIntentCallback = { _, shouldSavePaymentMethod ->
                 assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_12345")
+                CreateIntentCallback.Result.Success("pi_example_secret_12345")
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -254,7 +254,7 @@ internal class EmbeddedPaymentElementTest {
         showWalletButtons = true,
         createIntentCallback = { _, shouldSavePaymentMethod ->
             assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_12345")
+            CreateIntentCallback.Result.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->

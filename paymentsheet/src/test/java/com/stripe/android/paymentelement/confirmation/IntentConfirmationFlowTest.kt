@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -22,8 +23,6 @@ import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
@@ -101,7 +100,7 @@ internal class IntentConfirmationFlowTest {
     @Test
     fun `On deferred intent, action should be complete if completing without confirming`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition { _, _ ->
-            CreateIntentResult.Success(
+            CreateIntentCallback.Result.Success(
                 clientSecret = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
             )
         }
@@ -154,7 +153,7 @@ internal class IntentConfirmationFlowTest {
     @Test
     fun `On deferred intent, action should be confirm if completing intent`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition { _, _ ->
-            CreateIntentResult.Success(
+            CreateIntentCallback.Result.Success(
                 clientSecret = "seti_123_secret_123"
             )
         }
@@ -177,9 +176,9 @@ internal class IntentConfirmationFlowTest {
     @Test
     fun `On deferred intent, action should be fail if failed to create payment method`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition(
-            createPaymentMethodResult = Result.failure(IllegalStateException("An error occurred!"))
+            createPaymentMethodResult = kotlin.Result.failure(IllegalStateException("An error occurred!"))
         ) { _, _ ->
-            CreateIntentResult.Success(
+            CreateIntentCallback.Result.Success(
                 clientSecret = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
             )
         }
@@ -200,9 +199,9 @@ internal class IntentConfirmationFlowTest {
     @Test
     fun `On deferred intent, action should be fail if failed to retrieve intent`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition(
-            intentResult = Result.failure(IllegalStateException("An error occurred!"))
+            intentResult = kotlin.Result.failure(IllegalStateException("An error occurred!"))
         ) { _, _ ->
-            CreateIntentResult.Success(
+            CreateIntentCallback.Result.Success(
                 clientSecret = "si_123_secret_123"
             )
         }
@@ -275,9 +274,9 @@ internal class IntentConfirmationFlowTest {
     }
 
     private fun createIntentConfirmationDefinition(
-        createPaymentMethodResult: Result<PaymentMethod> = Result.success(CARD_PAYMENT_METHOD),
-        intentResult: Result<StripeIntent> =
-            Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
+        createPaymentMethodResult: kotlin.Result<PaymentMethod> = kotlin.Result.success(CARD_PAYMENT_METHOD),
+        intentResult: kotlin.Result<StripeIntent> =
+            kotlin.Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
         preparePaymentMethodHandler: PreparePaymentMethodHandler? = null,
         createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {

@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
@@ -28,8 +29,6 @@ import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationI
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.intent.intercept
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -701,7 +700,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intentCreationCallbackProvider = {
                 CreateIntentCallback { _, shouldSavePaymentMethod ->
                     observedValues += shouldSavePaymentMethod
-                    CreateIntentResult.Success("pi_123_secret_456")
+                    CreateIntentCallback.Result.Success("pi_123_secret_456")
                 }
             },
             preparePaymentMethodHandlerProvider = {
@@ -747,7 +746,9 @@ class DefaultIntentConfirmationInterceptorTest {
             allowsManualConfirmation = false,
             intentCreationCallbackProvider = {
                 CreateIntentCallback { _, _ ->
-                    CreateIntentResult.Success(IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                    CreateIntentCallback.Result.Success(
+                        IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT
+                    )
                 }
             },
             preparePaymentMethodHandlerProvider = {
@@ -794,7 +795,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 allowsManualConfirmation = false,
                 intentCreationCallbackProvider = {
                     CreateIntentCallback { _, _ ->
-                        CreateIntentResult.Success(clientSecret = "pi_123")
+                        CreateIntentCallback.Result.Success(clientSecret = "pi_123")
                     }
                 },
                 preparePaymentMethodHandlerProvider = {
@@ -1131,7 +1132,7 @@ class DefaultIntentConfirmationInterceptorTest {
     ): CreateIntentCallback {
         return CreateIntentCallback { paymentMethod, _ ->
             assertThat(paymentMethod).isEqualTo(expectedPaymentMethod)
-            CreateIntentResult.Success(clientSecret = "pi_123_secret_456")
+            CreateIntentCallback.Result.Success(clientSecret = "pi_123_secret_456")
         }
     }
 
@@ -1139,7 +1140,7 @@ class DefaultIntentConfirmationInterceptorTest {
         message: String? = null
     ): CreateIntentCallback {
         return CreateIntentCallback { _, _ ->
-            CreateIntentResult.Failure(
+            CreateIntentCallback.Result.Failure(
                 cause = TestException(message),
                 displayMessage = message
             )

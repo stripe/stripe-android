@@ -21,12 +21,11 @@ import androidx.compose.ui.unit.dp
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
-import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -91,7 +90,7 @@ fun CheckoutScreen() {
     }
 }
 
-private suspend fun checkout(context: Context): CreateIntentResult {
+private suspend fun checkout(context: Context): CreateIntentCallback.Result {
     val request = ExampleCheckoutRequest(
         hotDogCount = 1,
         saladCount = 1,
@@ -104,15 +103,15 @@ private suspend fun checkout(context: Context): CreateIntentResult {
         .suspendable()
         .awaitModel(ExampleCheckoutResponse.serializer())
     return when (apiResult) {
-        is Result.Success -> {
+        is com.github.kittinunf.result.Result.Success -> {
             PaymentConfiguration.init(
                 context = context,
                 publishableKey = apiResult.value.publishableKey,
             )
-            CreateIntentResult.Success(apiResult.value.paymentIntent)
+            CreateIntentCallback.Result.Success(apiResult.value.paymentIntent)
         }
-        is Result.Failure -> {
-            CreateIntentResult.Failure(apiResult.error)
+        is com.github.kittinunf.result.Result.Failure -> {
+            CreateIntentCallback.Result.Failure(apiResult.error)
         }
     }
 }

@@ -21,6 +21,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.DelicatePaymentSheetApi
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
@@ -540,7 +541,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success("pi_example_secret_example")
+                CreateIntentCallback.Result.Success("pi_example_secret_example")
             }
         },
         resultCallback = ::assertCompleted,
@@ -614,7 +615,7 @@ internal class FlowControllerTest {
     ) = runMultipleFlowControllerInstancesTest(
         networkRule = networkRule,
         testType = testType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        createIntentCallback = { _, _ -> CreateIntentCallback.Result.Success("pi_example_secret_example") },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -677,7 +678,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Failure(
+                CreateIntentCallback.Result.Failure(
                     cause = Exception("We don't accept visa"),
                     displayMessage = "We don't accept visa"
                 )
@@ -740,7 +741,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                CreateIntentCallback.Result.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         },
         resultCallback = ::assertCompleted,
@@ -795,7 +796,7 @@ internal class FlowControllerTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success("pi_example_secret_example")
+                CreateIntentCallback.Result.Success("pi_example_secret_example")
             }
         },
         resultCallback = { result ->
