@@ -19,6 +19,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -157,7 +158,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             } else {
                 GooglePayPaymentMethodLauncher.Config(
                     environment = when (config.environment) {
-                        PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                        GooglePayConfiguration.Environment.Production ->
                             GooglePayEnvironment.Production
                         else ->
                             GooglePayEnvironment.Test

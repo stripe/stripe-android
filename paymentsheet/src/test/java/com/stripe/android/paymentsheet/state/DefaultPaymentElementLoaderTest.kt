@@ -13,6 +13,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -3325,8 +3326,8 @@ internal class DefaultPaymentElementLoaderTest {
             shippingDetails = shippingDetails,
             defaultBillingDetails = defaultBillingDetails,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            googlePay = GooglePayConfiguration(
+                environment = GooglePayConfiguration.Environment.Test,
                 countryCode = CountryCode.US.value
             ).takeIf { isGooglePayEnabled }
         )

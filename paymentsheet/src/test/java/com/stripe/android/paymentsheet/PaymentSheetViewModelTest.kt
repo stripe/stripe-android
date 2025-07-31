@@ -21,6 +21,7 @@ import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -1340,42 +1341,42 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `'buttonType' from 'GooglePayConfiguration' should be parsed to proper 'GooglePayButtonType'`() = runTest {
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+            GooglePayConfiguration.ButtonType.Plain,
             GooglePayButtonType.Plain
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+            GooglePayConfiguration.ButtonType.Pay,
             GooglePayButtonType.Pay
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Book,
+            GooglePayConfiguration.ButtonType.Book,
             GooglePayButtonType.Book
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Buy,
+            GooglePayConfiguration.ButtonType.Buy,
             GooglePayButtonType.Buy
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Donate,
+            GooglePayConfiguration.ButtonType.Donate,
             GooglePayButtonType.Donate
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+            GooglePayConfiguration.ButtonType.Checkout,
             GooglePayButtonType.Checkout
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Order,
+            GooglePayConfiguration.ButtonType.Order,
             GooglePayButtonType.Order
         )
 
         testButtonTypeParsedToProperGooglePayButtonType(
-            PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe,
+            GooglePayConfiguration.ButtonType.Subscribe,
             GooglePayButtonType.Subscribe
         )
     }
@@ -2437,8 +2438,8 @@ internal class PaymentSheetViewModelTest {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "CA",
                         currencyCode = "CAD",
                         amount = expectedAmount,
@@ -2473,8 +2474,8 @@ internal class PaymentSheetViewModelTest {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.newBuilder()
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "CA",
                         currencyCode = "CAD",
                         amount = expectedAmount,
@@ -2525,8 +2526,8 @@ internal class PaymentSheetViewModelTest {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.newBuilder()
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "CA",
                         currencyCode = "CAD",
                     )
@@ -2560,8 +2561,8 @@ internal class PaymentSheetViewModelTest {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
             config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.newBuilder()
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "CA",
                         currencyCode = "CAD",
                     )
@@ -2600,8 +2601,8 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "CA",
                         currencyCode = "CAD",
                     )
@@ -2634,8 +2635,8 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "CA",
                         currencyCode = "CAD",
                     )
@@ -3743,7 +3744,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private suspend fun testButtonTypeParsedToProperGooglePayButtonType(
-        buttonType: PaymentSheet.GooglePayConfiguration.ButtonType,
+        buttonType: GooglePayConfiguration.ButtonType,
         googlePayButtonType: GooglePayButtonType
     ) {
         val viewModel = createViewModel(

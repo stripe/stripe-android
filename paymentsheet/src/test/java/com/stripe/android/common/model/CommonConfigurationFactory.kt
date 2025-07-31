@@ -5,6 +5,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -13,7 +14,7 @@ internal object CommonConfigurationFactory {
     fun create(
         merchantDisplayName: String = "Example, Inc.",
         customer: CustomerConfiguration? = null,
-        googlePay: PaymentSheet.GooglePayConfiguration? = null,
+        googlePay: GooglePayConfiguration? = null,
         defaultBillingDetails: BillingDetails? = null,
         shippingDetails: AddressDetails? = null,
         allowsDelayedPaymentMethods: Boolean = true,

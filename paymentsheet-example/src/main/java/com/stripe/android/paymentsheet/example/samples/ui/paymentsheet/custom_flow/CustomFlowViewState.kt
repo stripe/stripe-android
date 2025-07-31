@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.custom_flow
 
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -30,8 +31,8 @@ data class CustomFlowViewState(
             get() = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                 .customer(customerConfiguration)
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )

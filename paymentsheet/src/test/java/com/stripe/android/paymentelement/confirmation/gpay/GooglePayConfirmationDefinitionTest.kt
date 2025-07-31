@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -344,7 +345,7 @@ class GooglePayConfirmationDefinitionTest {
                 config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
                     merchantName = "Another merchant Inc.",
                     merchantCountryCode = "CA",
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    environment = GooglePayConfiguration.Environment.Production,
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                         email = BillingDetailsCollectionConfiguration.CollectionMode.Always,
                         phone = BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -613,7 +614,7 @@ class GooglePayConfirmationDefinitionTest {
     private companion object {
         private val GOOGLE_PAY_CONFIRMATION_OPTION = GooglePayConfirmationOption(
             config = GooglePayConfirmationOption.Config(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                environment = GooglePayConfiguration.Environment.Test,
                 merchantName = "Test merchant Inc.",
                 merchantCountryCode = "US",
                 merchantCurrencyCode = "CA",

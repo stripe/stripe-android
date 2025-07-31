@@ -21,6 +21,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -1115,8 +1116,8 @@ internal class FlowControllerTest {
                     )
                 )
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = "US",
                     )
                 )
@@ -1192,8 +1193,8 @@ internal class FlowControllerTest {
                         )
                     )
                     .googlePay(
-                        PaymentSheet.GooglePayConfiguration(
-                            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        GooglePayConfiguration(
+                            environment = GooglePayConfiguration.Environment.Test,
                             countryCode = "US",
                         )
                     )

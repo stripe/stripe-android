@@ -11,6 +11,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -649,9 +650,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production ->
+                    GooglePayConfiguration.Environment.Production ->
                         GooglePayEnvironment.Production
-                    PaymentSheet.GooglePayConfiguration.Environment.Test ->
+                    GooglePayConfiguration.Environment.Test ->
                         GooglePayEnvironment.Test
                 }
             )

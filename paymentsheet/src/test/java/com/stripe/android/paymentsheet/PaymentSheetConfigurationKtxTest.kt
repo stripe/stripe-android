@@ -10,6 +10,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
 import kotlin.test.assertFailsWith
@@ -207,13 +208,13 @@ class PaymentSheetConfigurationKtxTest {
                 id = "1",
                 ephemeralKeySecret = "ek_123",
             ),
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            googlePay = GooglePayConfiguration(
+                environment = GooglePayConfiguration.Environment.Test,
                 countryCode = "CA",
                 currencyCode = "CAD",
                 amount = 5099,
                 label = "Merchant, Inc.",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                buttonType = GooglePayConfiguration.ButtonType.Checkout,
             ),
             appearance = Appearance(
                 primaryButton = Appearance.PrimaryButton(

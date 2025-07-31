@@ -1,17 +1,17 @@
 package com.stripe.android.paymentsheet.utils
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
-internal val PaymentSheet.GooglePayConfiguration.ButtonType?.asGooglePayButtonType: GooglePayButtonType
+internal val GooglePayConfiguration.ButtonType?.asGooglePayButtonType: GooglePayButtonType
     get() = when (this) {
-        PaymentSheet.GooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
-        PaymentSheet.GooglePayConfiguration.ButtonType.Book -> GooglePayButtonType.Book
-        PaymentSheet.GooglePayConfiguration.ButtonType.Checkout -> GooglePayButtonType.Checkout
-        PaymentSheet.GooglePayConfiguration.ButtonType.Donate -> GooglePayButtonType.Donate
-        PaymentSheet.GooglePayConfiguration.ButtonType.Order -> GooglePayButtonType.Order
-        PaymentSheet.GooglePayConfiguration.ButtonType.Subscribe -> GooglePayButtonType.Subscribe
-        PaymentSheet.GooglePayConfiguration.ButtonType.Plain -> GooglePayButtonType.Plain
-        PaymentSheet.GooglePayConfiguration.ButtonType.Pay,
+        GooglePayConfiguration.ButtonType.Buy -> GooglePayButtonType.Buy
+        GooglePayConfiguration.ButtonType.Book -> GooglePayButtonType.Book
+        GooglePayConfiguration.ButtonType.Checkout -> GooglePayButtonType.Checkout
+        GooglePayConfiguration.ButtonType.Donate -> GooglePayButtonType.Donate
+        GooglePayConfiguration.ButtonType.Order -> GooglePayButtonType.Order
+        GooglePayConfiguration.ButtonType.Subscribe -> GooglePayButtonType.Subscribe
+        GooglePayConfiguration.ButtonType.Plain -> GooglePayButtonType.Plain
+        GooglePayConfiguration.ButtonType.Pay,
         null -> GooglePayButtonType.Pay
     }

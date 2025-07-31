@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -148,7 +149,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
             config = GooglePayPaymentMethodLauncher.Config(
                 environment = when (config.environment) {
-                    PaymentSheet.GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
+                    GooglePayConfiguration.Environment.Production -> GooglePayEnvironment.Production
                     else -> GooglePayEnvironment.Test
                 },
                 merchantCountryCode = config.merchantCountryCode,

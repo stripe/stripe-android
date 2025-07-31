@@ -8,6 +8,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -343,13 +344,13 @@ class PaymentSelectionUpdaterTest {
         val newConfig = defaultPaymentSheetConfiguration.newBuilder()
             .merchantDisplayName("Some other change")
             .googlePay(
-                PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                GooglePayConfiguration(
+                    environment = GooglePayConfiguration.Environment.Test,
                     countryCode = CountryCode.US.value,
                     amount = 5099,
                     currencyCode = "USD",
                     label = "Some product",
-                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                    buttonType = GooglePayConfiguration.ButtonType.Checkout,
                 )
             ).appearance(
                 Appearance(
@@ -379,13 +380,13 @@ class PaymentSelectionUpdaterTest {
             currentSelection = existingSelection,
             previousConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    GooglePayConfiguration(
+                        environment = GooglePayConfiguration.Environment.Test,
                         countryCode = CountryCode.US.value,
                         amount = 5099,
                         currencyCode = "USD",
                         label = "A product",
-                        buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+                        buttonType = GooglePayConfiguration.ButtonType.Plain,
                     )
                 ).build(),
             newState = newState,

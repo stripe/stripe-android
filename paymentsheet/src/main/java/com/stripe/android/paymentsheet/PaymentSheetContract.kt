@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
+import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
@@ -41,7 +42,7 @@ internal class PaymentSheetContract :
         val initializedViaCompose: Boolean = false,
     ) : ActivityStarter.Args {
 
-        val googlePayConfig: PaymentSheet.GooglePayConfiguration? get() = config.googlePay
+        val googlePayConfig: GooglePayConfiguration? get() = config.googlePay
 
         companion object {
             internal fun fromIntent(intent: Intent): Args? {
