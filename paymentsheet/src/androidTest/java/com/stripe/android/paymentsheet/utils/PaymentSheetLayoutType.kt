@@ -12,8 +12,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.paymentsheet.ui.getLabel
@@ -22,7 +22,7 @@ import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 
-internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentSheet.PaymentMethodLayout) {
+internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentMethodLayout) {
 
     abstract fun assertHasSelectedPaymentMethod(
         composeTestRule: ComposeTestRule,
@@ -48,7 +48,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         composeTestRule: ComposeTestRule,
     )
 
-    class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {
+    class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentMethodLayout.Horizontal) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,
@@ -129,7 +129,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         }
     }
 
-    class Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
+    class Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentMethodLayout.Vertical) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,

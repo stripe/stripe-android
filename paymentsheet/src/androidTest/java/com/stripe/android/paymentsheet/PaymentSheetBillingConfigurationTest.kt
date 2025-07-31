@@ -10,6 +10,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -91,7 +92,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = true,
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -165,7 +166,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                         attachDefaultsToPaymentMethod = false,
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -231,7 +232,7 @@ internal class PaymentSheetBillingConfigurationTest {
                         address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                         attachDefaultsToPaymentMethod = false,
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                 ),
             )
         }

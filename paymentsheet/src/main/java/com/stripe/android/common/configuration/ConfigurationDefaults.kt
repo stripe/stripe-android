@@ -8,10 +8,10 @@ import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 
 internal object ConfigurationDefaults {
     const val allowsDelayedPaymentMethods: Boolean = true

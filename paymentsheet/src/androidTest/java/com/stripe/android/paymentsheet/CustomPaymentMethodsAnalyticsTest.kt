@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -88,7 +89,7 @@ class CustomPaymentMethodsAnalyticsTest {
                             )
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .paymentMethodOrder(listOf("cpmt_123", "card"))
                     .build()
             )

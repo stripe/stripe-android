@@ -8,6 +8,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -173,7 +174,7 @@ internal class LinkTest {
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                     allowsDelayedPaymentMethods = false,
                 )
             )
@@ -461,7 +462,7 @@ internal class LinkTest {
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123"
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                     allowsDelayedPaymentMethods = false,
                 )
             )
@@ -950,7 +951,7 @@ internal class LinkTest {
                 email = "test-${UUID.randomUUID()}@email.com",
                 phone = "+15555555555",
             ),
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            paymentMethodLayout = PaymentMethodLayout.Horizontal,
         )
 
         testContext.launch(configuration)
@@ -1114,7 +1115,7 @@ internal class LinkTest {
                     id = "cus_1",
                     clientSecret = "cuss_654321",
                 ),
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                paymentMethodLayout = PaymentMethodLayout.Horizontal,
             )
         )
 

@@ -9,6 +9,7 @@ import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.testing.PaymentMethodFactory
@@ -58,7 +59,7 @@ internal object DefaultPaymentMethodsUtils {
     fun launch(
         testContext: ProductIntegrationTestRunnerContext,
         composeTestRule: ComposeTestRule,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        paymentMethodLayout: PaymentMethodLayout,
         paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
         hasSavedPaymentMethods: Boolean = true,
         isDeferredIntent: Boolean = false,
@@ -78,7 +79,7 @@ internal object DefaultPaymentMethodsUtils {
             isDeferredIntent = isDeferredIntent,
         )
 
-        if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
+        if (paymentMethodLayout == PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
             composeTestRule.waitUntil(timeoutMillis = 5_000) {
                 composeTestRule.onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)).fetchSemanticsNodes()
                     .isNotEmpty()

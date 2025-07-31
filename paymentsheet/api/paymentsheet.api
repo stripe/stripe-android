@@ -1433,6 +1433,15 @@ public final class com/stripe/android/elements/payment/LinkConfiguration$Display
 	public static fun values ()[Lcom/stripe/android/elements/payment/LinkConfiguration$Display;
 }
 
+public final class com/stripe/android/elements/payment/PaymentMethodLayout : java/lang/Enum {
+	public static final field Automatic Lcom/stripe/android/elements/payment/PaymentMethodLayout;
+	public static final field Horizontal Lcom/stripe/android/elements/payment/PaymentMethodLayout;
+	public static final field Vertical Lcom/stripe/android/elements/payment/PaymentMethodLayout;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/elements/payment/PaymentMethodLayout;
+	public static fun values ()[Lcom/stripe/android/elements/payment/PaymentMethodLayout;
+}
+
 public final class com/stripe/android/elements/payment/WalletButtonsConfiguration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -2639,7 +2648,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun googlePlacesApiKey (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun link (Lcom/stripe/android/elements/payment/LinkConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
-	public final fun paymentMethodLayout (Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun paymentMethodLayout (Lcom/stripe/android/elements/payment/PaymentMethodLayout;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
@@ -2729,15 +2738,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$R
 public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result$Success : com/stripe/android/paymentsheet/PaymentSheet$FlowController$Result {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Result$Success;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout : java/lang/Enum {
-	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
-	public static final field Horizontal Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
-	public static final field Vertical Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
-	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$PaymentMethodLayout;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$ShopPayConfiguration : android/os/Parcelable {

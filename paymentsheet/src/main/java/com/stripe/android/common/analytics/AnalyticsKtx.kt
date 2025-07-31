@@ -4,8 +4,8 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
 
@@ -110,10 +110,10 @@ internal fun CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is CardBrandAcceptance.All
 }
 
-internal fun PaymentSheet.PaymentMethodLayout.toAnalyticsValue(): String {
+internal fun PaymentMethodLayout.toAnalyticsValue(): String {
     return when (this) {
-        PaymentSheet.PaymentMethodLayout.Horizontal -> "horizontal"
-        PaymentSheet.PaymentMethodLayout.Vertical -> "vertical"
-        PaymentSheet.PaymentMethodLayout.Automatic -> "automatic"
+        PaymentMethodLayout.Horizontal -> "horizontal"
+        PaymentMethodLayout.Vertical -> "vertical"
+        PaymentMethodLayout.Automatic -> "automatic"
     }
 }

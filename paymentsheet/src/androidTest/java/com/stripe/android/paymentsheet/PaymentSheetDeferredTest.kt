@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -38,7 +39,7 @@ internal class PaymentSheetDeferredTest {
 
     private val defaultConfiguration = PaymentSheet.Configuration(
         merchantDisplayName = "Example, Inc.",
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        paymentMethodLayout = PaymentMethodLayout.Horizontal,
     )
 
     @Test
@@ -206,7 +207,7 @@ internal class PaymentSheetDeferredTest {
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .customer(CustomerConfiguration("cus_foobar", "ek_test_foobar"))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .build(),
             )
         }
@@ -291,7 +292,7 @@ internal class PaymentSheetDeferredTest {
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .customer(CustomerConfiguration("cus_foobar", "ek_test_foobar"))
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .build(),
             )
         }
@@ -465,7 +466,7 @@ internal class PaymentSheetDeferredTest {
                 ),
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc")
                     .allowsDelayedPaymentMethods(true)
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .build(),
             )
         }

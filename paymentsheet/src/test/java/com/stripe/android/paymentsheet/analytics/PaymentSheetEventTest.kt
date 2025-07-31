@@ -10,6 +10,7 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -149,7 +150,7 @@ class PaymentSheetEventTest {
     @Test
     fun `Init event with vertical mode should return expected params`() {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER.newBuilder()
-            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+            .paymentMethodLayout(PaymentMethodLayout.Vertical)
             .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,

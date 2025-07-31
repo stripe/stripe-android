@@ -11,6 +11,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -51,7 +52,7 @@ internal object PaymentSheetFixtures {
 
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        paymentMethodLayout = PaymentMethodLayout.Horizontal,
     )
 
     internal val CONFIG_WITH_EVERYTHING = PaymentSheet.Configuration(
@@ -112,7 +113,7 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         customer = defaultCustomerConfig,
-        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        paymentMethodLayout = PaymentMethodLayout.Horizontal,
     )
 
     internal val EMPTY_CUSTOMER_STATE = CustomerState(
@@ -127,7 +128,7 @@ internal object PaymentSheetFixtures {
         get() = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
             googlePay = ConfigFixtures.GOOGLE_PAY,
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            paymentMethodLayout = PaymentMethodLayout.Horizontal,
         )
 
     internal val CONFIG_CUSTOMER_WITH_GOOGLEPAY

@@ -23,6 +23,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -1639,7 +1640,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .build()
             ),
         )
@@ -1653,7 +1654,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build()
             ),
         )
@@ -1667,7 +1668,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .paymentMethodLayout(PaymentMethodLayout.Automatic)
                     .build()
             ),
         )
@@ -3239,7 +3240,7 @@ internal class PaymentSheetViewModelTest {
         var viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build()
             )
         )
@@ -3274,7 +3275,7 @@ internal class PaymentSheetViewModelTest {
         var viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .paymentMethodLayout(PaymentMethodLayout.Automatic)
                     .build()
             )
         )
@@ -3309,7 +3310,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build()
             ),
         )
@@ -3329,7 +3330,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .paymentMethodLayout(PaymentMethodLayout.Automatic)
                     .build()
             ),
         )
@@ -3350,7 +3351,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build()
             ),
             cvcRecollectionInteractor = cvcRecollectionInteractor
@@ -3392,7 +3393,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build()
             ),
         )
@@ -3412,7 +3413,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .paymentMethodLayout(PaymentMethodLayout.Automatic)
                     .build()
             ),
         )

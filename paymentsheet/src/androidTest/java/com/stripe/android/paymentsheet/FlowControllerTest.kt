@@ -23,6 +23,7 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -70,7 +71,7 @@ internal class FlowControllerTest {
     private val walletButtonsPage = WalletButtonsPage(testRules.compose)
 
     private val defaultConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
-        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+        .paymentMethodLayout(PaymentMethodLayout.Horizontal)
         .build()
 
     @After
@@ -138,7 +139,7 @@ internal class FlowControllerTest {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
@@ -184,7 +185,7 @@ internal class FlowControllerTest {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
                     configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     callback = { success, error ->
                         assertThat(success).isTrue()
@@ -229,7 +230,7 @@ internal class FlowControllerTest {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
                     configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
-                        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                        .paymentMethodLayout(PaymentMethodLayout.Vertical)
                         .build(),
                     callback = { success, error ->
                         assertThat(success).isTrue()
@@ -888,7 +889,7 @@ internal class FlowControllerTest {
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    paymentMethodLayout = PaymentMethodLayout.Horizontal,
                     allowsDelayedPaymentMethods = false,
                 ),
                 callback = { success, error ->
@@ -958,7 +959,7 @@ internal class FlowControllerTest {
                             ephemeralKeySecret = "ek_123",
                         )
                     )
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .allowsDelayedPaymentMethods(false)
                     .build(),
                 callback = { success, error ->
@@ -1032,7 +1033,7 @@ internal class FlowControllerTest {
                 configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
                     .allowsDelayedPaymentMethods(true)
                     .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .paymentMethodLayout(PaymentMethodLayout.Horizontal)
                     .build(),
                 callback = { success, error ->
                     assertThat(success).isTrue()
