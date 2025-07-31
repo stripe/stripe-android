@@ -6,6 +6,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
@@ -20,7 +21,7 @@ internal object ConfigurationDefaults {
         BillingDetailsCollectionConfiguration()
     val customer: CustomerConfiguration? = null
     val googlePay: PaymentSheet.GooglePayConfiguration? = null
-    val link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration()
+    val link: LinkConfiguration = LinkConfiguration()
     const val googlePayEnabled: Boolean = false
     val headerTextForSelectionScreen: String? = null
     val paymentMethodOrder: List<String> = emptyList()

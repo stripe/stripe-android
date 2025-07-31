@@ -11,6 +11,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -107,7 +108,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkEnabled: Boolean,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        linkDisplay: LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         financialConnectionsAvailability: FinancialConnectionsAvailability?,

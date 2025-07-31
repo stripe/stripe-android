@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -43,12 +44,12 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
         )
     }
 
-    private fun makeLinkConfiguration(value: Boolean): PaymentSheet.LinkConfiguration {
-        return PaymentSheet.LinkConfiguration(
+    private fun makeLinkConfiguration(value: Boolean): LinkConfiguration {
+        return LinkConfiguration(
             display = if (value) {
-                PaymentSheet.LinkConfiguration.Display.Automatic
+                LinkConfiguration.Display.Automatic
             } else {
-                PaymentSheet.LinkConfiguration.Display.Never
+                LinkConfiguration.Display.Never
             }
         )
     }

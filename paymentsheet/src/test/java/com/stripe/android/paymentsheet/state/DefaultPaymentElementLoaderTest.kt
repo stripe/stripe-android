@@ -1207,7 +1207,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -1271,7 +1271,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2530,7 +2530,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2565,7 +2565,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2600,7 +2600,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2633,7 +2633,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2676,7 +2676,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2719,7 +2719,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null
@@ -2808,8 +2808,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             ),
         )
 
@@ -2835,8 +2835,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             ),
         )
 
@@ -2855,7 +2855,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = eq(true),
             linkMode = anyOrNull(),
             googlePaySupported = any(),
-            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
+            linkDisplay = eq(com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
             initializationMode = any(),
             financialConnectionsAvailability = anyOrNull(),
@@ -2876,8 +2876,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Never,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Never,
             ),
         )
 
@@ -2903,8 +2903,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheet.Configuration(
             merchantDisplayName = MERCHANT_DISPLAY_NAME,
-            link = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.Never,
+            link = com.stripe.android.elements.payment.LinkConfiguration(
+                display = com.stripe.android.elements.payment.LinkConfiguration.Display.Never,
             ),
         )
 
@@ -2923,7 +2923,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkEnabled = eq(false),
             linkMode = anyOrNull(),
             googlePaySupported = any(),
-            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
+            linkDisplay = eq(com.stripe.android.elements.payment.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
             initializationMode = any(),
             financialConnectionsAvailability = anyOrNull(),
@@ -3190,7 +3190,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
-            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            linkDisplay = com.stripe.android.elements.payment.LinkConfiguration.Display.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             paymentMethodOptionsSetupFutureUsage = false,
             setupFutureUsage = null

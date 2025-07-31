@@ -7,7 +7,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
-import com.stripe.android.CollectMissingLinkBillingDetailsPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.strings.ResolvableString
@@ -19,6 +18,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -613,7 +613,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
-            private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+            private var link: LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
             private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
@@ -809,7 +809,7 @@ class PaymentSheet internal constructor(
             /**
              * Configuration related to Link.
              */
-            fun link(link: PaymentSheet.LinkConfiguration): Builder = apply {
+            fun link(link: LinkConfiguration): Builder = apply {
                 this.link = link
             }
 
@@ -1085,78 +1085,6 @@ class PaymentSheet internal constructor(
              * Displays only the Google Pay logo.
              */
             Plain
-        }
-    }
-
-    /**
-     * Configuration related to Link.
-     */
-    @Poko
-    @Parcelize
-    class LinkConfiguration internal constructor(
-        internal val display: Display,
-        internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
-        internal val allowUserEmailEdits: Boolean,
-    ) : Parcelable {
-
-        @JvmOverloads
-        constructor(
-            display: Display = Display.Automatic
-        ) : this(
-            display = display,
-            collectMissingBillingDetailsForExistingPaymentMethods = true,
-            allowUserEmailEdits = true,
-        )
-
-        internal val shouldDisplay: Boolean
-            get() = when (display) {
-                Display.Automatic -> true
-                Display.Never -> false
-            }
-
-        class Builder {
-            private var display: Display = Display.Automatic
-            private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = true
-
-            fun display(display: Display) = apply {
-                this.display = display
-            }
-
-            @CollectMissingLinkBillingDetailsPreview
-            fun collectMissingBillingDetailsForExistingPaymentMethods(
-                collectMissingBillingDetailsForExistingPaymentMethods: Boolean
-            ) = apply {
-                this.collectMissingBillingDetailsForExistingPaymentMethods =
-                    collectMissingBillingDetailsForExistingPaymentMethods
-            }
-
-            fun build() = LinkConfiguration(
-                display = display,
-                collectMissingBillingDetailsForExistingPaymentMethods =
-                collectMissingBillingDetailsForExistingPaymentMethods,
-                allowUserEmailEdits = true,
-            )
-        }
-
-        /**
-         * Display configuration for Link
-         */
-        enum class Display {
-            /**
-             * Link will be displayed when available.
-             */
-            Automatic,
-
-            /**
-             * Link will never be displayed.
-             */
-            Never;
-
-            internal val analyticsValue: String
-                get() = when (this) {
-                    Automatic -> "automatic"
-                    Never -> "never"
-                }
         }
     }
 

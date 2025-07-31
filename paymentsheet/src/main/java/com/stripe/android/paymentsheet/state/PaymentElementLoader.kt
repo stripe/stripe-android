@@ -764,7 +764,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
-        linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        linkDisplay: com.stripe.android.elements.payment.LinkConfiguration.Display,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerInfo: CustomerInfo?,
         paymentMethodMetadata: PaymentMethodMetadata,
