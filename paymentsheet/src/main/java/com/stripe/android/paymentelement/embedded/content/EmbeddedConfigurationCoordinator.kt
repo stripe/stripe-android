@@ -3,10 +3,10 @@ package com.stripe.android.paymentelement.embedded.content
 import android.os.Bundle
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 internal interface EmbeddedConfigurationCoordinator {
     suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): ConfigureResult
 }
@@ -30,7 +30,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedConfigurationCoordinator {
     override suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration
     ): ConfigureResult {
         return viewModelScope.async {
@@ -56,7 +56,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
 
     private fun handleLoadedState(
         state: PaymentElementLoader.State,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
         val newPaymentSelection = selectionChooser.choose(

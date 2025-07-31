@@ -6,6 +6,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -13,7 +14,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
@@ -109,8 +109,8 @@ class DefaultFormActivityConfirmationHelperTest {
         val eventReporter = FakeEventReporter()
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(5050, "USD")
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(5050, "USD")
                 )
             ),
             paymentMethodMetadata = paymentMethodMetadata,

@@ -9,6 +9,7 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -27,7 +28,6 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -212,8 +212,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Fail' action should be returned if currency code is not provided with a deferred intent in setup mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(),
                 ),
             ),
             merchantCurrencyCode = null,
@@ -234,8 +234,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is provided with a deferred intent in setup mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(),
                 ),
             ),
             merchantCurrencyCode = "USD",
@@ -266,8 +266,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is not provided with deferred intent in payment mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099,
                         currency = "USD",
                     ),
@@ -281,8 +281,8 @@ class GooglePayConfirmationDefinitionTest {
     fun `'Launch' action should be returned if currency code is provided with deferred intent in payment mode`() =
         runActionTest(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099,
                         currency = "USD",
                     ),

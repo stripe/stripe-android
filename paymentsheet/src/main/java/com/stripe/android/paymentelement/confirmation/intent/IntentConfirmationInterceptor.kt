@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -30,7 +31,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentValidator
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.delay
@@ -260,7 +260,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferred(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -300,7 +300,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferred(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -308,7 +308,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shouldSavePaymentMethod: Boolean,
     ): NextStep {
         return when (intentConfiguration.intentBehavior) {
-            is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
+            is IntentConfiguration.IntentBehavior.Default -> handleDeferredIntent(
                 intentConfiguration = intentConfiguration,
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -316,7 +316,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 shippingValues = shippingValues,
                 shouldSavePaymentMethod = shouldSavePaymentMethod,
             )
-            is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
+            is IntentConfiguration.IntentBehavior.SharedPaymentToken -> handlePreparePaymentMethod(
                 paymentMethod = paymentMethod,
                 shippingValues = shippingValues,
             )
@@ -324,7 +324,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private suspend fun handleDeferredIntent(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -480,7 +480,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
         createIntentCallback: CreateIntentCallback,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,
@@ -520,7 +520,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         paymentMethodExtraParams: PaymentMethodExtraParams?,

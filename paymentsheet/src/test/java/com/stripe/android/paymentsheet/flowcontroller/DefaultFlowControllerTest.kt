@@ -20,6 +20,7 @@ import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -275,8 +276,8 @@ internal class DefaultFlowControllerTest {
                 eventReporter = eventReporter,
             ).apply {
                 configureWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 5000,
                             currency = "USD",
                         ),
@@ -1552,15 +1553,15 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Calls confirmation handler with deferred intents`() = confirmationTest {
-        val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        val intentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(
                 amount = 12345,
                 currency = "usd"
             )
         )
         val flowController = createAndConfigureFlowControllerForDeferredIntent(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 12345,
                     currency = "usd"
                 )
@@ -1985,8 +1986,8 @@ internal class DefaultFlowControllerTest {
     fun `On complete internal payment result with intent config in PI mode, should not save payment selection`() =
         selectionSavedTest(shouldSave = false) { flowController ->
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD"
                     )
@@ -1998,11 +1999,11 @@ internal class DefaultFlowControllerTest {
     fun `On complete internal payment result with intent config in PI+SFU mode, should save payment selection`() =
         selectionSavedTest { flowController ->
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 10L,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession
                     )
                 )
             ) { _, _ -> }
@@ -2012,8 +2013,8 @@ internal class DefaultFlowControllerTest {
     fun `On complete internal payment result with intent config in SI mode, should save payment selection`() =
         selectionSavedTest { flowController ->
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(
                         currency = "USD"
                     )
                 )
@@ -2360,8 +2361,8 @@ internal class DefaultFlowControllerTest {
 
     private suspend fun FakeConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferredIntent(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,
-        intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+        intentConfiguration: IntentConfiguration = IntentConfiguration(
+            mode = IntentConfiguration.Mode.Payment(
                 amount = 12345,
                 currency = "usd"
             )

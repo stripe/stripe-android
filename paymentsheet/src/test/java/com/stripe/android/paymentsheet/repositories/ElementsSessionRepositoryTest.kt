@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -187,8 +188,8 @@ internal class ElementsSessionRepositoryTest {
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     )
@@ -222,8 +223,8 @@ internal class ElementsSessionRepositoryTest {
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -463,10 +464,10 @@ internal class ElementsSessionRepositoryTest {
 
         repository.get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
+                intentConfiguration = IntentConfiguration(
                     sharedPaymentTokenSessionWithMode =
-                    PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                    IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
+                    sellerDetails = IntentConfiguration.SellerDetails(
                         networkId = "network_123",
                         externalId = "external_123",
                     ),

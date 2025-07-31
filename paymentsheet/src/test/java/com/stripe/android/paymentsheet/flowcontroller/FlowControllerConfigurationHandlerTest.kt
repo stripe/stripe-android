@@ -11,6 +11,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -399,8 +400,8 @@ class FlowControllerConfigurationHandlerTest {
             configurationHandler.configure(
                 scope = this,
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = amount,
                             currency = "cad",
                         )
@@ -514,8 +515,8 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),
@@ -558,8 +559,8 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
                     ),

@@ -23,10 +23,10 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCheckoutResponse
@@ -58,8 +58,8 @@ fun CheckoutScreen() {
 
     LaunchedEffect(embeddedPaymentElement) {
         val configureResult = embeddedPaymentElement.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(
                     amount = 1099,
                     currency = "EUR",
                 ),

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.lpms.foundations
 
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -7,7 +8,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.MerchantCountry
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -74,11 +74,11 @@ internal class CreateIntentFactory(
         return Result.success(
             CreateIntentData(
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = amount.toLong(),
                             currency = currency,
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
+                            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession.takeIf {
                                 createWithSetupFutureUsage
                             },
                         )
@@ -135,9 +135,9 @@ internal class CreateIntentFactory(
         return Result.success(
             CreateIntentData(
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Setup(
+                            setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession,
                         )
                     )
                 ),

@@ -1,12 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 
-internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {
+internal fun IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {
     return DeferredIntentParams(
         mode = mode.toDeferredIntentMode(),
         paymentMethodTypes = paymentMethodTypes,
@@ -16,9 +17,9 @@ internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): Deferred
 }
 
 @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
-private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): DeferredIntentParams.Mode {
+private fun IntentConfiguration.Mode.toDeferredIntentMode(): DeferredIntentParams.Mode {
     return when (this) {
-        is PaymentSheet.IntentConfiguration.Mode.Payment -> {
+        is IntentConfiguration.Mode.Payment -> {
             DeferredIntentParams.Mode.Payment(
                 amount = amount,
                 currency = currency,
@@ -27,7 +28,7 @@ private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): Deferr
                 paymentMethodOptionsJsonString = paymentMethodOptions?.toJsonObjectString()
             )
         }
-        is PaymentSheet.IntentConfiguration.Mode.Setup -> {
+        is IntentConfiguration.Mode.Setup -> {
             DeferredIntentParams.Mode.Setup(
                 currency = currency,
                 setupFutureUsage = setupFutureUse.toIntentUsage(),
@@ -36,20 +37,20 @@ private fun PaymentSheet.IntentConfiguration.Mode.toDeferredIntentMode(): Deferr
     }
 }
 
-private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toIntentUsage(): StripeIntent.Usage {
+private fun IntentConfiguration.SetupFutureUse.toIntentUsage(): StripeIntent.Usage {
     return when (this) {
-        PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> StripeIntent.Usage.OnSession
-        PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> StripeIntent.Usage.OffSession
-        PaymentSheet.IntentConfiguration.SetupFutureUse.None -> throw IllegalArgumentException(
+        IntentConfiguration.SetupFutureUse.OnSession -> StripeIntent.Usage.OnSession
+        IntentConfiguration.SetupFutureUse.OffSession -> StripeIntent.Usage.OffSession
+        IntentConfiguration.SetupFutureUse.None -> throw IllegalArgumentException(
             "PaymentSheet.IntentConfiguration setupFutureUse cannot be set to None"
         )
     }
 }
 
-private fun PaymentSheet.IntentConfiguration.CaptureMethod.toIntentCaptureMethod(): PaymentIntent.CaptureMethod {
+private fun IntentConfiguration.CaptureMethod.toIntentCaptureMethod(): PaymentIntent.CaptureMethod {
     return when (this) {
-        PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> PaymentIntent.CaptureMethod.Automatic
-        PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync -> PaymentIntent.CaptureMethod.AutomaticAsync
-        PaymentSheet.IntentConfiguration.CaptureMethod.Manual -> PaymentIntent.CaptureMethod.Manual
+        IntentConfiguration.CaptureMethod.Automatic -> PaymentIntent.CaptureMethod.Automatic
+        IntentConfiguration.CaptureMethod.AutomaticAsync -> PaymentIntent.CaptureMethod.AutomaticAsync
+        IntentConfiguration.CaptureMethod.Manual -> PaymentIntent.CaptureMethod.Manual
     }
 }

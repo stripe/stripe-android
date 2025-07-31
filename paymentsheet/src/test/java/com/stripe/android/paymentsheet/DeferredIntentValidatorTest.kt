@@ -3,6 +3,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -10,7 +11,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
-import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJsonObjectString
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory

@@ -20,6 +20,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -209,7 +210,7 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     override fun configureWithIntentConfiguration(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: PaymentSheet.Configuration?,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {

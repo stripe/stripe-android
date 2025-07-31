@@ -7,6 +7,7 @@ import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -184,15 +185,15 @@ private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List
 }
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
+private fun IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
     return when (intentBehavior) {
-        is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
+        is IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
             ElementsSessionParams.SellerDetails(
                 externalId = externalId,
                 networkId = networkId,
             )
         }
-        is PaymentSheet.IntentConfiguration.IntentBehavior.Default -> null
+        is IntentConfiguration.IntentBehavior.Default -> null
     }
 }
 

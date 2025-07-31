@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -23,7 +24,6 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
@@ -132,8 +132,8 @@ internal class IntentConfirmationFlowTest {
             confirmationOption = CONFIRMATION_OPTION,
             confirmationParameters = DEFERRED_CONFIRMATION_PARAMETERS.copy(
                 initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Setup(
                             currency = "USD",
                         ),
                         sellerDetails = null,
@@ -364,8 +364,8 @@ internal class IntentConfirmationFlowTest {
 
         val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(
                         currency = "USD",
                     )
                 )

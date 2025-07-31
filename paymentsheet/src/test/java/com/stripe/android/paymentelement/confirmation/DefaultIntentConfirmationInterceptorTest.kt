@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -29,7 +30,6 @@ import com.stripe.android.paymentelement.confirmation.intent.intercept
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -171,8 +171,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -215,8 +215,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -251,8 +251,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -306,8 +306,8 @@ class DefaultIntentConfirmationInterceptorTest {
             val interceptJob = async {
                 interceptor.intercept(
                     initializationMode = InitializationMode.DeferredIntent(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        intentConfiguration = IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 1099L,
                                 currency = "usd",
                             ),
@@ -372,8 +372,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -427,8 +427,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -469,8 +469,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -509,8 +509,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -563,8 +563,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -608,8 +608,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -660,8 +660,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -714,8 +714,8 @@ class DefaultIntentConfirmationInterceptorTest {
         for (input in inputs) {
             interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 1099L,
                             currency = "usd",
                         ),
@@ -757,8 +757,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
@@ -804,8 +804,8 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        mode = IntentConfiguration.Mode.Payment(
                             amount = 1099L,
                             currency = "usd",
                         ),
@@ -854,12 +854,12 @@ class DefaultIntentConfirmationInterceptorTest {
 
             interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 1099L,
                             currency = "usd",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_id",
                             externalId = "external_id"
                         )
@@ -904,12 +904,12 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 1099L,
                             currency = "usd",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_id",
                             externalId = "external_id"
                         )
@@ -976,12 +976,12 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 1099L,
                             currency = "usd",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_id",
                             externalId = "external_id"
                         )
@@ -1045,12 +1045,12 @@ class DefaultIntentConfirmationInterceptorTest {
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    intentConfiguration = IntentConfiguration(
+                        sharedPaymentTokenSessionWithMode = IntentConfiguration.Mode.Payment(
                             amount = 1099L,
                             currency = "usd",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
+                        sellerDetails = IntentConfiguration.SellerDetails(
                             networkId = "network_id",
                             externalId = "external_id"
                         )

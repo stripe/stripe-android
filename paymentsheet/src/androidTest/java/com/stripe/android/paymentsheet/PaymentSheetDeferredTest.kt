@@ -5,6 +5,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -61,8 +62,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -134,8 +135,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup()
                 ),
                 configuration = defaultConfiguration,
             )
@@ -197,8 +198,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -282,8 +283,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -359,8 +360,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 2000,
                         currency = "usd"
                     )
@@ -395,7 +396,7 @@ internal class PaymentSheetDeferredTest {
         integrationType = integrationType,
         builder = {
             createIntentCallback { _, _ ->
-                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+                CreateIntentResult.Success(IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
             }
         },
         resultCallback = ::assertCompleted,
@@ -409,8 +410,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 2000,
                         currency = "usd"
                     )
@@ -456,8 +457,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -536,8 +537,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )
@@ -609,8 +610,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup()
                 ),
                 configuration = defaultConfiguration,
             )
@@ -663,8 +664,8 @@ internal class PaymentSheetDeferredTest {
 
         testContext.presentPaymentSheet {
             presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                intentConfiguration = IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd"
                     )

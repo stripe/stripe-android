@@ -9,6 +9,7 @@ import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.Appearance.Embedded
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -16,7 +17,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
@@ -265,8 +265,8 @@ internal class DefaultEmbeddedStateHelperTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     selection = selection,
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                        intentConfiguration = PaymentSheet.IntentConfiguration(
-                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        intentConfiguration = IntentConfiguration(
+                            mode = IntentConfiguration.Mode.Payment(
                                 amount = 5050,
                                 currency = "USD"
                             )

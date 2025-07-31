@@ -2,10 +2,10 @@ package com.stripe.android.link
 
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.LinkController.Configuration
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
@@ -23,8 +23,8 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
     override suspend fun load(configuration: Configuration): Result<LinkConfiguration> {
         return paymentElementLoader.load(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                IntentConfiguration(
+                    mode = IntentConfiguration.Mode.Setup(),
                 ),
             ),
             configuration = configuration.asCommonConfiguration(),

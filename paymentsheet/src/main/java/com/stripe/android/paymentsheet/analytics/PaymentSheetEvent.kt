@@ -8,6 +8,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -137,8 +138,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             get() = when (this) {
                 is PaymentElementLoader.InitializationMode.DeferredIntent -> {
                     when (this.intentConfiguration.mode) {
-                        is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
-                        is PaymentSheet.IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
+                        is IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
+                        is IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
                     }
                 }
                 is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"

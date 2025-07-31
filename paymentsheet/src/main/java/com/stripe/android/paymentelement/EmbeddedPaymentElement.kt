@@ -23,6 +23,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -79,7 +80,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
      */
     suspend fun configure(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
         return configurationCoordinator.configure(intentConfiguration, configuration)

@@ -13,11 +13,11 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -31,8 +31,8 @@ internal class EmbeddedPaymentElementTestRunnerContext(
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
         embeddedPaymentElement.configure(
-            intentConfiguration = PaymentSheet.IntentConfiguration(
-                mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
+            intentConfiguration = IntentConfiguration(
+                mode = IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .configurationMutator()
