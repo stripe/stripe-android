@@ -24,6 +24,7 @@ import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.elements.payment.PreparePaymentMethodHandler
+import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.link.account.LinkStore

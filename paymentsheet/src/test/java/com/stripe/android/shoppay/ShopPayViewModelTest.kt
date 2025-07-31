@@ -20,6 +20,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.payment.PreparePaymentMethodHandler
+import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
@@ -30,7 +31,6 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.shoppay.bridge.ECEBillingDetails
 import com.stripe.android.shoppay.bridge.ECEFullAddress

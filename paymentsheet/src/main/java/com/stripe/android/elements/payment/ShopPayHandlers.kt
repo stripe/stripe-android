@@ -1,7 +1,6 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.elements.payment
 
 import android.os.Parcelable
-import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
 import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
 import dev.drewhamilton.poko.Poko
