@@ -5,13 +5,13 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetDataCommonModule
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component

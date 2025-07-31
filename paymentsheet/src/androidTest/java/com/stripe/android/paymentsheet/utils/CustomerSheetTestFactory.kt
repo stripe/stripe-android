@@ -4,7 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
-import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.CustomerSessionApiPreview

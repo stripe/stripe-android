@@ -13,6 +13,7 @@ import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository

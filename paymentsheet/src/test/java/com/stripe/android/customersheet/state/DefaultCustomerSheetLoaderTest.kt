@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
@@ -18,6 +17,7 @@ import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.data.FakeCustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.elements.CardBrandAcceptance
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepository

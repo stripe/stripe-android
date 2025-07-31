@@ -5,13 +5,13 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.Address
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount

@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
-import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
+import com.stripe.android.elements.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter

@@ -2,9 +2,9 @@ package com.stripe.android.customersheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetViewModel
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR

@@ -1,7 +1,7 @@
 package com.stripe.android.customersheet.utils
 
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
 
 @OptIn(CustomerSessionApiPreview::class)
 class FakeCustomerSessionProvider(

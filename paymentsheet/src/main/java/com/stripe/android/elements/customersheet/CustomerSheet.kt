@@ -1,4 +1,4 @@
-package com.stripe.android.customersheet
+package com.stripe.android.elements.customersheet
 
 import android.app.Application
 import android.os.Parcelable
@@ -11,7 +11,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.CustomerSheetConfigViewModel
+import com.stripe.android.customersheet.CustomerSheetConfigureRequest
+import com.stripe.android.customersheet.CustomerSheetContract
+import com.stripe.android.customersheet.CustomerSheetIntegration
+import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.customersheet.CustomerSheetResultCallback
+import com.stripe.android.customersheet.InternalCustomerSheetResult
+import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.elements.Appearance

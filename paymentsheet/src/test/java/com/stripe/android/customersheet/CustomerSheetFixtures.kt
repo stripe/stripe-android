@@ -6,6 +6,7 @@ import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession

@@ -1,9 +1,9 @@
 package com.stripe.android.customersheet.utils
 
 import com.stripe.android.customersheet.CustomerPermissions
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory

@@ -1,9 +1,9 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
+import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
