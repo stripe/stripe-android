@@ -388,6 +388,9 @@ public final class com/stripe/android/elements/AddressLauncher$AdditionalFieldsC
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface annotation class com/stripe/android/elements/AddressLauncher$AddressElementSameAsBillingPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/elements/AddressLauncher$Configuration : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -1647,9 +1650,6 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentSheetC
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/AddressAutocompletePreview : java/lang/annotation/Annotation {
-}
-
-public abstract interface annotation class com/stripe/android/paymentelement/AddressElementSameAsBillingPreview : java/lang/annotation/Annotation {
 }
 
 public abstract class com/stripe/android/paymentelement/AnalyticEvent {

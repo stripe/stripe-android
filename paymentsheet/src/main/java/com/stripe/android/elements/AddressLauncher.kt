@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
-import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -211,6 +210,14 @@ class AddressLauncher internal constructor(
     fun interface ResultCallback {
         fun onAddressLauncherResult(addressLauncherResult: AddressLauncher.Result)
     }
+
+
+    @RequiresOptIn(
+        level = RequiresOptIn.Level.ERROR,
+        message = "This API is under construction. It can be changed or removed at any time (use at your own risk)."
+    )
+    @Retention(AnnotationRetention.BINARY)
+    annotation class AddressElementSameAsBillingPreview
 }
 
 /**
