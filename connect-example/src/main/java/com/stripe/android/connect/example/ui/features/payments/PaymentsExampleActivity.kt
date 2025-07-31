@@ -29,4 +29,4 @@ class PaymentsExampleActivity : BasicExampleComponentActivity() {
             Toast.makeText(this@PaymentsExampleActivity, error.message, Toast.LENGTH_LONG).show()
         }
     }
-} 
+}
