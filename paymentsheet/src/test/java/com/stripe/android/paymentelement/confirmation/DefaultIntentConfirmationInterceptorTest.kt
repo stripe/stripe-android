@@ -10,6 +10,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -22,7 +23,6 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.confirmation.intent.CreateIntentCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor

@@ -48,8 +48,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
-import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
@@ -227,7 +227,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                             } ?: run {
                                 onConfirmingChanged(false)
 
-                                setResult(Activity.RESULT_OK)
+                                setResult(RESULT_OK)
                                 finish()
                             }
                         }.onFailure {
@@ -239,7 +239,7 @@ internal class SharedPaymentTokenPlaygroundActivity : AppCompatActivity() {
                                 Toast.LENGTH_LONG
                             ).show()
 
-                            setResult(Activity.RESULT_OK)
+                            setResult(RESULT_OK)
                             finish()
                         }
                     }

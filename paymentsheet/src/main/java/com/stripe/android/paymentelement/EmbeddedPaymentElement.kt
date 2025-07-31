@@ -27,6 +27,7 @@ import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent

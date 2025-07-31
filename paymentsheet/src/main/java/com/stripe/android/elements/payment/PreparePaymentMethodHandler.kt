@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement
+package com.stripe.android.elements.payment
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.AddressDetails
