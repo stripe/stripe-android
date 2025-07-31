@@ -17,6 +17,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
@@ -291,8 +292,7 @@ internal class GooglePayConfirmationActivityTest {
                 customAmount = null,
                 merchantCountryCode = "CA",
                 customLabel = "Test merchant Inc.",
-                billingDetailsCollectionConfiguration = PaymentSheet
-                    .BillingDetailsCollectionConfiguration(),
+                billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                 cardBrandFilter = DefaultCardBrandFilter,
             )
         )
