@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -335,8 +336,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val wallets = mutableListOf<DisplayablePaymentMethod>()
         if (showsWalletsInline(walletsState)) {
             walletsState?.link?.let {
-                val subtitle = it.email?.resolvableString
-                    ?: PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
+                val subtitle = when (val state = it.state) {
+                    is LinkButtonState.Email -> state.email.resolvableString
+                    is LinkButtonState.DefaultPayment,
+                    is LinkButtonState.Default ->
+                        PaymentsCoreR.string.stripe_link_simple_secure_payments.resolvableString
+                }
 
                 wallets += DisplayablePaymentMethod(
                     code = PaymentMethod.Type.Link.code,
