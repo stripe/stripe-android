@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
@@ -124,7 +125,7 @@ internal class DefaultEmbeddedStateHelperTest {
                     countryCode = "US",
                 )
             )
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
         }
 
@@ -142,7 +143,7 @@ internal class DefaultEmbeddedStateHelperTest {
                     countryCode = "US",
                 )
             )
-            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+            customer(CustomerConfiguration("cus_123", "ek_test"))
             formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             embeddedViewDisplaysMandateText(false)
         }
@@ -160,7 +161,7 @@ internal class DefaultEmbeddedStateHelperTest {
                 "Use RowSelectionBehavior.Default or disable Google Pay and saved payment methods."
         ) {
             setState {
-                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                customer(CustomerConfiguration("cus_123", "ek_test"))
                 formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
             }
         }

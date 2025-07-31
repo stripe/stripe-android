@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -610,7 +611,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "some_id",
                     ephemeralKeySecret = "ek_123",
                 )
@@ -1074,7 +1075,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "id",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1101,7 +1102,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "id",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1179,7 +1180,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1477,7 +1478,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -1690,7 +1691,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "customer_client_secret",
                 ),
@@ -1701,7 +1702,7 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         assertThat(repository.lastParams?.customer).isEqualTo(
-            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
                 clientSecret = "customer_client_secret",
             )
@@ -1747,7 +1748,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1787,7 +1788,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1832,7 +1833,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1877,7 +1878,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1922,7 +1923,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -1953,7 +1954,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -1992,7 +1993,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -2032,7 +2033,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "cus_1",
                         clientSecret = "customer_client_secret",
                     ),
@@ -2078,7 +2079,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -2122,7 +2123,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "id",
                     clientSecret = "cuss_1",
                 ),
@@ -2161,7 +2162,7 @@ internal class DefaultPaymentElementLoaderTest {
             val result = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2217,7 +2218,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2260,7 +2261,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2293,7 +2294,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    customer = CustomerConfiguration.createWithCustomerSession(
                         id = "id",
                         clientSecret = "cuss_1",
                     ),
@@ -2486,7 +2487,7 @@ internal class DefaultPaymentElementLoaderTest {
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
-                    customer = PaymentSheet.CustomerConfiguration(
+                    customer = CustomerConfiguration(
                         id = "id",
                         ephemeralKeySecret = "ek_123",
                     ),
@@ -2773,7 +2774,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'LegacyEphemeralKey',last PM permission should be true if config value is true`() =
         removeLastPaymentMethodTest(
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "cus_1",
                 ephemeralKeySecret = "ek_123",
             ),
@@ -2786,7 +2787,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When using 'CustomerSession', last PM permission should be true if server & config value is true`() =
         removeLastPaymentMethodTest(
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            customer = CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
                 clientSecret = "cuss_123",
             ),
@@ -3005,7 +3006,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun removeLastPaymentMethodTest(
-        customer: PaymentSheet.CustomerConfiguration,
+        customer: CustomerConfiguration,
         shouldDisableMobilePaymentElement: Boolean = false,
         canRemoveLastPaymentMethodFromServer: Boolean = true,
         canRemoveLastPaymentMethodFromConfig: Boolean = true,
@@ -3164,7 +3165,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializationMode = initializationMode,
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
+                customer = CustomerConfiguration(
                     id = "cus_123",
                     ephemeralKeySecret = "ek_123",
                 ),
@@ -3309,7 +3310,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun mockConfiguration(
-        customer: PaymentSheet.CustomerConfiguration? = null,
+        customer: CustomerConfiguration? = null,
         isGooglePayEnabled: Boolean = true,
         allowsDelayedPaymentMethods: Boolean = false,
         shippingDetails: AddressDetails? = null,
@@ -3333,7 +3334,7 @@ internal class DefaultPaymentElementLoaderTest {
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD) + PaymentMethodFixtures.createCards(5)
         private val DEFAULT_PAYMENT_SHEET_CONFIG = PaymentSheet.Configuration(
             merchantDisplayName = "Some Name",
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "cus_123",
                 ephemeralKeySecret = "ek_123",
             ),
@@ -3397,7 +3398,7 @@ internal class DefaultPaymentElementLoaderTest {
         val result = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
             paymentSheetConfiguration = mockConfiguration(
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "id",
                     clientSecret = "cuss_1",
                 ),

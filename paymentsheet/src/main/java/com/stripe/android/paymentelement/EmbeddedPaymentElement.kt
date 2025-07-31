@@ -16,6 +16,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -216,7 +217,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     @Poko
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
-        internal val customer: PaymentSheet.CustomerConfiguration?,
+        internal val customer: CustomerConfiguration?,
         internal val googlePay: PaymentSheet.GooglePayConfiguration?,
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val shippingDetails: AddressDetails?,
@@ -242,7 +243,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              */
             private val merchantDisplayName: String
         ) {
-            private var customer: PaymentSheet.CustomerConfiguration? = ConfigurationDefaults.customer
+            private var customer: CustomerConfiguration? = ConfigurationDefaults.customer
             private var googlePay: PaymentSheet.GooglePayConfiguration? = ConfigurationDefaults.googlePay
             private var defaultBillingDetails: PaymentSheet.BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
@@ -269,7 +270,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             /**
              * If set, the customer can select a previously saved payment method.
              */
-            fun customer(customer: PaymentSheet.CustomerConfiguration?) =
+            fun customer(customer: CustomerConfiguration?) =
                 apply { this.customer = customer }
 
             /**

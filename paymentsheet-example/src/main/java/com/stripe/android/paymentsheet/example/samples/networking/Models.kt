@@ -6,7 +6,7 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentsheet.example.samples.model.CartProduct
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 import kotlinx.serialization.DeserializationStrategy
@@ -58,7 +58,7 @@ data class ExampleCheckoutResponse(
 ) {
 
     internal fun makeCustomerConfig() = if (customer != null && ephemeralKey != null) {
-        PaymentSheet.CustomerConfiguration(
+        CustomerConfiguration(
             id = customer,
             ephemeralKeySecret = ephemeralKey
         )

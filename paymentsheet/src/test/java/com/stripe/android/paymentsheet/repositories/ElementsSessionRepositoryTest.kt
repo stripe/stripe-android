@@ -8,6 +8,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -265,7 +266,7 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
-            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+            customer = CustomerConfiguration.createWithCustomerSession(
                 id = "cus_1",
                 clientSecret = "customer_session_client_secret"
             ),
@@ -316,7 +317,7 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret"
             ),
-            customer = PaymentSheet.CustomerConfiguration(
+            customer = CustomerConfiguration(
                 id = "cus_1",
                 ephemeralKeySecret = "legacy_customer_ephemeral_key"
             ),

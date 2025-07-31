@@ -15,6 +15,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
@@ -327,7 +328,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     ),
                     config = PaymentSheet.Configuration(
                         merchantDisplayName = "Merchant, Inc.",
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        customer = CustomerConfiguration.createWithCustomerSession(
                             id = "cus_1",
                             clientSecret = "cuss_1",
                         ),

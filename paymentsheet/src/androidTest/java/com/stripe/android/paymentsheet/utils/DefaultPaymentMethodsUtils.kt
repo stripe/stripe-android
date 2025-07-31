@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
@@ -68,7 +69,7 @@ internal object DefaultPaymentMethodsUtils {
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
                 paymentMethodLayout = paymentMethodLayout,
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                customer = CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_1",
                 ),

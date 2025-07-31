@@ -9,6 +9,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
@@ -136,7 +137,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
-    private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
+    private val prefsRepositoryFactory: @JvmSuppressWildcards (CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerRepository: CustomerRepository,
@@ -284,7 +285,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
-        customer: PaymentSheet.CustomerConfiguration?,
+        customer: CustomerConfiguration?,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
@@ -448,7 +449,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveCustomerPaymentMethods(
         metadata: PaymentMethodMetadata,
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerConfig: CustomerConfiguration,
     ): List<PaymentMethod> {
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
@@ -871,7 +872,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         data class Legacy(
-            val customerConfig: PaymentSheet.CustomerConfiguration,
+            val customerConfig: CustomerConfiguration,
             val accessType: PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey
         ) : CustomerInfo {
             override val id: String = customerConfig.id

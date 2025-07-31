@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -405,7 +406,7 @@ internal class PaymentSheetAnalyticsTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = horizontalModeConfiguration.newBuilder()
                     .customer(
-                        PaymentSheet.CustomerConfiguration(
+                        CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )
@@ -465,7 +466,7 @@ internal class PaymentSheetAnalyticsTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = horizontalModeConfiguration.newBuilder()
                     .customer(
-                        PaymentSheet.CustomerConfiguration(
+                        CustomerConfiguration(
                             id = "cus_1",
                             ephemeralKeySecret = "ek_123",
                         )

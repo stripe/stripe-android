@@ -9,6 +9,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -311,7 +312,7 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = " ",
                         ephemeralKeySecret = PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY,
                     )
@@ -337,7 +338,7 @@ class FlowControllerConfigurationHandlerTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
                 .customer(
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = "customer_id",
                         ephemeralKeySecret = " ",
                         accessType = LegacyCustomerEphemeralKey(PaymentSheetFixtures.DEFAULT_EPHEMERAL_KEY),

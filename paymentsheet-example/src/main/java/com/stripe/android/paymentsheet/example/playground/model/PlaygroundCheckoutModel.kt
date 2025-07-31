@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
+import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -226,7 +226,7 @@ data class CheckoutResponse(
         when (customerKeyType) {
             CheckoutRequest.CustomerKeyType.CustomerSession -> {
                 customerSessionClientSecret?.let { clientSecret ->
-                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    CustomerConfiguration.createWithCustomerSession(
                         id = id,
                         clientSecret = clientSecret,
                     )
@@ -235,7 +235,7 @@ data class CheckoutResponse(
             CheckoutRequest.CustomerKeyType.Legacy,
             null -> {
                 customerEphemeralKeySecret?.let { ephemeralKeySecret ->
-                    PaymentSheet.CustomerConfiguration(
+                    CustomerConfiguration(
                         id = id,
                         ephemeralKeySecret = ephemeralKeySecret
                     )
