@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.elements.payment.FlowController
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import kotlinx.coroutines.test.runTest

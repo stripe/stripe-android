@@ -11,9 +11,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.elements.payment.ExternalPaymentMethodResult
+import com.stripe.android.elements.payment.ExternalPaymentMethodResultHandler
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
-import com.stripe.android.paymentsheet.ExternalPaymentMethodResultHandler
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 class FawryActivity : AppCompatActivity() {

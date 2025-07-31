@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Activity
 import android.content.Intent
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.payment.ExternalPaymentMethodResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.testing.FakeErrorReporter

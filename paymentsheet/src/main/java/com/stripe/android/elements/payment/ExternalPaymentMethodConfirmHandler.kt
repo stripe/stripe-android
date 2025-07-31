@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.elements.payment
 
 import com.stripe.android.model.PaymentMethod
 

@@ -6,13 +6,13 @@ import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.elements.payment.PreparePaymentMethodHandler
 import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 
 @OptIn(
     ExperimentalCustomPaymentMethodsApi::class,

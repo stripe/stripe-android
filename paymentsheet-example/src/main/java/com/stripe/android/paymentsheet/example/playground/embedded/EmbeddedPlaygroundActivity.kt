@@ -34,12 +34,12 @@ import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.elements.payment.rememberEmbeddedPaymentElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity

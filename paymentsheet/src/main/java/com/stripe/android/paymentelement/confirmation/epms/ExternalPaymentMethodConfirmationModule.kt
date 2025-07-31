@@ -1,9 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.epms
 
+import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import dagger.Binds
 import dagger.Module
 import dagger.Provides

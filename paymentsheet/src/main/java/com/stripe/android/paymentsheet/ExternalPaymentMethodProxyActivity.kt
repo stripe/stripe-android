@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.elements.payment.ExternalPaymentMethodResult
+import com.stripe.android.elements.payment.ExternalPaymentMethodResultHandler
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 

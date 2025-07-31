@@ -38,7 +38,6 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
 import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter

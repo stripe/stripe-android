@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.elements.payment
 
 import android.app.Activity
 import android.content.Context
@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Parcelable
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodProxyActivity
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
