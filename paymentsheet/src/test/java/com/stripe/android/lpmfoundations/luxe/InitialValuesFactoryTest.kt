@@ -11,7 +11,7 @@ import org.junit.Test
 
 class InitialValuesFactoryTest {
     private val billingDetails = PaymentSheet.BillingDetails(
-        PaymentSheet.Address(
+        com.stripe.android.elements.Address(
             line1 = "123 Main Street",
             line2 = "APt 1",
             city = "Dublin",

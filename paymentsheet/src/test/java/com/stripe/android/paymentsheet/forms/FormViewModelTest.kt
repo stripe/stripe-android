@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
@@ -434,7 +435,7 @@ internal class FormViewModelTest {
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = "456",
                     city = "San Francisco",
@@ -477,7 +478,7 @@ internal class FormViewModelTest {
             billingDetails = PaymentSheet.BillingDetails(
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
-                address = PaymentSheet.Address(
+                address = Address(
                     country = "US",
                     postalCode = "94111"
                 ),
@@ -512,7 +513,7 @@ internal class FormViewModelTest {
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = "456",
                     city = "San Francisco",

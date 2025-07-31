@@ -467,7 +467,7 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
 
 internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
     return PaymentSheet.BillingDetails(
-        address = PaymentSheet.Address(
+        address = com.stripe.android.elements.Address(
             city = address?.city,
             country = address?.country,
             line1 = address?.line1,

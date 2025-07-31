@@ -19,7 +19,7 @@ class AddressDetails(
     /**
      * The customer's address
      */
-    val address: PaymentSheet.Address? = null,
+    val address: com.stripe.android.elements.Address? = null,
 
     /**
      * The customer's phone number, without formatting e.g. "5551234567"

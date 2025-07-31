@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CompletableDeferred
@@ -220,7 +220,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
     private fun createTestAddressDetails() = AddressDetails(
         name = "John Doe",
-        address = PaymentSheet.Address(
+        address = Address(
             line1 = "123 Main Street",
             line2 = "Apt 4B",
             city = "San Francisco",

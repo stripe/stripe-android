@@ -16,6 +16,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
@@ -999,7 +1000,7 @@ internal class DefaultFlowControllerTest {
             val linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
                 shippingDetails = AddressDetails(
                     name = "Test",
-                    address = PaymentSheet.Address(),
+                    address = Address(),
                 )
             )
 
@@ -2188,7 +2189,7 @@ internal class DefaultFlowControllerTest {
         val shippingDetails = AddressDetails(
             name = "John Doe",
             phoneNumber = "11234567890",
-            address = PaymentSheet.Address(
+            address = Address(
                 line1 = "123 Apple Street",
                 line2 = "Unit 47",
                 city = "South San Francisco",

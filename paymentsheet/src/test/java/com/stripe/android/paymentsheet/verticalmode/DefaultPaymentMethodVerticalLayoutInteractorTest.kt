@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
@@ -809,7 +810,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 name = "Jenny Rosen",
                 email = "mail@mail.com",
                 phone = "+13105551234",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = "456",
                     city = "San Francisco",

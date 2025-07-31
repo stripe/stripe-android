@@ -1,6 +1,6 @@
 package com.stripe.android.crypto.onramp.model
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -17,11 +17,11 @@ private data class AddressSurrogate(
     val state: String? = null
 )
 
-internal object PaymentSheetAddressSerializer : KSerializer<PaymentSheet.Address> {
+internal object PaymentSheetAddressSerializer : KSerializer<Address> {
     private val delegate = AddressSurrogate.serializer()
     override val descriptor = delegate.descriptor
 
-    override fun serialize(encoder: Encoder, value: PaymentSheet.Address) {
+    override fun serialize(encoder: Encoder, value: Address) {
         val surrogate = AddressSurrogate(
             city = value.city,
             country = value.country,
@@ -34,10 +34,10 @@ internal object PaymentSheetAddressSerializer : KSerializer<PaymentSheet.Address
         delegate.serialize(encoder, surrogate)
     }
 
-    override fun deserialize(decoder: Decoder): PaymentSheet.Address {
+    override fun deserialize(decoder: Decoder): Address {
         val surrogate = delegate.deserialize(decoder)
 
-        return PaymentSheet.Address.Builder()
+        return Address.Builder()
             .city(surrogate.city)
             .country(surrogate.country)
             .line1(surrogate.line1)

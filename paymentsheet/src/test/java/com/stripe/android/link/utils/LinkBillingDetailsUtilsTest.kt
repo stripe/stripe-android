@@ -2,6 +2,7 @@ package com.stripe.android.link.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.elements.Address
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -31,7 +32,7 @@ class LinkBillingDetailsUtilsTest {
         )
     )
 
-    private val defaultAddress = PaymentSheet.Address(
+    private val defaultAddress = Address(
         line1 = "123 Main St",
         city = "San Francisco",
         state = "CA",
@@ -282,7 +283,7 @@ class LinkBillingDetailsUtilsTest {
             defaultBillingDetails = PaymentSheet.BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "Default Line 1",
                     line2 = "Default Line 2",
                     city = "Default City",
@@ -321,7 +322,7 @@ class LinkBillingDetailsUtilsTest {
             defaultBillingDetails = PaymentSheet.BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "Default Line 1",
                     city = "Default City",
                     state = "CA",
@@ -364,7 +365,7 @@ class LinkBillingDetailsUtilsTest {
             defaultBillingDetails = PaymentSheet.BillingDetails(
                 name = "Default Name",
                 email = "default@example.com",
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "Default Line 1",
                     city = "Default City",
                     state = "CA",

@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.elements.Address
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -146,7 +147,7 @@ class CardUiDefinitionFactoryTest {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
                     shippingDetails = AddressDetails(
-                        address = PaymentSheet.Address(
+                        address = Address(
                             line1 = "354 Oyster Point Blvd",
                             city = "South San Francisco",
                             state = "CA",

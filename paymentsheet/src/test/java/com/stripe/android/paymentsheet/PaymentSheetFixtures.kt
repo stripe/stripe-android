@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -261,7 +262,7 @@ internal object PaymentSheetFixtures {
             PaymentMethod.Type.Bancontact.code,
             merchantName = "Merchant, Inc.",
             billingDetails = PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
+                address = Address(
                     line1 = "123 Main Street",
                     line2 = null,
                     city = "San Francisco",

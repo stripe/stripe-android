@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.elements.Address
 import com.stripe.android.paymentelement.assertCompleted
 import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -272,7 +273,7 @@ internal class PreparePaymentMethodTest {
 
     private companion object {
         val SHIPPING_ADDRESS = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "South San Francisc",
                 line1 = "123 Apple Street",
                 line2 = "Unit #2",

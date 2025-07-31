@@ -272,6 +272,45 @@ public abstract interface class com/stripe/android/customersheet/SetupIntentClie
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/elements/Address : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCity ()Ljava/lang/String;
+	public final fun getCountry ()Ljava/lang/String;
+	public final fun getLine1 ()Ljava/lang/String;
+	public final fun getLine2 ()Ljava/lang/String;
+	public final fun getPostalCode ()Ljava/lang/String;
+	public final fun getState ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/elements/Address$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun build ()Lcom/stripe/android/elements/Address;
+	public final fun city (Ljava/lang/String;)Lcom/stripe/android/elements/Address$Builder;
+	public final fun country (Ljava/lang/String;)Lcom/stripe/android/elements/Address$Builder;
+	public final fun line1 (Ljava/lang/String;)Lcom/stripe/android/elements/Address$Builder;
+	public final fun line2 (Ljava/lang/String;)Lcom/stripe/android/elements/Address$Builder;
+	public final fun postalCode (Ljava/lang/String;)Lcom/stripe/android/elements/Address$Builder;
+	public final fun state (Ljava/lang/String;)Lcom/stripe/android/elements/Address$Builder;
+}
+
+public final class com/stripe/android/elements/Address$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/Address;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/Address;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract class com/stripe/android/elements/CardBrandAcceptance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/elements/CardBrandAcceptance$Companion;
@@ -1493,45 +1532,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public static synthetic fun presentWithSetupIntent$default (Lcom/stripe/android/paymentsheet/PaymentSheet;Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;ILjava/lang/Object;)V
 }
 
-public final class com/stripe/android/paymentsheet/PaymentSheet$Address : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCity ()Ljava/lang/String;
-	public final fun getCountry ()Ljava/lang/String;
-	public final fun getLine1 ()Ljava/lang/String;
-	public final fun getLine2 ()Ljava/lang/String;
-	public final fun getPostalCode ()Ljava/lang/String;
-	public final fun getState ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$Address$Builder {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
-	public final fun city (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
-	public final fun country (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
-	public final fun line1 (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
-	public final fun line2 (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
-	public final fun postalCode (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
-	public final fun state (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$Address$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -1801,8 +1801,8 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails :
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -1813,8 +1813,8 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails :
 public final class com/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder {
 	public static final field $stable I
 	public fun <init> ()V
-	public final fun address (Lcom/stripe/android/paymentsheet/PaymentSheet$Address$Builder;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
-	public final fun address (Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
+	public final fun address (Lcom/stripe/android/elements/Address$Builder;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
+	public final fun address (Lcom/stripe/android/elements/Address;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
 	public final fun email (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
 	public final fun name (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails$Builder;
@@ -2900,11 +2900,11 @@ public final class com/stripe/android/paymentsheet/addresselement/AddressDetails
 	public static final field Companion Lcom/stripe/android/paymentsheet/addresselement/AddressDetails$Companion;
 	public static final field KEY Ljava/lang/String;
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/Boolean;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/Boolean;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/elements/Address;Ljava/lang/String;Ljava/lang/Boolean;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getAddress ()Lcom/stripe/android/elements/Address;
 	public final fun getName ()Ljava/lang/String;
 	public final fun getPhoneNumber ()Ljava/lang/String;
 	public fun hashCode ()I

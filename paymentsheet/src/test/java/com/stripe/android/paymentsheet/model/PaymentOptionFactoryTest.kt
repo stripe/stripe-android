@@ -280,7 +280,7 @@ class PaymentOptionFactoryTest {
 
         assertThat(paymentOption.billingDetails).isEqualTo(
             PaymentSheet.BillingDetails(
-                address = PaymentSheet.Address(
+                address = com.stripe.android.elements.Address(
                     city = null,
                     country = null,
                     line1 = null,
@@ -323,7 +323,7 @@ class PaymentOptionFactoryTest {
         )
 
         val PAYMENT_SHEET_BILLING_DETAILS = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(
+            address = com.stripe.android.elements.Address(
                 city = "San Francisco",
                 country = "US",
                 line1 = "123 Main St",

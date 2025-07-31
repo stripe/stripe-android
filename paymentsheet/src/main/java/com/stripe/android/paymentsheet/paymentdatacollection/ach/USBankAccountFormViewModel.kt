@@ -31,7 +31,6 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForI
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
@@ -842,7 +841,7 @@ internal fun Address.Companion.fromFormFieldValues(formFieldValues: Map<Identifi
         postalCode = formFieldValues[IdentifierSpec.PostalCode],
     )
 
-internal fun PaymentSheet.Address.asAddressModel() =
+internal fun com.stripe.android.elements.Address.asAddressModel() =
     Address(
         line1 = line1,
         line2 = line2,

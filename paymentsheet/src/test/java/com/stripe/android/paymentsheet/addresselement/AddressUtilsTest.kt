@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.Address
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -11,7 +11,7 @@ class AddressUtilsTest {
     @Test
     fun `test edit distance equal address`() {
         val address = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "San Francisco",
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -26,7 +26,7 @@ class AddressUtilsTest {
     @Test
     fun `test edit distance one char diff`() {
         val address = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "San Francisco",
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -36,7 +36,7 @@ class AddressUtilsTest {
         )
 
         val otherAddress = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "Sa Francisco", // One char diff here
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -51,7 +51,7 @@ class AddressUtilsTest {
     @Test
     fun `test edit distance different city`() {
         val address = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "San Francisco",
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -61,7 +61,7 @@ class AddressUtilsTest {
         )
 
         val otherAddress = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "Freemont",
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -76,7 +76,7 @@ class AddressUtilsTest {
     @Test
     fun `test edit distance missing city original`() {
         val address = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = null,
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -86,7 +86,7 @@ class AddressUtilsTest {
         )
 
         val otherAddress = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "San Francisco",
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -101,7 +101,7 @@ class AddressUtilsTest {
     @Test
     fun `test edit distance missing city other`() {
         val address = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = "San Francisco",
                 country = "AT",
                 line1 = "510 Townsend St.",
@@ -111,7 +111,7 @@ class AddressUtilsTest {
         )
 
         val otherAddress = AddressDetails(
-            address = PaymentSheet.Address(
+            address = Address(
                 city = null,
                 country = "AT",
                 line1 = "510 Townsend St.",

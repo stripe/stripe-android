@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.Address
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -691,7 +692,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader()
 
         val billingDetails = PaymentSheet.BillingDetails(
-            address = PaymentSheet.Address(country = "CA"),
+            address = Address(country = "CA"),
             name = "Till",
         )
 
@@ -723,7 +724,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val shippingDetails = AddressDetails(
             name = "Not Till",
-            address = PaymentSheet.Address(country = "US"),
+            address = Address(country = "US"),
             isCheckboxSelected = true,
         )
 
@@ -1040,7 +1041,7 @@ internal class DefaultPaymentElementLoaderTest {
         val billingDetails = PaymentSheet.BillingDetails(phone = "123-456-7890")
 
         val shippingDetails = AddressDetails(
-            address = PaymentSheet.Address(country = "US"),
+            address = Address(country = "US"),
             phoneNumber = "098-765-4321",
             isCheckboxSelected = true,
         )

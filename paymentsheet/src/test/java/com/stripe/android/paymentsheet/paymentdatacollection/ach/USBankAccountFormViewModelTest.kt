@@ -1781,7 +1781,7 @@ class USBankAccountFormViewModelTest {
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
         const val CUSTOMER_COUNTRY = "US"
         const val CUSTOMER_PHONE = "+13105551234"
-        val CUSTOMER_ADDRESS = PaymentSheet.Address(
+        val CUSTOMER_ADDRESS = com.stripe.android.elements.Address(
             line1 = "123 Main Street",
             line2 = "Apt 456",
             city = "San Francisco",

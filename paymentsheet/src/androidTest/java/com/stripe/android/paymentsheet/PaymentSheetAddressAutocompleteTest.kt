@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.text.SpannableString
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.elements.Address
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -93,7 +94,7 @@ class PaymentSheetAddressAutocompleteTest {
                     )
                     .defaultBillingDetails(
                         PaymentSheet.BillingDetails(
-                            address = PaymentSheet.Address(
+                            address = Address(
                                 line1 = "123 Coffee Street",
                                 city = "Chicago",
                                 state = "IL",
