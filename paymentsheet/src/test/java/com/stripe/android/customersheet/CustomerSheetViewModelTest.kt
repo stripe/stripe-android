@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionData
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelModule
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
@@ -31,7 +32,6 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -3133,10 +3133,10 @@ class CustomerSheetViewModelTest {
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Merchant",
                 // Only accept Visa and Mastercard
-                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
+                cardBrandAcceptance = CardBrandAcceptance.allowed(
                     listOf(
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Visa,
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard
+                        CardBrandAcceptance.BrandCategory.Visa,
+                        CardBrandAcceptance.BrandCategory.Mastercard
                     )
                 )
             ),

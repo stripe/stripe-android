@@ -6,6 +6,7 @@ import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -1030,8 +1031,8 @@ internal class PaymentMethodMetadataTest {
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
         val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
-        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
-            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        val cardBrandAcceptance = CardBrandAcceptance.allowed(
+            listOf(CardBrandAcceptance.BrandCategory.Amex)
         )
         val customPaymentMethods = listOf(
             PaymentSheet.CustomPaymentMethod(
@@ -1162,8 +1163,8 @@ internal class PaymentMethodMetadataTest {
         val defaultBillingDetails = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
-        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
-            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        val cardBrandAcceptance = CardBrandAcceptance.allowed(
+            listOf(CardBrandAcceptance.BrandCategory.Amex)
         )
 
         val configuration = createCustomerSheetConfiguration(
@@ -1894,7 +1895,7 @@ internal class PaymentMethodMetadataTest {
             shippingDetails = AddressDetails(),
             billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration(),
             customPaymentMethods = listOf(),
-            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+            cardBrandAcceptance = CardBrandAcceptance.all(),
             shopPayConfiguration = shopPayConfiguration,
         )
 
@@ -1923,7 +1924,7 @@ internal class PaymentMethodMetadataTest {
 
     fun `Passes CBF along to Link`() {
         val linkConfiguration = LinkTestUtils.createLinkConfiguration(
-            cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+            cardBrandFilter = PaymentSheetCardBrandFilter(CardBrandAcceptance.all())
         )
 
         val metadata = PaymentMethodMetadata.createForNativeLink(
@@ -1986,7 +1987,7 @@ internal class PaymentMethodMetadataTest {
     private fun createCustomerSheetConfiguration(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         defaultBillingDetails: PaymentSheet.BillingDetails,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+        cardBrandAcceptance: CardBrandAcceptance
     ) = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
         .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
         .defaultBillingDetails(defaultBillingDetails)
@@ -2000,7 +2001,7 @@ internal class PaymentMethodMetadataTest {
         defaultBillingDetails: PaymentSheet.BillingDetails,
         shippingDetails: AddressDetails,
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        cardBrandAcceptance: CardBrandAcceptance,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",

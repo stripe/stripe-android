@@ -1,6 +1,7 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
@@ -19,8 +20,8 @@ internal class CommonConfigurationTest {
     @Test
     fun `'containVolatileDifferences' should return true when volatile differences are found`() {
         val configWithCardBrandAcceptanceChanges = configuration.copy(
-            cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
-                listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+            cardBrandAcceptance = CardBrandAcceptance.disallowed(
+                listOf(CardBrandAcceptance.BrandCategory.Visa)
             )
         )
 

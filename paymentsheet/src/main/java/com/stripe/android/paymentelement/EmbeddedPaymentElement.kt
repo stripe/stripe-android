@@ -16,6 +16,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -230,7 +231,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean,
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
-        internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val cardBrandAcceptance: CardBrandAcceptance,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
@@ -259,7 +260,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
-            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
+            private var cardBrandAcceptance: CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
@@ -417,7 +418,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: Card brand filtering is not currently supported in Link.
              */
             fun cardBrandAcceptance(
-                cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+                cardBrandAcceptance: CardBrandAcceptance
             ) = apply {
                 this.cardBrandAcceptance = cardBrandAcceptance
             }

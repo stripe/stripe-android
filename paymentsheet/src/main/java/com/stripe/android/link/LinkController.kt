@@ -8,6 +8,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.link.injection.LinkControllerScope
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethod
@@ -172,7 +173,7 @@ class LinkController @Inject internal constructor(
     @Poko
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
-        internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val cardBrandAcceptance: CardBrandAcceptance,
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val allowUserEmailEdits: Boolean,
@@ -190,7 +191,7 @@ class LinkController @Inject internal constructor(
              */
             private val merchantDisplayName: String
         ) {
-            private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
+            private var cardBrandAcceptance: CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var defaultBillingDetails: PaymentSheet.BillingDetails? =
                 ConfigurationDefaults.billingDetails
@@ -207,7 +208,7 @@ class LinkController @Inject internal constructor(
              * @param cardBrandAcceptance Configuration for which card brands should be accepted.
              * @return This builder instance for method chaining.
              */
-            fun cardBrandAcceptance(cardBrandAcceptance: PaymentSheet.CardBrandAcceptance) = apply {
+            fun cardBrandAcceptance(cardBrandAcceptance: CardBrandAcceptance) = apply {
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.common.model
 
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -21,7 +22,7 @@ internal object CommonConfigurationFactory {
         paymentMethodOrder: List<String> = emptyList(),
         externalPaymentMethods: List<String> = emptyList(),
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
-        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+        cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
         link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null,
         googlePlacesApiKey: String? = null,

@@ -3,6 +3,7 @@ package com.stripe.android.common.model
 import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -26,7 +27,7 @@ internal data class CommonConfiguration(
     val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
-    val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    val cardBrandAcceptance: CardBrandAcceptance,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
@@ -231,5 +232,5 @@ private fun CommonConfiguration.toVolatileConfiguration(): VolatileCommonConfigu
 private data class VolatileCommonConfiguration(
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    val cardBrandAcceptance: CardBrandAcceptance,
 )

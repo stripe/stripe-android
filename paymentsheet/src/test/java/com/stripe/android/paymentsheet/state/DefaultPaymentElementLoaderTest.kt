@@ -7,6 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
@@ -154,7 +155,7 @@ internal class DefaultPaymentElementLoaderTest {
                     isGooglePayReady = true,
                     linkMode = null,
                     availableWallets = emptyList(),
-                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                    cardBrandFilter = PaymentSheetCardBrandFilter(CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
                     financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                     customerMetadataPermissions = CustomerMetadata.Permissions(
@@ -1571,9 +1572,9 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some Name",
-                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                cardBrandAcceptance = CardBrandAcceptance.disallowed(
                     listOf(
-                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                        CardBrandAcceptance.BrandCategory.Amex
                     )
                 )
             ),
@@ -2748,8 +2749,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
             .cardBrandAcceptance(
-                PaymentSheet.CardBrandAcceptance.disallowed(
-                    listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Visa)
+                CardBrandAcceptance.disallowed(
+                    listOf(CardBrandAcceptance.BrandCategory.Visa)
                 )
             ).build()
 

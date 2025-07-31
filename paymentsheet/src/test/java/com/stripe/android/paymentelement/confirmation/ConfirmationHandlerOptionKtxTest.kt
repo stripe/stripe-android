@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -254,7 +255,7 @@ class ConfirmationHandlerOptionKtxTest {
                     customLabel = "Merchant Payments",
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                     cardBrandFilter = PaymentSheetCardBrandFilter(
-                        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+                        cardBrandAcceptance = CardBrandAcceptance.All
                     )
                 )
             )
