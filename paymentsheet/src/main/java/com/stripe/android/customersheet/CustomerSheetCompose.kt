@@ -8,6 +8,7 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet.ResultCallback
 import com.stripe.android.utils.rememberActivity
 
 /**
@@ -21,7 +22,7 @@ import com.stripe.android.utils.rememberActivity
 @Composable
 fun rememberCustomerSheet(
     customerAdapter: CustomerAdapter,
-    callback: CustomerSheetResultCallback,
+    callback: ResultCallback,
 ): CustomerSheet {
     return rememberCustomerSheet(
         integration = remember(customerAdapter) {
@@ -43,7 +44,7 @@ fun rememberCustomerSheet(
 @Composable
 fun rememberCustomerSheet(
     customerSessionProvider: CustomerSheet.CustomerSessionProvider,
-    callback: CustomerSheetResultCallback,
+    callback: ResultCallback,
 ): CustomerSheet {
     return rememberCustomerSheet(
         integration = remember(customerSessionProvider) {
@@ -56,7 +57,7 @@ fun rememberCustomerSheet(
 @Composable
 private fun rememberCustomerSheet(
     integration: CustomerSheetIntegration,
-    callback: CustomerSheetResultCallback,
+    callback: ResultCallback,
 ): CustomerSheet {
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
         "CustomerSheet must be created with access to an ActivityResultRegistryOwner"

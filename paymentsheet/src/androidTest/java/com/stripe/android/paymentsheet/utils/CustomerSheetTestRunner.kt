@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetActivity
-import com.stripe.android.customersheet.CustomerSheetResultCallback
+import com.stripe.android.elements.customersheet.CustomerSheet.ResultCallback
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.MainActivity
@@ -40,7 +40,7 @@ internal fun runCustomerSheetTest(
     configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
         merchantDisplayName = "Merchant Inc."
     ),
-    resultCallback: CustomerSheetResultCallback,
+    resultCallback: ResultCallback,
     block: (CustomerSheetTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)

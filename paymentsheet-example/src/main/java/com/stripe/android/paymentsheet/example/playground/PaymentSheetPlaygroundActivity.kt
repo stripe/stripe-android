@@ -51,12 +51,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
 import com.stripe.android.elements.rememberAddressLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -703,11 +703,11 @@ internal class PaymentSheetPlaygroundActivity :
 
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
-    ): Result<PaymentOption?> = withContext(Dispatchers.IO) {
+    ): kotlin.Result<PaymentOption?> = withContext(Dispatchers.IO) {
         when (val result = customerSheet.retrievePaymentOptionSelection()) {
-            is CustomerSheetResult.Selected -> Result.success(result.selection?.paymentOption)
-            is CustomerSheetResult.Failed -> Result.failure(result.exception)
-            is CustomerSheetResult.Canceled -> Result.success(null)
+            is CustomerSheet.Result.Selected -> kotlin.Result.success(result.selection?.paymentOption)
+            is CustomerSheet.Result.Failed -> kotlin.Result.failure(result.exception)
+            is CustomerSheet.Result.Canceled -> kotlin.Result.success(null)
         }
     }
 

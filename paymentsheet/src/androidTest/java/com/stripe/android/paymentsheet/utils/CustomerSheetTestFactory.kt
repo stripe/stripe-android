@@ -5,7 +5,7 @@ import androidx.activity.compose.setContent
 import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 import com.stripe.android.elements.customersheet.CustomerSheet
-import com.stripe.android.customersheet.CustomerSheetResultCallback
+import com.stripe.android.elements.customersheet.CustomerSheet.ResultCallback
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.elements.CustomerSessionApiPreview
 
@@ -14,7 +14,7 @@ internal class CustomerSheetTestFactory(
     private val integrationType: IntegrationType,
     private val customerSheetTestType: CustomerSheetTestType,
     private val configuration: CustomerSheet.Configuration,
-    private val resultCallback: CustomerSheetResultCallback,
+    private val resultCallback: ResultCallback,
 ) {
 
     fun make(activity: ComponentActivity): CustomerSheet {

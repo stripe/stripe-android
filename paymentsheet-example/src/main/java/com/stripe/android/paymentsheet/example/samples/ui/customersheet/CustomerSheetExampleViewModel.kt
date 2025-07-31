@@ -8,9 +8,10 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerEphemeralKey
+import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.samples.networking.ExampleCustomerSheetRequest
@@ -138,9 +139,9 @@ class CustomerSheetExampleViewModel(
         }
     }
 
-    fun onCustomerSheetResult(result: CustomerSheetResult) {
+    fun onCustomerSheetResult(result: Result) {
         when (result) {
-            is CustomerSheetResult.Canceled -> {
+            is CustomerSheet.Result.Canceled -> {
                 updateDataViewState {
                     it.copy(
                         selection = result.selection,
@@ -148,7 +149,7 @@ class CustomerSheetExampleViewModel(
                     )
                 }
             }
-            is CustomerSheetResult.Selected -> {
+            is CustomerSheet.Result.Selected -> {
                 updateDataViewState {
                     it.copy(
                         selection = result.selection,
@@ -156,7 +157,7 @@ class CustomerSheetExampleViewModel(
                     )
                 }
             }
-            is CustomerSheetResult.Failed -> {
+            is CustomerSheet.Result.Failed -> {
                 updateDataViewState {
                     it.copy(
                         selection = null,

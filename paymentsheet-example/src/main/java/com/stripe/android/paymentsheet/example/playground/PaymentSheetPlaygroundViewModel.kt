@@ -14,12 +14,12 @@ import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.elements.AddressLauncher
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -469,19 +469,19 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    fun onCustomerSheetCallback(result: CustomerSheetResult) {
+    fun onCustomerSheetCallback(result: Result) {
         val statusMessage = when (result) {
-            is CustomerSheetResult.Canceled -> {
+            is CustomerSheet.Result.Canceled -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 "Canceled"
             }
-            is CustomerSheetResult.Selected -> {
+            is CustomerSheet.Result.Selected -> {
                 updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 null
             }
-            is CustomerSheetResult.Failed -> "An error occurred: ${result.exception.message}"
+            is CustomerSheet.Result.Failed -> "An error occurred: ${result.exception.message}"
         }
 
         statusMessage?.let { message ->

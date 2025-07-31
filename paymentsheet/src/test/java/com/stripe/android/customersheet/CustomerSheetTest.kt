@@ -14,6 +14,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.elements.customersheet.CustomerAdapter
 import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.customersheet.CustomerSheet.Result
+import com.stripe.android.elements.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -249,7 +251,7 @@ class CustomerSheetTest {
             CustomerAdapter.Result.success(null),
         paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =
             CustomerAdapter.Result.success(listOf()),
-        test: (result: CustomerSheetResult) -> Unit,
+        test: (result: Result) -> Unit,
     ) {
         runTestActivityTest {
             val customerSheet = CustomerSheet.create(
@@ -295,12 +297,12 @@ class CustomerSheetTest {
         return this as PaymentOptionSelection.PaymentMethod
     }
 
-    private fun CustomerSheetResult.asSelected(): CustomerSheetResult.Selected {
-        return this as CustomerSheetResult.Selected
+    private fun Result.asSelected(): CustomerSheet.Result.Selected {
+        return this as CustomerSheet.Result.Selected
     }
 
-    private fun CustomerSheetResult.asFailed(): CustomerSheetResult.Failed {
-        return this as CustomerSheetResult.Failed
+    private fun Result.asFailed(): CustomerSheet.Result.Failed {
+        return this as CustomerSheet.Result.Failed
     }
 
     private class Scenario(
