@@ -57,8 +57,6 @@ internal class OnrampActivity : ComponentActivity() {
 
         // Create callbacks to handle async responses
         val callbacks = OnrampCallbacks(
-            configurationCallback = viewModel::onConfigurationResult,
-            linkLookupCallback = viewModel::onLookupResult,
             authenticationCallback = viewModel::onAuthenticationResult,
             registerUserCallback = viewModel::onRegisterUserResult
         )
@@ -69,13 +67,13 @@ internal class OnrampActivity : ComponentActivity() {
             paymentSheetAppearance = PaymentSheet.Appearance()
         )
 
-        onrampCoordinator.configure(configuration)
+        viewModel.configure(onrampCoordinator, configuration)
 
         setContent {
             PaymentSheetExampleTheme {
                 OnrampScreen(
                     viewModel = viewModel,
-                    onCheckUser = { email -> onrampCoordinator.isLinkUser(email) },
+                    onCheckUser = { email -> viewModel.checkIfLinkUser(email, onrampCoordinator) },
                     onRegisterUser = { userInfo -> onrampCoordinator.registerNewLinkUser(userInfo) },
                     onAuthenticateUser = { email -> onrampCoordinator.authenticateExistingLinkUser(email) }
                 )
@@ -117,9 +115,7 @@ internal fun OnrampScreen(
         when (val currentState = uiState) {
             is OnrampUiState.EmailInput -> {
                 EmailInputScreen(
-                    onCheckUser = { email ->
-                        viewModel.checkIfLinkUser(email, onCheckUser)
-                    }
+                    onCheckUser = onCheckUser
                 )
             }
             is OnrampUiState.Loading -> {

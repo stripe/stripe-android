@@ -2,7 +2,10 @@ package com.stripe.android.paymentsheet.example.onramp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -10,6 +13,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 internal class OnrampViewModel : ViewModel() {
 
@@ -20,8 +24,20 @@ internal class OnrampViewModel : ViewModel() {
     val message: StateFlow<String?> = _message.asStateFlow()
 
     private var currentEmail: String = ""
+    
+    fun configure(coordinator: OnrampCoordinator, configuration: OnrampConfiguration) {
+        viewModelScope.launch {
+            try {
+                val result = coordinator.configure(configuration)
+                onConfigurationResult(result)
+            } catch (e: Exception) {
+                _message.value = "Configuration failed: ${e.message}"
+                _uiState.value = OnrampUiState.EmailInput // Allow user to try anyway
+            }
+        }
+    }
 
-    fun checkIfLinkUser(email: String, onCheckUser: (String) -> Unit) {
+    fun checkIfLinkUser(email: String, coordinator: OnrampCoordinator) {
         if (email.isBlank()) {
             _message.value = "Please enter an email address"
             return
@@ -29,7 +45,25 @@ internal class OnrampViewModel : ViewModel() {
 
         currentEmail = email.trim()
         _uiState.value = OnrampUiState.Loading
-        onCheckUser(currentEmail)
+
+        viewModelScope.launch {
+            val result = coordinator.isLinkUser(currentEmail)
+            when (result) {
+                is OnrampLinkLookupResult.Completed -> {
+                    if (result.isLinkUser) {
+                        _message.value = "User exists in Link. Please authenticate:"
+                        _uiState.value = OnrampUiState.Authentication(currentEmail)
+                    } else {
+                        _message.value = "User does not exist in Link. Please register:"
+                        _uiState.value = OnrampUiState.Registration(currentEmail)
+                    }
+                }
+                is OnrampLinkLookupResult.Failed -> {
+                    _message.value = "Lookup failed: ${result.error.message}"
+                    _uiState.value = OnrampUiState.EmailInput
+                }
+            }
+        }
     }
 
     fun registerNewUser(
@@ -102,25 +136,6 @@ internal class OnrampViewModel : ViewModel() {
             is OnrampConfigurationResult.Failed -> {
                 _message.value = "Configuration failed: ${result.error.message}"
                 _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-            }
-        }
-    }
-
-    // Handle lookup result
-    fun onLookupResult(result: OnrampLinkLookupResult) {
-        when (result) {
-            is OnrampLinkLookupResult.Completed -> {
-                if (result.isLinkUser) {
-                    _message.value = "User exists in Link. Please authenticate:"
-                    _uiState.value = OnrampUiState.Authentication(currentEmail)
-                } else {
-                    _message.value = "User does not exist in Link. Please register:"
-                    _uiState.value = OnrampUiState.Registration(currentEmail)
-                }
-            }
-            is OnrampLinkLookupResult.Failed -> {
-                _message.value = "Lookup failed: ${result.error.message}"
-                _uiState.value = OnrampUiState.EmailInput
             }
         }
     }

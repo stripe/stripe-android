@@ -85,12 +85,11 @@ class LinkController @Inject internal constructor(
      * This is useful for determining whether to show Link-specific UI elements or messaging to the user
      * before they interact with Link payment methods.
      *
-     * The result will be communicated through the [LookupConsumerCallback] provided during controller creation.
-     *
      * @param email The email address to check for an existing Link consumer account.
+     * @return The result of the lookup operation.
      */
-    fun lookupConsumer(email: String) {
-        viewModel.onLookupConsumer(email)
+    suspend fun lookupConsumer(email: String): LookupConsumerResult {
+        return viewModel.lookupConsumer(email)
     }
 
     // Crypto Onramp specific methods
@@ -452,14 +451,6 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Callback for receiving results from [lookupConsumer].
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun interface LookupConsumerCallback {
-        fun onLookupConsumerResult(result: LookupConsumerResult)
-    }
-
-    /**
      * Callback for receiving results from [createPaymentMethod].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -539,7 +530,6 @@ class LinkController @Inject internal constructor(
          *
          * @param activity The Activity that will present Link-related UI.
          * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
-         * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
          * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
          *
          * @return A configured [LinkController] instance.
@@ -548,13 +538,11 @@ class LinkController @Inject internal constructor(
         fun create(
             activity: ComponentActivity,
             presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
-            lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
         ): LinkController {
             return create(
                 activity = activity,
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
-                lookupConsumerCallback = lookupConsumerCallback,
                 createPaymentMethodCallback = createPaymentMethodCallback,
                 // Only for crypto onramp flows
                 authenticationCallback = {},
@@ -567,7 +555,6 @@ class LinkController @Inject internal constructor(
          *
          * @param activity The Activity that will present Link-related UI.
          * @param presentPaymentMethodsCallback Called with the result when [presentPaymentMethods] completes.
-         * @param lookupConsumerCallback Called with the result when [lookupConsumer] completes.
          * @param createPaymentMethodCallback Called with the result when [createPaymentMethod] completes.
          * @param authenticationCallback Called with the result when authentication methods complete.
          * @param registerConsumerCallback Called with the result when [registerConsumer] completes.
@@ -579,7 +566,6 @@ class LinkController @Inject internal constructor(
         fun create(
             activity: ComponentActivity,
             presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
-            lookupConsumerCallback: LookupConsumerCallback,
             createPaymentMethodCallback: CreatePaymentMethodCallback,
             authenticationCallback: AuthenticationCallback,
             registerConsumerCallback: RegisterConsumerCallback
@@ -595,7 +581,6 @@ class LinkController @Inject internal constructor(
                     lifecycleOwner = activity,
                     activityResultRegistryOwner = activity,
                     presentPaymentMethodsCallback = presentPaymentMethodsCallback,
-                    lookupConsumerCallback = lookupConsumerCallback,
                     createPaymentMethodCallback = createPaymentMethodCallback,
                     authenticationCallback = authenticationCallback,
                     registerConsumerCallback = registerConsumerCallback,

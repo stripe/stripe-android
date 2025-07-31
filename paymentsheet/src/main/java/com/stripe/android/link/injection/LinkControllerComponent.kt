@@ -19,7 +19,6 @@ internal interface LinkControllerComponent {
             @BindsInstance lifecycleOwner: LifecycleOwner,
             @BindsInstance activityResultRegistryOwner: ActivityResultRegistryOwner,
             @BindsInstance presentPaymentMethodsCallback: LinkController.PresentPaymentMethodsCallback,
-            @BindsInstance lookupConsumerCallback: LinkController.LookupConsumerCallback,
             @BindsInstance createPaymentMethodCallback: LinkController.CreatePaymentMethodCallback,
             @BindsInstance authenticationCallback: LinkController.AuthenticationCallback,
             @BindsInstance registerConsumerCallback: LinkController.RegisterConsumerCallback,

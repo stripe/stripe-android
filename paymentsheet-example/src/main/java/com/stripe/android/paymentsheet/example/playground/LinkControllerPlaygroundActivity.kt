@@ -40,7 +40,6 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                 LinkController.create(
                     activity = this,
                     presentPaymentMethodsCallback = viewModel::onLinkControllerPresentPaymentMethod,
-                    lookupConsumerCallback = viewModel::onLinkControllerLookupConsumer,
                     createPaymentMethodCallback = viewModel::onLinkControllerCreatePaymentMethod,
                     authenticationCallback = viewModel::onLinkControllerAuthentication,
                     registerConsumerCallback = viewModel::onRegisterConsumer,
@@ -61,7 +60,7 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         playgroundState = linkControllerPlaygroundState,
                         onEmailChange = { email ->
                             if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                                linkController.lookupConsumer(email)
+                                viewModel.lookupConsumer(email, linkController)
                             }
                         },
                         onPaymentMethodButtonClick = { email ->
