@@ -10,6 +10,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.PaymentMethodLayout
 import com.stripe.android.link.LinkAccountUpdate
@@ -146,12 +147,12 @@ internal object PaymentSheetFixtures {
         get() = CONFIG_CUSTOMER.newBuilder()
             .customPaymentMethods(
                 listOf(
-                    PaymentSheet.CustomPaymentMethod(
+                    CustomPaymentMethod(
                         id = "cpmt_123",
                         subtitle = "Pay now with BuFoPay".resolvableString,
                         disableBillingDetailCollection = false,
                     ),
-                    PaymentSheet.CustomPaymentMethod(
+                    CustomPaymentMethod(
                         id = "cpmt_456",
                         subtitle = "Pay now with PayPal".resolvableString,
                         disableBillingDetailCollection = true,

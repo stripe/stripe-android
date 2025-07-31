@@ -5,6 +5,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.model.CardBrand
@@ -25,7 +26,7 @@ internal object CommonConfigurationFactory {
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),
         externalPaymentMethods: List<String> = emptyList(),
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
+        customPaymentMethods: List<CustomPaymentMethod> = emptyList(),
         cardBrandAcceptance: CardBrandAcceptance = CardBrandAcceptance.all(),
         link: LinkConfiguration = LinkConfiguration(),
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null,

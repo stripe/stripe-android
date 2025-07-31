@@ -7,6 +7,7 @@ import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -30,7 +31,7 @@ internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession>
@@ -58,7 +59,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -125,7 +126,7 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customer: CustomerConfiguration?,
-    customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+    customPaymentMethods: List<CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     mobileSessionId: String,
@@ -178,7 +179,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     }
 }
 
-private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List<String> {
+private fun List<CustomPaymentMethod>.toElementSessionParam(): List<String> {
     return map { customPaymentMethod ->
         customPaymentMethod.id
     }

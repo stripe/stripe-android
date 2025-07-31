@@ -9,14 +9,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.CustomPaymentMethodResult
+import com.stripe.android.elements.payment.CustomPaymentMethodResultHandler.EXTRA_CUSTOM_PAYMENT_METHOD_RESULT
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.CustomPaymentMethodResult
-import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler.EXTRA_CUSTOM_PAYMENT_METHOD_RESULT
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -32,7 +32,7 @@ internal class CustomPaymentMethodProxyActivityTest {
     fun `On init, should call confirm callback with expected params`() {
         val countDownLatch = CountDownLatch(1)
 
-        lateinit var receivedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod
+        lateinit var receivedCustomPaymentMethod: CustomPaymentMethod
         lateinit var receivedBillingDetails: PaymentMethod.BillingDetails
 
         PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
@@ -120,7 +120,7 @@ internal class CustomPaymentMethodProxyActivityTest {
     private companion object {
         const val PAYMENT_ELEMENT_CALLBACK_IDENTIFIER = "CustomPaymentMethodTestIdentifier"
 
-        val CUSTOM_PAYMENT_METHOD = PaymentSheet.CustomPaymentMethod(
+        val CUSTOM_PAYMENT_METHOD = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now".resolvableString,
             disableBillingDetailCollection = false,

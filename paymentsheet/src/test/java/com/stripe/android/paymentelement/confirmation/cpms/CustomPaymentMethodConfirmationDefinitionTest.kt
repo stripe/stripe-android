@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
@@ -18,7 +19,6 @@ import com.stripe.android.paymentelement.confirmation.asFailed
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asSucceeded
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
@@ -251,7 +251,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             shippingDetails = null,
         )
 
-        private val CUSTOM_PAYMENT_METHOD_TYPE = PaymentSheet.CustomPaymentMethod(
+        private val CUSTOM_PAYMENT_METHOD_TYPE = CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now".resolvableString,
             disableBillingDetailCollection = false,

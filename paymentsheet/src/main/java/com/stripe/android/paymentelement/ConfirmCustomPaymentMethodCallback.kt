@@ -1,7 +1,7 @@
 package com.stripe.android.paymentelement
 
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 
 /**
  * Handler to be used to confirm payment with a custom payment method.
@@ -21,7 +21,7 @@ fun interface ConfirmCustomPaymentMethodCallback {
      * @param billingDetails Any billing details you've configured Payment Element to collect
      */
     fun onConfirmCustomPaymentMethod(
-        customPaymentMethod: PaymentSheet.CustomPaymentMethod,
+        customPaymentMethod: CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails,
     )
 }

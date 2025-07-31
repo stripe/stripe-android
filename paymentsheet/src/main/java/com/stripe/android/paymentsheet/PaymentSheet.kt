@@ -3,14 +3,10 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
-import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.AddressDetails
 import com.stripe.android.elements.AllowsRemovalOfLastSavedPaymentMethodPreview
 import com.stripe.android.elements.Appearance
@@ -21,6 +17,7 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.AddressAutocompletePreview
 import com.stripe.android.elements.payment.AnalyticEventCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
@@ -676,75 +673,6 @@ class PaymentSheet internal constructor(
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
                 shopPayConfiguration?.let { shopPayConfiguration(it) }
             }
-    }
-
-    /**
-     * Defines a custom payment method type that can be displayed in Payment Element.
-     */
-    @Poko
-    @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class CustomPaymentMethod internal constructor(
-        val id: String,
-        internal val subtitle: ResolvableString?,
-        internal val disableBillingDetailCollection: Boolean,
-    ) : Parcelable {
-        @ExperimentalCustomPaymentMethodsApi
-        constructor(
-            /**
-             * The unique identifier for this custom payment method type in the format of "cmpt_...".
-             *
-             * Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
-             */
-            id: String,
-
-            /**
-             * Optional subtitle text to be displayed below the custom payment method's display name.
-             */
-            @StringRes subtitle: Int?,
-
-            /**
-             * When true, Payment Element will not collect billing details for this custom payment method type
-             * irregardless of the [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] settings.
-             *
-             * This has no effect if [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] is not
-             * configured.
-             */
-            disableBillingDetailCollection: Boolean = true,
-        ) : this(
-            id = id,
-            subtitle = subtitle?.resolvableString,
-            disableBillingDetailCollection = disableBillingDetailCollection,
-        )
-
-        @ExperimentalCustomPaymentMethodsApi
-        constructor(
-            /**
-             * The unique identifier for this custom payment method type in the format of "cmpt_...".
-             *
-             * Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
-             */
-            id: String,
-
-            /**
-             * Optional subtitle text string resource to be resolved and displayed below the custom payment method's
-             * display name.
-             */
-            subtitle: String?,
-
-            /**
-             * When true, Payment Element will not collect billing details for this custom payment method type
-             * irregardless of the [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] settings.
-             *
-             * This has no effect if [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] is not
-             * configured.
-             */
-            disableBillingDetailCollection: Boolean = true,
-        ) : this(
-            id = id,
-            subtitle = subtitle?.resolvableString,
-            disableBillingDetailCollection = disableBillingDetailCollection,
-        )
     }
 
     internal sealed interface CustomerAccessType : Parcelable {

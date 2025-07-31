@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.elements.payment.AnalyticEvent
 import com.stripe.android.elements.payment.AnalyticEventCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -39,7 +40,6 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
@@ -393,7 +393,7 @@ internal class EmbeddedPlaygroundActivity :
     }
 
     override fun onConfirmCustomPaymentMethod(
-        customPaymentMethod: PaymentSheet.CustomPaymentMethod,
+        customPaymentMethod: CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails
     ) {
         startActivity(

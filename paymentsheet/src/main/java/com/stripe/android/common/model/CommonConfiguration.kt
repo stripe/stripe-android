@@ -8,6 +8,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
 import com.stripe.android.link.LinkController
@@ -32,7 +33,7 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: CardBrandAcceptance,
-    val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+    val customPaymentMethods: List<CustomPaymentMethod>,
     val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
 ) : Parcelable {

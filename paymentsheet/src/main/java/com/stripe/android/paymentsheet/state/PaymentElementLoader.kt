@@ -11,6 +11,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -288,7 +289,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: CustomerConfiguration?,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customPaymentMethods: List<CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {

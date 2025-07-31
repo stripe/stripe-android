@@ -13,6 +13,7 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -1623,17 +1624,17 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `When CPMs are requested and returned by elements session, CPMs are available`() = testCustomPaymentMethods(
         requestedCustomPaymentMethods = listOf(
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_123",
                 subtitle = "Pay now".resolvableString,
                 disableBillingDetailCollection = false,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_456",
                 subtitle = "Pay later".resolvableString,
                 disableBillingDetailCollection = true,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_789",
                 subtitle = "Pay later".resolvableString,
                 disableBillingDetailCollection = true,
@@ -3129,7 +3130,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     private fun testCustomPaymentMethods(
-        requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        requestedCustomPaymentMethods: List<CustomPaymentMethod>,
         returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
         expectedCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
         expectedLogMessages: List<String>,

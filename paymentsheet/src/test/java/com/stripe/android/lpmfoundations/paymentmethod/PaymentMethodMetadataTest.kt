@@ -12,6 +12,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.customersheet.CustomerSheet
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
@@ -1038,17 +1039,17 @@ internal class PaymentMethodMetadataTest {
             listOf(CardBrandAcceptance.BrandCategory.Amex)
         )
         val customPaymentMethods = listOf(
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_123",
                 subtitle = "Pay now".resolvableString,
                 disableBillingDetailCollection = true,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_456",
                 subtitle = "Pay later".resolvableString,
                 disableBillingDetailCollection = false,
             ),
-            PaymentSheet.CustomPaymentMethod(
+            CustomPaymentMethod(
                 id = "cpmt_789",
                 subtitle = "Pay never".resolvableString,
                 disableBillingDetailCollection = false,
@@ -2003,7 +2004,7 @@ internal class PaymentMethodMetadataTest {
         billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
         defaultBillingDetails: BillingDetails,
         shippingDetails: AddressDetails,
-        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        customPaymentMethods: List<CustomPaymentMethod>,
         cardBrandAcceptance: CardBrandAcceptance,
         shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     ) = PaymentSheet.Configuration(

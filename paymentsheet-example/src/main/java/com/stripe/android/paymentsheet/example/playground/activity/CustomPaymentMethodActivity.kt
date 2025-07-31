@@ -14,11 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.CustomPaymentMethodResult
+import com.stripe.android.elements.payment.CustomPaymentMethodResultHandler
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.CustomPaymentMethodResult
-import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
@@ -26,7 +26,7 @@ class CustomPaymentMethodActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val customPaymentMethodType: PaymentSheet.CustomPaymentMethod? =
+        val customPaymentMethodType: CustomPaymentMethod? =
             intent.getParcelableExtra(EXTRA_CUSTOM_PAYMENT_METHOD_TYPE)
 
         if (customPaymentMethodType == null) {
@@ -107,7 +107,7 @@ class CustomPaymentMethodActivity : AppCompatActivity() {
 
     @Composable
     fun Title(
-        customPaymentMethodType: PaymentSheet.CustomPaymentMethod,
+        customPaymentMethodType: CustomPaymentMethod,
     ) {
         Text(
             text = customPaymentMethodType.id,

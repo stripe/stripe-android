@@ -10,6 +10,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -17,7 +18,6 @@ import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -411,17 +411,17 @@ internal class ElementsSessionRepositoryTest {
             customer = null,
             externalPaymentMethods = emptyList(),
             customPaymentMethods = listOf(
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_123",
                     subtitle = "Pay now".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_456",
                     subtitle = "Pay later".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_789",
                     subtitle = "Pay never".resolvableString,
                     disableBillingDetailCollection = true,
@@ -539,17 +539,17 @@ internal class ElementsSessionRepositoryTest {
             customer = null,
             externalPaymentMethods = emptyList(),
             customPaymentMethods = listOf(
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_123",
                     subtitle = "Pay now".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_456",
                     subtitle = "Pay later".resolvableString,
                     disableBillingDetailCollection = true,
                 ),
-                PaymentSheet.CustomPaymentMethod(
+                CustomPaymentMethod(
                     id = "cpmt_789",
                     subtitle = "Pay never".resolvableString,
                     disableBillingDetailCollection = true,

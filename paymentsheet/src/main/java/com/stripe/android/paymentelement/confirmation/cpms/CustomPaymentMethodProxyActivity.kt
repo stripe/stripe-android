@@ -6,13 +6,13 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.BundleCompat
+import com.stripe.android.elements.payment.CustomPaymentMethod
+import com.stripe.android.elements.payment.CustomPaymentMethodResult
+import com.stripe.android.elements.payment.CustomPaymentMethodResultHandler
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.paymentelement.CustomPaymentMethodResult
-import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
-import com.stripe.android.paymentsheet.PaymentSheet
 
 /**
  * Handles custom payment methods.
@@ -37,7 +37,7 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
             BundleCompat.getParcelable(
                 it,
                 EXTRA_CUSTOM_PAYMENT_METHOD_TYPE,
-                PaymentSheet.CustomPaymentMethod::class.java,
+                CustomPaymentMethod::class.java,
             )
         }
         val paymentElementCallbackIdentifier = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
@@ -77,7 +77,7 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
         val type = BundleCompat.getParcelable(
             extras,
             EXTRA_CUSTOM_PAYMENT_METHOD_TYPE,
-            PaymentSheet.CustomPaymentMethod::class.java,
+            CustomPaymentMethod::class.java,
         )
 
         val customPaymentMethodResult = BundleCompat.getParcelable(

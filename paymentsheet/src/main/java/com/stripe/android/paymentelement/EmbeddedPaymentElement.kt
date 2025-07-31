@@ -24,6 +24,7 @@ import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.AnalyticEventCallback
 import com.stripe.android.elements.payment.CreateIntentCallback
+import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
@@ -41,7 +42,6 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -240,7 +240,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: CardBrandAcceptance,
-        internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        internal val customPaymentMethods: List<CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: LinkConfiguration,
         internal val formSheetAction: FormSheetAction,
@@ -271,7 +271,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var cardBrandAcceptance: CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
-            private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
+            private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
             private var link: LinkConfiguration = ConfigurationDefaults.link
             private var formSheetAction: FormSheetAction = FormSheetAction.Continue
@@ -438,7 +438,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
              */
             @ExperimentalCustomPaymentMethodsApi
             fun customPaymentMethods(
-                customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+                customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
                 this.customPaymentMethods = customPaymentMethods
             }

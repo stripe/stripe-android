@@ -1277,6 +1277,61 @@ public final class com/stripe/android/elements/payment/CreateIntentCallback$Resu
 	public fun <init> (Ljava/lang/String;)V
 }
 
+public final class com/stripe/android/elements/payment/CustomPaymentMethod$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/CustomPaymentMethod;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/CustomPaymentMethod;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/elements/payment/CustomPaymentMethodResult : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Companion;
+	public static final fun canceled ()Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public static final fun completed ()Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public static final fun failed ()Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public static final fun failed (Ljava/lang/String;)Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+}
+
+public final class com/stripe/android/elements/payment/CustomPaymentMethodResult$Canceled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Canceled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Canceled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/payment/CustomPaymentMethodResult$Companion {
+	public final fun canceled ()Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public final fun completed ()Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public final fun failed ()Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public final fun failed (Ljava/lang/String;)Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+	public static synthetic fun failed$default (Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Companion;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;
+}
+
+public final class com/stripe/android/elements/payment/CustomPaymentMethodResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/payment/CustomPaymentMethodResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/elements/payment/CustomPaymentMethodResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/elements/payment/CustomPaymentMethodResultHandler {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/elements/payment/CustomPaymentMethodResultHandler;
+	public static final fun handleCustomPaymentMethodResult (Landroid/content/Context;Lcom/stripe/android/elements/payment/CustomPaymentMethodResult;)V
+}
+
 public abstract interface annotation class com/stripe/android/elements/payment/DelicatePaymentSheetApi : java/lang/annotation/Annotation {
 }
 
@@ -2032,54 +2087,7 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentSheetC
 }
 
 public abstract interface class com/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback {
-	public abstract fun onConfirmCustomPaymentMethod (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
-}
-
-public abstract class com/stripe/android/paymentelement/CustomPaymentMethodResult : android/os/Parcelable {
-	public static final field $stable I
-	public static final field Companion Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Companion;
-	public static final fun canceled ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public static final fun completed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public static final fun failed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public static final fun failed (Ljava/lang/String;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-}
-
-public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Companion {
-	public final fun canceled ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public final fun completed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public final fun failed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public final fun failed (Ljava/lang/String;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-	public static synthetic fun failed$default (Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Companion;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
-}
-
-public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/CustomPaymentMethodResultHandler {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/paymentelement/CustomPaymentMethodResultHandler;
-	public static final fun handleCustomPaymentMethodResult (Landroid/content/Context;Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;)V
+	public abstract fun onConfirmCustomPaymentMethod (Lcom/stripe/android/elements/payment/CustomPaymentMethod;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
@@ -2662,14 +2670,6 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Cr
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

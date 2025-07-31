@@ -1,8 +1,9 @@
-package com.stripe.android.paymentelement
+package com.stripe.android.elements.payment
 
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodProxyActivity
 import kotlinx.parcelize.Parcelize
 
