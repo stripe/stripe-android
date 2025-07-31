@@ -201,6 +201,7 @@ internal class VerificationScreenTest {
                     onResendCodeClick = viewModel::resendCode,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+                    linkAppearance = null
                 )
             }
         }
@@ -242,6 +243,7 @@ internal class VerificationScreenTest {
                     onResendCodeClick = viewModel::resendCode,
                     onFocusRequested = viewModel::onFocusRequested,
                     didShowCodeSentNotification = viewModel::didShowCodeSentNotification,
+                    linkAppearance = null
                 )
             }
         }
