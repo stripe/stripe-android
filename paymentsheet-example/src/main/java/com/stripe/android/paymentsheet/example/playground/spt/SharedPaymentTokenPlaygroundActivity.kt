@@ -49,8 +49,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.elements.payment.PreparePaymentMethodHandler
+import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentResult

@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.shopPayConfiguration
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.shoppay.ShopPayArgs

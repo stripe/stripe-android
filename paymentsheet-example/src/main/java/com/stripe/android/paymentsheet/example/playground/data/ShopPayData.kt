@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.data
 
-import com.stripe.android.paymentelement.ShopPayPreview
+import com.stripe.android.elements.payment.ShopPayPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ShopPayHandlers
 import com.stripe.android.paymentsheet.ShopPayHandlers.ShippingContactUpdate
