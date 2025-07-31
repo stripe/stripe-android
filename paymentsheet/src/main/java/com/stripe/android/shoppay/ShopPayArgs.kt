@@ -1,7 +1,7 @@
 package com.stripe.android.shoppay
 
 import android.os.Parcelable
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.CustomerConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
@@ -68,7 +69,6 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebit
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
-import com.stripe.android.paymentsheet.PaymentSheet
 
 class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 

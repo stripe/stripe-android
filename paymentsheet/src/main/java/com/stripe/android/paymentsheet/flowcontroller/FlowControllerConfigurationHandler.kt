@@ -4,7 +4,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.elements.payment.FlowController
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage

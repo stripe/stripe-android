@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.example.samples.ui.paymentsheet.complete
 
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.model.CartState
 
 data class CompleteFlowViewState(

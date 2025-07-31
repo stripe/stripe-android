@@ -17,6 +17,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.payment.CustomPaymentMethodResult
 import com.stripe.android.elements.payment.CustomPaymentMethodResultHandler
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule

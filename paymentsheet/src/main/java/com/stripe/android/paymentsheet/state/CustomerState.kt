@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

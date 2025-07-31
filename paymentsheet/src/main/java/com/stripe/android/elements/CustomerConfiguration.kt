@@ -1,7 +1,7 @@
 package com.stripe.android.elements
 
 import android.os.Parcelable
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 

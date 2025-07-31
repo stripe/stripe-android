@@ -12,9 +12,9 @@ import com.stripe.android.elements.payment.CustomPaymentMethod
 import com.stripe.android.elements.payment.EmbeddedPaymentElement
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

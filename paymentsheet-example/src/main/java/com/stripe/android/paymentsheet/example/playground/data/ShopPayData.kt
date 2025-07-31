@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.example.playground.data
 
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.elements.payment.ShopPayHandlers
 import com.stripe.android.elements.payment.ShopPayHandlers.ShippingContactUpdate
 import com.stripe.android.elements.payment.ShopPayHandlers.ShippingRateUpdate
 import com.stripe.android.elements.payment.ShopPayPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(ShopPayPreview::class)
 internal object ShopPayData {

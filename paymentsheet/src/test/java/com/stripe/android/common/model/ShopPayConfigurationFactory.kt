@@ -1,6 +1,6 @@
 package com.stripe.android.common.model
 
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 
 internal val SHOP_PAY_CONFIGURATION = shopPayConfiguration()
 

@@ -1,8 +1,8 @@
 package com.stripe.android.elements.payment
 
 import android.os.Parcelable
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.ShippingRate
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 

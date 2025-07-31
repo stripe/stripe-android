@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.paymentelement.WalletButtonsPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object WalletButtonsSettingsDefinition :

@@ -10,7 +10,7 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.PaymentMethodLayout
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.testing.PaymentMethodFactory
 import org.json.JSONArray

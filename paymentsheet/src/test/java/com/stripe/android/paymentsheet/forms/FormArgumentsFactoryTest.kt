@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.forms
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import org.junit.Test

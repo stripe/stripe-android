@@ -9,9 +9,9 @@ import com.stripe.android.elements.customersheet.CustomerAdapter.PaymentOption.C
 import com.stripe.android.elements.customersheet.CustomerEphemeralKey
 import com.stripe.android.elements.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.elements.customersheet.SetupIntentClientSecretProvider
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CustomerRepository

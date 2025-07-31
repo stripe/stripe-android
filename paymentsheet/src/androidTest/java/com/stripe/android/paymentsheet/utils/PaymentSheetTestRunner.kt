@@ -9,7 +9,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import kotlinx.coroutines.test.runTest

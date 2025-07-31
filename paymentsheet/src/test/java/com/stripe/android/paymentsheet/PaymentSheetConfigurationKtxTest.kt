@@ -11,6 +11,7 @@ import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
 import kotlin.test.assertFailsWith

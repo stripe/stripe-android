@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.elements.payment
 
 import android.content.Context
 import android.os.Parcelable
@@ -14,19 +14,8 @@ import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.BillingDetailsCollectionConfiguration
 import com.stripe.android.elements.CardBrandAcceptance
 import com.stripe.android.elements.CustomerConfiguration
-import com.stripe.android.elements.payment.AddressAutocompletePreview
-import com.stripe.android.elements.payment.AnalyticEventCallback
-import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
-import com.stripe.android.elements.payment.CreateIntentCallback
-import com.stripe.android.elements.payment.CustomPaymentMethod
-import com.stripe.android.elements.payment.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.elements.payment.GooglePayConfiguration
-import com.stripe.android.elements.payment.IntentConfiguration
-import com.stripe.android.elements.payment.LinkConfiguration
-import com.stripe.android.elements.payment.PaymentMethodLayout
-import com.stripe.android.elements.payment.PreparePaymentMethodHandler
-import com.stripe.android.elements.payment.ShopPayPreview
-import com.stripe.android.elements.payment.WalletButtonsConfiguration
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.ShippingRate
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -36,8 +25,11 @@ import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
+import com.stripe.android.paymentsheet.DefaultPaymentSheetLauncher
+import com.stripe.android.paymentsheet.PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER
+import com.stripe.android.paymentsheet.PaymentSheetLauncher
+import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import com.stripe.android.paymentsheet.internalRememberPaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.IgnoredOnParcel

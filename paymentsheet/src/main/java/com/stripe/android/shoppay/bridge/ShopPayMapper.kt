@@ -1,8 +1,8 @@
 package com.stripe.android.shoppay.bridge
 
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.DeliveryEstimate
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.LineItem
-import com.stripe.android.paymentsheet.PaymentSheet.ShopPayConfiguration.ShippingRate
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.DeliveryEstimate
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.LineItem
+import com.stripe.android.elements.payment.PaymentSheet.ShopPayConfiguration.ShippingRate
 import org.json.JSONObject
 
 internal fun LineItem.toJSON(): JSONObject {

@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.elements.payment.AnalyticEvent
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentelement.AnalyticEventRule
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule

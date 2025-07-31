@@ -1,7 +1,7 @@
 package com.stripe.android.shoppay.bridge
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

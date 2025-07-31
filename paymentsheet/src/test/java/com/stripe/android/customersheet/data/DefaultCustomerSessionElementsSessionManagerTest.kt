@@ -5,11 +5,11 @@ import com.stripe.android.customersheet.utils.FakeCustomerSessionProvider
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.customersheet.CustomerSheet
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.FakePrefsRepository
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode

@@ -8,6 +8,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize

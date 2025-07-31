@@ -8,7 +8,7 @@ import com.stripe.android.elements.payment.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.elements.payment.CreateIntentCallback
 import com.stripe.android.elements.payment.FlowController
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.elements.payment.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
 internal fun runProductIntegrationTest(
