@@ -410,6 +410,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<SetupIntent> {
+        return confirmSetupIntentParams.maybeForDashboard(options).mapResult {
+            confirmSetupIntentInternal(
+                confirmSetupIntentParams = it,
+                options = options,
+                expandFields = expandFields
+            )
+        }
+    }
+    private suspend fun confirmSetupIntentInternal(
+        confirmSetupIntentParams: ConfirmSetupIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
         }.getOrElse {
@@ -425,7 +438,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 fraudDetectionDataParamsUtils.addFraudDetectionData(
                     // Add payment_user_agent if the Payment Method is being created on this call
                     maybeAddPaymentUserAgent(
-                        confirmSetupIntentParams.toParamMap(),
+                        confirmSetupIntentParams.toParamMap()
+                            // Omit client_secret with user key auth.
+                            .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
                         confirmSetupIntentParams.paymentMethodCreateParams
                     ).plus(createExpandParam(expandFields)),
                     fraudDetectionData
@@ -459,6 +474,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }.getOrElse {
             return Result.failure(it)
         }
+        val params: Map<String, Any?> =
+            if (options.apiKeyIsUserKey) {
+                createExpandParam(expandFields)
+            } else {
+                createClientSecretParam(clientSecret, expandFields)
+            }
 
         fireFraudDetectionDataRequest()
 
@@ -466,7 +487,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveSetupIntentUrl(setupIntentId),
                 options = options,
-                params = createClientSecretParam(clientSecret, expandFields),
+                params = params,
             ),
             jsonParser = SetupIntentJsonParser(),
         ) {
@@ -1883,6 +1904,28 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         return paymentMethodResult.mapCatching { paymentMethod ->
             ConfirmPaymentIntentParams.createForDashboard(
+                clientSecret = clientSecret,
+                paymentMethodId = paymentMethod.id!!,
+                paymentMethodOptions = paymentMethodOptions,
+            )
+        }
+    }
+
+    private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
+        options: ApiRequest.Options
+    ): Result<ConfirmSetupIntentParams> {
+        if (!options.apiKeyIsUserKey || paymentMethodCreateParams == null) {
+            return Result.success(this)
+        }
+
+        // For user key auth, we must create the PM first.
+        val paymentMethodResult = createPaymentMethod(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            options = options,
+        )
+
+        return paymentMethodResult.mapCatching { paymentMethod ->
+            ConfirmSetupIntentParams.createForDashboard(
                 clientSecret = clientSecret,
                 paymentMethodId = paymentMethod.id!!,
                 paymentMethodOptions = paymentMethodOptions,
