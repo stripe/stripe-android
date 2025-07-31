@@ -118,9 +118,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             googlePayButtonType = GooglePayButtonType.Pay,
             onGooglePayPressed = {
                 updateSelection(PaymentSelection.GooglePay)
+                onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(PaymentSelection.Link(useLinkExpress = false))
+                updateSelection(PaymentSelection.Link())
+                onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
         )
