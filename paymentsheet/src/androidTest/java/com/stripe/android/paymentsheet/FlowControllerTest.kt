@@ -23,6 +23,7 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.CustomerSessionApiPreview
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -1200,7 +1201,7 @@ internal class FlowControllerTest {
                         )
                     )
                     .walletButtons(
-                        PaymentSheet.WalletButtonsConfiguration(
+                        WalletButtonsConfiguration(
                             willDisplayExternally = true,
                             walletsToShow = listOf("link"),
                         )

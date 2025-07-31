@@ -21,6 +21,7 @@ import com.stripe.android.elements.CustomerConfiguration
 import com.stripe.android.elements.payment.GooglePayConfiguration
 import com.stripe.android.elements.payment.IntentConfiguration
 import com.stripe.android.elements.payment.LinkConfiguration
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -781,27 +782,6 @@ class PaymentSheet internal constructor(
             override val analyticsValue: String = "customer_session"
         }
     }
-
-    /**
-     * Configuration for wallet buttons
-     */
-    @Poko
-    @Parcelize
-    class WalletButtonsConfiguration(
-        /**
-         * Indicates the `WalletButtons` API will be used. This helps
-         * ensure the Payment Element is not initialized with a displayed
-         * wallet option as the default payment option.
-         */
-        internal val willDisplayExternally: Boolean = false,
-
-        /**
-         * Identifies the list of wallets that can be shown in `WalletButtons`. Wallets
-         * are identified by their wallet identifier (google_pay, link, shop_pay). An
-         * empty list means all wallets will be shown.
-         */
-        internal val walletsToShow: List<String> = emptyList(),
-    ) : Parcelable
 
     /**
      * Configuration related to Shop Pay, which only applies when using wallet buttons.

@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.Appearance
 import com.stripe.android.elements.BillingDetails
 import com.stripe.android.elements.payment.GooglePayConfiguration
+import com.stripe.android.elements.payment.WalletButtonsConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -462,7 +463,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                     ),
                 ).build(),
@@ -483,7 +484,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                     ),
                 ).build(),
@@ -504,7 +505,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("google_pay"),
                     ),
@@ -526,7 +527,7 @@ class PaymentSelectionUpdaterTest {
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
                 .walletButtons(
-                    PaymentSheet.WalletButtonsConfiguration(
+                    WalletButtonsConfiguration(
                         willDisplayExternally = true,
                         walletsToShow = listOf("link"),
                     ),
