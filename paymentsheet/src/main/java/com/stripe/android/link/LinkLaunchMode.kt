@@ -22,6 +22,11 @@ internal sealed interface LinkLaunchMode : Parcelable {
          * If true, shares the payment details immediately after creating it in passthrough mode.
          */
         val sharePaymentDetailsImmediatelyAfterCreation: Boolean = true,
+
+        /**
+         * Optional hint to be displayed.
+         */
+        val hint: String? = null,
     ) : LinkLaunchMode
 
     /**

@@ -65,6 +65,8 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                             }
                         },
                         onPaymentMethodButtonClick = { email ->
+                            linkController.paymentSelectionHint =
+                                "Lorem ipsum dolor sit amet consectetur adipiscing elit."
                             linkController.presentPaymentMethods(email = email.takeIf { it.isNotBlank() })
                         },
                         onCreatePaymentMethodClick = linkController::createPaymentMethod,

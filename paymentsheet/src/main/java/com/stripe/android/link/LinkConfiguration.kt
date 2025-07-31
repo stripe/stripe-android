@@ -41,6 +41,9 @@ internal data class LinkConfiguration(
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
 
+    val enableLinkPaymentSelectionHint: Boolean
+        get() = flags["link_mobile_enable_payment_selection_hint"] == true
+
     @Parcelize
     data class CustomerInfo(
         val name: String?,
