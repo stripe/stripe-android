@@ -125,9 +125,9 @@ private fun LinkColors.toMaterialColors(isLight: Boolean): Colors {
     return if (isLight) {
         Colors(
             primary = buttonPrimary,
-            primaryVariant = buttonBrand,
+            primaryVariant = buttonPrimary,
             secondary = buttonTertiary,
-            secondaryVariant = buttonBrand,
+            secondaryVariant = buttonTertiary,
             background = surfaceBackdrop,
             surface = surfacePrimary,
             error = buttonCritical,
@@ -141,9 +141,9 @@ private fun LinkColors.toMaterialColors(isLight: Boolean): Colors {
     } else {
         Colors(
             primary = buttonPrimary,
-            primaryVariant = buttonBrand,
+            primaryVariant = buttonPrimary,
             secondary = buttonTertiary,
-            secondaryVariant = buttonBrand,
+            secondaryVariant = buttonTertiary,
             background = surfaceBackdrop,
             surface = surfacePrimary,
             error = buttonCritical,
