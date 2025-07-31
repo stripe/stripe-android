@@ -2,7 +2,10 @@ package com.stripe.android.paymentsheet.example.onramp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampLinkLookupResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterUserResult
@@ -10,6 +13,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerificationResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 internal class OnrampViewModel : ViewModel() {
 
@@ -87,25 +91,6 @@ internal class OnrampViewModel : ViewModel() {
         _message.value = null
     }
 
-    // Handle configuration result
-    fun onConfigurationResult(result: OnrampConfigurationResult) {
-        when (result) {
-            is OnrampConfigurationResult.Completed -> {
-                if (result.success) {
-                    _message.value = "Configuration successful"
-                    _uiState.value = OnrampUiState.EmailInput
-                } else {
-                    _message.value = "Configuration failed"
-                    _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-                }
-            }
-            is OnrampConfigurationResult.Failed -> {
-                _message.value = "Configuration failed: ${result.error.message}"
-                _uiState.value = OnrampUiState.EmailInput // Still allow user to try
-            }
-        }
-    }
-
     // Handle lookup result
     fun onLookupResult(result: OnrampLinkLookupResult) {
         when (result) {
@@ -157,6 +142,27 @@ internal class OnrampViewModel : ViewModel() {
     // Update registration state with email
     fun showRegistrationForEmail(email: String) {
         _uiState.value = OnrampUiState.Registration(email)
+    }
+
+    fun configure(onrampCoordinator: OnrampCoordinator, configuration: OnrampConfiguration) {
+        viewModelScope.launch {
+            val result = onrampCoordinator.configure(configuration)
+            when (result) {
+                is OnrampConfigurationResult.Completed -> {
+                    if (result.success) {
+                        _message.value = "Configuration successful"
+                        _uiState.value = OnrampUiState.EmailInput
+                    } else {
+                        _message.value = "Configuration failed"
+                        _uiState.value = OnrampUiState.EmailInput // Still allow user to try
+                    }
+                }
+                is OnrampConfigurationResult.Failed -> {
+                    _message.value = "Configuration failed: ${result.error.message}"
+                    _uiState.value = OnrampUiState.EmailInput // Still allow user to try
+                }
+            }
+        }
     }
 
     class Factory : ViewModelProvider.Factory {

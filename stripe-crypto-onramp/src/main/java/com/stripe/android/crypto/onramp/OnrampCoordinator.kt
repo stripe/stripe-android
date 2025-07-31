@@ -12,6 +12,7 @@ import com.stripe.android.crypto.onramp.di.OnrampComponent
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
+import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.viewmodels.OnrampCoordinatorViewModel
 import javax.inject.Inject
 
@@ -36,11 +37,13 @@ class OnrampCoordinator @Inject internal constructor(
      * Initialize the coordinator with the provided configuration.
      *
      * @param configuration The OnrampConfiguration to apply.
+     * @return An [OnrampConfigurationResult] indicating the success or failure of the configuration.
      */
-    fun configure(
+    suspend fun configure(
         configuration: OnrampConfiguration,
-    ) {
-        viewModel.configure(configuration)
+    ): OnrampConfigurationResult {
+        val configureResult = onrampLinkController.configure()
+        return viewModel.configure(configuration, configureResult)
     }
 
     /**

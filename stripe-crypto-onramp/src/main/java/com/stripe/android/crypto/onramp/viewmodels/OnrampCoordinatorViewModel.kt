@@ -43,37 +43,23 @@ internal class OnrampCoordinatorViewModel @Inject constructor(
         get() = handle["configuration"]
         set(value) = handle.set("configuration", value)
 
-    private val _configurationFlow =
-        MutableSharedFlow<LinkController.Configuration>(replay = 1)
-
     private var linkControllerState: LinkController.State? = null
-
-    /**
-     * A flow that receives the built configuration model when `[configure]` is called.
-     */
-    internal val configurationFlow = _configurationFlow.asSharedFlow()
 
     /**
      * Configure the view model and associated types.
      *
      * @param configuration The OnrampConfiguration to apply.
      */
-    fun configure(configuration: OnrampConfiguration) {
+    suspend fun configure(
+        configuration: OnrampConfiguration,
+        linkControllerConfigureResult: LinkController.ConfigureResult
+    ): OnrampConfigurationResult {
         onRampConfiguration = configuration
-
-        viewModelScope.launch {
-            val config = LinkController.Configuration.Builder(merchantDisplayName = "").build()
-
-            _configurationFlow.emit(config)
-        }
-    }
-
-    fun onLinkControllerConfigureResult(result: LinkController.ConfigureResult) {
-        when (result) {
+        return when (linkControllerConfigureResult) {
             is LinkController.ConfigureResult.Success ->
-                onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Completed(true))
+                OnrampConfigurationResult.Completed(true)
             is LinkController.ConfigureResult.Failed ->
-                onrampCallbacks.configurationCallback.onResult(OnrampConfigurationResult.Failed(result.error))
+                OnrampConfigurationResult.Failed(linkControllerConfigureResult.error)
         }
     }
 

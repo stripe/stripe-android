@@ -37,11 +37,6 @@ internal class OnrampLinkController @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.configurationFlow
-                        .collect(::configureLinkController)
-                }
-
-                launch {
                     linkController.state
                         .collect(viewModel::onLinkControllerState)
                 }
@@ -49,10 +44,11 @@ internal class OnrampLinkController @Inject constructor(
         }
     }
 
-    private suspend fun configureLinkController(configuration: LinkController.Configuration) {
-        val result = linkController.configure(configuration)
-
-        viewModel.onLinkControllerConfigureResult(result)
+    suspend fun configure(): LinkController.ConfigureResult {
+        val linkControllerConfiguration = LinkController.Configuration
+            .Builder(merchantDisplayName = "")
+            .build()
+        return linkController.configure(linkControllerConfiguration)
     }
 
     fun isLinkUser(email: String) {
