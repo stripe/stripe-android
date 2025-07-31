@@ -81,6 +81,10 @@ internal class ElementsSessionJsonParser(
 
         val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
 
+        val passiveCaptcha = json.optJSONObject(FIELD_PASSIVE_CAPTCHA)?.let {
+            PassiveCaptchaJsonParser().parse(it)
+        }
+
         return if (stripeIntent != null) {
             ElementsSession(
                 linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
@@ -95,7 +99,8 @@ internal class ElementsSessionJsonParser(
                 flags = flags,
                 experimentsData = experimentsData,
                 orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
-                elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
+                elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
+                passiveCaptcha = passiveCaptcha
             )
         } else {
             null
@@ -486,6 +491,7 @@ internal class ElementsSessionJsonParser(
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
         private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
+        private const val FIELD_PASSIVE_CAPTCHA = "passive_captcha"
         private const val ARB_ID = "arb_id"
 
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()

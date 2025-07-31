@@ -2325,4 +2325,106 @@ internal object ElementsSessionFixtures {
         }
       }
     """.trimIndent()
+
+    val PASSIVE_CAPTCHA_JSON_WITH_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key",
+          "rqdata": "test_rq_data"
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_WITHOUT_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key"
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_WITH_BLANK_RQ_DATA = JSONObject(
+        """
+        {
+          "site_key": "test_site_key",
+          "rqdata": ""
+        }
+        """.trimIndent()
+    )
+
+    val PASSIVE_CAPTCHA_JSON_MISSING_SITE_KEY = JSONObject(
+        """
+        {
+          "rqdata": "test_rq_data"
+        }
+        """.trimIndent()
+    )
+
+    val EXPANDED_PAYMENT_INTENT_JSON_WITH_PASSIVE_CAPTCHA = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card"
+            ],
+            "payment_intent": {
+              "id": "pi_123",
+              "object": "payment_intent",
+              "amount": 1000,
+              "currency": "usd",
+              "status": "requires_payment_method",
+              "payment_method_types": ["card"]
+            },
+            "type": "payment_intent"
+          },
+          "passive_captcha": {
+            "site_key": "test_site_key",
+            "rqdata": "test_rq_data"
+          },
+          "flags": {
+            "elements_enable_passive_captcha": true
+          }
+        }
+        """.trimIndent()
+    )
+
+    val EXPANDED_PAYMENT_INTENT_JSON_WITHOUT_PASSIVE_CAPTCHA = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card"
+            ],
+            "payment_intent": {
+              "id": "pi_123",
+              "object": "payment_intent",
+              "amount": 1000,
+              "currency": "usd",
+              "status": "requires_payment_method",
+              "payment_method_types": ["card"]
+            },
+            "type": "payment_intent"
+          },
+          "flags": {
+            "elements_enable_passive_captcha": true
+          }
+        }
+        """.trimIndent()
+    )
 }

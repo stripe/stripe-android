@@ -25,6 +25,7 @@ data class ElementsSession(
     val sessionsError: Throwable? = null,
     val customPaymentMethods: List<CustomPaymentMethod>,
     val elementsSessionId: String,
+    private val passiveCaptcha: PassiveCaptchaParams?
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -60,6 +61,9 @@ data class ElementsSession(
 
     val linkEnableDisplayableDefaultValuesInEce: Boolean
         get() = linkSettings?.linkEnableDisplayableDefaultValuesInEce ?: false
+
+    val passiveCaptchaParams: PassiveCaptchaParams?
+        get() = passiveCaptcha.takeIf { flags[Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA] == true }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -178,6 +182,7 @@ data class ElementsSession(
         ELEMENTS_PREFER_FC_LITE("elements_prefer_fc_lite"),
         ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
         ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
+        ELEMENTS_ENABLE_PASSIVE_CAPTCHA("elements_enable_passive_captcha")
     }
 
     /**
@@ -211,6 +216,7 @@ data class ElementsSession(
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
                 elementsSessionId = elementsSessionId,
+                passiveCaptcha = null
             )
         }
     }
