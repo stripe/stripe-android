@@ -7,8 +7,10 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -52,9 +54,21 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
 
+        val formType = formHelper.formTypeForCode(paymentMethodCode)
+        val formArguments = formHelper.createFormArguments(paymentMethodCode)
+        if (formType is FormHelper.FormType.MandateOnly) {
+            embeddedSelectionHolder.set(
+                formArguments.mandateOnlyFormFieldValues().transformToPaymentSelection(
+                    paymentMethod = requireNotNull(
+                        paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
+                    ),
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
+            )
+        }
         return DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = paymentMethodCode,
-            formArguments = formHelper.createFormArguments(paymentMethodCode),
+            formArguments = formArguments,
             formElements = formHelper.formElementsForCode(paymentMethodCode),
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = usBankAccountFormArguments,
