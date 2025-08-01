@@ -244,6 +244,7 @@ internal class InlineSignupViewModel(
                     hasPrefilledEmail = prefilledEmail != null,
                     hasPrefilledPhone = prefilledPhone.isNotBlank(),
                     defaultOptIn = initialViewState.allowsDefaultOptIn,
+                    linkSignUpOptInFeatureEnabled = initialViewState.linkSignUpOptInFeatureEnabled
                 )
             ).takeIf { isNameValid }
         } else {
@@ -332,6 +333,7 @@ internal class InlineSignupViewModel(
         hasPrefilledEmail: Boolean,
         hasPrefilledPhone: Boolean,
         defaultOptIn: Boolean,
+        linkSignUpOptInFeatureEnabled: Boolean
     ): SignUpConsentAction {
         return when (this) {
             LinkSignupMode.AlongsideSaveForFutureUse -> {
@@ -342,6 +344,9 @@ internal class InlineSignupViewModel(
             }
             LinkSignupMode.InsteadOfSaveForFutureUse -> {
                 when {
+                    linkSignUpOptInFeatureEnabled -> {
+                        SignUpConsentAction.SignUpOptInMobileChecked
+                    }
                     defaultOptIn -> {
                         if (hasPrefilledEmail && hasPrefilledPhone) {
                             SignUpConsentAction.DefaultOptInWithAllPrefilled
