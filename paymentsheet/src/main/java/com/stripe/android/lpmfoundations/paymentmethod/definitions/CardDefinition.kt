@@ -295,21 +295,20 @@ internal class CardMandateTextElement(
     override fun ComposeUI(enabled: Boolean) {
         val linkState by linkSignupStateFlow.collectAsState()
         Mandate(
-            mandateText = when {
-                // save for future usage only terms when Link sign-up toggle feature enabled
-                linkState?.linkSignUpOptInFeatureEnabled == false ->
+            mandateText = when (linkState?.linkSignUpOptInFeatureEnabled) {
+                true -> if (linkState?.isExpanded == true) {
                     stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
                         formatArgs = arrayOf(merchantName)
                     ).replaceHyperlinks()
-                // save for future usage + link signup toggle terms
-                linkState?.isExpanded == true -> stringResource(
-                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on,
-                    formatArgs = arrayOf(merchantName)
-                ).replaceHyperlinks()
-                // save for future usage terms when Link sign-up toggle feature disabled
+                } else {
+                    stringResource(
+                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                        formatArgs = arrayOf(merchantName)
+                    ).replaceHyperlinks()
+                }
                 else -> stringResource(
-                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
                     formatArgs = arrayOf(merchantName)
                 )
             },
