@@ -1181,7 +1181,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         id: String,
         extraParams: Map<String, *>?,
         requestOptions: ApiRequest.Options
-    ): Result<String> {
+    ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = sharePaymentDetailsUrl,
@@ -1196,7 +1196,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ).plus(extraParams ?: emptyMap())
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
-        ).map { it.id }
+        ).map { it.paymentMethod }
     }
 
     override suspend fun logOut(
