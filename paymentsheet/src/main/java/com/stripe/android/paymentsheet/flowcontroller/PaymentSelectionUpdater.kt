@@ -109,7 +109,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
 
         // If this selection is the existing selection (likely selected externally)
         // AND specific wallets are configured externally, preserve it
-        if (potentialSelection == selection && walletType in walletTypesDisplayedExternally) {
+        if (potentialSelection == selection &&
+            walletType in walletTypesDisplayedExternally &&
+            configuration.walletButtons.walletsToShow.isNotEmpty()
+        ) {
             return true
         }
 

@@ -522,6 +522,28 @@ class PaymentSelectionUpdaterTest {
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
     }
 
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `If using wallet buttons config with specific wallet and existing selection matches, should preserve it`() {
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = PaymentSelection.Link(useLinkExpress = false),
+            previousConfig = null,
+            newState = mockPaymentSheetStateWithPaymentIntent(),
+            newConfig = defaultPaymentSheetConfiguration.newBuilder()
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        willDisplayExternally = true,
+                        walletsToShow = listOf("link"),
+                    ),
+                ).build(),
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+    }
+
     private fun mockPaymentSheetStateWithPaymentIntent(
         paymentMethodTypes: List<String>? = null,
         paymentSelection: PaymentSelection? = null,
