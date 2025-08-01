@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkScreen.Companion.billingDetailsUpdateFlow
 import com.stripe.android.paymentsheet.R
 
 internal data class LinkAppBarState(
+    val merchantLogoUrl: String?,
     val showHeader: Boolean,
     val canNavigateBack: Boolean,
     val title: ResolvableString?,
@@ -19,8 +20,9 @@ internal data class LinkAppBarState(
 
     internal companion object {
 
-        fun initial(): LinkAppBarState {
+        fun initial(merchantLogoUrl: String?): LinkAppBarState {
             return LinkAppBarState(
+                merchantLogoUrl = merchantLogoUrl,
                 showHeader = true,
                 canNavigateBack = false,
                 title = null,
@@ -29,6 +31,7 @@ internal data class LinkAppBarState(
         }
 
         fun create(
+            merchantLogoUrl: String?,
             currentEntry: NavBackStackEntry?,
             previousEntryRoute: String?,
             consumerIsSigningUp: Boolean,
@@ -63,6 +66,7 @@ internal data class LinkAppBarState(
             }
 
             return LinkAppBarState(
+                merchantLogoUrl = merchantLogoUrl,
                 showHeader = route in showHeaderRoutes,
                 canNavigateBack = previousEntryRoute != null,
                 title = title,

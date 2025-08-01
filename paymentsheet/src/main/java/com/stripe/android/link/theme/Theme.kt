@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
+import com.stripe.android.link.ui.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 
 internal val LocalLinkTypography = staticCompositionLocalOf<LinkTypography> {
     error("No Typography provided")
@@ -35,10 +37,13 @@ internal fun DefaultLinkTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    val stripeImageLoader = runCatching { LocalStripeImageLoader.current }
+        .getOrElse { StripeImageLoader(LocalContext.current) }
     CompositionLocalProvider(
         LocalLinkTypography provides linkTypography,
         LocalLinkColors provides LinkThemeConfig.colors(darkTheme),
         LocalLinkShapes provides LinkShapes,
+        LocalStripeImageLoader provides stripeImageLoader,
     ) {
         MaterialTheme(
             colors = debugColors(),
