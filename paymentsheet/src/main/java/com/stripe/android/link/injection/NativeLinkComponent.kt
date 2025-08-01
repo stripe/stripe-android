@@ -19,6 +19,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.ui.oauth.OAuthConsentViewModelComponent
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -67,6 +68,7 @@ internal interface NativeLinkComponent {
     val linkLaunchMode: LinkLaunchMode
     val autocompleteLauncher: AutocompleteLauncher
     val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
+    val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
 
     @Component.Builder
     interface Builder {
