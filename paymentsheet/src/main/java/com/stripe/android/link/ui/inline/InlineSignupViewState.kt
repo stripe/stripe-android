@@ -47,12 +47,10 @@ constructor(
 
             return when (signupMode) {
                 LinkSignupMode.AlongsideSaveForFutureUse -> userInput != null
-                LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                    if (allowsDefaultOptIn) {
-                        userInput != null
-                    } else {
-                        isExpanded
-                    }
+                LinkSignupMode.InsteadOfSaveForFutureUse -> when {
+                    linkSignUpOptInFeatureEnabled -> userInput != null && isExpanded
+                    allowsDefaultOptIn -> userInput != null
+                    else -> isExpanded
                 }
                 null -> false
             }
