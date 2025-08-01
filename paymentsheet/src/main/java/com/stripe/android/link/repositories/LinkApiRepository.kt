@@ -312,6 +312,7 @@ internal class LinkApiRepository @Inject constructor(
             selectedPaymentDetails = paymentMethod.details,
             consumerSessionClientSecret = consumerSessionClientSecret,
             cvc = paymentMethod.collectedCvc,
+            billingPhone = paymentMethod.billingPhone,
         )
         stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = params,
