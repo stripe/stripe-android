@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
 import com.stripe.android.paymentsheet.example.samples.ui.shared.SubscriptionToggle
-import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 import kotlinx.coroutines.CompletableDeferred
 
 internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
@@ -51,11 +50,17 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
 
         setContent {
             PaymentSheetExampleTheme {
-                val flowController = rememberPaymentSheetFlowController(
-                    createIntentCallback = viewModel::createAndConfirmIntent,
-                    paymentOptionCallback = viewModel::handlePaymentOptionChanged,
-                    paymentResultCallback = viewModel::handlePaymentSheetResult,
-                )
+                val flowController = remember(
+                    viewModel::createAndConfirmIntent,
+                    viewModel::handlePaymentOptionChanged,
+                    viewModel::handlePaymentSheetResult
+                ) {
+                    PaymentSheet.FlowController.Builder(
+                        resultCallback = viewModel::handlePaymentSheetResult,
+                        paymentOptionCallback = viewModel::handlePaymentOptionChanged
+                    )
+                        .createIntentCallback(viewModel::createAndConfirmIntent)
+                }.build()
 
                 val uiState by viewModel.state.collectAsState()
                 val paymentMethodLabel = determinePaymentMethodLabel(uiState)
