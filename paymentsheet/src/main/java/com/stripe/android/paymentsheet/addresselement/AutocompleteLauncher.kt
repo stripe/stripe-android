@@ -93,6 +93,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
         ) {
             LinkAppBar(
                 state = LinkAppBarState(
+                    merchantLogoUrl = null,
                     showHeader = false,
                     canNavigateBack = !isRootScreen,
                     title = null,

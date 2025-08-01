@@ -162,6 +162,7 @@ private fun LinkAppBarPreview() {
             ) {
                 LinkAppBar(
                     state = LinkAppBarState(
+                        merchantLogoUrl = "",
                         showHeader = true,
                         canNavigateBack = false,
                         title = null,
@@ -183,6 +184,7 @@ private fun LinkAppBarChildScreen() {
         ) {
             LinkAppBar(
                 state = LinkAppBarState(
+                    merchantLogoUrl = null,
                     showHeader = false,
                     canNavigateBack = true,
                     title = "Add a payment method".resolvableString,
