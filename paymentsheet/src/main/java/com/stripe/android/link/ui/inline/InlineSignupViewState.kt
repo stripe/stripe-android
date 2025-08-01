@@ -131,7 +131,6 @@ constructor(
             config: LinkConfiguration,
             signupMode: LinkSignupMode
         ): Boolean = config.linkSignUpOptInFeatureEnabled &&
-            config.stripeIntent.countryCode == "US" &&
             // We only allow the opt-in feature if the user has provided an email address.
             config.customerInfo.email.isNullOrBlank().not() &&
             signupMode == LinkSignupMode.InsteadOfSaveForFutureUse
